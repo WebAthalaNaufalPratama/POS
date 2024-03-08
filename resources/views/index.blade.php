@@ -9,6 +9,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Dreams Pos admin template</title>
 
+<<<<<<< HEAD
 <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.jpg">
 
 <link rel="stylesheet" href="assets/css/bootstrap.min.css">
@@ -21,6 +22,20 @@
 <link rel="stylesheet" href="assets/plugins/fontawesome/css/all.min.css">
 
 <link rel="stylesheet" href="assets/css/style.css">
+=======
+<link rel="shortcut icon" type="image/x-icon" href="/assets/img/favicon.jpg">
+
+<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="/assets/css/animate.css">
+
+<link rel="stylesheet" href="/assets/css/dataTables.bootstrap4.min.css">
+
+<link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
+<link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
+
+<link rel="stylesheet" href="/assets/css/style.css">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </head>
 <body>
 <div id="global-loader">
@@ -33,10 +48,17 @@
 
 <div class="header-left active">
 <a href="index.html" class="logo">
+<<<<<<< HEAD
 <img src="assets/img/logo.png" alt="">
 </a>
 <a href="index.html" class="logo-small">
 <img src="assets/img/logo-small.png" alt="">
+=======
+<img src="/assets/img/logo.png" alt="">
+</a>
+<a href="index.html" class="logo-small">
+<img src="/assets/img/logo-small.png" alt="">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a id="toggle_btn" href="javascript:void(0);">
 </a>
@@ -61,10 +83,17 @@
 <div class="searchinputs">
 <input type="text" placeholder="Search Here ...">
 <div class="search-addon">
+<<<<<<< HEAD
 <span><img src="assets/img/icons/closes.svg" alt="img"></span>
 </div>
 </div>
 <a class="btn" id="searchdiv"><img src="assets/img/icons/search.svg" alt="img"></a>
+=======
+<span><img src="/assets/img/icons/closes.svg" alt="img"></span>
+</div>
+</div>
+<a class="btn" id="searchdiv"><img src="/assets/img/icons/search.svg" alt="img"></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </form>
 </div>
 </li>
@@ -72,6 +101,7 @@
 
 <li class="nav-item dropdown has-arrow flag-nav">
 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" role="button">
+<<<<<<< HEAD
 <img src="assets/img/flags/us1.png" alt="" height="20">
 </a>
 <div class="dropdown-menu dropdown-menu-right">
@@ -86,6 +116,22 @@
 </a>
 <a href="javascript:void(0);" class="dropdown-item">
 <img src="assets/img/flags/de.png" alt="" height="16"> German
+=======
+<img src="/assets/img/flags/us1.png" alt="" height="20">
+</a>
+<div class="dropdown-menu dropdown-menu-right">
+<a href="javascript:void(0);" class="dropdown-item">
+<img src="/assets/img/flags/us.png" alt="" height="16"> English
+</a>
+<a href="javascript:void(0);" class="dropdown-item">
+<img src="/assets/img/flags/fr.png" alt="" height="16"> French
+</a>
+<a href="javascript:void(0);" class="dropdown-item">
+<img src="/assets/img/flags/es.png" alt="" height="16"> Spanish
+</a>
+<a href="javascript:void(0);" class="dropdown-item">
+<img src="/assets/img/flags/de.png" alt="" height="16"> German
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 </div>
 </li>
@@ -93,7 +139,11 @@
 
 <li class="nav-item dropdown">
 <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+<<<<<<< HEAD
 <img src="assets/img/icons/notification-bing.svg" alt="img"> <span class="badge rounded-pill">4</span>
+=======
+<img src="/assets/img/icons/notification-bing.svg" alt="img"> <span class="badge rounded-pill">4</span>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <div class="dropdown-menu notifications">
 <div class="topnav-dropdown-header">
@@ -106,7 +156,11 @@
 <a href="activities.html">
 <div class="media d-flex">
 <span class="avatar flex-shrink-0">
+<<<<<<< HEAD
 <img alt="" src="assets/img/profiles/avatar-02.jpg">
+=======
+<img alt="" src="/assets/img/profiles/avatar-02.jpg">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </span>
 <div class="media-body flex-grow-1">
 <p class="noti-details"><span class="noti-title">John Doe</span> added new task <span class="noti-title">Patient appointment booking</span></p>
@@ -119,7 +173,11 @@
 <a href="activities.html">
 <div class="media d-flex">
 <span class="avatar flex-shrink-0">
+<<<<<<< HEAD
 <img alt="" src="assets/img/profiles/avatar-03.jpg">
+=======
+<img alt="" src="/assets/img/profiles/avatar-03.jpg">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </span>
 <div class="media-body flex-grow-1">
 <p class="noti-details"><span class="noti-title">Tarah Shropshire</span> changed the task name <span class="noti-title">Appointment booking with payment gateway</span></p>
@@ -132,7 +190,11 @@
 <a href="activities.html">
 <div class="media d-flex">
 <span class="avatar flex-shrink-0">
+<<<<<<< HEAD
 <img alt="" src="assets/img/profiles/avatar-06.jpg">
+=======
+<img alt="" src="/assets/img/profiles/avatar-06.jpg">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </span>
 <div class="media-body flex-grow-1">
 <p class="noti-details"><span class="noti-title">Misty Tison</span> added <span class="noti-title">Domenic Houston</span> and <span class="noti-title">Claire Mapes</span> to project <span class="noti-title">Doctor available module</span></p>
@@ -145,7 +207,11 @@
 <a href="activities.html">
 <div class="media d-flex">
 <span class="avatar flex-shrink-0">
+<<<<<<< HEAD
 <img alt="" src="assets/img/profiles/avatar-17.jpg">
+=======
+<img alt="" src="/assets/img/profiles/avatar-17.jpg">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </span>
 <div class="media-body flex-grow-1">
 <p class="noti-details"><span class="noti-title">Rolland Webber</span> completed task <span class="noti-title">Patient and Doctor video conferencing</span></p>
@@ -158,7 +224,11 @@
 <a href="activities.html">
 <div class="media d-flex">
 <span class="avatar flex-shrink-0">
+<<<<<<< HEAD
 <img alt="" src="assets/img/profiles/avatar-13.jpg">
+=======
+<img alt="" src="/assets/img/profiles/avatar-13.jpg">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </span>
 <div class="media-body flex-grow-1">
 <p class="noti-details"><span class="noti-title">Bernardo Galaviz</span> added new task <span class="noti-title">Private chat module</span></p>
@@ -177,13 +247,21 @@
 
 <li class="nav-item dropdown has-arrow main-drop">
 <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
+<<<<<<< HEAD
 <span class="user-img"><img src="assets/img/profiles/avator1.jpg" alt="">
+=======
+<span class="user-img"><img src="/assets/img/profiles/avator1.jpg" alt="">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <span class="status online"></span></span>
 </a>
 <div class="dropdown-menu menu-drop-user">
 <div class="profilename">
 <div class="profileset">
+<<<<<<< HEAD
 <span class="user-img"><img src="assets/img/profiles/avator1.jpg" alt="">
+=======
+<span class="user-img"><img src="/assets/img/profiles/avator1.jpg" alt="">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <span class="status online"></span></span>
 <div class="profilesets">
 <h6>John Doe</h6>
@@ -194,7 +272,11 @@
 <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> My Profile</a>
 <a class="dropdown-item" href="generalsettings.html"><i class="me-2" data-feather="settings"></i>Settings</a>
 <hr class="m-0">
+<<<<<<< HEAD
 <a class="dropdown-item logout pb-0" href="signin.html"><img src="assets/img/icons/log-out.svg" class="me-2" alt="img">Logout</a>
+=======
+<a class="dropdown-item logout pb-0" href="signin.html"><img src="/assets/img/icons/log-out.svg" class="me-2" alt="img">Logout</a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </div>
 </div>
 </li>
@@ -218,10 +300,17 @@
 <div id="sidebar-menu" class="sidebar-menu">
 <ul>
 <li class="active">
+<<<<<<< HEAD
 <a href="index.html"><img src="assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
 </li>
 <li class="submenu">
 <a href="javascript:void(0);"><img src="assets/img/icons/product.svg" alt="img"><span> Product</span> <span class="menu-arrow"></span></a>
+=======
+<a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
+</li>
+<li class="submenu">
+<a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Product</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="productlist.html">Product List</a></li>
 <li><a href="addproduct.html">Add Product</a></li>
@@ -236,7 +325,11 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="saleslist.html">Sales List</a></li>
 <li><a href="pos.html">POS</a></li>
@@ -246,7 +339,11 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/purchase1.svg" alt="img"><span> Purchase</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/purchase1.svg" alt="img"><span> Purchase</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="purchaselist.html">Purchase List</a></li>
 <li><a href="addpurchase.html">Add Purchase</a></li>
@@ -254,7 +351,11 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/expense1.svg" alt="img"><span> Expense</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/expense1.svg" alt="img"><span> Expense</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="expenselist.html">Expense List</a></li>
 <li><a href="createexpense.html">Add Expense</a></li>
@@ -262,14 +363,22 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/quotation1.svg" alt="img"><span> Quotation</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Quotation</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="quotationList.html">Quotation List</a></li>
  <li><a href="addquotation.html">Add Quotation</a></li>
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/transfer1.svg" alt="img"><span> Transfer</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/transfer1.svg" alt="img"><span> Transfer</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="transferlist.html">Transfer List</a></li>
 <li><a href="addtransfer.html">Add Transfer </a></li>
@@ -277,7 +386,11 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/return1.svg" alt="img"><span> Return</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/return1.svg" alt="img"><span> Return</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="salesreturnlist.html">Sales Return List</a></li>
 <li><a href="createsalesreturn.html">Add Sales Return </a></li>
@@ -286,7 +399,11 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/users1.svg" alt="img"><span> People</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> People</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="customerlist.html">Customer List</a></li>
 <li><a href="addcustomer.html">Add Customer </a></li>
@@ -298,7 +415,11 @@
 <li><a href="addstore.html">Add Store</a></li>
 </ul>
 </li> <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/places.svg" alt="img"><span> Places</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/places.svg" alt="img"><span> Places</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="newcountry.html">New Country</a></li>
 <li><a href="countrieslist.html">Countries list</a></li>
@@ -388,7 +509,11 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/product.svg" alt="img"><span> Application</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Application</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="chat.html">Chat</a></li>
 <li><a href="calendar.html">Calendar</a></li>
@@ -396,7 +521,11 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/time.svg" alt="img"><span> Report</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/time.svg" alt="img"><span> Report</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="purchaseorderreport.html">Purchase order report</a></li>
 <li><a href="inventoryreport.html">Inventory Report</a></li>
@@ -408,14 +537,22 @@
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="newuser.html">New User </a></li>
 <li><a href="userlists.html">Users List</a></li>
 </ul>
 </li>
 <li class="submenu">
+<<<<<<< HEAD
 <a href="javascript:void(0);"><img src="assets/img/icons/settings.svg" alt="img"><span> Settings</span> <span class="menu-arrow"></span></a>
+=======
+<a href="javascript:void(0);"><img src="/assets/img/icons/settings.svg" alt="img"><span> Settings</span> <span class="menu-arrow"></span></a>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 <ul>
 <li><a href="generalsettings.html">General Settings</a></li>
 <li><a href="emailsettings.html">Email Settings</a></li>
@@ -436,7 +573,11 @@
 <div class="col-lg-3 col-sm-6 col-12">
 <div class="dash-widget">
 <div class="dash-widgetimg">
+<<<<<<< HEAD
 <span><img src="assets/img/icons/dash1.svg" alt="img"></span>
+=======
+<span><img src="/assets/img/icons/dash1.svg" alt="img"></span>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </div>
 <div class="dash-widgetcontent">
 <h5>$<span class="counters" data-count="307144.00">$307,144.00</span></h5>
@@ -447,7 +588,11 @@
 <div class="col-lg-3 col-sm-6 col-12">
 <div class="dash-widget dash1">
 <div class="dash-widgetimg">
+<<<<<<< HEAD
 <span><img src="assets/img/icons/dash2.svg" alt="img"></span>
+=======
+<span><img src="/assets/img/icons/dash2.svg" alt="img"></span>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </div>
 <div class="dash-widgetcontent">
 <h5>$<span class="counters" data-count="4385.00">$4,385.00</span></h5>
@@ -458,7 +603,11 @@
 <div class="col-lg-3 col-sm-6 col-12">
 <div class="dash-widget dash2">
 <div class="dash-widgetimg">
+<<<<<<< HEAD
 <span><img src="assets/img/icons/dash3.svg" alt="img"></span>
+=======
+<span><img src="/assets/img/icons/dash3.svg" alt="img"></span>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </div>
 <div class="dash-widgetcontent">
 <h5>$<span class="counters" data-count="385656.50">385,656.50</span></h5>
@@ -469,7 +618,11 @@
 <div class="col-lg-3 col-sm-6 col-12">
 <div class="dash-widget dash3">
 <div class="dash-widgetimg">
+<<<<<<< HEAD
 <span><img src="assets/img/icons/dash4.svg" alt="img"></span>
+=======
+<span><img src="/assets/img/icons/dash4.svg" alt="img"></span>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </div>
 <div class="dash-widgetcontent">
 <h5>$<span class="counters" data-count="40000.00">400.00</span></h5>
@@ -539,7 +692,11 @@
 </ul>
 <div class="dropdown">
 <button class="btn btn-white btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+<<<<<<< HEAD
  2022 <img src="assets/img/icons/dropdown.svg" alt="img" class="ms-2">
+=======
+ 2022 <img src="/assets/img/icons/dropdown.svg" alt="img" class="ms-2">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </button>
 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 <li>
@@ -593,7 +750,11 @@
 <td>1</td>
 <td class="productimgname">
 <a href="productlist.html" class="product-img">
+<<<<<<< HEAD
 <img src="assets/img/product/product22.jpg" alt="product">
+=======
+<img src="/assets/img/product/product22.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">Apple Earpods</a>
 </td>
@@ -603,7 +764,11 @@
 <td>2</td>
 <td class="productimgname">
 <a href="productlist.html" class="product-img">
+<<<<<<< HEAD
 <img src="assets/img/product/product23.jpg" alt="product">
+=======
+<img src="/assets/img/product/product23.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">iPhone 11</a>
 </td>
@@ -613,7 +778,11 @@
 <td>3</td>
 <td class="productimgname">
 <a href="productlist.html" class="product-img">
+<<<<<<< HEAD
 <img src="assets/img/product/product24.jpg" alt="product">
+=======
+<img src="/assets/img/product/product24.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">samsung</a>
 </td>
@@ -623,7 +792,11 @@
 <td>4</td>
 <td class="productimgname">
 <a href="productlist.html" class="product-img">
+<<<<<<< HEAD
 <img src="assets/img/product/product6.jpg" alt="product">
+=======
+<img src="/assets/img/product/product6.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">Macbook Pro</a>
 </td>
@@ -657,7 +830,11 @@
 <td><a href="javascript:void(0);">IT0001</a></td>
 <td class="productimgname">
 <a class="product-img" href="productlist.html">
+<<<<<<< HEAD
 <img src="assets/img/product/product2.jpg" alt="product">
+=======
+<img src="/assets/img/product/product2.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">Orange</a>
 </td>
@@ -670,7 +847,11 @@
 <td><a href="javascript:void(0);">IT0002</a></td>
 <td class="productimgname">
 <a class="product-img" href="productlist.html">
+<<<<<<< HEAD
 <img src="assets/img/product/product3.jpg" alt="product">
+=======
+<img src="/assets/img/product/product3.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">Pineapple</a>
 </td>
@@ -683,7 +864,11 @@
 <td><a href="javascript:void(0);">IT0003</a></td>
 <td class="productimgname">
 <a class="product-img" href="productlist.html">
+<<<<<<< HEAD
 <img src="assets/img/product/product4.jpg" alt="product">
+=======
+<img src="/assets/img/product/product4.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">Stawberry</a>
 </td>
@@ -696,7 +881,11 @@
 <td><a href="javascript:void(0);">IT0004</a></td>
 <td class="productimgname">
 <a class="product-img" href="productlist.html">
+<<<<<<< HEAD
 <img src="assets/img/product/product5.jpg" alt="product">
+=======
+<img src="/assets/img/product/product5.jpg" alt="product">
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </a>
 <a href="productlist.html">Avocat</a>
 </td>
@@ -714,6 +903,7 @@
 </div>
 
 
+<<<<<<< HEAD
 <script src="assets/js/jquery-3.6.0.min.js"></script>
 
 <script src="assets/js/feather.min.js"></script>
@@ -729,5 +919,22 @@
 <script src="assets/plugins/apexchart/chart-data.js"></script>
 
 <script src="assets/js/script.js"></script>
+=======
+<script src="/assets/js/jquery-3.6.0.min.js"></script>
+
+<script src="/assets/js/feather.min.js"></script>
+
+<script src="/assets/js/jquery.slimscroll.min.js"></script>
+
+<script src="/assets/js/jquery.dataTables.min.js"></script>
+<script src="/assets/js/dataTables.bootstrap4.min.js"></script>
+
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+
+<script src="/assets/plugins/apexchart/apexcharts.min.js"></script>
+<script src="/assets/plugins/apexchart/chart-data.js"></script>
+
+<script src="/assets/js/script.js"></script>
+>>>>>>> ddd07b0 (tambah hak user dan login)
 </body>
 </html>
