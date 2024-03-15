@@ -1,8 +1,10 @@
-@extends('layouts.app-master')
+@extends('layouts.app-von')
 
 @section('content')
-    <div class="bg-light p-4 rounded">
-        <h1>{{ ucfirst($role->name) }} Role</h1>
+<div class="page-wrapper">
+    <div class="content">
+    <h1 class="mb-3">{{ ucfirst($role->name) }} Role</h1>
+        <h6 class="card-title">Roles</h6>
         <div class="lead">
             
         </div>

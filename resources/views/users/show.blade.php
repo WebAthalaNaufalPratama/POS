@@ -1,10 +1,11 @@
-@extends('layouts.app-master')
+@extends('layouts.app-von')
 
 @section('content')
-    <div class="bg-light p-4 rounded">
-        <h1>Show user</h1>
+<div class="page-wrapper">
+    <div class="content">
+        <h6 class="card-title">Show Users</h6>
         <div class="lead">
-            
+            Show Users.
         </div>
         
         <div class="container mt-4">

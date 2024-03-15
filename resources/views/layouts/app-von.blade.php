@@ -218,9 +218,7 @@
     
     @include('layouts.partials.sidebar')
 
-    <main class="container mt-5">
-        @yield('content')
-    </main>
+    @yield('content')
 
     <script src="/assets/js/jquery-3.6.0.min.js"></script>
 

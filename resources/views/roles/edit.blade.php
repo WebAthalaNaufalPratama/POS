@@ -1,11 +1,13 @@
-@extends('layouts.app-master')
+@extends('layouts.app-von')
 
 @section('content')
-    <div class="bg-light p-4 rounded">
-        <h1>Update role</h1>
+<div class="page-wrapper">
+    <div class="content">
+        <h6 class="card-title">Edit new permission</h6>
         <div class="lead">
-            Edit role and manage permissions.
+             Edit role and manage permissions.
         </div>
+
 
         <div class="container mt-4">
 
