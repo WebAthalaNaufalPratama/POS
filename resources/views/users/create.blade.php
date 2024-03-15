@@ -1,10 +1,11 @@
-@extends('layouts.app-master')
+@extends('layouts.app-von')
 
 @section('content')
-    <div class="bg-light p-4 rounded">
-        <h1>Add new user</h1>
+<div class="page-wrapper">
+    <div class="content">
+        <h6 class="card-title">Add new users</h6>
         <div class="lead">
-            Add new user and assign role.
+            Add new users and assign permissions.
         </div>
 
         <div class="container mt-4">
