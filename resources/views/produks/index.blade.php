@@ -100,7 +100,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form action="{{ route('produks.update', ['produk' => 1]) }}" method="POST">
+          <form id="editForm" action="produks/0/update" method="POST">
             @csrf
             @method('PATCH')
             <div class="mb-3">
@@ -144,6 +144,7 @@
             type: "GET",
             url: "/produks/"+id+"/edit",
             success: function(response) {
+                $('#editForm').attr('action', 'produks/'+id+'/update');
                 $('#edit_nama').val(response[0].nama)
                 $('#edit_tipe_produk').val(response[0].tipe_produk).trigger('change')
                 $('#edit_deskripsi').val(response[0].deskripsi)
