@@ -89,6 +89,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{tipe_produk}/delete', 'TipeProdukController@destroy')->name('tipe_produk.destroy');
         });
 
+        Route::group(['prefix' => 'kondisi'], function() {
+            Route::get('/', 'KondisiController@index')->name('kondisi.index');
+            Route::post('/store', 'KondisiController@store')->name('kondisi.store');
+            Route::get('/{kondisi}/show', 'KondisiController@show')->name('kondisi.show');
+            Route::get('/{kondisi}/edit', 'KondisiController@edit')->name('kondisi.edit');
+            Route::patch('/{kondisi}/update', 'KondisiController@update')->name('kondisi.update');
+            Route::get('/{kondisi}/delete', 'KondisiController@destroy')->name('kondisi.destroy');
+        });
+
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
     });
