@@ -98,6 +98,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kondisi}/delete', 'KondisiController@destroy')->name('kondisi.destroy');
         });
 
+        Route::group(['prefix' => 'tipe_lokasi'], function() {
+            Route::get('/', 'TipeLokasiController@index')->name('tipe_lokasi.index');
+            Route::post('/store', 'TipeLokasiController@store')->name('tipe_lokasi.store');
+            Route::get('/{tipe_lokasi}/show', 'TipeLokasiController@show')->name('tipe_lokasi.show');
+            Route::get('/{tipe_lokasi}/edit', 'TipeLokasiController@edit')->name('tipe_lokasi.edit');
+            Route::patch('/{tipe_lokasi}/update', 'TipeLokasiController@update')->name('tipe_lokasi.update');
+            Route::get('/{tipe_lokasi}/delete', 'TipeLokasiController@destroy')->name('tipe_lokasi.destroy');
+        });
+
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
     });

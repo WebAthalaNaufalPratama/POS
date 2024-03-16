@@ -12,7 +12,7 @@
 <li><a href="{{ route('tipe_produk.index') }}">Tipe Produk</a></li>
 <li><a href="{{ route('kondisi.index') }}">Kondisi</a></li>
 <li><a href="addcategory.html">Lokasi</a></li>
-<li><a href="subcategorylist.html">Tipe Lokasi</a></li>
+<li><a href="{{ route('tipe_lokasi.index') }}">Tipe Lokasi</a></li>
 <li><a href="subcategorylist.html">Supplier</a></li>
 </ul>
 </li>
