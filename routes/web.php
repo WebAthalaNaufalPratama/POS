@@ -80,6 +80,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{produk}/delete', 'ProdukController@destroy')->name('produks.destroy');
         });
 
+        Route::group(['prefix' => 'tipe_produks'], function() {
+            Route::get('/', 'TipeProdukController@index')->name('tipe_produk.index');
+            Route::post('/store', 'TipeProdukController@store')->name('tipe_produk.store');
+            Route::get('/{tipe_produk}/show', 'TipeProdukController@show')->name('tipe_produk.show');
+            Route::get('/{tipe_produk}/edit', 'TipeProdukController@edit')->name('tipe_produk.edit');
+            Route::patch('/{tipe_produk}/update', 'TipeProdukController@update')->name('tipe_produk.update');
+            Route::get('/{tipe_produk}/delete', 'TipeProdukController@destroy')->name('tipe_produk.destroy');
+        });
+
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
     });

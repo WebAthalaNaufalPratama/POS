@@ -9,7 +9,7 @@
 <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Master</span> <span class="menu-arrow"></span></a>
 <ul>
 <li><a href="{{ route('produks.index') }}">Produk</a></li>
-<li><a href="addproduct.html">Tipe Produk</a></li>
+<li><a href="{{ route('tipe_produk.index') }}">Tipe Produk</a></li>
 <li><a href="categorylist.html">Kondisi</a></li>
 <li><a href="addcategory.html">Lokasi</a></li>
 <li><a href="subcategorylist.html">Tipe Lokasi</a></li>

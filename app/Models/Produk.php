@@ -11,4 +11,8 @@ class Produk extends Model
     use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
+
+    public function tipe(){
+        return $this->belongsTo(Tipe_Produk::class, 'tipe_produk', 'id');
+    }
 }

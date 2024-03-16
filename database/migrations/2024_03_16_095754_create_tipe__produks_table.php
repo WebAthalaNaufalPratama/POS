@@ -15,7 +15,11 @@ class CreateTipeProduksTable extends Migration
     {
         Schema::create('tipe_produks', function (Blueprint $table) {
             $table->id();
+            $table->string('nama')->unique();
+            $table->text('deskripsi');
+            $table->string('kategori');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

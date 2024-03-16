@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produk;
+use App\Models\Tipe_Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,8 +16,9 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        $produks = Produk::all();
-        return view('produks.index', compact('produks'));
+        $produks = Produk::with('tipe')->get();
+        $tipe_produks = Tipe_Produk::where('kategori', 'master')->get();
+        return view('produks.index', compact('produks', 'tipe_produks'));
     }
 
     /**
@@ -82,7 +84,7 @@ class ProdukController extends Controller
      * @param  \App\Models\Produk  $produk
      * @return \Illuminate\Http\Response
      */
-    public function edit(Produk $produk)
+    public function edit($produk)
     {
         $data = Produk::find($produk);
         return response()->json($data);
@@ -95,7 +97,7 @@ class ProdukController extends Controller
      * @param  \App\Models\Produk  $produk
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $req, Produk $produk)
+    public function update(Request $req, $produk)
     {
         // validasi
         $validator = Validator::make($req->all(), [
@@ -108,7 +110,7 @@ class ProdukController extends Controller
         $data = $req->except(['_token', '_method']);
 
         // update data
-        $check = $produk->update($data);
+        $check = Produk::find($produk)->update($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
         return redirect()->back()->with('success', 'Data berhsail diperbarui');
     }
@@ -119,11 +121,12 @@ class ProdukController extends Controller
      * @param  \App\Models\Produk  $produk
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Produk $produk)
+    public function destroy($produk)
     {
-        if(!$produk) return redirect()->back()->withInput()->with('fail', 'Data tidak ditemukan');
-        $check = $produk->delete();
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menghapus data');
-        return redirect()->back()->withInput()->with('success', 'Data berhasil dihapus');
+        $data = Produk::find($produk);
+        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        $check = $data->delete();
+        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
+        return response()->json(['msg' => 'Data berhasil dihapus']);
     }
 }
