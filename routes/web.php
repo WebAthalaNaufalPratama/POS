@@ -71,7 +71,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::delete('/{post}/delete', 'PostsController@destroy')->name('posts.destroy');
         });
 
-        Route::resource('roles', RolesController::class);
-        Route::resource('permissions', PermissionsController::class);
+        Route::group(['prefix' => 'produks'], function() {
+            Route::get('/', 'ProdukController@index')->name('produks.index');
+            Route::post('/store', 'ProdukController@store')->name('produks.store');
+            Route::get('/{produk}/show', 'ProdukController@show')->name('produks.show');
+            Route::get('/{produk}/edit', 'ProdukController@edit')->name('produks.edit');
+            Route::patch('/{produk}/update', 'ProdukController@update')->name('produks.update');
+            Route::get('/{produk}/delete', 'ProdukController@destroy')->name('produks.destroy');
+        });
+
+        Route::resource('roles', 'RolesController');
+        Route::resource('permissions', 'PermissionsController');
     });
 });

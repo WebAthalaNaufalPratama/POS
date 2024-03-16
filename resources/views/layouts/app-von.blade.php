@@ -15,6 +15,10 @@
 
 <link rel="stylesheet" href="/assets/css/animate.css">
 
+<link rel="stylesheet" href="assets/plugins/select2/css/select2.min.css" />
+
+<link rel="stylesheet" href="assets/plugins/toastr/toatr.css" />
+
 <link rel="stylesheet" href="/assets/css/dataTables.bootstrap4.min.css">
 
 <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
@@ -218,7 +222,11 @@
     
     @include('layouts.partials.sidebar')
 
-    @yield('content')
+    <div class="page-wrapper">
+      <div class="content">
+        @yield('content')
+      </div>
+    </div>
 
     <script src="/assets/js/jquery-3.6.0.min.js"></script>
 
@@ -231,10 +239,48 @@
 
     <script src="/assets/js/bootstrap.bundle.min.js"></script>
 
+    <script src="assets/plugins/select2/js/select2.min.js"></script>
+    <script src="assets/plugins/select2/js/custom-select.js"></script>
+
+    <script src="assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
+    <script src="assets/plugins/sweetalert/sweetalerts.min.js"></script>
+
+    <script src="assets/plugins/toastr/toastr.js"></script>
+    <script src="assets/plugins/toastr/toastr.min.js"></script>
+
     <script src="/assets/plugins/apexchart/apexcharts.min.js"></script>
     <script src="/assets/plugins/apexchart/chart-data.js"></script>
 
     <script src="/assets/js/script.js"></script>
+    <script type="text/javascript">
+      $( document ).ready(function() {
+        let sessionData = @json(session()->all());
+        @if(session('fail'))
+          toastr.error(sessionData.fail, {
+            closeButton: true,
+            tapToDismiss: false,
+            rtl: false,
+            progressBar: true
+          });
+        @endif
+        @if ( session('success'))
+          toastr.success(sessionData.success, {
+            closeButton: true,
+            tapToDismiss: false,
+            rtl: false,
+            progressBar: true
+          });
+        @endif
+        @if ( session('warning'))
+          toastr.warning(sessionData.warning, {
+            closeButton: true,
+            tapToDismiss: false,
+            rtl: false,
+            progressBar: true
+          });
+            @endif
+      });
+    </script>
     
     @section("scripts")
 
