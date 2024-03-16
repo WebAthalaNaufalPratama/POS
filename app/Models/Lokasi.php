@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Tipe_Lokasi extends Model
+class Lokasi extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $table = 'tipe_lokasis';
     protected $guarded = ['id'];
 
-    public function lokasi(){
-        return $this->hasMany(Lokasi::class, 'id', 'tipe_lokasi');
+    public function tipe(){
+        return $this->belongsTo(Tipe_Lokasi::class, 'tipe_lokasi', 'id');
     }
 }
