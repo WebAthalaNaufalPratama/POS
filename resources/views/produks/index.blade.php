@@ -67,13 +67,13 @@
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="add_nama">
+              <input type="text" class="form-control" name="nama" id="add_nama" required>
             </div>
             <div class="mb-3">
               <label for="tipe_produk" class="col-form-label">Tipe Produk</label>
               <div class="form-group">
-                <select class="select2" name="tipe_produk" id="add_tipe_produk">
-                  <option>Choose Product</option>
+                <select class="select2" name="tipe_produk" id="add_tipe_produk" required>
+                  <option value="">Pilih Tipe</option>
                   @foreach ($tipe_produks as $tipe_produk)
                     <option value="{{ $tipe_produk->id }}">{{ $tipe_produk->nama }}</option>
                   @endforeach
@@ -82,7 +82,7 @@
             </div>
             <div class="mb-3">
               <label for="deskripsi" class="col-form-label">Deskripsi</label>
-              <textarea class="form-control" name="deskripsi" id="add_deskripsi"></textarea>
+              <textarea class="form-control" name="deskripsi" id="add_deskripsi" required></textarea>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -106,13 +106,13 @@
             @method('PATCH')
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="edit_nama" value="">
+              <input type="text" class="form-control" name="nama" id="edit_nama" value="" required>
             </div>
             <div class="mb-3">
               <label for="tipe_produk" class="col-form-label">Tipe Produk</label>
               <div class="form-group">
-                <select class="select2" name="tipe_produk" id="edit_tipe_produk" value="">
-                  <option>Choose Product</option>
+                <select class="select2" name="tipe_produk" id="edit_tipe_produk" value="" required>
+                  <option value="">Pilih Tipe</option>
                   @foreach ($tipe_produks as $tipe_produk)
                     <option value="{{ $tipe_produk->id }}">{{ $tipe_produk->nama }}</option>
                   @endforeach
@@ -121,7 +121,7 @@
             </div>
             <div class="mb-3">
               <label for="deskripsi" class="col-form-label">Deskripsi</label>
-              <textarea class="form-control" name="deskripsi" id="edit_deskripsi" value=""></textarea>
+              <textarea class="form-control" name="deskripsi" id="edit_deskripsi" value="" required></textarea>
             </div>
         </div>
         <div class="modal-footer justify-content-center">

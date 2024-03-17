@@ -63,11 +63,11 @@
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="add_nama">
+              <input type="text" class="form-control" name="nama" id="add_nama" required>
             </div>
             <div class="mb-3">
                 <label for="deskripsi" class="col-form-label">Deskripsi</label>
-                <textarea class="form-control" name="deskripsi" id="add_deskripsi"></textarea>
+                <textarea class="form-control" name="deskripsi" id="add_deskripsi" required></textarea>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -91,11 +91,11 @@
             @method('PATCH')
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="edit_nama" value="">
+              <input type="text" class="form-control" name="nama" id="edit_nama" value="" required>
             </div>
             <div class="mb-3">
                 <label for="deskripsi" class="col-form-label">Deskripsi</label>
-                <textarea class="form-control" name="deskripsi" id="edit_deskripsi" value=""></textarea>
+                <textarea class="form-control" name="deskripsi" id="edit_deskripsi" value="" required></textarea>
               </div>
         </div>
         <div class="modal-footer justify-content-center">

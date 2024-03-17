@@ -80,8 +80,8 @@
             <div class="mb-3">
                 <label for="tipe_supplier" class="col-form-label">Tipe Supplier</label>
                 <div class="form-group">
-                    <select class="select2" name="tipe_supplier" id="add_tipe_supplier" value="">
-                        <option>Pilih Tipe</option>
+                    <select class="select2" name="tipe_supplier" id="add_tipe_supplier" value="" required>
+                        <option value="">Pilih Tipe</option>
                         <option value="tradisional">Tradisional</option>
                         <option value="inden">Inden</option>
                     </select>
@@ -130,8 +130,8 @@
               <div class="mb-3">
                   <label for="tipe_supplier" class="col-form-label">Tipe Supplier</label>
                   <div class="form-group">
-                      <select class="select2" name="tipe_supplier" id="edit_tipe_supplier" value="">
-                          <option>Pilih Tipe</option>
+                      <select class="select2" name="tipe_supplier" id="edit_tipe_supplier" value="" required>
+                          <option value="">Pilih Tipe</option>
                           <option value="tradisional">Tradisional</option>
                           <option value="inden">Inden</option>
                       </select>

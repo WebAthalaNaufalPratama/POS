@@ -65,13 +65,13 @@
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="add_nama">
+              <input type="text" class="form-control" name="nama" id="add_nama" required>
             </div>
             <div class="mb-3">
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
               <div class="form-group">
-                <select class="select2" name="lokasi_id" id="add_lokasi">
-                  <option>Pilih Lokasi</option>
+                <select class="select2" name="lokasi_id" id="add_lokasi" required>
+                  <option value="">Pilih Lokasi</option>
                   @foreach ($lokasis as $lokasi)
                     <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                   @endforeach
@@ -80,7 +80,7 @@
             </div>
             <div class="mb-3">
                 <label for="biaya" class="col-form-label">Biaya</label>
-                <input type="text" class="form-control" name="biaya" id="add_biaya">
+                <input type="text" class="form-control" name="biaya" id="add_biaya" required>
               </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -104,13 +104,13 @@
             @method('PATCH')
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="edit_nama" value="">
+              <input type="text" class="form-control" name="nama" id="edit_nama" value="" required>
             </div>
             <div class="mb-3">
                 <label for="lokasi_id" class="col-form-label">Lokasi</label>
                 <div class="form-group">
-                  <select class="select2" name="lokasi_id" id="edit_lokasi">
-                    <option>Pilih Lokasi</option>
+                  <select class="select2" name="lokasi_id" id="edit_lokasi" required>
+                    <option value="">Pilih Lokasi</option>
                     @foreach ($lokasis as $lokasi)
                       <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                     @endforeach
@@ -119,7 +119,7 @@
               </div>
             <div class="mb-3">
                 <label for="biaya" class="col-form-label">Biaya</label>
-                <input type="text" class="form-control" name="biaya" id="edit_biaya" value="">
+                <input type="text" class="form-control" name="biaya" id="edit_biaya" value="" required>
               </div>
         </div>
         <div class="modal-footer justify-content-center">

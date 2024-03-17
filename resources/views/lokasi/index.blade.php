@@ -67,13 +67,13 @@
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="add_nama">
+              <input type="text" class="form-control" name="nama" id="add_nama" required>
             </div>
             <div class="mb-3">
                 <label for="tipe_lokasi" class="col-form-label">Tipe Lokasi</label>
                 <div class="form-group">
-                  <select class="select2" name="tipe_lokasi" id="add_tipe_lokasi">
-                    <option>Pilih Tipe Lokasi</option>
+                  <select class="select2" name="tipe_lokasi" id="add_tipe_lokasi" required>
+                    <option value="">Pilih Tipe Lokasi</option>
                     @foreach ($tipe_lokasis as $tipe_lokasi)
                       <option value="{{ $tipe_lokasi->id }}">{{ $tipe_lokasi->nama }}</option>
                     @endforeach
@@ -82,11 +82,11 @@
             </div>
             <div class="mb-3">
                 <label for="alamat" class="col-form-label">Alamat</label>
-                <textarea class="form-control" name="alamat" id="add_alamat"></textarea>
+                <textarea class="form-control" name="alamat" id="add_alamat" required></textarea>
             </div>
             <div class="mb-3">
               <label for="pic" class="col-form-label">Pic</label>
-              <input type="text" class="form-control" name="pic" id="add_pic">
+              <input type="text" class="form-control" name="pic" id="add_pic" required>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -110,13 +110,13 @@
             @method('PATCH')
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="edit_nama" value="">
+              <input type="text" class="form-control" name="nama" id="edit_nama" value="" required>
             </div>
             <div class="mb-3">
                 <label for="tipe_lokasi" class="col-form-label">Tipe Lokasi</label>
                 <div class="form-group">
-                  <select class="select2" name="tipe_lokasi" id="edit_tipe_lokasi">
-                    <option>Pilih Tipe Lokasi</option>
+                  <select class="select2" name="tipe_lokasi" id="edit_tipe_lokasi" required>
+                    <option value="">Pilih Tipe Lokasi</option>
                     @foreach ($tipe_lokasis as $tipe_lokasi)
                       <option value="{{ $tipe_lokasi->id }}">{{ $tipe_lokasi->nama }}</option>
                     @endforeach
@@ -125,11 +125,11 @@
             </div>
             <div class="mb-3">
                 <label for="alamat" class="col-form-label">Alamat</label>
-                <textarea class="form-control" name="alamat" id="edit_alamat" value=""></textarea>
+                <textarea class="form-control" name="alamat" id="edit_alamat" value="" required></textarea>
             </div>
             <div class="mb-3">
               <label for="pic" class="col-form-label">Pic</label>
-              <input type="text" class="form-control" name="pic" id="edit_pic" value="">
+              <input type="text" class="form-control" name="pic" id="edit_pic" value="" required>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
