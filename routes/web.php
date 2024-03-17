@@ -116,6 +116,24 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{lokasi}/delete', 'LokasiController@destroy')->name('lokasi.destroy');
         });
 
+        Route::group(['prefix' => 'supplier'], function() {
+            Route::get('/', 'SupplierController@index')->name('supplier.index');
+            Route::post('/store', 'SupplierController@store')->name('supplier.store');
+            Route::get('/{supplier}/show', 'SupplierController@show')->name('supplier.show');
+            Route::get('/{supplier}/edit', 'SupplierController@edit')->name('supplier.edit');
+            Route::patch('/{supplier}/update', 'SupplierController@update')->name('supplier.update');
+            Route::get('/{supplier}/delete', 'SupplierController@destroy')->name('supplier.destroy');
+        });
+
+        Route::group(['prefix' => 'ongkir'], function() {
+            Route::get('/', 'OngkirController@index')->name('ongkir.index');
+            Route::post('/store', 'OngkirController@store')->name('ongkir.store');
+            Route::get('/{ongkir}/show', 'OngkirController@show')->name('ongkir.show');
+            Route::get('/{ongkir}/edit', 'OngkirController@edit')->name('ongkir.edit');
+            Route::patch('/{ongkir}/update', 'OngkirController@update')->name('ongkir.update');
+            Route::get('/{ongkir}/delete', 'OngkirController@destroy')->name('ongkir.destroy');
+        });
+
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
     });
