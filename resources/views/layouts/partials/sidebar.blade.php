@@ -1,4 +1,5 @@
 <div class="sidebar" id="sidebar">
+<<<<<<< HEAD
 <div class="sidebar-inner slimscroll">
 <div id="sidebar-menu" class="sidebar-menu">
 <ul>
@@ -25,6 +26,32 @@
 </ul>
 </li>
 {{-- <li class="submenu">
+=======
+    <div class="sidebar-inner slimscroll">
+        <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+                <li class="active">
+                    <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Master</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('produks.index') }}">Produk</a></li>
+                        <li><a href="{{ route('tipe_produk.index') }}">Tipe Produk</a></li>
+                        <li><a href="{{ route('kondisi.index') }}">Kondisi</a></li>
+                        <li><a href="{{ route('lokasi.index') }}">Lokasi</a></li>
+                        <li><a href="{{ route('tipe_lokasi.index') }}">Tipe Lokasi</a></li>
+                        <li><a href="{{ route('supplier.index') }}">Supplier</a></li>
+                        <li><a href="{{ route('ongkir.index') }}">Ongkir</a></li>
+                        <li><a href="{{ route('customer.index') }}">Customer</a></li>
+                        <li><a href="{{ route('karyawan.index') }}">Karyawan</a></li>
+                        <li><a href="{{ route('rekening.index') }}">Rekening</a></li>
+                        <li><a href="{{ route('aset.index') }}">Aset</a></li>
+                        <li><a href="{{ route('promo.index') }}">Promo</a></li>
+                    </ul>
+                </li>
+                {{-- <li class="submenu">
+>>>>>>> 2d092fc3733300089a13a91dd65adfdc82297eaf
 <a href="javascript:void(0);"><img src="/assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
 <ul>
 <li><a href="saleslist.html">Sales List</a></li>
@@ -184,7 +211,7 @@
 <li><a href="email.html">Email</a></li>
 </ul>
 </li> --}}
-{{-- <li class="submenu">
+                {{-- <li class="submenu">
 <a href="javascript:void(0);"><img src="/assets/img/icons/time.svg" alt="img"><span> Report</span> <span class="menu-arrow"></span></a>
 <ul>
 <li><a href="purchaseorderreport.html">Purchase order report</a></li>
@@ -196,26 +223,26 @@
 <li><a href="customerreport.html">Customer Report</a></li>
 </ul>
 </li> --}}
-<li class="submenu">
-<a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
-<ul>
-<li><a href="/roles">Roles </a></li>
-<li><a href="/permissions">Permissions </a></li>
-<li><a href="{{ route('users.index') }}">User </a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="javascript:void(0);"><img src="/assets/img/icons/settings.svg" alt="img"><span> Settings</span> <span class="menu-arrow"></span></a>
-<ul>
-<li><a href="generalsettings.html">General Settings</a></li>
-<li><a href="emailsettings.html">Email Settings</a></li>
- <li><a href="paymentsettings.html">Payment Settings</a></li>
-<li><a href="currencysettings.html">Currency Settings</a></li>
-<li><a href="grouppermissions.html">Group Permissions</a></li>
-<li><a href="taxrates.html">Tax Rates</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="/roles">Roles </a></li>
+                        <li><a href="/permissions">Permissions </a></li>
+                        <li><a href="{{ route('users.index') }}">User </a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/settings.svg" alt="img"><span> Settings</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="generalsettings.html">General Settings</a></li>
+                        <li><a href="emailsettings.html">Email Settings</a></li>
+                        <li><a href="paymentsettings.html">Payment Settings</a></li>
+                        <li><a href="currencysettings.html">Currency Settings</a></li>
+                        <li><a href="grouppermissions.html">Group Permissions</a></li>
+                        <li><a href="taxrates.html">Tax Rates</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
