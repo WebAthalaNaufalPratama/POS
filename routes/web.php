@@ -134,6 +134,51 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{ongkir}/delete', 'OngkirController@destroy')->name('ongkir.destroy');
         });
 
+        Route::group(['prefix'=> 'customer'], function() {
+            Route::get('/', 'CustomerController@index')->name('customer.index');
+            Route::post('/store', 'CustomerController@store')->name('customer.store');
+            Route::get('/store', 'CustomerController@show')->name('customer.show');
+            Route::get('/{customer}/edit', 'CustomerController@edit')->name('customer.edit');
+            Route::patch('/{customer}/update', 'CustomerController@update')->name('customer.update');
+            Route::get('/{customer}/delete', 'CustomerController@destroy')->name('customer.destroy');
+        });
+
+        Route::group(['prefix'=> 'karyawan'], function() {
+            Route::get('/', 'KaryawanController@index')->name('karyawan.index');
+            Route::post('/store', 'KaryawanController@store')->name('karyawan.store');
+            Route::get('/store', 'KaryawanController@show')->name('karyawan.show');
+            Route::get('/{karyawan}/edit', 'KaryawanController@edit')->name('karyawan.edit');
+            Route::patch('/{karyawan}/update', 'KaryawanController@update')->name('karyawan.update');
+            Route::get('/{karyawan}/delete', 'KaryawanController@destroy')->name('karyawan.destroy');
+        });
+
+        Route::group(['prefix'=> 'rekening'], function() {
+            Route::get('/', 'RekeningController@index')->name('rekening.index');
+            Route::post('/store', 'RekeningController@store')->name('rekening.store');
+            Route::get('/store', 'RekeningController@show')->name('rekening.show');
+            Route::get('/{rekening}/edit', 'RekeningController@edit')->name('rekening.edit');
+            Route::patch('/{rekening}/update', 'RekeningController@update')->name('rekening.update');
+            Route::get('/{rekening}/delete', 'RekeningController@destroy')->name('rekening.destroy');
+        });
+
+        Route::group(['prefix'=> 'aset'], function() {
+            Route::get('/', 'AsetController@index')->name('aset.index');
+            Route::post('/store', 'AsetController@store')->name('aset.store');
+            Route::get('/store', 'AsetController@show')->name('aset.show');
+            Route::get('/{rekening}/edit', 'AsetController@edit')->name('aset.edit');
+            Route::patch('/{rekening}/update', 'AsetController@update')->name('aset.update');
+            Route::get('/{rekening}/delete', 'AsetController@destroy')->name('aset.destroy');
+        });
+
+        Route::group(['prefix'=> 'promo'], function() {
+            Route::get('/', 'PromoController@index')->name('promo.index');
+            Route::post('/store', 'PromoController@store')->name('promo.store');
+            Route::get('/store', 'PromoController@show')->name('promo.show');
+            Route::get('/{rekening}/edit', 'PromoController@edit')->name('promo.edit');
+            Route::patch('/{rekening}/update', 'PromoController@update')->name('promo.update');
+            Route::get('/{rekening}/delete', 'PromoController@destroy')->name('promo.destroy');
+        });
+
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
     });

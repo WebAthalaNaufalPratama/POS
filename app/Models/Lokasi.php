@@ -18,4 +18,24 @@ class Lokasi extends Model
     public function ongkir(){
         return $this->hasMany(Ongkir::class);
     }
+
+    public function karyawan()
+    {
+        return $this->hasMany(Karyawan::class);
+    }
+
+    public function rekening()
+    {
+        return $this->hasMany(Rekening::class);
+    }
+    
+    public function aset()
+    {
+        return $this->hasMany(Aset::class);
+    }
+
+    public function promo()
+    {
+        return $this->hasMany(Promo::class);
+    }
 }
