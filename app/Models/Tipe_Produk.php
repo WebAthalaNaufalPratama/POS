@@ -16,4 +16,8 @@ class Tipe_Produk extends Model
     public function produk(){
         return $this->hasMany(Produk::class, 'id', 'tipe_produk');
     }
+
+    public function produk_jual(){
+        return $this->hasMany(Produk_Jual::class, 'id', 'tipe_produk');
+    }
 }

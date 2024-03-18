@@ -6,7 +6,7 @@
 <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
 </li>
 <li class="submenu">
-<a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Master</span> <span class="menu-arrow"></span></a>
+<a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
 <ul>
 <li><a href="{{ route('produks.index') }}">Produk</a></li>
 <li><a href="{{ route('tipe_produk.index') }}">Tipe Produk</a></li>
@@ -15,6 +15,13 @@
 <li><a href="{{ route('tipe_lokasi.index') }}">Tipe Lokasi</a></li>
 <li><a href="{{ route('supplier.index') }}">Supplier</a></li>
 <li><a href="{{ route('ongkir.index') }}">Ongkir</a></li>
+</ul>
+</li>
+<li class="submenu">
+<a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
+<ul>
+<li><a href="{{ route('tradisional.index') }}">Tradisional</a></li>
+<li><a href="{{ route('gift.index') }}">Gift</a></li>
 </ul>
 </li>
 {{-- <li class="submenu">

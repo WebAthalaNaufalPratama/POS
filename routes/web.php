@@ -134,6 +134,25 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{ongkir}/delete', 'OngkirController@destroy')->name('ongkir.destroy');
         });
 
+        Route::group(['prefix' => 'tradisional'], function() {
+            Route::get('/', 'ProdukJualController@index')->name('tradisional.index');
+            Route::get('/create', 'ProdukJualController@create')->name('tradisional.create');
+            Route::post('/store', 'ProdukJualController@store')->name('tradisional.store');
+            Route::get('/{tradisional}/show', 'ProdukJualController@show')->name('tradisional.show');
+            Route::get('/{tradisional}/edit', 'ProdukJualController@edit')->name('tradisional.edit');
+            Route::patch('/{tradisional}/update', 'ProdukJualController@update')->name('tradisional.update');
+            Route::get('/{tradisional}/delete', 'ProdukJualController@destroy')->name('tradisional.destroy');
+        });
+        Route::group(['prefix' => 'gift'], function() {
+            Route::get('/', 'ProdukJualController@index')->name('gift.index');
+            Route::get('/create', 'ProdukJualController@create')->name('gift.create');
+            Route::post('/store', 'ProdukJualController@store')->name('gift.store');
+            Route::get('/{gift}/show', 'ProdukJualController@show')->name('gift.show');
+            Route::get('/{gift}/edit', 'ProdukJualController@edit')->name('gift.edit');
+            Route::patch('/{gift}/update', 'ProdukJualController@update')->name('gift.update');
+            Route::get('/{gift}/delete', 'ProdukJualController@destroy')->name('gift.destroy');
+        });
+
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
     });

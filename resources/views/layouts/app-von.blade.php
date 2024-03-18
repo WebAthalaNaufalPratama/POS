@@ -7,7 +7,7 @@
 <meta name="keywords" content="admin, estimates, bootstrap, business, corporate, creative, management, minimal, modern,  html5, responsive">
 <meta name="author" content="Dreamguys - Bootstrap Admin Template">
 <meta name="robots" content="noindex, nofollow">
-<title>Dreams Pos admin template</title>
+<title>Vonflorist</title>
 
 <link rel="shortcut icon" type="image/x-icon" href="/assets/img/favicon.jpg">
 
@@ -15,9 +15,9 @@
 
 <link rel="stylesheet" href="/assets/css/animate.css">
 
-<link rel="stylesheet" href="assets/plugins/select2/css/select2.min.css" />
+<link rel="stylesheet" href="/assets/plugins/select2/css/select2.min.css" />
 
-<link rel="stylesheet" href="assets/plugins/toastr/toatr.css" />
+<link rel="stylesheet" href="/assets/plugins/toastr/toatr.css" />
 
 <link rel="stylesheet" href="/assets/css/dataTables.bootstrap4.min.css">
 
@@ -239,14 +239,14 @@
 
     <script src="/assets/js/bootstrap.bundle.min.js"></script>
 
-    <script src="assets/plugins/select2/js/select2.min.js"></script>
-    <script src="assets/plugins/select2/js/custom-select.js"></script>
+    <script src="/assets/plugins/select2/js/select2.min.js"></script>
+    <script src="/assets/plugins/select2/js/custom-select.js"></script>
 
-    <script src="assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
-    <script src="assets/plugins/sweetalert/sweetalerts.min.js"></script>
+    <script src="/assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
+    <script src="/assets/plugins/sweetalert/sweetalerts.min.js"></script>
 
-    <script src="assets/plugins/toastr/toastr.js"></script>
-    <script src="assets/plugins/toastr/toastr.min.js"></script>
+    <script src="/assets/plugins/toastr/toastr.js"></script>
+    <script src="/assets/plugins/toastr/toastr.min.js"></script>
 
     <script src="/assets/plugins/apexchart/apexcharts.min.js"></script>
     <script src="/assets/plugins/apexchart/chart-data.js"></script>
