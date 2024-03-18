@@ -151,6 +151,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{gift}/edit', 'ProdukJualController@edit')->name('gift.edit');
             Route::patch('/{gift}/update', 'ProdukJualController@update')->name('gift.update');
             Route::get('/{gift}/delete', 'ProdukJualController@destroy')->name('gift.destroy');
+        });
 
         Route::group(['prefix'=> 'customer'], function() {
             Route::get('/', 'CustomerController@index')->name('customer.index');
@@ -199,6 +200,5 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
-    });
     });
 });
