@@ -5,26 +5,25 @@
     <div class="col-sm-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">Edit Produk Tradisional</h5>
+                <h5 class="card-title">Tambah Produk Gift</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm">
-                        <form action="{{ route('tradisional.update', ['tradisional' => $getProdukJual->id]) }}" method="POST">
+                        <form action="{{ route('gift.store') }}" method="POST">
                             @csrf
-                            @method('PATCH')
                             <div class="form-row row">
                                 <div class="col-md-4 mb-3">
                                     <label for="kode">Kode</label>
-                                    <input type="text" class="form-control" id="kode" name="kode" placeholder="Kode Produk" value="{{ $getProdukJual->kode }}" readonly required>
+                                    <input type="text" class="form-control" id="kode" name="kode" placeholder="Kode Produk" value="{{ $getKode }}" readonly required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="nama">Nama</label>
-                                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Produk" value="{{ $getProdukJual->nama }}" required>
+                                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Produk" value="{{ old('nama') }}" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="tipe_produk">Tipe Produk</label>
-                                    <input type="text" class="form-control" id="tipe_produk" name="tipe_produk" value="Tradisional" readonly required>
+                                    <input type="text" class="form-control" id="tipe_produk" name="tipe_produk" value="gift" readonly required>
                                 </div>
                             </div>
                             <div class="form-row row">
@@ -32,19 +31,19 @@
                                     <label for="harga">Harga</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="number" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ $getProdukJual->harga }}" aria-describedby="inputGroupPrepend2" required>
+                                        <input type="number" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ old('harga') }}" aria-describedby="inputGroupPrepend2" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="harga_jual">Harga Jual</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="number" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="{{ $getProdukJual->harga_jual }}" aria-describedby="inputGroupPrepend2" required>
+                                        <input type="number" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="{{ old('harga_jual') }}" aria-describedby="inputGroupPrepend2" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Deskripsi</label>
-                                    <textarea rows="5" cols="5" class="form-control" placeholder="Deskripsi Produk" name="deskripsi" required>{{ $getProdukJual->deskripsi }}</textarea>
+                                    <textarea rows="5" cols="5" class="form-control" placeholder="Deskripsi Produk" name="deskripsi" required>{{ old('deskripsi') }}</textarea>
                                 </div>
                             </div>
                             <div class="form-row row">
@@ -92,7 +91,7 @@
                                 </div>
                             </div>
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="{{ route('tradisional.index') }}" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('gift.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </form>
                     </div>
                 </div>

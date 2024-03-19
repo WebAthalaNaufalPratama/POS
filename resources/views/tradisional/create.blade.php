@@ -19,7 +19,7 @@
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="nama">Nama</label>
-                                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Produk" value="" required>
+                                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Produk" value="{{ old('nama') }}" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="tipe_produk">Tipe Produk</label>
@@ -31,19 +31,19 @@
                                     <label for="harga">Harga</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="number" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="" aria-describedby="inputGroupPrepend2" required>
+                                        <input type="number" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ old('harga') }}" aria-describedby="inputGroupPrepend2" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="harga_jual">Harga Jual</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="number" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="" aria-describedby="inputGroupPrepend2" required>
+                                        <input type="number" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="{{ old('harga_jual') }}" aria-describedby="inputGroupPrepend2" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Deskripsi</label>
-                                    <textarea rows="5" cols="5" class="form-control" placeholder="Deskripsi Produk" name="deskripsi" required></textarea>
+                                    <textarea rows="5" cols="5" class="form-control" placeholder="Deskripsi Produk" name="deskripsi" required>{{ old('deskripsi') }}</textarea>
                                 </div>
                             </div>
                             <div class="form-row row">
@@ -139,6 +139,8 @@
             $(document).on('click', '.btn_remove', function() {
                 var button_id = $(this).attr("id");
                 $('#row'+button_id+'').remove();
+                multiply($('#harga_satuan_0'))
+                multiply($('#jumlah_0'))
             });
             $(document).on('change', '[id^=nama_produk]', function() {
                 var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID

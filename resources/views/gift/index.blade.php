@@ -7,10 +7,10 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Produk Tradisional</h4>
+                    <h4>Produk Gift</h4>
                 </div>
                 <div class="page-btn">
-                    <a href="{{ route('tradisional.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Produk</a>
+                    <a href="{{ route('gift.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Produk</a>
                 </div>
             </div>
         </div>
@@ -30,16 +30,16 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($tradisionals as $tradisional)
+                    @foreach ($gifts as $gift)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $tradisional->nama }}</td>
-                            <td>{{ $tradisional->tipe->nama }}</td>
-                            <td>{{ $tradisional->harga }}</td>
-                            <td>{{ $tradisional->harga_jual }}</td>
-                            <td>{{ $tradisional->deskripsi }}</td>
+                            <td>{{ $gift->nama }}</td>
+                            <td>{{ $gift->tipe->nama }}</td>
+                            <td>{{ $gift->harga }}</td>
+                            <td>{{ $gift->harga_jual }}</td>
+                            <td>{{ $gift->deskripsi }}</td>
                             <td>
-                                @foreach ($tradisional->komponen as $komponen)
+                                @foreach ($gift->komponen as $komponen)
                                     {{ $komponen->kode_produk }} - {{ $komponen->nama_produk ?? '-' }} x {{ $komponen->jumlah ?? '-' }} <br>
                                 @endforeach
                             </td>
@@ -47,8 +47,8 @@
                                 <div class="dropdown">
                                     <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('tradisional.edit', ['tradisional' => $tradisional->id]) }}">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $tradisional->id }})">Delete</a>
+                                        <a class="dropdown-item" href="{{ route('gift.edit', ['gift' => $gift->id]) }}">Edit</a>
+                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $gift->id }})">Delete</a>
                                     </div>
                                 </div>
                             </td>
@@ -69,7 +69,7 @@
     function deleteData(id){
         $.ajax({
             type: "GET",
-            url: "/tradisional/"+id+"/delete",
+            url: "/gift/"+id+"/delete",
             success: function(response) {
                 toastr.success(response.msg, 'Success', {
                     closeButton: true,

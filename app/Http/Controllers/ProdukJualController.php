@@ -78,6 +78,7 @@ class ProdukJualController extends Controller
                 $kode = explode('-', $lastProduk->kode);
                 $getKode = 'GFT-' . str_pad((int)$kode[1] + 1, 5, '0', STR_PAD_LEFT);
             }
+
             return view('gift.create', compact('getKode', 'produks', 'kondisi'));
         }
         else{
@@ -108,6 +109,7 @@ class ProdukJualController extends Controller
             ]);
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+            if(count($req->nama_produk) < 1 || $req->nama_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
             $data = $req->except(['_token', '_method']);
 
             // ambil tipe
@@ -138,8 +140,45 @@ class ProdukJualController extends Controller
             return redirect(route('tradisional.index'))->with('success', 'Data tersimpan');
         }
         elseif($jenis == 'gift'){
+            // validasi
+            $validator = Validator::make($req->all(), [
+                'kode' => 'required',
+                'nama' => 'required',
+                'harga' => 'required|integer',
+                'harga_jual' => 'required|integer',
+                'deskripsi' => 'required',
+            ]);
+            $error = $validator->errors()->all();
+            if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+            if(count($req->nama_produk) < 1 || $req->nama_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
+            $data = $req->except(['_token', '_method']);
 
-            return view('gift.create', compact('getKode'));
+            // ambil tipe
+            $getTipe = Tipe_Produk::where('nama', 'gift')->first()->id;
+
+            // save data produk jual
+            $data['tipe_produk'] = $getTipe;
+            $check = Produk_Jual::create($data);
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            // save data komponen
+            for ($i=0; $i < count($req->nama_produk); $i++) { 
+                $produk = Produk::find($req->nama_produk[$i]);
+                $datakomponen = array(
+                    'produk_jual_id' => $check->id,
+                    'kode_produk' => $produk->kode,
+                    'nama_produk' => $produk->nama,
+                    'tipe_produk' => $produk->tipe_produk,
+                    'kondisi' => $req->kondisi[$i],
+                    'deskripsi' => $produk->deskripsi,
+                    'jumlah' => $req->jumlah[$i],
+                    'harga_satuan' => $req->harga_satuan[$i],
+                    'harga_total' => $req->harga_total[$i]
+                );
+                $check2 = Komponen_Produk_Jual::create($datakomponen);
+                if(!$check2) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+            return redirect(route('gift.index'))->with('success', 'Data tersimpan');
         }
         else{
             return redirect()->back()->with('fail', 'Url salah');
@@ -165,7 +204,36 @@ class ProdukJualController extends Controller
      */
     public function edit(Request $req, $produk_Jual)
     {
-        $jenis = $req->path();
+        $path = $req->path();
+        $path = explode('/', $path);
+        $jenis = $path[0];
+        $produks = Produk::all();
+        $kondisi = Kondisi::all();
+        if($jenis == 'tradisional'){
+
+            $getProdukJual = Produk_Jual::find($produk_Jual);
+            $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
+            return view('tradisional.edit', compact('getProdukJual', 'getKomponen', 'produks', 'kondisi'));
+        }
+        elseif($jenis == 'gift'){
+
+            // ambil tipe produk
+            $getTipe = Tipe_Produk::where('nama', 'gift')->first();
+
+            // penentuan kode produk
+            $latestProduks = Produk_Jual::withTrashed()->where('tipe_produk', $getTipe->id)->orderBy('kode', 'desc')->get();
+            if(count($latestProduks) < 1){
+                $getKode = 'GFT-00001';
+            } else {
+                $lastProduk = $latestProduks->first();
+                $kode = explode('-', $lastProduk->kode);
+                $getKode = 'GFT-' . str_pad((int)$kode[1] + 1, 5, '0', STR_PAD_LEFT);
+            }
+            return view('gift.edit', compact('getKode', 'produks', 'kondisi'));
+        }
+        else{
+            return redirect()->back()->with('fail', 'Url salah');
+        }
     }
 
     /**
@@ -190,8 +258,12 @@ class ProdukJualController extends Controller
     {
         $data = Produk_Jual::find($produk_Jual);
         if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $data->id)->get();
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
+        if($getKomponen){
+            $getKomponen->each->delete();
+        }
         return response()->json(['msg' => 'Data berhasil dihapus']);
     }
 }
