@@ -117,6 +117,15 @@ class RolesController extends Controller
         $role->update($request->only('name'));
     
         $role->syncPermissions($request->get('permission'));
+
+        $activity = Activity::create([
+            'log_name' => 'default',
+            'description' => 'Updated role: ' . $role->name,
+            'subject_type' => Role::class,
+            'subject_id' => $role->id,
+            'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'causer_id' => Auth::id(),
+        ]);
     
         return redirect()->route('roles.index')
                         ->with('success','Role updated successfully');
@@ -131,6 +140,15 @@ class RolesController extends Controller
     public function destroy(Role $role)
     {
         $role->delete();
+
+        $activity = Activity::create([
+            'log_name' => 'default',
+            'description' => 'Deleted role: ' . $role->name,
+            'subject_type' => Role::class,
+            'subject_id' => $role->id,
+            'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'causer_id' => Auth::id(),
+        ]);
 
         return redirect()->route('roles.index')
                         ->with('success','Role deleted successfully');
