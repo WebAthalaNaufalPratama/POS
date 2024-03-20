@@ -2,31 +2,31 @@
     <div class="sidebar-inner slimscroll">
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
-                <li class="active">
+                <li class="submenu">
                     <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                 </li>
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('produks.index') }}">Produk</a></li>
-                        <li><a href="{{ route('tipe_produk.index') }}">Tipe Produk</a></li>
-                        <li><a href="{{ route('kondisi.index') }}">Kondisi</a></li>
-                        <li><a href="{{ route('lokasi.index') }}">Lokasi</a></li>
-                        <li><a href="{{ route('tipe_lokasi.index') }}">Tipe Lokasi</a></li>
-                        <li><a href="{{ route('supplier.index') }}">Supplier</a></li>
-                        <li><a href="{{ route('ongkir.index') }}">Ongkir</a></li>
-                        <li><a href="{{ route('customer.index') }}">Customer</a></li>
-                        <li><a href="{{ route('karyawan.index') }}">Karyawan</a></li>
-                        <li><a href="{{ route('rekening.index') }}">Rekening</a></li>
-                        <li><a href="{{ route('aset.index') }}">Aset</a></li>
-                        <li><a href="{{ route('promo.index') }}">Promo</a></li>
+                        <li><a href="{{ route('produks.index') }}" class="{{ request()->is('produks*') ? 'active' : '' }}">Produk</a></li>
+                        <li><a href="{{ route('tipe_produk.index') }}" class="{{ request()->is('tipe_produks*') ? 'active' : '' }}">Tipe Produk</a></li>
+                        <li><a href="{{ route('kondisi.index') }}" class="{{ request()->is('kondisi*') ? 'active' : '' }}">Kondisi</a></li>
+                        <li><a href="{{ route('lokasi.index') }}" class="{{ request()->is('lokasi*') ? 'active' : '' }}">Lokasi</a></li>
+                        <li><a href="{{ route('tipe_lokasi.index') }}" class="{{ request()->is('tipe_lokasi*') ? 'active' : ''}}">Tipe Lokasi</a></li>
+                        <li><a href="{{ route('supplier.index') }}" class="{{ request()->is('supplier*') ? 'active' : '' }}">Supplier</a></li>
+                        <li><a href="{{ route('ongkir.index') }}" class="{{ request()->is('ongkir*') ? 'active' : '' }}">Ongkir</a></li>
+                        <li><a href="{{ route('customer.index') }}" class="{{ request()->is('customer*') ? 'active' : '' }}">Customer</a></li>
+                        <li><a href="{{ route('karyawan.index') }}" class="{{ request()->is('karyawan*') ? 'active' : '' }}">Karyawan</a></li>
+                        <li><a href="{{ route('rekening.index') }}" class="{{ request()->is('rekening*') ? 'active' : '' }}">Rekening</a></li>
+                        <li><a href="{{ route('aset.index') }}" class="{{ request()->is('aset*') ? 'active' : '' }}">Aset</a></li>
+                        <li><a href="{{ route('promo.index') }}" class="{{ request()->is('promo*') ? 'active' : '' }}">Promo</a></li>
                     </ul>
                 </li>
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('tradisional.index') }}">Tradisional</a></li>
-                        <li><a href="{{ route('gift.index') }}">Gift</a></li>
+                        <li><a href="{{ route('tradisional.index') }}" class="{{ request()->is('tradisional*') ? 'active' : '' }}">Tradisional</a></li>
+                        <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li>
                     </ul>
                 </li>
                 {{-- <li class="submenu">
@@ -204,10 +204,10 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="/roles">Roles </a></li>
-                        <li><a href="/permissions">Permissions </a></li>
-                        <li><a href="/posts">Log Activity </a></li>
-                        <li><a href="{{ route('users.index') }}">User </a></li>
+                        <li><a href="/roles" class="{{ request()->is('roles*') ? 'active' : '' }}">Roles </a></li>
+                        <li><a href="/permissions" class="{{ request()->is('permissions*') ? 'active' : '' }}">Permissions </a></li>
+                        <li><a href="/posts" class="{{ request()->is('posts*') ? 'active' : '' }}">Log Activity </a></li>
+                        <li><a href="{{ route('users.index') }}" class="{{ request()->is('users*') ? 'active' : '' }}">User </a></li>
                     </ul>
                 </li>
                 <li class="submenu">

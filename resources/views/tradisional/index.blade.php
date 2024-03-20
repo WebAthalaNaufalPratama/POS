@@ -25,7 +25,7 @@
                     <th>Harga</th>
                     <th>Harga Jual</th>
                     <th>Deskripsi</th>
-                    <th>Komponen</th>
+                    <th class="text-center">Komponen</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -39,9 +39,15 @@
                             <td>{{ $tradisional->harga_jual }}</td>
                             <td>{{ $tradisional->deskripsi }}</td>
                             <td>
-                                @foreach ($tradisional->komponen as $komponen)
-                                    {{ $komponen->kode_produk }} - {{ $komponen->nama_produk ?? '-' }} x {{ $komponen->jumlah ?? '-' }} <br>
-                                @endforeach
+                                <table class="table table-bordered">
+                                    @foreach ($tradisional->komponen as $komponen)
+                                    <tr>
+                                        <td>{{ $komponen->kode_produk }}</td>
+                                        <td>{{ $komponen->nama_produk }}</td>
+                                        <td>{{ $komponen->jumlah }}</td>
+                                    </tr>
+                                    @endforeach
+                                </table>
                             </td>
                             <td>
                                 <div class="dropdown">
