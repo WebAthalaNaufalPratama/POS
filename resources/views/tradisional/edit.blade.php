@@ -62,6 +62,7 @@
                                             </tr>
                                         </thead>
                                         <tbody id="dynamic_field">
+                                            @if(count($getKomponen) < 1)
                                             <tr>
                                                 <td>
                                                     <select id="nama_produk" name="nama_produk[]" class="form-control">
@@ -87,6 +88,44 @@
                                                 <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control"></td>
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             </tr>
+                                            @endif
+                                            @php
+                                                $i = 0;
+                                            @endphp
+                                            @foreach ($getKomponen as $komponen)
+                                                <tr id="row{{ $i }}">
+                                                    <td>
+                                                        <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control">
+                                                            <option value="">Pilih Produk</option>
+                                                            @foreach ($produks as $produk)
+                                                                <option value="{{ $produk->id }}" {{ $komponen->kode_produk == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        {{-- <input type="hidden" name="kode_produk[]" style="display: none;" value="{{ $komponen->kode_produk }}">
+                                                        <input type="hidden" name="tipe_produk[]" style="display: none;" value="{{ $komponen->tipe_produk }}">
+                                                        <input type="hidden" name="deskripsi_komponen[]" style="display: none;" value="{{ $komponen->deskripsi }}"> --}}
+                                                    </td>
+                                                    <td>
+                                                        <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control">
+                                                            <option value="">Pilih Kondisi</option>
+                                                            @foreach ($kondisi as $item)
+                                                                <option value="{{ $item->id }}" {{ $komponen->kondisi == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" value="{{ $komponen->harga_satuan }}" oninput="multiply(this)" class="form-control"></td>
+                                                    <td><input type="number" name="jumlah[]" id="jumlah_0" value="{{ $komponen->jumlah }}" oninput="multiply(this)" class="form-control"></td>
+                                                    <td><input type="number" name="harga_total[]" id="harga_total_0" value="{{ $komponen->harga_total }}" class="form-control"></td>
+                                                    @if ($i == 0)
+                                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                    @else
+                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                    @endif
+                                                    @php
+                                                        $i++;
+                                                    @endphp
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -106,7 +145,7 @@
     <script>
         $(document).ready(function() {
             $('[id^=nama_produk], [id^=kondisi]').select2();
-            var i = 1;
+            var i = '{{ count($getKomponen) }}';
             $('#add').click(function() {
                 var newRow = '<tr class="tr_clone" id="row' + i + '">' +
                 '<td>' +
@@ -143,14 +182,14 @@
                 multiply($('#harga_satuan_0'))
                 multiply($('#jumlah_0'))
             });
-            $(document).on('change', '[id^=nama_produk]', function() {
-                var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
-                var selectedValue = $(this).val(); // Nilai yang dipilih
-                // Set nilai input tersembunyi yang sesuai
-                $('#kode_produk_' + id).val($(this).data('kode'));
-                $('#tipe_produk_' + id).val($(this).data('tipe'));
-                $('#deskripsi_komponen_' + id).val($(this).data('deskripsi'));
-            });
+            // $(document).on('change', '[id^=nama_produk]', function() {
+            //     var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
+            //     var selectedValue = $(this).val(); // Nilai yang dipilih
+            //     // Set nilai input tersembunyi yang sesuai
+            //     $('#kode_produk_' + id).val($(this).data('kode'));
+            //     $('#tipe_produk_' + id).val($(this).data('tipe'));
+            //     $('#deskripsi_komponen_' + id).val($(this).data('deskripsi'));
+            // });
         });
         function multiply(element) {
             var id = 0
