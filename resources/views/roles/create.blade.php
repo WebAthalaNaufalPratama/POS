@@ -35,23 +35,25 @@
 
                             <label for="permissions" class="form-label">Assign Permissions</label>
 
-                            <table class="table table-striped">
-                                <thead>
-                                    <th scope="col" width="1%"><input type="checkbox" name="all_permission"></th>
-                                    <th scope="col" width="20%">Name</th>
-                                    <th scope="col" width="1%">Guard</th>
-                                </thead>
+                            <div class="table-responsive">
+                                <table class="table datanew">
+                                    <thead>
+                                        <th scope="col" width="1%"><input type="checkbox" name="all_permission"></th>
+                                        <th scope="col" width="20%">Name</th>
+                                        <th scope="col" width="1%">Guard</th>
+                                    </thead>
 
-                                @foreach($permissions as $permission)
-                                <tr>
-                                    <td>
-                                        <input type="checkbox" name="permission[{{ $permission->name }}]" value="{{ $permission->name }}" class='permission'>
-                                    </td>
-                                    <td>{{ $permission->name }}</td>
-                                    <td>{{ $permission->guard_name }}</td>
-                                </tr>
-                                @endforeach
-                            </table>
+                                    @foreach($permissions as $permission)
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="permission[{{ $permission->name }}]" value="{{ $permission->name }}" class='permission'>
+                                        </td>
+                                        <td>{{ $permission->name }}</td>
+                                        <td>{{ $permission->guard_name }}</td>
+                                    </tr>
+                                    @endforeach
+                                </table>
+                            </div>
 
                             <button type="submit" class="btn btn-submit me-2 mt-3">Save user</button>
                             <a href="{{ route('roles.index') }}" class="btn btn-cancel mt-3">Back</a>
