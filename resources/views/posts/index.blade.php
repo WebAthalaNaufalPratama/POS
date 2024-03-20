@@ -1,47 +1,54 @@
 @extends('layouts.app-von')
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <a href="{{ route('posts.create') }}" class="btn btn-primary">
-                    + New Post
-                    </a>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h4>Log Activity</h4>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <table class="table table-striped">
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table datanew">
                         <thead>
                             <tr>
-                                <th scope="col" width="5%">#</th>
-                                <th scope="col" width="55%">Title</th>
-                                <th scope="col" width="30%">User</th>
-                                <th scope="col" width="10%">Action</th>
+                                <th width="1%">No</th>
+                                <th>Nama Log</th>
+                                <th>Deskripsi</th>
+                                <th>Subject Type</th>
+                                <th>Subject ID</th>
+                                <th>User</th>
+                                <th>ID User</th>
+                                <th>Tanggal Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($posts as $key => $post)
+                            @foreach ($posts as $post)
                             <tr>
-                                <th scope="row">{{ ++$key }}</th>
-                                <td>{{ $post->title }}</td>
-                                <td>{{ $post->user->name }}</td>
-                                <td>
+                                <td>{{ $post->id }}</td>
+                                <td>{{ $post->log_name }}</td>
+                                <td>{{ $post->description }}</td>
+                                <td>{{ $post->subject_type }}</td>
+                                <td>{{ $post->subject_id }}</td>
+                                <td>{{ $post->causer_type }}</td>
+                                <td>{{ $post->causer_id}}</td>
+                                <td>{{ $post->created_at }}</td>
+                                <!-- <td>
                                     <div class="dropdown">
                                         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Action
+                                            Action
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li><a class="dropdown-item" href="{{ route('posts.edit', $post->id) }}">Edit</a></li>
                                             <li><a class="dropdown-item" href="{{ route('posts.log',$post->id) }}">Log</a></li>
                                         </ul>
                                     </div>
-                                </td>
+                                </td> -->
                             </tr>
-                            @empty
-                            <tr>
-                                <td colspan="4" class="text-center">No posts found.</td>
-                            </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
