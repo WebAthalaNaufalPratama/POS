@@ -198,6 +198,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{rekening}/delete', 'PromoController@destroy')->name('promo.destroy');
         });
 
+        Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
+        Route::resource('posts', 'PostController');
+
         Route::resource('roles', 'RolesController');
         Route::resource('permissions', 'PermissionsController');
     });

@@ -1,35 +1,35 @@
 <div class="sidebar" id="sidebar">
-<div class="sidebar-inner slimscroll">
-<div id="sidebar-menu" class="sidebar-menu">
-<ul>
-<li class="active">
-<a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
-</li>
-<li class="submenu">
-<a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
-<ul>
-    <li><a href="{{ route('produks.index') }}">Produk</a></li>
-    <li><a href="{{ route('tipe_produk.index') }}">Tipe Produk</a></li>
-    <li><a href="{{ route('kondisi.index') }}">Kondisi</a></li>
-    <li><a href="{{ route('lokasi.index') }}">Lokasi</a></li>
-    <li><a href="{{ route('tipe_lokasi.index') }}">Tipe Lokasi</a></li>
-    <li><a href="{{ route('supplier.index') }}">Supplier</a></li>
-    <li><a href="{{ route('ongkir.index') }}">Ongkir</a></li>
-    <li><a href="{{ route('customer.index') }}">Customer</a></li>
-    <li><a href="{{ route('karyawan.index') }}">Karyawan</a></li>
-    <li><a href="{{ route('rekening.index') }}">Rekening</a></li>
-    <li><a href="{{ route('aset.index') }}">Aset</a></li>
-    <li><a href="{{ route('promo.index') }}">Promo</a></li>
-</ul>
-</li>
-<li class="submenu">
-<a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
-<ul>
-<li><a href="{{ route('tradisional.index') }}">Tradisional</a></li>
-<li><a href="{{ route('gift.index') }}">Gift</a></li>
-</ul>
-</li>
-{{-- <li class="submenu">
+    <div class="sidebar-inner slimscroll">
+        <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+                <li class="active">
+                    <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('produks.index') }}">Produk</a></li>
+                        <li><a href="{{ route('tipe_produk.index') }}">Tipe Produk</a></li>
+                        <li><a href="{{ route('kondisi.index') }}">Kondisi</a></li>
+                        <li><a href="{{ route('lokasi.index') }}">Lokasi</a></li>
+                        <li><a href="{{ route('tipe_lokasi.index') }}">Tipe Lokasi</a></li>
+                        <li><a href="{{ route('supplier.index') }}">Supplier</a></li>
+                        <li><a href="{{ route('ongkir.index') }}">Ongkir</a></li>
+                        <li><a href="{{ route('customer.index') }}">Customer</a></li>
+                        <li><a href="{{ route('karyawan.index') }}">Karyawan</a></li>
+                        <li><a href="{{ route('rekening.index') }}">Rekening</a></li>
+                        <li><a href="{{ route('aset.index') }}">Aset</a></li>
+                        <li><a href="{{ route('promo.index') }}">Promo</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('tradisional.index') }}">Tradisional</a></li>
+                        <li><a href="{{ route('gift.index') }}">Gift</a></li>
+                    </ul>
+                </li>
+                {{-- <li class="submenu">
 <a href="javascript:void(0);"><img src="/assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
 <ul>
 <li><a href="saleslist.html">Sales List</a></li>
@@ -206,6 +206,7 @@
                     <ul>
                         <li><a href="/roles">Roles </a></li>
                         <li><a href="/permissions">Permissions </a></li>
+                        <li><a href="/posts">Log Activity </a></li>
                         <li><a href="{{ route('users.index') }}">User </a></li>
                     </ul>
                 </li>

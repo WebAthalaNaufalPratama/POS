@@ -8,6 +8,9 @@ use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Permission;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\LogActivity;
+use Illuminate\Support\Facades\Auth;
 
 class RolesController extends Controller
 {
@@ -54,6 +57,15 @@ class RolesController extends Controller
     
         $role = Role::create(['name' => $request->get('name')]);
         $role->syncPermissions($request->get('permission'));
+
+        $activity = Activity::create([
+            'log_name' => 'default',
+            'description' => 'Created role: ' . $role->name,
+            'subject_type' => Role::class,
+            'subject_id' => $role->id,
+            'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'causer_id' => Auth::id(),
+        ]);
     
         return redirect()->route('roles.index')
                         ->with('success','Role created successfully');
