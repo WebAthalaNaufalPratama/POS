@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\LogActivity;
+use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
@@ -102,10 +105,24 @@ class UsersController extends Controller
      * 
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user) 
+    public function destroy($user) 
     {
-        $user->delete();
+        $data = User::find($user);
+        // dd($data);
 
+        $activity = Activity::create([
+            'log_name' => 'default',
+            'description' => 'Deleted role: ' . $data->name,
+            'subject_type' => User::class,
+            'subject_id' => $data->id,
+            'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'causer_id' => Auth::id(),
+        ]);
+
+        
+        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        $check = $data->delete();
+        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return redirect()->route('users.index')
             ->withSuccess(__('User deleted successfully.'));
     }

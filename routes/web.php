@@ -55,7 +55,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{user}/show', 'UsersController@show')->name('users.show');
             Route::get('/{user}/edit', 'UsersController@edit')->name('users.edit');
             Route::patch('/{user}/update', 'UsersController@update')->name('users.update');
-            Route::delete('/{user}/delete', 'UsersController@destroy')->name('users.destroy');
+            Route::get('/{user}/delete', 'UsersController@destroy')->name('users.destroy');
         });
 
         /**
@@ -198,10 +198,27 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{rekening}/delete', 'PromoController@destroy')->name('promo.destroy');
         });
 
+        Route::group(['prefix'=> 'roles'], function() {
+            Route::get('/', 'RolesController@index')->name('roles.index');
+            Route::get('/create', 'RolesController@create')->name('roles.create');
+            Route::post('/store', 'RolesController@store')->name('roles.store');
+            Route::get('/store', 'RolesController@show')->name('roles.show');
+            Route::get('/{role}/edit', 'RolesController@edit')->name('roles.edit');
+            Route::patch('/{role}/update', 'RolesController@update')->name('roles.update');
+            Route::get('/{role}/delete', 'RolesController@destroy')->name('roles.destroy');
+        });
+
+        Route::group(['prefix'=> 'permissions'], function() {
+            Route::get('/', 'PermissionsController@index')->name('permissions.index');
+            Route::get('/create', 'PermissionsController@create')->name('permissions.create');
+            Route::post('/store', 'PermissionsController@store')->name('permissions.store');
+            Route::get('/store', 'PermissionsController@show')->name('permissions.show');
+            Route::get('/{Permission}/edit', 'PermissionsController@edit')->name('permissions.edit');
+            Route::patch('/{Permission}/update', 'PermissionsController@update')->name('permissions.update');
+            Route::get('/{Permission}/delete', 'PermissionsController@destroy')->name('permissions.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
-
-        Route::resource('roles', 'RolesController');
-        Route::resource('permissions', 'PermissionsController');
     });
 });
