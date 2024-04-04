@@ -15,4 +15,9 @@ class Karyawan extends Model
     {
         return $this->belongsTo(Lokasi::class, 'lokasi_id');
     }
+
+    public function penjualan()
+    {
+        return $this->hasMany(Penjualan::class);
+    }
 }

@@ -217,6 +217,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{Permission}/update', 'PermissionsController@update')->name('permissions.update');
             Route::get('/{Permission}/delete', 'PermissionsController@destroy')->name('permissions.destroy');
         });
+        
+        Route::group(['prefix' => 'penjualan'], function() {
+            Route::get('/', 'PenjualanController@index')->name('penjualan.index');
+            Route::get('/create', 'PenjualanController@create')->name('penjualan.create');
+            Route::post('/store', 'PenjualanController@store')->name('penjualan.store');
+            Route::get('/{penjualan}/show', 'PenjualanController@show')->name('penjualan.show');
+            Route::get('/{penjualan}/edit', 'PenjualanController@edit')->name('penjualan.edit');
+            Route::patch('/{penjualan}/update', 'PenjualanController@update')->name('penjualan.update');
+            Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
+        });
 
         Route::group(['prefix' => 'kontrak'], function() {
             Route::get('/', 'KontrakController@index')->name('kontrak.index');

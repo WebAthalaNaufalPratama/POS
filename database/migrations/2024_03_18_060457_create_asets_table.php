@@ -21,6 +21,7 @@ class CreateAsetsTable extends Migration
             $table->integer('jumlah');
             $table->date('tahun_beli');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
