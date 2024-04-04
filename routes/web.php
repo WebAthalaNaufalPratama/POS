@@ -198,6 +198,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{rekening}/delete', 'PromoController@destroy')->name('promo.destroy');
         });
 
+        Route::group(['prefix' => 'kontrak'], function() {
+            Route::get('/', 'KontrakController@index')->name('kontrak.index');
+            Route::get('/create', 'KontrakController@create')->name('kontrak.create');
+            Route::post('/store', 'KontrakController@store')->name('kontrak.store');
+            Route::get('/{kontrak}/show', 'KontrakController@show')->name('kontrak.show');
+            Route::get('/{kontrak}/edit', 'KontrakController@edit')->name('kontrak.edit');
+            Route::patch('/{kontrak}/update', 'KontrakController@update')->name('kontrak.update');
+            Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
 
