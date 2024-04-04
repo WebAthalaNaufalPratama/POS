@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Permission;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\LogActivity;
+use Illuminate\Support\Facades\Auth;
 
 class PermissionsController extends Controller
 {
@@ -81,9 +84,24 @@ class PermissionsController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Permission $permission)
+    public function destroy($permission)
     {
-        $permission->delete();
+        $data = Permission::find($permission);
+        // dd($data);
+
+        $activity = Activity::create([
+            'log_name' => 'default',
+            'description' => 'Deleted role: ' . $data->name,
+            'subject_type' => Permission::class,
+            'subject_id' => $data->id,
+            'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
+            'causer_id' => Auth::id(),
+        ]);
+
+        
+        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        $check = $data->delete();
+        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
 
         return redirect()->route('permissions.index')
             ->withSuccess(__('Permission deleted successfully.'));

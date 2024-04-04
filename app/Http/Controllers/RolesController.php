@@ -137,20 +137,25 @@ class RolesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Role $role)
+    public function destroy($role)
     {
-        $role->delete();
+        $data = Role::find($role);
+        // dd($data);
 
         $activity = Activity::create([
             'log_name' => 'default',
-            'description' => 'Deleted role: ' . $role->name,
+            'description' => 'Deleted role: ' . $data->name,
             'subject_type' => Role::class,
-            'subject_id' => $role->id,
+            'subject_id' => $data->id,
             'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
             'causer_id' => Auth::id(),
         ]);
 
+        
+        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        $check = $data->delete();
+        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return redirect()->route('roles.index')
-                        ->with('success','Role deleted successfully');
+            ->withSuccess(__('Roles deleted successfully.'));
     }
 }
