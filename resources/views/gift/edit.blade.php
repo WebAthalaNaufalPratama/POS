@@ -32,7 +32,7 @@
                                     <label for="harga">Harga</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="number" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ $getProdukJual->harga }}" aria-describedby="inputGroupPrepend2" required>
+                                        <input type="number" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ $getProdukJual->harga }}" aria-describedby="inputGroupPrepend2" required readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -65,15 +65,12 @@
                                             @if(count($getKomponen) < 1)
                                             <tr>
                                                 <td>
-                                                    <select id="nama_produk" name="nama_produk[]" class="form-control">
+                                                    <select id="kode_produk" name="kode_produk[]" class="form-control">
                                                         <option value="">Pilih Produk</option>
                                                         @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->id }}">{{ $produk->nama }}</option>
+                                                            <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
                                                         @endforeach
                                                     </select>
-                                                    <input type="hidden" name="kode_produk[]" style="display: none;">
-                                                    <input type="hidden" name="tipe_produk[]" style="display: none;">
-                                                    <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
                                                 </td>
                                                 <td>
                                                     <select id="kondisi" name="kondisi[]" class="form-control">
@@ -95,15 +92,12 @@
                                             @foreach ($getKomponen as $komponen)
                                                 <tr id="row{{ $i }}">
                                                     <td>
-                                                        <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control">
+                                                        <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
-                                                                <option value="{{ $produk->id }}" {{ $komponen->kode_produk == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
+                                                                <option value="{{ $produk->kode }}" {{ $komponen->kode_produk == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
                                                             @endforeach
                                                         </select>
-                                                        <input type="hidden" name="kode_produk[]" style="display: none;" value="{{ $komponen->kode_produk }}">
-                                                        <input type="hidden" name="tipe_produk[]" style="display: none;" value="{{ $komponen->tipe_produk }}">
-                                                        <input type="hidden" name="deskripsi_komponen[]" style="display: none;" value="{{ $komponen->deskripsi }}">
                                                     </td>
                                                     <td>
                                                         <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control">
@@ -144,20 +138,17 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $('[id^=nama_produk], [id^=kondisi]').select2();
+            $('[id^=kode_produk], [id^=kondisi]').select2();
             var i = '{{ count($getKomponen) }}';
             $('#add').click(function() {
                 var newRow = '<tr class="tr_clone" id="row' + i + '">' +
                 '<td>' +
-                '<select id="nama_produk_' + i + '" name="nama_produk[]" class="form-control select2">' +
+                '<select id="kode_produk_' + i + '" name="kode_produk[]" class="form-control select2">' +
                 '<option value="">Pilih Produk</option>' +
                 '@foreach ($produks as $produk)' +
-                '<option value="{{ $produk->id }}">{{ $produk->nama }}</option>' +
+                '<option value="{{ $produk->kode }}">{{ $produk->nama }}</option>' +
                 '@endforeach' +
                 '</select>' +
-                '<input type="hidden" name="kode_produk[]" id="kode_produk_' + i + '" style="display: none;">' +
-                '<input type="hidden" name="tipe_produk[]" id="tipe_produk_' + i + '" style="display: none;">' +
-                '<input type="hidden" name="deskripsi_komponen[]" id="deskripsi_komponen_' + i + '" style="display: none;">' +
                 '</td>' +
                 '<td>' +
                 '<select id="kondisi_' + i + '" name="kondisi[]" class="form-control select2">' +
@@ -173,7 +164,7 @@
                 '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
                 '</tr>';
                 $('#dynamic_field').append(newRow);
-                $('#nama_produk_' + i + ', #kondisi_' + i).select2();
+                $('#kode_produk_' + i + ', #kondisi_' + i).select2();
                 i++
             });
             $(document).on('click', '.btn_remove', function() {
@@ -181,14 +172,6 @@
                 $('#row'+button_id+'').remove();
                 multiply($('#harga_satuan_0'))
                 multiply($('#jumlah_0'))
-            });
-            $(document).on('change', '[id^=nama_produk]', function() {
-                var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
-                var selectedValue = $(this).val(); // Nilai yang dipilih
-                // Set nilai input tersembunyi yang sesuai
-                $('#kode_produk_' + id).val($(this).data('kode'));
-                $('#tipe_produk_' + id).val($(this).data('tipe'));
-                $('#deskripsi_komponen_' + id).val($(this).data('deskripsi'));
             });
         });
         function multiply(element) {

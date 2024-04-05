@@ -103,7 +103,7 @@ class ProdukJualController extends Controller
         if($jenis == 'tradisional'){
             // validasi
             $validator = Validator::make($req->all(), [
-                'kode' => 'required',
+                'kode_produk' => 'required',
                 'nama' => 'required',
                 'harga' => 'required|integer',
                 'harga_jual' => 'required|integer',
@@ -111,7 +111,7 @@ class ProdukJualController extends Controller
             ]);
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-            if(count($req->nama_produk) < 1 || $req->nama_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
+            if(count($req->kode_produk) < 1 || $req->kode_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
             $data = $req->except(['_token', '_method']);
 
             // ambil tipe
@@ -123,8 +123,8 @@ class ProdukJualController extends Controller
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
             // save data komponen
-            for ($i=0; $i < count($req->nama_produk); $i++) { 
-                $produk = Produk::find($req->nama_produk[$i]);
+            for ($i=0; $i < count($req->kode_produk); $i++) { 
+                $produk = Produk::where('kode', $req->kode_produk[$i])->first();
                 $datakomponen = array(
                     'produk_jual_id' => $check->id,
                     'kode_produk' => $produk->kode,
@@ -152,7 +152,7 @@ class ProdukJualController extends Controller
             ]);
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-            if(count($req->nama_produk) < 1 || $req->nama_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
+            if(count($req->kode_produk) < 1 || $req->kode_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
             $data = $req->except(['_token', '_method']);
 
             // ambil tipe
@@ -164,8 +164,8 @@ class ProdukJualController extends Controller
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
             // save data komponen
-            for ($i=0; $i < count($req->nama_produk); $i++) { 
-                $produk = Produk::find($req->nama_produk[$i]);
+            for ($i=0; $i < count($req->kode_produk); $i++) { 
+                $produk = Produk::where('kode', $req->kode_produk[$i])->first();
                 $datakomponen = array(
                     'produk_jual_id' => $check->id,
                     'kode_produk' => $produk->kode,
@@ -244,7 +244,7 @@ class ProdukJualController extends Controller
         if($jenis == 'tradisional'){
             // validasi
             $validator = Validator::make($req->all(), [
-                'kode' => 'required',
+                'kode_produk' => 'required',
                 'nama' => 'required',
                 'harga' => 'required|integer',
                 'harga_jual' => 'required|integer',
@@ -252,7 +252,7 @@ class ProdukJualController extends Controller
             ]);
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-            if(count($req->nama_produk) < 1 || $req->nama_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
+            if(count($req->kode_produk) < 1 || $req->kode_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
             $data = $req->except(['_token', '_method']);
 
             // ambil tipe
@@ -265,8 +265,8 @@ class ProdukJualController extends Controller
 
             // save data komponen
             $deleteKomponen = Komponen_Produk_Jual::where('produk_jual_id', $produk_Jual)->forceDelete();
-            for ($i=0; $i < count($req->nama_produk); $i++) { 
-                $produk = Produk::find($req->nama_produk[$i]);
+            for ($i=0; $i < count($req->kode_produk); $i++) { 
+                $produk = Produk::where('kode', $req->kode_produk[$i])->first();
                 $datakomponen = array(
                     'produk_jual_id' => $produk_Jual,
                     'kode_produk' => $produk->kode,
@@ -294,7 +294,7 @@ class ProdukJualController extends Controller
         elseif($jenis == 'gift'){
             // validasi
             $validator = Validator::make($req->all(), [
-                'kode' => 'required',
+                'kode_produk' => 'required',
                 'nama' => 'required',
                 'harga' => 'required|integer',
                 'harga_jual' => 'required|integer',
@@ -302,7 +302,7 @@ class ProdukJualController extends Controller
             ]);
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-            if(count($req->nama_produk) < 1 || $req->nama_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
+            if(count($req->kode_produk) < 1 || $req->kode_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
             $data = $req->except(['_token', '_method']);
 
             // ambil tipe
@@ -315,8 +315,8 @@ class ProdukJualController extends Controller
 
             // save data komponen
             $deleteKomponen = Komponen_Produk_Jual::where('produk_jual_id', $produk_Jual)->forceDelete();
-            for ($i=0; $i < count($req->nama_produk); $i++) { 
-                $produk = Produk::find($req->nama_produk[$i]);
+            for ($i=0; $i < count($req->kode_produk); $i++) { 
+                $produk = Produk::where('kode', $req->kode_produk[$i])->first();
                 $datakomponen = array(
                     'produk_jual_id' => $produk_Jual,
                     'kode_produk' => $produk->kode,
