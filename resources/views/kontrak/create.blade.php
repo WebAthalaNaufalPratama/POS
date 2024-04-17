@@ -13,7 +13,7 @@
                     <div class="col-sm">
                             @csrf
                             <div class="row justify-content-around">
-                                <div class="col-md-6 border rounded pt-3 me-1">
+                                <div class="col-md-6 border rounded pt-3">
                                     <h5 class="card-title">Informasi Pelanggan</h5>
                                     <div class="row">
                                         <div class="form-group">
@@ -50,18 +50,23 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <input type="text" id="status" name="status" value="{{ old('status') }}" class="form-control">
+                                                <select id="status" name="status" class="form-control">
+                                                    <option value="">Pilih Status</option>
+                                                    <option value="DRAFT">Draft</option>
+                                                    <option value="AKTIF">Aktif</option>
+                                                    <option value="TIDAK AKTIF">Tidak Aktif</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-5 border rounded pt-3 ms-1">
+                                <div class="col-md-6 border rounded pt-3">
                                     <h5 class="card-title">Detail Kontrak</h5>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Kontrak</label>
-                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $getKode }}" value="{{ old('no_kontrak') }}" class="form-control">
+                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $getKode }}" value="{{ old('no_kontrak') }}" class="form-control" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Mulai</label>
@@ -82,7 +87,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal Kontrak</label>
-                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ old('tanggal_kontrak') }}" class="form-control">
+                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ old('tanggal_kontrak') ?? date('Y-m-d') }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Selesai</label>
@@ -138,7 +143,7 @@
                                         </td>
                                         <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"></td>
-                                        <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control"></td>
+                                        <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
                                         <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                     </tr>
                                 </tbody>
@@ -149,7 +154,7 @@
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-around">
-                            <div class="col-md-7 border rounded pt-3 me-1">
+                            <div class="col-md-8 border rounded pt-3">
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -161,39 +166,47 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>{{ date('Y-m-d') }}</td>
-                                            <td>{{ date('Y-m-d') }}</td>
-                                            <td>{{ date('Y-m-d') }}</td>
-                                            <td>{{ date('Y-m-d') }}</td>
+                                            <td id="pengaju">-</td>
+                                            <td id="pembuat">{{ Auth::user()->name }}</td>
+                                            <td id="penyetuju">-</td>
+                                            <td id="pemeriksa">-</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 25%;">
+                                                <input type="date" id="tanggal_sales" name="tanggal_sales" value="{{ date('Y-m-d') }}" class="form-control">
+                                            </td>
+                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="col-md-4 border rounded pt-3 me-1">
+                            <div class="col-md-4 border rounded pt-3">
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Subtotal</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="subtotal" name="subtotal" value="{{ old('subtotal') }}" class="form-control">
+                                        <input type="text" id="subtotal" name="subtotal" value="{{ old('subtotal') }}" class="form-control" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPN</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ old('ppn_persen') }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ old('ppn_persen') ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" name="ppn_nominal" id="ppn_nominal" value="{{ old('ppn_nominal') }}">
+                                        <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ old('ppn_nominal') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPH</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ old('pph_persen') }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ old('pph_persen') ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" name="pph_nominal" id="pph_nominal" value="{{ old('pph_nominal') }}">
+                                        <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ old('pph_nominal') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -211,13 +224,21 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="ongkir_nominal" name="ongkir_nominal" value="{{ old('ongkir_nominal') }}" class="form-control">
+                                        <div class="input-group">
+                                            <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                                <option value="">Pilih Ongkir</option>
+                                                @foreach ($ongkirs as $ongkir)
+                                                    <option value="{{ $ongkir->id }}">{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <input type="number" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ old('ongkir_nominal') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Total Harga</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="total_harga" name="total_harga" value="{{ old('total_harga') }}" class="form-control">
+                                        <input type="number" id="total_harga" name="total_harga" value="{{ old('total_harga') }}" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -238,7 +259,7 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $('[id^=produk], #customer_id, #sales, #rekening_id').select2();
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id').select2();
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
@@ -263,9 +284,31 @@
                 multiply($('#harga_satuan_0'))
                 multiply($('#jumlah_0'))
             });
-            $('#ongkir, #total_promo, #ppn_persen, #pph_persen').on('input', function(){
+            $('#ongkir_nominal, #total_promo, #ppn_persen, #pph_persen').on('input', function(){
                 total_harga();
             })
+        });
+        $('#sales').on('change', function() {
+            var nama_sales = $("#sales option:selected").text();
+            var val_sales = $("#sales option:selected").val();
+            if(val_sales != ""){
+                $('#pengaju').text(nama_sales)
+            } else {
+                $('#pengaju').text('-')
+            }
+        });
+        $('#tanggal_mulai').on('input', function() {
+            var tgl_mulai = new Date($(this).val());
+            tgl_mulai.setFullYear(tgl_mulai.getFullYear() + 1);
+            var tanggalAkhir = tgl_mulai.toISOString().slice(0,10);
+            $('#tanggal_selesai').val(tanggalAkhir);
+            $('#masa_sewa').val(12);
+        });
+        $('#ongkir_id').on('change', function() {
+            var ongkir = $("#ongkir_id option:selected").text();
+            var biaya = ongkir.split('-')[1];
+            $('#ongkir_nominal').val(parseInt(biaya));
+            total_harga();
         });
         function multiply(element) {
             var id = 0
@@ -302,7 +345,7 @@
             var subtotal = $('#subtotal').val();
             var ppn_nominal = $('#ppn_nominal').val() || 0;
             var pph_nominal = $('#pph_nominal').val() || 0;
-            var ongkir_nominal = $('#ongkir').val() || 0;
+            var ongkir_nominal = $('#ongkir_nominal').val() || 0;
             var diskon_nominal = $('#total_promo').val() || 0;
 
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal) - parseInt(diskon_nominal);
