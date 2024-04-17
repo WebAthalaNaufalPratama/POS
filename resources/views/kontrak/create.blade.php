@@ -55,6 +55,7 @@
                                                     <option value="DRAFT">Draft</option>
                                                     <option value="AKTIF">Aktif</option>
                                                     <option value="TIDAK AKTIF">Tidak Aktif</option>
+                                                    <option value="SELESAI">Selesai</option>
                                                 </select>
                                             </div>
                                         </div>

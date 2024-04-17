@@ -56,6 +56,7 @@
                                                     <option value="DRAFT" {{ $kontrak->status == 'DRAFT' ? 'selected' : '' }}>Draft</option>
                                                     <option value="AKTIF" {{ $kontrak->status == 'AKTIF' ? 'selected' : '' }}>Aktif</option>
                                                     <option value="TIDAK AKTIF" {{ $kontrak->status == 'TIDAK AKTIF' ? 'selected' : '' }}>Tidak Aktif</option>
+                                                    <option value="SELESAI" {{ $kontrak->status == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
                                                 </select>
                                             </div>
                                         </div>
