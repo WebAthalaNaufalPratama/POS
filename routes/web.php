@@ -44,6 +44,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
          * Logout Routes
          */
         Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
+        Route::get('checkPromo', 'PromoController@checkPromo')->name('checkPromo');
 
         /**
          * User Routes
