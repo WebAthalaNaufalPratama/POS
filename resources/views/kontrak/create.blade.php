@@ -138,7 +138,7 @@
                                             <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkjuals as $produk)
-                                                    <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                    <option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}">{{ $produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -213,13 +213,16 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        <input type="text" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Nominal Diskon</label>
-                                    <div class="col-lg-9">
-                                        <input type="number" id="total_promo" name="total_promo" value="{{ old('total_promo') }}" class="form-control">
+                                        <div class="row align-items-center">
+                                            <div class="col-9 pe-0">
+                                                <select id="diskon" name="diskon" class="form-control" disabled>
+                                                </select>
+                                            </div>
+                                            <div class="col-3 ps-0 mb-0">
+                                                <button id="btnCheckPromo" class="btn btn-primary w-100">Cek</button>
+                                            </div>
+                                        </div>                                        
+                                        <input type="number" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -259,15 +262,16 @@
 
 @section('scripts')
     <script>
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id').select2();
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #diskon').select2();
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $produk)'+
-                                        '<option value="{{ $produk->kode }}">{{ $produk->nama }}</option>'+
+                                        '<option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}">{{ $produk->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
@@ -310,6 +314,19 @@
             var biaya = ongkir.split('-')[1];
             $('#ongkir_nominal').val(parseInt(biaya));
             total_harga();
+        });
+        $('#btnCheckPromo').click(function(e) {
+            e.preventDefault();
+            var total_transaksi = $('#total_harga').val();
+            var produk = [];
+            var tipe_produk = [];
+            $('select[id^="produk_"]').each(function() {
+                produk.push($(this).val());
+                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
+
+            });
+            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
+            checkPromo(total_transaksi, tipe_produk, produk);
         });
         function multiply(element) {
             var id = 0
@@ -363,6 +380,49 @@
             var subtotal = $('#subtotal').val()
             var pph_nominal = pph_persen * subtotal / 100
             $('#pph_nominal').val(pph_nominal)
+        }
+        function checkPromo(total_transaksi, tipe_produk, produk){
+            var data = {
+                total_transaksi: total_transaksi,
+                tipe_produk: tipe_produk,
+                produk: produk
+            };
+            $.ajax({
+                url: '/checkPromo',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    $('#diskon').empty()
+                    $('#diskon').append('<option value="">Pilih Diskon</option>')
+
+                    var min_transaksi = response.min_transaksi;
+                    for (var j = 0; j < min_transaksi.length; j++) {
+                        var promo = min_transaksi[j];
+                        $('#diskon').append('<option value="' + promo[0].id + '">' + promo[0].nama + '</option>');
+                    }
+                    var tipe_produk = response.tipe_produk;
+                    for (var j = 0; j < tipe_produk.length; j++) {
+                        var promo = tipe_produk[j];
+                        $('#diskon').append('<option value="' + promo[0].id + '">' + promo[0].nama + '</option>');
+                    }
+                    var produk = response.produk;
+                    for (var j = 0; j < produk.length; j++) {
+                        var promo = produk[j];
+                        $('#diskon').append('<option value="' + promo[0].id + '">' + promo[0].nama + '</option>');
+                    }
+                    $('#diskon').attr('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                },
+                complete: function() {
+                    $('#btnCheckPromo').text('Cek')
+                }
+            });
+
         }
     </script>
 @endsection
