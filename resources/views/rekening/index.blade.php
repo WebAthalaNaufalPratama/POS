@@ -60,7 +60,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addrekeninglabel">Tambah Rekening</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
           <form action="{{ route('rekening.store') }}" method="POST">
@@ -102,7 +102,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="editrekeninglabel">Edit Rekening</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
           <form id="editForm" action="rekening/0/update" method="POST">
