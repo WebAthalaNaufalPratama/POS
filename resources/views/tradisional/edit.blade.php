@@ -107,9 +107,9 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" value="{{ $komponen->harga_satuan }}" oninput="multiply(this)" class="form-control"></td>
-                                                    <td><input type="number" name="jumlah[]" id="jumlah_0" value="{{ $komponen->jumlah }}" oninput="multiply(this)" class="form-control"></td>
-                                                    <td><input type="number" name="harga_total[]" id="harga_total_0" value="{{ $komponen->harga_total }}" class="form-control"></td>
+                                                    <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" value="{{ $komponen->harga_satuan }}" oninput="multiply(this)" class="form-control"></td>
+                                                    <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" value="{{ $komponen->jumlah }}" oninput="multiply(this)" class="form-control"></td>
+                                                    <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" value="{{ $komponen->harga_total }}" class="form-control"></td>
                                                     @if ($i == 0)
                                                         <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                     @else
