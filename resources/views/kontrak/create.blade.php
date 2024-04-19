@@ -215,14 +215,14 @@
                                     <div class="col-lg-9">
                                         <div class="row align-items-center">
                                             <div class="col-9 pe-0">
-                                                <select id="diskon" name="diskon" class="form-control" disabled>
+                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
                                                 </select>
                                             </div>
                                             <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100">Cek</button>
+                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
                                             </div>
                                         </div>                                        
-                                        <input type="number" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -264,7 +264,7 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #diskon').select2();
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id').select2();
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
@@ -328,6 +328,11 @@
             $(this).html('<span class="spinner-border spinner-border-sm me-2">')
             checkPromo(total_transaksi, tipe_produk, produk);
         });
+        $('#promo_id').change(function() {
+            var promo_id = $(this).select2().find(":selected").val()
+            if(!promo_id) return 0;
+            calculatePromo(promo_id);
+        });
         function multiply(element) {
             var id = 0
             var jumlah = 0
@@ -364,8 +369,12 @@
             var ppn_nominal = $('#ppn_nominal').val() || 0;
             var pph_nominal = $('#pph_nominal').val() || 0;
             var ongkir_nominal = $('#ongkir_nominal').val() || 0;
-            var diskon_nominal = $('#total_promo').val() || 0;
-
+            var diskon_nominal = $('#total_promo').val();
+            if (/(poin|TRD|GFT)/.test(diskon_nominal)) {
+                diskon_nominal = 0;
+            } else {
+                diskon_nominal = parseInt(diskon_nominal) || 0;
+            }
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal) - parseInt(diskon_nominal);
             $('#total_harga').val(harga_total);
         }
@@ -382,6 +391,7 @@
             $('#pph_nominal').val(pph_nominal)
         }
         function checkPromo(total_transaksi, tipe_produk, produk){
+            $('#total_promo').val(0);
             var data = {
                 total_transaksi: total_transaksi,
                 tipe_produk: tipe_produk,
@@ -395,34 +405,71 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    $('#diskon').empty()
-                    $('#diskon').append('<option value="">Pilih Diskon</option>')
+                    $('#promo_id').empty()
+                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
 
                     var min_transaksi = response.min_transaksi;
                     for (var j = 0; j < min_transaksi.length; j++) {
                         var promo = min_transaksi[j];
-                        $('#diskon').append('<option value="' + promo[0].id + '">' + promo[0].nama + '</option>');
+                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
                     }
                     var tipe_produk = response.tipe_produk;
                     for (var j = 0; j < tipe_produk.length; j++) {
                         var promo = tipe_produk[j];
-                        $('#diskon').append('<option value="' + promo[0].id + '">' + promo[0].nama + '</option>');
+                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
                     }
                     var produk = response.produk;
                     for (var j = 0; j < produk.length; j++) {
                         var promo = produk[j];
-                        $('#diskon').append('<option value="' + promo[0].id + '">' + promo[0].nama + '</option>');
+                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
                     }
-                    $('#diskon').attr('disabled', false);
+                    $('#promo_id').attr('disabled', false);
                 },
                 error: function(xhr, status, error) {
                     console.log(error)
                 },
                 complete: function() {
-                    $('#btnCheckPromo').text('Cek')
+                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i>')
                 }
             });
-
+        }
+        function calculatePromo(promo_id){
+            var data = {
+                promo_id: promo_id,
+            };
+            $.ajax({
+                url: '/getPromo',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    var total_transaksi = parseInt($('#total_harga').val());
+                    var total_promo;
+                    switch (response.diskon) {
+                        case 'persen':
+                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            break;
+                        case 'nominal':
+                            total_promo = parseInt(response.diskon_nominal);
+                            break;
+                        case 'poin':
+                            total_promo = 'poin ' + response.diskon_poin;
+                            break;
+                        case 'produk':
+                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
+                            break;
+                        default:
+                            break;
+                    }
+                    $('#total_promo').val(total_promo);
+                    total_harga();
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                }
+            });
         }
     </script>
 @endsection

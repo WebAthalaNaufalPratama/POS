@@ -156,16 +156,16 @@
                                     @foreach ($produks as $komponen) 
                                         <tr>
                                             <td>
-                                                <select id="produk_0" name="nama_produk[]" class="form-control">
+                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
                                                     <option value="">Pilih Produk</option>
                                                     @foreach ($produkjuals as $produk)
-                                                        <option value="{{ $produk->kode }}" {{ $komponen->produk->kode == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
+                                                        <option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}" {{ $komponen->produk->kode == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" value="{{ $komponen->komponen[0]->harga_satuan }}"></td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" value="{{ $komponen->komponen[0]->jumlah }}"></td>
-                                            <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" value="{{ $komponen->komponen[0]->harga_total }}" readonly></td>
+                                            <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->harga }}"></td>
+                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->jumlah }}"></td>
+                                            <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual }}" readonly></td>
                                             @if ($i == 0)
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             @else
@@ -250,13 +250,17 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        <input type="text" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Nominal Diskon</label>
-                                    <div class="col-lg-9">
-                                        <input type="number" id="total_promo" name="total_promo" value="{{ $kontrak->total_promo }}" class="form-control">
+                                        <div class="row align-items-center">
+                                            <div class="col-9 pe-0">
+                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
+                                                </select>
+                                            </div>
+                                            <input type="hidden" id="old_promo_id" value="{{ $kontrak->promo_id }}">
+                                            <div class="col-3 ps-0 mb-0">
+                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
+                                            </div>
+                                        </div>                                        
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -296,15 +300,28 @@
 
 @section('scripts')
     <script>
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id').select2();
+            var total_transaksi = $('#total_harga').val();
+            var old_promo_id = $('#old_promo_id').val();
+            var produk = [];
+            var tipe_produk = [];
+            $('select[id^="produk_"]').each(function() {
+                produk.push($(this).val());
+                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
+
+            });
+            checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
+            calculatePromo(old_promo_id);
+
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id').select2();
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $produk)'+
-                                        '<option value="{{ $produk->kode }}">{{ $produk->nama }}</option>'+
+                                        '<option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}">{{ $produk->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
@@ -348,6 +365,28 @@
             $('#ongkir_nominal').val(parseInt(biaya));
             total_harga();
         });
+        $('#btnCheckPromo').click(function(e) {
+            e.preventDefault();
+            var total_transaksi = $('#total_harga').val();
+            var produk = [];
+            var tipe_produk = [];
+            $('select[id^="produk_"]').each(function() {
+                produk.push($(this).val());
+                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
+
+            });
+            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
+            checkPromo(total_transaksi, tipe_produk, produk);
+        });
+        $('#promo_id').change(function() {
+            var promo_id = $(this).select2().find(":selected").val()
+            if(!promo_id){
+                $('#total_promo').val(0);
+                total_harga();
+                return 0;
+            } 
+            calculatePromo(promo_id);
+        });
         function multiply(element) {
             var id = 0
             var jumlah = 0
@@ -383,9 +422,13 @@
             var subtotal = $('#subtotal').val();
             var ppn_nominal = $('#ppn_nominal').val() || 0;
             var pph_nominal = $('#pph_nominal').val() || 0;
-            var ongkir_nominal = $('#ongkir').val() || 0;
-            var diskon_nominal = $('#total_promo').val() || 0;
-
+            var ongkir_nominal = $('#ongkir_nominal').val() || 0;
+            var diskon_nominal = $('#total_promo').val();
+            if (/(poin|TRD|GFT)/.test(diskon_nominal)) {
+                diskon_nominal = 0;
+            } else {
+                diskon_nominal = parseInt(diskon_nominal) || 0;
+            }
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal) - parseInt(diskon_nominal);
             $('#total_harga').val(harga_total);
         }
@@ -400,6 +443,90 @@
             var subtotal = $('#subtotal').val()
             var pph_nominal = pph_persen * subtotal / 100
             $('#pph_nominal').val(pph_nominal)
+        }
+        function checkPromo(total_transaksi, tipe_produk, produk, old_promo_id){
+            $('#total_promo').val(0);
+            var data = {
+                total_transaksi: total_transaksi,
+                tipe_produk: tipe_produk,
+                produk: produk
+            };
+            $.ajax({
+                url: '/checkPromo',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    $('#promo_id').empty()
+                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
+
+                    var min_transaksi = response.min_transaksi;
+                    for (var j = 0; j < min_transaksi.length; j++) {
+                        var promo = min_transaksi[j];
+                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
+                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
+                    }
+                    var tipe_produk = response.tipe_produk;
+                    for (var j = 0; j < tipe_produk.length; j++) {
+                        var promo = tipe_produk[j];
+                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
+                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
+                    }
+                    var produk = response.produk;
+                    for (var j = 0; j < produk.length; j++) {
+                        var promo = produk[j];
+                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
+                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
+                    }
+                    $('#promo_id').attr('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                },
+                complete: function() {
+                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i>')
+                }
+            });
+        }
+        function calculatePromo(promo_id){
+            var data = {
+                promo_id: promo_id,
+            };
+            $.ajax({
+                url: '/getPromo',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    var total_transaksi = parseInt($('#total_harga').val());
+                    var total_promo;
+                    switch (response.diskon) {
+                        case 'persen':
+                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            break;
+                        case 'nominal':
+                            total_promo = parseInt(response.diskon_nominal);
+                            break;
+                        case 'poin':
+                            total_promo = 'poin ' + response.diskon_poin;
+                            break;
+                        case 'produk':
+                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
+                            break;
+                        default:
+                            break;
+                    }
+                    $('#total_promo').val(total_promo);
+                    total_harga();
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                }
+            });
         }
     </script>
 @endsection
