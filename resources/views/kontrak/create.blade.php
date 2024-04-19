@@ -330,7 +330,11 @@
         });
         $('#promo_id').change(function() {
             var promo_id = $(this).select2().find(":selected").val()
-            if(!promo_id) return 0;
+            if(!promo_id){
+                $('#total_promo').val(0);
+                total_harga();
+                return 0;
+            } 
             calculatePromo(promo_id);
         });
         function multiply(element) {

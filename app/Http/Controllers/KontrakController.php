@@ -46,7 +46,7 @@ class KontrakController extends Controller
         $sales = Karyawan::where('jabatan', 'sales')->get();
         $ongkirs = Ongkir::all();
 
-        $latestKontrak = Kontrak::withTrashed()->get();
+        $latestKontrak = Kontrak::withTrashed()->orderByDesc('id')->get();
             if(count($latestKontrak) < 1){
                 $getKode = 'KSW-00001';
             } else {

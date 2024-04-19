@@ -302,6 +302,7 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
+            $('#sales').trigger('change');
             var total_transaksi = $('#total_harga').val();
             var old_promo_id = $('#old_promo_id').val();
             var produk = [];
