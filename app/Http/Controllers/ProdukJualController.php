@@ -211,17 +211,18 @@ class ProdukJualController extends Controller
         $jenis = $path[0];
         $produks = Produk::all();
         $kondisi = Kondisi::all();
+        $riwayat = Activity::where('subject_type', Produk_Jual::class)->where('subject_id', $produk_Jual)->orderBy('id', 'desc')->get();
         if($jenis == 'tradisional'){
 
             $getProdukJual = Produk_Jual::find($produk_Jual);
             $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
-            return view('tradisional.edit', compact('getProdukJual', 'getKomponen', 'produks', 'kondisi'));
+            return view('tradisional.edit', compact('getProdukJual', 'getKomponen', 'produks', 'kondisi', 'riwayat'));
         }
         elseif($jenis == 'gift'){
 
             $getProdukJual = Produk_Jual::find($produk_Jual);
             $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
-            return view('gift.edit', compact('getProdukJual', 'getKomponen', 'produks', 'kondisi'));
+            return view('gift.edit', compact('getProdukJual', 'getKomponen', 'produks', 'kondisi', 'riwayat'));
         }
         else{
             return redirect()->back()->with('fail', 'Url salah');

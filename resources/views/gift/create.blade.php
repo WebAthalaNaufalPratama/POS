@@ -164,6 +164,7 @@
                 total += parseInt($(this).val()) || 0;
             });
             $('#harga').val(total)
+            $('#harga_jual').val(total)
         }
     </script>
 @endsection

@@ -132,6 +132,49 @@
             </div>
         </div>
     </div>
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Riwayat</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                <table class="table datanew">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal Perubahan</th>
+                        <th>Pengubah</th>
+                        <th>Log</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($riwayat as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->created_at ?? '-' }}</td>
+                            <td>{{ $item->causer->name ?? '-' }}</td>
+                            <td>
+                                @php
+                                    $changes = $item->changes();
+                                    if(isset($changes['old'])){
+                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                                        foreach ($diff as $key => $value) {
+                                            echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span>" . "<br>";
+                                        }
+                                    } else {
+                                        echo 'Data Produk Gift Terbuat';
+                                    }
+                                @endphp
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
