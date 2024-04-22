@@ -17,6 +17,7 @@ use App\Models\Rekening;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Activitylog\Models\Activity;
 
 class KontrakController extends Controller
 {
@@ -127,6 +128,14 @@ class KontrakController extends Controller
                 if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
         }
+        // $activity = Activity::create([
+        //     'log_name' => 'Kontrak',
+        //     'description' => 'Data kontrak dibuat',
+        //     'subject_type' => Kontrak::class,
+        //     'subject_id' => $check->id,
+        //     'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
+        //     'causer_id' => Auth::id(),
+        // ]);
         return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
 
@@ -155,11 +164,12 @@ class KontrakController extends Controller
         $rekenings = Rekening::all();
         $promos = Promo::all();
         $sales = Karyawan::where('jabatan', 'sales')->get();
-        $kontrak = Kontrak::find($kontrak);
-        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontrak->no_kontrak)->get();
+        $kontraks = Kontrak::find($kontrak);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
         $ongkirs = Ongkir::all();
-        // dd($produks);
-        return view('kontrak.edit', compact('kontrak', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs'));
+        $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
+        // dd($riwayat);
+        return view('kontrak.edit', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat'));
     }
 
     /**
@@ -196,7 +206,7 @@ class KontrakController extends Controller
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
+        $data = $req->except(['_token', '_method', 'log']);
         // dd($data);
         $dataKontrak = Kontrak::find($kontrak);
         $data['lokasi_id'] = 1;
@@ -240,6 +250,14 @@ class KontrakController extends Controller
                 if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
         }
+        // $activity = Activity::create([
+        //     'log_name' => 'Kontrak',
+        //     'description' => $req->log,
+        //     'subject_type' => Kontrak::class,
+        //     'subject_id' => $kontrak,
+        //     'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
+        //     'causer_id' => Auth::id(),
+        // ]);
         return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
 

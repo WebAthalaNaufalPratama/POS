@@ -8,7 +8,7 @@
                 <h5 class="card-title">Edit Kontrak</h5>
             </div>
             <div class="card-body">
-                <form action="{{ route('kontrak.update', ['kontrak' => $kontrak->id]) }}" method="POST">
+                <form action="{{ route('kontrak.update', ['kontrak' => $kontraks->id]) }}" method="POST">
                 <div class="row">
                     <div class="col-sm">
                             @csrf
@@ -24,7 +24,7 @@
                                                     <select id="customer_id" name="customer_id" class="form-control">
                                                         <option value="">Pilih Customer</option>
                                                         @foreach ($customers as $customer)
-                                                            <option value="{{ $customer->id }}" {{ $kontrak->customer_id == $customer->id ? 'selected' : ''}}>{{ $customer->nama }}</option>
+                                                            <option value="{{ $customer->id }}" {{ $kontraks->customer_id == $customer->id ? 'selected' : ''}}>{{ $customer->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -36,34 +36,34 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>PIC</label>
-                                                <input type="text" id="pic" name="pic" value="{{ $kontrak->pic }}" class="form-control">
+                                                <input type="text" id="pic" name="pic" value="{{ $kontraks->pic }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>No NPWP</label>
-                                                <input type="text" id="no_npwp" name="no_npwp" value="{{ $kontrak->no_npwp }}" class="form-control">
+                                                <input type="text" id="no_npwp" name="no_npwp" value="{{ $kontraks->no_npwp }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>Alamat</label>
-                                                <textarea type="text" id="alamat" name="alamat" class="form-control">{{ $kontrak->alamat }}</textarea>
+                                                <textarea type="text" id="alamat" name="alamat" class="form-control">{{ $kontraks->alamat }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Handphone</label>
-                                                <input type="text" id="handhpone" name="handphone" value="{{ $kontrak->handphone }}" class="form-control">
+                                                <input type="text" id="handhpone" name="handphone" value="{{ $kontraks->handphone }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>Nama NPWP</label>
-                                                <input type="text" id="nama_npwp" name="nama_npwp" value="{{ $kontrak->nama_npwp }}" class="form-control">
+                                                <input type="text" id="nama_npwp" name="nama_npwp" value="{{ $kontraks->nama_npwp }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>Status</label>
                                                 <select id="status" name="status" class="form-control">
                                                     <option value="">Pilih Status</option>
-                                                    <option value="DRAFT" {{ $kontrak->status == 'DRAFT' ? 'selected' : '' }}>Draft</option>
-                                                    <option value="AKTIF" {{ $kontrak->status == 'AKTIF' ? 'selected' : '' }}>Aktif</option>
-                                                    <option value="TIDAK AKTIF" {{ $kontrak->status == 'TIDAK AKTIF' ? 'selected' : '' }}>Tidak Aktif</option>
-                                                    <option value="SELESAI" {{ $kontrak->status == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
+                                                    <option value="DRAFT" {{ $kontraks->status == 'DRAFT' ? 'selected' : '' }}>Draft</option>
+                                                    <option value="AKTIF" {{ $kontraks->status == 'AKTIF' ? 'selected' : '' }}>Aktif</option>
+                                                    <option value="TIDAK AKTIF" {{ $kontraks->status == 'TIDAK AKTIF' ? 'selected' : '' }}>Tidak Aktif</option>
+                                                    <option value="SELESAI" {{ $kontraks->status == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -75,39 +75,39 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Kontrak</label>
-                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $kontrak->no_kontrak }}" class="form-control" readonly>
+                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $kontraks->no_kontrak }}" class="form-control" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Mulai</label>
-                                                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ $kontrak->tanggal_mulai }}" class="form-control">
+                                                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ $kontraks->tanggal_mulai }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>Masa Sewa</label>
                                                 <div class="input-group">
-                                                    <input type="text" id="masa_sewa" name="masa_sewa" value="{{ $kontrak->masa_sewa }}" class="form-control" placeholder="Masa sewa" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                                                    <input type="text" id="masa_sewa" name="masa_sewa" value="{{ $kontraks->masa_sewa }}" class="form-control" placeholder="Masa sewa" aria-label="Recipient's username" aria-describedby="basic-addon2">
                                                     <span class="input-group-text" id="basic-addon2">bulan</span>
                                                 </div>
                                             </div>
                                             <div class="form-group">
                                                 <label>Catatan</label>
-                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ $kontrak->catatan }}</textarea>
+                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ $kontraks->catatan }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal Kontrak</label>
-                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ $kontrak->tanggal_kontrak }}" class="form-control">
+                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ $kontraks->tanggal_kontrak }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Selesai</label>
-                                                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ $kontrak->tanggal_selesai }}" class="form-control">
+                                                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ $kontraks->tanggal_selesai }}" class="form-control">
                                             </div>
                                             <div class="form-group">
                                                 <label>Sales</label>
                                                 <select id="sales" name="sales" class="form-control">
                                                     <option value="">Pilih Sales</option>
                                                     @foreach ($sales as $item)
-                                                        <option value="{{ $item->id }}" {{ $kontrak->sales == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                                        <option value="{{ $item->id }}" {{ $kontraks->sales == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -116,7 +116,7 @@
                                                 <select id="rekening_id" name="rekening_id" class="form-control">
                                                     <option value="">Pilih Rekening</option>
                                                     @foreach ($rekenings as $rekening)
-                                                        <option value="{{ $rekening->id }}" {{ $kontrak->rekening_id == $rekening->id ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
+                                                        <option value="{{ $rekening->id }}" {{ $kontraks->rekening_id == $rekening->id ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -203,53 +203,98 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td id="pengaju">{{ $kontrak->pengaju->nama ?? '-' }}</td>
-                                            <td id="pembuat">{{ $kontrak->pembuat->nama ?? '-' }}</td>
-                                            <td id="penyetuju">{{ $kontrak->penyetuju->nama ?? '-' }}</td>
-                                            <td id="pemeriksa">{{ $kontrak->pemeriksa->nama ?? '-' }}</td>
+                                            <td id="pengaju">{{ $kontraks->pengaju->nama ?? '-' }}</td>
+                                            <td id="pembuat">{{ $kontraks->pembuat->nama ?? '-' }}</td>
+                                            <td id="penyetuju">{{ $kontraks->penyetuju->nama ?? '-' }}</td>
+                                            <td id="pemeriksa">{{ $kontraks->pemeriksa->nama ?? '-' }}</td>
                                         </tr>
                                         <tr>
                                             <td id="tgl_sales" class="col-md-3">
-                                                <input type="date" id="tanggal_sales" name="tanggal_sales" value="{{ isset($kontrak->tanggal_sales) ? \Carbon\Carbon::parse($kontrak->tanggal_sales)->format('Y-m-d') : '' }}" class="form-control">
+                                                <input type="date" id="tanggal_sales" name="tanggal_sales" value="{{ isset($kontraks->tanggal_sales) ? \Carbon\Carbon::parse($kontraks->tanggal_sales)->format('Y-m-d') : '' }}" class="form-control">
                                             </td>
                                             <td id="tgl_pembuat" class="col-md-3">
-                                                <input type="date" id="tanggal_pembuat" name="tanggal_pembuat" value="{{ isset($kontrak->tanggal_pembuat) ? \Carbon\Carbon::parse($kontrak->tanggal_pembuat)->format('Y-m-d') : '' }}" class="form-control">
+                                                <label id="tanggal_pembuat" name="tanggal_pembuat">{{ isset($kontraks->tanggal_pembuat) ? \Carbon\Carbon::parse($kontraks->tanggal_pembuat)->format('Y-m-d') : '-' }}</label>
                                             </td>
                                             <td id="tgl_penyetuju" class="col-md-3">
-                                                <input type="date" id="tanggal_penyetuju" name="tanggal_penyetuju" value="{{ isset($kontrak->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetuju)->format('Y-m-d') : '' }}" class="form-control">
+                                                <label id="tanggal_penyetuju" name="tanggal_penyetuju">{{ isset($kontraks->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontraks->tanggal_penyetuju)->format('Y-m-d') : '-' }}</label>
                                             </td>
                                             <td id="tgl_pemeriksa" class="col-md-3">
-                                                <input type="date" id="tanggal_pemeriksa" name="tanggal_pemeriksa" value="{{ isset($kontrak->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontrak->tanggal_pemeriksa)->format('Y-m-d') : '' }}" class="form-control">
+                                                <label id="tanggal_pemeriksa" name="tanggal_pemeriksa">{{ isset($kontraks->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontraks->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</label>
                                             </td>
                                         </tr>                                        
                                     </tbody>
                                 </table>
+                                <div class="col-sm-12 mt-3">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4 class="card-title">Riwayat</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                            <table class="table datanew">
+                                                <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th>Tanggal Perubahan</th>
+                                                    <th>Customer</th>
+                                                    <th>Pengubah</th>
+                                                    <th>Log</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($riwayat as $item)
+                                                    <tr>
+                                                        <td>{{ $loop->iteration }}</td>
+                                                        <td>{{ $item->created_at ?? '-' }}</td>
+                                                        <td>{{ $item->subject->customer->nama ?? '-' }}</td>
+                                                        <td>{{ $item->causer->name ?? '-' }}</td>
+                                                        <td>
+                                                            @php
+                                                                $changes = $item->changes();
+                                                                if(isset($changes['old'])){
+                                                                    $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                                                                    foreach ($diff as $key => $value) {
+                                                                        echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span>" . "<br>";
+                                                                    }
+                                                                } else {
+                                                                    echo 'Data Kontrak Terbuat';
+                                                                }
+                                                            @endphp
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-4 border rounded mt-3 pt-3">
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Subtotal</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="subtotal" name="subtotal" value="{{ $kontrak->subtotal }}" class="form-control" readonly>
+                                        <input type="text" id="subtotal" name="subtotal" value="{{ $kontraks->subtotal }}" class="form-control" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPN</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ $kontrak->ppn_persen ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ $kontraks->ppn_persen ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ $kontrak->ppn_nominal }}" readonly>
+                                        <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ $kontraks->ppn_nominal }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPH</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ $kontrak->pph_persen ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ $kontraks->pph_persen ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontrak->pph_nominal }}" readonly>
+                                        <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -260,7 +305,7 @@
                                                 <select id="promo_id" name="promo_id" class="form-control" disabled>
                                                 </select>
                                             </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontrak->promo_id }}">
+                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
                                             <div class="col-3 ps-0 mb-0">
                                                 <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
                                             </div>
@@ -275,17 +320,17 @@
                                             <select id="ongkir_id" name="ongkir_id" class="form-control">
                                                 <option value="">Pilih Ongkir</option>
                                                 @foreach ($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" {{ $ongkir->id == $kontrak->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
+                                                    <option value="{{ $ongkir->id }}" {{ $ongkir->id == $kontraks->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <input type="number" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontrak->ongkir_nominal }}" readonly>
+                                        <input type="number" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontraks->ongkir_nominal }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Total Harga</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="total_harga" name="total_harga" value="{{ $kontrak->total_harga }}" class="form-control" readonly>
+                                        <input type="number" id="total_harga" name="total_harga" value="{{ $kontraks->total_harga }}" class="form-control" readonly>
                                     </div>
                                 </div>
                             </div>
