@@ -19,12 +19,19 @@
                                     <div class="row">
                                         <div class="form-group">
                                             <label>Customer</label>
-                                            <select id="customer_id" name="customer_id" class="form-control">
-                                                <option value="">Pilih Customer</option>
-                                                @foreach ($customers as $customer)
-                                                    <option value="{{ $customer->id }}" {{ $kontrak->customer_id == $customer->id ? 'selected' : ''}}>{{ $customer->nama }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="row align-items-center">
+                                                <div class="col-10 pe-0">
+                                                    <select id="customer_id" name="customer_id" class="form-control">
+                                                        <option value="">Pilih Customer</option>
+                                                        @foreach ($customers as $customer)
+                                                            <option value="{{ $customer->id }}" {{ $kontrak->customer_id == $customer->id ? 'selected' : ''}}>{{ $customer->nama }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-2 ps-0 mb-0">
+                                                    <button id="btnAddCustomer" class="btn btn-primary w-100"><i class="fa fa-plus"></i></button>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -184,8 +191,8 @@
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-around">
-                            <div class="col-md-8 border rounded pt-3">
-                                <table class="table">
+                            <div class="col-md-8 pt-3 ps-0 pe-0">
+                                <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
                                             <th>Pengaju</th>
@@ -202,25 +209,23 @@
                                             <td id="pemeriksa">{{ $kontrak->pemeriksa->nama ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 25%;">
-                                                <input type="date" id="tanggal_sales" name="tanggal_sales" value="{{ isset($kontrak->tanggal_sales) ? \Carbon\Carbon::parse($kontrak->tanggal_sales)->format('Y-m-d') : '-' }}" class="form-control">
-
+                                            <td id="tgl_sales" class="col-md-3">
+                                                <input type="date" id="tanggal_sales" name="tanggal_sales" value="{{ isset($kontrak->tanggal_sales) ? \Carbon\Carbon::parse($kontrak->tanggal_sales)->format('Y-m-d') : '' }}" class="form-control">
                                             </td>
-                                            <td id="tgl_pembuat" style="width: 25%;">
-                                                <input type="date" id="tanggal_pembuat" name="tanggal_pembuat" value="{{ isset($kontrak->tanggal_pembuat) ? \Carbon\Carbon::parse($kontrak->tanggal_pembuat)->format('Y-m-d') : '-' }}" class="form-control">
+                                            <td id="tgl_pembuat" class="col-md-3">
+                                                <input type="date" id="tanggal_pembuat" name="tanggal_pembuat" value="{{ isset($kontrak->tanggal_pembuat) ? \Carbon\Carbon::parse($kontrak->tanggal_pembuat)->format('Y-m-d') : '' }}" class="form-control">
                                             </td>
-                                            <td id="tgl_penyetuju" style="width: 25%;">
-                                                <input type="date" id="tgl_penyetuju" name="tgl_penyetuju" value="{{ isset($kontrak->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetuju)->format('Y-m-d') : '-' }}" class="form-control">
-
+                                            <td id="tgl_penyetuju" class="col-md-3">
+                                                <input type="date" id="tanggal_penyetuju" name="tanggal_penyetuju" value="{{ isset($kontrak->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetuju)->format('Y-m-d') : '' }}" class="form-control">
                                             </td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">
-                                                <input type="date" id="tgl_pemeriksa" name="tgl_pemeriksa" value="{{ isset($kontrak->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontrak->tanggal_pemeriksa)->format('Y-m-d') : '-' }}" class="form-control">
+                                            <td id="tgl_pemeriksa" class="col-md-3">
+                                                <input type="date" id="tanggal_pemeriksa" name="tanggal_pemeriksa" value="{{ isset($kontrak->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontrak->tanggal_pemeriksa)->format('Y-m-d') : '' }}" class="form-control">
                                             </td>
-                                        </tr>
+                                        </tr>                                        
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="col-md-4 border rounded pt-3">
+                            <div class="col-md-4 border rounded mt-3 pt-3">
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Subtotal</label>
                                     <div class="col-lg-9">
@@ -259,7 +264,7 @@
                                             <div class="col-3 ps-0 mb-0">
                                                 <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
                                             </div>
-                                        </div>                                        
+                                        </div>
                                         <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
@@ -291,11 +296,62 @@
                     <button class="btn btn-primary" type="submit">Submit</button>
                     <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
-            </form>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+{{-- modal start --}}
+<div class="modal fade" id="addcustomer" tabindex="-1" aria-labelledby="addcustomerlabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addcustomerlabel">Tambah Customer</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+        </div>
+        <div class="modal-body">
+          <form action="{{ route('customer.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="route" value="{{ request()->route()->getName() }},kontrak,{{ request()->route()->parameter('kontrak') }}">
+            <div class="mb-3">
+              <label for="nama" class="col-form-label">Nama</label>
+              <input type="text" class="form-control" name="nama" id="add_nama" required>
+            </div>
+            <div class="mb-3">
+              <label for="tipe" class="col-form-label">Tipe Customer</label>
+              <div class="form-group">
+                <select id="add_tipe" name="tipe" class="form-control">
+                    <option value="sewa">Sewa</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="handphone" class="col-form-label"> No Handphone</label>
+              <input type="text" class="form-control" name="handphone" id="add_handphone" required>
+            </div>
+            <div class="mb-3">
+              <label for="alamat" class="col-form-label">Alamat</label>
+              <textarea class="form-control" name="alamat" id="add_alamat" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="tanggal_lahir" class="col-form-label">Tanggal Lahir</label>
+              <input type="date" class="form-control" name="tanggal_lahir" id="add_tanggal_lahir" required>
+            </div>
+            <div class="mb-3">
+              <label for="tanggal_bergabung" class="col-form-label">Tanggal Gabung</label>
+              <input type="date" class="form-control" name="tanggal_bergabung" id="add_tanggal_bergabung" required>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+    </form>
+      </div>
+    </div>
+</div>
+{{-- modal end --}}
 @endsection
 
 @section('scripts')
@@ -315,7 +371,7 @@
             checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
             calculatePromo(old_promo_id);
 
-            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id').select2();
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
@@ -387,6 +443,10 @@
                 return 0;
             } 
             calculatePromo(promo_id);
+        });
+        $('#btnAddCustomer').click(function(e) {
+            e.preventDefault()
+            $('#addcustomer').modal('show');
         });
         function multiply(element) {
             var id = 0

@@ -44,11 +44,19 @@ class CustomerController extends Controller
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
-
+        $data = $req->except(['_token', '_method', 'route']);
+        
         // save data
         $check = Customer::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        if($req->route){
+            $route = explode(',', $req->route);
+            if(count($route) == 1){
+                return redirect()->route($route[0])->with('success', 'Customer ditambahkan');
+            } else {
+                return redirect()->route($route[0], [$route[1] => $route[2]])->with('success', 'Customer ditambahkan');
+            }
+        }
         return redirect()->back()->with('success', 'Data tersimpan');
     }
 

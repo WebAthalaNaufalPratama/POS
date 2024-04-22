@@ -7,7 +7,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Customer/h4>
+                    <h4>Customer</h4>
                 </div>
                 <div class="page-btn">
                     <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addcustomer" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Customer</a>
