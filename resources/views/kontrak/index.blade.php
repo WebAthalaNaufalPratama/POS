@@ -44,6 +44,7 @@
                                     <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}">Edit</a>
+                                        <a class="dropdown-item" href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}">Detail</a>
                                         <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $kontrak->id }})">Delete</a>
                                     </div>
                                 </div>

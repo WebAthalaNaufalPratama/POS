@@ -145,9 +145,20 @@ class KontrakController extends Controller
      * @param  \App\Models\Kontrak  $kontrak
      * @return \Illuminate\Http\Response
      */
-    public function show(Kontrak $kontrak)
+    public function show($kontrak)
     {
-        //
+        $produkjuals = Produk_Jual::all();
+        $lokasis = Lokasi::all();
+        $customers = Customer::where('tipe', 'sewa')->get();
+        $rekenings = Rekening::all();
+        $promos = Promo::all();
+        $sales = Karyawan::where('jabatan', 'sales')->get();
+        $kontraks = Kontrak::find($kontrak);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
+        $ongkirs = Ongkir::all();
+        $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        return view('kontrak.show', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat', 'perangkai'));
     }
 
     /**
@@ -167,8 +178,7 @@ class KontrakController extends Controller
         $kontraks = Kontrak::find($kontrak);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
         $ongkirs = Ongkir::all();
-        $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
-        // dd($riwayat);
+        $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();        
         return view('kontrak.edit', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat'));
     }
 

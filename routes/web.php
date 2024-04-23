@@ -46,6 +46,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
         Route::get('checkPromo', 'PromoController@checkPromo')->name('checkPromo');
         Route::get('getPromo', 'PromoController@getPromo')->name('getPromo');
+        Route::get('getProdukTerjual', 'ProdukTerjualController@getProdukTerjual')->name('getProdukTerjual');
 
         /**
          * User Routes
@@ -250,6 +251,17 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{dopenjualan}/update', 'DopenjualanController@update')->name('dopenjualan.update');
             Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
         });
+
+        Route::group(['prefix' => 'form'], function() {
+            Route::get('/', 'FormPerangkaiController@index')->name('form.index');
+            Route::get('/create', 'FormPerangkaiController@create')->name('form.create');
+            Route::post('/store', 'FormPerangkaiController@store')->name('form.store');
+            Route::get('/{form}/show', 'FormPerangkaiController@show')->name('form.show');
+            Route::get('/{form}/edit', 'FormPerangkaiController@edit')->name('form.edit');
+            Route::patch('/{form}/update', 'FormPerangkaiController@update')->name('form.update');
+            Route::get('/{form}/delete', 'FormPerangkaiController@destroy')->name('form.destroy');
+        });
+
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
