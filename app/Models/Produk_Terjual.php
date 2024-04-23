@@ -19,4 +19,8 @@ class Produk_Terjual extends Model
     public function produk(){
         return $this->belongsTo(Produk_Jual::class, 'produk_jual_id', 'id');
     }
+
+    public function perangkai(){
+        return $this->hasMany(FormPerangkai::class, 'no_form', 'no_form');
+    }
 }
