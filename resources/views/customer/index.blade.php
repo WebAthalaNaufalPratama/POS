@@ -7,7 +7,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Customer/h4>
+                    <h4>Customer</h4>
                 </div>
                 <div class="page-btn">
                     <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addcustomer" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Customer</a>
@@ -68,7 +68,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addcustomerlabel">Tambah Customer</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
           <form action="{{ route('customer.store') }}" method="POST">
@@ -118,7 +118,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="editcustomerlabel">Edit Customer</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
           <form id="editForm" action="customer/0/update" method="POST">

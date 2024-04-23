@@ -13,7 +13,10 @@ class Produk_Terjual extends Model
     protected $guarded = ['id'];
 
     public function komponen(){
-        return $this->hasMany(Komponen_Produk_Terjual::class, 'produk_terjual
-        _id', 'id');
+        return $this->hasMany(Komponen_Produk_Terjual::class, 'produk_terjual_id', 'id');
+    }
+
+    public function produk(){
+        return $this->belongsTo(Produk_Jual::class, 'produk_jual_id', 'id');
     }
 }
