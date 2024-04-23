@@ -26,7 +26,7 @@
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('penjualan.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('penjualan.update', ['penjualan' => $getProdukJual->id]) }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
                         @csrf
@@ -165,31 +165,9 @@
                                                         <select id="nama_produk_0" name="nama_produk[]" class="form-control" onchange="updateHargaSatuan(this)">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}">
-                                                                @if (substr($produk->kode, 0, 3) === 'TRD')
-                                                                {{ $produk->nama }}
-                                                                @foreach ($produk->komponen as $komponen)
-                                                                @if ($komponen->kondisi)
-                                                                @foreach($kondisis as $kondisi)
-                                                                @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                $found = true;
-                                                                break;
-                                                                @endphp
-                                                                @endif
-                                                                @endforeach
-                                                                @endif
-                                                                @if ($found) @break @endif
-                                                                @endforeach
-                                                                @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                                {{ $produk->nama }}
-                                                                @endif
-                                                            </option>
+                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>
                                                             @endforeach
                                                         </select>
-
-
                                                     </td>
                                                     <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
@@ -451,12 +429,13 @@
                         <input type="text" class="form-control" id="no_invoice_rangkai" name="no_invoice_rangkai" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
                     </div>
                     <div class="form-group">
-                        <label for="jumlahStaff">Jumlah Staff Perangkai</label>
-                        <input type="text" class="form-control" id="jumlahStaff" name="jumlahStaff" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="staffPerangkaiContainer">Pilih PIC Perangkai</label>
-                        <div id="staffPerangkaiContainer"></div>
+                        <label for="staffrangkai">Nomor Invoice</label>
+                        <select id="staffrangkai_{{ $index }}" name="staffrangkai" class="form-control">
+                            <option value="">Pilih Nama Staff Perangkai</option>
+                            @foreach ($karyawans as $karyawan)
+                            <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="table-responsive">
@@ -548,7 +527,7 @@
 
 @section('scripts')
 <script>
-    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+    var cekInvoiceNumbers = "<?php echo $cekInvoice?>";
     console.log(cekInvoiceNumbers);
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
@@ -559,7 +538,7 @@
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Adding leading zero if necessary
         var day = currentDate.getDate().toString().padStart(2, '0'); // Adding leading zero if necessary
-
+        
         var generatedInvoice = invoicePrefix + year + month + day + nextInvoiceNumber;
 
         // Update the value of the invoice input field using jQuery
@@ -789,51 +768,6 @@
             // Panggil fungsi updateHargaSatuan
             updateHargaSatuan(this);
         });
-
-        $('#jumlahStaff').on('change', function() {
-    var jumlahStaff = parseInt($(this).val());
-    var container = $('#staffPerangkaiContainer');
-
-    // Batasi jumlahStaff hingga maksimal 10
-    if (jumlahStaff > 10) {
-        jumlahStaff = 10;
-        $(this).val(jumlahStaff); // Update nilai input jika melebihi 10
-    }
-
-    // Kosongkan container sebelum menambahkan inputan baru
-    container.empty();
-
-    // Tambahkan inputan Nama Staff Perangkai sebanyak jumlah yang diinginkan
-    for (var i = 0; i < jumlahStaff; i++) {
-        var select = $('<select>', {
-            'class': 'form-control',
-            'name': 'staffrangkai_' + i
-        });
-        select.append($('<option>', {
-    'disabled': true,
-    'selected': true,
-    'hidden': true, // Sembunyikan opsi ini agar tidak bisa dipilih
-    'text': 'Pilih Staff Perangkai'
-}));
-        // Tambahkan opsi default untuk "Pilih Staff Perangkai"
-        select.append($('<option>', {
-            'value': '',
-            'text': 'Pilih Staff Perangkai'
-        }));
-
-        // Tambahkan opsi untuk setiap karyawan
-        @foreach ($karyawans as $karyawan)
-            select.append($('<option>', {
-                'value': '{{ $karyawan->id }}',
-                'text': '{{ $karyawan->nama }}'
-            }));
-        @endforeach
-
-        // Tambahkan select ke dalam container
-        container.append(select);
-    }
-});
-
 
 
         $('#delivery_order_section').show();

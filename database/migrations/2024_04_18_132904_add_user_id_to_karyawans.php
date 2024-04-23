@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddLokasiIdToUsers extends Migration
+class AddUserIdToKaryawans extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddLokasiIdToUsers extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->bigInteger('lokasi_id')->after('password');
+        Schema::table('karyawans', function (Blueprint $table) {
+            $table->bigInteger('user_id')->after('id');
         });
     }
 
@@ -25,7 +25,7 @@ class AddLokasiIdToUsers extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('karyawan', function (Blueprint $table) {
             //
         });
     }

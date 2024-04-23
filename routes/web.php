@@ -224,6 +224,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/store', 'PenjualanController@store')->name('penjualan.store');
             Route::get('/{penjualan}/show', 'PenjualanController@show')->name('penjualan.show');
             Route::get('/{penjualan}/edit', 'PenjualanController@edit')->name('penjualan.edit');
+            Route::get('/{penjualan}/payment', 'PenjualanController@payment')->name('penjualan.payment');
             Route::patch('/{penjualan}/update', 'PenjualanController@update')->name('penjualan.update');
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
         });
@@ -236,6 +237,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/edit', 'KontrakController@edit')->name('kontrak.edit');
             Route::patch('/{kontrak}/update', 'KontrakController@update')->name('kontrak.update');
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
+        });
+
+        Route::group(['prefix' => 'dopenjualan'], function() {
+            Route::get('/', 'DopenjualanController@index')->name('dopenjualan.index');
+            Route::get('/create', 'DopenjualanController@create')->name('dopenjualan.create');
+            Route::post('/store', 'DopenjualanController@store')->name('dopenjualan.store');
+            Route::get('/{dopenjualan}/show', 'DopenjualanController@show')->name('dopenjualan.show');
+            Route::get('/{dopenjualan}/edit', 'DopenjualanController@edit')->name('dopenjualan.edit');
+            Route::patch('/{dopenjualan}/update', 'DopenjualanController@update')->name('dopenjualan.update');
+            Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
