@@ -230,6 +230,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
         });
 
+        Route::group(['prefix' => 'form'], function() {
+            Route::get('/', 'FormPerangkaiController@index')->name('form.index');
+            Route::get('/create', 'FormPerangkaiController@create')->name('form.create');
+            Route::post('/store', 'FormPerangkaiController@store')->name('form.store');
+            Route::get('/{form}/show', 'FormPerangkaiController@show')->name('form.show');
+            Route::get('/{form}/edit', 'FormPerangkaiController@edit')->name('form.edit');
+            Route::patch('/{form}/update', 'FormPerangkaiController@update')->name('form.update');
+            Route::get('/{form}/delete', 'FormPerangkaiController@destroy')->name('form.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
