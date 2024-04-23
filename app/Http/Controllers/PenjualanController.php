@@ -58,9 +58,10 @@ class PenjualanController extends Controller
             // $komponen = Kondisi::with('komponen')->get();
             // dd($komponen);
             $kondisis =Kondisi::all();
+            $invoices = Penjualan::get();
         }
 
-        return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis'));
+        return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
     }
 
 
@@ -165,5 +166,35 @@ class PenjualanController extends Controller
     public function payment()
     {
 
+    }
+
+    public function show(Request $req, $penjualan)
+    {
+        $penjualans = Penjualan::find($penjualan);
+        $roles = Auth::user()->roles()->value('name');
+        if ($roles == 'admin' || $roles == 'kasir') {
+            $user = Auth::user()->value('id');
+            $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
+            // dd($karyawans);
+            $customers = Customer::where('lokasi_id', $lokasi)->get();
+            $lokasis = Lokasi::where('id', $lokasi)->get();
+            $rekenings = Rekening::get();
+            $ongkirs = Ongkir::get();
+            $karyawans = Karyawan::where('lokasi_id', $lokasi)->get();
+            $promos = Promo::where(function ($query) use ($lokasi) {
+                $query->where('lokasi_id', $lokasi)
+                    ->orWhere('lokasi_id', 'Semua');
+            })->get();
+            $produks = Produk_Jual::with('komponen.kondisi')->get();
+            // dd($produks);
+            $bankpens = Rekening::get();
+            $Invoice = Penjualan::latest()->first();
+            $cekInvoice = substr($Invoice->no_invoice, -1);
+            // $komponen = Kondisi::with('komponen')->get();
+            // dd($komponen);
+            $kondisis =Kondisi::all();
+            $invoices = Penjualan::get();
+            return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
+        return view('penjualan.show', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
     }
 }

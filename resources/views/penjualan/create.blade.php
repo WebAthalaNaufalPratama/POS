@@ -162,10 +162,10 @@
                                             <tbody id="dynamic_field">
                                                 <tr>
                                                     <td>
-                                                        <select id="nama_produk_0" name="nama_produk[]" class="form-control" onchange="updateHargaSatuan(this)">
+                                                        <select id="nama_produk_0" name="nama_produk[]" class="form-control">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}">
+                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
                                                                 @if (substr($produk->kode, 0, 3) === 'TRD')
                                                                 {{ $produk->nama }}
                                                                 @foreach ($produk->komponen as $komponen)
@@ -266,14 +266,14 @@
                                         <div class="form-group">
                                             <div id="inputOngkir" style="display: none;">
                                                 <label for="alamat_tujuan">Alamat Tujuan </label>
-                                                <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control">
+                                                <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control"></textarea>
                                             </div>
                                             <div id="inputExspedisi" style="display: none;">
                                                 <label>Alamat Pengiriman</label>
                                                 <select id="ongkir_id" name="ongkir_id" class="form-control">
                                                     <option value="">Pilih Alamat Tujuan</option>
                                                     @foreach($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}">{{ $ongkir->nama }}</option>
+                                                    <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya}}">{{ $ongkir->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -287,25 +287,47 @@
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" readonly required></h5>
                                                 </li>
                                                 <li>
-                                                    <h4><select id="jenis_ppn" name="jenis_ppn" class="form-control" onchange="updateHargaSatuan(this)" required>
+                                                    <h4>PPN
+                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
                                                             <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude"> PPN EXCLUDE</option>
-                                                            <option value="include"> PPN INCLUDE</option>
-                                                        </select></h4>
-                                                    <h5><input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" required></h5>
+                                                            <option value="exclude">EXCLUDE</option>
+                                                            <option value="include">INCLUDE</option>
+                                                        </select>
+                                                    </h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" readonly required>
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" readonly required>
+
+                                                    </h5>
                                                 </li>
                                                 <li>
-                                                    <h4><select id="promo_id" name="promo_id" class="form-control" onchange="updateHargaSatuan(this)">
+                                                    <h4>Promo</h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-9 pe-0">
+                                                                <select id="promo_id" name="promo_id" class="form-control" required disabled>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-3 ps-0 mb-0">
+                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                                    </h5>
+                                                    <!-- <h5><select id="promo_id" name="promo_id" class="form-control" onchange="updateHargaSatuan(this)">
                                                             <option value="">Pilih Promo</option>
                                                             @foreach ($promos as $promo)
                                                             <option value="{{ $promo->id }}" data-harga="{{ $promo->harga_jual }}">{{ $promo->nama }}</option>
                                                             @endforeach
-                                                        </select></h4>
-                                                    <h5>$ 0.00 (0.00%)</h5>
+                                                        </select></h5> -->
+                                                    <!-- <h5>$ 0.00 (0.00%)</h5> -->
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" required></h5>
+                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>DP</h4>
@@ -447,16 +469,16 @@
                         <input type="text" class="form-control" id="jnsrangkai_{{ $index }}" name="jnsrangkai" value="penjualan" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="no_invoice">Nomor Invoice</label>
-                        <input type="text" class="form-control" id="no_invoice_rangkai" name="no_invoice_rangkai" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
+                        <label for="no_invoice_rangkai_{{ $index }}">Nomor Invoice</label>
+                        <input type="text" class="form-control" id="no_invoice_rangkai_{{ $index }}" name="no_invoice_rangkai_{{ $index }}" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
                     </div>
                     <div class="form-group">
-                        <label for="jumlahStaff">Jumlah Staff Perangkai</label>
-                        <input type="text" class="form-control" id="jumlahStaff" name="jumlahStaff" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
+                        <label for="jumlahStaff_{{ $index }}">Jumlah Staff Perangkai</label>
+                        <input type="text" class="form-control" id="jumlahStaff_{{ $index }}" name="jumlahStaff_{{ $index }}" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
                     </div>
                     <div class="form-group">
                         <label for="staffPerangkaiContainer">Pilih PIC Perangkai</label>
-                        <div id="staffPerangkaiContainer"></div>
+                        <div id="staffPerangkaiContainer_{{ $index }}"></div>
                     </div>
 
                     <div class="table-responsive">
@@ -486,7 +508,7 @@
 
                 <div class="modal-footer justify-content-center">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="submit" class="btn btn-primary" id="simpanButton_{{ $index }}">Simpan</button>
                 </div>
             </form>
         </div>
@@ -549,7 +571,7 @@
 @section('scripts')
 <script>
     var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-    console.log(cekInvoiceNumbers);
+    // console.log(cekInvoiceNumbers);
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     // Function to generate the invoice based on certain criteria
@@ -562,10 +584,21 @@
 
         var generatedInvoice = invoicePrefix + year + month + day + nextInvoiceNumber;
 
-        // Update the value of the invoice input field using jQuery
         $('#no_invoice').val(generatedInvoice);
         $('#no_invoice_bayar').val(generatedInvoice);
-        $('#no_invoice_rangkai').val(generatedInvoice);
+        @foreach($produks as $index => $produk)
+        $('#no_invoice_rangkai_{{ $index }}').val(generatedInvoice);
+
+        var invoices = "<?php $invoices->pluck('no_invoice') ?>";
+
+        var invoiceExists = invoices.includes(generatedInvoice);
+        if (invoiceExists) {
+            $('#simpanButton_{{ $index }}').show();
+        } else {
+            $('#simpanButton_{{ $index }}').hide();
+        }
+
+        @endforeach
     }
 
 
@@ -660,109 +693,130 @@
 </script>
 
 <script>
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
     $(document).ready(function() {
         var i = 1;
         $('#add').click(function() {
-            var newRow = '<tr class="tr_clone" id="row' + i + '">' +
-                '<td>' +
-                '<select id="nama_produk_' + i + '" name="nama_produk[]" class="form-control select2">' +
-                '<option value="">Pilih Produk</option>' +
-                '@foreach ($produks as $index => $produk)' +
-                '<option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}">{{ $produk->nama }}</option>' +
-                '@endforeach' +
-                '</select>' +
-                '</td>' +
-                '<td><input type="number" name="harga_satuan[]" id="harga_satuan_' + i + '" class="form-control" readonly></td>' +
-                '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control" oninput="multiply(this)"></td>' +
-                '<td>' +
-                '<select id="jenis_diskon_' + i + '" name="jenis_diskon[]" class="form-control" onchange="showInputType(' + i + ')">' +
-                '<option value="0">Pilih Diskon</option>' +
-                '<option value="Nominal">Nominal</option>' +
-                '<option value="persen">Persen</option>' +
-                '</select>' +
-                '<div class="input-group">' +
-                '<input type="number" name="diskon[]" id="diskon_' + i + '" value="" class="form-control" style="display: none;" aria-label="Recipients username" aria-describedby="basic-addon3" onchange="calculateTotal(' + i + ')">' +
-                '<span class="input-group-text" id="nominalInput_' + i + '" style="display: none;">.00</span>' +
-                '<span class="input-group-text" id="persenInput_' + i + '" style="display: none;">%</span>' +
-                '</div>' +
-                '</div>' +
-                '</td>' +
-                '<td><input type="number" name="harga_total[]" id="harga_total_' + i + '" class="form-control" readonly></td>' +
-                '<td><button type="button" name="pic[]" id="pic_' + i + '" class="btn btn-warning" data-toggle="modal" data-target="#picModal_' + i + '" onclick="copyDataToModal(' + i + ')">PIC Perangkai</button></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
-                '</tr>';
-
+            var newRow = `<tr class="tr_clone" id="row${i}">
+                            <td>
+                                <select id="nama_produk_${i}" name="nama_produk[]" class="form-control select2">
+                                    <option value="">Pilih Produk</option>
+                                    @foreach ($produks as $index => $produk)
+                                        <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                            @if (substr($produk->kode, 0, 3) === 'TRD') 
+                                                {{ $produk->nama }}
+                                                @foreach ($produk->komponen as $komponen)
+                                                    @if ($komponen->kondisi)
+                                                        @foreach($kondisis as $kondisi)
+                                                            @if($kondisi->id == $komponen->kondisi)
+                                                                - {{ $kondisi->nama }}
+                                                                @php
+                                                                    $found = true;
+                                                                    break;
+                                                                @endphp
+                                                            @endif
+                                                        @endforeach
+                                                    @endif
+                                                    @if ($found) @break @endif
+                                                @endforeach
+                                            @elseif (substr($produk->kode, 0, 3) === 'GFT')
+                                                {{ $produk->nama }}
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td><input type="number" name="harga_satuan[]" id="harga_satuan_${i}" class="form-control" readonly></td>
+                            <td><input type="number" name="jumlah[]" id="jumlah_${i}" class="form-control" oninput="multiply(this)"></td>
+                            <td>
+                                <select id="jenis_diskon_${i}" name="jenis_diskon[]" class="form-control" onchange="showInputType(${i})">
+                                    <option value="0">Pilih Diskon</option>
+                                    <option value="Nominal">Nominal</option>
+                                    <option value="persen">Persen</option>
+                                </select>
+                                <div class="input-group">
+                                    <input type="number" name="diskon[]" id="diskon_${i}" value="" class="form-control" style="display: none;" aria-label="Recipients username" aria-describedby="basic-addon3" onchange="calculateTotal(${i})">
+                                    <span class="input-group-text" id="nominalInput_${i}" style="display: none;">.00</span>
+                                    <span class="input-group-text" id="persenInput_${i}" style="display: none;">%</span>
+                                </div>
+                            </td>
+                            <td><input type="number" name="harga_total[]" id="harga_total_${i}" class="form-control" readonly></td>
+                            <td><button type="button" name="pic[]" id="pic_${i}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_${i}" onclick="copyDataToModal(${i})">PIC Perangkai</button></td>
+                            <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
+                        </tr>`;
 
             $('#dynamic_field').append(newRow);
 
-            // Menambahkan modal untuk setiap pic
-            var picModal = '<div class="modal fade" id="picModal_' + i + '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">' +
-                '<div class="modal-dialog" role="document">' +
-                '<div class="modal-content">' +
-                '<div class="modal-header">' +
-                '<h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ' + i + '</h5>' +
-                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                '<span aria-hidden="true">&times;</span>' +
-                '</button>' +
-                '</div>' +
-                '<div class="modal-body">' +
-                '<div class="form-group">' +
-                '<label for="tglrangkai">Tanggal Rangkaian</label>' +
-                '<input type="date" class="form-control" id="tglrangkai" name="tglrangkai">' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label for="jnsrangkai">Jenis Rangkaian</label>' +
-                '<input type="text" class="form-control" id="jnsrangkai" name="jnsrangkai" value="penjualan" readonly>' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label for="no_invoice">Nomor Invoice</label>' +
-                '<input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label for="staffrangkai">Nama Staff Perangkai</label>' +
-                '<select id="staffrangkai" name="staffrangkai" class="form-control">' +
-                '<option value="">Pilih Nama Staff Perangkai</option>' +
-                '@foreach ($karyawans as $karyawan)' +
-                '<option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>' +
-                '@endforeach' +
-                '</select>' +
-                '</div>' +
-                '<div class="table-responsive">' +
-                '<table class="table">' +
-                '<thead>' +
-                '<tr>' +
-                '<th>Nama</th>' +
-                '<th>Jumlah</th>' +
-                '<th></th>' +
-                '</tr>' +
-                '</thead>' +
-                '<tbody id="dynamic_field">' +
-                '<tr>' +
-                '<td>' +
-                '<select id="nama_produk" name="nama_produk[]" class="form-control">' +
-                '<option value="">Pilih Produk</option>' +
-                '@foreach ($produks as $produk)' +
-                '<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>' +
-                '@endforeach' +
-                '</select>' +
-                '<input type="hidden" name="kode_produk[]" style="display: none;">' +
-                '<input type="hidden" name="tipe_produk[]" style="display: none;">' +
-                '<input type="hidden" name="deskripsi_komponen[]" style="display: none;">' +
-                '</td>' +
-                '<td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>' +
-                '</tr>' +
-                '</tbody>' +
-                '</table>' +
-                '</div>' +
-                '</div>' +
-                '<div class="modal-footer justify-content-center">' +
-                '<button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>';
+            // var picModal = `<div class="modal fade" id="picModal_${i}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            //                     <div class="modal-dialog" role="document">
+            //                         <div class="modal-content">
+            //                             <div class="modal-header">
+            //                                 <h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ${i}</h5>
+            //                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            //                                     <span aria-hidden="true">&times;</span>
+            //                                 </button>
+            //                             </div>
+            //                             <div class="modal-body">
+            //                                 <div class="form-group">
+            //                                     <label for="tglrangkai_${i}">Tanggal Rangkaian</label>
+            //                                     <input type="date" class="form-control" id="tglrangkai_${i}" name="tglrangkai_${i}">
+            //                                 </div>
+            //                                 <div class="form-group">
+            //                                     <label for="jnsrangkai_${i}">Jenis Rangkaian</label>
+            //                                     <input type="text" class="form-control" id="jnsrangkai_${i}" name="jnsrangkai_${i}" value="penjualan" readonly>
+            //                                 </div>
+            //                                 <div class="form-group">
+            //                                     <label for="no_invoice_rangkai_${i}">Nomor Invoice</label>
+            //                                     <input type="text" class="form-control" id="no_invoice_rangkai_${i}" name="no_invoice_rangkai_${i}" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
+            //                                 </div>
+            //                                 <div class="form-group">
+            //                                     <label for="jumlahStaff_${i}">Jumlah Staff Perangkai</label>
+            //                                     <input type="text" class="form-control" id="jumlahStaff_${i}" name="jumlahStaff_${i}" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
+            //                                 </div>
+            //                                 <div class="form-group">
+            //                                     <label for="staffPerangkaiContainer_${i}">Pilih PIC Perangkai</label>
+            //                                     <div id="staffPerangkaiContainer_${i}"></div>
+            //                                 </div>
+            //                                 <div class="table-responsive">
+            //                                     <table class="table">
+            //                                         <thead>
+            //                                             <tr>
+            //                                                 <th>Nama</th>
+            //                                                 <th>Jumlah</th>
+            //                                                 <th></th>
+            //                                             </tr>
+            //                                         </thead>
+            //                                         <tbody id="dynamic_field">
+            //                                             <tr>
+            //                                                 <td>
+            //                                                     <select id="nama_produk" name="nama_produk[]" class="form-control">
+            //                                                         <option value="">Pilih Produk</option>`;
 
-            $('body').append(picModal);
+            // @foreach($produks as $produk)
+            // picModal += `<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>`;
+            // @endforeach
+
+            // picModal += `                    </select>
+            //                                                     <input type="hidden" name="kode_produk[]" style="display: none;">
+            //                                                     <input type="hidden" name="tipe_produk[]" style="display: none;">
+            //                                                     <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
+            //                                                 </td>
+            //                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
+            //                                             </tr>
+            //                                         </tbody>
+            //                                     </table>
+            //                                 </div>
+            //                             </div>
+            //                             <div class="modal-footer justify-content-center">
+            //                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+            //                             </div>
+            //                         </div>
+            //                     </div>
+            //                 </div>`;
+
+
+            // $('body').append(picModal);
+
 
             $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
             i++
@@ -772,6 +826,13 @@
             var button_id = $(this).attr("id");
             $('#row' + button_id + '').remove();
             calculateTotal(0);
+        });
+
+        function addModal(){
+            let i = $('.modal').length;
+        }
+        $('#pic_0').on('click', function() {
+            addModal();
         });
 
         $(document).on('change', '[id^=nama_produk]', function() {
@@ -790,49 +851,45 @@
             updateHargaSatuan(this);
         });
 
-        $('#jumlahStaff').on('change', function() {
-    var jumlahStaff = parseInt($(this).val());
-    var container = $('#staffPerangkaiContainer');
+        @foreach($produks as $index => $produk)
+        $('#jumlahStaff_{{ $index }}').on('input', function() {
+            var jumlahStaff = parseInt($(this).val());
+            var container = $('#staffPerangkaiContainer_{{ $index }}'); // Ganti ${i} dengan $index
 
-    // Batasi jumlahStaff hingga maksimal 10
-    if (jumlahStaff > 10) {
-        jumlahStaff = 10;
-        $(this).val(jumlahStaff); // Update nilai input jika melebihi 10
-    }
+            if (jumlahStaff > 10) {
+                jumlahStaff = 10;
+                $(this).val(jumlahStaff);
+            }
 
-    // Kosongkan container sebelum menambahkan inputan baru
-    container.empty();
+            container.empty();
 
-    // Tambahkan inputan Nama Staff Perangkai sebanyak jumlah yang diinginkan
-    for (var i = 0; i < jumlahStaff; i++) {
-        var select = $('<select>', {
-            'class': 'form-control',
-            'name': 'staffrangkai_' + i
+            for (var i = 0; i < jumlahStaff; i++) {
+                var select = $('<select>', {
+                    'class': 'form-control',
+                    'name': 'staffrangkai_' + i
+                });
+                select.append($('<option>', {
+                    'disabled': true,
+                    'selected': true,
+                    'hidden': true,
+                    'text': 'Pilih Staff Perangkai'
+                }));
+                select.append($('<option>', {
+                    'value': '',
+                    'text': 'Pilih Staff Perangkai'
+                }));
+
+                @foreach($karyawans as $karyawan)
+                select.append($('<option>', {
+                    'value': '{{ $karyawan->id }}',
+                    'text': '{{ $karyawan->nama }}'
+                }));
+                @endforeach
+
+                container.append(select);
+            }
         });
-        select.append($('<option>', {
-    'disabled': true,
-    'selected': true,
-    'hidden': true, // Sembunyikan opsi ini agar tidak bisa dipilih
-    'text': 'Pilih Staff Perangkai'
-}));
-        // Tambahkan opsi default untuk "Pilih Staff Perangkai"
-        select.append($('<option>', {
-            'value': '',
-            'text': 'Pilih Staff Perangkai'
-        }));
-
-        // Tambahkan opsi untuk setiap karyawan
-        @foreach ($karyawans as $karyawan)
-            select.append($('<option>', {
-                'value': '{{ $karyawan->id }}',
-                'text': '{{ $karyawan->nama }}'
-            }));
         @endforeach
-
-        // Tambahkan select ke dalam container
-        container.append(select);
-    }
-});
 
 
 
@@ -844,6 +901,21 @@
             } else {
                 $('#delivery_order_section').show();
             }
+        });
+
+        $('#btnCheckPromo').click(function(e) {
+            e.preventDefault();
+            var total_transaksi = $('#total_tagihan').val();
+            console.log(total_transaksi);
+            var produk = [];
+            var tipe_produk = [];
+            $('select[id^="nama_produk_"]').each(function() {
+                produk.push($(this).val());
+                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
+
+            });
+            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
+            checkPromo(total_transaksi, tipe_produk, produk);
         });
 
         $('#cara_bayar').change(function() {
@@ -861,15 +933,55 @@
 
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
+            var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
 
             $('#inputOngkir').hide();
             $('#inputExspedisi').hide();
 
             if (pengiriman === "sameday") {
                 $('#inputOngkir').show();
+                $('#biaya_ongkir').prop('readonly', false);
             } else if (pengiriman === "exspedisi") {
                 $('#inputExspedisi').show();
+                $('#biaya_ongkir').prop('readonly', true);
+                ongkirId();
             }
+        });
+
+        $('#ongkir_id').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var ongkirValue = parseFloat(selectedOption.data('biaya_ongkir')) || 0;
+            $('#biaya_ongkir').val(ongkirValue);
+            Totaltagihan();
+        });
+
+        $('#jenis_ppn').change(function() {
+            var ppn = $(this).val();
+            $('#persen_ppn').prop('readonly', true);
+            var subtotal = parseFloat($('#sub_total').val()) || 0;
+            var hitungppn = 11 * subtotal / 100;
+            console.log(hitungppn);
+
+            if (ppn === "include") {
+                $('#persen_ppn').val(0);
+                $('#jumlah_ppn').val(0);
+                $('#persen_ppn').prop('readonly', true);
+            } else if (ppn === "exclude") {
+                $('#persen_ppn').prop('readonly', false);
+                $('#persen_ppn').val(11);
+                $('#jumlah_ppn').val(hitungppn);
+            }
+            Totaltagihan();
+        });
+
+        $('#promo_id').change(function() {
+            var promo_id = $(this).select2().find(":selected").val()
+            if (!promo_id) {
+                $('#total_promo').val(0);
+                total_harga();
+                return 0;
+            }
+            calculatePromo(promo_id);
         });
 
         $('#id_customer').change(function() {
@@ -896,6 +1008,51 @@
                 pointInput.val(0);
             }
         });
+
+
+        function checkPromo(total_transaksi, tipe_produk, produk) {
+            $('#total_promo').val(0);
+            var data = {
+                total_transaksi: total_transaksi,
+                tipe_produk: tipe_produk,
+                produk: produk
+            };
+            $.ajax({
+                url: '/checkPromo',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    $('#promo_id').empty()
+                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
+
+                    var min_transaksi = response.min_transaksi;
+                    for (var j = 0; j < min_transaksi.length; j++) {
+                        var promo = min_transaksi[j];
+                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
+                    }
+                    var tipe_produk = response.tipe_produk;
+                    for (var j = 0; j < tipe_produk.length; j++) {
+                        var promo = tipe_produk[j];
+                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
+                    }
+                    var produk = response.produk;
+                    for (var j = 0; j < produk.length; j++) {
+                        var promo = produk[j];
+                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
+                    }
+                    $('#promo_id').attr('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                },
+                complete: function() {
+                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip"></i>')
+                }
+            });
+        }
 
         function updateHargaSatuan(select) {
             var index = select.selectedIndex;
@@ -939,6 +1096,7 @@
             $('#harga').val(total);
 
             $('#sub_total').val(total);
+            $('#total_tagihan').val(total);
         }
 
         function updateSubTotal() {
@@ -953,18 +1111,64 @@
             subTotalInput.val(subTotal.toFixed(2));
         }
 
+        function calculatePromo(promo_id) {
+            var data = {
+                promo_id: promo_id,
+            };
+            $.ajax({
+                url: '/getPromo',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    var total_transaksi = parseInt($('#total_tagihan').val());
+                    var total_promo;
+                    switch (response.diskon) {
+                        case 'persen':
+                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            // console.log(total_promo);
+                            break;
+                        case 'nominal':
+                            total_promo = parseInt(response.diskon_nominal);
+                            break;
+                        case 'poin':
+                            total_promo = 'poin ' + response.diskon_poin;
+                            break;
+                        case 'produk':
+                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
+                            break;
+                        default:
+                            break;
+                    }
+                    $('#total_promo').val(total_promo);
+                    Totaltagihan();
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                }
+            });
+        }
+
         function Totaltagihan() {
             var subtotal = parseFloat($('#sub_total').val()) || 0;
-            var extot = parseFloat($('#jumlah_ppn').val()) || 0;
+            // var extot = parseFloat($('#jumlah_ppn').val()) || 0;
+            var persenPPN = parseFloat($('#persen_ppn').val()) || 0;
             var dp = parseFloat($('#dp').val()) || 0;
-            var totalTagihan = subtotal + extot - dp;
+            var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
+            var diskon_nominal = parseFloat($('#total_promo').val()) || 0;
+            // console.log(extot);
+            var ppn = persenPPN * subtotal / 100;
+            var totalTagihan = subtotal + ppn + biayaOngkir + diskon_nominal - dp;
             var sisaBayar = totalTagihan - dp;
 
             $('#total_tagihan').val(totalTagihan.toFixed(2));
             $('#sisa_bayar').val(sisaBayar.toFixed(2));
+            $('#jumlah_ppn').val(ppn.toFixed(2));
         }
 
-        $('#sub_total, #jumlah_ppn, #dp').on('input', Totaltagihan);
+        $('#sub_total, #jumlah_ppn, #dp, #biaya_ongkir, #total_promo, #persen_ppn').on('input', Totaltagihan);
     });
 </script>
 
