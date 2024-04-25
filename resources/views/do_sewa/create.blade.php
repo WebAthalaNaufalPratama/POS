@@ -29,14 +29,20 @@
                                                 <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') ?? $kontrak->customer->nama }}" class="form-control" required disabled>
                                                 <input type="hidden" id="customer_id" name="customer_id" value="{{ old('customer_id') ?? $kontrak->customer_id }}" class="form-control" required>
                                             </div>
+                                        </div>
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>PIC</label>
-                                                <input type="text" id="penerima" name="penerima" value="{{ old('penerima') ?? $kontrak->pic }}" class="form-control" required readonly>
+                                                <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $kontrak->pic }}" class="form-control" required readonly>
                                             </div>
+                                        </div>
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Handphone</label>
                                                 <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $kontrak->handphone }}" class="form-control" required>
                                             </div>
+                                        </div>
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Alamat</label>
                                                 <textarea type="text" id="alamat" name="alamat" class="form-control" required>{{ old('alamat') ?? $kontrak->alamat }}</textarea>
@@ -53,27 +59,21 @@
                                                 <input type="text" id="no_do" name="no_do" value="{{ old('no_do') ?? $getKode }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Tanggal Mulai</label>
-                                                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') ?? $kontrak->tanggal_mulai }}" class="form-control" required readonly>
+                                                <label>Tanggal Kirim</label>
+                                                <input type="date" id="tanggal_kirim" name="tanggal_kirim" value="{{ old('tanggal_kirim') ?? date('Y-m-d') }}" class="form-control" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Kontrak</label>
-                                                <input type="text" id="no_sewa" name="no_sewa" value="{{ old('no_sewa') ?? $kontrak->no_kontrak }}" class="form-control"  required readonly>
+                                                <input type="text" id="no_referensi" name="no_referensi" value="{{ old('no_referensi') ?? $kontrak->no_kontrak }}" class="form-control"  required readonly>
                                             </div>
-                                            <div class="form-group">
-                                                <label>Tanggal Selesai</label>
-                                                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') ?? $kontrak->tanggal_selesai }}" class="form-control" required readonly>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Driver</label>
                                                 <select id="driver_id" name="driver" class="form-control" required>
                                                     <option value="">Pilih Driver</option>
                                                     @foreach ($drivers as $driver)
-                                                        <option value="{{ $driver->id }}">{{ $driver->nama }}</option>
+                                                        <option value="{{ $driver->id }}" {{ old('driver') == $driver->id ? 'selected' : '' }}>{{ $driver->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -133,9 +133,9 @@
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}"></td>
-                                            <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="pcs"></td>
-                                            <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="" required></td>
+                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}"></td>
+                                            <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ old('satuan.' . $i) ?? 'pcs' }}"></td>
+                                            <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ old('detail_lokasi.' . $i) }}" required></td>
                                             @if ($i == 0)
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             @else
@@ -178,7 +178,7 @@
                                         </td>
                                         <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
                                         <td><input type="text" name="satuan2[]" id="satuan2_0" class="form-control"></td>
-                                        <td><input type="text" name="detail_lokasi2[]" id="detail_lokasi2_0" class="form-control"></td>
+                                        <td><input type="text" name="keterangan2[]" id="keterangan2_0" class="form-control"></td>
                                         <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
                                     </tr>
                                 </tbody>
@@ -210,7 +210,7 @@
                                             <td style="width: 25%;">
                                                 <input type="date" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
                                             </td>
-                                            <td id="tgl_pembuat" style="width: 25%;">{{ isset($kontrak->tanggal_pembuat) ? \Carbon\Carbon::parse($kontrak->tanggal_pembuat)->format('Y-m-d') : '-' }}</td>
+                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('Y-m-d') }}</td>
                                             <td id="tgl_penyetuju" style="width: 25%;">{{ isset($kontrak->tanggal_penyetujju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetujju)->format('Y-m-d') : '-' }}</td>
                                             <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($kontrak->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontrak->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</td>
                                         </tr>

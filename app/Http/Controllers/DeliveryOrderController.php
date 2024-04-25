@@ -9,6 +9,7 @@ use App\Models\Kontrak;
 use App\Models\Produk_Jual;
 use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class DeliveryOrderController extends Controller
@@ -67,12 +68,11 @@ class DeliveryOrderController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'no_do' => 'required',
-            'no_sewa' => 'required',
-            'tanggal_mulai' => 'required',
-            'tanggal_selesai' => 'required',
+            'no_referensi' => 'required',
+            'tanggal_kirim' => 'required',
             'driver' => 'required',
             'customer_id' => 'required',
-            'penerima' => 'required',
+            'pic' => 'required',
             'handphone' => 'required',
             'alamat' => 'required',
         ]);
@@ -82,11 +82,8 @@ class DeliveryOrderController extends Controller
         $data['jenis_do'] = 'SEWA';
         $data['status'] = 'DRAFT';
         $data['tanggal_pembuat'] = now();
-
-        // data kontrak
-        $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
-        $data['pembuat'] = $kontrak->pembuat;
-        
+        $data['pembuat'] = Auth::user()->id;
+     
         // save data do
         $check = DeliveryOrder::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
@@ -128,7 +125,7 @@ class DeliveryOrderController extends Controller
                 'jumlah' => $data['jumlah2'][$i],
                 'satuan' => $data['satuan2'][$i],
                 'jenis' => 'TAMBAHAN',
-                'detail_lokasi' => $data['detail_lokasi2'][$i]
+                'keterangan' => $data['keterangan2'][$i]
             ]);
 
             if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');

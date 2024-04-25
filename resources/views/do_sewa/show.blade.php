@@ -27,14 +27,20 @@
                                             <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') ?? $data->customer->nama }}" class="form-control" disabled>
                                             <input type="hidden" id="customer_id" name="customer_id" value="{{ old('customer_id') ?? $data->customer_id }}" class="form-control" disabled>
                                         </div>
+                                    </div>
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>PIC</label>
-                                            <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $data->penerima }}" class="form-control" disabled>
+                                            <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $data->pic }}" class="form-control" disabled>
                                         </div>
+                                    </div>
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Handphone</label>
                                             <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $data->handphone }}" class="form-control" disabled>
                                         </div>
+                                    </div>
+                                    <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Alamat</label>
                                             <textarea type="text" id="alamat" name="alamat" class="form-control" disabled>{{ old('alamat') ?? $data->alamat }}</textarea>
@@ -51,21 +57,15 @@
                                             <input type="text" id="no_do" name="no_do" value="{{ old('no_do') ?? $data->no_do }}" class="form-control" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <label>Tanggal Mulai</label>
-                                            <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') ?? $data->tanggal_mulai }}" class="form-control" disabled>
+                                            <label>Tanggal Kirim</label>
+                                            <input type="date" id="tanggal_kirim" name="tanggal_kirim" value="{{ old('tanggal_kirim') ?? $data->tanggal_kirim }}" class="form-control" disabled>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>No Kontrak</label>
-                                            <input type="text" id="no_sewa" name="no_sewa" value="{{ old('no_sewa') ?? $data->no_sewa }}" class="form-control"  disabled>
+                                            <input type="text" id="no_referensi" name="no_referensi" value="{{ old('no_referensi') ?? $data->no_referensi }}" class="form-control"  disabled>
                                         </div>
-                                        <div class="form-group">
-                                            <label>Tanggal Selesai</label>
-                                            <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') ?? $data->tanggal_selesai }}" class="form-control" disabled>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
                                         <div class="form-group">
                                             <label>Driver</label>
                                             <select id="driver_id" name="driver_id" class="form-control" disabled>
@@ -171,7 +171,7 @@
                                     </td>
                                     <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
                                     <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
-                                    <td><input type="number" name="detail_lokasi[]" id="detail_lokasi_0" class="form-control"></td>
+                                    <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
                                 </tr>
                                 @else
                                 @php
@@ -190,7 +190,7 @@
                                         </td>
                                         <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" disabled></td>
                                         <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" disabled></td>
-                                        <td><input type="text" name="detail_lokasi2[]" id="detail_lokasi2_{{ $i }}" class="form-control" value="{{ $produk->detail_lokasi }}" disabled></td>
+                                        <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" disabled></td>
                                     </tr>
                                 @endif 
                                 @php
