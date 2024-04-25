@@ -60,8 +60,8 @@
                                             <label for="lokasi_beli">Driver</label>
                                             <select id="lokasi_beli" name="lokasi_beli" class="form-control">
                                                 <option value=""> Pilih Nama Driver </option>
-                                                @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                                                @foreach ($karyawans as $karyawan)
+                                                <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -82,7 +82,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required>
+                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required disabled>
                                         </div>
                                         <div class="form-group">
                                             <label for="nama">Tanggal Kirim</label>
@@ -101,10 +101,10 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="sales">Pengirim</label>
-                                            <select id="sales" name="sales" class="form-control">
-                                                <option value="">Pilih Nama Pengirim</option>
-                                                @foreach ($karyawans as $karyawan)
-                                                <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
+                                            <select id="sales" name="sales" class="form-control" value="{{ $penjualans->id_customer}}">
+                                                <!-- <option value="">Pilih Nama Pengirim</option> -->
+                                                @foreach ($customers as $customer)
+                                                <option value="{{ $customer->id }}">{{ $customer->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -142,23 +142,52 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
-                                                <tr>
-                                                    <td>
-                                                        <select id="nama_produk" name="nama_produk[]" class="form-control" onchange="updateHargaSatuan(this)">
-                                                            <option value="">Pilih Produk</option>
-                                                            @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        <input type="hidden" name="kode_produk[]" style="display: none;">
-                                                        <input type="hidden" name="tipe_produk[]" style="display: none;">
-                                                        <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
-                                                    </td>
-                                                    <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
-                                                    <td><input type="text" name="unit_satuan[]" id="unit_satuan_0" class="form-control"></td>
-                                                    <td><input type="text" name="keterangan[]" id="keterangan_0" class="form-control"></td>
-                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                                </tr>
+                                                @if(count($penjualans->produk) < 1) <tr>
+                                                    <tr>
+                                                        <td>
+                                                            <select id="nama_produk" name="nama_produk[]" class="form-control" onchange="updateHargaSatuan(this)">
+                                                                <option value="">Pilih Produk</option>
+                                                                @foreach ($produkjuals as $produk)
+                                                                <option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            <input type="hidden" name="kode_produk[]" style="display: none;">
+                                                            <input type="hidden" name="tipe_produk[]" style="display: none;">
+                                                            <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
+                                                        </td>
+                                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
+                                                        <td><input type="text" name="unit_satuan[]" id="unit_satuan_0" class="form-control"></td>
+                                                        <td><input type="text" name="keterangan[]" id="keterangan_0" class="form-control"></td>
+                                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                    </tr>
+                                                    @else
+                                                    @php
+                                                    $i = 0;
+                                                    @endphp
+                                                    @foreach ($penjualans->produk as $produk)
+                                                    <tr id="row{{ $i }}">
+                                                        <td>
+                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control">
+                                                                <option value="">Pilih Produk</option>
+                                                                @foreach ($produkjuals as $pj)
+                                                                <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}"></td>
+                                                        <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ old('satuan.' . $i) ?? 'pcs' }}"></td>
+                                                        <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ old('detail_lokasi.' . $i) }}" required></td>
+                                                        @if ($i == 0)
+                                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                        @else
+                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                        @endif
+                                                        @php
+                                                        $i++;
+                                                        @endphp
+                                                    </tr>
+                                                    @endforeach
+                                                    @endif
                                             </tbody>
                                         </table>
                                     </div>
@@ -303,6 +332,7 @@
 </script>
 <script>
     var used = [1001, 1003, 1005];
+
     function generateDOP() {
         var dopPrefix = "DOP";
         var currentDate = new Date();
@@ -314,14 +344,13 @@
             nextDOP++;
         }
 
-        var generatedDOP = dopPrefix + year +month +day +nextDOP ;
+        var generatedDOP = dopPrefix + year + month + day + nextDOP;
 
-        document.getElementById('no_dop').value =generatedDOP;
+        document.getElementById('no_dop').value = generatedDOP;
     }
 
     generateDOP();
-
-    </script>
+</script>
 <script>
     // Function to update date to today's date
     function updateDate(element) {
