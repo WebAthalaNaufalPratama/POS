@@ -29,14 +29,17 @@ class DopenjualanController extends Controller
         return view('dopenjualan.index');
     }
 
-    public function create(Request $req, $penjualan)
+    public function create($penjualan)
     {
-        $penjualans = Penjualan::find($penjualan);
+        $penjualans = Penjualan::with('produk')->find($penjualan);
         $user = Auth::user();
         $lokasis = Lokasi::find($user);
         $karyawans = Karyawan::all();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
+        $customers = Customer::where('id', $penjualans->id_customer)->get();
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
+        $produkjuals = Produk_Jual::all();
 
-        return view('dopenjualan.create', compact('penjualans', 'karyawans', 'lokasis', 'produks'));
+        return view('dopenjualan.create', compact('penjualans', 'karyawans', 'lokasis', 'produks','customers', 'produks','produkjuals'));
     }
 }

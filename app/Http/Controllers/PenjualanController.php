@@ -127,7 +127,7 @@ class PenjualanController extends Controller
             $data['bukti_file'] = $filePath;
         }
         // dd($data);
-        $penjualan = Penjualan::create($req->all());
+        $penjualan = Penjualan::create($data);
 
         if ($penjualan) {
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
