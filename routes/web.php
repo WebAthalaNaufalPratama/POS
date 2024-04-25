@@ -244,7 +244,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'dopenjualan'], function() {
             Route::get('/', 'DopenjualanController@index')->name('dopenjualan.index');
-            Route::get('{dopenjualan}/create', 'DopenjualanController@create')->name('dopenjualan.create');
+            Route::get('{penjualan}/create', 'DopenjualanController@create')->name('dopenjualan.create');
             Route::post('/store', 'DopenjualanController@store')->name('dopenjualan.store');
             Route::get('/{dopenjualan}/show', 'DopenjualanController@show')->name('dopenjualan.show');
             Route::get('/{dopenjualan}/edit', 'DopenjualanController@edit')->name('dopenjualan.edit');
@@ -255,7 +255,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::group(['prefix' => 'pembayaran'], function() {
             Route::get('/', 'PembayaranController@index')->name('pembayaran.index');
             Route::get('/create', 'PembayaranController@create')->name('pembayaran.create');
-            Route::post('{pembayaran}/store', 'PembayaranController@store')->name('pembayaran.store');
+            Route::post('/store', 'PembayaranController@store')->name('pembayaran.store');
             Route::get('/{pembayaran}/show', 'PembayaranController@show')->name('pembayaran.show');
             Route::get('/{pembayaran}/edit', 'PembayaranController@edit')->name('pembayaran.edit');
             Route::patch('/{pembayaran}/update', 'PembayaranController@update')->name('pembayaran.update');

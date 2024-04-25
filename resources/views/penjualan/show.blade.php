@@ -364,41 +364,6 @@
                             </div>
                         </div>
 
-                        <!-- <div class="row justify-content-between">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="add-icon text-end">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBayar">add +</button>
-                                </div>
-                            </div>
-                        </div> -->
-
-                        <!-- <div class="row justify-content-around">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-1">
-                                <div class="form-row row">
-                                    <div class="mb-4">
-                                        <h5>Riwayat Pembayaran</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-
-                        <!-- <div class="row justify-content-between" id="delivery_order_section">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="row justify-content-between">
-                                    <a href="{{ route('dopenjualan.create') }}" class="btn btn-primary">Tambah Delivery Order</a>
-                                </div>
-                            </div>
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-1" id="delivery_order_section">
-                                <div class="form-row row">
-                                    <div class="mb-4">
-                                        <h5>Riwayat Delivery Order</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="{{ route('penjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
@@ -465,62 +430,62 @@
 
 <div class="modal fade" id="modalPerangkai" tabindex="-1" aria-labelledby="modalPerangkaiLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalPerangkaiLabel">Atur Perangkai</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalPerangkaiLabel">Atur Perangkai</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <form id="form_perangkai" action="{{ route('form.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="route" value="{{ request()->route()->getName() }},penjualan,{{ request()->route()->parameter('penjualan') }}">
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <label for="prdTerjual" class="col-form-label">Produk</label>
+                                <input type="text" class="form-control" name="produk_id" id="prdTerjual" readonly required>
+                            </div>
+                            <input type="hidden" name="prdTerjual_id" id="prdTerjual_id" value="">
+                            <div class="col-sm-4">
+                                <label for="jml_produk" class="col-form-label">Jumlah</label>
+                                <input type="number" class="form-control" name="jml_produk" id="jml_produk" readonly required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="no_form" class="col-form-label">No Form Perangkai</label>
+                        <input type="text" class="form-control" name="no_form" id="no_form" readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jenis_rangkaian" class="col-form-label">Jenis Rangkaian</label>
+                        <input type="text" class="form-control" name="jenis_rangkaian" id="jenis_rangkaian" value="Penjualan" readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggal" class="col-form-label">Tanggal</label>
+                        <input type="date" class="form-control" name="tanggal" id="add_tanggal" value="{{ date('Y-m-d') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jml_perangkai" class="col-form-label">Jumlah Perangkai</label>
+                        <input type="number" class="form-control" name="jml_perangkai" id="jml_perangkai" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="perangkai_id" class="col-form-label">Perangkai</label>
+                        <div id="div_perangkai" class="form-group">
+                            <select id="perangkai_id_0" name="perangkai_id[]" class="form-control" required>
+                                <option value="">Pilih Perangkai</option>
+                                @foreach ($perangkai as $item)
+                                <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+            </form>
         </div>
-        <div class="modal-body">
-          <form id="form_perangkai" action="{{ route('form.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="route" value="{{ request()->route()->getName() }},penjualan,{{ request()->route()->parameter('penjualan') }}">
-            <div class="mb-3">
-                <div class="row">
-                    <div class="col-sm-8">
-                    <label for="prdTerjual" class="col-form-label">Produk</label>
-                    <input type="text" class="form-control" name="produk_id" id="prdTerjual" readonly required>
-                </div>
-                <input type="hidden" name="prdTerjual_id" id="prdTerjual_id" value="">
-                <div class="col-sm-4">
-                    <label for="jml_produk" class="col-form-label">Jumlah</label>
-                    <input type="number" class="form-control" name="jml_produk" id="jml_produk" readonly required>
-                </div>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label for="no_form" class="col-form-label">No Form Perangkai</label>
-              <input type="text" class="form-control" name="no_form" id="no_form" readonly required>
-            </div>
-            <div class="mb-3">
-              <label for="jenis_rangkaian" class="col-form-label">Jenis Rangkaian</label>
-              <input type="text" class="form-control" name="jenis_rangkaian" id="jenis_rangkaian" value="Penjualan" readonly required>
-              </div>
-            <div class="mb-3">
-              <label for="tanggal" class="col-form-label">Tanggal</label>
-              <input type="date" class="form-control" name="tanggal" id="add_tanggal" value="{{ date('Y-m-d') }}" required>
-            </div>
-            <div class="mb-3">
-              <label for="jml_perangkai" class="col-form-label">Jumlah Perangkai</label>
-              <input type="number" class="form-control" name="jml_perangkai" id="jml_perangkai" required>
-            </div>
-            <div class="mb-3">
-                <label for="perangkai_id" class="col-form-label">Perangkai</label>
-                <div id="div_perangkai" class="form-group">
-                  <select id="perangkai_id_0" name="perangkai_id[]" class="form-control" required>
-                      <option value="">Pilih Perangkai</option>
-                      @foreach ($perangkai as $item)
-                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                      @endforeach
-                  </select>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer justify-content-center">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            <button type="submit" class="btn btn-primary">Simpan</button>
-        </div>
-    </form>
-      </div>
     </div>
 </div>
 
@@ -770,7 +735,7 @@
             getDataPerangkai(produk_id);
         });
 
-        function getDataPerangkai(produk_id){
+        function getDataPerangkai(produk_id) {
             var data = {
                 produk_id: produk_id,
             };
@@ -793,9 +758,9 @@
                         $(this).select2('destroy');
                         $(this).remove();
                     });
-                    if(response.perangkai.length > 0){
-                        for(var i = 0; i < response.perangkai.length; i++){
-                            var rowPerangkai = 
+                    if (response.perangkai.length > 0) {
+                        for (var i = 0; i < response.perangkai.length; i++) {
+                            var rowPerangkai =
                                 '<select id="perangkai_id_' + i + '" name="perangkai_id[]" class="form-control">' +
                                 '<option value="">Pilih Perangkai</option>' +
                                 '@foreach ($perangkai as $item)' +
@@ -826,9 +791,9 @@
                 $(this).select2('destroy');
                 $(this).remove();
             });
-            if(jumlah < 1) return 0;
-            for(var i = 0; i < jumlah; i++){
-                var rowPerangkai = 
+            if (jumlah < 1) return 0;
+            for (var i = 0; i < jumlah; i++) {
+                var rowPerangkai =
                     '<select id="perangkai_id_' + i + '" name="perangkai_id[]" class="form-control">' +
                     '<option value="">Pilih Perangkai</option>' +
                     '@foreach ($perangkai as $item)' +

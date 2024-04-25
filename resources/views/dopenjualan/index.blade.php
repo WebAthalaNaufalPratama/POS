@@ -9,9 +9,6 @@
                 <div class="page-title">
                     <h4>Produk Penjualan</h4>
                 </div>
-                <div class="page-btn">
-                    <a href="{{ route('dopenjualan.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Penjualan</a>
-                </div>
             </div>
         </div>
         <div class="card-body">
