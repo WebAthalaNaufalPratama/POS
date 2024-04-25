@@ -241,6 +241,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{form}/delete', 'FormPerangkaiController@destroy')->name('form.destroy');
         });
 
+        Route::group(['prefix' => 'do_sewa'], function() {
+            Route::get('/', 'DeliveryOrderController@index_sewa')->name('do_sewa.index');
+            Route::get('/create', 'DeliveryOrderController@create_sewa')->name('do_sewa.create');
+            Route::post('/store', 'DeliveryOrderController@store_sewa')->name('do_sewa.store');
+            Route::get('/{do_sewa}/show', 'DeliveryOrderController@show_sewa')->name('do_sewa.show');
+            Route::get('/{do_sewa}/edit', 'DeliveryOrderController@edit_sewa')->name('do_sewa.edit');
+            Route::patch('/{do_sewa}/update', 'DeliveryOrderController@update_sewa')->name('do_sewa.update');
+            Route::get('/{do_sewa}/delete', 'DeliveryOrderController@destroy_sewa')->name('do_sewa.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
