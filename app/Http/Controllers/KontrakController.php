@@ -128,14 +128,6 @@ class KontrakController extends Controller
                 if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
         }
-        // $activity = Activity::create([
-        //     'log_name' => 'Kontrak',
-        //     'description' => 'Data kontrak dibuat',
-        //     'subject_type' => Kontrak::class,
-        //     'subject_id' => $check->id,
-        //     'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
-        //     'causer_id' => Auth::id(),
-        // ]);
         return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
 

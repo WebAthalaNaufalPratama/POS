@@ -64,19 +64,22 @@ class Kontrak extends Model
         return $this->belongsTo(Promo::class);
     }
     
-    public function sales(){
+    public function data_sales(){
         return $this->belongsTo(Karyawan::class, 'sales', 'id');
     }
         
-    public function pembuat(){
+    public function data_pembuat(){
         return $this->belongsTo(Karyawan::class, 'pembuat', 'id');
     }
         
-    public function penyetuju(){
+    public function data_penyetuju(){
         return $this->belongsTo(Karyawan::class, 'penyetuju', 'id');
     }
         
-    public function pemeriksa(){
+    public function data_pemeriksa(){
         return $this->belongsTo(Karyawan::class, 'pemeriksa', 'id');
+    }
+    public function produk(){
+        return $this->hasMany(Produk_Terjual::class, 'no_sewa', 'no_kontrak');
     }
 }
