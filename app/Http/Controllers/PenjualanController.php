@@ -20,6 +20,7 @@ use App\Models\Rekening;
 use App\Models\Promo;
 use App\Models\Ongkir;
 use App\Models\Penjualan;
+use App\Models\Pembayaran;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -29,9 +30,27 @@ class PenjualanController extends Controller
 
     public function index()
     {
-        $penjualans = Penjualan::with('karyawan')->get();
+        $penjualans = Penjualan::with('karyawan')->orderBy('created_at', 'desc')->get();
 
-        return view('penjualan.index', compact('penjualans'));
+        $payments = Pembayaran::with('penjualan')->get();
+
+        $latestPayments = [];
+
+        foreach ($payments as $payment) {
+            $penjualanId = $payment->invoice_penjualan_id;
+
+            if (!isset($latestPayments[$penjualanId])) {
+                $latestPayments[$penjualanId] = $payment;
+            } else {
+                if ($payment->id > $latestPayments[$penjualanId]->id) {
+                    $latestPayments[$penjualanId] = $payment;
+                }
+            }
+        }
+
+        // dd($latestPayments);
+
+        return view('penjualan.index', compact('penjualans', 'latestPayments'));
     }
 
     public function create()
@@ -54,14 +73,18 @@ class PenjualanController extends Controller
             // dd($produks);
             $bankpens = Rekening::get();
             $Invoice = Penjualan::latest()->first();
-            $cekInvoice = substr($Invoice->no_invoice, -1);
+            if ($Invoice != null) {
+                $cekInvoice = substr($Invoice->no_invoice, -1);
+            } else {
+                $cekInvoice = 0;
+            }
             // $komponen = Kondisi::with('komponen')->get();
             // dd($komponen);
-            $kondisis =Kondisi::all();
+            $kondisis = Kondisi::all();
             $invoices = Penjualan::get();
         }
 
-        return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
+        return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices'));
     }
 
 
@@ -101,7 +124,7 @@ class PenjualanController extends Controller
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
             // dd($filePath);
-            $data['bukti_file'] = $file->getClientOriginalName();
+            $data['bukti_file'] = $filePath;
         }
         // dd($data);
         $penjualan = Penjualan::create($req->all());
@@ -146,55 +169,83 @@ class PenjualanController extends Controller
     {
         $data = Penjualan::find($penjualan);
         // dd($data);
-        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        if (!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
         $getProduks = Produk_Terjual::where('no_invoice', $data->no_invoice)->get();
         // dd($getProduks);
         $check = $data->delete();
-        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
-        if($getProduks){
+        if (!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
+        if ($getProduks) {
             $getProduks->each->delete();
         }
         foreach ($getProduks as $item) {
             $getKomponenProduks = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->get();
-            if($getKomponenProduks){
+            if ($getKomponenProduks) {
                 $getKomponenProduks->each->delete();
             }
         }
         return response()->json(['msg' => 'Data berhasil dihapus']);
     }
 
-    public function payment()
+    public function payment(Request $req, $penjualan)
     {
-
+        $produkjuals = Produk_Jual::all();
+        // dd($produkjuals);
+        $penjualans = Penjualan::find($penjualan);
+        $customers = Customer::where('id', $penjualans->id_customer)->get();
+        $karyawans = Karyawan::where('id', $penjualans->employee_id)->get();
+        $promos = Promo::where('id', $penjualans->promo_id)->get();
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
+        $Invoice = Pembayaran::latest()->first();
+        if ($Invoice != null) {
+            $cekInvoice = substr($Invoice->no_invoice_bayar, -1);
+        } else {
+            $cekInvoice = 0;
+        }
+        $pembayarans = Pembayaran::where('invoice_penjualan_id', $penjualan)->orderBy('created_at', 'desc')->get();
+        // dd($produks);
+        // dd($promos);
+        // $getProdukJual = Produk_Jual::find($penjualan);
+        // $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
+        $roles = Auth::user()->roles()->value('name');
+        $user = Auth::user()->value('id');
+        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
+        $lokasis = Lokasi::where('id', $lokasi)->get();
+        $rekenings = Rekening::get();
+        $ongkirs = Ongkir::get();
+        $bankpens = Rekening::get();
+        $Invoice = Penjualan::latest()->first();
+        $kondisis = Kondisi::all();
+        $invoices = Penjualan::get();
+        // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
+        return view('penjualan.payment', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
     }
 
     public function show(Request $req, $penjualan)
     {
+        $produkjuals = Produk_Jual::all();
+        // dd($produkjuals);
         $penjualans = Penjualan::find($penjualan);
+        $customers = Customer::where('id', $penjualans->id_customer)->get();
+        $karyawans = Karyawan::where('id', $penjualans->employee_id)->get();
+        $promos = Promo::where('id', $penjualans->promo_id)->get();
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
+        // dd($produks);
+        // dd($promos);
+        // $getProdukJual = Produk_Jual::find($penjualan);
+        // $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
         $roles = Auth::user()->roles()->value('name');
-        if ($roles == 'admin' || $roles == 'kasir') {
-            $user = Auth::user()->value('id');
-            $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
-            // dd($karyawans);
-            $customers = Customer::where('lokasi_id', $lokasi)->get();
-            $lokasis = Lokasi::where('id', $lokasi)->get();
-            $rekenings = Rekening::get();
-            $ongkirs = Ongkir::get();
-            $karyawans = Karyawan::where('lokasi_id', $lokasi)->get();
-            $promos = Promo::where(function ($query) use ($lokasi) {
-                $query->where('lokasi_id', $lokasi)
-                    ->orWhere('lokasi_id', 'Semua');
-            })->get();
-            $produks = Produk_Jual::with('komponen.kondisi')->get();
-            // dd($produks);
-            $bankpens = Rekening::get();
-            $Invoice = Penjualan::latest()->first();
-            $cekInvoice = substr($Invoice->no_invoice, -1);
-            // $komponen = Kondisi::with('komponen')->get();
-            // dd($komponen);
-            $kondisis =Kondisi::all();
-            $invoices = Penjualan::get();
-            return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
-        return view('penjualan.show', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
+        $user = Auth::user()->value('id');
+        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
+        $lokasis = Lokasi::where('id', $lokasi)->get();
+        $rekenings = Rekening::get();
+        $ongkirs = Ongkir::get();
+        $bankpens = Rekening::get();
+        $Invoice = Penjualan::latest()->first();
+        $kondisis = Kondisi::all();
+        $invoices = Penjualan::get();
+        // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
+        return view('penjualan.show', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai'));
     }
 }

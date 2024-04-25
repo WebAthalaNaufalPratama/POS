@@ -19,6 +19,3 @@ use App \Http\Controllers\PenjualanController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-
-Route::get('pengabdian', [PenjualanController::class, 'pengabdian']);

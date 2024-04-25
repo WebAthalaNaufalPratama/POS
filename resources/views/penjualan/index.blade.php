@@ -24,7 +24,7 @@
                                 <th>Sales</th>
                                 <th>Tanggal Invoice</th>
                                 <th>Jatuh Tempo</th>
-                                <!-- <th>Status Bayar</th> -->
+                                <th>Status Bayar</th>
                                 <th>Total Tagihan</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -38,14 +38,20 @@
                                 <td>{{ $penjualan->karyawan->nama }}</td>
                                 <td>{{ $penjualan->tanggal_invoice }}</td>
                                 <td>{{ $penjualan->jatuh_tempo }}</td>
-                                <!-- <td>{{ $penjualan->status_bayar }}</td> -->
+                                <td>
+                                    @if(isset($latestPayments[$penjualan->id]))
+                                    {{ $latestPayments[$penjualan->id]->status_bayar }}
+                                    @else
+                                    Belum ada pembayaran
+                                    @endif
+                                </td>
                                 <td>{{ $penjualan->total_tagihan }}</td>
                                 <td>{{ $penjualan->status }}</td>
                                 <td>
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Show</a>
+                                            <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Perangkai</a>
                                             <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}">Pembayaran</a>
                                             <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a>
                                         </div>

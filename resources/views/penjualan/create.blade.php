@@ -155,7 +155,7 @@
                                                     <th>Jumlah</th>
                                                     <th>Diskon</th>
                                                     <th>Harga Total</th>
-                                                    <th>PIC Perangkai</th>
+                                                    <!-- <th>PIC Perangkai</th> -->
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -215,7 +215,7 @@
                                                         </div> -->
                                                     </td>
                                                     <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
-                                                    <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td>
+                                                    <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                     <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                 </tr>
                                             </tbody>
@@ -348,16 +348,16 @@
                             </div>
                         </div>
 
-                        <div class="row justify-content-between">
+                        <!-- <div class="row justify-content-between">
                             <div class="col-md-12">
                                 <label for=""></label>
                                 <div class="add-icon text-end">
                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBayar">add +</button>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="row justify-content-around">
+                        <!-- <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-1">
                                 <div class="form-row row">
                                     <div class="mb-4">
@@ -365,9 +365,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
-                        <div class="row justify-content-between" id="delivery_order_section">
+                        <!-- <div class="row justify-content-between" id="delivery_order_section">
                             <div class="col-md-12">
                                 <label for=""></label>
                                 <div class="row justify-content-between">
@@ -381,7 +381,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
@@ -741,7 +741,6 @@
                                 </div>
                             </td>
                             <td><input type="number" name="harga_total[]" id="harga_total_${i}" class="form-control" readonly></td>
-                            <td><button type="button" name="pic[]" id="pic_${i}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_${i}" onclick="copyDataToModal(${i})">PIC Perangkai</button></td>
                             <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
                         </tr>`;
 
@@ -828,7 +827,7 @@
             calculateTotal(0);
         });
 
-        function addModal(){
+        function addModal() {
             let i = $('.modal').length;
         }
         $('#pic_0').on('click', function() {
@@ -893,20 +892,20 @@
 
 
 
-        $('#delivery_order_section').show();
+        // $('#delivery_order_section').show();
 
-        $('#distribusi').change(function() {
-            if ($(this).val() === 'Diambil') {
-                $('#delivery_order_section').hide();
-            } else {
-                $('#delivery_order_section').show();
-            }
-        });
+        // $('#distribusi').change(function() {
+        //     if ($(this).val() === 'Diambil') {
+        //         $('#delivery_order_section').hide();
+        //     } else {
+        //         $('#delivery_order_section').show();
+        //     }
+        // });
 
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
             var total_transaksi = $('#total_tagihan').val();
-            console.log(total_transaksi);
+            // console.log(total_transaksi);
             var produk = [];
             var tipe_produk = [];
             $('select[id^="nama_produk_"]').each(function() {
@@ -959,7 +958,7 @@
             var ppn = $(this).val();
             $('#persen_ppn').prop('readonly', true);
             var subtotal = parseFloat($('#sub_total').val()) || 0;
-            var hitungppn = 11 * subtotal / 100;
+            var hitungppn = (11 * subtotal) / 100;
             console.log(hitungppn);
 
             if (ppn === "include") {
