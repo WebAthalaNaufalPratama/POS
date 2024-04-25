@@ -348,40 +348,6 @@
                             </div>
                         </div>
 
-                        <!-- <div class="row justify-content-between">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="add-icon text-end">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBayar">add +</button>
-                                </div>
-                            </div>
-                        </div> -->
-
-                        <!-- <div class="row justify-content-around">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-1">
-                                <div class="form-row row">
-                                    <div class="mb-4">
-                                        <h5>Riwayat Pembayaran</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-
-                        <!-- <div class="row justify-content-between" id="delivery_order_section">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="row justify-content-between">
-                                    <a href="{{ route('dopenjualan.create') }}" class="btn btn-primary">Tambah Delivery Order</a>
-                                </div>
-                            </div>
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-1" id="delivery_order_section">
-                                <div class="form-row row">
-                                    <div class="mb-4">
-                                        <h5>Riwayat Delivery Order</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>

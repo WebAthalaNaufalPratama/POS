@@ -14,7 +14,7 @@ class AddKeteranganColumnToProdukTerjualsTable extends Migration
     public function up()
     {
         Schema::table('produk_terjuals', function (Blueprint $table) {
-            $table->string('keterangan')->nullable()->after('satuan');
+            
         });
     }
 

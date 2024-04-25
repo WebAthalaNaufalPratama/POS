@@ -15,6 +15,8 @@ class AddColumnToProdukTerjualTable extends Migration
     {
         Schema::table('produk_terjuals', function (Blueprint $table) {
             $table->string('satuan')->nullable()->after('jumlah');
+            $table->string('keterangan')->nullable()->after('satuan');
+            $table->string('jenis')->nullable()->after('keterangan');
             $table->string('detail_lokasi')->nullable()->after('jenis');
             $table->string('harga')->nullable()->change();
             $table->string('harga_jual')->nullable()->change();
