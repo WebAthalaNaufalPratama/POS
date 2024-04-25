@@ -202,7 +202,7 @@ class PenjualanController extends Controller
         } else {
             $cekInvoice = 0;
         }
-        $pembayarans = Pembayaran::where('invoice_penjualan_id', $penjualan)->orderBy('created_at', 'desc')->get();
+        $pembayarans = Pembayaran::with('rekening')->where('invoice_penjualan_id', $penjualan)->orderBy('created_at', 'desc')->get();
         // dd($produks);
         // dd($promos);
         // $getProdukJual = Produk_Jual::find($penjualan);

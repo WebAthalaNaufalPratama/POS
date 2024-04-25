@@ -46,13 +46,8 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="nama_customer">Penerima</label>
-                                            <select id="nama_customer" name="nama_customer" class="form-control">
-                                                <option value="">Pilih Nama Penerima</option>
-                                                @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}" data-point="{{ $customer->poin_loyalty }}" data-hp="{{ $customer->handphone }}">{{ $customer->nama }}</option>
-                                                @endforeach
-                                            </select>
+                                            <label for="penerima">Penerima</label>
+                                            <input type="text" class="form-control" id="penerima" name="penerima" placeholder="Masukan Nama Penerima" value="" required>
                                         </div>
                                     </div>
 
@@ -74,7 +69,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="nama">Alamat</label>
-                                            <input type="text" class="form-control" id="nohandphone" name="nohandphone" placeholder="Nomor Handphone" value="" required>
+                                            <textarea type="text" class="form-control" id="alamat" name="alamat" placeholder="Alamat" value="" required></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -87,7 +82,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
+                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="nama">Tanggal Kirim</label>
