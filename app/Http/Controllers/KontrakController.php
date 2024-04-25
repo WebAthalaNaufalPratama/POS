@@ -203,8 +203,6 @@ class KontrakController extends Controller
             'status' => 'required',
             'sales' => 'required',
             'rekening_id' => 'required',
-            'tanggal_sales' => 'required',
-            'tanggal_pembuat' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -213,6 +211,7 @@ class KontrakController extends Controller
         $dataKontrak = Kontrak::find($kontrak);
         $data['lokasi_id'] = 1;
         $data['pembuat'] = $dataKontrak->pembuat;
+        $data['tanggal_pembuat'] = now();
 
         // save data kontrak
         $check = Kontrak::find($kontrak)->update($data);

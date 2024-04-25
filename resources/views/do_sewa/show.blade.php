@@ -235,22 +235,27 @@
                             </table>
                         </div>
                         <div class="col-md-4 border rounded mt-3 pt-3">
+                            <form action="{{ route('do_sewa.update', ['do_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('patch')
                             <div class="custom-file-container" data-upload-id="myFirstImage">
                                 <label>Bukti Kirim (Single File) <a href="javascript:void(0)" class="custom-file-container__image-clear" title="Clear Image">clear</a></label>
                                 <label class="custom-file-container__custom-file">
-                                <input type="file" class="custom-file-container__custom-file__custom-file-input" accept="image/*">
-                                <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
-                                <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                </label>
-                                <div class="custom-file-container__image-preview"></div>
+                                        <input type="file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
+                                        <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
+                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                    </label>
+                                    <div class="custom-file-container__image-preview"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="text-end mt-3">
-                <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
-            </div>
+                <div class="text-end mt-3">
+                    <button class="btn btn-primary" type="submit">Upload File</button>
+                    <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
+                </div>
+            </form>
             </div>
         </div>
     </div>
@@ -279,7 +284,7 @@
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
                 i++;
-            })
+            });
             $('#add2').click(function(){
                 var newRow = '<tr id="row2'+i+'"><td>' + 
                                 '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
@@ -296,7 +301,7 @@
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();
                 i++;
-            })
+            });
         })
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
@@ -307,7 +312,6 @@
             $('#row2'+button_id+'').remove();
         });
         $('#driver_id').on('change', function() {
-            console.log('fe')
             var nama_driver = $("#driver_id option:selected").text();
             var val_driver = $("#driver_id option:selected").val();
             if(val_driver != ""){

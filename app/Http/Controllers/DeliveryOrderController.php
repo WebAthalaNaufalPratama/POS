@@ -187,9 +187,22 @@ class DeliveryOrderController extends Controller
      * @param  \App\Models\DeliveryOrder  $deliveryOrder
      * @return \Illuminate\Http\Response
      */
-    public function update_sewa(Request $request, DeliveryOrder $deliveryOrder)
+    public function update_sewa(Request $req, $deliveryOrder)
     {
-        //
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
+            $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('bukti_do_sewa', $fileName, 'public');
+            $data['file'] = $filePath;
+
+            // update bukti DO
+            $do = DeliveryOrder::find($deliveryOrder);
+            $do->file = $data['file'];
+            $do->update();
+            return redirect()->back()->with('success', 'File tersimpan');
+        } else {
+            return redirect()->back()->with('fail', 'Gagal menyimpan file');
+        }
     }
 
     /**
@@ -198,7 +211,7 @@ class DeliveryOrderController extends Controller
      * @param  \App\Models\DeliveryOrder  $deliveryOrder
      * @return \Illuminate\Http\Response
      */
-    public function destroy_sewa(DeliveryOrder $deliveryOrder)
+    public function destroy_sewa($deliveryOrder)
     {
         //
     }
