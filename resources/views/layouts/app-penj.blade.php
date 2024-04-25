@@ -1,36 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=0"
+        />
+        <meta name="description" content="POS - Bootstrap Admin Template" />
+        <meta
+            name="keywords"
+            content="admin, estimates, bootstrap, business, corporate, creative, management, minimal, modern,  html5, responsive"
+        />
+        <meta name="author" content="Dreamguys - Bootstrap Admin Template" />
+        <meta name="robots" content="noindex, nofollow" />
+        <title>Dreams Pos admin template</title>
 
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-<meta name="description" content="POS - Bootstrap Admin Template">
-<meta name="keywords" content="admin, estimates, bootstrap, business, corporate, creative, management, minimal, modern,  html5, responsive">
-<meta name="author" content="Dreamguys - Bootstrap Admin Template">
-<meta name="robots" content="noindex, nofollow">
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Vonflorist</title>
+        <link
+            rel="shortcut icon"
+            type="image/x-icon"
+            href="/assets/img/favicon.jpg"
+        />
 
-  <link rel="shortcut icon" type="image/x-icon" href="/assets/img/favicon.jpg">
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
 
-  <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+        <link
+            rel="stylesheet"
+            href="/assets/plugins/twitter-bootstrap-wizard/form-wizard.css"
+        />
 
-  <link rel="stylesheet" href="/assets/css/animate.css">
+        <link
+            rel="stylesheet"
+            href="/assets/plugins/fontawesome/css/fontawesome.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="/assets/plugins/fontawesome/css/all.min.css"
+        />
 
-  <link rel="stylesheet" href="/assets/plugins/select2/css/select2.min.css" />
-
-  <link rel="stylesheet" href="/assets/plugins/toastr/toatr.css" />
-
-  <link rel="stylesheet" href="/assets/css/dataTables.bootstrap4.min.css">
-
-  <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
-  <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
-
-  <link rel="stylesheet" href="/assets/css/style.css">
-</head>
-
-<body>
-  <div id="global-loader">
+        <link rel="stylesheet" href="/assets/css/style.css" />
+    </head>
+    <body>
+    <div id="global-loader">
     <div class="whirly-loader"> </div>
   </div>
 
@@ -225,72 +235,32 @@
 
     @include('layouts.partials.sidebar')
 
-    <div class="page-wrapper">
-      <div class="content">
-        @yield('content')
-      </div>
-    </div>
+            <div class="page-wrapper cardhead">
+                <div class="content container-fluid">
+                        @yield('content')
+                </div>
+            </div>
+        </div>
 
-    <script src="/assets/js/jquery-3.6.0.min.js"></script>
+        <script src="/assets/js/jquery-3.6.0.min.js"></script>
 
-    <script src="/assets/js/feather.min.js"></script>
+        <script src="/assets/js/feather.min.js"></script>
 
-    <script src="/assets/js/jquery.slimscroll.min.js"></script>
+        <script src="/assets/js/jquery.slimscroll.min.js"></script>
 
-    <script src="/assets/js/jquery.dataTables.min.js"></script>
-    <script src="/assets/js/dataTables.bootstrap4.min.js"></script>
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
 
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+        <script src="/assets/plugins/twitter-bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script>
+        <script src="/assets/plugins/twitter-bootstrap-wizard/prettify.js"></script>
+        <script src="/assets/plugins/twitter-bootstrap-wizard/form-wizard.js"></script>
 
-    <script src="/assets/plugins/select2/js/select2.min.js"></script>
-    <script src="/assets/plugins/select2/js/custom-select.js"></script>
+        <script src="/assets/js/script.js"></script>
+        <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script src="/assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
-    <script src="/assets/plugins/sweetalert/sweetalerts.min.js"></script>
 
-    <script src="/assets/plugins/toastr/toastr.js"></script>
-    <script src="/assets/plugins/toastr/toastr.min.js"></script>
+        @section("scripts")
 
-    <script src="/assets/plugins/apexchart/apexcharts.min.js"></script>
-    <script src="/assets/plugins/apexchart/chart-data.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <script src="/assets/plugins/fileupload/fileupload.min.js"></script>
-
-    <script src="/assets/js/script.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function() {
-        let sessionData = @json(session()->all());
-        @if(session('fail'))
-        toastr.error(sessionData.fail, {
-          closeButton: true,
-          tapToDismiss: false,
-          rtl: false,
-          progressBar: true
-        });
-        @endif
-        @if(session('success'))
-        toastr.success(sessionData.success, {
-          closeButton: true,
-          tapToDismiss: false,
-          rtl: false,
-          progressBar: true
-        });
-        @endif
-        @if(session('warning'))
-        toastr.warning(sessionData.warning, {
-          closeButton: true,
-          tapToDismiss: false,
-          rtl: false,
-          progressBar: true
-        });
-        @endif
-      });
-    </script>
-
-    @section("scripts")
-
-    @show
-</body>
-
+        @show
+    </body>
 </html>

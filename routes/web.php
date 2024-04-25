@@ -220,6 +220,17 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{Permission}/update', 'PermissionsController@update')->name('permissions.update');
             Route::get('/{Permission}/delete', 'PermissionsController@destroy')->name('permissions.destroy');
         });
+        
+        Route::group(['prefix' => 'penjualan'], function() {
+            Route::get('/', 'PenjualanController@index')->name('penjualan.index');
+            Route::get('/create', 'PenjualanController@create')->name('penjualan.create');
+            Route::post('/store', 'PenjualanController@store')->name('penjualan.store');
+            Route::get('/{penjualan}/show', 'PenjualanController@show')->name('penjualan.show');
+            Route::get('/{penjualan}/edit', 'PenjualanController@edit')->name('penjualan.edit');
+            Route::get('/{penjualan}/payment', 'PenjualanController@payment')->name('penjualan.payment');
+            Route::patch('/{penjualan}/update', 'PenjualanController@update')->name('penjualan.update');
+            Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
+        });
 
         Route::group(['prefix' => 'kontrak'], function() {
             Route::get('/', 'KontrakController@index')->name('kontrak.index');
@@ -229,6 +240,26 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/edit', 'KontrakController@edit')->name('kontrak.edit');
             Route::patch('/{kontrak}/update', 'KontrakController@update')->name('kontrak.update');
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
+        });
+
+        Route::group(['prefix' => 'dopenjualan'], function() {
+            Route::get('/', 'DopenjualanController@index')->name('dopenjualan.index');
+            Route::get('{dopenjualan}/create', 'DopenjualanController@create')->name('dopenjualan.create');
+            Route::post('/store', 'DopenjualanController@store')->name('dopenjualan.store');
+            Route::get('/{dopenjualan}/show', 'DopenjualanController@show')->name('dopenjualan.show');
+            Route::get('/{dopenjualan}/edit', 'DopenjualanController@edit')->name('dopenjualan.edit');
+            Route::patch('/{dopenjualan}/update', 'DopenjualanController@update')->name('dopenjualan.update');
+            Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
+        });
+
+        Route::group(['prefix' => 'pembayaran'], function() {
+            Route::get('/', 'PembayaranController@index')->name('pembayaran.index');
+            Route::get('/create', 'PembayaranController@create')->name('pembayaran.create');
+            Route::post('{pembayaran}/store', 'PembayaranController@store')->name('pembayaran.store');
+            Route::get('/{pembayaran}/show', 'PembayaranController@show')->name('pembayaran.show');
+            Route::get('/{pembayaran}/edit', 'PembayaranController@edit')->name('pembayaran.edit');
+            Route::patch('/{pembayaran}/update', 'PembayaranController@update')->name('pembayaran.update');
+            Route::get('/{pembayaran}/delete', 'PembayaranController@destroy')->name('pembayaran.destroy');
         });
 
         Route::group(['prefix' => 'form'], function() {

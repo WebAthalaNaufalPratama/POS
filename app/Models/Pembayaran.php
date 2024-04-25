@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Customer extends Model
+class Pembayaran extends Model
 {
     use HasFactory;
 
@@ -13,6 +13,6 @@ class Customer extends Model
 
     public function penjualan()
     {
-        return $this->hasMany(Penjualan::class);
+        return $this->belongsTo(Penjualan::class, 'invoice_penjualan_id');
     }
 }

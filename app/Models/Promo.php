@@ -16,6 +16,10 @@ class Promo extends Model
     {
         return $this->belongsTo(Lokasi::class, 'lokasi_id');
     }
+    public function penjualan()
+    {
+        return $this->hasMany(Penjualan::class);
+    }
     public function free_produk()
     {
         return $this->belongsTo(Produk_Jual::class, 'diskon_free_produk', 'kode');
@@ -28,4 +32,5 @@ class Promo extends Model
     {
         return $this->belongsTo(Tipe_Produk::class, 'ketentuan_tipe_produk', 'id');
     }
+    
 }

@@ -14,4 +14,9 @@ class Ongkir extends Model
     public function lokasi(){
         return $this->belongsTo(Lokasi::class);
     }
+
+    public function penjualan()
+    {
+        return $this->hasMany(Penjualan::class);
+    }
 }

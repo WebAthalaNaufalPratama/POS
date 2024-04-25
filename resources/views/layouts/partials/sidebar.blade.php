@@ -36,6 +36,15 @@
                         <li><a href="{{ route('do_sewa.index') }}" class="{{ request()->is('do_sewa*') ? 'active' : '' }}">Delivery Order</a></li>
                     </ul>
                 </li>
+                <li class="submenu">
+
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice Penjualan</a></li>
+                        <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order Penjualan</a></li>
+                        <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
+                    </ul>
+                </li>
                 {{-- <li class="submenu">
 <a href="javascript:void(0);"><img src="/assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
 <ul>

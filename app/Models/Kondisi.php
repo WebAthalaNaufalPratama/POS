@@ -10,4 +10,9 @@ class Kondisi extends Model
 {
     use HasFactory, SoftDeletes;
     protected $guarded = ['id'];
+
+    public function komponen(){
+        return $this->hasMany(Komponen_Produk_Jual::class, 'kondisi', 'id');
+    }
+
 }
