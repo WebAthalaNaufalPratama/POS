@@ -17,6 +17,8 @@ use App\Models\Karyawan;
 use App\Models\Rekening;
 use App\Models\Promo;
 use App\Models\Ongkir;
+use App\Models\Penjualan;
+use App\Models\Produk_Terjual;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -27,27 +29,14 @@ class DopenjualanController extends Controller
         return view('dopenjualan.index');
     }
 
-    public function create()
+    public function create(Request $req, $penjualan)
     {
-        $roles = Auth::user()->roles()->value('name');
-        if($roles == 'admin' || $roles == 'kasir')
-        {
-            $user = Auth::user()->value('id');
-            $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
-            // dd($karyawans);
-            $customers = Customer::where('lokasi_id', $lokasi)->get();
-            $lokasis = Lokasi::where('id', $lokasi)->get();
-            $rekenings = Rekening::get();
-            $ongkirs = Ongkir::get();
-            $karyawans = Karyawan::where('lokasi_id', $lokasi)->get();        
-            $promos = Promo::where(function($query) use ($lokasi) {
-                $query->where('lokasi_id', $lokasi)
-                      ->orWhere('lokasi_id', 'Semua');
-            })->get();
-            $produks = Produk_Jual::get();
-            $bankpens = Rekening::get();
-        }
+        $penjualans = Penjualan::find($penjualan);
+        $user = Auth::user();
+        $lokasis = Lokasi::find($user);
+        $karyawans = Karyawan::all();
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
 
-        return view('dopenjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens'));
+        return view('dopenjualan.create', compact('penjualans', 'karyawans', 'lokasis', 'produks'));
     }
 }

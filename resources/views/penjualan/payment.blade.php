@@ -378,64 +378,47 @@
                                 <div class="form-row row">
                                     <div class="mb-4">
                                         <h5>Riwayat Pembayaran</h5>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table datanew">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>No</th>
+                                                            <th>No Invoice Bayar</th>
+                                                            <th>Nominal</th>
+                                                            <th>Rekening</th>
+                                                            <th>Tanggal_Bayar</th>
+                                                            <th>Status Bayar</th>
+                                                            <th>Aksi</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($pembayarans as $pembayaran)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>{{ $pembayaran->no_invoice_bayar }}</td>
+                                                            <td>{{ $pembayaran->nominal }}</td>
+                                                            <td>{{ $pembayaran->rekening->bank }}</td>
+                                                            <td>{{ $pembayaran->tanggal_bayar }}</td>
+                                                            <td>{{ $pembayaran->status_bayar }}</td>
+                                                            <td>
+                                                                <div class="dropdown">
+                                                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
+                                                                    <div class="dropdown-menu">
+                                                                        <a class="dropdown-item" href="{{ route('pembayaran.show', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
+                                                                        <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $pembayaran->id }})">Delete</a>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table datanew">
-                                    <thead>
-                                        <tr>
-                                            <th>No</th>
-                                            <th>No Invoice Bayar</th>
-                                            <th>Nominal</th>
-                                            <th>Rekening</th>
-                                            <th>Tanggal_Bayar</th>
-                                            <th>Status Bayar</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($pembayarans as $pembayaran)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $pembayaran->no_invoice_bayar }}</td>
-                                            <td>{{ $pembayaran->nominal }}</td>
-                                            <td>{{ $pembayaran->rekening_id }}</td>
-                                            <td>{{ $pembayaran->tanggal_bayar }}</td>
-                                            <td>{{ $pembayaran->status_bayar }}</td>
-                                            <td>
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="{{ route('pembayaran.show', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
-                                                        <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $pembayaran->id }})">Delete</a>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- <div class="row justify-content-between" id="delivery_order_section">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="row justify-content-between">
-                                    <a href="{{ route('dopenjualan.create') }}" class="btn btn-primary">Tambah Delivery Order</a>
-                                </div>
-                            </div>
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-1" id="delivery_order_section">
-                                <div class="form-row row">
-                                    <div class="mb-4">
-                                        <h5>Riwayat Delivery Order</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
@@ -978,9 +961,11 @@
         });
 
         var sisaBayar = {{ $penjualans->sisa_bayar }};
+        // console.log(sisaBayar);
 
         $('#nominal').on('input', function() {
             var inputNominal = $(this).val();
+
             if (parseInt(inputNominal) > sisaBayar) {
                 alert('Nominal pembayaran tidak boleh lebih dari sisa bayar!');
                 $(this).val(sisaBayar);

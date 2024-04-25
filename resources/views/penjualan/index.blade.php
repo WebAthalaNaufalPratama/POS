@@ -26,6 +26,7 @@
                                 <th>Jatuh Tempo</th>
                                 <th>Status Bayar</th>
                                 <th>Total Tagihan</th>
+                                <th>Sisa Bayar</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -46,6 +47,7 @@
                                     @endif
                                 </td>
                                 <td>{{ $penjualan->total_tagihan }}</td>
+                                <td>{{ $penjualan->sisa_bayar }}</td>
                                 <td>{{ $penjualan->status }}</td>
                                 <td>
                                     <div class="dropdown">
@@ -53,6 +55,7 @@
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Perangkai</a>
                                             <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}">Pembayaran</a>
+                                            <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}">Delivery Order</a>
                                             <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a>
                                         </div>
                                     </div>

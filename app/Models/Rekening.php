@@ -20,4 +20,10 @@ class Rekening extends Model
     {
         return $this->hasMany(Penjualan::class);
     }
+
+    public function pembayaran()
+    {
+        return $this->hasMany(Pembayaran::class);
+    }
+
 }
