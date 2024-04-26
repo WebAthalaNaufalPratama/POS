@@ -21,7 +21,8 @@
                     <th>No Kontrak</th>
                     <th>Pelanggan</th>
                     <th>PIC</th>
-                    <th>Tanggal</th>
+                    <th>Driver</th>
+                    <th>Tanggal Kirim</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -34,6 +35,7 @@
                             <td>{{ $item->no_referensi }}</td>
                             <td>{{ $item->customer->nama }}</td>
                             <td>{{ $item->pic }}</td>
+                            <td>{{ $item->data_driver->nama }}</td>
                             <td>{{ $item->tanggal_kirim }}</td>
                             <td>{{ $item->status }}</td>
                             <td>
