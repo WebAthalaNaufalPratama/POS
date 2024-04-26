@@ -239,14 +239,15 @@
                             @csrf
                             @method('patch')
                             <div class="custom-file-container" data-upload-id="myFirstImage">
-                                <label>Bukti Kirim (Single File) <a href="javascript:void(0)" class="custom-file-container__image-clear" title="Clear Image">clear</a></label>
+                                <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
+                                </label>
                                 <label class="custom-file-container__custom-file">
-                                        <input type="file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
-                                        <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
-                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                    </label>
-                                    <div class="custom-file-container__image-preview"></div>
-                                </div>
+                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
+                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                </label>
+                                <span class="text-danger">max 2mb</span>
+                                <img id="preview" src="{{ $data->file ? '/storage/' . $data->file : '' }}" alt="your image" />
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -266,6 +267,9 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
+            if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
+            }
             $('[id^=produk], #driver_id').select2();
             var i = '{{ count($data->produk) }}';
             $('#add').click(function(){
@@ -320,5 +324,29 @@
                 $('#driver').text('-')
             }
         });
+        $('#bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        };
     </script>
 @endsection
