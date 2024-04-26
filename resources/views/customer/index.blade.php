@@ -170,7 +170,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_tipe_customer, #edit_tipe_customer').select2()
+        $('#add_tipe, #edit_tipe').select2()
     });
 
     function getData(id){

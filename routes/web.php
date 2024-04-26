@@ -47,6 +47,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('checkPromo', 'PromoController@checkPromo')->name('checkPromo');
         Route::get('getPromo', 'PromoController@getPromo')->name('getPromo');
         Route::get('getProdukTerjual', 'ProdukTerjualController@getProdukTerjual')->name('getProdukTerjual');
+        Route::get('uploadFileDO', 'DeliveryOrderController@uploadFile')->name('uploadFileDO');
 
         /**
          * User Routes

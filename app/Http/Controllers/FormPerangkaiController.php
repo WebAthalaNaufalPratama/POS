@@ -14,9 +14,15 @@ class FormPerangkaiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        //
+        $query = FormPerangkai::whereHas('produk_terjual');
+        if($req->jenis_rangkaian){
+            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->get();
+        } else {
+            $data = $query->get();
+        }
+        return view('form_sewa.index', compact('data'));
     }
 
     /**

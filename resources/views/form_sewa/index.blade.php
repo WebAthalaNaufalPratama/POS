@@ -7,10 +7,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Kontrak</h4>
-                </div>
-                <div class="page-btn">
-                    <a href="{{ route('kontrak.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kontrak</a>
+                    <h4>Form Perangkai</h4>
                 </div>
             </div>
         </div>
@@ -20,35 +17,30 @@
                 <thead>
                 <tr>
                     <th>No</th>
+                    <th>No From</th>
                     <th>No Kontrak</th>
-                    <th>Pelanggan</th>
-                    <th>PIC</th>
-                    <th>Handphone</th>
-                    <th>Masa Kontrak</th>
-                    <th>Rentang Tanggal</th>
-                    <th>Total Biaya</th>
+                    <th>Produk</th>
+                    <th>Perangkai</th>
+                    <th>Tanggal Dirangkai</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($kontraks as $kontrak)
+                    @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $kontrak->no_kontrak }}</td>
-                            <td>{{ $kontrak->customer->nama }}</td>
-                            <td>{{ $kontrak->pic }}</td>
-                            <td>{{ $kontrak->handphone }}</td>
-                            <td>{{ $kontrak->masa_sewa }} bulan</td>
-                            <td>{{ \Carbon\Carbon::parse($kontrak->tanggal_mulai)->format('d-m-Y')}} - {{ \Carbon\Carbon::parse($kontrak->tanggal_selesai)->format('d-m-Y') }}</td>
-                            <td>{{ $kontrak->total_harga }}</td>
+                            <td>{{ $item->no_form ?? '-' }}</td>
+                            <td>{{ $item->produk_terjual->no_sewa ?? '-' }}</td>
+                            <td>{{ $item->produk_terjual->produk->nama ?? '-' }}</td>
+                            <td>{{ $item->perangkai->nama ?? '-' }}</td>
+                            <td>{{ $item->tanggal ?? '-' }}</td>
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('do_sewa.create', ['kontrak' => $kontrak->id]) }}">Delivery Order</a>
-                                        <a class="dropdown-item" href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}">Edit</a>
-                                        <a class="dropdown-item" href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}">Detail</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $kontrak->id }})">Delete</a>
+                                        {{-- <a class="dropdown-item" href="{{ route('do_sewa.edit', ['do_sewa' => $item->id]) }}">Edit</a> --}}
+                                        <a class="dropdown-item" href="{{ route('form.show', ['form' => $item->id]) }}">Detail</a>
+                                        {{-- <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $item->id }})">Delete</a> --}}
                                     </div>
                                 </div>
                             </td>
@@ -69,7 +61,7 @@
     function deleteData(id){
         $.ajax({
             type: "GET",
-            url: "/kontrak/"+id+"/delete",
+            url: "/do_sewa/"+id+"/delete",
             success: function(response) {
                 toastr.success(response.msg, 'Success', {
                     closeButton: true,
