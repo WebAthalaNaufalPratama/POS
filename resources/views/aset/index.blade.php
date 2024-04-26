@@ -79,7 +79,7 @@
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
               <div class="form-group">
                 <select class="select2" name="lokasi_id" id="add_lokasi_id" required>
-                  <option value="">Pilih Tipe</option>
+                  <option value="">Pilih Lokasi</option>
                   @foreach($lokasis as $lokasi)
                     <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                   @endforeach
@@ -126,7 +126,7 @@
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
               <div class="form-group">
                 <select class="select2" name="lokasi_id" id="edit_lokasi_id" required>
-                  <option value="">Pilih Tipe</option>
+                  <option value="">Pilih Lokasi</option>
                   @foreach($lokasis as $lokasi)
                     <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                   @endforeach
@@ -156,7 +156,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_tipe_aset, #edit_tipe_aset').select2()
+        $('#add_lokasi_id, #edit_lokasi_id').select2()
     });
 
     function getData(id){
