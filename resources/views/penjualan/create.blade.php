@@ -106,7 +106,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
+                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="nama">Tanggal Invoice</label>
@@ -540,35 +540,18 @@
     // console.log(cekInvoiceNumbers);
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
-    // Function to generate the invoice based on certain criteria
     function generateInvoice() {
         var invoicePrefix = "INV";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Adding leading zero if necessary
-        var day = currentDate.getDate().toString().padStart(2, '0'); // Adding leading zero if necessary
+        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        var day = currentDate.getDate().toString().padStart(2, '0');
+        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
-        var generatedInvoice = invoicePrefix + year + month + day + nextInvoiceNumber;
-
+        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
         $('#no_invoice').val(generatedInvoice);
-        $('#no_invoice_bayar').val(generatedInvoice);
-        @foreach($produks as $index => $produk)
-        $('#no_invoice_rangkai_{{ $index }}').val(generatedInvoice);
-
-        var invoices = "<?php $invoices->pluck('no_invoice') ?>";
-
-        var invoiceExists = invoices.includes(generatedInvoice);
-        if (invoiceExists) {
-            $('#simpanButton_{{ $index }}').show();
-        } else {
-            $('#simpanButton_{{ $index }}').hide();
-        }
-
-        @endforeach
     }
 
-
-    // Call the function to generate the invoice when the page loads
     generateInvoice();
 </script>
 <script>

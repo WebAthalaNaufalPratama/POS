@@ -19,6 +19,8 @@ use App\Models\Promo;
 use App\Models\Ongkir;
 use App\Models\Penjualan;
 use App\Models\Produk_Terjual;
+use App\Models\DeliveryOrder;
+use App\Models\Komponen_Produk_Terjual;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -26,12 +28,15 @@ class DopenjualanController extends Controller
 {
     public function index()
     {
-        return view('dopenjualan.index');
+        $dopenjualans = DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc')->get();
+        // dd($dopenjualans);
+        return view('dopenjualan.index', compact('dopenjualans'));
     }
 
     public function create($penjualan)
     {
         $penjualans = Penjualan::with('produk')->find($penjualan);
+        // dd($penjualans);
         $user = Auth::user();
         $lokasis = Lokasi::find($user);
         $karyawans = Karyawan::all();
@@ -39,7 +44,112 @@ class DopenjualanController extends Controller
         $customers = Customer::where('id', $penjualans->id_customer)->get();
         // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         $produkjuals = Produk_Jual::all();
+        $Invoice = DeliveryOrder::latest()->first();
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_do, 11);
+            $cekInvoice = substr($substring, 0, 3);
+        } else {
+            $cekInvoice = 0;
+        }
+        // dd($produks);
 
-        return view('dopenjualan.create', compact('penjualans', 'karyawans', 'lokasis', 'produks','customers', 'produks','produkjuals'));
+        return view('dopenjualan.create', compact('penjualans', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals', 'cekInvoice'));
+    }
+
+    public function store(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'no_do' => 'required',
+            'no_referensi' => 'required',
+            'tanggal_kirim' => 'required',
+            'driver' => 'required',
+            'customer_id' => 'required',
+            'penerima' => 'required',
+            'handphone' => 'required',
+            'alamat' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        $data = $req->except(['_token', '_method']);
+        // dd($data['nama_produk']);
+        $data['jenis_do'] = 'PENJUALAN';
+        $data['status'] = 'DIKIRIM';
+        // $data['tanggal_pembuat'] = now();
+        $data['pembuat'] = Auth::user()->id;
+
+        // save data do
+        $check = DeliveryOrder::create($data);
+        if (!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+        // save produk do
+        for ($i = 0; $i < count($data['nama_produk']); $i++) {
+            $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
+            $produk_terjual = Produk_Terjual::create([
+                'produk_jual_id' => $getProdukJual->id,
+                'no_do' => $check->no_do,
+                'jumlah' => $data['jumlah'][$i],
+                'satuan' => $data['satuan'][$i],
+                'keterangan' => $data['keterangan'][$i]
+            ]);
+
+            if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            foreach ($getProdukJual->komponen as $komponen) {
+                $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                    'produk_terjual_id' => $produk_terjual->id,
+                    'kode_produk' => $komponen->kode_produk,
+                    'nama_produk' => $komponen->nama_produk,
+                    'tipe_produk' => $komponen->tipe_produk,
+                    'kondisi' => $komponen->kondisi,
+                    'deskripsi' => $komponen->deskripsi,
+                    'jumlah' => $komponen->jumlah,
+                    'harga_satuan' => $komponen->harga_satuan,
+                    'harga_total' => $komponen->harga_total
+                ]);
+                if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+        }
+
+        if (!empty($data['nama_produk2'])) {
+            // Simpan data tambahan
+            foreach ($data['nama_produk2'] as $index => $nama_produk) {
+                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $nama_produk)->first();
+                if (!$getProdukJual) {
+                    return redirect(route('penjualan.index'))->with('success', 'Data tersimpan');
+                }
+        
+                $produk_terjual = Produk_Terjual::create([
+                    'produk_jual_id' => $getProdukJual->id,
+                    'no_do' => $check->no_do,
+                    'jumlah' => $data['jumlah2'][$index],
+                    'satuan' => $data['satuan2'][$index],
+                    'jenis' => 'TAMBAHAN',
+                    'keterangan' => $data['keterangan2'][$index]
+                ]);
+        
+                if (!$produk_terjual) {
+                    return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data produk terjual');
+                }
+        
+                foreach ($getProdukJual->komponen as $komponen) {
+                    $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                        'produk_terjual_id' => $produk_terjual->id,
+                        'kode_produk' => $komponen->kode_produk,
+                        'nama_produk' => $komponen->nama_produk,
+                        'tipe_produk' => $komponen->tipe_produk,
+                        'kondisi' => $komponen->kondisi,
+                        'deskripsi' => $komponen->deskripsi,
+                        'jumlah' => $komponen->jumlah,
+                        'harga_satuan' => $komponen->harga_satuan,
+                        'harga_total' => $komponen->harga_total
+                    ]);
+                    if (!$komponen_produk_terjual) {
+                        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                    }
+                }
+            }
+        }
+        
+
+        return redirect(route('penjualan.index'))->with('success', 'Data tersimpan');
     }
 }

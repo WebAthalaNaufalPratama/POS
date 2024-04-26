@@ -73,8 +73,11 @@ class PenjualanController extends Controller
             // dd($produks);
             $bankpens = Rekening::get();
             $Invoice = Penjualan::latest()->first();
+            // dd($Invoice);
             if ($Invoice != null) {
-                $cekInvoice = substr($Invoice->no_invoice, -1);
+                $substring = substr($Invoice->no_invoice, 11); 
+                $cekInvoice = substr($substring, 0, 3);
+                // dd($cekInvoice);
             } else {
                 $cekInvoice = 0;
             }
@@ -197,8 +200,11 @@ class PenjualanController extends Controller
         $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         $Invoice = Pembayaran::latest()->first();
+        // dd($Invoice);
         if ($Invoice != null) {
-            $cekInvoice = substr($Invoice->no_invoice_bayar, -1);
+            $substring = substr($Invoice->no_invoice_bayar, 11); 
+            $cekInvoice = substr($substring, 0, 3);
+            // dd($cekInvoice);
         } else {
             $cekInvoice = 0;
         }
@@ -226,6 +232,7 @@ class PenjualanController extends Controller
         $produkjuals = Produk_Jual::all();
         // dd($produkjuals);
         $penjualans = Penjualan::find($penjualan);
+        // dd($penjualans);
         $customers = Customer::where('id', $penjualans->id_customer)->get();
         $karyawans = Karyawan::where('id', $penjualans->employee_id)->get();
         $promos = Promo::where('id', $penjualans->promo_id)->get();
