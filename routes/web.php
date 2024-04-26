@@ -273,6 +273,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{form}/delete', 'FormPerangkaiController@destroy')->name('form.destroy');
         });
 
+        Route::group(['prefix' => 'formpenjualan'], function() {
+            Route::get('/', 'FormPerangkaiController@penjualan_index')->name('formpenjualan.index');
+            Route::get('/create', 'FormPerangkaiController@penjualan_create')->name('formpenjualan.create');
+            Route::post('/store', 'FormPerangkaiController@penjualan_store')->name('formpenjualan.store');
+            Route::get('/{formpenjualan}/show', 'FormPerangkaiController@penjualan_show')->name('formpenjualan.show');
+            Route::get('/{formpenjualan}/edit', 'FormPerangkaiController@penjualan_edit')->name('formpenjualan.edit');
+            Route::patch('/{formpenjualan}/update', 'FormPerangkaiController@penjualan_update')->name('formpenjualan.update');
+            Route::get('/{formpenjualan}/delete', 'FormPerangkaiController@penjualan_destroy')->name('formpenjualan.destroy');
+        });
+
         Route::group(['prefix' => 'do_sewa'], function() {
             Route::get('/', 'DeliveryOrderController@index_sewa')->name('do_sewa.index');
             Route::get('/create', 'DeliveryOrderController@create_sewa')->name('do_sewa.create');
