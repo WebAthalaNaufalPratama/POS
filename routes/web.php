@@ -282,6 +282,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{do_sewa}/delete', 'DeliveryOrderController@destroy_sewa')->name('do_sewa.destroy');
         });
 
+        Route::group(['prefix' => 'inven_galeri'], function() {
+            Route::get('/', 'InventoryGalleryController@index')->name('inven_galeri.index');
+            Route::get('/create', 'InventoryGalleryController@create')->name('inven_galeri.create');
+            Route::post('/store', 'InventoryGalleryController@store')->name('inven_galeri.store');
+            Route::get('/{inven_galeri}/show', 'InventoryGalleryController@show')->name('inven_galeri.show');
+            Route::get('/{inven_galeri}/edit', 'InventoryGalleryController@edit')->name('inven_galeri.edit');
+            Route::patch('/{inven_galeri}/update', 'InventoryGalleryController@update')->name('inven_galeri.update');
+            Route::get('/{inven_galeri}/delete', 'InventoryGalleryController@destroy')->name('inven_galeri.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
