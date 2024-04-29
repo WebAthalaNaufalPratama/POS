@@ -292,6 +292,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{do_sewa}/delete', 'DeliveryOrderController@destroy_sewa')->name('do_sewa.destroy');
         });
 
+        Route::group(['prefix' => 'returpenjualan'], function() {
+            Route::get('/', 'ReturpenjualanController@index')->name('returpenjualan.index');
+            Route::get('{penjualan}/create', 'ReturpenjualanController@create')->name('returpenjualan.create');
+            Route::post('/store', 'ReturpenjualanController@store')->name('returpenjualan.store');
+            Route::get('/{returpenjualan}/show', 'ReturpenjualanController@show')->name('returpenjualan.show');
+            Route::get('/{returpenjualan}/edit', 'ReturpenjualanController@edit')->name('returpenjualan.edit');
+            Route::patch('/{returpenjualan}/update', 'ReturpenjualanController@update')->name('returpenjualan.update');
+            Route::get('/{returpenjualan}/delete', 'ReturpenjualanController@destroy')->name('returpenjualan.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });

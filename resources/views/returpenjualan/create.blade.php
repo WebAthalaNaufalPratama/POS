@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Delivery Order</h3>
+            <h3 class="page-title">Retur Penjualan</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="index.html">Penjualan</a>
@@ -16,6 +16,9 @@
                 <li class="breadcrumb-item active">
                     DO Penjualan
                 </li>
+                <li class="breadcrumb-item active">
+                    Retur Penjualan
+                </li>
             </ul>
         </div>
     </div>
@@ -25,11 +28,11 @@
     <div class="card">
         <div class="card-header">
             <h4 class="card-title mb-0">
-                Delivery Order Penjualan
+                Retur Penjualan
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('dopenjualan.store', ['penjualan' => $penjualans->id]) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('returpenjualan.store', ['penjualan' => $penjualans->id]) }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
                         @csrf
@@ -40,36 +43,41 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="no_do">No Delivery Order</label>
-                                            <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Delivery Order" value="" onchange="generateDOP(this)" readonly required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="penerima">Penerima</label>
-                                            <input type="text" class="form-control" id="penerima" name="penerima" placeholder="Masukan Nama Penerima" value="" required>
+                                            <label for="no_retur">No Retur Penjualan</label>
+                                            <input type="text" class="form-control" id="no_retur" name="no_retur" placeholder="Nomor Delivery Order" value="" onchange="generateDOP(this)" readonly required>
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="handphone">No Hp/Wa</label>
-                                            <input type="text" class="form-control" id="handphone" name="handphone" placeholder="Nomor Handphone" value="" required>
+                                        <label for="customer_id">Nama Customer</label>
+                                            <select id="customer_id" name="customer_id" class="form-control">
+                                                <option value=""> Pilih Nama Customer </option>
+                                                @foreach ($customers as $customer)
+                                                <option value="{{ $customer->id }}">{{ $customer->nama }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="driver">Driver</label>
-                                            <select id="driver" name="driver" class="form-control">
-                                                <option value=""> Pilih Nama Driver </option>
-                                                @foreach ($karyawans as $karyawan)
-                                                <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
+                                            <label for="lokasi_id">Lokasi</label>
+                                            <select id="lokasi_id" name="lokasi_id" class="form-control">
+                                                <option value=""> Pilih Lokasi </option>
+                                                @foreach ($lokasis as $lokasi)
+                                                <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="alamat">Alamat</label>
-                                            <textarea type="text" class="form-control" id="alamat" name="alamat" placeholder="Alamat" value="" required></textarea>
+                                        <label for="supplier_id">Supplier</label>
+                                            <select id="supplier_id" name="customer_id" class="form-control">
+                                                <option value=""> Pilih Nama Supplier </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="bukti">Upload File</label>
+                                            <input type="file" class="form-control" id="bukti" name="bukti">
                                         </div>
                                     </div>
                                 </div>
@@ -77,16 +85,16 @@
 
 
                             <div class="col-md-5 border rounded pt-3 ms-1">
-                                <h5>Informasi Pesanan</h5>
+                                <h5>Informasi Komplain</h5>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="no_referensi">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_referensi" name="no_referensi" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required readonly>
+                                            <label for="tanggal_invoice">Tanggal Invoice</label>
+                                            <input type="text" class="form-control" id="tanggal_invoice" name="tanggal_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required readonly>
                                         </div>
                                         <div class="form-group">
-                                            <label for="tanggal_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" id="tanggal_kirim" name="tanggal_kirim" placeholder="Tanggal_kirim" onchange="updateDate(this)" required>
+                                            <label for="tanggal_retur">Tanggal Retur</label>
+                                            <input type="date" class="form-control" id="tanggal_retur" name="tanggal_retur" placeholder="Tanggal_kirim" onchange="updateDate(this)" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="catatan">Catatan</label>
@@ -96,7 +104,7 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="nama">Tanggal Invoice</label>
+                                            <label for="tanggal">Tanggal Retur</label>
                                             <input type="date" class="form-control" id="tanggal_pembuat" name="tanggal_pembuat" placeholder="Tanggal Invoice" onchange="updateDate(this)" required>
                                         </div>
                                         <div class="form-group">

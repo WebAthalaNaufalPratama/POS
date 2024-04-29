@@ -93,9 +93,16 @@
                                             <label for="harga_jual">Input File</label>
                                             <div class="input-group mt-3">
                                                 <!-- <input type="file" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" aria-describedby="inputGroupPrepend2" required disabled> -->
-                                                <label class="input-group-text" for="bukti_file">
-                                                    <i class="fas fa-upload"></i> {{ $penjualans->bukti_file}}
-                                                </label>
+                                                <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                    <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                    </label>
+                                                    <label class="custom-file-container__custom-file">
+                                                        <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required disabled>
+                                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                    </label>
+                                                    <span class="text-danger">max 2mb</span>
+                                                    <img id="preview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" alt="your image" />
+                                                </div>
                                             </div>
 
                                         </div>
@@ -670,6 +677,32 @@
             // Panggil fungsi updateHargaSatuan
             updateHargaSatuan(this);
         });
+
+        $('#bukti_file').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val('');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function clearFile() {
+            $('#bukti_file').val('');
+            $('#preview').attr('src', defaultImg);
+        };
 
         
     });

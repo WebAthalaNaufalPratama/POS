@@ -18,7 +18,7 @@
                 <tr>
                     <th>No</th>
                     <th>No From</th>
-                    <th>No Kontrak</th>
+                    <th>No Invoice</th>
                     <th>Produk</th>
                     <th>Perangkai</th>
                     <th>Tanggal Dirangkai</th>

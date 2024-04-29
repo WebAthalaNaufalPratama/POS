@@ -92,7 +92,16 @@
                                         <div class="form-group">
                                             <label for="harga_jual">Input File</label>
                                             <div class="input-group">
-                                                <input type="file" class="form-control" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" value="" aria-describedby="inputGroupPrepend2" required>
+                                            <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                </label>
+                                                <label class="custom-file-container__custom-file">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti_file" accept="image/*">
+                                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                </label>
+                                                <span class="text-danger">max 2mb</span>
+                                                <img id="preview" />
+                                            </div>
                                             </div>
                                         </div>
                                     </div>
@@ -236,23 +245,36 @@
                                                 <option value="transfer">TRANSFER</option>
                                             </select>
                                         </div>
-                                        <div id="inputCash" style="display: none;">
+                                        <!-- <div id="inputCash" style="display: none;">
                                             <label for="jumlahCash">Jumlah Pembayaran (CASH): </label>
                                             <input type="text" id="jumlahCash" name="jumlahCash" class="form-control">
-                                        </div>
+                                        </div> -->
                                         <div id="inputTransfer" style="display: none;">
-                                            <label>Bank</label>
+                                            <label>Rekening Von</label>
                                             <select id="rekening_id" name="rekening_id" class="form-control">
                                                 <option value="">Pilih Bank</option>
-                                                @foreach($rekenings as $rekening)
-                                                <option value="{{ $rekening->id }}">{{ $rekening->nama }}</option>
+                                                @foreach($bankpens as $bankpen)
+                                                <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="form-group mt-3">
-                                            <label>Notes</label>
-                                            <textarea class="form-control" id="notes" name="notes" required></textarea>
+                                        <div class="form-group" style="display:none;">
+                                            <label for="no_invoice">Nomor Invoice</label>
+                                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)"  readonly>
                                         </div>
+                                        <div class="form-group mt-3">
+                                            <div id="inputPembayaran" style="display: none;">
+                                                <label for="nominal">Nominal</label>
+                                                <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="inputBuktiBayar" style="display: none;">
+                                                <label for="buktibayar">Unggah Bukti</label>
+                                                <input type="file" class="form-control" id="bukti" name="bukti">
+                                            </div>
+                                        </div>
+                                        
                                     </div>
                                     <div class="col-lg-3 col-sm-6 col-6 mt-4 ">
                                         <div class="form-group">
@@ -277,6 +299,10 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+                                        </div>
+                                        <div class="form-group mt-3">
+                                            <label>Notes</label>
+                                            <textarea class="form-control" id="notes" name="notes" required></textarea>
                                         </div>
                                     </div>
                                     <div class="col-lg-6 float-md-right">
@@ -483,53 +509,6 @@
 @endforeach
 
 
-<div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Form Pembayaran</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="{{ route('customer.store') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="no_invoice">Nomor Invoice</label>
-                        <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nominalbayar">Nominal</label>
-                        <input type="number" class="form-control" id="nominalbayar" name="nominalbayar" placeholder="Nominal Bayar">
-                    </div>
-                    <div class="form-group">
-                        <label for="bankpenerima">Bank Penerima</label>
-                        <select>
-                            <option value="">Pilih Bank Penerima</option>
-                            @foreach ($bankpens as $bankpen)
-                            <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tanggalbayar">Tanggal</label>
-                        <input type="date" class="form-control" id="tanggalbayar" name="tanggalbayar" onchange="updateDate(this)">
-                    </div>
-                    <div class="form-group">
-                        <label for="buktibayar">Unggah Bukti</label>
-                        <input type="file" class="form-control" id="buktibayar" name="buktibayar" readonly>
-                    </div>
-                </div>
-
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 </div>
 @endsection
@@ -550,6 +529,25 @@
 
         var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
         $('#no_invoice').val(generatedInvoice);
+    }
+
+    generateInvoice();
+</script>
+<script>
+    var cekInvoiceNumbers = "0";
+    // console.log(cekInvoiceNumbers);
+    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+
+    function generateInvoice() {
+        var invoicePrefix = "BYR";
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        var day = currentDate.getDate().toString().padStart(2, '0');
+        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+
+        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+        $('#no_invoice_bayar').val(generatedInvoice);
     }
 
     generateInvoice();
@@ -922,6 +920,26 @@
             Totaltagihan();
         });
 
+        $('#dp').on('input', function() {
+            var inputNominal = $(this).val();
+            var dpValue = parseFloat($(this).val());
+
+            if (parseInt(inputNominal) > 0) {
+                $('#inputPembayaran').show();
+                $('#inputRekening').show();
+                $('#inputTanggalBayar').show();
+                $('#inputBuktiBayar').show();
+                $('#nominal').val(dpValue);
+                // alert('Nominal pembayaran tidak boleh lebih dari sisa bayar!');
+                // $(this).val(0);
+            } else {
+                $('#inputPembayaran').hide();
+                $('#inputRekening').hide();
+                $('#inputTanggalBayar').hide();
+                $('#inputBuktiBayar').hide();
+            }
+        });
+
         $('#promo_id').change(function() {
             var promo_id = $(this).select2().find(":selected").val()
             if (!promo_id) {
@@ -1058,6 +1076,32 @@
 
             subTotalInput.val(subTotal.toFixed(2));
         }
+
+        $('#bukti_file').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val('');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function clearFile() {
+            $('#bukti_file').val('');
+            $('#preview').attr('src', defaultImg);
+        };
 
         function calculatePromo(promo_id) {
             var data = {

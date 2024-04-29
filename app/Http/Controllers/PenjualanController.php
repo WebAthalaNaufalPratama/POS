@@ -62,7 +62,6 @@ class PenjualanController extends Controller
             // dd($karyawans);
             $customers = Customer::where('lokasi_id', $lokasi)->get();
             $lokasis = Lokasi::where('id', $lokasi)->get();
-            $rekenings = Rekening::get();
             $ongkirs = Ongkir::get();
             $karyawans = Karyawan::where('lokasi_id', $lokasi)->get();
             $promos = Promo::where(function ($query) use ($lokasi) {
@@ -73,21 +72,30 @@ class PenjualanController extends Controller
             // dd($produks);
             $bankpens = Rekening::get();
             $Invoice = Penjualan::latest()->first();
-            // dd($Invoice);
+            // dd($bankpens);
             if ($Invoice != null) {
-                $substring = substr($Invoice->no_invoice, 11); 
+                $substring = substr($Invoice->no_invoice, 11);
                 $cekInvoice = substr($substring, 0, 3);
                 // dd($cekInvoice);
             } else {
                 $cekInvoice = 0;
             }
+            $InvoiceBayar = Pembayaran::latest()->first();
+        // dd($Invoice);
+        if ($InvoiceBayar != null) {
+            $substringBayar = substr($InvoiceBayar->no_invoice_bayar, 11);
+            $cekInvoiceBayar = substr($substringBayar, 0, 3);
+            // dd($cekInvoice);
+        } else {
+            $cekInvoiceBayar = 0;
+        }
             // $komponen = Kondisi::with('komponen')->get();
             // dd($komponen);
             $kondisis = Kondisi::all();
             $invoices = Penjualan::get();
         }
 
-        return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices'));
+        return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
     }
 
 
@@ -121,7 +129,8 @@ class PenjualanController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-        $data = $req->except(['_token', '_method', 'bukti_file']);
+        $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
+        // dd($req->cara_bayar);
         if ($req->hasFile('bukti_file')) {
             $file = $req->file('bukti_file');
             $fileName = time() . '_' . $file->getClientOriginalName();
@@ -129,6 +138,12 @@ class PenjualanController extends Controller
             // dd($filePath);
             $data['bukti_file'] = $filePath;
         }
+        // dd($req->cara_bayar);
+        if($req->cara_bayar == 'cash')
+        {
+            $data['jumlahCash'] = $req->nominal;
+        }
+        
         // dd($data);
         $penjualan = Penjualan::create($data);
 
@@ -161,6 +176,31 @@ class PenjualanController extends Controller
                     ]);
                     if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
+            }
+
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
+                $data['bukti'] = $filePath;
+            }
+
+            // dd($cek);
+            if ($req->dp > 0) {
+                if ($req->sisa_bayar == 0) {
+                    $data['invoice_penjualan_id'] = $penjualan->id;
+                    $data['tanggal_bayar'] = $req->tanggal_invoice;
+                    $data['status_bayar'] = 'LUNAS';
+                    $pembayaran = Pembayaran::create($data);
+                    return redirect()->back()->with('success', 'Tagihan sudah Lunas');
+                } else {
+                    $data['invoice_penjualan_id'] = $penjualan->id;
+                    $data['tanggal_bayar'] = $req->tanggal_invoice;
+                    $data['status_bayar'] = 'BELUM LUNAS';
+                    $pembayaran = Pembayaran::create($data);
+                }
+            } else {
+                return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
             }
             return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
         } else {
@@ -202,7 +242,7 @@ class PenjualanController extends Controller
         $Invoice = Pembayaran::latest()->first();
         // dd($Invoice);
         if ($Invoice != null) {
-            $substring = substr($Invoice->no_invoice_bayar, 11); 
+            $substring = substr($Invoice->no_invoice_bayar, 11);
             $cekInvoice = substr($substring, 0, 3);
             // dd($cekInvoice);
         } else {
