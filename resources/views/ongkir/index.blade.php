@@ -33,14 +33,18 @@
                             <td>{{ $ongkir->nama }}</td>
                             <td>{{ $ongkir->lokasi->nama ?? '-' }}</td>
                             <td>{{ $ongkir->biaya }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $ongkir->id }})" data-bs-toggle="modal" data-bs-target="#editongkir">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $ongkir->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                              </a>
+                              <ul class="dropdown-menu">
+                                  <li>
+                                      <a href="javascript:void(0);" onclick="getData({{ $ongkir->id }})" data-bs-toggle="modal" data-bs-target="#editongkir" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  </li>
+                                  <li>
+                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $ongkir->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                  </li>
+                              </ul>
                             </td>
                         </tr>
                     @endforeach

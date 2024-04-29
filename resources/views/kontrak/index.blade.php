@@ -41,16 +41,24 @@
                             <td>{{ $kontrak->masa_sewa }} bulan</td>
                             <td>{{ \Carbon\Carbon::parse($kontrak->tanggal_mulai)->format('d-m-Y')}} - {{ \Carbon\Carbon::parse($kontrak->tanggal_selesai)->format('d-m-Y') }}</td>
                             <td>{{ $kontrak->total_harga }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('do_sewa.create', ['kontrak' => $kontrak->id]) }}">Delivery Order</a>
-                                        <a class="dropdown-item" href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}">Edit</a>
-                                        <a class="dropdown-item" href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}">Detail</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $kontrak->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{{ route('do_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $kontrak->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                    </li>
+                                </ul>
                             </td>
                         </tr>
                     @endforeach

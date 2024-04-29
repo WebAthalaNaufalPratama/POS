@@ -39,14 +39,18 @@
                             <td>{{ $promo->ketentuan }}</td>
                             <td>{{ $promo->diskon }}</td>
                             <td>{{ $promo->lokasi->nama}}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="bu tton" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $promo->id }})" data-bs-toggle="modal" data-bs-target="#editpromo">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $promo->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                              </a>
+                              <ul class="dropdown-menu">
+                                  <li>
+                                      <a href="javascript:void(0);" onclick="getData({{ $promo->id }})" data-bs-toggle="modal" data-bs-target="#editpromo" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  </li>
+                                  <li>
+                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $promo->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                  </li>
+                              </ul>
                             </td>
                         </tr>
                     @endforeach
@@ -505,8 +509,30 @@
                 $('#edit_nama').val(response.nama)
                 $('#edit_tanggal_mulai').val(response.tanggal_mulai)
                 $('#edit_tanggal_berakhir').val(response.tanggal_berakhir)
-                $('#edit_ketentuan').val(response.ketentuan)
-                $('#edit_diskon').val(response.diskon)
+                $('#edit_ketentuan').val(response.ketentuan).trigger('change')
+                if(response.ketentuan == 'tipe_produk'){
+                 $('#edit_ketentuan_tipe_produk').val(response.ketentuan_tipe_produk).trigger('change')
+                }
+                if(response.ketentuan == 'min_transaksi'){
+                 $('#edit_ketentuan_min_transaksi').val(response.ketentuan_min_transaksi)
+                }
+                if(response.ketentuan == 'produk'){
+                 $('#edit_ketentuan_produk').val(response.ketentuan_produk).trigger('change')
+                }
+
+                $('#edit_diskon').val(response.diskon).trigger('change')
+                if(response.diskon == 'persen'){
+                 $('#edit_diskon_persen').val(response.diskon_persen)
+                }
+                if(response.diskon == 'nominal'){
+                 $('#edit_diskon_nominal').val(response.diskon_nominal)
+                }
+                if(response.diskon == 'poin'){
+                 $('#edit_diskon_poin').val(response.diskon_poin)
+                }
+                if(response.diskon == 'produk'){
+                 $('#edit_diskon_free_produk').val(response.diskon_free_produk).trigger('change')
+                }
                 $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
             },
             error: function(error) {

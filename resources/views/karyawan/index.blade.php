@@ -37,14 +37,18 @@
                             <td>{{ $karyawan->lokasi->nama}}</td>
                             <td>{{ $karyawan->handphone }}</td>
                             <td>{{ $karyawan->alamat }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="bu tton" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $karyawan->id }})" data-bs-toggle="modal" data-bs-target="#editkaryawan">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $karyawan->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                              </a>
+                              <ul class="dropdown-menu">
+                                  <li>
+                                      <a href="javascript:void(0);" onclick="getData({{ $karyawan->id }})" data-bs-toggle="modal" data-bs-target="#editkaryawan" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  </li>
+                                  <li>
+                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $karyawan->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                  </li>
+                              </ul>
                             </td>
                         </tr>
                     @endforeach
@@ -168,7 +172,7 @@
                 $('#editForm').attr('action', 'karyawan/'+id+'/update');
                 $('#edit_nama').val(response.nama)
                 $('#edit_jabatan').val(response.jabatan)
-                $('#edit_lokasi').val(response.lokasi_id).trigger('change')
+                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
                 $('#edit_handphone').val(response.handphone)
                 $('#edit_alamat').val(response.alamat)
             },
