@@ -302,6 +302,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{inven_galeri}/delete', 'InventoryGalleryController@destroy')->name('inven_galeri.destroy');
         });
 
+        Route::group(['prefix' => 'jabatan'], function() {
+            Route::get('/', 'JabatanController@index')->name('jabatan.index');
+            Route::post('/store', 'JabatanController@store')->name('jabatan.store');
+            Route::get('/{jabatan}/show', 'JabatanController@show')->name('jabatan.show');
+            Route::get('/{jabatan}/edit', 'JabatanController@edit')->name('jabatan.edit');
+            Route::patch('/{jabatan}/update', 'JabatanController@update')->name('jabatan.update');
+            Route::get('/{jabatan}/delete', 'JabatanController@destroy')->name('jabatan.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
