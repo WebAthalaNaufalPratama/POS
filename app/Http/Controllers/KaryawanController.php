@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Jabatan;
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
 use App\Models\Lokasi;
@@ -13,7 +14,8 @@ class KaryawanController extends Controller
     {
         $karyawans = Karyawan::all();
         $lokasis = Lokasi::all();
-        return view('karyawan.index', compact('karyawans', 'lokasis'));
+        $jabatans = Jabatan::all();
+        return view('karyawan.index', compact('karyawans', 'lokasis', 'jabatans'));
     }
 
     /**
