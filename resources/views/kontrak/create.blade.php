@@ -89,7 +89,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Catatan</label>
-                                                <textarea type="text" id="catatan" name="catatan" value="{{ old('catatan') }}" class="form-control"  required></textarea>
+                                                <textarea type="text" id="catatan" name="catatan" value="{{ old('catatan') }}" class="form-control"></textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -145,7 +145,7 @@
                                             <select id="produk_0" name="nama_produk[]" class="form-control"  required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkjuals as $produk)
-                                                    <option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}">{{ $produk->nama }}</option>
+                                                    <option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}" data-harga_jual="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -222,14 +222,14 @@
                                     <div class="col-lg-9">
                                         <div class="row align-items-center">
                                             <div class="col-9 pe-0">
-                                                <select id="promo_id" name="promo_id" class="form-control"  required disabled>
+                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
                                                 </select>
                                             </div>
                                             <div class="col-3 ps-0 mb-0">
                                                 <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                             </div>
                                         </div>                                        
-                                        <input type="text" class="form-control"  required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -329,13 +329,13 @@
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $produk)'+
-                                        '<option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}">{{ $produk->nama }}</option>'+
+                                        '<option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}" data-harga_jual="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
                             '<td><input type="number" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
-                            '<td><input type="number" name="harga_total[]" id="harga_total_'+i+'" class="form-control"></td>'+
+                            '<td><input type="number" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
@@ -398,6 +398,13 @@
         $('#btnAddCustomer').click(function(e) {
             e.preventDefault()
             $('#addcustomer').modal('show');
+        });
+        $(document).on('change', '[id^=produk_]', function(){
+            var id = $(this).attr('id');
+            var parts = id.split('_');
+            var nomor = parts[parts.length - 1];
+            var harga_jual = $(this).find(":selected").data("harga_jual");
+            $('#harga_satuan_' + nomor).val(harga_jual);
         });
         function multiply(element) {
             var id = 0

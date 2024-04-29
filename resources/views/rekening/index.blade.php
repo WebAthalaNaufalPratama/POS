@@ -35,14 +35,18 @@
                             <td>{{ $rekening->nomor_rekening }}</td>
                             <td>{{ $rekening->nama_akun}}</td>
                             <td>{{ $rekening->lokasi->nama }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="bu tton" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $rekening->id }})" data-bs-toggle="modal" data-bs-target="#editrekening">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $rekening->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                              </a>
+                              <ul class="dropdown-menu">
+                                  <li>
+                                      <a href="javascript:void(0);" onclick="getData({{ $rekening->id }})" data-bs-toggle="modal" data-bs-target="#editrekening" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  </li>
+                                  <li>
+                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $rekening->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                  </li>
+                              </ul>
                             </td>
                         </tr>
                     @endforeach
@@ -159,7 +163,7 @@
                 $('#edit_bank').val(response.bank)
                 $('#edit_nomor_rekening').val(response.nomor_rekening)
                 $('#edit_nama_akun').val(response.nama_akun)
-                $('#edit_lokasi').val(response.lokasi_id).trigger('change')
+                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
             },
             error: function(error) {
                 toastr.error('Ambil data error', 'Error', {

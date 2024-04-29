@@ -49,14 +49,18 @@
                                     @endforeach
                                 </table>
                             </td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('tradisional.edit', ['tradisional' => $tradisional->id]) }}">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $tradisional->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{{ route('tradisional.edit', ['tradisional' => $tradisional->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $tradisional->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                    </li>
+                                </ul>
                             </td>
                         </tr>
                     @endforeach

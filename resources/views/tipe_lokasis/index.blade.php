@@ -31,15 +31,19 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $tipe_lokasi->nama }}</td>
                             <td>{{ $tipe_lokasi->deskripsi }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $tipe_lokasi->id }})" data-bs-toggle="modal" data-bs-target="#edittipelokasi">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $tipe_lokasi->id }})">Delete</a>
-                                    </div>
-                                </div>
-                            </td>
+                            <td class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="javascript:void(0);" onclick="getData({{ $tipe_lokasi->id }})" data-bs-toggle="modal" data-bs-target="#edittipelokasi" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $tipe_lokasi->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                    </li>
+                                </ul>
+                              </td>
                         </tr>
                     @endforeach
                 </tbody>

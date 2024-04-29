@@ -7,10 +7,10 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Kontrak</h4>
+                    <h4>Inventory Gallery</h4>
                 </div>
                 <div class="page-btn">
-                    <a href="{{ route('kontrak.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kontrak</a>
+                    <a href="{{ route('inven_galeri.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
                 </div>
             </div>
         </div>
@@ -20,43 +20,38 @@
                 <thead>
                 <tr>
                     <th>No</th>
-                    <th>No Kontrak</th>
-                    <th>Pelanggan</th>
-                    <th>PIC</th>
-                    <th>Handphone</th>
-                    <th>Masa Kontrak</th>
-                    <th>Rentang Tanggal</th>
-                    <th>Total Biaya</th>
-                    <th>Aksi</th>
+                    <th>Kode Produk</th>
+                    <th>Nama Produk</th>
+                    <th>Kondisi</th>
+                    <th>Gallery</th>
+                    <th>Jumlah</th>
+                    <th>Minimal Stok</th>
+                    <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($kontraks as $kontrak)
+                    @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $kontrak->no_kontrak }}</td>
-                            <td>{{ $kontrak->customer->nama }}</td>
-                            <td>{{ $kontrak->pic }}</td>
-                            <td>{{ $kontrak->handphone }}</td>
-                            <td>{{ $kontrak->masa_sewa }} bulan</td>
-                            <td>{{ \Carbon\Carbon::parse($kontrak->tanggal_mulai)->format('d-m-Y')}} - {{ \Carbon\Carbon::parse($kontrak->tanggal_selesai)->format('d-m-Y') }}</td>
-                            <td>{{ $kontrak->total_harga }}</td>
+                            <td>{{ $item->kode_produk ?? '-' }}</td>
+                            <td>{{ $item->produk->nama ?? '-' }}</td>
+                            <td>{{ $item->kondisi->nama ?? '-' }}</td>
+                            <td>{{ $item->gallery->nama ?? '-' }}</td>
+                            <td>{{ $item->jumlah ?? '-' }}</td>
+                            <td>{{ $item->min_stok ?? '-' }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="{{ route('do_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order</a>
+                                        <a href="{{ route('inven_galeri.show', ['inven_galeri' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        <a href="{{ route('inven_galeri.edit', ['inven_galeri' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $kontrak->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
                                     </li>
                                 </ul>
                             </td>
@@ -77,7 +72,7 @@
     function deleteData(id){
         $.ajax({
             type: "GET",
-            url: "/kontrak/"+id+"/delete",
+            url: "/inven_galeri/"+id+"/delete",
             success: function(response) {
                 toastr.success(response.msg, 'Success', {
                     closeButton: true,

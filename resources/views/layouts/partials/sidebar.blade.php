@@ -8,14 +8,15 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('produks.index') }}" class="{{ request()->is('produks*') ? 'active' : '' }}">Produk</a></li>
                         <li><a href="{{ route('tipe_produk.index') }}" class="{{ request()->is('tipe_produks*') ? 'active' : '' }}">Tipe Produk</a></li>
+                        <li><a href="{{ route('produks.index') }}" class="{{ request()->is('produks*') ? 'active' : '' }}">Produk</a></li>
                         <li><a href="{{ route('kondisi.index') }}" class="{{ request()->is('kondisi*') ? 'active' : '' }}">Kondisi</a></li>
-                        <li><a href="{{ route('lokasi.index') }}" class="{{ request()->is('lokasi*') ? 'active' : '' }}">Lokasi</a></li>
                         <li><a href="{{ route('tipe_lokasi.index') }}" class="{{ request()->is('tipe_lokasi*') ? 'active' : ''}}">Tipe Lokasi</a></li>
+                        <li><a href="{{ route('lokasi.index') }}" class="{{ request()->is('lokasi*') ? 'active' : '' }}">Lokasi</a></li>
                         <li><a href="{{ route('supplier.index') }}" class="{{ request()->is('supplier*') ? 'active' : '' }}">Supplier</a></li>
                         <li><a href="{{ route('ongkir.index') }}" class="{{ request()->is('ongkir*') ? 'active' : '' }}">Ongkir</a></li>
                         <li><a href="{{ route('customer.index') }}" class="{{ request()->is('customer*') ? 'active' : '' }}">Customer</a></li>
+                        <li><a href="{{ route('jabatan.index') }}" class="{{ request()->is('jabatan*') ? 'active' : '' }}">Jabatan</a></li>
                         <li><a href="{{ route('karyawan.index') }}" class="{{ request()->is('karyawan*') ? 'active' : '' }}">Karyawan</a></li>
                         <li><a href="{{ route('rekening.index') }}" class="{{ request()->is('rekening*') ? 'active' : '' }}">Rekening</a></li>
                         <li><a href="{{ route('aset.index') }}" class="{{ request()->is('aset*') ? 'active' : '' }}">Aset</a></li>
@@ -47,6 +48,14 @@
                         <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
                         <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><i class="fa fa-archive" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-archive" aria-label="fa fa-archive"></i><span> Inventory</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('inven_galeri.index') }}" class="{{ request()->is('inven_galeri*') ? 'active' : '' }}">Gallery</a></li>
+                        <li><a href="#" class="">Outlet</a></li>
+                        <li><a href="#" class="">Inden</a></li>
                     </ul>
                 </li>
                 {{-- <li class="submenu">

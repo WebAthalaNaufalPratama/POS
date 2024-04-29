@@ -37,14 +37,18 @@
                             <td>{{ $karyawan->lokasi->nama}}</td>
                             <td>{{ $karyawan->handphone }}</td>
                             <td>{{ $karyawan->alamat }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="bu tton" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $karyawan->id }})" data-bs-toggle="modal" data-bs-target="#editkaryawan">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $karyawan->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                              </a>
+                              <ul class="dropdown-menu">
+                                  <li>
+                                      <a href="javascript:void(0);" onclick="getData({{ $karyawan->id }})" data-bs-toggle="modal" data-bs-target="#editkaryawan" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  </li>
+                                  <li>
+                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $karyawan->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                  </li>
+                              </ul>
                             </td>
                         </tr>
                     @endforeach
@@ -73,7 +77,14 @@
             </div>
             <div class="mb-3">
               <label for="jabatan" class="col-form-label">Jabatan</label>
-              <input type="text" class="form-control" name="jabatan" id="add_jabatan" required>
+              <div class="form-group">
+                <select class="select2" name="jabatan" id="add_jabatan" required>
+                  <option value="">Pilih Jabatan</option>
+                  @foreach($jabatans as $jabatan)
+                    <option value="{{ $jabatan->nama }}">{{ $jabatan->nama }}</option>
+                  @endforeach
+                </select>
+              </div>
             </div>
             <div class="mb-3">
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
@@ -120,7 +131,14 @@
             </div>
             <div class="mb-3">
               <label for="jabatan" class="col-form-label">Jabatan</label>
-              <input type="text" class="form-control" name="jabatan" id="edit_jabatan" required>
+              <div class="form-group">
+                <select class="select2" name="jabatan" id="edit_jabatan" required>
+                  <option value="">Pilih Jabatan</option>
+                  @foreach($jabatans as $jabatan)
+                    <option value="{{ $jabatan->nama }}">{{ $jabatan->nama }}</option>
+                  @endforeach
+                </select>
+              </div>
             </div>
             <div class="mb-3">
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
@@ -156,7 +174,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_lokasi_id, #edit_lokasi_id').select2()
+        $('#add_lokasi_id, #edit_lokasi_id, #add_jabatan, #edit_jabatan').select2()
     });
 
     function getData(id){
@@ -167,8 +185,8 @@
                 // console.log(response)
                 $('#editForm').attr('action', 'karyawan/'+id+'/update');
                 $('#edit_nama').val(response.nama)
-                $('#edit_jabatan').val(response.jabatan)
-                $('#edit_lokasi').val(response.lokasi_id).trigger('change')
+                $('#edit_jabatan').val(response.jabatan).trigger('change')
+                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
                 $('#edit_handphone').val(response.handphone)
                 $('#edit_alamat').val(response.alamat)
             },

@@ -302,6 +302,26 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{returpenjualan}/delete', 'ReturpenjualanController@destroy')->name('returpenjualan.destroy');
         });
 
+        Route::group(['prefix' => 'inven_galeri'], function() {
+            Route::get('/', 'InventoryGalleryController@index')->name('inven_galeri.index');
+            Route::get('/create', 'InventoryGalleryController@create')->name('inven_galeri.create');
+            Route::post('/store', 'InventoryGalleryController@store')->name('inven_galeri.store');
+            Route::get('/{inven_galeri}/show', 'InventoryGalleryController@show')->name('inven_galeri.show');
+            Route::get('/{inven_galeri}/edit', 'InventoryGalleryController@edit')->name('inven_galeri.edit');
+            Route::patch('/{inven_galeri}/update', 'InventoryGalleryController@update')->name('inven_galeri.update');
+            Route::get('/{inven_galeri}/delete', 'InventoryGalleryController@destroy')->name('inven_galeri.destroy');
+        });
+
+        Route::group(['prefix' => 'jabatan'], function() {
+            Route::get('/', 'JabatanController@index')->name('jabatan.index');
+            Route::post('/store', 'JabatanController@store')->name('jabatan.store');
+            Route::get('/{jabatan}/show', 'JabatanController@show')->name('jabatan.show');
+            Route::get('/{jabatan}/edit', 'JabatanController@edit')->name('jabatan.edit');
+            Route::patch('/{jabatan}/update', 'JabatanController@update')->name('jabatan.update');
+            Route::get('/{jabatan}/delete', 'JabatanController@destroy')->name('jabatan.destroy');
+        });
+
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
