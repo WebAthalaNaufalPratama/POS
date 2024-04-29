@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DeliveryOrder;
+use App\Models\InventoryGallery;
 use App\Models\Karyawan;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kontrak;
@@ -93,6 +94,7 @@ class DeliveryOrderController extends Controller
         // save data do
         $check = DeliveryOrder::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        $kontrak = Kontrak::where('no_kontrak', $data['no_referensi'])->first();
 
         // save produk do
         for ($i=0; $i < count($data['nama_produk']); $i++) { 
@@ -119,6 +121,9 @@ class DeliveryOrderController extends Controller
                     'harga_total' => $komponen->harga_total
                 ]);
                 if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
+                $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($data['jumlah'][$i]));
+                $stok->update();
             }
         }
 
@@ -149,6 +154,9 @@ class DeliveryOrderController extends Controller
                         'harga_total' => $komponen->harga_total
                     ]);
                     if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
+                    $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($data['jumlah2'][$i]));
+                    $stok->update();
                 }
             }
         }
