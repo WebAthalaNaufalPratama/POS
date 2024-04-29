@@ -71,6 +71,13 @@ class DopenjualanController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_do_penjualan', $fileName, 'public');
+            // dd($filePath);
+            $data['file'] = $filePath;
+        }
         // dd($data['nama_produk']);
         $data['jenis_do'] = 'PENJUALAN';
         $data['status'] = 'DIKIRIM';
