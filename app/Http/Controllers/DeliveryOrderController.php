@@ -45,6 +45,7 @@ class DeliveryOrderController extends Controller
         $kontrak = Kontrak::with('produk')->find($data['kontrak']);
         $drivers = Karyawan::where('jabatan', 'driver')->get();
         $produkjuals = Produk_Jual::all();
+        $produkSewa = $kontrak->produk()->whereHas('produk')->get();
         $latestDO = DeliveryOrder::withTrashed()->orderByDesc('id')->get();
 
         // kode do
@@ -52,10 +53,10 @@ class DeliveryOrderController extends Controller
             $getKode = 'DVO' . date('Ymd') . '00001';
         } else {
             $lastDO = $latestDO->first();
-            $kode = substr($lastDO->no_referensi, -5);
+            $kode = substr($lastDO->no_do, -5);
             $getKode = 'DVO' . date('Ymd') . str_pad((int)$kode + 1, 5, '0', STR_PAD_LEFT);
         }
-        return view('do_sewa.create', compact('kontrak', 'drivers', 'produkjuals', 'getKode'));
+        return view('do_sewa.create', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa'));
     }
 
     /**
@@ -91,10 +92,67 @@ class DeliveryOrderController extends Controller
             $data['file'] = $filePath;
         }
 
+        // check produk and quantity from sewa
+        $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_referensi'])->first();
+        $produkSewa = $kontrak->produk()->whereHas('produk')->get();
+
+        // cek input dengan sewa
+        foreach ($produkSewa as $item) {
+            for ($i=0; $i < count($data['nama_produk']); $i++) {
+                if($data['nama_produk'][$i] == $item->produk->kode){
+                    if($data['jumlah'][$i] > $item->jumlah){
+                        return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai dengan kontrak');
+                    }
+                }
+            }
+        }
+
+        
+
+        // check sisa produk sewa yang belum dikirim
+        $sisa_sewa = collect();
+        $do_terbuat = DeliveryOrder::with('produk')->where('no_referensi', $data['no_referensi'])->get();
+        if($do_terbuat){
+            foreach ($produkSewa as $item_sewa) {
+                $sisa_produk = $item_sewa->jumlah; // Sisa produk diinisialisasi dengan jumlah awal dari sewa
+                foreach ($do_terbuat as $do) { // Dapatkan DO
+                    foreach ($do->produk as $item_do) { // Dapatkan produk terjual DO
+                        if($item_sewa->produk_jual_id == $item_do->produk_jual_id){ // Periksa produk yang sama antara sewa dan DO
+                            $sisa_produk -= intval($item_do->jumlah); // Kurangi jumlah produk terjual dari sisa produk sewa
+                        }
+                    }
+                }
+                if ($sisa_produk > 0) {
+                    $sisa_sewa->push([ // masukkan sisa produk ke array
+                        'id' => $item_sewa->produk_jual_id,
+                        'kode_produk' => $item_sewa->produk->kode,
+                        'jumlah' => $sisa_produk
+                    ]);
+                }
+            }
+        }
+
+        // cek jika sudah terkirim semua
+        if ($sisa_sewa->isEmpty()) {
+            // Jika $sisa_sewa kosong, berikan penanganan khusus di sini
+            return redirect()->back()->withInput()->with('fail', 'Produk sudah dikirim semua');
+        }
+
+        // cek input dengan sisa produk dari do terbuat
+            for ($j=0; $j < count($sisa_sewa); $j++) { // loop sisa produk
+                for ($i=0; $i <count($data['nama_produk']); $i++) { // loop produk dari input
+                    if($data['nama_produk'][$i] == $sisa_sewa[$j]['kode_produk']){ // cek kode produk
+                        if($data['jumlah'][$i] > $sisa_sewa[$j]['jumlah']){ // cek jumlah
+                            return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai');
+                        }
+                    }
+                }
+            }
+            dd('das');
+        
         // save data do
         $check = DeliveryOrder::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-        $kontrak = Kontrak::where('no_kontrak', $data['no_referensi'])->first();
 
         // save produk do
         for ($i=0; $i < count($data['nama_produk']); $i++) { 

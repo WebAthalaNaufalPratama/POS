@@ -106,8 +106,8 @@
                                         <td>
                                             <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
-                                                @foreach ($produkjuals as $produk)
-                                                    <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                @foreach ($produkSewa as $produk)
+                                                    <option value="{{ $produk->produk->kode }}">{{ $produk->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -125,8 +125,8 @@
                                             <td>
                                                 <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
                                                     <option value="">Pilih Produk</option>
-                                                    @foreach ($produkjuals as $pj)
-                                                        <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                    @foreach ($produkSewa as $pj)
+                                                        <option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
@@ -244,6 +244,7 @@
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
             $('[id^=produk], #driver_id').select2();
+            $('#driver_id').trigger('change');
             var i = '{{ count($kontrak->produk) }}';
             $('#add').click(function(){
                 var newRow = '<tr id="row'+i+'"><td>' + 
@@ -289,7 +290,6 @@
             $('#row2'+button_id+'').remove();
         });
         $('#driver_id').on('change', function() {
-            console.log('fe')
             var nama_driver = $("#driver_id option:selected").text();
             var val_driver = $("#driver_id option:selected").val();
             if(val_driver != ""){
