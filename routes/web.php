@@ -232,6 +232,14 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
         });
 
+        Route::group(['prefix' => 'purchase'], function() {
+            Route::get('/pembelian', 'PembelianController@index')->name('pembelian.index');
+            Route::get('/create', 'PembelianController@create')->name('pembelian.create');
+            Route::get('/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
+            Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
+           
+        });
+
         Route::group(['prefix' => 'kontrak'], function() {
             Route::get('/', 'KontrakController@index')->name('kontrak.index');
             Route::get('/create', 'KontrakController@create')->name('kontrak.create');
