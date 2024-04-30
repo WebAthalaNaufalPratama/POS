@@ -4,18 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Jabatan;
 use Illuminate\Http\Request;
-use App\Models\Karyawan;
-use App\Models\Lokasi;
 use Illuminate\Support\Facades\Validator;
 
-class KaryawanController extends Controller
+class JabatanController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-        $karyawans = Karyawan::all();
-        $lokasis = Lokasi::all();
         $jabatans = Jabatan::all();
-        return view('karyawan.index', compact('karyawans', 'lokasis', 'jabatans'));
+        return view('jabatan.index', compact('jabatans'));
     }
 
     /**
@@ -39,17 +40,14 @@ class KaryawanController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
-            'jabatan' => 'required',
-            'lokasi_id' => 'required',
-            'handphone' => 'required',
-            'alamat' => 'required',
+            'deskripsi' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
 
         // save data
-        $check = Karyawan::create($data);
+        $check = Jabatan::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
         return redirect()->back()->with('success', 'Data tersimpan');
     }
@@ -57,24 +55,23 @@ class KaryawanController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Produk  $produk
+     * @param  \App\Models\Jabatan  $jabatan
      * @return \Illuminate\Http\Response
      */
-    public function show(Karyawan $karyawan)
+    public function show(Jabatan $jabatan)
     {
-        $data = Karyawan::find($karyawan);
-        return response()->json($data);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Produk  $produk
+     * @param  \App\Models\Jabatan  $jabatan
      * @return \Illuminate\Http\Response
      */
-    public function edit($karyawan)
+    public function edit($jabatan)
     {
-        $data = Karyawan::find($karyawan);
+        $data = Jabatan::find($jabatan);
         return response()->json($data);
     }
 
@@ -82,25 +79,22 @@ class KaryawanController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Produk  $produk
+     * @param  \App\Models\Jabatan  $jabatan
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $req, $karyawan)
+    public function update(Request $req, $jabatan)
     {
         // validasi
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
-            'jabatan' => 'required',
-            'lokasi_id' => 'required',
-            'handphone' => 'required',
-            'alamat' => 'required',
+            'deskripsi' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
 
         // update data
-        $check = Karyawan::find($karyawan)->update($data);
+        $check = Jabatan::find($jabatan)->update($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
         return redirect()->back()->with('success', 'Data berhsail diperbarui');
     }
@@ -108,12 +102,12 @@ class KaryawanController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Produk  $produk
+     * @param  \App\Models\Jabatan  $jabatan
      * @return \Illuminate\Http\Response
      */
-    public function destroy($karyawan)
+    public function destroy($jabatan)
     {
-        $data = Karyawan::find($karyawan);
+        $data = Jabatan::find($jabatan);
         if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);

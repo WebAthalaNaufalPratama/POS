@@ -37,14 +37,18 @@
                             <td>{{ $aset->lokasi->nama}}</td>
                             <td>{{ $aset->jumlah }}</td>
                             <td>{{ $aset->tahun_beli }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="bu tton" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $aset->id }})" data-bs-toggle="modal" data-bs-target="#editaset">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $aset->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                              </a>
+                              <ul class="dropdown-menu">
+                                  <li>
+                                      <a href="javascript:void(0);" onclick="getData({{ $aset->id }})" data-bs-toggle="modal" data-bs-target="#editaset" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  </li>
+                                  <li>
+                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $aset->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                  </li>
+                              </ul>
                             </td>
                         </tr>
                     @endforeach
@@ -79,7 +83,7 @@
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
               <div class="form-group">
                 <select class="select2" name="lokasi_id" id="add_lokasi_id" required>
-                  <option value="">Pilih Tipe</option>
+                  <option value="">Pilih Lokasi</option>
                   @foreach($lokasis as $lokasi)
                     <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                   @endforeach
@@ -126,7 +130,7 @@
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
               <div class="form-group">
                 <select class="select2" name="lokasi_id" id="edit_lokasi_id" required>
-                  <option value="">Pilih Tipe</option>
+                  <option value="">Pilih Lokasi</option>
                   @foreach($lokasis as $lokasi)
                     <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                   @endforeach
@@ -156,7 +160,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_tipe_aset, #edit_tipe_aset').select2()
+        $('#add_lokasi_id, #edit_lokasi_id').select2()
     });
 
     function getData(id){

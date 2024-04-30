@@ -280,6 +280,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{form}/delete', 'FormPerangkaiController@destroy')->name('form.destroy');
         });
 
+        Route::group(['prefix' => 'formpenjualan'], function() {
+            Route::get('/', 'FormPerangkaiController@penjualan_index')->name('formpenjualan.index');
+            Route::get('/create', 'FormPerangkaiController@penjualan_create')->name('formpenjualan.create');
+            Route::post('/store', 'FormPerangkaiController@penjualan_store')->name('formpenjualan.store');
+            Route::get('/{formpenjualan}/show', 'FormPerangkaiController@penjualan_show')->name('formpenjualan.show');
+            Route::get('/{formpenjualan}/edit', 'FormPerangkaiController@penjualan_edit')->name('formpenjualan.edit');
+            Route::patch('/{formpenjualan}/update', 'FormPerangkaiController@penjualan_update')->name('formpenjualan.update');
+            Route::get('/{formpenjualan}/delete', 'FormPerangkaiController@penjualan_destroy')->name('formpenjualan.destroy');
+        });
+
         Route::group(['prefix' => 'do_sewa'], function() {
             Route::get('/', 'DeliveryOrderController@index_sewa')->name('do_sewa.index');
             Route::get('/create', 'DeliveryOrderController@create_sewa')->name('do_sewa.create');
@@ -288,6 +298,25 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{do_sewa}/edit', 'DeliveryOrderController@edit_sewa')->name('do_sewa.edit');
             Route::patch('/{do_sewa}/update', 'DeliveryOrderController@update_sewa')->name('do_sewa.update');
             Route::get('/{do_sewa}/delete', 'DeliveryOrderController@destroy_sewa')->name('do_sewa.destroy');
+        });
+
+        Route::group(['prefix' => 'inven_galeri'], function() {
+            Route::get('/', 'InventoryGalleryController@index')->name('inven_galeri.index');
+            Route::get('/create', 'InventoryGalleryController@create')->name('inven_galeri.create');
+            Route::post('/store', 'InventoryGalleryController@store')->name('inven_galeri.store');
+            Route::get('/{inven_galeri}/show', 'InventoryGalleryController@show')->name('inven_galeri.show');
+            Route::get('/{inven_galeri}/edit', 'InventoryGalleryController@edit')->name('inven_galeri.edit');
+            Route::patch('/{inven_galeri}/update', 'InventoryGalleryController@update')->name('inven_galeri.update');
+            Route::get('/{inven_galeri}/delete', 'InventoryGalleryController@destroy')->name('inven_galeri.destroy');
+        });
+
+        Route::group(['prefix' => 'jabatan'], function() {
+            Route::get('/', 'JabatanController@index')->name('jabatan.index');
+            Route::post('/store', 'JabatanController@store')->name('jabatan.store');
+            Route::get('/{jabatan}/show', 'JabatanController@show')->name('jabatan.show');
+            Route::get('/{jabatan}/edit', 'JabatanController@edit')->name('jabatan.edit');
+            Route::patch('/{jabatan}/update', 'JabatanController@update')->name('jabatan.update');
+            Route::get('/{jabatan}/delete', 'JabatanController@destroy')->name('jabatan.destroy');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

@@ -7,10 +7,10 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h5 class="card-title">Detail Delivery order</h5>
+                        <h5 class="card-title">Detail Form Perangkai Penjualan</h5>
                     </div>
                     <div class="page-btn">
-                        <a href="#" class="btn btn-added">Cetak DO</a>
+                        <a href="#" class="btn btn-added">Cetak Form</a>
                     </div>
                 </div>
             </div>

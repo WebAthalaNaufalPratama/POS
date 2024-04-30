@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FormPerangkai;
+use App\Models\Karyawan;
 use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -14,9 +15,15 @@ class FormPerangkaiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        //
+        $query = FormPerangkai::whereHas('produk_terjual');
+        if($req->jenis_rangkaian){
+            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->get();
+        } else {
+            $data = $query->get();
+        }
+        return view('form_sewa.index', compact('data'));
     }
 
     /**
@@ -71,6 +78,8 @@ class FormPerangkaiController extends Controller
             $route = explode(',', $req->route);
             if(count($route) == 1){
                 return redirect()->route($route[0])->with('success', 'Form Perangkai ditambahkan');
+            } elseif($route[1] == 'form') {
+                return redirect()->route($route[0], [$route[1] => $check->id])->with('success', 'Form Perangkai ditambahkan');
             } else {
                 return redirect()->route($route[0], [$route[1] => $route[2]])->with('success', 'Form Perangkai ditambahkan');
             }
@@ -84,9 +93,11 @@ class FormPerangkaiController extends Controller
      * @param  \App\Models\FormPerangkai  $formPerangkai
      * @return \Illuminate\Http\Response
      */
-    public function show(FormPerangkai $formPerangkai)
+    public function show($formPerangkai)
     {
-        //
+        $data = FormPerangkai::with('produk_terjual')->find($formPerangkai);
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        return view('form_sewa.show', compact('perangkai', 'data'));
     }
 
     /**
@@ -121,5 +132,27 @@ class FormPerangkaiController extends Controller
     public function destroy(FormPerangkai $formPerangkai)
     {
         //
+    }
+
+    public function penjualan_index(Request $req)
+    {
+        $query = FormPerangkai::whereHas('produk_terjual');
+        if($req->jenis_rangkaian){
+            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->get();
+        } else {
+            $data = $query->get();
+        }
+        return view('form_jual.index', compact('data'));
+    }
+
+    public function penjualan_show(Request $req)
+    {
+        $query = FormPerangkai::whereHas('produk_terjual');
+        if($req->jenis_rangkaian){
+            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->get();
+        } else {
+            $data = $query->get();
+        }
+        return view('form_jual.show', compact('data'));
     }
 }

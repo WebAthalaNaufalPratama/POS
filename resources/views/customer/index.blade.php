@@ -43,14 +43,18 @@
                             <td>{{ $custome->poin_loyalty }}</td>
                             <td>{{ $custome->status_piutang}}</td>
                             <td>{{ $custome->tanggal_bergabung }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="bu tton" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0);" onclick="getData({{ $custome->id }})" data-bs-toggle="modal" data-bs-target="#editcustomer">Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $custome->id }})">Delete</a>
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                              </a>
+                              <ul class="dropdown-menu">
+                                  <li>
+                                      <a href="javascript:void(0);" onclick="getData({{ $custome->id }})" data-bs-toggle="modal" data-bs-target="#editcustomer" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  </li>
+                                  <li>
+                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $custome->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                  </li>
+                              </ul>
                             </td>
                         </tr>
                     @endforeach
@@ -170,7 +174,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_tipe_customer, #edit_tipe_customer').select2()
+        $('#add_tipe, #edit_tipe').select2()
     });
 
     function getData(id){

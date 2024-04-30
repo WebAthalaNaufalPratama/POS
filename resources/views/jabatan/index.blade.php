@@ -7,10 +7,10 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Ongkir</h4>
+                    <h4>Jabatan</h4>
                 </div>
                 <div class="page-btn">
-                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addongkir" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Ongkir</a>
+                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addjabatan" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Jabatan</a>
                 </div>
             </div>
         </div>
@@ -21,31 +21,29 @@
                 <tr>
                     <th>No</th>
                     <th>Nama</th>
-                    <th>Lokasi</th>
-                    <th>Biaya</th>
+                    <th>Deskripsi</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($ongkirs as $ongkir)
+                    @foreach ($jabatans as $jabatan)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $ongkir->nama }}</td>
-                            <td>{{ $ongkir->lokasi->nama ?? '-' }}</td>
-                            <td>{{ $ongkir->biaya }}</td>
+                            <td>{{ $jabatan->nama }}</td>
+                            <td>{{ $jabatan->deskripsi }}</td>
                             <td class="text-center">
-                              <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                  <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                              </a>
-                              <ul class="dropdown-menu">
-                                  <li>
-                                      <a href="javascript:void(0);" onclick="getData({{ $ongkir->id }})" data-bs-toggle="modal" data-bs-target="#editongkir" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                  </li>
-                                  <li>
-                                      <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $ongkir->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
-                                  </li>
-                              </ul>
-                            </td>
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="javascript:void(0);" onclick="getData({{ $jabatan->id }})" data-bs-toggle="modal" data-bs-target="#editjabatan" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $jabatan->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                    </li>
+                                </ul>
+                              </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -57,35 +55,24 @@
 </div>
 
 {{-- modal start --}}
-<div class="modal fade" id="addongkir" tabindex="-1" aria-labelledby="addongkirlabel" aria-hidden="true">
+<div class="modal fade" id="addjabatan" tabindex="-1" aria-labelledby="addjabatanlabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addongkirlabel">Tambah ongkir</h5>
+          <h5 class="modal-title" id="addjabatanlabel">Tambah Jabatan</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form action="{{ route('ongkir.store') }}" method="POST">
+          <form action="{{ route('jabatan.store') }}" method="POST">
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
               <input type="text" class="form-control" name="nama" id="add_nama" required>
             </div>
             <div class="mb-3">
-              <label for="lokasi_id" class="col-form-label">Lokasi</label>
-              <div class="form-group">
-                <select class="select2" name="lokasi_id" id="add_lokasi" required>
-                  <option value="">Pilih Lokasi</option>
-                  @foreach ($lokasis as $lokasi)
-                    <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                  @endforeach
-                </select>
-              </div>
+                <label for="deskripsi" class="col-form-label">Deskripsi</label>
+                <textarea class="form-control" name="deskripsi" id="add_deskripsi" required></textarea>
             </div>
-            <div class="mb-3">
-                <label for="biaya" class="col-form-label">Biaya</label>
-                <input type="text" class="form-control" name="biaya" id="add_biaya" required>
-              </div>
         </div>
         <div class="modal-footer justify-content-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -95,15 +82,15 @@
       </div>
     </div>
 </div>
-<div class="modal fade" id="editongkir" tabindex="-1" aria-labelledby="editongkirlabel" aria-hidden="true">
+<div class="modal fade" id="editjabatan" tabindex="-1" aria-labelledby="editjabatanlabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editongkirlabel">Edit ongkir</h5>
+          <h5 class="modal-title" id="editjabatanlabel">Edit Jabatan</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form id="editForm" action="ongkir/0/update" method="POST">
+          <form id="editForm" action="jabatan/0/update" method="POST">
             @csrf
             @method('PATCH')
             <div class="mb-3">
@@ -111,19 +98,8 @@
               <input type="text" class="form-control" name="nama" id="edit_nama" value="" required>
             </div>
             <div class="mb-3">
-                <label for="lokasi_id" class="col-form-label">Lokasi</label>
-                <div class="form-group">
-                  <select class="select2" name="lokasi_id" id="edit_lokasi" required>
-                    <option value="">Pilih Lokasi</option>
-                    @foreach ($lokasis as $lokasi)
-                      <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                    @endforeach
-                  </select>
-                </div>
-              </div>
-            <div class="mb-3">
-                <label for="biaya" class="col-form-label">Biaya</label>
-                <input type="text" class="form-control" name="biaya" id="edit_biaya" value="" required>
+                <label for="deskripsi" class="col-form-label">Deskripsi</label>
+                <textarea class="form-control" name="deskripsi" id="edit_deskripsi" value="" required></textarea>
               </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -139,19 +115,14 @@
 
 @section('scripts')
     <script>
-    $(document).ready(function() {
-        $('#add_lokasi, #edit_lokasi').select2()
-    });
-
     function getData(id){
         $.ajax({
             type: "GET",
-            url: "/ongkir/"+id+"/edit",
+            url: "/jabatan/"+id+"/edit",
             success: function(response) {
-                $('#editForm').attr('action', 'ongkir/'+id+'/update');
+                $('#editForm').attr('action', 'jabatan/'+id+'/update');
                 $('#edit_nama').val(response.nama)
-                $('#edit_lokasi').val(response.lokasi_id).trigger('change')
-                $('#edit_biaya').val(response.biaya)
+                $('#edit_deskripsi').val(response.deskripsi)
             },
             error: function(error) {
                 toastr.error('Ambil data error', 'Error', {
@@ -167,7 +138,7 @@
     function deleteData(id){
         $.ajax({
             type: "GET",
-            url: "/ongkir/"+id+"/delete",
+            url: "/jabatan/"+id+"/delete",
             success: function(response) {
                 toastr.success(response.msg, 'Success', {
                     closeButton: true,

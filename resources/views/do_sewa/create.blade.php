@@ -9,9 +9,6 @@
                     <div class="page-title">
                         <h5 class="card-title">Buat Delivery order</h5>
                     </div>
-                    <div class="page-btn">
-                        <a href="#" class="btn btn-added">Cetak DO</a>
-                    </div>
                 </div>
             </div>
             <div class="card-body">

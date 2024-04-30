@@ -58,7 +58,7 @@
                                             @if($penjualan->distribusi == 'Dikirim')
                                             <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}">Delivery Order</a>
                                             @endif
-                                            <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a>
+                                            <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a> -->
                                         </div>
                                     </div>
                                 </td>

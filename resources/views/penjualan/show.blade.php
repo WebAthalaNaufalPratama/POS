@@ -50,7 +50,7 @@
                                         <div class="form-group">
                                             <label for=""></label>
                                             <div class="add-icon">
-                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                                                <button type="button" class="btn btn-primary" disabled>
                                                     <img src="/assets/img/icons/plus1.svg" alt="img" />
                                                 </button>
                                             </div>
@@ -316,13 +316,23 @@
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ $penjualans->sub_total}}" readonly required disabled></h5>
                                                 </li>
                                                 <li>
-                                                    <h4><select id="jenis_ppn" name="jenis_ppn" class="form-control" required disabled>
+                                                    <h4>
+                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required disabled>
                                                             <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude" {{ $penjualans->jenis_ppn = 'exclude' ? 'selected' : ''}}> PPN EXCLUDE</option>
-                                                            <option value="include" {{ $penjualans->jenis_ppn = 'include' ? 'selected' : ''}}> PPN INCLUDE</option>
-                                                        </select></h4>
-                                                    <h5><input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ $penjualans->jumlah_ppn}}" required disabled></h5>
+                                                            <option value="exclude" {{ $penjualans->jenis_ppn == 'exclude' ? 'selected' : '' }}> PPN EXCLUDE</option>
+                                                            <option value="include" {{ $penjualans->jenis_ppn == 'include' ? 'selected' : '' }}> PPN INCLUDE</option>
+                                                        </select>
+                                                    </h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $penjualans->persen_ppn }}" readonly required>
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ $penjualans->jumlah_ppn}}" readonly required>
+
+                                                    </h5>
                                                 </li>
+
                                                 <li>
                                                     <h4>Promo</h4>
                                                     <h5 class="col-lg-5">
@@ -335,7 +345,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-3 ps-0 mb-0">
-                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
+                                                                <button id="btnCheckPromo" class="btn btn-primary w-100" disabled><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                                             </div>
                                                         </div>
                                                         <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ $penjualans->total_promo }}" readonly readonly>
@@ -375,58 +385,6 @@
 </div>
 </div>
 
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Tambah Customer</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="{{ route('customer.store') }}" method="POST">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="nama" class="col-form-label">Nama</label>
-                        <input type="text" class="form-control" name="nama" id="add_nama" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tipe" class="col-form-label">Tipe Customer</label>
-                        <div class="form-group">
-                            <select class="select2" name="tipe" id="add_tipe" required>
-                                <option value="">Pilih Tipe</option>
-                                <option value="tradisional">tradisional</option>
-                                <option value="sewa">sewa</option>
-                                <option value="premium">premium</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="handphone" class="col-form-label"> No Handphone</label>
-                        <input type="text" class="form-control" name="handphone" id="add_handphone" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="alamat" class="col-form-label">Alamat</label>
-                        <textarea class="form-control" name="alamat" id="add_alamat" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tanggal_lahir" class="col-form-label">Tanggal Lahir</label>
-                        <input type="date" class="form-control" name="tanggal_lahir" id="add_tanggal_lahir" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tanggal_bergabung" class="col-form-label">Tanggal Gabung</label>
-                        <input type="date" class="form-control" name="tanggal_bergabung" id="add_tanggal_bergabung" required>
-                    </div>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
-            </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade" id="modalPerangkai" tabindex="-1" aria-labelledby="modalPerangkaiLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -489,119 +447,11 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Form Pembayaran</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="{{ route('customer.store') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="no_invoice">Nomor Invoice</label>
-                        <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nominalbayar">Nominal</label>
-                        <input type="number" class="form-control" id="nominalbayar" name="nominalbayar" placeholder="Nominal Bayar">
-                    </div>
-                    <div class="form-group">
-                        <label for="bankpenerima">Bank Penerima</label>
-                        <select>
-                            <option value="">Pilih Bank Penerima</option>
-                            @foreach ($bankpens as $bankpen)
-                            <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="tanggalbayar">Tanggal</label>
-                        <input type="date" class="form-control" id="tanggalbayar" name="tanggalbayar" onchange="updateDate(this)">
-                    </div>
-                    <div class="form-group">
-                        <label for="buktibayar">Unggah Bukti</label>
-                        <input type="file" class="form-control" id="buktibayar" name="buktibayar" readonly>
-                    </div>
-                </div>
-
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    function showInputType(index) {
-        var selectElement = document.getElementById("jenis_diskon_" + index);
-        var selectedValue = selectElement.value;
-        // console.log(selectedValue);
-        var diskonInput = document.getElementById("diskon_" + index);
-        var nominalInput = document.getElementById("nominalInput_" + index);
-        var persenInput = document.getElementById("persenInput_" + index);
-
-        if (selectedValue === "Nominal") {
-            diskonInput.style.display = "block";
-            nominalInput.style.display = "block";
-            persenInput.style.display = "none";
-        } else if (selectedValue === "persen") {
-            diskonInput.style.display = "block";
-            nominalInput.style.display = "none";
-            persenInput.style.display = "block";
-        } else {
-            diskonInput.style.display = "none";
-            nominalInput.style.display = "none";
-            persenInput.style.display = "none";
-            diskonInput.value = 0;
-        }
-
-        calculateTotal(index);
-    }
-
-    function calculateTotal(index) {
-        var diskonType = $('#jenis_diskon_' + index).val();
-        // console.log(diskonType);
-
-        var diskonValue = parseFloat($('#diskon_' + index).val());
-        var jumlah = parseFloat($('#jumlah_' + index).val());
-        var hargaSatuan = parseFloat($('#harga_satuan_' + index).val());
-        var hargaTotal = 0;
-        // console.log(diskonValue);
-
-        if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
-            hargaTotal = jumlah * hargaSatuan;
-        }
-
-        if (!isNaN(hargaTotal)) {
-            if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue;
-            } else if (diskonType === "persen" && !isNaN(diskonValue)) {
-                hargaTotal -= (hargaTotal * diskonValue / 100);
-            }
-        }
-
-        // Set nilai input harga total
-        $('#harga_total_' + index).val(hargaTotal.toFixed(2));
-
-        // Hitung ulang subtotal
-        var subtotal = 0;
-        $('input[name="harga_total[]"]').each(function() {
-            subtotal += parseFloat($(this).val()) || 0;
-        });
-
-        // Set nilai input subtotal
-        $('#sub_total').val(subtotal.toFixed(2));
-    }
 
     function copyDataToModal(index) {
         var namaProdukValue = $('#nama_produk_' + index).val();
@@ -821,238 +671,7 @@
             updateHargaSatuan(this);
         });
 
-
-        $('#delivery_order_section').show();
-
-        $('#distribusi').change(function() {
-            if ($(this).val() === 'Diambil') {
-                $('#delivery_order_section').hide();
-            } else {
-                $('#delivery_order_section').show();
-            }
-        });
-
-
-
-        $('#cara_bayar').change(function() {
-            var pembayaran = $(this).val();
-
-            $('#inputCash').hide();
-            $('#inputTransfer').hide();
-
-            if (pembayaran === "cash") {
-                $('#inputCash').show();
-            } else if (pembayaran === "transfer") {
-                $('#inputTransfer').show();
-            }
-        });
-
-        $('#cara_bayar').trigger('change');
-
-        $('#pilih_pengiriman').change(function() {
-            var pengiriman = $(this).val();
-
-            $('#inputOngkir').hide();
-            $('#inputExspedisi').hide();
-
-            if (pengiriman === "sameday") {
-                $('#inputOngkir').show();
-            } else if (pengiriman === "exspedisi") {
-                $('#inputExspedisi').show();
-            }
-        });
-
-        $('#pilih_pengiriman').trigger('change');
-
-        $('#id_customer').change(function() {
-            var pointInput = $('#point_dipakai');
-            var selectedOption = $(this).find('option:selected');
-            var pointValue = selectedOption.data('point');
-            if ($('#cek_point').prop('checked')) {
-                pointInput.val(pointValue);
-            } else {
-                pointInput.val(0);
-            }
-            var hpInput = $('#nohandphone');
-            var hpValue = selectedOption.data('hp');
-            hpInput.val(hpValue);
-        });
-
-        function checkPromo(total_transaksi, tipe_produk, produk) {
-            $('#total_promo').val(0);
-            var data = {
-                total_transaksi: total_transaksi,
-                tipe_produk: tipe_produk,
-                produk: produk
-            };
-            $.ajax({
-                url: '/checkPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    $('#promo_id').empty()
-                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
-
-                    var min_transaksi = response.min_transaksi;
-                    for (var j = 0; j < min_transaksi.length; j++) {
-                        var promo = min_transaksi[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    var tipe_produk = response.tipe_produk;
-                    for (var j = 0; j < tipe_produk.length; j++) {
-                        var promo = tipe_produk[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    var produk = response.produk;
-                    for (var j = 0; j < produk.length; j++) {
-                        var promo = produk[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    $('#promo_id').attr('disabled', false);
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                },
-                complete: function() {
-                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip"></i>')
-                }
-            });
-        }
-
-        $('#promo_id').change(function() {
-            var promo_id = $(this).select2().find(":selected").val()
-            if (!promo_id) {
-                $('#total_promo').val(0);
-                total_harga();
-                return 0;
-            }
-            calculatePromo(promo_id);
-        });
-
-        $('#promo_id').trigger('change');
-
-        function calculatePromo(promo_id) {
-            var data = {
-                promo_id: promo_id,
-            };
-            $.ajax({
-                url: '/getPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
-                    var total_promo;
-                    switch (response.diskon) {
-                        case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
-                            // console.log(total_promo);
-                            break;
-                        case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
-                            break;
-                        case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
-                            break;
-                        case 'produk':
-                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
-                            break;
-                        default:
-                            break;
-                    }
-                    $('#total_promo').val(total_promo);
-                    Totaltagihan();
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                }
-            });
-        }
-
-        $('#cek_point').change(function() {
-            var pointInput = $('#point_dipakai');
-            var selectedOption = $('#id_customer').find('option:selected');
-            var pointValue = selectedOption.data('point');
-            if ($(this).prop('checked')) {
-                pointInput.val(pointValue);
-            } else {
-                pointInput.val(0);
-            }
-        });
-
-        function updateHargaSatuan(select) {
-            var index = select.selectedIndex;
-            var hargaSatuanInput = $('#harga_satuan_0');
-            var selectedOption = $(select).find('option').eq(index);
-            var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
-        }
-        $('#nama_produk').on('change', function() {
-            updateHargaSatuan(this);
-        });
-
-        function updateHargaSatuan(select) {
-            var index = select.selectedIndex;
-            var hargaSatuanInput = $('#harga_satuan_' + select.id.split('_')[2]);
-            var selectedOption = $(select).find('option').eq(index);
-            var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
-            multiply(hargaSatuanInput);
-        }
-
-        window.multiply = function(element) {
-            var id;
-            // Memeriksa apakah element adalah objek jQuery atau bukan
-            if (element instanceof jQuery) {
-                id = element.attr('id').split('_')[1];
-            } else {
-                // Jika element bukan objek jQuery, asumsikan itu adalah elemen HTML dan akses langsung properti id
-                id = element.id.split('_')[1];
-            }
-            var jumlah = $('#jumlah_' + id).val();
-            var harga_satuan = $('#harga_satuan_' + id).val();
-            if (jumlah && harga_satuan) {
-                $('#harga_total_' + id).val(harga_satuan * jumlah);
-            }
-            var inputs = $('input[name="harga_total[]"]');
-            var total = 0;
-            inputs.each(function() {
-                total += parseInt($(this).val()) || 0;
-            });
-            $('#harga').val(total);
-
-            $('#sub_total').val(total);
-        }
-
-        function updateSubTotal() {
-            var subTotalInput = $('#sub_total');
-            var hargaTotalInputs = $('input[name="harga_total[]"]');
-            var subTotal = 0;
-
-            hargaTotalInputs.each(function() {
-                subTotal += parseFloat($(this).val()) || 0;
-            });
-
-            subTotalInput.val(subTotal.toFixed(2));
-        }
-
-        function Totaltagihan() {
-            var subtotal = parseFloat($('#sub_total').val()) || 0;
-            var extot = parseFloat($('#jumlah_ppn').val()) || 0;
-            var dp = parseFloat($('#dp').val()) || 0;
-            var totalTagihan = subtotal + extot - dp;
-            var sisaBayar = totalTagihan - dp;
-
-            $('#total_tagihan').val(totalTagihan.toFixed(2));
-            $('#sisa_bayar').val(sisaBayar.toFixed(2));
-        }
-
-        $('#sub_total, #jumlah_ppn, #dp').on('input', Totaltagihan);
+        
     });
 </script>
 
