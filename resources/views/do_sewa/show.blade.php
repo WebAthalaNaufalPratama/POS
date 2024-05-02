@@ -248,14 +248,14 @@
                                 <span class="text-danger">max 2mb</span>
                                 <img id="preview" src="{{ $data->file ? '/storage/' . $data->file : '' }}" alt="your image" />
                             </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit">Upload File</button>
-                    <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
-                </div>
+            </div>
+            <div class="text-end mt-3">
+                <button class="btn btn-primary" type="submit">Upload File</button>
+                <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
+            </div>
             </form>
             </div>
         </div>

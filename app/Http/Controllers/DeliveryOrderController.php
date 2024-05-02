@@ -107,8 +107,6 @@ class DeliveryOrderController extends Controller
             }
         }
 
-        
-
         // check sisa produk sewa yang belum dikirim
         $sisa_sewa = collect();
         $do_terbuat = DeliveryOrder::with('produk')->where('no_referensi', $data['no_referensi'])->get();
@@ -134,21 +132,19 @@ class DeliveryOrderController extends Controller
 
         // cek jika sudah terkirim semua
         if ($sisa_sewa->isEmpty()) {
-            // Jika $sisa_sewa kosong, berikan penanganan khusus di sini
             return redirect()->back()->withInput()->with('fail', 'Produk sudah dikirim semua');
         }
 
         // cek input dengan sisa produk dari do terbuat
-            for ($j=0; $j < count($sisa_sewa); $j++) { // loop sisa produk
-                for ($i=0; $i <count($data['nama_produk']); $i++) { // loop produk dari input
-                    if($data['nama_produk'][$i] == $sisa_sewa[$j]['kode_produk']){ // cek kode produk
-                        if($data['jumlah'][$i] > $sisa_sewa[$j]['jumlah']){ // cek jumlah
-                            return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai');
-                        }
+        for ($j=0; $j < count($sisa_sewa); $j++) { // loop sisa produk
+            for ($i=0; $i <count($data['nama_produk']); $i++) { // loop produk dari input
+                if($data['nama_produk'][$i] == $sisa_sewa[$j]['kode_produk']){ // cek kode produk
+                    if($data['jumlah'][$i] > $sisa_sewa[$j]['jumlah']){ // cek jumlah
+                        return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai');
                     }
                 }
             }
-            dd('das');
+        }
         
         // save data do
         $check = DeliveryOrder::create($data);
