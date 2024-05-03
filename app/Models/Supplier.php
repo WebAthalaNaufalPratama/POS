@@ -10,4 +10,11 @@ class Supplier extends Model
 {
     use HasFactory, SoftDeletes;
     protected $guarded = ['id'];
+
+    public function pembelian (){
+        return $this->hasMany(Pembelian::class);
+    }
+    public function poinden (){
+        return $this->hasMany(Poinden::class);
+    }
 }

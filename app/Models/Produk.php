@@ -15,4 +15,7 @@ class Produk extends Model
     public function tipe(){
         return $this->belongsTo(Tipe_Produk::class, 'tipe_produk', 'id');
     }
+    public function produkbeli (){
+        return $this->hasMany(produkbeli::class);
+    }
 }

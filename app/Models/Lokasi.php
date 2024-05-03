@@ -43,4 +43,7 @@ class Lokasi extends Model
     {
         return $this->hasMany(Penjualan::class);
     }
+    public function pembelian (){
+        return $this->hasMany(Pembelian::class);
+    }
 }
