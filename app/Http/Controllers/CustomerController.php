@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\Tipe_Produk;
+use App\Models\Karyawan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
@@ -45,7 +47,9 @@ class CustomerController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'route']);
-        
+        $user = Auth::user()->value('id');
+        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
+        $data['lokasi_id'] = $lokasi;
         // save data
         $check = Customer::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');

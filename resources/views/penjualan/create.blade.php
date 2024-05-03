@@ -405,11 +405,9 @@
                     <div class="mb-3">
                         <label for="tipe" class="col-form-label">Tipe Customer</label>
                         <div class="form-group">
-                            <select class="select2" name="tipe" id="add_tipe" required>
+                            <select class="select2 form-control" name="tipe" id="add_tipe" required>
                                 <option value="">Pilih Tipe</option>
                                 <option value="tradisional">tradisional</option>
-                                <option value="sewa">sewa</option>
-                                <option value="premium">premium</option>
                             </select>
                         </div>
                     </div>
