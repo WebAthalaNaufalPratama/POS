@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Produk Penjualan</h4>
+                        <h4>Retur Penjualan</h4>
                     </div>
                 </div>
             </div>
@@ -17,31 +17,39 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>No DO</th>
+                                <th>No Retur</th>
                                 <th>No Invoice</th>
+                                <th>No DO</th>
                                 <th>Customer</th>
-                                <th>Tanggal Kirim</th>
-                                <th>Status</th>
-                                <th>Driver</th>
+                                <th>Lokasi</th>
+                                <th>Supplier</th>
+                                <th>Tanggal Retur</th>
+                                <th>Komplain</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($dopenjualans as $dopenjualan)
+                            @foreach ($returs as $retur)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $dopenjualan->no_do }}</td>
-                                <td>{{ $dopenjualan->no_referensi }}</td>
-                                <td>{{ $dopenjualan->customer->nama }}</td>
-                                <td>{{ $dopenjualan->tanggal_kirim }}</td>
-                                <td>{{ $dopenjualan->status }}</td>
-                                <td>{{ $dopenjualan->data_driver->nama }}</td>
+                                <td>{{ $retur->no_retur }}</td>
+                                <td>{{ $retur->no_invoice }}</td>
+                                <td>@if($retur->komplain == 'retur')
+                                    {{ $retur->no_do }}
+                                    @else
+                                    Bukan Retur
+                                    @endif
+                                </td>
+                                <td>{{ $retur->customer->nama }}</td>
+                                <td>{{ $retur->lokasi->nama }}</td>
+                                <td>{{ $retur->supplier->nama }}</td>
+                                <td>{{ $retur->tanggal_retur }}</td>
+                                <td>{{ $retur->komplain }}</td>
                                 <td>
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('dopenjualan.show', ['dopenjualan' => $dopenjualan->id]) }}">Show</a>
-                                            <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $dopenjualan->id }})">Delete</a> -->
+                                            <a class="dropdown-item" href="{{ route('returpenjualan.show', ['returpenjualan' => $retur->id]) }}">Show</a>
                                         </div>
                                     </div>
                                 </td>

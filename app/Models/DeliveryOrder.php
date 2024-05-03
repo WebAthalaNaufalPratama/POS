@@ -54,4 +54,8 @@ class DeliveryOrder extends Model
     public function data_pemeriksa(){
         return $this->belongsTo(Karyawan::class, 'pemeriksa', 'id');
     }
+
+    public function produk_retur(){
+        return $this->hasMany(ProdukReturJual::class, 'no_retur', 'no_referensi');
+    }
 }

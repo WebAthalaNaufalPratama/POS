@@ -20,6 +20,8 @@ class CreateProdukReturJualsTable extends Migration
             $table->string('jenis')->nullable();
             $table->string('alasan')->nullable();
             $table->integer('jumlah')->nullable();
+            $table->string('satuan')->nullable();
+            $table->string('keterangan')->nullable();
             $table->string('jenis_diskon')->nullable();
             $table->integer('diskon')->nullable();
             $table->integer('harga')->nullable();

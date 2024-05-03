@@ -28,6 +28,7 @@ class CreateReturPenjualansTable extends Migration
             $table->string('catatan_komplain')->nullable();
             $table->string('pilih_pengiriman')->nullable();
             $table->integer('ongkir_id')->nullable();
+            $table->integer('sub_total')->nullable();
             $table->integer('biaya_pengiriman')->nullable();
             $table->integer('total')->nullable();
             $table->timestamps();
