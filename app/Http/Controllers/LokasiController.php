@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Lokasi;
 use App\Models\Tipe_Lokasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class LokasiController extends Controller
@@ -49,7 +50,6 @@ class LokasiController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-
         // save data
         $check = Lokasi::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');

@@ -27,44 +27,42 @@
                                 <th>No DO Supplier</th>
                                 <th>Lokasi</th>
                                 <th>Status</th>
-                                <th>Status Pembayaran</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        {{-- <tbody>
-                            @foreach ($penjualans as $penjualan)
+                        <tbody>
+                            @foreach ($datapos as $datapo)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $penjualan->no_invoice }}</td>
-                                <td>{{ $penjualan->karyawan->nama }}</td>
-                                <td>{{ $penjualan->tanggal_invoice }}</td>
-                                <td>{{ $penjualan->jatuh_tempo }}</td>
-                                <td>
-                                    @if(isset($latestPayments[$penjualan->id]))
-                                    {{ $latestPayments[$penjualan->id]->status_bayar }}
-                                    @else
-                                    Belum ada pembayaran
-                                    @endif
-                                </td>
-                                <td>{{ $penjualan->total_tagihan }}</td>
-                                <td>{{ $penjualan->sisa_bayar }}</td>
-                                <td>{{ $penjualan->status }}</td>
-                                <td>
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Perangkai</a>
-                                            <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}">Pembayaran</a>
-                                            @if($penjualan->distribusi == 'Dikirim')
-                                            <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}">Delivery Order</a>
-                                            @endif
-                                            <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a>
-                                        </div>
-                                    </div>
+                                <td>{{ $datapo->no_po }}</td>
+                                <td>{{ $datapo->supplier->nama }}</td>
+                                <td>{{ $datapo->tgl_kirim }}</td>
+                                <td>{{ $datapo->tgl_diterima}}</td>
+                                <td>{{ $datapo->no_do_suplier}}</td>
+                                <td>{{ $datapo->lokasi->nama}}</td>
+                                <td>{{ $datapo->status_dibuat}}</td>
+                                <td class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="" class="dropdown-item"><img src="/assets/img/icons/truck.svg" class="me-2" alt="img">Invoice</a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('pembelian.show', ['datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        </li>
+                                        <li>
+                                            <a href="" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                        </li>
+                                    </ul>
                                 </td>
                             </tr>
                             @endforeach
-                        </tbody> --}}
+                        </tbody>
                     </table>
                 </div>
             </div>

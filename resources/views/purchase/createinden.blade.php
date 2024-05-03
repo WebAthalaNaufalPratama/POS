@@ -168,7 +168,8 @@
           <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="supplierForm">
+            <form id="supplierForm" action="{{ route('supplier.store') }}" method="POST">
+                @csrf
             <div class="mb-3">
               <label for="nama" class="form-label">Nama Supplier</label>
               <input type="text" class="form-control" id="nama" name="nama" required>
@@ -186,13 +187,13 @@
               <textarea class="form-control" id="alamat" name="alamat" rows="3"></textarea>
             </div>
             <div class="mb-3">
-              <label for="tanggal_bermitra" class="form-label">Tanggal Bermitra</label>
-              <input type="date" class="form-control" id="tanggal_bermitra" name="tanggal_bermitra">
+              <label for="tanggal_bergabung" class="form-label">Tanggal bergabung</label>
+              <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung">
             </div>
             <div class="mb-3">
               <label for="tipe_supplier" class="form-label">Tipe Supplier</label>
               <select class="form-control" id="tipe_supplier" name="tipe_supplier">
-                <option value="tradisional">Tradisional</option>
+                {{-- <option value="tradisional">Tradisional</option> --}}
                 <option value="inden">Inden</option>
               </select>
             </div>
@@ -204,7 +205,7 @@
         </div>
       </div>
     </div>
-  </div>
+</div>
   
 @section('scripts')
 <script>

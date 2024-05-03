@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Purchase Order</h3>
+            <h3 class="page-title">Show Purchase Order : {{ $beli->no_po }}</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="index.html">Purchase Order</a>
@@ -37,11 +37,12 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="nopo">No. PO</label>
-                                            <input type="text" class="form-control" id="nopo" name="nopo" placeholder="Nomor Purchase Order" value="{{ $nomor_po }}" readonly>
+                                            <input type="text" class="form-control" id="nopo" name="nopo" value="{{ $beli->no_po }}" readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
-                                            <div class="input-group">
+                                            <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $beli->supplier->nama}}" readonly>
+                                            {{-- <div class="input-group">
                                                 <select id="id_supplier" name="id_supplier" class="form-control" required>
                                                     <option value="">Pilih Nama Supplier</option>
                                                     @foreach ($suppliers as $supplier)
@@ -53,19 +54,20 @@
                                                         <img src="/assets/img/icons/plus1.svg" alt="img" />
                                                     </button>
                                                 </div>
-                                            </div>
+                                            </div> --}}
                                         </div>
                                         
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="lokasi">Lokasi</label>
-                                                <select id="id_lokasi" name="id_lokasi" class="form-control" required>
+                                            <input type="text" class="form-control" id="lokasi" name="lokasi"  value="{{ $beli->lokasi->nama }}" readonly>
+                                                {{-- <select id="id_lokasi" name="id_lokasi" class="form-control" required>
                                                     <option value="">Pilih Lokasi</option>
                                                     @foreach ($lokasis as $lokasi)
                                                     <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                                                     @endforeach
-                                                </select>
+                                                </select> --}}
                                        </div>
                                         <div class="form-group">
                                             <label for="harga_jual">Status</label>
@@ -75,17 +77,17 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim">
+                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim}}">
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="date" class="form-control" id="tgl_terima" name="tgl_terima">
+                                                    <input type="date" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ $beli->tgl_diterima }}">
                                                 </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="no_do">Nomor DO supplier</label>
-                                                <input type="text" class="form-control" id="no_do" name="no_do">
+                                                <input type="text" class="form-control" id="no_do" name="no_do" value="{{ $beli->no_do_suplier }}">
                                             </div>
                                             <div class="form-group">
                                                 <label for="filedo">Delivery Order supplier</label>
@@ -111,33 +113,32 @@
                                                     <th>Jumlah Dikirim</th>
                                                     <th>Jumlah Diterima</th>
                                                     <th>Kondisi</th>
-                                                    <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
+                                                @foreach ($produkbelis as $item)
                                                 <tr>
-                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" readonly></td>
-                                                    <td>
-                                                    <select id="produk_0" name="produk[]" class="form-control" onchange="showInputType(0)">
+                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}"></td>
+                                                    <td><input type="text" name="nama[]" id="nama_0" class="form-control" value="{{ $item->produk->nama }}"></td>
+
+                                                    {{-- <select id="produk_0" name="produk[]" class="form-control" onchange="showInputType(0)">
                                                         <option value="">----- Pilih Produk ----</option>
                                                         @foreach ($produks as $produk)
                                                         <option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}">{{ $produk->nama }}</option>
                                                         @endforeach
-                                                    </select>
-                                                    </td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                                                    <td>
-                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
+                                                    </select> --}}
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}"></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_diterima }}"></td>
+                                                    <td><input type="text" name="kondisi[]" id="kondisi_0" class="form-control" value="{{ $item->kondisi->nama }}"></td>
+
+                                                        {{-- <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
                                                             <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
                                                             @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
-                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                        </select> --}}
                                                 </tr>
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>
@@ -253,7 +254,7 @@
     </div>
 </div>
   
-@section('scripts')
+{{-- @section('scripts')
 <script>
 var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
@@ -322,4 +323,4 @@ $(document).ready(function() {
     });
 </script>
 
-@endsection
+@endsection --}}

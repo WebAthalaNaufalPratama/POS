@@ -10,7 +10,7 @@
                         <h4>Invoice Pembelian</h4>
                     </div>
                     <div class="page-btn">
-                        <a href="{{ route('pembelian.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Invoice</a>
+                        {{-- <a href="{{ route('pembelian.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Invoice</a> --}}
                     </div>
                 </div>
             </div>
@@ -79,7 +79,7 @@
                         <h4>Invoice Pembelian Inden</h4>
                     </div>
                     <div class="page-btn">
-                        <a href="{{ route('pembelianinden.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Invoice</a>
+                        {{-- <a href="{{ route('pembelianinden.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Invoice</a> --}}
                     </div>
                 </div>
             </div>

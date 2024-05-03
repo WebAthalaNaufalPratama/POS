@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Pembelian;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -234,9 +235,14 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'purchase'], function() {
             Route::get('/pembelian', 'PembelianController@index')->name('pembelian.index');
-            Route::get('/create', 'PembelianController@create')->name('pembelian.create');
-            Route::get('/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
+            Route::get('/pembelian/create', 'PembelianController@create')->name('pembelian.create');
+            Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
+            Route::post('/store_po', 'PembelianController@store_po')->name('pembelianpo.store');
+            Route::get('/{datapo}/show', 'PembelianController@show')->name('pembelian.show');
+ 
             Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
+            Route::get('/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
+            Route::get('/createinvinden', 'PembelianController@createinvoiceinden')->name('invoiceinden.create');
            
         });
 
