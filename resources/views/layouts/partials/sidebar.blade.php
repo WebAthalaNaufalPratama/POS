@@ -51,11 +51,19 @@
                     </ul>
                 </li>
                 <li class="submenu">
+
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*') ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
                     <a href="javascript:void(0);"><i class="fa fa-archive" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-archive" aria-label="fa fa-archive"></i><span> Inventory</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('inven_galeri.index') }}" class="{{ request()->is('inven_galeri*') ? 'active' : '' }}">Gallery</a></li>
-                        <li><a href="#" class="">Outlet</a></li>
+                        <li><a href="{{ route('inven_outlet.index') }}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
                         <li><a href="#" class="">Inden</a></li>
+                        <li><a href="#" class="">GreenHouse/Gudang</a></li>
                     </ul>
                 </li>
                 {{-- <li class="submenu">

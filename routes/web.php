@@ -321,6 +321,26 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{jabatan}/delete', 'JabatanController@destroy')->name('jabatan.destroy');
         });
 
+        Route::group(['prefix' => 'inven_outlet'], function() {
+            Route::get('/', 'InventoryOutletController@index')->name('inven_outlet.index');
+            Route::get('/create', 'InventoryOutletController@create')->name('inven_outlet.create');
+            Route::post('/store', 'InventoryOutletController@store')->name('inven_outlet.store');
+            Route::get('/{inven_outlet}/show', 'InventoryOutletController@show')->name('inven_outlet.show');
+            Route::get('/{inven_outlet}/edit', 'InventoryOutletController@edit')->name('inven_outlet.edit');
+            Route::patch('/{inven_outlet}/update', 'InventoryOutletController@update')->name('inven_outlet.update');
+            Route::get('/{inven_outlet}/delete', 'InventoryOutletController@destroy')->name('inven_outlet.destroy');
+        });
+
+        Route::group(['prefix' => 'mutasiGO'], function() {
+            Route::get('/', 'MutasiController@index_outlet')->name('mutasigalery.index');
+            Route::get('/create', 'MutasiController@create_outlet')->name('mutasigalery.create');
+            Route::post('/store', 'MutasiController@store_outlet')->name('mutasigalery.store');
+            Route::get('/{mutasiGO}/show', 'MutasiController@show_outlet')->name('mutasigalery.show');
+            Route::get('/{mutasiGO}/edit', 'MutasiController@edit_outlet')->name('mutasigalery.edit');
+            Route::patch('/{mutasiGO}/update', 'MutasiController@update_outlet')->name('mutasigalery.update');
+            Route::get('/{mutasiGO}/delete', 'MutasiController@destroy_outlet')->name('mutasigalery.destroy');
+        });
+
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
