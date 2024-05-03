@@ -138,21 +138,19 @@ class FormPerangkaiController extends Controller
     {
         $query = FormPerangkai::whereHas('produk_terjual');
         if($req->jenis_rangkaian){
-            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->get();
+            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->orderBy('created_at', 'desc')->get();
+            // dd($query->get());
         } else {
             $data = $query->get();
         }
         return view('form_jual.index', compact('data'));
     }
 
-    public function penjualan_show(Request $req)
+    public function penjualan_show($formpenjualan)
     {
-        $query = FormPerangkai::whereHas('produk_terjual');
-        if($req->jenis_rangkaian){
-            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->get();
-        } else {
-            $data = $query->get();
-        }
-        return view('form_jual.show', compact('data'));
+        $data = FormPerangkai::with('produk_terjual')->find($formpenjualan);
+        // dd($data);
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        return view('form_jual.show', compact('perangkai', 'data'));
     }
 }

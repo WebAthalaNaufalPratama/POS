@@ -50,4 +50,8 @@ class Penjualan extends Model
         return $this->hasMany(Produk_Terjual::class, 'no_invoice', 'no_invoice');
     }
 
+    public function deliveryorder(){
+        return $this->hasMany(DeliveryOrder::class, 'no_referensi', 'no_invoice');
+    }
+
 }

@@ -93,9 +93,16 @@
                                             <label for="harga_jual">Input File</label>
                                             <div class="input-group mt-3">
                                                 <!-- <input type="file" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" aria-describedby="inputGroupPrepend2" required disabled> -->
-                                                <label class="input-group-text" for="bukti_file">
-                                                    <i class="fas fa-upload"></i> {{ $penjualans->bukti_file}}
-                                                </label>
+                                                <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                    <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                    </label>
+                                                    <label class="custom-file-container__custom-file">
+                                                        <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required disabled>
+                                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                    </label>
+                                                    <span class="text-danger">max 2mb</span>
+                                                    <img id="preview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" alt="your image" />
+                                                </div>
                                             </div>
 
                                         </div>
@@ -398,15 +405,19 @@
                                                             <td>{{ $loop->iteration }}</td>
                                                             <td>{{ $pembayaran->no_invoice_bayar }}</td>
                                                             <td>{{ $pembayaran->nominal }}</td>
-                                                            <td>{{ $pembayaran->rekening->bank }}</td>
+                                                            <td>@if($pembayaran->rekening == null)
+                                                                Pembayaran Cash
+                                                                @else
+                                                                {{ $pembayaran->rekening->bank }}
+                                                                @endif
+                                                            </td>
                                                             <td>{{ $pembayaran->tanggal_bayar }}</td>
                                                             <td>{{ $pembayaran->status_bayar }}</td>
                                                             <td>
                                                                 <div class="dropdown">
                                                                     <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                                                     <div class="dropdown-menu">
-                                                                        <a class="dropdown-item" href="{{ route('pembayaran.show', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
-                                                                        <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $pembayaran->id }})">Delete</a>
+                                                                        <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -415,15 +426,15 @@
                                                     </tbody>
                                                 </table>
                                             </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="text-end mt-3">
-                            <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
-                            <a href="{{ route('penjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
-                        </div>
+                            <div class="text-end mt-3">
+                                <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
+                                <a href="{{ route('penjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
+                            </div>
             </form>
         </div>
 
@@ -562,11 +573,19 @@
                         <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required readonly>
                     </div>
                     <div class="form-group">
-                        <label for="nominalbayar">Nominal</label>
+                        <label for="bayar">Cara Bayar</label>
+                        <select class="form-control" id="bayar" name="cara_bayar" required>
+                            <option value="">Pilih Cara Bayar</option>
+                            <option value="cash">Cash</option>
+                            <option value="transfer">Transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nominal">Nominal</label>
                         <input type="number" class="form-control" id="nominal" name="nominal" value="{{ $penjualans->sisa_bayar }}" placeholder="Nominal Bayar" required>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="rekening">
                         <label for="bankpenerima">Rekening Vonflorist</label>
                         <select class="form-control" id="rekening_id" name="rekening_id" required>
                             <option value="">Pilih Rekening Von</option>
@@ -915,23 +934,6 @@
             }
         });
 
-
-
-        $('#cara_bayar').change(function() {
-            var pembayaran = $(this).val();
-
-            $('#inputCash').hide();
-            $('#inputTransfer').hide();
-
-            if (pembayaran === "cash") {
-                $('#inputCash').show();
-            } else if (pembayaran === "transfer") {
-                $('#inputTransfer').show();
-            }
-        });
-
-        $('#cara_bayar').trigger('change');
-
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
 
@@ -961,7 +963,7 @@
             hpInput.val(hpValue);
         });
 
-        var sisaBayar = {{ $penjualans->sisa_bayar }};
+        var sisaBayar = {{ $penjualans->sisa_bayar}};
         // console.log(sisaBayar);
 
         $('#nominal').on('input', function() {
@@ -970,6 +972,42 @@
             if (parseInt(inputNominal) > sisaBayar) {
                 alert('Nominal pembayaran tidak boleh lebih dari sisa bayar!');
                 $(this).val(sisaBayar);
+            }
+        });
+
+        $('#bukti_file').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val('');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function clearFile() {
+            $('#bukti_file').val('');
+            $('#preview').attr('src', defaultImg);
+        };
+
+        $('#bayar').on('change', function() {
+            var caraBayar = $(this).val();
+            console.log(caraBayar);
+            if (caraBayar == 'cash') {
+                $('#rekening').hide();
+            } else if (caraBayar == 'transfer') {
+                $('#rekening').show();
             }
         });
     });

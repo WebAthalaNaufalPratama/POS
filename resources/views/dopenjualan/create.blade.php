@@ -109,8 +109,16 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="file">Bukti Pengiriman</label>
-                                            <input type="file" id="file" name="file" class="form-control" aria-describedby="inputGroupPrepend2" required>
+                                            <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                </label>
+                                                <label class="custom-file-container__custom-file">
+                                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*">
+                                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                </label>
+                                                <span class="text-danger">max 2mb</span>
+                                                <img id="preview" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -437,7 +445,31 @@
             $('#deskripsi_komponen_' + id).val(selectedOption.data('deskripsi'));
             updateHargaSatuan(this);
         });
+        $('#bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val('');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
 
+        function clearFile() {
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        };
 
     });
 </script>
