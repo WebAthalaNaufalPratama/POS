@@ -37,6 +37,7 @@
                         <li><a href="{{ route('form.index', ['jenis_rangkaian' => 'Sewa']) }}" class="{{ request()->is('form*') ? 'active' : '' }}">Perangkai</a></li>
                         <li><a href="{{ route('do_sewa.index') }}" class="{{ request()->is('do_sewa*') ? 'active' : '' }}">Delivery Order</a></li>
                         <li><a href="{{ route('kembali_sewa.index') }}" class="{{ request()->is('kembali_sewa*') ? 'active' : '' }}">Barang Kembali</a></li>
+                        <li><a href="{{ route('invoice_sewa.index') }}" class="{{ request()->is('invoice_sewa*') ? 'active' : '' }}">Invoice</a></li>
                     </ul>
                 </li>
                 <li class="submenu">

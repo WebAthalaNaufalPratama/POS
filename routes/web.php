@@ -321,6 +321,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kembali_sewa}/delete', 'KembaliSewaController@destroy')->name('kembali_sewa.destroy');
         });
 
+        Route::group(['prefix' => 'invoice_sewa'], function() {
+            Route::get('/', 'InvoiceSewaController@index')->name('invoice_sewa.index');
+            Route::get('/create', 'InvoiceSewaController@create')->name('invoice_sewa.create');
+            Route::post('/store', 'InvoiceSewaController@store')->name('invoice_sewa.store');
+            Route::get('/{invoice_sewa}/show', 'InvoiceSewaController@show')->name('invoice_sewa.show');
+            Route::get('/{invoice_sewa}/edit', 'InvoiceSewaController@edit')->name('invoice_sewa.edit');
+            Route::patch('/{invoice_sewa}/update', 'InvoiceSewaController@update')->name('invoice_sewa.update');
+            Route::get('/{invoice_sewa}/delete', 'InvoiceSewaController@destroy')->name('invoice_sewa.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
