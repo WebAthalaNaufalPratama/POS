@@ -159,4 +159,38 @@ class DopenjualanController extends Controller
 
         return redirect(route('penjualan.index'))->with('success', 'Data tersimpan');
     }
+
+    public function show($dopenjualan)
+    {
+        $dopenjualan = DeliveryOrder::find($dopenjualan);
+        $produkjuals = Produk_Jual::all();
+        $customers = Customer::all();
+        $karyawans = Karyawan::all();
+        $Invoice = DeliveryOrder::latest()->first();
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_do, 11);
+            $cekInvoice = substr($substring, 0, 3);
+        } else {
+            $cekInvoice = 0;
+        }
+        return view('dopenjualan.show', compact('dopenjualan', 'produkjuals', 'karyawans', 'customers', 'cekInvoice'));
+    }
+
+    public function update(Request $req, $dopenjualan)
+    {
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
+            $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('bukti_do_sewa', $fileName, 'public');
+            $data['file'] = $filePath;
+
+            // update bukti DO
+            $do = DeliveryOrder::find($dopenjualan);
+            $do->file = $data['file'];
+            $do->update();
+            return redirect()->back()->with('success', 'File tersimpan');
+        } else {
+            return redirect()->back()->with('fail', 'Gagal menyimpan file');
+        }
+    }
 }

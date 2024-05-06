@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Pembelian;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -232,6 +233,19 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
         });
 
+        Route::group(['prefix' => 'purchase'], function() {
+            Route::get('/pembelian', 'PembelianController@index')->name('pembelian.index');
+            Route::get('/pembelian/create', 'PembelianController@create')->name('pembelian.create');
+            Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
+            Route::post('/store_po', 'PembelianController@store_po')->name('pembelianpo.store');
+            Route::get('/{datapo}/show', 'PembelianController@show')->name('pembelian.show');
+ 
+            Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
+            Route::get('/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
+            Route::get('/createinvinden', 'PembelianController@createinvoiceinden')->name('invoiceinden.create');
+           
+        });
+
         Route::group(['prefix' => 'kontrak'], function() {
             Route::get('/', 'KontrakController@index')->name('kontrak.index');
             Route::get('/create', 'KontrakController@create')->name('kontrak.create');
@@ -292,6 +306,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{do_sewa}/delete', 'DeliveryOrderController@destroy_sewa')->name('do_sewa.destroy');
         });
 
+        Route::group(['prefix' => 'returpenjualan'], function() {
+            Route::get('/', 'ReturpenjualanController@index')->name('returpenjualan.index');
+            Route::get('{penjualan}/create', 'ReturpenjualanController@create')->name('returpenjualan.create');
+            Route::post('/store', 'ReturpenjualanController@store')->name('returpenjualan.store');
+            Route::get('/{returpenjualan}/show', 'ReturpenjualanController@show')->name('returpenjualan.show');
+            Route::get('/{returpenjualan}/edit', 'ReturpenjualanController@edit')->name('returpenjualan.edit');
+            Route::patch('/{returpenjualan}/update', 'ReturpenjualanController@update')->name('returpenjualan.update');
+            Route::get('/{returpenjualan}/delete', 'ReturpenjualanController@destroy')->name('returpenjualan.destroy');
+        });
+
         Route::group(['prefix' => 'inven_galeri'], function() {
             Route::get('/', 'InventoryGalleryController@index')->name('inven_galeri.index');
             Route::get('/create', 'InventoryGalleryController@create')->name('inven_galeri.create');
@@ -340,6 +364,26 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{pembayaran_sewa}/update', 'PembayaranController@update_sewa')->name('pembayaran_sewa.update_sewa');
             Route::get('/{pembayaran_sewa}/delete', 'PembayaranController@destroy_sewa')->name('pembayaran_sewa.destroy_sewa');
         });
+        Route::group(['prefix' => 'inven_outlet'], function() {
+            Route::get('/', 'InventoryOutletController@index')->name('inven_outlet.index');
+            Route::get('/create', 'InventoryOutletController@create')->name('inven_outlet.create');
+            Route::post('/store', 'InventoryOutletController@store')->name('inven_outlet.store');
+            Route::get('/{inven_outlet}/show', 'InventoryOutletController@show')->name('inven_outlet.show');
+            Route::get('/{inven_outlet}/edit', 'InventoryOutletController@edit')->name('inven_outlet.edit');
+            Route::patch('/{inven_outlet}/update', 'InventoryOutletController@update')->name('inven_outlet.update');
+            Route::get('/{inven_outlet}/delete', 'InventoryOutletController@destroy')->name('inven_outlet.destroy');
+        });
+
+        Route::group(['prefix' => 'mutasiGO'], function() {
+            Route::get('/', 'MutasiController@index_outlet')->name('mutasigalery.index');
+            Route::get('/create', 'MutasiController@create_outlet')->name('mutasigalery.create');
+            Route::post('/store', 'MutasiController@store_outlet')->name('mutasigalery.store');
+            Route::get('/{mutasiGO}/show', 'MutasiController@show_outlet')->name('mutasigalery.show');
+            Route::get('/{mutasiGO}/edit', 'MutasiController@edit_outlet')->name('mutasigalery.edit');
+            Route::patch('/{mutasiGO}/update', 'MutasiController@update_outlet')->name('mutasigalery.update');
+            Route::get('/{mutasiGO}/delete', 'MutasiController@destroy_outlet')->name('mutasigalery.destroy');
+        });
+
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
