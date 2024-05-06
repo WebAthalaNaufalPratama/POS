@@ -18,6 +18,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>No Invoice Bayar</th>
+                                <th> Cara Bayar</th>
                                 <th>Nominal</th>
                                 <th>Rekening</th>
                                 <th>Tanggal_Bayar</th>
@@ -30,6 +31,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $pembayaran->no_invoice_bayar }}</td>
+                                <td>{{ $pembayaran->cara_bayar }}</td>
                                 <td>{{ $pembayaran->nominal }}</td>
                                 <td>@if($pembayaran->rekening == null)
                                     Pembayaran Cash

@@ -22,6 +22,7 @@ use App\Models\Promo;
 use App\Models\Ongkir;
 use App\Models\Penjualan;
 use App\Models\Pembayaran;
+use App\Models\Mutasi;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -52,10 +53,10 @@ class MutasiController extends Controller
             $produks = Produk_Jual::with('komponen.kondisi')->get();
             // dd($produks);
             $bankpens = Rekening::get();
-            $Invoice = Penjualan::latest()->first();
+            $Invoice = Mutasi::latest()->first();
             // dd($bankpens);
             if ($Invoice != null) {
-                $substring = substr($Invoice->no_invoice, 11);
+                $substring = substr($Invoice->no_mutasi, 11);
                 $cekInvoice = substr($substring, 0, 3);
                 // dd($cekInvoice);
             } else {

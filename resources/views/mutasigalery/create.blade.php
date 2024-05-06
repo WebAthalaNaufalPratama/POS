@@ -72,12 +72,12 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required readonly>
+                                            <label for="nama">Tanggal Pengiriman</label>
+                                            <input type="date" class="form-control" id="tanggal_kirim" name="tanggal_kirim" placeholder="Tanggal_Invoice" onchange="updateDate(this)" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="nama">Tanggal Invoice</label>
-                                            <input type="date" class="form-control" id="tanggal_invoice" name="tanggal_invoice" placeholder="Tanggal_Invoice" onchange="updateDate(this)" required>
+                                            <label for="nama">Tanggal Diterima</label>
+                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" onchange="updateDate(this)" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="status">Status</label>
@@ -218,35 +218,6 @@
                                         </div>
                                         
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-6 mt-4 ">
-                                        <div class="form-group">
-                                            <label>Pengiriman</label>
-                                            <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
-                                                <option value="">Pilih Jenis Pengiriman</option>
-                                                <option value="exspedisi">Ekspedisi</option>
-                                                <option value="sameday">SameDay</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div id="inputOngkir" style="display: none;">
-                                                <label for="alamat_tujuan">Alamat Tujuan </label>
-                                                <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control"></textarea>
-                                            </div>
-                                            <div id="inputExspedisi" style="display: none;">
-                                                <label>Alamat Pengiriman</label>
-                                                <select id="ongkir_id" name="ongkir_id" class="form-control">
-                                                    <option value="">Pilih Alamat Tujuan</option>
-                                                    @foreach($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya}}">{{ $ongkir->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group mt-3">
-                                            <label>Notes</label>
-                                            <textarea class="form-control" id="notes" name="notes" required></textarea>
-                                        </div>
-                                    </div>
                                     <div class="col-lg-6 float-md-right">
                                         <div class="total-order">
                                             <ul>
@@ -255,59 +226,34 @@
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" readonly required></h5>
                                                 </li>
                                                 <li>
-                                                    <h4>PPN
-                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
-                                                            <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude">EXCLUDE</option>
-                                                            <option value="include">INCLUDE</option>
-                                                        </select>
+                                                    <h4>Pengiriman
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                        <option value="">Pilih Jenis Pengiriman</option>
+                                                        <option value="exspedisi">Ekspedisi</option>
+                                                        <option value="sameday">SameDay</option>
+                                                    </select>
                                                     </h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" readonly required>
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" readonly required>
-
-                                                    </h5>
-                                                </li>
-                                                <li>
-                                                    <h4>Promo</h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-9 pe-0">
-                                                                <select id="promo_id" name="promo_id" class="form-control" required disabled>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-3 ps-0 mb-0">
-                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
-                                                    </h5>
-                                                    <!-- <h5><select id="promo_id" name="promo_id" class="form-control" onchange="updateHargaSatuan(this)">
-                                                            <option value="">Pilih Promo</option>
-                                                            @foreach ($promos as $promo)
-                                                            <option value="{{ $promo->id }}" data-harga="{{ $promo->harga_jual }}">{{ $promo->nama }}</option>
+                                                    <div id="inputOngkir" style="display: none;">
+                                                        <label for="alamat_tujuan">Alamat Tujuan </label>
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control">
+                                                    </div>
+                                                    <div id="inputExspedisi" style="display: none;">
+                                                        <label>Alamat Pengiriman</label>
+                                                        <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                                            <option value="">Pilih Alamat Tujuan</option>
+                                                            @foreach($ongkirs as $ongkir)
+                                                            <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya}}">{{ $ongkir->nama }}</option>
                                                             @endforeach
-                                                        </select></h5> -->
-                                                    <!-- <h5>$ 0.00 (0.00%)</h5> -->
+                                                        </select>
+                                                    </div> 
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
                                                     <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" readonly required></h5>
                                                 </li>
-                                                <li>
-                                                    <h4>DP</h4>
-                                                    <h5><input type="text" id="dp" name="dp" class="form-control" required></h5>
-                                                </li>
                                                 <li class="total">
-                                                    <h4>Total Tagihan</h4>
+                                                    <h4>Total Biaya</h4>
                                                     <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" readonly required></h5>
-                                                </li>
-                                                <li>
-                                                    <h4>Sisa Bayar</h4>
-                                                    <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly required></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -460,7 +406,7 @@
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
-        var invoicePrefix = "INV";
+        var invoicePrefix = "MGO";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -468,7 +414,7 @@
         var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
         var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_invoice').val(generatedInvoice);
+        $('#no_mutasi').val(generatedInvoice);
     }
 
     generateInvoice();
@@ -479,7 +425,7 @@
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
-        var invoicePrefix = "BYR";
+        var invoicePrefix = "MGO";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -500,8 +446,8 @@
     }
 
     // Call the function to set the date to today's date initially
-    updateDate(document.getElementById('tanggal_invoice'));
-    updateDate(document.getElementById('jatuh_tempo'));
+    updateDate(document.getElementById('tanggal_kirim'));
+    updateDate(document.getElementById('tanggal_diterima'));
     @foreach($produks as $index => $produk)
     updateDate(document.getElementById('tglrangkai_{{ $index }}'), '{{ $index }}');
     @endforeach
