@@ -331,6 +331,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{invoice_sewa}/delete', 'InvoiceSewaController@destroy')->name('invoice_sewa.destroy');
         });
 
+        Route::group(['prefix' => 'pembayaran_sewa'], function() {
+            Route::get('/', 'PembayaranController@index_sewa')->name('pembayaran_sewa.index_sewa');
+            Route::get('/create', 'PembayaranController@create_sewa')->name('pembayaran_sewa.create_sewa');
+            Route::post('/store', 'PembayaranController@store_sewa')->name('pembayaran_sewa.store_sewa');
+            Route::get('/{pembayaran_sewa}/show', 'PembayaranController@show_sewa')->name('pembayaran_sewa.show_sewa');
+            Route::get('/{pembayaran_sewa}/edit', 'PembayaranController@edit_sewa')->name('pembayaran_sewa.edit_sewa');
+            Route::patch('/{pembayaran_sewa}/update', 'PembayaranController@update_sewa')->name('pembayaran_sewa.update_sewa');
+            Route::get('/{pembayaran_sewa}/delete', 'PembayaranController@destroy_sewa')->name('pembayaran_sewa.destroy_sewa');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
