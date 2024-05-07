@@ -1,13 +1,5 @@
 @extends('layouts.app-von')
 
-@section('css')
-<style>
-    .accordion-head:hover {
-        background: rgba(0, 0, 0, 0.1);
-        transition: background 0.3s ease;
-    }
-</style>
-@endsection
 @section('content')
 <div class="row">
     <div class="col-sm-12">
@@ -69,7 +61,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Rekening</label>
-                                                <select id="rekening" name="rekening_id" class="form-control" required>
+                                                <select id="rekening_id" name="rekening_id" class="form-control" required>
                                                     <option value="">Pilih Rekening</option>
                                                     @foreach ($rekening as $item)
                                                         <option value="{{ $item->id }}" {{ $data->kontrak->rekening_id == $item->id ? 'selected' : '' }}>{{ $item->nama_akun }}</option>
@@ -194,50 +186,6 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div class="card">
-                                    <div class="card-header accordion-head" data-toggle="collapse" data-target="#table_log">
-                                        <h4 class="card-title text-center">Riwayat</h4>
-                                    </div>
-                                    <hr>
-                                    <div class="card-body collpase show" id="table_log">
-                                        <div class="table-responsive">
-                                        <table class="table datanew">
-                                            <thead>
-                                            <tr>
-                                                <th>No</th>
-                                                <th>Tanggal Perubahan</th>
-                                                <th>Customer</th>
-                                                <th>Pengubah</th>
-                                                <th>Log</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($riwayat as $item)
-                                                <tr>
-                                                    <td>{{ $loop->iteration }}</td>
-                                                    <td>{{ $item->created_at ?? '-' }}</td>
-                                                    <td>{{ $item->subject->kontrak->customer->nama ?? '-' }}</td>
-                                                    <td>{{ $item->causer->name ?? '-' }}</td>
-                                                    <td>
-                                                        @php
-                                                            $changes = $item->changes();
-                                                            if(isset($changes['old'])){
-                                                                $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
-                                                                foreach ($diff as $key => $value) {
-                                                                    echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span>" . "<br>";
-                                                                }
-                                                            } else {
-                                                                echo 'Data Invoice Terbuat';
-                                                            }
-                                                        @endphp
-                                                    </td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="col-md-4 border rounded mt-3 pt-3">
                                 <div class="form-group row mt-1">
@@ -301,9 +249,9 @@
                                     <div class="col-lg-9">
                                         <input type="number" id="dp" name="dp" value="{{ $data->dp }}" class="form-control" required>
                                         <div class="d-flex justify-content-between">
-                                            <button type="button" class="btn btn-primary btn-sm w-100 rounded-0 mr-1" onclick="dp_val(10)">10%</button>
-                                            <button type="button" class="btn btn-primary btn-sm w-100 rounded-0 mx-1" onclick="dp_val(20)">20%</button>
-                                            <button type="button" class="btn btn-primary btn-sm w-100 rounded-0 ml-1" onclick="dp_val(50)">50%</button>
+                                            <button type="button" class="btn btn-primary w-100 rounded-0 mr-1" onclick="dp_val(10)">10%</button>
+                                            <button type="button" class="btn btn-primary w-100 rounded-0 mx-1" onclick="dp_val(20)">20%</button>
+                                            <button type="button" class="btn btn-primary w-100 rounded-0 ml-1" onclick="dp_val(50)">50%</button>
                                         </div>
                                     </div>
                                 </div>
@@ -342,138 +290,6 @@
                 </form>
             </div>
         </div>
-        <div class="col-sm-12">
-            <div class="card">
-                <div class="card-header accordion-head" data-toggle="collapse" data-target="#table_pembayaran">
-                    @if ($data->sisa_bayar != 0)
-                    <div class="page-header">
-                        <div class="page-title">
-                            <h4 class="card-title">Pembayaran</h4>
-                        </div>
-                        <div class="page-btn">
-                            <a href="javascript:void(0);" onclick="bayar({{ $data }})" class="btn btn-added">Tambah Pembayaran</a>
-                        </div>
-                    </div>
-                    @else
-                    <h4 class="card-title text-center">Pembayaran</h4>
-                    @endif
-                </div>
-                <hr>
-                <div class="card-body collapse show" id="table_pembayaran">
-                    <div class="table-responsive">
-                    <table class="table datanew">
-                        <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>No Invoice Pembayaran</th>
-                            <th>Nominal</th>
-                            <th>Tanggal Bayar</th>
-                            <th>Metode</th>
-                            <th class="text-center">Status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($pembayaran as $item)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item->no_invoice_bayar }}</td>
-                                <td>{{ $item->nominal }}</td>
-                                <td>{{ $item->tanggal_bayar }}</td>
-                                <td>{{ $item->cara_bayar }}</td>
-                                <td class="text-center">
-                                    @if ($item->status_bayar == 'LUNAS')
-                                        <span class="badge bg-success">{{ $item->status_bayar }}</span>
-                                    @elseif ($item->status_bayar == 'BELUM LUNAS')
-                                        <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Form Pembayaran</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="{{ route('pembayaran_sewa.store')}}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Kontrak</label>
-                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
-                            <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Total Tagihan</label>
-                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Sisa Tagihan</label>
-                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="bayar">Cara Bayar</label>
-                            <select class="form-control" id="bayar" name="cara_bayar" required>
-                                <option value="">Pilih Cara Bayar</option>
-                                <option value="cash">Cash</option>
-                                <option value="transfer">Transfer</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-6" id="div_rekening" style="display: none">
-                            <label for="bankpenerima">Rekening Vonflorist</label>
-                            <select class="form-control" id="rekening_id" name="rekening_id" required>
-                                <option value="">Pilih Rekening Von</option>
-                                @foreach ($bankpens as $bankpen)
-                                <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="nominal">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="tanggalbayar">Tanggal</label>
-                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-12">
-                            <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
     </div>
 </div>
 @endsection
@@ -481,13 +297,8 @@
 @section('scripts')
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
-        var cekInvoiceNumbers = "{{ $invoice_bayar }}";
-        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){
-            $('#rekening_id, #bayar').select2();
-        });
-        $(document).ready(function(){
-            $('[id^=produk], #sales_id, #ongkir_id, #rekening, #rekening_id, #bayar').select2();
+            $('[id^=produk], #sales_id, #ongkir_id, #rekening_id').select2();
             $('#sales_id').trigger('change');
             var i = '{{ count($data->kontrak->produk) }}';
             $('#add').click(function(){
@@ -546,28 +357,6 @@
             var sisa_bayar = $('#sisa_bayar_awal').val();
             sisa_bayar = sisa_bayar - dp;
             $('#sisa_bayar').val(sisa_bayar);
-        });
-        $('#bayar').on('change', function() {
-            var caraBayar = $(this).val();
-            if (caraBayar == 'transfer') {
-                $('#div_rekening').show();
-                $('#rekening_id').attr('required', true);
-                $('#bukti').attr('required', true);
-            } else {
-                $('#div_rekening').hide();
-                $('#rekening_id').attr('required', false);
-                $('#bukti').attr('required', false);
-            }
-        });
-        $('#nominal').on('input', function() {
-            var nominal = parseFloat($(this).val());
-            var sisaTagihan = parseFloat($('#sisa_tagihan').val());
-            if(nominal < 0) {
-                $(this).val(0);
-            }
-            if(nominal > sisaTagihan) {
-                $(this).val(sisaTagihan);
-            }
         });
         function multiply(element) {
             var id = 0
@@ -632,26 +421,6 @@
             sisa_bayar = sisa_bayar - dp;
             $('#dp').val(dp);
             $('#sisa_bayar').val(sisa_bayar);
-        }
-        function bayar(invoice){
-            $('#no_kontrak').val(invoice.no_sewa);
-            $('#invoice_sewa_id').val(invoice.id);
-            $('#total_tagihan').val(invoice.total_tagihan);
-            $('#sisa_tagihan').val(invoice.sisa_bayar);
-            $('#nominal').val(invoice.sisa_bayar);
-            $('#modalBayar').modal('show');
-            generateInvoice();
-        }
-        function generateInvoice() {
-            var invoicePrefix = "BYR";
-            var currentDate = new Date();
-            var year = currentDate.getFullYear();
-            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            var day = currentDate.getDate().toString().padStart(2, '0');
-            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-            $('#no_invoice_bayar').val(generatedInvoice);
         }
     </script>
 @endsection

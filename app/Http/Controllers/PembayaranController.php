@@ -128,8 +128,8 @@ class PembayaranController extends Controller
     }          
 
     public function index_sewa(){
-        $data = Pembayaran::whereNotNull('invoice_sewa_id')->get();
-        return view('pembayaran_sewa', compact('data'));
+        $data = Pembayaran::whereNotNull('invoice_sewa_id')->orderByDesc('id')->get();
+        return view('pembayaran_sewa.index', compact('data'));
     }
 
     public function store_sewa(Request $req){
@@ -138,9 +138,7 @@ class PembayaranController extends Controller
             'invoice_sewa_id' => 'required',
             'no_invoice_bayar' => 'required',
             'nominal' => 'required',
-            'rekening_id' => 'required',
             'tanggal_bayar' => 'required',
-            'bukti' => 'required|file',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -161,7 +159,8 @@ class PembayaranController extends Controller
                 $data['bukti'] = $filePath;
             }
 
-            if($check->sisa_bayar <= 0){
+            $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+            if($new_invoice_tagihan->sisa_bayar <= 0){
                 $data['status_bayar'] = 'LUNAS';
             } else {
                 $data['status_bayar'] = 'BELUM LUNAS';
@@ -170,7 +169,7 @@ class PembayaranController extends Controller
 
             if(!$pembayaran) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
-            return redirect()->back()->with('success', 'Tagihan sudah Lunas');
+            return redirect()->back()->with('success', 'Pembayaran berhasil');
         } else {
             return redirect()->back()->withInput()->with('fail', 'Invoice sudah lunas');
         }

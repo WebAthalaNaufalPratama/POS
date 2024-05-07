@@ -53,4 +53,8 @@ class InvoiceSewa extends Model
     public function data_pemeriksa(){
         return $this->belongsTo(Karyawan::class, 'pemeriksa', 'id');
     }
+
+    public function pembayaran(){
+        return $this->hasMany(Pembayaran::class, 'invoice_sewa_id', 'id');
+    }
 }

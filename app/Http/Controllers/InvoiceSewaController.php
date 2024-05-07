@@ -7,12 +7,14 @@ use App\Models\Karyawan;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kontrak;
 use App\Models\Ongkir;
+use App\Models\Pembayaran;
 use App\Models\Produk_Jual;
 use App\Models\Produk_Terjual;
 use App\Models\Rekening;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Activitylog\Models\Activity;
 
 class InvoiceSewaController extends Controller
 {
@@ -24,7 +26,15 @@ class InvoiceSewaController extends Controller
     public function index()
     {
         $data = InvoiceSewa::all();
-        return view('invoice_sewa.index', compact('data'));
+        $Invoice = Pembayaran::latest()->first();
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_invoice_bayar, 11);
+            $invoice_bayar = substr($substring, 0, 3);
+        } else {
+            $invoice_bayar = 0;
+        }
+        $bankpens = Rekening::get();
+        return view('invoice_sewa.index', compact('data', 'invoice_bayar', 'bankpens'));
     }
 
     /**
@@ -144,13 +154,23 @@ class InvoiceSewaController extends Controller
      */
     public function show($invoiceSewa)
     {
-        $data = InvoiceSewa::find($invoiceSewa);
+        $data = InvoiceSewa::with('pembayaran')->find($invoiceSewa);
         $kontrak = Kontrak::with('produk')->where('no_kontrak', $data->no_sewa)->first();
         $sales = Karyawan::where('jabatan', 'sales')->get();
         $ongkirs = Ongkir::all();
         $rekening = Rekening::all();
         $produkSewa = $kontrak->produk()->whereHas('produk')->get();
-        return view('invoice_sewa.show', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa'));
+        $riwayat = Activity::where('subject_type', InvoiceSewa::class)->where('subject_id', $invoiceSewa)->orderBy('id', 'desc')->get();
+        $pembayaran = $data->pembayaran()->orderByDesc('id')->get();
+        $bankpens = Rekening::get();
+        $Invoice = Pembayaran::latest()->first();
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_invoice_bayar, 11);
+            $invoice_bayar = substr($substring, 0, 3);
+        } else {
+            $invoice_bayar = 0;
+        }
+        return view('invoice_sewa.show', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa', 'riwayat', 'pembayaran', 'bankpens', 'invoice_bayar'));
     }
 
     /**

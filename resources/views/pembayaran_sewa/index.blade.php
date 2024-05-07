@@ -7,7 +7,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Invoice Sewa</h4>
+                    <h4>Pembayaran Sewa</h4>
                 </div>
             </div>
         </div>
@@ -18,11 +18,11 @@
                 <tr>
                     <th>No</th>
                     <th>No Kontrak</th>
-                    <th>No Invoice</th>
-                    <th>Jatuh Tempo</th>
-                    <th>Tagihan</th>
-                    <th>DP</th>
-                    <th>Sisa Bayar</th>
+                    <th>No Invoice Tagihan</th>
+                    <th>No Invoice Pembayaran</th>
+                    <th>Nominal</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Metode</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -31,13 +31,13 @@
                     @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->no_sewa }}</td>
-                            <td>{{ $item->no_invoice }}</td>
-                            <td>{{ $item->jatuh_tempo }}</td>
-                            <td>{{ $item->total_tagihan }}</td>
-                            <td>{{ $item->dp }}</td>
-                            <td>{{ $item->sisa_bayar }}</td>
-                            <td>{{ $item->status }}</td>
+                            <td>{{ $item->sewa->no_sewa }}</td>
+                            <td>{{ $item->sewa->no_invoice }}</td>
+                            <td>{{ $item->no_invoice_bayar }}</td>
+                            <td>{{ $item->nominal }}</td>
+                            <td>{{ $item->tanggal_bayar }}</td>
+                            <td>{{ $item->cara_bayar }}</td>
+                            <td>{{ $item->status_bayar }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -46,11 +46,11 @@
                                     <li>
                                         <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
-                                    @if ($item->sisa_bayar != 0)
+                                    {{-- @if ($item->sisa_bayar != 0)
                                     <li>
                                         <a href="javascript:void(0);" onclick="bayar({{ $item }})" class="dropdown-item"><img src="assets/img/icons/cash.svg" class="me-2" alt="img">Bayar</a>
                                     </li>
-                                    @endif
+                                    @endif --}}
                                 </ul>
                             </td>
                         </tr>
@@ -63,7 +63,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{{-- <div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -140,13 +140,11 @@
             </form>
         </div>
     </div>
-</div>
+</div> --}}
 @endsection
 
 @section('scripts')
     <script>
-        var cekInvoiceNumbers = "{{ $invoice_bayar }}";
-        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){
             $('#rekening_id, #bayar').select2();
         });
@@ -156,11 +154,9 @@
             if (caraBayar == 'transfer') {
                 $('#rekening').show();
                 $('#rekening_id').attr('required', true);
-                $('#bukti').attr('required', true);
             } else {
                 $('#rekening').hide();
                 $('#rekening_id').attr('required', false);
-                $('#bukti').attr('required', false);
             }
         });
         $('#nominal').on('input', function() {
