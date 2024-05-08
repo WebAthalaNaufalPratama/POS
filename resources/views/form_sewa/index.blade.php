@@ -34,15 +34,15 @@
                             <td>{{ $item->produk_terjual->produk->nama ?? '-' }}</td>
                             <td>{{ $item->perangkai->nama ?? '-' }}</td>
                             <td>{{ $item->tanggal ?? '-' }}</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                    <div class="dropdown-menu">
-                                        {{-- <a class="dropdown-item" href="{{ route('do_sewa.edit', ['do_sewa' => $item->id]) }}">Edit</a> --}}
-                                        <a class="dropdown-item" href="{{ route('form.show', ['form' => $item->id]) }}">Detail</a>
-                                        {{-- <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $item->id }})">Delete</a> --}}
-                                    </div>
-                                </div>
+                            <td class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{{ route('form.show', ['form' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                    </li>
+                                </ul>
                             </td>
                         </tr>
                     @endforeach

@@ -52,11 +52,11 @@ class ProdukController extends Controller
         // penentuan kode produk
         $latestProduks = Produk::withTrashed()->orderBy('kode', 'desc')->get();
         if(count($latestProduks) < 1){
-            $getKode = 'PRD-001';
+            $getKode = 'PRD-00001';
         } else {
             $lastProduk = $latestProduks->first();
             $kode = explode('-', $lastProduk->kode);
-            $getKode = 'PRD-' . str_pad((int)$kode[1] + 1, 3, '0', STR_PAD_LEFT);
+            $getKode = 'PRD-' . str_pad((int)$kode[1] + 1, 6, '0', STR_PAD_LEFT);
         }
         $data['kode'] = $getKode;
 

@@ -57,11 +57,11 @@ class ProdukJualController extends Controller
             // penentuan kode produk
             $latestProduks = Produk_Jual::withTrashed()->where('tipe_produk', $getTipe->id)->orderBy('kode', 'desc')->get();
             if(count($latestProduks) < 1){
-                $getKode = 'TRD-00001';
+                $getKode = 'TRD-000001';
             } else {
                 $lastProduk = $latestProduks->first();
                 $kode = explode('-', $lastProduk->kode);
-                $getKode = 'TRD-' . str_pad((int)$kode[1] + 1, 5, '0', STR_PAD_LEFT);
+                $getKode = 'TRD-' . str_pad((int)$kode[1] + 1, 6, '0', STR_PAD_LEFT);
             }
 
             return view('tradisional.create', compact('getKode', 'produks', 'kondisi'));
@@ -74,11 +74,11 @@ class ProdukJualController extends Controller
             // penentuan kode produk
             $latestProduks = Produk_Jual::withTrashed()->where('tipe_produk', $getTipe->id)->orderBy('kode', 'desc')->get();
             if(count($latestProduks) < 1){
-                $getKode = 'GFT-00001';
+                $getKode = 'GFT-000001';
             } else {
                 $lastProduk = $latestProduks->first();
                 $kode = explode('-', $lastProduk->kode);
-                $getKode = 'GFT-' . str_pad((int)$kode[1] + 1, 5, '0', STR_PAD_LEFT);
+                $getKode = 'GFT-' . str_pad((int)$kode[1] + 1, 6, '0', STR_PAD_LEFT);
             }
 
             return view('gift.create', compact('getKode', 'produks', 'kondisi'));

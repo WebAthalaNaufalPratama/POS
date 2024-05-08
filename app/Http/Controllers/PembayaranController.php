@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InvoiceSewa;
 use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Penjualan;
@@ -124,5 +125,54 @@ class PembayaranController extends Controller
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan data');
         }
+    }          
+
+    public function index_sewa(){
+        $data = Pembayaran::whereNotNull('invoice_sewa_id')->orderByDesc('id')->get();
+        return view('pembayaran_sewa.index', compact('data'));
     }
+
+    public function store_sewa(Request $req){
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'invoice_sewa_id' => 'required',
+            'no_invoice_bayar' => 'required',
+            'nominal' => 'required',
+            'tanggal_bayar' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        $data = $req->except(['_token', '_method', 'bukti']);
+        $invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+
+        // cek sisa bayar
+        if($invoice_tagihan->sisa_bayar > 0){
+            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->sisa_bayar) - intval($data['nominal']);
+            $check = $invoice_tagihan->update();
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            // store file
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
+                $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
+                $data['bukti'] = $filePath;
+            }
+
+            $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+            if($new_invoice_tagihan->sisa_bayar <= 0){
+                $data['status_bayar'] = 'LUNAS';
+            } else {
+                $data['status_bayar'] = 'BELUM LUNAS';
+            }
+            $pembayaran = Pembayaran::create($data);
+
+            if(!$pembayaran) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            return redirect()->back()->with('success', 'Pembayaran berhasil');
+        } else {
+            return redirect()->back()->withInput()->with('fail', 'Invoice sudah lunas');
+        }
+    }
+    
 }

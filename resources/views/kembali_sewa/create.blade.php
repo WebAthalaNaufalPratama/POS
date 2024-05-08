@@ -7,12 +7,12 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h5 class="card-title">Buat Delivery order</h5>
+                        <h5 class="card-title">Buat Kembali Sewa</h5>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <form action="{{ route('do_sewa.store') }}" method="POST">
+                <form action="{{ route('kembali_sewa.store') }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
                             @csrf
@@ -20,10 +20,16 @@
                                 <div class="col-md-6 border rounded pt-3">
                                     <h5 class="card-title">Informasi Pelanggan</h5>
                                     <div class="row">
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>No Kontrak</label>
+                                                <input type="text" id="no_sewa" name="no_sewa" value="{{ old('no_sewa') ?? $kontrak->no_kontrak }}" class="form-control" required readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Customer</label>
-                                                <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') ?? $kontrak->customer->nama }}" class="form-control" required disabled>
+                                                <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') ?? $kontrak->customer->nama }}" class="form-control" required readonly>
                                                 <input type="hidden" id="customer_id" name="customer_id" value="{{ old('customer_id') ?? $kontrak->customer_id }}" class="form-control" required>
                                             </div>
                                         </div>
@@ -36,35 +42,25 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Handphone</label>
-                                                <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $kontrak->handphone }}" class="form-control" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Alamat</label>
-                                                <textarea type="text" id="alamat" name="alamat" class="form-control" required>{{ old('alamat') ?? $kontrak->alamat }}</textarea>
+                                                <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $kontrak->handphone }}" class="form-control" required readonly>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6 border rounded pt-3">
-                                    <h5 class="card-title">Detail Pesanan</h5>
+                                    <h5 class="card-title">Detail Kembali Sewa</h5>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label>No Delivery Order</label>
-                                                <input type="text" id="no_do" name="no_do" value="{{ old('no_do') ?? $getKode }}" class="form-control" required readonly>
+                                                <label>No Kembali Sewa</label>
+                                                <input type="text" id="no_kembali" name="no_kembali" value="{{ old('no_kembali') ?? $getKode }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label>Tanggal Kirim</label>
-                                                <input type="date" id="tanggal_kirim" name="tanggal_kirim" value="{{ old('tanggal_kirim') ?? date('Y-m-d') }}" class="form-control" required>
+                                                <label>Tanggal kembali</label>
+                                                <input type="date" id="tanggal_kembali" name="tanggal_kembali" value="{{ old('tanggal_kembali') ?? date('Y-m-d') }}" class="form-control" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>No Kontrak</label>
-                                                <input type="text" id="no_referensi" name="no_referensi" value="{{ old('no_referensi') ?? $kontrak->no_kontrak }}" class="form-control"  required readonly>
-                                            </div>
                                             <div class="form-group">
                                                 <label>Driver</label>
                                                 <select id="driver_id" name="driver" class="form-control" required>
@@ -73,12 +69,6 @@
                                                         <option value="{{ $driver->id }}" {{ old('driver') == $driver->id ? 'selected' : '' }}>{{ $driver->nama }}</option>
                                                     @endforeach
                                                 </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Catatan</label>
-                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ old('catatan') }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -93,16 +83,25 @@
                             <table class="table">
                                 <thead>
                                     <tr>
+                                        <th style="width: 15%">No DO</th>
                                         <th>Nama</th>
-                                        <th>Jumlah</th>
-                                        <th>Satuan</th>
+                                        <th style="width: 10%">Jumlah</th>
                                         <th>Detail Lokasi</th>
+                                        <th>Kondisi</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field">
                                     @if(count($kontrak->produk) < 1)
                                     <tr>
+                                        <td>
+                                            <select id="no_do_produk_0" name="no_do_produk[]" class="form-control">
+                                                <option value="">Pilih DO</option>
+                                                @foreach ($do as $item)
+                                                    <option value="{{ $item->no_do }}">{{ $item->no_do }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
                                         <td>
                                             <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
@@ -112,8 +111,22 @@
                                             </select>
                                         </td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control"></td>
-                                        <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" class="form-control"></td>
-                                        <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control"></td>
+                                        <td>
+                                            <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" required>
+                                                <option value="">Pilih Detail Lokasi</option>
+                                                @foreach ($detail_lokasi as $item)
+                                                    <option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control">
+                                                <option value="">Pilih Kondisi</option>
+                                                @foreach ($kondisi as $item)
+                                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
                                         <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                     </tr>
                                     @else
@@ -123,16 +136,38 @@
                                     @foreach ($kontrak->produk as $produk) 
                                         <tr id="row{{ $i }}">
                                             <td>
-                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
+                                                <select id="no_do_produk_{{ $i }}" name="no_do_produk[]" class="form-control" required>
+                                                    <option value="">Pilih DO</option>
+                                                    @foreach ($do as $item)
+                                                        <option value="{{ $item->no_do }}">{{ $item->no_do }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
                                                     <option value="">Pilih Produk</option>
                                                     @foreach ($produkSewa as $pj)
                                                         <option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}"></td>
-                                            <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ old('satuan.' . $i) ?? 'pcs' }}"></td>
-                                            <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ old('detail_lokasi.' . $i) }}" required></td>
+                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required></td>
+                                            <td>
+                                                <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" required>
+                                                    <option value="">Pilih Detail Lokasi</option>
+                                                    @foreach ($detail_lokasi as $item)
+                                                        <option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" required>
+                                                    <option value="">Pilih Kondisi</option>
+                                                    @foreach ($kondisi as $item)
+                                                        <option value="{{ $item->id }}" {{ $item->id == old('kondisi.' . $i) ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
                                             @if ($i == 0)
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             @else
@@ -144,40 +179,6 @@
                                         </tr>
                                     @endforeach
                                     @endif
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="form-row row">
-                        <label>Tambahan Produk</label>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>Jumlah</th>
-                                        <th>Satuan</th>
-                                        <th>Detail Lokasi</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="dynamic_field2">
-                                    <tr>
-                                        <td>
-                                            <select id="produk2_0" name="nama_produk2[]" class="form-control">
-                                                <option value="">Pilih Produk</option>
-                                                @foreach ($produkjuals as $produk)
-                                                    <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
-                                        <td><input type="text" name="satuan2[]" id="satuan2_0" class="form-control"></td>
-                                        <td><input type="text" name="keterangan2[]" id="keterangan2_0" class="form-control"></td>
-                                        <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -205,7 +206,7 @@
                                         </tr>
                                         <tr>
                                             <td style="width: 25%;">
-                                                <input type="date" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
+                                                <input type="date" class="form-control" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
                                             </td>
                                             <td id="tgl_pembuat" style="width: 25%;">{{ date('Y-m-d') }}</td>
                                             <td id="tgl_penyetuju" style="width: 25%;">{{ isset($kontrak->tanggal_penyetujju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetujju)->format('Y-m-d') : '-' }}</td>
@@ -216,13 +217,14 @@
                             </div>
                             <div class="col-md-4 border rounded mt-3 pt-3">
                                 <div class="custom-file-container" data-upload-id="myFirstImage">
-                                    <label>Bukti Kirim (Single File) <a href="javascript:void(0)" class="custom-file-container__image-clear" title="Clear Image">clear</a></label>
-                                    <label class="custom-file-container__custom-file">
-                                    <input type="file" class="custom-file-container__custom-file__custom-file-input" accept="image/*">
-                                    <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
-                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                    <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
                                     </label>
-                                    <div class="custom-file-container__image-preview"></div>
+                                    <label class="custom-file-container__custom-file">
+                                        <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
+                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                    </label>
+                                    <span class="text-danger">max 2mb</span>
+                                    <img id="preview" src="" alt="your image" />
                                 </div>
                             </div>
                         </div>
@@ -232,7 +234,7 @@
                     <button class="btn btn-primary" type="submit">Submit</button>
                     <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
-                </form>
+            </form>
             </div>
         </div>
     </div>
@@ -243,11 +245,23 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
-            $('[id^=produk], #driver_id').select2();
+            if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
+            }
+            $('[id^=produk], #driver_id, [id^=no_do_produk], [id^=kondisi], [id^=lokasi]').select2();
             $('#driver_id').trigger('change');
             var i = '{{ count($kontrak->produk) }}';
             $('#add').click(function(){
-                var newRow = '<tr id="row'+i+'"><td>' + 
+                var newRow = '<tr id="row'+i+'">' + 
+                               '<td>' +
+                                    '<select id="no_do_produk_'+i+'" name="no_do_produk[]" class="form-control">' +
+                                        '<option value="">Pilih DO</option>'+
+                                        '@foreach ($do as $item)' +
+                                            '<option value="{{ $item->no_do }}">{{ $item->no_do }}</option>' +
+                                        '@endforeach' +
+                                    '</select>' +
+                                '</td>' +
+                                '<td>' +
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $pj)'+
@@ -255,39 +269,36 @@
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
-                            '<td><input type="number" name="satuan[]" id="satuan_'+i+'" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control"></td>'+
-                            '<td><input type="number" name="detail_lokasis[]" id="detail_lokasis_'+i+'" class="form-control"></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
+                            '<td>' +
+                                '<select id="lokasi_'+i+'" name="lokasi[]" class="form-control" required>' +
+                                    '<option value="">Pilih Detail Lokasi</option>' +
+                                    '@foreach ($detail_lokasi as $item)' +
+                                        '<option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>' +
+                                    '@endforeach' +
+                                '</select>' +
+                            '</td>' +
+                            '<td>' +
+                                '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control">' +
+                                    '<option value="">Pilih Kondisi</option>' +
+                                    '@foreach ($kondisi as $item)' +
+                                        '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
+                                    '@endforeach' +
+                                '</select>' +
+                            '</td>' +
+                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                            '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
-                i++;
-            })
-            $('#add2').click(function(){
-                var newRow = '<tr id="row2'+i+'"><td>' + 
-                                '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
-                                    '<option value="">Pilih Produk</option>'+
-                                    '@foreach ($produkjuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
-                                    '@endforeach'+
-                                '</select>'+
-                            '</td>'+
-                            '<td><input type="number" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
-                            '<td><input type="number" name="jumlah2[]" id="jumlah2_'+i+'" class="form-control"></td>'+
-                            '<td><input type="number" name="detail_lokasis2[]" id="detail_lokasis2_'+i+'" class="form-control"></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
-                $('#dynamic_field2').append(newRow);
-                $('#produk2_' + i).select2();
+                $('#no_do_produk_' + i).select2();
+                $('#kondisi_' + i).select2();
+                $('#lokasi_' + i).select2();
                 i++;
             })
         })
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
             $('#row'+button_id+'').remove();
-        });
-        $(document).on('click', '.btn_remove2', function() {
-            var button_id = $(this).attr("id");
-            $('#row2'+button_id+'').remove();
         });
         $('#driver_id').on('change', function() {
             var nama_driver = $("#driver_id option:selected").text();
@@ -298,5 +309,29 @@
                 $('#driver').text('-')
             }
         });
+        $('#bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        };
     </script>
 @endsection

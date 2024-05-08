@@ -47,14 +47,20 @@ class KontrakController extends Controller
         $sales = Karyawan::where('jabatan', 'sales')->get();
         $ongkirs = Ongkir::all();
 
-        $latestKontrak = Kontrak::withTrashed()->orderByDesc('id')->get();
-            if(count($latestKontrak) < 1){
-                $getKode = 'KSW-00001';
+        $latestKontrak = Kontrak::withTrashed()->orderByDesc('id')->first();
+        if (!$latestKontrak) {
+            $getKode = 'KSW' . date('Ymd') . '00001';
+        } else {
+            $lastDate = substr($latestKontrak->no_kontrak, 3, 8);
+            $todayDate = date('Ymd');
+            if ($lastDate != $todayDate) {
+                $getKode = 'KSW' . date('Ymd') . '00001';
             } else {
-                $lastKontrak = $latestKontrak->first();
-                $kode = explode('-', $lastKontrak->no_kontrak);
-                $getKode = 'KSW-' . str_pad((int)$kode[1] + 1, 5, '0', STR_PAD_LEFT);
+                $lastNumber = substr($latestKontrak->no_kontrak, -5);
+                $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                $getKode = 'KSW' . date('Ymd') . $nextNumber;
             }
+        }
 
         return view('kontrak.create', compact('produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'getKode', 'ongkirs'));
     }
@@ -100,6 +106,7 @@ class KontrakController extends Controller
         // save data kontrak
         $check = Kontrak::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        $newProdukTerjual = [];
         
         // save data produk kontrak
         for ($i=0; $i < count($data['nama_produk']); $i++) { 
@@ -111,6 +118,10 @@ class KontrakController extends Controller
                 'jumlah' => $data['jumlah'][$i],
                 'harga_jual' => $data['harga_total'][$i]
             ]);
+
+            if($getProdukJual->tipe_produk == 6){
+                $newProdukTerjual[] = $produk_terjual;
+            }
 
             if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             foreach ($getProdukJual->komponen as $komponen ) {
@@ -127,6 +138,10 @@ class KontrakController extends Controller
                 ]);
                 if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
+        }
+
+        if(!empty($newProdukTerjual)){
+            return redirect(route('kontrak.show', ['kontrak' => $check->id]))->with('success', 'Silakan set komponen gift');
         }
         return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
@@ -150,7 +165,9 @@ class KontrakController extends Controller
         $ongkirs = Ongkir::all();
         $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
         $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
-        return view('kontrak.show', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat', 'perangkai'));
+        $bungapot = Produk::where('tipe_produk',1)->orWhere('tipe_produk',2)->get();
+        $kondisi = Kondisi::all();
+        return view('kontrak.show', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat', 'perangkai', 'bungapot', 'kondisi'));
     }
 
     /**
@@ -285,5 +302,14 @@ class KontrakController extends Controller
             }
         }
         return response()->json(['msg' => 'Data berhasil dihapus']);
+    }
+
+    public function create_gift(Request $req)
+    {
+        $gift = Kontrak::with('produk')->find($req->kontrak);
+        $bungapot = Produk::where('tipe_produk',1)->orWhere('tipe_produk',2)->get();
+        $kondisi = Kondisi::all();
+        // dd($gift);
+        return view('kontrak.create_gift', compact('gift', 'bungapot', 'kondisi'));
     }
 }

@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Komponen_Produk_Jual;
 use App\Models\Komponen_Produk_Terjual;
+use App\Models\Produk;
+use App\Models\Produk_Jual;
+use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class KomponenProdukTerjualController extends Controller
 {
@@ -81,5 +86,52 @@ class KomponenProdukTerjualController extends Controller
     public function destroy(Komponen_Produk_Terjual $komponen_Produk_Terjual)
     {
         //
+    }
+
+    public function addKomponen(Request $req)
+    {
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'data_produk_id' => 'required',
+            'new_produk' => 'required',
+            'jml_tambahan' => 'required',
+            'new_produk_kondisi' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        $data = $req->except(['_token', '_method']);
+
+        // save data komponen pot dan bunga
+        $produkTerjual = Produk_Terjual::find($data['data_produk_id']);
+
+        // remove data komponen before update
+        $oldBungaPot = Komponen_Produk_Terjual::where('produk_terjual_id', $produkTerjual->id)->whereIn('tipe_produk', [1, 2])->delete();
+
+        for ($i=0; $i < count($data['new_produk']); $i++) { 
+            $produk = Produk::find($data['new_produk'][$i]);
+
+            if(!$produk) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                'produk_terjual_id' => $produkTerjual->id,
+                'kode_produk' => $produk->kode,
+                'nama_produk' => $produk->nama,
+                'tipe_produk' => $produk->tipe_produk,
+                'kondisi' => $data['new_produk_kondisi'][$i],
+                'deskripsi' => $produk->deskripsi,
+                'jumlah' => $data['jml_tambahan'][$i],
+                'harga_satuan' => 0,
+                'harga_total' => 0
+            ]);
+            if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        }
+
+        // kembali ke show kontrak
+        $route = explode(',', $req->route);
+        if(count($route) == 1){
+            return redirect()->route($route[0])->with('success', 'Produk berhasil ditambahkan');
+        } else {
+            return redirect()->route($route[0], [$route[1] => $route[2]])->with('success', 'Produk berhasil ditambahkan');
+        }
     }
 }
