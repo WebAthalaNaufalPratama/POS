@@ -23,7 +23,7 @@
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
                     <th>Metode</th>
-                    <th>Status</th>
+                    <th class="text-center">Status</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -37,7 +37,13 @@
                             <td>{{ $item->nominal }}</td>
                             <td>{{ $item->tanggal_bayar }}</td>
                             <td>{{ $item->cara_bayar }}</td>
-                            <td>{{ $item->status_bayar }}</td>
+                            <td class="text-center">
+                                @if ($item->status_bayar == 'LUNAS')
+                                    <span class="badge bg-success">{{ $item->status_bayar }}</span>
+                                @elseif ($item->status_bayar == 'BELUM LUNAS')
+                                    <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
+                                @endif
+                            </td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

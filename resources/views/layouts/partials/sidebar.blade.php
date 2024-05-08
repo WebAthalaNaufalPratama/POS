@@ -74,7 +74,7 @@
                         <li><a href="{{ route('inven_outlet.index')}}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
                         <li><a href="#" class="">Inden</a></li>
                     </ul>
-                </li>
+                </li>
                 <li class="submenu">
                 {{-- <li class="submenu">
 <a href="javascript:void(0);"><img src="/assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
