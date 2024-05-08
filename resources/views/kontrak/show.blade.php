@@ -150,7 +150,7 @@
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" disabled></td>
                                         <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
                                         <td></td>
-                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary">Perangkai</button></td>
                                         {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
                                     </tr>
                                     @endif
@@ -175,7 +175,7 @@
                                                 <button id="btnGift_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-info w-100">Set Gift</button>
                                                 @endif
                                             </td>
-                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary">Perangkai</button></td>
                                             {{-- @if ($i == 0)
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             @else
@@ -457,7 +457,7 @@
       </div>
     </div>
 </div>
-<div class="modal fade" id="modalSetGift" tabindex="-1" aria-labelledby="modalSetGift" aria-hidden="true">
+<div class="modal fade" id="modalSetGift" aria-labelledby="modalSetGift" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -539,7 +539,7 @@
             checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
             calculatePromo(old_promo_id);
 
-            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe, [id^=new_produk_]').select2();
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
@@ -554,7 +554,7 @@
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
                             '<td><button id="btnGift_'+i+'" data-produk="{{ $komponen }}" class="btn btn-info">Set Gift</button></td>' +
-                            '<td><button id="btnPerangkai_'+i+'" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>' +
+                            '<td><button id="btnPerangkai_'+i+'" data-produk="{{ $komponen->id }}" class="btn btn-primary">Perangkai</button></td>' +
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
@@ -641,7 +641,9 @@
                     '@endforeach' +
                     '</select>';
                 $('#div_perangkai').append(rowPerangkai);
-                $('#perangkai_id_' + i).select2();
+                $('#perangkai_id_' + i).select2({
+                    dropdownParent: $("#modalPerangkai")
+                });
             }
         })
         $('[id^=btnGift]').click(function(e) {
@@ -680,8 +682,12 @@
                     '</div>' +
                     '</div>';
                 $('#div_new_produk').append(row_bungapot);
-                $('#new_produk_' + i).select2();
-                $('#new_produk_kondisi_' + i).select2();
+                $('#new_produk_' + i).select2({
+                    dropdownParent: $("#modalSetGift")
+                });
+                $('#new_produk_kondisi_' + i).select2({
+                    dropdownParent: $("#modalSetGift")
+                });
             }
         })
         function multiply(element) {
@@ -841,9 +847,7 @@
                     $('#jml_produk').val(response.jumlah);
                     $('#no_form').val(response.kode_form);
                     $('#jml_perangkai').val(response.perangkai.length);
-                    $('[id^="perangkai_id"]').select2()
                     $('[id^="perangkai_id_"]').each(function() {
-                        $(this).select2('destroy');
                         $(this).remove();
                     });
                     if(response.perangkai.length > 0){
@@ -859,7 +863,9 @@
                             $('#div_perangkai select').each(function(index) {
                                 $(this).val(response.perangkai[index].perangkai_id);
                             });
-                            $('#perangkai_id_' + i).select2();
+                            $('#perangkai_id_' + i).select2({
+                                dropdownParent: $("#modalPerangkai")
+                            });
                         }
                     }
                     $('#modalPerangkai').modal('show');
@@ -881,11 +887,11 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
+                    console.log(response);
                     $('#data_produk').val(response.produk.nama);
                     $('#data_produk_id').val(response.id);
                     $('#jml_data_produk').val(response.jumlah);
                     $('#modalSetGift').modal('show');
-                    $('[id^="new_produk_"]').select2()
                     $('[id^="div_produk_jumlah_"]').each(function() {
                         $(this).remove();
                     });
@@ -920,8 +926,12 @@
                                 $('#new_produk_kondisi_' + i).val(response.komponen[i].kondisi);
                                 $('#jml_tambahan_' + i).val(response.komponen[i].jumlah);
                                 $('#new_produk_' + i).val(response.komponen[i].produk.id);
-                                $('#new_produk_' + i).select2();
-                                $('#new_produk_kondisi_' + i).select2();
+                                $('#new_produk_' + i).select2({
+                                    dropdownParent: $("#modalSetGift")
+                                });
+                                $('#new_produk_kondisi_' + i).select2({
+                                    dropdownParent: $("#modalSetGift")
+                                });
                             }
                         }
                     }

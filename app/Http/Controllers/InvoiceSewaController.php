@@ -165,16 +165,16 @@ class InvoiceSewaController extends Controller
         $bankpens = Rekening::get();
         $Invoice = Pembayaran::latest()->first();
         if (!$Invoice) {
-            $getKode = 'BYR' . date('Ymd') . '00001';
+            $invoice_bayar = 'BYR' . date('Ymd') . '00001';
         } else {
             $lastDate = substr($Invoice->no_kontrak, 3, 8);
             $todayDate = date('Ymd');
             if ($lastDate != $todayDate) {
-                $getKode = 'BYR' . date('Ymd') . '00001';
+                $invoice_bayar = 'BYR' . date('Ymd') . '00001';
             } else {
                 $lastNumber = substr($Invoice->no_kontrak, -5);
                 $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
-                $getKode = 'BYR' . date('Ymd') . $nextNumber;
+                $invoice_bayar = 'BYR' . date('Ymd') . $nextNumber;
             }
         }
         return view('invoice_sewa.show', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa', 'riwayat', 'pembayaran', 'bankpens', 'invoice_bayar'));

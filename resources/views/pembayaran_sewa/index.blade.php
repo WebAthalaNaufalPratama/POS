@@ -50,7 +50,7 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->sewa->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
                                     {{-- @if ($item->sisa_bayar != 0)
                                     <li>

@@ -68,7 +68,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Form Pembayaran</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -134,7 +134,7 @@
                 </div>
 
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
@@ -148,7 +148,6 @@
         var cekInvoiceNumbers = "{{ $invoice_bayar }}";
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){
-            $('#rekening_id, #bayar').select2();
         });
 
         $('#bayar').on('change', function() {
@@ -175,12 +174,17 @@
         });
         
         function bayar(invoice){
-            console.log(invoice)
             $('#no_kontrak').val(invoice.no_sewa);
             $('#invoice_sewa_id').val(invoice.id);
             $('#total_tagihan').val(invoice.total_tagihan);
             $('#sisa_tagihan').val(invoice.sisa_bayar);
             $('#nominal').val(invoice.sisa_bayar);
+            $('#rekening_id').select2({
+                dropdownParent: $("#modalBayar")
+            });
+            $('#bayar').select2({
+                dropdownParent: $("#modalBayar")
+            });
             $('#modalBayar').modal('show');
             generateInvoice();
         }

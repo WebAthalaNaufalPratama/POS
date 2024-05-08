@@ -205,7 +205,7 @@
                                         </tr>
                                         <tr>
                                             <td style="width: 25%;">
-                                                <input type="date" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
+                                                <input type="date" class="form-control" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
                                             </td>
                                             <td id="tgl_pembuat" style="width: 25%;">{{ date('Y-m-d') }}</td>
                                             <td id="tgl_penyetuju" style="width: 25%;">{{ isset($kontrak->tanggal_penyetujju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetujju)->format('Y-m-d') : '-' }}</td>

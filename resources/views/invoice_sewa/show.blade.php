@@ -639,6 +639,12 @@
             $('#total_tagihan').val(invoice.total_tagihan);
             $('#sisa_tagihan').val(invoice.sisa_bayar);
             $('#nominal').val(invoice.sisa_bayar);
+            $('#rekening_id').select2({
+                dropdownParent: $("#modalBayar")
+            });
+            $('#bayar').select2({
+                dropdownParent: $("#modalBayar")
+            });
             $('#modalBayar').modal('show');
             generateInvoice();
         }
