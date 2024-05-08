@@ -47,14 +47,20 @@ class KontrakController extends Controller
         $sales = Karyawan::where('jabatan', 'sales')->get();
         $ongkirs = Ongkir::all();
 
-        $latestKontrak = Kontrak::withTrashed()->orderByDesc('id')->get();
-            if(count($latestKontrak) < 1){
-                $getKode = 'KSW-00001';
+        $latestKontrak = Kontrak::withTrashed()->orderByDesc('id')->first();
+        if (!$latestKontrak) {
+            $getKode = 'KSW' . date('Ymd') . '00001';
+        } else {
+            $lastDate = substr($latestKontrak->no_kontrak, 3, 8);
+            $todayDate = date('Ymd');
+            if ($lastDate != $todayDate) {
+                $getKode = 'KSW' . date('Ymd') . '00001';
             } else {
-                $lastKontrak = $latestKontrak->first();
-                $kode = explode('-', $lastKontrak->no_kontrak);
-                $getKode = 'KSW-' . str_pad((int)$kode[1] + 1, 5, '0', STR_PAD_LEFT);
+                $lastNumber = substr($latestKontrak->no_kontrak, -5);
+                $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                $getKode = 'KSW' . date('Ymd') . $nextNumber;
             }
+        }
 
         return view('kontrak.create', compact('produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'getKode', 'ongkirs'));
     }

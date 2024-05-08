@@ -46,15 +46,21 @@ class DeliveryOrderController extends Controller
         $drivers = Karyawan::where('jabatan', 'driver')->get();
         $produkjuals = Produk_Jual::all();
         $produkSewa = $kontrak->produk()->whereHas('produk')->get();
-        $latestDO = DeliveryOrder::withTrashed()->orderByDesc('id')->get();
+        $latestDO = DeliveryOrder::withTrashed()->orderByDesc('id')->first();
 
         // kode do
-        if(count($latestDO) < 1){
+        if (!$latestDO) {
             $getKode = 'DVO' . date('Ymd') . '00001';
         } else {
-            $lastDO = $latestDO->first();
-            $kode = substr($lastDO->no_do, -5);
-            $getKode = 'DVO' . date('Ymd') . str_pad((int)$kode + 1, 5, '0', STR_PAD_LEFT);
+            $lastDate = substr($latestDO->no_do, 3, 8);
+            $todayDate = date('Ymd');
+            if ($lastDate != $todayDate) {
+                $getKode = 'DVO' . date('Ymd') . '00001';
+            } else {
+                $lastNumber = substr($latestDO->no_do, -5);
+                $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                $getKode = 'DVO' . date('Ymd') . $nextNumber;
+            }
         }
         return view('do_sewa.create', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa'));
     }

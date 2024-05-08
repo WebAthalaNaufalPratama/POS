@@ -39,9 +39,15 @@
                             <td>{{ $gift->harga_jual }}</td>
                             <td>{{ $gift->deskripsi }}</td>
                             <td>
-                                @foreach ($gift->komponen as $komponen)
-                                    {{ $komponen->kode_produk }} - {{ $komponen->nama_produk ?? '-' }} x {{ $komponen->jumlah ?? '-' }} <br>
-                                @endforeach
+                                <table class="table table-bordered">
+                                    @foreach ($gift->komponen as $komponen)
+                                    <tr>
+                                        <td>{{ $komponen->kode_produk }}</td>
+                                        <td>{{ $komponen->nama_produk }}</td>
+                                        <td>{{ $komponen->jumlah }}</td>
+                                    </tr>
+                                    @endforeach
+                                </table>
                             </td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">

@@ -55,13 +55,19 @@ class KembaliSewaController extends Controller
             $q->where('no_referensi', $kontrak->no_kontrak);
         })->get()->unique('detail_lokasi');
 
-        // kode do
-        if(count($latestKembali) < 1){
+        // kode kembali sewa
+        if (!$latestKembali) {
             $getKode = 'KMB' . date('Ymd') . '00001';
         } else {
-            $lastKembali = $latestKembali->first();
-            $kode = substr($lastKembali->no_kembali, -5);
-            $getKode = 'KMB' . date('Ymd') . str_pad((int)$kode + 1, 5, '0', STR_PAD_LEFT);
+            $lastDate = substr($latestKembali->no_kemblai, 3, 8);
+            $todayDate = date('Ymd');
+            if ($lastDate != $todayDate) {
+                $getKode = 'KMB' . date('Ymd') . '00001';
+            } else {
+                $lastNumber = substr($latestKembali->no_kemblai, -5);
+                $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                $getKode = 'KMB' . date('Ymd') . $nextNumber;
+            }
         }
         return view('kembali_sewa.create', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa', 'do', 'kondisi', 'detail_lokasi'));
     }
