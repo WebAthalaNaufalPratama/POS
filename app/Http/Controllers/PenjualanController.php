@@ -69,6 +69,13 @@ class PenjualanController extends Controller
                     ->orWhere('lokasi_id', 'Semua');
             })->get();
             $produks = Produk_Jual::with('komponen.kondisi')->get();
+            $komponenproduks = Komponen_Produk_Jual::all();
+            $produkkompos = Produk_Jual::with('komponen.kondisi')
+                            ->where(function($query) {
+                                $query->where('kode', 'like', 'TRD%')
+                                    ->orWhere('kode', 'like', 'POT%');
+                            })->get();
+
             // dd($produks);
             $bankpens = Rekening::get();
             $Invoice = Penjualan::latest()->first();
@@ -95,7 +102,7 @@ class PenjualanController extends Controller
             $invoices = Penjualan::get();
         }
 
-        return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
+        return view('penjualan.create', compact('produkkompos', 'komponenproduks','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
     }
 
 
@@ -117,7 +124,6 @@ class PenjualanController extends Controller
             'pilih_pengiriman' => 'required',
             'biaya_ongkir' => 'required',
             'sub_total' => 'required',
-            'promo_id' => 'required',
             'jenis_ppn' => 'required',
             'jumlah_ppn' => 'required',
             'dp' => 'required',
@@ -130,7 +136,7 @@ class PenjualanController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
-        // dd($req->cara_bayar);
+        dd($data);
         if ($req->hasFile('bukti_file')) {
             $file = $req->file('bukti_file');
             $fileName = time() . '_' . $file->getClientOriginalName();
@@ -144,7 +150,7 @@ class PenjualanController extends Controller
             $data['jumlahCash'] = $req->nominal;
         }
         
-        // dd($data);
+        dd($data);
         $penjualan = Penjualan::create($data);
 
         if ($penjualan) {
@@ -292,7 +298,49 @@ class PenjualanController extends Controller
         $Invoice = Penjualan::latest()->first();
         $kondisis = Kondisi::all();
         $invoices = Penjualan::get();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
         // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
-        return view('penjualan.show', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai'));
+        return view('penjualan.show', compact('produkKomponens','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai'));
+    }
+
+    public function store_komponen(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'komponen_id' => 'required',
+            'kondisi_id' => 'required',
+            'jumlahproduk' => 'required',
+            'prdTerjual_id' => 'required'
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->withErrors($validator);
+        }
+        
+        $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
+        
+        $jumlahItem = count($req->komponen_id);
+        
+        for ($i = 0; $i < $jumlahItem; $i++) {
+            $data['produk_terjual_id'] = $req->komponen_id[$i];
+            $data['kondisi'] = $req->kondisi_id[$i];
+            $data['jumlah'] = $req->jumlahproduk[$i];
+    
+            $produk = Produk::findOrFail($req->komponen_id[$i]);
+        
+            $data['kode_produk'] = $produk->kode;
+            $data['nama_produk'] = $produk->nama;
+            $data['tipe_produk'] = $produk->tipe_produk;
+            $data['deskripsi'] = $produk->deskripsi;
+            $data['harga_satuan'] = 0;
+            $data['harga_total'] = 0;
+
+            $check = Komponen_Produk_Terjual::create($data);
+        
+    
+            if (!$check) {
+                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+        }
+        return redirect()->back()->with('success', 'Data tersimpan');
     }
 }

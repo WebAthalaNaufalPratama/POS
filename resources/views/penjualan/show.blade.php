@@ -204,6 +204,7 @@
                                                         </div> -->
                                                     </td>
                                                     <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
+                                                    <td><button id="btnGift_0" data-produk_gift="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
                                                     <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                     <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                     <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
@@ -246,6 +247,7 @@
                                                         </div> -->
                                                         </td>
                                                         <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual}}" readonly></td>
+                                                        <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
                                                         <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
@@ -454,6 +456,70 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalGift" tabindex="-1" aria-labelledby="modalGiftLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalGiftLabel">Atur Komponen Gift</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <form id="form_gift" action="{{ route('komponenpenjulan.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="route" value="{{ request()->route()->getName() }},penjualan,{{ request()->route()->parameter('penjualan') }}">
+                    <div class="mb-3">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <label for="prdTerjualGift" class="col-form-label">Produk</label>
+                                <input type="text" class="form-control" name="produk_id" id="prdTerjualGift" readonly required>
+                            </div>
+                            <input type="hidden" name="prdTerjual_id" id="prdTerjualGift_id" value="">
+                            <div class="col-sm-4">
+                                <label for="jmlGift_produk" class="col-form-label">Jumlah</label>
+                                <input type="number" class="form-control" name="jml_produk" id="jmlGift_produk" readonly required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jml_komponen" class="col-form-label">Jumlah Bunga/POT</label>
+                        <input type="number" class="form-control" name="jml_komponen" id="jml_komponen" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="komponen_id" class="col-form-label">Bunga/POT</label>
+                        <div id="div_komponen" class="form-group">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <select id="komponen_id_0" name="komponen_id[]" class="form-control" required>
+                                        <option value="">Pilih Komponen Bunga/POT</option>
+                                        @foreach ($produkKomponens as $itemkomponen)
+                                        <option value="{{ $itemkomponen->id }}">{{ $itemkomponen->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <select id="kondisi_id_0" name="kondisi_id[]" class="form-control" required>
+                                        <option value="">kondisi</option>
+                                        @foreach ($kondisis as $kondisi)
+                                        <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="number" class="form-control" name="jumlahproduk_id[]" id="jumlahproduk_id_0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </div>
 @endsection
 
@@ -592,6 +658,13 @@
             getDataPerangkai(produk_id);
         });
 
+        $('[id^=btnGift]').click(function(e) {
+            e.preventDefault();
+            var produk_id = $(this).data('produk_gift');
+            // console.log(produk_id);
+            getDataGift(produk_id);
+        });
+
         function getDataPerangkai(produk_id) {
             var data = {
                 produk_id: produk_id,
@@ -604,7 +677,8 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    console.log(response.perangkai, produk_id)
+                    // console.log(data);
+                    // console.log(response.perangkai, produk_id)
                     $('#prdTerjual').val(response.produk.nama);
                     $('#prdTerjual_id').val(response.id);
                     $('#jml_produk').val(response.jumlah);
@@ -612,7 +686,7 @@
                     $('#jml_perangkai').val(response.perangkai.length);
                     $('[id^="perangkai_id"]').select2()
                     $('[id^="perangkai_id_"]').each(function() {
-                        $(this).select2('destroy');
+                        $(this).select2().select2('destroy');
                         $(this).remove();
                     });
                     if (response.perangkai.length > 0) {
@@ -632,6 +706,81 @@
                         }
                     }
                     $('#modalPerangkai').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                }
+            });
+        }
+
+        function getDataGift(produk_id) {
+            var data = {
+                produk_id: produk_id,
+            };
+            // console.log(data);
+            $.ajax({
+                url: '/getProdukTerjual',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    // console.log(response.produk.nama)
+                    $('#prdTerjualGift').val(response.produk.nama);
+                    $('#prdTerjualGift_id').val(response.id);
+                    $('#jmlGift_produk').val(response.jumlah);
+                    $('#jml_komponen').val(response.perangkai.length);
+                    $('[id^="komponen_id"]').select2()
+                    $('[id^="komponen_id_"]').each(function() {
+                        $(this).select2().select2('destroy');
+                        $(this).remove();
+                    });
+                    $('[id^="kondisi_id"]').select2()
+                    $('[id^="kondisi_id_"]').each(function() {
+                        $(this).select2().select2('destroy');
+                        $(this).remove();
+                    });
+                    $('[id^="jumlahproduk_id_"]').remove();
+
+                    if (response.perangkai.length > 0) {
+                        for (var i = 0; i < response.komponen.length; i++) {
+                            var rowPerangkai =
+                            '<div class="row">' +
+                            '<div class="col-sm-4">' +
+                            '<select id="komponen_id_' + i + '" name="komponen_id[]" class="form-control">' +
+                            '<option value="">Pilih Komponen Bunga/POT</option>' +
+                            '@foreach ($produkKomponens as $itemkomponen)' +
+                            '<option value="{{ $itemkomponen->id }}">{{ $itemkomponen->nama }}</option>' +
+                            '@endforeach' +
+                            '</select>' +
+                            '</div>' +
+                            '<div class="col-sm-4">' +
+                            '<select id="kondisi_id_' + i + '" name="kondisi_id[]" class="form-control" required>' +
+                            '<option value="">kondisi</option>' +
+                            '@foreach ($kondisis as $kondisi)' +
+                            '<option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>' +
+                            '@endforeach' +
+                            '</select>' +
+                            '</div>' +
+                            '<div class="col-sm-4">' +
+                            '<input type="number" class="form-control" id="jumlahproduk_id_'+ i +'" name="jumlahproduk[]">' +
+                            '</div>' +
+                            '</div>';
+                            $('#div_komponen').append(rowPerangkai);
+                            $('#div_komponen select').each(function(index) {
+                                console.log(response.komponen[index].id);
+                                $(this).val(response.komponen[index].id);
+                            });
+                            $('#div_kondisi').append(rowPerangkai);
+                            $('#div_kondisi select').each(function(index) {
+                                $(this).val(response.komponen[index].kondisi);
+                            });
+                            $('#komponen_id_' + i).select2();
+                            $('#kondisi_id_' + i).select2();
+                        }
+                    }
+                    $('#modalGift').modal('show');
                 },
                 error: function(xhr, status, error) {
                     console.log(error)
@@ -659,6 +808,50 @@
                     '</select>';
                 $('#div_perangkai').append(rowPerangkai);
                 $('#perangkai_id_' + i).select2();
+            }
+        })
+
+        $('#jml_komponen').on('input', function(e) {
+            e.preventDefault();
+            var jumlah = $(this).val();
+            jumlah = parseInt(jumlah) > 10 ? 10 : parseInt(jumlah);
+            console.log(jumlah)
+            $('[id^="komponen_id_"]').each(function() {
+                $(this).select2('destroy');
+                $(this).remove();
+            });
+            $('[id^="kondisi_id_"]').each(function() {
+                $(this).select2('destroy');
+                $(this).remove();
+            });
+            $('[id^="jumlahproduk_id_"]').remove();
+            if (jumlah < 1) return 0;
+            for (var i = 0; i < jumlah; i++) {
+                var rowPerangkai =
+                    '<div class="row">' +
+                    '<div class="col-sm-4">' +
+                    '<select id="komponen_id_' + i + '" name="komponen_id[]" class="form-control">' +
+                    '<option value="">Pilih Bunga/POT</option>' +
+                    '@foreach ($produkKomponens as $itemkomponen)' +
+                    '<option value="{{ $itemkomponen->id }}">{{ $itemkomponen->nama }}</option>' +
+                    '@endforeach' +
+                    '</select>' +
+                    '</div>' +
+                    '<div class="col-sm-4">' +
+                    '<select id="kondisi_id_' + i + '" name="kondisi_id[]" class="form-control" required>' +
+                    '<option value="">kondisi</option>' +
+                    '@foreach ($kondisis as $kondisi)' +
+                    '<option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>' +
+                    '@endforeach' +
+                    '</select>' +
+                    '</div>' +
+                    '<div class="col-sm-4">' +
+                    '<input type="number" class="form-control" id="jumlahproduk_id_'+ i +'" name="jumlahproduk[]">' +
+                    '</div>' +
+                    '</div>';
+                $('#div_komponen').append(rowPerangkai);
+                $('#komponen_id_' + i).select2();
+                $('#kondisi_id_' + i).select2();
             }
         })
 

@@ -62,6 +62,11 @@
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*') ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
+                        <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasioutlet*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
+                        <li><a href="#" class="">Mutasi GH ke Galery</a></li>
+                        <li><a href="#" class="">Mutasi Inden ke GH</a></li>
+                        <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
+                        <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
                     </ul>
                 </li>
                 <li class="submenu">
