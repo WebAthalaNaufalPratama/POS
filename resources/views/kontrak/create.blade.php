@@ -229,7 +229,7 @@
                                                 <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                             </div>
                                         </div>                                        
-                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') ?? 0 }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">

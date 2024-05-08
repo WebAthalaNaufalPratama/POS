@@ -15,4 +15,8 @@ class Komponen_Produk_Terjual extends Model
     public function produk_terjual(){
         return $this->belongsTo(Produk_Terjual::class, 'produk_terjual_id', 'id');
     }
+
+    public function produk(){
+        return $this->belongsTo(Produk::class, 'kode_produk', 'kode');
+    }
 }
