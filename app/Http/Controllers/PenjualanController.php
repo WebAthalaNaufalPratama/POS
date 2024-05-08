@@ -136,7 +136,7 @@ class PenjualanController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
-        dd($data);
+        // dd($data);
         if ($req->hasFile('bukti_file')) {
             $file = $req->file('bukti_file');
             $fileName = time() . '_' . $file->getClientOriginalName();
@@ -150,7 +150,7 @@ class PenjualanController extends Controller
             $data['jumlahCash'] = $req->nominal;
         }
         
-        dd($data);
+        
         $penjualan = Penjualan::create($data);
 
         if ($penjualan) {
@@ -166,6 +166,11 @@ class PenjualanController extends Controller
                     'diskon' => $data['diskon'][$i],
                     'harga_jual' => $data['harga_total'][$i]
                 ]);
+
+                if($getProdukJual->tipe_produk == 6){
+                    // dd($produk_terjual);
+                    $newProdukTerjual[] = $produk_terjual;
+                }
 
                 if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 foreach ($getProdukJual->komponen as $komponen) {
@@ -207,6 +212,10 @@ class PenjualanController extends Controller
                 }
             } else {
                 return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
+            }
+
+            if(!empty($newProdukTerjual)){
+                return redirect(route('penjualan.show', ['penjualan' => $penjualan->id]))->with('success', 'Silakan set komponen gift');
             }
             return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
         } else {
@@ -319,9 +328,9 @@ class PenjualanController extends Controller
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
         
         $jumlahItem = count($req->komponen_id);
-        
+        // dd($req->prdTerjual_id);
         for ($i = 0; $i < $jumlahItem; $i++) {
-            $data['produk_terjual_id'] = $req->komponen_id[$i];
+            $data['produk_terjual_id'] = $req->prdTerjual_id;
             $data['kondisi'] = $req->kondisi_id[$i];
             $data['jumlah'] = $req->jumlahproduk[$i];
     
