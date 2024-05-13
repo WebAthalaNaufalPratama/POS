@@ -24,6 +24,9 @@ class DeliveryOrderController extends Controller
     {
         $query = DeliveryOrder::where('jenis_do', 'SEWA');
 
+        if ($req->customer) {
+            $query->where('customer_id', $req->input('customer'));
+        }
         if ($req->driver) {
             $query->where('driver', $req->input('driver'));
         }
@@ -34,12 +37,17 @@ class DeliveryOrderController extends Controller
             $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
         }
         $data = $query->get();
+        $customer = DeliveryOrder::select('customer_id')
+        ->distinct()
+        ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
+        ->orderBy('customers.nama')
+        ->get();
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
         ->orderBy('karyawans.nama')
         ->get();
-        return view('do_sewa.index', compact('data', 'driver'));
+        return view('do_sewa.index', compact('data', 'driver', 'customer'));
     }
 
     /**

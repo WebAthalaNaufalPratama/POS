@@ -14,6 +14,14 @@
         <div class="card-body">
             <div class="row ps-2 pe-2">
                 <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterCustomer" name="filterCustomer" class="form-control" title="Customer">
+                        <option value="">Pilih Customer</option>
+                        @foreach ($customer as $item)
+                            <option value="{{ $item->customer->id }}" {{ $item->customer->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->customer->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterDriver" name="filterDriver" class="form-control" title="driver">
                         <option value="">Pilih driver</option>
                         @foreach ($driver as $item)
@@ -82,7 +90,7 @@
 @section('scripts')
     <script>
         $(document).ready(function(){
-        $('#filterDriver').select2();
+        $('#filterCustomer, #filterDriver').select2();
     });
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');
@@ -90,6 +98,19 @@
         var first = true;
         var symbol = '';
 
+        var customer = $('#filterCustomer').val();
+        if (customer) {
+            var filterCustomer = 'customer=' + customer;
+            if (first == true) {
+                symbol = '?';
+                first = false;
+            } else {
+                symbol = '&';
+            }
+            urlString += symbol;
+            urlString += filterCustomer;
+        }
+        
         var driver = $('#filterDriver').val();
         if (driver) {
             var filterDriver = 'driver=' + driver;
