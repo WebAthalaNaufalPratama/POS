@@ -22,10 +22,36 @@ class KembaliSewaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $data = KembaliSewa::all();
-        return view('kembali_sewa.index', compact('data'));
+        $query = KembaliSewa::query();
+
+        if ($req->customer) {
+            $query->whereHas('sewa',function($q) use($req){
+                $q->where('customer_id', $req->input('customer'));
+            });
+        }
+        if ($req->driver) {
+            $query->where('driver', $req->input('driver'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kembali', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kembali', '<=', $req->input('dateEnd'));
+        }
+        $data = $query->get();
+        $customer = Kontrak::whereHas('kembali_sewa')->select('customer_id')
+        ->distinct()
+        ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->orderBy('customers.nama')
+        ->get();
+        $driver = DeliveryOrder::select('driver')
+        ->distinct()
+        ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
+        return view('kembali_sewa.index', compact('data', 'driver', 'customer'));
     }
 
     /**

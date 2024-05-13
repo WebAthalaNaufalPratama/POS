@@ -89,7 +89,7 @@
 
 @section('scripts')
     <script>
-        $(document).ready(function(){
+    $(document).ready(function(){
         $('#filterCustomer, #filterDriver').select2();
     });
     $('#filterBtn').click(function(){
