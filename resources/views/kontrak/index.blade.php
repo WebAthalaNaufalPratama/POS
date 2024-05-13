@@ -173,7 +173,7 @@
             urlString += symbol;
             urlString += filterDateEnd;
         }
-        console.log(urlString)
+        window.location.href = urlString;
     });
     $('#clearBtn').click(function(){
         var baseUrl = $(this).data('base-url');
