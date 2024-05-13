@@ -14,7 +14,7 @@
         <div class="card-body">
             <div class="row ps-2 pe-2">
                 <div class="col-sm-2 ps-0 pe-0">
-                    <select id="filterPerangkai" name="filterPerangkai" class="form-control">
+                    <select id="filterPerangkai" name="filterPerangkai" class="form-control" title="Perangkai">
                         <option value="">Pilih Perangkai</option>
                         @foreach ($perangkai as $item)
                             <option value="{{ $item->perangkai->id }}" {{ $item->perangkai->id == request()->input('perangkai') ? 'selected' : '' }}>{{ $item->perangkai->nama }}</option>
@@ -22,10 +22,10 @@
                     </select>
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}">
+                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}">
+                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('form.index', ['jenis_rangkaian' => 'Sewa']) }}" class="btn btn-info">Filter</a>

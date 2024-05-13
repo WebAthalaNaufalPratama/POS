@@ -20,10 +20,26 @@ class DeliveryOrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index_sewa()
+    public function index_sewa(Request $req)
     {
-        $data = DeliveryOrder::where('jenis_do', 'SEWA')->get();
-        return view('do_sewa.index', compact('data'));
+        $query = DeliveryOrder::where('jenis_do', 'SEWA');
+
+        if ($req->driver) {
+            $query->where('driver', $req->input('driver'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kirim', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
+        }
+        $data = $query->get();
+        $driver = DeliveryOrder::select('driver')
+        ->distinct()
+        ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
+        return view('do_sewa.index', compact('data', 'driver'));
     }
 
     /**
