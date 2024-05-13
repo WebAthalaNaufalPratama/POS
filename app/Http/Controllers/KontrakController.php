@@ -26,10 +26,34 @@ class KontrakController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $kontraks = Kontrak::all();
-        return view('kontrak.index', compact('kontraks'));
+        $query = Kontrak::with('customer');
+
+        if ($req->customer) {
+            $query->where('customer_id', $req->input('customer'));
+        }
+        if ($req->sales) {
+            $query->where('sales', $req->input('sales'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kontrak', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kontrak', '<=', $req->input('dateEnd'));
+        }
+        $kontraks = $query->get();
+        $customer = Kontrak::select('customer_id')
+        ->distinct()
+        ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->orderBy('customers.nama')
+        ->get();
+        $sales = Kontrak::select('sales')
+        ->distinct()
+        ->join('karyawans', 'kontraks.sales', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
+        return view('kontrak.index', compact('kontraks', 'customer', 'sales'));
     }
 
     /**
@@ -311,5 +335,37 @@ class KontrakController extends Controller
         $kondisi = Kondisi::all();
         // dd($gift);
         return view('kontrak.create_gift', compact('gift', 'bungapot', 'kondisi'));
+    }
+    public function datatable(Request $request)
+    {
+        $query = Kontrak::with('customer');
+
+        if ($request->has('customer')) {
+            $query->where('customer_id', $request->input('customer'));
+        }
+        $data = $query->paginate($request->input('length'));
+    
+        $formattedData = [];
+        foreach ($data as $index => $kontrak) {
+            $formattedData[] = [
+                'loop_number' => $index + 1,
+                'no_kontrak' => $kontrak->no_kontrak,
+                'customer' => $kontrak->customer->nama,
+                'pic' => $kontrak->pic,
+                'handphone' => $kontrak->handphone,
+                'masa_sewa' => $kontrak->masa_sewa . ' bulan',
+                'rentang_tanggal' => $kontrak->tanggal_mulai . ' - ' . $kontrak->tanggal_selesai,
+                'total_biaya' => $kontrak->total_harga,
+            ];
+        }
+    
+        $response = [
+            'draw' => $request->input('draw'),
+            'recordsTotal' => $data->total(),
+            'recordsFiltered' => $data->total(),
+            'data' => $formattedData,
+        ];
+    
+        return response()->json($response);
     }
 }

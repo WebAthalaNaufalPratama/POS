@@ -15,8 +15,36 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="row ps-2 pe-2">
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterCustomer" name="filterCustomer" class="form-control">
+                        <option value="">Pilih Customer</option>
+                        @foreach ($customer as $item)
+                            <option value="{{ $item->customer->id }}" {{ $item->customer->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->customer->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterSales" name="filterSales" class="form-control">
+                        <option value="">Pilih Sales</option>
+                        @foreach ($sales as $item)
+                            <option value="{{ $item->data_sales->id }}" {{ $item->data_sales->id == request()->input('sales') ? 'selected' : '' }}>{{ $item->data_sales->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}">
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}">
+                </div>
+                <div class="col-sm-2">
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kontrak.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('kontrak.index') }}" class="btn btn-warning">Clear</a>
+                </div>
+            </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="dataTable">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -31,6 +59,7 @@
                 </tr>
                 </thead>
                 <tbody>
+                    @if(count($kontraks) > 0)
                     @foreach ($kontraks as $kontrak)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
@@ -68,6 +97,11 @@
                             </td>
                         </tr>
                     @endforeach
+                    @else
+                        <tr class="text-center">
+                            <td colspan="9">Tidak ada data</td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
             </div>
@@ -79,7 +113,76 @@
 
 @section('scripts')
     <script>
+    $(document).ready(function(){
+        $('#filterCustomer, #filterSales').select2();
+    });
+    $('#filterBtn').click(function(){
+        var baseUrl = $(this).data('base-url');
+        var urlString = baseUrl;
+        var first = true;
+        var symbol = '';
 
+        var customer = $('#filterCustomer').val();
+        if (customer) {
+            var filterCustomer = 'customer=' + customer;
+            if (first == true) {
+                symbol = '?';
+                first = false;
+            } else {
+                symbol = '&';
+            }
+            urlString += symbol;
+            urlString += filterCustomer;
+        }
+
+        var sales = $('#filterSales').val();
+        if (sales) {
+            var filterSales = 'sales=' + sales;
+            if (first == true) {
+                symbol = '?';
+                first = false;
+            } else {
+                symbol = '&';
+            }
+            urlString += symbol;
+            urlString += filterSales;
+        }
+
+        var dateStart = $('#filterDateStart').val();
+        if (dateStart) {
+            var filterDateStart = 'dateStart=' + dateStart;
+            if (first == true) {
+                symbol = '?';
+                first = false;
+            } else {
+                symbol = '&';
+            }
+            urlString += symbol;
+            urlString += filterDateStart;
+        }
+
+        var dateEnd = $('#filterDateEnd').val();
+        if (dateEnd) {
+            var filterDateEnd = 'dateEnd=' + dateEnd;
+            if (first == true) {
+                symbol = '?';
+                first = false;
+            } else {
+                symbol = '&';
+            }
+            urlString += symbol;
+            urlString += filterDateEnd;
+        }
+        console.log(urlString)
+    });
+    $('#clearBtn').click(function(){
+        var baseUrl = $(this).data('base-url');
+        var url = window.location.href;
+        if(url.indexOf('?') !== -1){
+            window.location.href = baseUrl;
+        }
+        return 0;
+    });
     function deleteData(id){
         $.ajax({
             type: "GET",

@@ -261,6 +261,8 @@
 
     <script src="/assets/js/script.js"></script>
     <script type="text/javascript">
+      var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
       $(document).ready(function() {
         let sessionData = @json(session()->all());
         @if(session('fail'))
