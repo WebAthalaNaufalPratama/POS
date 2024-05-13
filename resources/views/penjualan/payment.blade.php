@@ -622,7 +622,7 @@
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
-        var invoicePrefix = "BYR";
+        var invoicePrefix = "BYJ";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');

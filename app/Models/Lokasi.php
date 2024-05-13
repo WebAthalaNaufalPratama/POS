@@ -46,4 +46,9 @@ class Lokasi extends Model
     public function pembelian (){
         return $this->hasMany(Pembelian::class);
     }
+
+    public function pengirim()
+    {
+        return $this->hasMany(Mutasi::class, 'id', 'pengirim');
+    }
 }

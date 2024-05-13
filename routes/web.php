@@ -232,6 +232,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{penjualan}/payment', 'PenjualanController@payment')->name('penjualan.payment');
             Route::patch('/{penjualan}/update', 'PenjualanController@update')->name('penjualan.update');
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
+            Route::post('/storekomponen', 'PenjualanController@store_komponen')->name('komponenpenjulan.store');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -385,6 +386,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGO}/delete', 'MutasiController@destroy_outlet')->name('mutasigalery.destroy');
         });
 
+        Route::group(['prefix' => 'mutasiOG'], function() {
+            Route::get('/', 'MutasiController@index_outletgalery')->name('mutasioutlet.index');
+            Route::get('/create', 'MutasiController@create_outletgalery')->name('mutasioutlet.create');
+            Route::post('/store', 'MutasiController@store_outletgalery')->name('mutasioutlet.store');
+            Route::get('/{mutasiOG}/show', 'MutasiController@show_outletgalery')->name('mutasioutlet.show');
+            Route::get('/{mutasiOG}/edit', 'MutasiController@edit_outletgalery')->name('mutasioutlet.edit');
+            Route::patch('/{mutasiOG}/update', 'MutasiController@update_outletgalery')->name('mutasioutlet.update');
+            Route::get('/{mutasiOG}/delete', 'MutasiController@destroy_outletgalery')->name('mutasioutlet.destroy');
+        });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
