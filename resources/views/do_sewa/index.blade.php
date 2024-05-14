@@ -64,7 +64,7 @@
                             <td>{{ $item->customer->nama }}</td>
                             <td>{{ $item->pic }}</td>
                             <td>{{ $item->data_driver->nama }}</td>
-                            <td>{{ $item->tanggal_kirim }}</td>
+                            <td>{{ formatTanggal($item->tanggal_kirim) }}</td>
                             <td>{{ $item->status }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">

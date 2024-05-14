@@ -71,9 +71,9 @@
                             <td>{{ $kontrak->data_sales->nama }}</td>
                             <td>{{ $kontrak->handphone }}</td>
                             <td>{{ $kontrak->masa_sewa }} bulan</td>
-                            <td>{{ \Carbon\Carbon::parse($kontrak->tanggal_mulai)->format('d-m-Y')}} - {{ \Carbon\Carbon::parse($kontrak->tanggal_selesai)->format('d-m-Y') }}</td>
+                            <td>{{ formatTanggal($kontrak->tanggal_mulai)}} - {{ formatTanggal($kontrak->tanggal_selesai) }}</td>
                             <td>{{ $kontrak->total_harga }}</td>
-                            <td>{{ \Carbon\Carbon::parse($kontrak->tanggal_kontrak)->format('d-m-Y') }}</td>
+                            <td>{{ formatTanggal($kontrak->tanggal_kontrak) }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

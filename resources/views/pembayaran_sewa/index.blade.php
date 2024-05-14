@@ -34,8 +34,8 @@
                             <td>{{ $item->sewa->no_sewa }}</td>
                             <td>{{ $item->sewa->no_invoice }}</td>
                             <td>{{ $item->no_invoice_bayar }}</td>
-                            <td>{{ $item->nominal }}</td>
-                            <td>{{ $item->tanggal_bayar }}</td>
+                            <td>{{ formatRupiah($item->nominal) }}</td>
+                            <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
                             <td>{{ $item->cara_bayar }}</td>
                             <td class="text-center">
                                 @if ($item->status_bayar == 'LUNAS')

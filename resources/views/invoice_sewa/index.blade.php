@@ -55,10 +55,10 @@
                             <td>{{ $item->no_sewa }}</td>
                             <td>{{ $item->no_invoice }}</td>
                             <td>{{ $item->sewa->customer->nama }}</td>
-                            <td>{{ $item->jatuh_tempo }}</td>
-                            <td>{{ $item->total_tagihan }}</td>
-                            <td>{{ $item->dp }}</td>
-                            <td>{{ $item->sisa_bayar }}</td>
+                            <td>{{ formatTanggal($item->jatuh_tempo) }}</td>
+                            <td>{{ formatRupiah($item->total_tagihan) }}</td>
+                            <td>{{ formatRupiah($item->dp) }}</td>
+                            <td>{{ formatRupiah($item->sisa_bayar) }}</td>
                             <td>{{ $item->status }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">

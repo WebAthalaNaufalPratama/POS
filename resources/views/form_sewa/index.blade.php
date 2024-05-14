@@ -53,7 +53,7 @@
                             <td>{{ $item->produk_terjual->no_sewa ?? '-' }}</td>
                             <td>{{ $item->produk_terjual->produk->nama ?? '-' }}</td>
                             <td>{{ $item->perangkai->nama ?? '-' }}</td>
-                            <td>{{ $item->tanggal ?? '-' }}</td>
+                            <td>{{ formatTanggal($item->tanggal) ?? '-' }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

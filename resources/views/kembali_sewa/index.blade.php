@@ -62,7 +62,7 @@
                             <td>{{ $item->no_sewa }}</td>
                             <td>{{ $item->sewa->customer->nama }}</td>
                             <td>{{ $item->data_driver->nama }}</td>
-                            <td>{{ $item->tanggal_kembali }}</td>
+                            <td>{{ formatTanggal($item->tanggal_kembali) }}</td>
                             <td>{{ $item->status }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
