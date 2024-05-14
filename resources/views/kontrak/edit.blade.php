@@ -278,6 +278,22 @@
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
+                                    <label class="col-lg-3 col-form-label">Diskon</label>
+                                    <div class="col-lg-9">
+                                        <div class="row align-items-center">
+                                            <div class="col-9 pe-0">
+                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
+                                                </select>
+                                            </div>
+                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
+                                            <div class="col-3 ps-0 mb-0">
+                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
+                                            </div>
+                                        </div>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPN</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
@@ -295,22 +311,6 @@
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
                                         <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Diskon</label>
-                                    <div class="col-lg-9">
-                                        <div class="row align-items-center">
-                                            <div class="col-9 pe-0">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
-                                            <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
-                                            </div>
-                                        </div>
-                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -484,6 +484,12 @@
             var promo_id = $(this).select2().find(":selected").val()
             if(!promo_id){
                 $('#total_promo').val(0);
+                var inputs = $('input[name="harga_total[]"]');
+                var subtotal = 0;
+                inputs.each(function() {
+                    subtotal += parseInt($(this).val()) || 0;
+                });
+                $('#subtotal').val(subtotal)
                 total_harga();
                 return 0;
             } 
@@ -529,13 +535,7 @@
             var ppn_nominal = $('#ppn_nominal').val() || 0;
             var pph_nominal = $('#pph_nominal').val() || 0;
             var ongkir_nominal = $('#ongkir_nominal').val() || 0;
-            var diskon_nominal = $('#total_promo').val();
-            if (/(poin|TRD|GFT)/.test(diskon_nominal)) {
-                diskon_nominal = 0;
-            } else {
-                diskon_nominal = parseInt(diskon_nominal) || 0;
-            }
-            var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal) - parseInt(diskon_nominal);
+            var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(harga_total);
         }
         function ppn(){
@@ -608,11 +608,11 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#total_harga').val());
+                    var sub_total = parseInt($('#subtotal').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            total_promo = sub_total * parseInt(response.diskon_persen) / 100;
                             break;
                         case 'nominal':
                             total_promo = parseInt(response.diskon_nominal);
@@ -627,6 +627,20 @@
                             break;
                     }
                     $('#total_promo').val(total_promo);
+
+                    var inputs = $('input[name="harga_total[]"]');
+                    var subtotal = 0;
+                    inputs.each(function() {
+                        subtotal += parseInt($(this).val()) || 0;
+                    });
+                    $('#subtotal').val(subtotal)
+                    
+                    if (/(poin|TRD|GFT)/.test(total_promo)) {
+                        total_promo = 0;
+                    } else {
+                        total_promo = parseInt(total_promo) || 0;
+                        $('#subtotal').val(subtotal - total_promo);
+                    }
                     total_harga();
                 },
                 error: function(xhr, status, error) {

@@ -281,6 +281,22 @@
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
+                                    <label class="col-lg-3 col-form-label">Diskon</label>
+                                    <div class="col-lg-9">
+                                        <div class="row align-items-center">
+                                            <div class="col-9 pe-0">
+                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
+                                                </select>
+                                            </div>
+                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
+                                            <div class="col-3 ps-0 mb-0">
+                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
+                                            </div>
+                                        </div>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPN</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
@@ -298,22 +314,6 @@
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
                                         <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Diskon</label>
-                                    <div class="col-lg-9">
-                                        <div class="row align-items-center">
-                                            <div class="col-9 pe-0">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
-                                            <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
-                                            </div>
-                                        </div>
-                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
