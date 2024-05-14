@@ -32,21 +32,19 @@
                             <tr>
                                 <td>{{ $permission->name }}</td>
                                 <td>{{ $permission->guard_name }}</td>
-                                <td>
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('permissions.edit', $permission->id) }}" onclick="getData({{ $permission->id }})">Edit</a>
-                                            <a class="dropdown-item" href="{{ route('permissions.destroy', $permission->id) }}" onclick="deleteData({{ $permission->id }})">Delete</a>
-                                        </div>
-                                    </div>
+                                <td class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="{{ route('permissions.edit', $permission->id) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $permission->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                        </li>
+                                    </ul>
                                 </td>
-                                <!-- <td><a href="{{ route('permissions.edit', $permission->id) }}" class="btn btn-info btn-sm">Edit</a></td>
-                    <td>
-                        {!! Form::open(['method' => 'DELETE','route' => ['permissions.destroy', $permission->id],'style'=>'display:inline']) !!}
-                        {!! Form::submit('Delete', ['class' => 'btn btn-danger btn-sm']) !!}
-                        {!! Form::close() !!}
-                    </td> -->
                             </tr>
                             @endforeach
                         </tbody>
@@ -62,27 +60,40 @@
 @section('scripts')
 <script>
     function deleteData(id) {
-        $.ajax({
-            type: "GET",
-            url: "/permission/" + id + "/delete",
-            success: function(response) {
-                toastr.success(response.msg, 'Success', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-
-                setTimeout(() => {
-                    location.reload()
-                }, 2000);
-            },
-            error: function(error) {
-                toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/permission/" + id + "/delete",
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
                 });
             }
         });

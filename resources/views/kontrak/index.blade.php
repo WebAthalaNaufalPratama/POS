@@ -72,7 +72,7 @@
                             <td>{{ $kontrak->handphone }}</td>
                             <td>{{ $kontrak->masa_sewa }} bulan</td>
                             <td>{{ formatTanggal($kontrak->tanggal_mulai)}} - {{ formatTanggal($kontrak->tanggal_selesai) }}</td>
-                            <td>{{ $kontrak->total_harga }}</td>
+                            <td>{{ formatRupiah($kontrak->total_harga) }}</td>
                             <td>{{ formatTanggal($kontrak->tanggal_kontrak) }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -188,27 +188,40 @@
         return 0;
     });
     function deleteData(id){
-        $.ajax({
-            type: "GET",
-            url: "/kontrak/"+id+"/delete",
-            success: function(response) {
-                toastr.success(response.msg, 'Success', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-
-                setTimeout(() => {
-                    location.reload()
-                }, 2000);
-            },
-            error: function(error) {
-                toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/kontrak/"+id+"/delete",
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
                 });
             }
         });

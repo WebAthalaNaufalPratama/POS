@@ -19,7 +19,7 @@ class InventoryOutlet extends Model
     {
         return $this->belongsTo(Kondisi::class);
     }
-    public function gallery()
+    public function outlet()
     {
         return $this->belongsTo(Lokasi::class, 'lokasi_id', 'id');
     }

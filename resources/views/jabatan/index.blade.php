@@ -43,7 +43,7 @@
                                         <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $jabatan->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
                                     </li>
                                 </ul>
-                              </td>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -136,27 +136,40 @@
     }
 
     function deleteData(id){
-        $.ajax({
-            type: "GET",
-            url: "/jabatan/"+id+"/delete",
-            success: function(response) {
-                toastr.success(response.msg, 'Success', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-
-                setTimeout(() => {
-                    location.reload()
-                }, 2000);
-            },
-            error: function(error) {
-                toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/jabatan/"+id+"/delete",
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
                 });
             }
         });

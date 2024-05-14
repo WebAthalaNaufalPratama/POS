@@ -33,8 +33,8 @@ class InventoryOutletController extends Controller
     {
         $produks = Produk_Jual::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 2)->get();
-        return view('inven_outlet.create', compact('produks', 'kondisi', 'gallery'));
+        $outlets = Lokasi::where('tipe_lokasi', 2)->get();
+        return view('inven_outlet.create', compact('produks', 'kondisi', 'outlets'));
     }
 
     /**
@@ -79,8 +79,8 @@ class InventoryOutletController extends Controller
         $data = InventoryOutlet::find($inventoryGallery);
         $produks = Produk_Jual::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 2)->get();
-        return view('inven_outlet.show', compact('data', 'produks', 'kondisi', 'gallery'));
+        $outlets = Lokasi::where('tipe_lokasi', 2)->get();
+        return view('inven_outlet.show', compact('data', 'produks', 'kondisi', 'outlets'));
     }
 
     /**
@@ -94,8 +94,8 @@ class InventoryOutletController extends Controller
         $data = InventoryOutlet::find($inventoryGallery);
         $produks = Produk_Jual::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 2)->get();
-        return view('inven_outlet.edit', compact('data', 'produks', 'kondisi', 'gallery'));
+        $outlets = Lokasi::where('tipe_lokasi', 2)->get();
+        return view('inven_outlet.edit', compact('data', 'produks', 'kondisi', 'outlets'));
     }
 
     /**
