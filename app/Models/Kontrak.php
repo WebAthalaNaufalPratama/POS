@@ -85,4 +85,7 @@ class Kontrak extends Model
     public function kembali_sewa(){
         return $this->hasMany(KembaliSewa::class, 'no_sewa', 'no_kontrak');
     }
+    public function invoice(){
+        return $this->hasMany(InvoiceSewa::class, 'no_sewa', 'no_kontrak');
+    }
 }

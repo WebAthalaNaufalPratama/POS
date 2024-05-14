@@ -47,6 +47,7 @@
                     <th>No</th>
                     <th>No Kembali</th>
                     <th>No Kontrak</th>
+                    <th>Customer</th>
                     <th>Driver</th>
                     <th>Tanggal Kembali</th>
                     <th>Status</th>
@@ -59,6 +60,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_kembali }}</td>
                             <td>{{ $item->no_sewa }}</td>
+                            <td>{{ $item->sewa->customer->nama }}</td>
                             <td>{{ $item->data_driver->nama }}</td>
                             <td>{{ $item->tanggal_kembali }}</td>
                             <td>{{ $item->status }}</td>

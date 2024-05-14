@@ -47,7 +47,7 @@
                     <th>No</th>
                     <th>No Delivery Order</th>
                     <th>No Kontrak</th>
-                    <th>Pelanggan</th>
+                    <th>Customer</th>
                     <th>PIC</th>
                     <th>Driver</th>
                     <th>Tanggal Kirim</th>

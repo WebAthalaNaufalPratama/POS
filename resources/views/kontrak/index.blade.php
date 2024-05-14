@@ -49,13 +49,14 @@
                 <tr>
                     <th>No</th>
                     <th>No Kontrak</th>
-                    <th>Pelanggan</th>
+                    <th>Customer</th>
                     <th>PIC</th>
                     <th>Sales</th>
                     <th>Handphone</th>
                     <th>Masa Kontrak</th>
                     <th>Rentang Tanggal</th>
                     <th>Total Biaya</th>
+                    <th>Tanggal Dibuat</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -72,6 +73,7 @@
                             <td>{{ $kontrak->masa_sewa }} bulan</td>
                             <td>{{ \Carbon\Carbon::parse($kontrak->tanggal_mulai)->format('d-m-Y')}} - {{ \Carbon\Carbon::parse($kontrak->tanggal_selesai)->format('d-m-Y') }}</td>
                             <td>{{ $kontrak->total_harga }}</td>
+                            <td>{{ \Carbon\Carbon::parse($kontrak->tanggal_kontrak)->format('d-m-Y') }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

@@ -12,6 +12,26 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="row ps-2 pe-2">
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterCustomer" name="filterCustomer" class="form-control" title="Customer">
+                        <option value="">Pilih Customer</option>
+                        @foreach ($customer as $item)
+                            <option value="{{ $item->customer->id }}" {{ $item->customer->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->customer->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                </div>
+                <div class="col-sm-2">
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('invoice_sewa.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('invoice_sewa.index') }}" class="btn btn-warning">Clear</a>
+                </div>
+            </div>
             <div class="table-responsive">
             <table class="table datanew">
                 <thead>
@@ -19,6 +39,7 @@
                     <th>No</th>
                     <th>No Kontrak</th>
                     <th>No Invoice</th>
+                    <th>Customer</th>
                     <th>Jatuh Tempo</th>
                     <th>Tagihan</th>
                     <th>DP</th>
@@ -33,6 +54,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_sewa }}</td>
                             <td>{{ $item->no_invoice }}</td>
+                            <td>{{ $item->sewa->customer->nama }}</td>
                             <td>{{ $item->jatuh_tempo }}</td>
                             <td>{{ $item->total_tagihan }}</td>
                             <td>{{ $item->dp }}</td>
@@ -171,6 +193,63 @@
             if(nominal > sisaTagihan) {
                 $(this).val(sisaTagihan);
             }
+        });
+        $(document).ready(function(){
+            $('#filterCustomer').select2();
+        });
+        $('#filterBtn').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var urlString = baseUrl;
+            var first = true;
+            var symbol = '';
+
+            var customer = $('#filterCustomer').val();
+            if (customer) {
+                var filterCustomer = 'customer=' + customer;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterCustomer;
+            }
+            
+            var dateStart = $('#filterDateStart').val();
+            if (dateStart) {
+                var filterDateStart = 'dateStart=' + dateStart;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterDateStart;
+            }
+
+            var dateEnd = $('#filterDateEnd').val();
+            if (dateEnd) {
+                var filterDateEnd = 'dateEnd=' + dateEnd;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterDateEnd;
+            }
+            window.location.href = urlString;
+        });
+        $('#clearBtn').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var url = window.location.href;
+            if(url.indexOf('?') !== -1){
+                window.location.href = baseUrl;
+            }
+            return 0;
         });
         
         function bayar(invoice){
