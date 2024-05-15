@@ -121,12 +121,10 @@ class KontrakController extends Controller
             'ongkir_id' => 'required|exists:ongkirs.id',
             'ongkir_nominal' => 'required|integer',
         ]);
-        dd('sccs');
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        // dd($data);
-        $data['lokasi_id'] = 1;
+        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
 
@@ -253,7 +251,7 @@ class KontrakController extends Controller
         $data = $req->except(['_token', '_method', 'log']);
         // dd($data);
         $dataKontrak = Kontrak::find($kontrak);
-        $data['lokasi_id'] = 1;
+        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = $dataKontrak->pembuat;
         $data['tanggal_pembuat'] = now();
 

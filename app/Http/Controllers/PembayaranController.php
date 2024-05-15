@@ -127,8 +127,19 @@ class PembayaranController extends Controller
         }
     }          
 
-    public function index_sewa(){
-        $data = Pembayaran::whereNotNull('invoice_sewa_id')->orderByDesc('id')->get();
+    public function index_sewa(Request $req){
+        $query = Pembayaran::whereNotNull('invoice_sewa_id');
+
+        if ($req->metode) {
+            $query->where('cara_bayar', $req->input('metode'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
+        }
+        $data = $query->orderByDesc('id')->get();
         return view('pembayaran_sewa.index', compact('data'));
     }
 

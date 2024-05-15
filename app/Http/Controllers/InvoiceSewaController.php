@@ -117,7 +117,7 @@ class InvoiceSewaController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        $data['lokasi_id'] = 1;
+        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
         $data['status'] = 'DRAFT';
@@ -128,11 +128,6 @@ class InvoiceSewaController extends Controller
         
         // update data produk invoice
         $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
-        // $produkKontrak = $kontrak->produk()->get();
-        // $produkKontrak->transform(function ($item) use ($check) {
-        //     $item->no_invoice = $check->no_invoice;
-        //     return $item;
-        // });
 
         for ($i=0; $i < count($data['nama_produk']); $i++) { 
             $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
