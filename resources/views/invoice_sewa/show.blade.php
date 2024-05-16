@@ -369,6 +369,8 @@
                             <th>Nominal</th>
                             <th>Tanggal Bayar</th>
                             <th>Metode</th>
+                            <th>Rekening</th>
+                            <th>Bukti</th>
                             <th class="text-center">Status</th>
                         </tr>
                         </thead>
@@ -377,9 +379,15 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->no_invoice_bayar }}</td>
-                                <td>{{ $item->nominal }}</td>
-                                <td>{{ $item->tanggal_bayar }}</td>
+                                <td>{{ formatRupiah($item->nominal) }}</td>
+                                <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
                                 <td>{{ $item->cara_bayar }}</td>
+                                <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
+                                <td>
+                                    @if ($item->bukti)
+                                        <button onclick="bukti('{{ $item->bukti }}')" class="btn btn-info">Bukti</button>
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     @if ($item->status_bayar == 'LUNAS')
                                         <span class="badge bg-success">{{ $item->status_bayar }}</span>
@@ -474,6 +482,23 @@
                 </div>
             </form>
         </div>
+    </div>
+</div>
+<div class="modal fade" id="modalBukti" tabindex="-1" aria-labelledby="addAkunlabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAkunlabel">Bukti</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+        </div>
+        <div class="modal-body">
+            <img id="imgBukti" src="" alt="" style="max-width: 100%;height: auto;">
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </div>
     </div>
 </div>
 @endsection
@@ -765,6 +790,12 @@
                     console.log(error)
                 }
             });
+        }
+        function bukti(src){
+            var baseUrl = window.location.origin;
+            var fullUrl = baseUrl + '/storage/' + src;
+            $('#imgBukti').attr('src', fullUrl);
+            $('#modalBukti').modal('show');
         }
     </script>
 @endsection

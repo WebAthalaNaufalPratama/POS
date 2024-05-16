@@ -42,6 +42,7 @@
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
                     <th>Metode</th>
+                    <th>Rekening</th>
                     <th class="text-center">Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -56,6 +57,7 @@
                             <td>{{ formatRupiah($item->nominal) }}</td>
                             <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
                             <td>{{ $item->cara_bayar }}</td>
+                            <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
                             <td class="text-center">
                                 @if ($item->status_bayar == 'LUNAS')
                                     <span class="badge bg-success">{{ $item->status_bayar }}</span>
