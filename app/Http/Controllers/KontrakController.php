@@ -115,10 +115,10 @@ class KontrakController extends Controller
             'subtotal' => 'required|integer',
             'total_harga' => 'required|integer',
             'status' => 'required',
-            'sales' => 'required|exists:karyawans.id',
-            'rekening_id' => 'required|exists:rekenings.id',
+            'sales' => 'required|exists:karyawans,id',
+            'rekening_id' => 'required|exists:rekenings,id',
             'tanggal_sales' => 'required|date',
-            'ongkir_id' => 'required|exists:ongkirs.id',
+            'ongkir_id' => 'required|exists:ongkirs,id',
             'ongkir_nominal' => 'required|integer',
         ]);
         $error = $validator->errors()->all();

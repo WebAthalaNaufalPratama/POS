@@ -23,7 +23,7 @@
                                                     <select id="customer_id" name="customer_id" class="form-control" required>
                                                         <option value="">Pilih Customer</option>
                                                         @foreach ($customers as $customer)
-                                                            <option value="{{ $customer->id }}">{{ $customer->nama }}</option>
+                                                            <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -43,7 +43,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Alamat</label>
-                                                <textarea type="text" id="alamat" name="alamat" value="{{ old('alamat') }}" class="form-control" required></textarea>
+                                                <textarea type="text" id="alamat" name="alamat" class="form-control" required>{{ old('alamat') }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -57,12 +57,12 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <select id="status" name="status" class="form-control"  required>
+                                                <select id="status" name="status" class="form-control" required>
                                                     <option value="">Pilih Status</option>
-                                                    <option value="DRAFT">Draft</option>
-                                                    <option value="AKTIF">Aktif</option>
-                                                    <option value="TIDAK AKTIF">Tidak Aktif</option>
-                                                    <option value="SELESAI">Selesai</option>
+                                                    <option value="DRAFT" {{ old('status') == 'DRAFT' ? 'selected' : '' }}>Draft</option>
+                                                    <option value="AKTIF" {{ old('status') == 'AKTIF' ? 'selected' : '' }}>Aktif</option>
+                                                    <option value="TIDAK AKTIF"  {{ old('status') == 'TIDAK AKTIF' ? 'selected' : '' }}>Tidak Aktif</option>
+                                                    <option value="SELESAI" {{ old('status') == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -74,48 +74,48 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Kontrak</label>
-                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $getKode }}" value="{{ old('no_kontrak') }}" class="form-control"  required readonly>
+                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $getKode }}" value="{{ old('no_kontrak') }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Mulai</label>
-                                                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" class="form-control"  required>
+                                                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Masa Sewa</label>
                                                 <div class="input-group">
-                                                    <input type="text" id="masa_sewa" name="masa_sewa" value="{{ old('masa_sewa') }}" class="form-control"  required placeholder="Masa sewa" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                                                    <input type="text" id="masa_sewa" name="masa_sewa" value="{{ old('masa_sewa') }}" class="form-control" required placeholder="Masa sewa" aria-label="Recipient's username" aria-describedby="basic-addon2">
                                                     <span class="input-group-text" id="basic-addon2">bulan</span>
                                                 </div>
                                             </div>
                                             <div class="form-group">
                                                 <label>Catatan</label>
-                                                <textarea type="text" id="catatan" name="catatan" value="{{ old('catatan') }}" class="form-control"></textarea>
+                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ old('catatan') }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal Kontrak</label>
-                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ old('tanggal_kontrak') ?? date('Y-m-d') }}" class="form-control"  required>
+                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ old('tanggal_kontrak') ?? date('Y-m-d') }}" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Selesai</label>
-                                                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" class="form-control"  required>
+                                                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Sales</label>
-                                                <select id="sales" name="sales" class="form-control"  required>
+                                                <select id="sales" name="sales" class="form-control" required>
                                                     <option value="">Pilih Sales</option>
                                                     @foreach ($sales as $item)
-                                                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                                        <option value="{{ $item->id }}" {{ old('sales') == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label>Rekening</label>
-                                                <select id="rekening_id" name="rekening_id" class="form-control"  required>
+                                                <select id="rekening_id" name="rekening_id" class="form-control" required>
                                                     <option value="">Pilih Rekening</option>
                                                     @foreach ($rekenings as $rekening)
-                                                        <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
+                                                        <option value="{{ $rekening->id }}" {{ old('rekening_id') == $rekening->id ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -236,10 +236,10 @@
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <select id="ongkir_id" name="ongkir_id" class="form-control"  required>
+                                            <select id="ongkir_id" name="ongkir_id" class="form-control" required>
                                                 <option value="">Pilih Ongkir</option>
                                                 @foreach ($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}">{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
+                                                    <option value="{{ $ongkir->id }}" {{ old('ongkir_id') == $ongkir->id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -323,6 +323,7 @@
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
+            $('#sales').trigger('cahnge');
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
@@ -375,7 +376,7 @@
         });
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
-            var total_transaksi = $('#total_harga').val();
+            var total_transaksi = $('#subtotal').val();
             var produk = [];
             var tipe_produk = [];
             $('select[id^="produk_"]').each(function() {

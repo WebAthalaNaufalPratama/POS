@@ -147,7 +147,7 @@
                                             <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkjuals as $produk)
-                                                    <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                    <option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}" data-harga_jual="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -403,8 +403,7 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            $('#sales').trigger('change');
-            var total_transaksi = $('#total_harga').val();
+            var total_transaksi = $('#subtotal').val();
             var old_promo_id = $('#old_promo_id').val();
             var produk = [];
             var tipe_produk = [];
@@ -414,6 +413,8 @@
 
             });
             checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
+            $('#promo_id').trigger('change');
+            $('#sales').trigger('change');
             calculatePromo(old_promo_id);
 
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
@@ -423,7 +424,7 @@
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $produk)'+
-                                        '<option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}">{{ $produk->nama }}</option>'+
+                                        '<option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}" data-harga_jual="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
@@ -469,7 +470,7 @@
         });
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
-            var total_transaksi = $('#total_harga').val();
+            var total_transaksi = $('#subtotal').val();
             var produk = [];
             var tipe_produk = [];
             $('select[id^="produk_"]').each(function() {
@@ -498,6 +499,13 @@
         $('#btnAddCustomer').click(function(e) {
             e.preventDefault()
             $('#addcustomer').modal('show');
+        });
+        $(document).on('change', '[id^=produk_]', function(){
+            var id = $(this).attr('id');
+            var parts = id.split('_');
+            var nomor = parts[parts.length - 1];
+            var harga_jual = $(this).find(":selected").data("harga_jual");
+            $('#harga_satuan_' + nomor).val(harga_jual);
         });
         function multiply(element) {
             var id = 0
