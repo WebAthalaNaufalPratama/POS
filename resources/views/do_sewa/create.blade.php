@@ -107,7 +107,7 @@
                                             <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkSewa as $produk)
-                                                    <option value="{{ $produk->produk->kode }}">{{ $produk->produk->nama }}</option>
+                                                    <option value="{{ $produk->produk->kode }}" data-id="{{ $pj->id }}">{{ $produk->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -126,7 +126,7 @@
                                                 <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
                                                     <option value="">Pilih Produk</option>
                                                     @foreach ($produkSewa as $pj)
-                                                        <option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
+                                                        <option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
@@ -169,7 +169,7 @@
                                             <select id="produk2_0" name="nama_produk2[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkjuals as $produk)
-                                                    <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                    <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}">{{ $produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -205,7 +205,7 @@
                                         </tr>
                                         <tr>
                                             <td style="width: 25%;">
-                                                <input type="date" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
+                                                <input type="date" class="form-control" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
                                             </td>
                                             <td id="tgl_pembuat" style="width: 25%;">{{ date('Y-m-d') }}</td>
                                             <td id="tgl_penyetuju" style="width: 25%;">{{ isset($kontrak->tanggal_penyetujju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetujju)->format('Y-m-d') : '-' }}</td>
@@ -243,6 +243,27 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
+            $('form').on('submit', function(event) { // add request id
+                $('select[name="nama_produk[]"]').each(function() {
+                    var selectedOption = $(this).find('option:selected');
+                    var productId = selectedOption.data('id');
+                    var hiddenInput = $('<input>')
+                        .attr('type', 'hidden')
+                        .attr('name', 'produk_id[]')
+                        .val(productId);
+                    $(this).closest('form').append(hiddenInput);
+                });
+                $('select[name="nama_produk2[]"]').each(function() {
+                    var selectedOption = $(this).find('option:selected');
+                    var productId = selectedOption.data('id');
+                    var hiddenInput = $('<input>')
+                        .attr('type', 'hidden')
+                        .attr('name', 'produk_id2[]')
+                        .val(productId);
+                    $(this).closest('form').append(hiddenInput);
+                });
+            });
+
             $('[id^=produk], #driver_id').select2();
             $('#driver_id').trigger('change');
             var i = '{{ count($kontrak->produk) }}';
@@ -250,8 +271,8 @@
                 var newRow = '<tr id="row'+i+'"><td>' + 
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
-                                    '@foreach ($produkjuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
+                                    '@foreach ($produkSewa as $pj)'+
+                                        '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}">{{ $pj->produk->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
@@ -268,7 +289,7 @@
                                 '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
+                                        '<option value="{{ $pj->kode }}" data-id="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+

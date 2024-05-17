@@ -26,10 +26,34 @@ class KontrakController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $kontraks = Kontrak::all();
-        return view('kontrak.index', compact('kontraks'));
+        $query = Kontrak::with('customer');
+
+        if ($req->customer) {
+            $query->where('customer_id', $req->input('customer'));
+        }
+        if ($req->sales) {
+            $query->where('sales', $req->input('sales'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kontrak', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kontrak', '<=', $req->input('dateEnd'));
+        }
+        $kontraks = $query->get();
+        $customer = Kontrak::select('customer_id')
+        ->distinct()
+        ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->orderBy('customers.nama')
+        ->get();
+        $sales = Kontrak::select('sales')
+        ->distinct()
+        ->join('karyawans', 'kontraks.sales', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
+        return view('kontrak.index', compact('kontraks', 'customer', 'sales'));
     }
 
     /**
@@ -77,29 +101,30 @@ class KontrakController extends Controller
         $validator = Validator::make($req->all(), [
             'no_kontrak' => 'required',
             'masa_sewa' => 'required|integer',
-            'tanggal_kontrak' => 'required',
-            'tanggal_mulai' => 'required',
-            'tanggal_selesai' => 'required',
-            'customer_id' => 'required',
+            'tanggal_kontrak' => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
+            'customer_id' => 'required|exists:customers,id',
             'pic' => 'required',
-            'handphone' => 'required',
+            'handphone' => 'required|numeric',
             'alamat' => 'required',
-            'no_npwp' => 'required',
+            'no_npwp' => 'required|',
             'nama_npwp' => 'required',
-            'ppn_nominal' => 'required',
-            'pph_nominal' => 'required',
-            'subtotal' => 'required',
-            'total_harga' => 'required',
+            'ppn_nominal' => 'required|integer',
+            'pph_nominal' => 'required|integer',
+            'subtotal' => 'required|integer',
+            'total_harga' => 'required|integer',
             'status' => 'required',
-            'sales' => 'required',
-            'rekening_id' => 'required',
-            'tanggal_sales' => 'required',
+            'sales' => 'required|exists:karyawans,id',
+            'rekening_id' => 'required|exists:rekenings,id',
+            'tanggal_sales' => 'required|date',
+            'ongkir_id' => 'required|exists:ongkirs,id',
+            'ongkir_nominal' => 'required|integer',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        // dd($data);
-        $data['lokasi_id'] = 1;
+        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
 
@@ -226,7 +251,7 @@ class KontrakController extends Controller
         $data = $req->except(['_token', '_method', 'log']);
         // dd($data);
         $dataKontrak = Kontrak::find($kontrak);
-        $data['lokasi_id'] = 1;
+        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = $dataKontrak->pembuat;
         $data['tanggal_pembuat'] = now();
 
@@ -311,5 +336,37 @@ class KontrakController extends Controller
         $kondisi = Kondisi::all();
         // dd($gift);
         return view('kontrak.create_gift', compact('gift', 'bungapot', 'kondisi'));
+    }
+    public function datatable(Request $request)
+    {
+        $query = Kontrak::with('customer');
+
+        if ($request->has('customer')) {
+            $query->where('customer_id', $request->input('customer'));
+        }
+        $data = $query->paginate($request->input('length'));
+    
+        $formattedData = [];
+        foreach ($data as $index => $kontrak) {
+            $formattedData[] = [
+                'loop_number' => $index + 1,
+                'no_kontrak' => $kontrak->no_kontrak,
+                'customer' => $kontrak->customer->nama,
+                'pic' => $kontrak->pic,
+                'handphone' => $kontrak->handphone,
+                'masa_sewa' => $kontrak->masa_sewa . ' bulan',
+                'rentang_tanggal' => $kontrak->tanggal_mulai . ' - ' . $kontrak->tanggal_selesai,
+                'total_biaya' => $kontrak->total_harga,
+            ];
+        }
+    
+        $response = [
+            'draw' => $request->input('draw'),
+            'recordsTotal' => $data->total(),
+            'recordsFiltered' => $data->total(),
+            'data' => $formattedData,
+        ];
+    
+        return response()->json($response);
     }
 }

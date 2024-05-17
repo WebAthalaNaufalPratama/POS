@@ -21,13 +21,27 @@ class FormPerangkaiController extends Controller
      */
     public function index(Request $req)
     {
+        $perangkai = FormPerangkai::select('perangkai_id')
+        ->distinct()
+        ->join('karyawans', 'form_perangkais.perangkai_id', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
+
         $query = FormPerangkai::whereHas('produk_terjual');
         if($req->jenis_rangkaian){
-            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->get();
-        } else {
-            $data = $query->get();
+            $query->where('jenis_rangkaian', $req->jenis_rangkaian);
         }
-        return view('form_sewa.index', compact('data'));
+        if ($req->perangkai) {
+            $query->where('perangkai_id', $req->input('perangkai'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal', '<=', $req->input('dateEnd'));
+        }
+        $data = $query->get();
+        return view('form_sewa.index', compact('data', 'perangkai'));
     }
 
     /**

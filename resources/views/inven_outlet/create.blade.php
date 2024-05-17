@@ -36,11 +36,11 @@
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <label for="lokasi_id" class="col-form-label">Lokasi</label>
+                            <label for="lokasi_id" class="col-form-label">Outlet</label>
                             <div id="div_lokasi" class="form-group">
                                 <select id="lokasi_id" name="lokasi_id" class="form-control" required>
-                                    <option value="">Pilih Gallery</option>
-                                    @foreach ($gallery as $item)
+                                    <option value="">Pilih Outlet</option>
+                                    @foreach ($outlets as $item)
                                         <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                     @endforeach
                                 </select>

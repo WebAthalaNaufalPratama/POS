@@ -33,4 +33,8 @@ class KembaliSewa extends Model
     public function produk(){
         return $this->hasMany(Produk_Terjual::class, 'no_kembali_sewa', 'no_kembali');
     }
+
+    public function sewa(){
+        return $this->belongsTo(Kontrak::class, 'no_sewa', 'no_kontrak');
+    }
 }

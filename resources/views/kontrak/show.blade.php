@@ -150,7 +150,7 @@
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" disabled></td>
                                         <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
                                         <td></td>
-                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary">Perangkai</button></td>
                                         {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
                                     </tr>
                                     @endif
@@ -175,7 +175,7 @@
                                                 <button id="btnGift_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-info w-100">Set Gift</button>
                                                 @endif
                                             </td>
-                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary">Perangkai</button></td>
                                             {{-- @if ($i == 0)
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             @else
@@ -277,7 +277,23 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Subtotal</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="subtotal" name="subtotal" value="{{ $kontraks->subtotal }}" class="form-control" readonly>
+                                        <input type="text" id="subtotal" name="subtotal" value="" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-1">
+                                    <label class="col-lg-3 col-form-label">Diskon</label>
+                                    <div class="col-lg-9">
+                                        <div class="row align-items-center">
+                                            <div class="col-12">
+                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
+                                                </select>
+                                            </div>
+                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
+                                            {{-- <div class="col-3 ps-0 mb-0">
+                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
+                                            </div> --}}
+                                        </div>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -298,22 +314,6 @@
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
                                         <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Diskon</label>
-                                    <div class="col-lg-9">
-                                        <div class="row align-items-center">
-                                            <div class="col-9 pe-0">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
-                                            <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
-                                            </div>
-                                        </div>
-                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -457,7 +457,7 @@
       </div>
     </div>
 </div>
-<div class="modal fade" id="modalSetGift" tabindex="-1" aria-labelledby="modalSetGift" aria-hidden="true">
+<div class="modal fade" id="modalSetGift" aria-labelledby="modalSetGift" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -526,20 +526,21 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            $('#sales').trigger('change');
-            var total_transaksi = $('#total_harga').val();
+            var total_transaksi = $('#subtotal').val();
             var old_promo_id = $('#old_promo_id').val();
             var produk = [];
             var tipe_produk = [];
             $('select[id^="produk_"]').each(function() {
                 produk.push($(this).val());
                 tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
+                
             });
             checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
+            $('#promo_id').trigger('change');
+            $('#sales').trigger('change');
             calculatePromo(old_promo_id);
 
-            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe, [id^=new_produk_]').select2();
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
@@ -554,7 +555,7 @@
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
                             '<td><button id="btnGift_'+i+'" data-produk="{{ $komponen }}" class="btn btn-info">Set Gift</button></td>' +
-                            '<td><button id="btnPerangkai_'+i+'" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>' +
+                            '<td><button id="btnPerangkai_'+i+'" data-produk="{{ $komponen->id }}" class="btn btn-primary">Perangkai</button></td>' +
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
@@ -594,7 +595,7 @@
         });
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
-            var total_transaksi = $('#total_harga').val();
+            var total_transaksi = $('#subtotal').val();
             var produk = [];
             var tipe_produk = [];
             $('select[id^="produk_"]').each(function() {
@@ -609,6 +610,12 @@
             var promo_id = $(this).select2().find(":selected").val()
             if(!promo_id){
                 $('#total_promo').val(0);
+                var inputs = $('input[name="harga_total[]"]');
+                var subtotal = 0;
+                inputs.each(function() {
+                    subtotal += parseInt($(this).val()) || 0;
+                });
+                $('#subtotal').val(subtotal)
                 total_harga();
                 return 0;
             } 
@@ -641,7 +648,9 @@
                     '@endforeach' +
                     '</select>';
                 $('#div_perangkai').append(rowPerangkai);
-                $('#perangkai_id_' + i).select2();
+                $('#perangkai_id_' + i).select2({
+                    dropdownParent: $("#modalPerangkai")
+                });
             }
         })
         $('[id^=btnGift]').click(function(e) {
@@ -680,8 +689,12 @@
                     '</div>' +
                     '</div>';
                 $('#div_new_produk').append(row_bungapot);
-                $('#new_produk_' + i).select2();
-                $('#new_produk_kondisi_' + i).select2();
+                $('#new_produk_' + i).select2({
+                    dropdownParent: $("#modalSetGift")
+                });
+                $('#new_produk_kondisi_' + i).select2({
+                    dropdownParent: $("#modalSetGift")
+                });
             }
         })
         function multiply(element) {
@@ -720,13 +733,7 @@
             var ppn_nominal = $('#ppn_nominal').val() || 0;
             var pph_nominal = $('#pph_nominal').val() || 0;
             var ongkir_nominal = $('#ongkir_nominal').val() || 0;
-            var diskon_nominal = $('#total_promo').val();
-            if (/(poin|TRD|GFT)/.test(diskon_nominal)) {
-                diskon_nominal = 0;
-            } else {
-                diskon_nominal = parseInt(diskon_nominal) || 0;
-            }
-            var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal) - parseInt(diskon_nominal);
+            var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(harga_total);
         }
         function ppn(){
@@ -798,11 +805,11 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#total_harga').val());
+                    var sub_total = parseInt($('#subtotal').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            total_promo = sub_total * parseInt(response.diskon_persen) / 100;
                             break;
                         case 'nominal':
                             total_promo = parseInt(response.diskon_nominal);
@@ -817,6 +824,20 @@
                             break;
                     }
                     $('#total_promo').val(total_promo);
+
+                    var inputs = $('input[name="harga_total[]"]');
+                    var subtotal = 0;
+                    inputs.each(function() {
+                        subtotal += parseInt($(this).val()) || 0;
+                    });
+                    $('#subtotal').val(subtotal)
+                    
+                    if (/(poin|TRD|GFT)/.test(total_promo)) {
+                        total_promo = 0;
+                    } else {
+                        total_promo = parseInt(total_promo) || 0;
+                        $('#subtotal').val(subtotal - total_promo);
+                    }
                     total_harga();
                 },
                 error: function(xhr, status, error) {
@@ -841,9 +862,7 @@
                     $('#jml_produk').val(response.jumlah);
                     $('#no_form').val(response.kode_form);
                     $('#jml_perangkai').val(response.perangkai.length);
-                    $('[id^="perangkai_id"]').select2()
                     $('[id^="perangkai_id_"]').each(function() {
-                        $(this).select2('destroy');
                         $(this).remove();
                     });
                     if(response.perangkai.length > 0){
@@ -859,7 +878,9 @@
                             $('#div_perangkai select').each(function(index) {
                                 $(this).val(response.perangkai[index].perangkai_id);
                             });
-                            $('#perangkai_id_' + i).select2();
+                            $('#perangkai_id_' + i).select2({
+                                dropdownParent: $("#modalPerangkai")
+                            });
                         }
                     }
                     $('#modalPerangkai').modal('show');
@@ -881,11 +902,11 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
+                    console.log(response);
                     $('#data_produk').val(response.produk.nama);
                     $('#data_produk_id').val(response.id);
                     $('#jml_data_produk').val(response.jumlah);
                     $('#modalSetGift').modal('show');
-                    $('[id^="new_produk_"]').select2()
                     $('[id^="div_produk_jumlah_"]').each(function() {
                         $(this).remove();
                     });
@@ -920,8 +941,12 @@
                                 $('#new_produk_kondisi_' + i).val(response.komponen[i].kondisi);
                                 $('#jml_tambahan_' + i).val(response.komponen[i].jumlah);
                                 $('#new_produk_' + i).val(response.komponen[i].produk.id);
-                                $('#new_produk_' + i).select2();
-                                $('#new_produk_kondisi_' + i).select2();
+                                $('#new_produk_' + i).select2({
+                                    dropdownParent: $("#modalSetGift")
+                                });
+                                $('#new_produk_kondisi_' + i).select2({
+                                    dropdownParent: $("#modalSetGift")
+                                });
                             }
                         }
                     }

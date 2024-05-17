@@ -22,10 +22,36 @@ class KembaliSewaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $data = KembaliSewa::all();
-        return view('kembali_sewa.index', compact('data'));
+        $query = KembaliSewa::query();
+
+        if ($req->customer) {
+            $query->whereHas('sewa',function($q) use($req){
+                $q->where('customer_id', $req->input('customer'));
+            });
+        }
+        if ($req->driver) {
+            $query->where('driver', $req->input('driver'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kembali', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kembali', '<=', $req->input('dateEnd'));
+        }
+        $data = $query->get();
+        $customer = Kontrak::whereHas('kembali_sewa')->select('customer_id')
+        ->distinct()
+        ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->orderBy('customers.nama')
+        ->get();
+        $driver = DeliveryOrder::select('driver')
+        ->distinct()
+        ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
+        return view('kembali_sewa.index', compact('data', 'driver', 'customer'));
     }
 
     /**
@@ -50,7 +76,7 @@ class KembaliSewaController extends Controller
         $produkjuals = Produk_Jual::all();
         $kondisi = Kondisi::all();
         $produkSewa = $kontrak->produk()->whereHas('produk')->get();
-        $latestKembali = KembaliSewa::withTrashed()->orderByDesc('id')->get();
+        $latestKembali = KembaliSewa::withTrashed()->orderByDesc('id')->first();
         $detail_lokasi = Produk_Terjual::whereNotNull('detail_lokasi')->whereHas('do_sewa', function($q) use($kontrak){
             $q->where('no_referensi', $kontrak->no_kontrak);
         })->get()->unique('detail_lokasi');
@@ -59,12 +85,12 @@ class KembaliSewaController extends Controller
         if (!$latestKembali) {
             $getKode = 'KMB' . date('Ymd') . '00001';
         } else {
-            $lastDate = substr($latestKembali->no_kemblai, 3, 8);
+            $lastDate = substr($latestKembali->no_kembali, 3, 8);
             $todayDate = date('Ymd');
             if ($lastDate != $todayDate) {
                 $getKode = 'KMB' . date('Ymd') . '00001';
             } else {
-                $lastNumber = substr($latestKembali->no_kemblai, -5);
+                $lastNumber = substr($latestKembali->no_kembali, -5);
                 $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
                 $getKode = 'KMB' . date('Ymd') . $nextNumber;
             }

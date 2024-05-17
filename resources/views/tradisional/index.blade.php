@@ -35,8 +35,8 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $tradisional->nama }}</td>
                             <td>{{ $tradisional->tipe->nama }}</td>
-                            <td>{{ $tradisional->harga }}</td>
-                            <td>{{ $tradisional->harga_jual }}</td>
+                            <td>{{ formatRupiah($tradisional->harga) }}</td>
+                            <td>{{ formatRupiah($tradisional->harga_jual) }}</td>
                             <td>{{ $tradisional->deskripsi }}</td>
                             <td>
                                 <table class="table table-bordered">
@@ -77,27 +77,40 @@
     <script>
 
     function deleteData(id){
-        $.ajax({
-            type: "GET",
-            url: "/tradisional/"+id+"/delete",
-            success: function(response) {
-                toastr.success(response.msg, 'Success', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-
-                setTimeout(() => {
-                    location.reload()
-                }, 2000);
-            },
-            error: function(error) {
-                toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/tradisional/"+id+"/delete",
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
                 });
             }
         });

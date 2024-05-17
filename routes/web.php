@@ -185,6 +185,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{rekening}/delete', 'RekeningController@destroy')->name('rekening.destroy');
         });
 
+        Route::group(['prefix'=> 'akun'], function() {
+            Route::get('/', 'AkunController@index')->name('akun.index');
+            Route::post('/store', 'AkunController@store')->name('akun.store');
+            Route::get('/store', 'AkunController@show')->name('akun.show');
+            Route::get('/{akun}/edit', 'AkunController@edit')->name('akun.edit');
+            Route::patch('/{akun}/update', 'AkunController@update')->name('akun.update');
+            Route::get('/{akun}/delete', 'AkunController@destroy')->name('akun.destroy');
+        });
+
         Route::group(['prefix'=> 'aset'], function() {
             Route::get('/', 'AsetController@index')->name('aset.index');
             Route::post('/store', 'AsetController@store')->name('aset.store');

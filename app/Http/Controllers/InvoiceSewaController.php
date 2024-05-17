@@ -23,9 +23,27 @@ class InvoiceSewaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $data = InvoiceSewa::all();
+        $query = InvoiceSewa::query();
+
+        if ($req->customer) {
+            $query->whereHas('sewa',function($q) use($req){
+                $q->where('customer_id', $req->input('customer'));
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('jatuh_tempo', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('jatuh_tempo', '<=', $req->input('dateEnd'));
+        }
+        $data = $query->get();
+        $customer = Kontrak::whereHas('invoice')->select('customer_id')
+        ->distinct()
+        ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->orderBy('customers.nama')
+        ->get();
         $Invoice = Pembayaran::latest()->first();
         if ($Invoice != null) {
             $substring = substr($Invoice->no_invoice_bayar, 11);
@@ -34,7 +52,7 @@ class InvoiceSewaController extends Controller
             $invoice_bayar = 0;
         }
         $bankpens = Rekening::get();
-        return view('invoice_sewa.index', compact('data', 'invoice_bayar', 'bankpens'));
+        return view('invoice_sewa.index', compact('data', 'invoice_bayar', 'bankpens', 'customer'));
     }
 
     /**
@@ -99,7 +117,7 @@ class InvoiceSewaController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        $data['lokasi_id'] = 1;
+        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
         $data['status'] = 'DRAFT';
@@ -110,11 +128,6 @@ class InvoiceSewaController extends Controller
         
         // update data produk invoice
         $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
-        // $produkKontrak = $kontrak->produk()->get();
-        // $produkKontrak->transform(function ($item) use ($check) {
-        //     $item->no_invoice = $check->no_invoice;
-        //     return $item;
-        // });
 
         for ($i=0; $i < count($data['nama_produk']); $i++) { 
             $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
@@ -165,16 +178,16 @@ class InvoiceSewaController extends Controller
         $bankpens = Rekening::get();
         $Invoice = Pembayaran::latest()->first();
         if (!$Invoice) {
-            $getKode = 'BYR' . date('Ymd') . '00001';
+            $invoice_bayar = 'BYR' . date('Ymd') . '00001';
         } else {
             $lastDate = substr($Invoice->no_kontrak, 3, 8);
             $todayDate = date('Ymd');
             if ($lastDate != $todayDate) {
-                $getKode = 'BYR' . date('Ymd') . '00001';
+                $invoice_bayar = 'BYR' . date('Ymd') . '00001';
             } else {
                 $lastNumber = substr($Invoice->no_kontrak, -5);
                 $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
-                $getKode = 'BYR' . date('Ymd') . $nextNumber;
+                $invoice_bayar = 'BYR' . date('Ymd') . $nextNumber;
             }
         }
         return view('invoice_sewa.show', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa', 'riwayat', 'pembayaran', 'bankpens', 'invoice_bayar'));
