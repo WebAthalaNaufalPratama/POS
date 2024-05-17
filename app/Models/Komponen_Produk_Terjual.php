@@ -19,4 +19,8 @@ class Komponen_Produk_Terjual extends Model
     public function produk(){
         return $this->belongsTo(Produk::class, 'kode_produk', 'kode');
     }
+
+    public function kondisi(){
+        return $this->belongsTo(Kondisi::class, 'kondisi', 'id');
+    }
 }

@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi Galery ke Outlet</h3>
+            <h3 class="page-title">Mutasi Outlet ke Galery</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="index.html">Mutasi</a>
@@ -26,7 +26,7 @@
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('mutasigalery.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('mutasioutlet.store', ['returpenjualan' => $returpenjualans->id]) }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
                         @csrf
@@ -119,43 +119,105 @@
                                                     <th></th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="dynamic_field">
-                                                <tr>
-                                                    <td>
-                                                        <select id="nama_produk_0" name="nama_produk[]" class="form-control">
-                                                            <option value="">Pilih Produk</option>
-                                                            @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                                                @if (substr($produk->kode, 0, 3) === 'TRD')
-                                                                {{ $produk->nama }}
-                                                                @foreach ($produk->komponen as $komponen)
-                                                                @if ($komponen->kondisi)
-                                                                @foreach($kondisis as $kondisi)
-                                                                @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
+                                                <tbody id="dynamic_field">
+                                                    @if(count($produks) > 0)
+                                                    @php
+                                                    $i = 0;
+                                                    @endphp
+                                                    @foreach ($produks as $produk)
+                                                    <tr id="row{{ $i }}">
+                                                        <td>
+                                                        @php
+                                                            $isTRDSelected = false;
+                                                        @endphp
+                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly>
+                                                                <option value="">Pilih Produk</option>
                                                                 @php
-                                                                $found = true;
-                                                                break;
+                                                                    $isTRDSelected = false; // Reset the variable each time the loop starts
+                                                                    $selectedTRDKode = ''; // Initialize the selected TRD product code
+                                                                    $selectedGFTKode = ''; // Initialize the selected GFT product code
                                                                 @endphp
-                                                                @endif
+                                                                @foreach ($produkjuals as $index => $pj)
+                                                                    @php
+                                                                        $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_retur ==  $returpenjualans->no_retur && $pj->jenis != 'TAMBAHAN');
+                                                                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $returpenjualans->no_retur && $pj->jenis != 'TAMBAHAN');
+                                                                        if($isSelectedTRD){
+                                                                            $isTRDSelected = true;                                             // Reset selected TRD code
+                                                                            $selectedTRDKode = '';
+                                                                            foreach ($pj->komponen as $komponen) {
+                                                                                if ($komponen->kondisi) {
+                                                                                    foreach($kondisis as $kondisi) {
+                                                                                        if($kondisi->id == $komponen->kondisi) {
+                                                                                            // Set selected TRD code based on condition
+                                                                                            $selectedTRDKode = $kondisi->nama;
+                                                                                            $selectedTRDJumlah = $komponen->jumlah;
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    @endphp
+                                                                    <option value="{{ $pj->produk->kode }}" data-kondisi="{{ $pj->produk->kode }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT  ? 'selected' : '' }}>
+                                                                        @if (substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                                            {{ $pj->produk->nama }}
+                                                                        @elseif (substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                            {{ $pj->produk->nama }}
+                                                                        @endif
+                                                                    </option>
                                                                 @endforeach
-                                                                @endif
-                                                                @if ($found) @break @endif
+                                                            </select>
+                                                            @if($isTRDSelected)
+                                                                <div class="row mt-2">
+                                                                    <div class="col">
+                                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}">
+                                                                            <option value=""> Pilih Kondisi </option>
+                                                                            @foreach ($kondisis as $kondisi)
+                                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}">
+                                                                    </div>
+                                                                </div>
+                                                            @elseif($perPendapatan)
+                                                                @foreach ($perPendapatan as $noJual => $items)
+                                                                    @if($noJual == $produk->id)
+                                                                        @foreach ($items as $komponen)
+                                                                            <div class="row mt-2">
+                                                                                <div class="col">
+                                                                                    <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
+                                                                                </div>
+                                                                                <div class="col">
+                                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}">
+                                                                                        <option value=""> Pilih Kondisi </option>
+                                                                                        @foreach ($kondisis as $kondisi)
+                                                                                        <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </div>
+                                                                                <div class="col">
+                                                                                    <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required>
+                                                                                </div>
+                                                                                <!-- <div class="col">
+                                                                                <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>                                                               
+                                                                                </div> -->
+                                                                            </div>
+                                                                        @endforeach
+                                                                    @endif
                                                                 @endforeach
-                                                                @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                                {{ $produk->nama }}
-                                                                @endif
-                                                            </option>
-                                                            @endforeach
-                                                        </select>
-
-
-                                                    </td>
-                                                    <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                                                    <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                                </tr>
-                                            </tbody>
+                                                            @endif
+                                                        </td>
+                                                        <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly></td>
+                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}"></td>
+                                                    </tr>
+                                                    @php
+                                                    $i++;
+                                                    @endphp
+                                                    @endforeach
+                                                    @endif
+                                                </tbody>
+                                            </table>
                                         </table>
                                     </div>
                                 </div>
@@ -392,7 +454,7 @@
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
-        var invoicePrefix = "MGO";
+        var invoicePrefix = "MOG";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');

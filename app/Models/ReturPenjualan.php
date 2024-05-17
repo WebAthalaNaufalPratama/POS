@@ -28,7 +28,7 @@ class ReturPenjualan extends Model
         return $this->hasMany(Produk_Terjual::class, 'no_do', 'no_do');
     }
     public function produk_retur(){
-        return $this->hasMany(ProdukReturJual::class, 'no_retur', 'no_retur');
+        return $this->hasMany(Produk_Terjual::class, 'no_retur', 'no_retur');
     }
 
     public function deliveryorder(){

@@ -233,6 +233,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{penjualan}/update', 'PenjualanController@update')->name('penjualan.update');
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
             Route::post('/storekomponen', 'PenjualanController@store_komponen')->name('komponenpenjulan.store');
+            Route::post('/storekomponenmutasi', 'PenjualanController@store_komponen_mutasi')->name('komponenmutasi.store');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -381,6 +382,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/create', 'MutasiController@create_outlet')->name('mutasigalery.create');
             Route::post('/store', 'MutasiController@store_outlet')->name('mutasigalery.store');
             Route::get('/{mutasiGO}/show', 'MutasiController@show_outlet')->name('mutasigalery.show');
+            Route::get('/{mutasiGO}/acc', 'MutasiController@acc_outlet')->name('mutasigalery.acc');
             Route::get('/{mutasiGO}/edit', 'MutasiController@edit_outlet')->name('mutasigalery.edit');
             Route::patch('/{mutasiGO}/update', 'MutasiController@update_outlet')->name('mutasigalery.update');
             Route::get('/{mutasiGO}/delete', 'MutasiController@destroy_outlet')->name('mutasigalery.destroy');
@@ -388,12 +390,32 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'mutasiOG'], function() {
             Route::get('/', 'MutasiController@index_outletgalery')->name('mutasioutlet.index');
-            Route::get('/create', 'MutasiController@create_outletgalery')->name('mutasioutlet.create');
+            Route::get('{returpenjualan}/create', 'MutasiController@create_outletgalery')->name('mutasioutlet.create');
             Route::post('/store', 'MutasiController@store_outletgalery')->name('mutasioutlet.store');
             Route::get('/{mutasiOG}/show', 'MutasiController@show_outletgalery')->name('mutasioutlet.show');
             Route::get('/{mutasiOG}/edit', 'MutasiController@edit_outletgalery')->name('mutasioutlet.edit');
             Route::patch('/{mutasiOG}/update', 'MutasiController@update_outletgalery')->name('mutasioutlet.update');
             Route::get('/{mutasiOG}/delete', 'MutasiController@destroy_outletgalery')->name('mutasioutlet.destroy');
+        });
+
+        Route::group(['prefix' => 'mutasiGG'], function() {
+            Route::get('/', 'MutasiController@index_ghgalery')->name('mutasighgalery.index');
+            Route::get('/create', 'MutasiController@create_ghgalery')->name('mutasighgalery.create');
+            Route::post('/store', 'MutasiController@store_ghgalery')->name('mutasighgalery.store');
+            Route::get('/{mutasiGG}/show', 'MutasiController@show_ghgalery')->name('mutasighgalery.show');
+            Route::get('/{mutasiGG}/edit', 'MutasiController@edit_ghgalery')->name('mutasighgalery.edit');
+            Route::patch('/{mutasiGG}/update', 'MutasiController@update_ghgalery')->name('mutasighgalery.update');
+            Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_ghgalery')->name('mutasighgalery.destroy');
+        });
+
+        Route::group(['prefix' => 'inven_greenhouse'], function() {
+            Route::get('/', 'InventoryGreenhouseController@index')->name('inven_greenhouse.index');
+            Route::get('/create', 'InventoryGreenhouseController@create')->name('inven_greenhouse.create');
+            Route::post('/store', 'InventoryGreenhouseController@store')->name('inven_greenhouse.store');
+            Route::get('/{inven_greenhouse}/show', 'InventoryGreenhouseController@show')->name('inven_greenhouse.show');
+            Route::get('/{inven_greenhouse}/edit', 'InventoryGreenhouseController@edit')->name('inven_greenhouse.edit');
+            Route::patch('/{inven_greenhouse}/update', 'InventoryGreenhouseController@update')->name('inven_greenhouse.update');
+            Route::get('/{inven_greenhouse}/delete', 'InventoryGreenhouseController@destroy')->name('inven_greenhouse.destroy');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

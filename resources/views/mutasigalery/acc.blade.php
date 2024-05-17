@@ -28,7 +28,7 @@
         <div class="card-body">
                 <div class="row">
                     <div class="col-sm">
-                    <!-- <form action="{{ route('mutasigalery.update', ['mutasiGO' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data"> -->
+                    <form action="{{ route('mutasigalery.update', ['mutasiGO' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
@@ -126,22 +126,87 @@
                                                     @foreach ($produks as $produk)
                                                     <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly disabled>
+                                                        @php
+                                                            $isTRDSelected = false;
+                                                        @endphp
+                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly>
                                                                 <option value="">Pilih Produk</option>
-                                                                @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                @php
+                                                                    $isTRDSelected = false; // Reset the variable each time the loop starts
+                                                                    $selectedTRDKode = ''; // Initialize the selected TRD product code
+                                                                    $selectedGFTKode = ''; // Initialize the selected GFT product code
+                                                                @endphp
+                                                                @foreach ($produkjuals as $index => $pj)
+                                                                    @php
+                                                                        $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_mutasigo ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
+                                                                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT'&& $pj->no_mutasigo ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
+                                                                        if($isSelectedTRD){
+                                                                            $isTRDSelected = true;                                             // Reset selected TRD code
+                                                                            $selectedTRDKode = '';
+                                                                            foreach ($pj->komponen as $komponen) {
+                                                                                if ($komponen->kondisi) {
+                                                                                    foreach($kondisis as $kondisi) {
+                                                                                        if($kondisi->id == $komponen->kondisi) {
+                                                                                            // Set selected TRD code based on condition
+                                                                                            $selectedTRDKode = $kondisi->nama;
+                                                                                            $selectedTRDJumlah = $komponen->jumlah;
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    @endphp
+                                                                    <option value="{{ $produk->id }}" data-kondisi="{{ $pj->produk->kode }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT  ? 'selected' : '' }}>
+                                                                        @if (substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                                            {{ $pj->produk->nama }}
+                                                                        @elseif (substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                            {{ $pj->produk->nama }}
+                                                                        @endif
+                                                                    </option>
                                                                 @endforeach
                                                             </select>
+                                                            @if($isTRDSelected)
+                                                                <div class="row mt-2 komponen{{$i}}">
+                                                                    <div class="col">
+                                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}">
+                                                                            <option value=""> Pilih Kondisi </option>
+                                                                            @foreach ($kondisis as $kondisi)
+                                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}">
+                                                                    </div>
+                                                                </div>
+                                                            @elseif($perPendapatan)
+                                                                @foreach ($perPendapatan as $noJual => $items)
+                                                                    @if($noJual == $produk->id)
+                                                                        @foreach ($items as $index => $komponen)
+                                                                            <div class="row mt-2 komponen{{ $index }}">
+                                                                                <div class="col">
+                                                                                    <input type="text" name="komponengiftproduk_{{ $index }}[]" id="komponengiftproduk_{{ $index }}" class="form-control komponengift-{{ $index }}" value="{{ $komponen['nama'] }}" readonly>
+                                                                                </div>
+                                                                                <div class="col">
+                                                                                    <select name="kondisigiftproduk_{{ $index }}[]" id="kondisigiftproduk_{{ $index }}" class="form-control kondisigift-{{ $index }}">
+                                                                                        <option value="">Pilih Kondisi</option>
+                                                                                        @foreach ($kondisis as $kondisi)
+                                                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
+                                                                                        @endforeach
+                                                                                    </select>
+                                                                                </div>
+                                                                                <div class="col">
+                                                                                    <input type="number" name="jumlahgiftproduk_{{ $index }}[]" id="jumlahgiftproduk_{{ $index }}" class="form-control jumlahgift-{{ $index }}" data-index="{{ $index }}" value="{{ $komponen['jumlah'] }}" required>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endforeach
+                                                                    @endif
+                                                                @endforeach
+
+                                                            @endif
                                                         </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly></td>
-                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" readonly></td>
-                                                        <td>
-                                                            <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
-                                                                Set Gift
-                                                            </button>
-                                                        </td>
-
-
+                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}"></td>
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -241,7 +306,7 @@
                             </div>
                         </div>
                         <div class="text-end mt-3">
-                            <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
+                            <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="{{ route('mutasigalery.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
@@ -260,7 +325,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
             </div>
             <div class="modal-body">
-                <form id="form_gift" action="{{ route('komponenmutasi.store') }}" method="POST">
+                <form id="form_gift" action="{{ route('komponenpenjulan.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="route" value="{{ request()->route()->getName() }},penjualan,{{ request()->route()->parameter('penjualan') }}">
                     <div class="mb-3">
@@ -270,7 +335,6 @@
                                 <input type="text" class="form-control" name="produk_id" id="prdTerjualGift" readonly required>
                             </div>
                             <input type="hidden" name="prdTerjual_id" id="prdTerjualGift_id" value="">
-                            <input type="hidden" name="pengirim" value="{{ $mutasis->pengirim }}">
                             <div class="col-sm-4">
                                 <label for="jmlGift_produk" class="col-form-label">Jumlah</label>
                                 <input type="number" class="form-control" name="jml_produk" id="jmlGift_produk" readonly required>
@@ -528,8 +592,8 @@
 
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
-            $('#row' + button_id + '').remove();
-            calculateTotal(0);
+            $('.komponen' + button_id + '').remove();
+            // calculateTotal(0);
         });
 
         function addModal() {
@@ -617,6 +681,35 @@
             });
         }
 
+        var produkData = [];
+
+        @foreach ($produks as $produk)
+            produkData.push({
+                id: {{ $produk->id }},
+                jumlah: {{ $produk->jumlah }}
+            });
+        @endforeach
+        // console.log('Produk Data:', produkData);
+
+
+        $(document).on('input', '.jumlah_diterima', function() {
+            var inputId = $(this).attr('id');
+            var jumlah = parseInt($(this).val(), 10); // Ensure jumlah is parsed as an integer
+            var produkId = $(this).data('produk-id'); // Extract the product ID from the data attribute
+
+            var produk = produkData.find(function(item) {
+                return item.id == produkId;
+            });
+
+            if (jumlah > produk.jumlah) {
+                alert('jumlah diterima tidak boleh lebih dari jumlah dikirim');
+                $(this).val(produk.jumlah);
+            } else if (jumlah < 0) {
+                alert('jumlah diterima tidak boleh kurang dari 0');
+                $(this).val(0);
+            }
+        });
+
         $('#jml_komponen').on('input', function(e) {
             e.preventDefault();
             var jumlah = $(this).val();
@@ -678,15 +771,7 @@
             updateHargaSatuan(this);
         });
 
-        // $('#delivery_order_section').show();
-
-        // $('#distribusi').change(function() {
-        //     if ($(this).val() === 'Diambil') {
-        //         $('#delivery_order_section').hide();
-        //     } else {
-        //         $('#delivery_order_section').show();
-        //     }
-        // });
+        
 
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
@@ -740,6 +825,10 @@
                 ongkirId();
             }
         });
+
+        var produkData = [];
+
+        
 
         $('#ongkir_id').change(function() {
             var selectedOption = $(this).find('option:selected');

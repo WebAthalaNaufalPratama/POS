@@ -5,13 +5,13 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi Galery ke Outlet</h3>
+            <h3 class="page-title">Mutasi GreenHouse ke Galery</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="index.html">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    Galery Ke Outlet
+                    GreenHouse Ke Galery
                 </li>
             </ul>
         </div>
@@ -22,13 +22,13 @@
     <div class="card">
         <div class="card-header">
             <h4 class="card-title mb-0">
-                Transaksi Penjualan
+                Atur Komponen Barang
             </h4>
         </div>
         <div class="card-body">
                 <div class="row">
                     <div class="col-sm">
-                    <!-- <form action="{{ route('mutasigalery.update', ['mutasiGO' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data"> -->
+                    <form action="{{ route('mutasighgalery.update', ['mutasiGG' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
@@ -49,7 +49,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="penerima">Nama Penerima</label>
-                                            <select id="penerima" name="penerima" class="form-control" required disabled>
+                                            <select id="penerima" name="penerima" class="form-control" required readonly>
                                                 <option value="">Pilih Nama Penerima</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -119,35 +119,36 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
-                                                    @if(count($produks) > 0)
+                                                @if(count($produks) > 0)
                                                     @php
                                                     $i = 0;
                                                     @endphp
                                                     @foreach ($produks as $produk)
                                                     <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly disabled>
+                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
+                                                                    {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
+                                                                </option>
                                                                 @endforeach
                                                             </select>
-                                                        </td>
-                                                        <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly></td>
-                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" readonly></td>
+                                                            <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
+                                                        </td> 
                                                         <td>
-                                                            <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
-                                                                Set Gift
-                                                            </button>
+                                                            <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly>
                                                         </td>
-
-
+                                                        <td>
+                                                            <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
+                                                        </td>
                                                     </tr>
                                                     @php
                                                     $i++;
                                                     @endphp
                                                     @endforeach
-                                                    @endif
+                                                @endif
+
                                                 </tbody>
                                             </table>
                                         </div>
@@ -241,7 +242,7 @@
                             </div>
                         </div>
                         <div class="text-end mt-3">
-                            <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
+                            <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="{{ route('mutasigalery.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
@@ -270,7 +271,6 @@
                                 <input type="text" class="form-control" name="produk_id" id="prdTerjualGift" readonly required>
                             </div>
                             <input type="hidden" name="prdTerjual_id" id="prdTerjualGift_id" value="">
-                            <input type="hidden" name="pengirim" value="{{ $mutasis->pengirim }}">
                             <div class="col-sm-4">
                                 <label for="jmlGift_produk" class="col-form-label">Jumlah</label>
                                 <input type="number" class="form-control" name="jml_produk" id="jmlGift_produk" readonly required>
@@ -408,6 +408,40 @@
         $('#nama_produk_modal_' + index).val(namaProdukValue);
         $('#jumlah_produk_modal_' + index).val(jumlahValue);
     }
+</script>
+<script>
+    var produkData = [];
+
+    @foreach ($produks as $produk)
+        produkData.push({
+            id: {{ $produk->id }},
+            jumlah: {{ $produk->jumlah }}
+        });
+    @endforeach
+
+    // console.log('Produk Data:', produkData);
+
+    $(document).on('input', '.jumlah_diterima', function() {
+        var inputId = $(this).attr('id');
+        var jumlah = parseInt($(this).val(), 10); // Ensure jumlah is parsed as an integer
+        var produkId = $(this).data('produk-id'); // Extract the product ID from the data attribute
+
+        var produk = produkData.find(function(item) {
+            return item.id == produkId;
+        });
+
+        if (produk) {
+            if (jumlah > produk.jumlah) {
+                alert('jumlah diterima tidak boleh lebih dari jumlah dikirim');
+                $(this).val(produk.jumlah);
+            } else if (jumlah < 0) {
+                alert('jumlah diterima tidak boleh kurang dari 0');
+                $(this).val(0);
+            }
+        } else {
+            console.error('Produk not found for ID:', produkId);
+        }
+    });
 </script>
 
 <script>
