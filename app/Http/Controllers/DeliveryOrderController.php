@@ -175,16 +175,60 @@ class DeliveryOrderController extends Controller
                 }
             }
         }
-        
+
+        // ambil akumulasi komponen DO
+        $dataDO = [];
+        for ($i=0; $i < count($data['produk_id']); $i++) { 
+            $produkTerjual = Produk_Terjual::find($data['produk_id'][$i])->komponen;
+            foreach ($produkTerjual as $item) {
+                if(isset($dataDO[$item->kode_produk]['kondisi'])){
+                    $dataDO[$item->kode_produk]['jumlah'] += $item->jumlah * $data['jumlah'][$i];
+                } else {
+                    $dataDO[$item->kode_produk] = ['kondisi' => $item->kondisi, 'jumlah' => $item->jumlah * $data['jumlah'][$i]];
+                }
+            }
+        }
+
+        // ambil akumulasi komponen tambahan DO
+        $dataTambahanDO = [];
+        if(isset($data['nama_produk2'][0])){
+            for ($i=0; $i < count($data['produk_id2']); $i++) { 
+                $produkTerjual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i])->komponen;
+                foreach ($produkTerjual as $item) {
+                    if(isset($dataTambahanDO[$item->kode_produk]['kondisi'])){
+                        $dataTambahanDO[$item->kode_produk]['jumlah'] += $item->jumlah * $data['jumlah2'][$i];
+                    } else {
+                        $dataTambahanDO[$item->kode_produk] = ['kondisi' => $item->kondisi, 'jumlah' => $item->jumlah * $data['jumlah2'][$i]];
+                    }
+                }
+            }
+
+            // penggabungan data DO dan tambahan
+            foreach ($dataTambahanDO as $key => $value) {
+                if (isset($dataDO[$key]) && $dataDO[$key]['kondisi'] == $value['kondisi']) {
+                    $dataDO[$key]['jumlah'] += $value['jumlah'];
+                } else {
+                    $dataDO[$key] = $value;
+                }
+            }
+        }
+
+        // cek stok inventory
+        foreach ($dataDO as $key => $value) {
+            $inventory = InventoryGallery::where('kode_produk', $key)->where('kondisi_id', $value['kondisi'])->where('lokasi_id', $kontrak->lokasi_id)->first();
+            if(!$inventory) return redirect()->back()->withInput()->with('fail', 'Stok tidak tersedia');
+            if($inventory->jumlah < $value['jumlah']) return redirect()->back()->withInput()->with('fail', 'Stok tidak mencukupi');
+        }
+
         // save data do
         $check = DeliveryOrder::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
         // save produk do
         for ($i=0; $i < count($data['nama_produk']); $i++) { 
-            $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
+            $getProdukTerjual = Produk_Terjual::with('komponen')->find($data['produk_id'][$i]);
             $produk_terjual = Produk_Terjual::create([
-                'produk_jual_id' => $getProdukJual->id,
+                'produk_jual_id' => $getProdukTerjual->produk_jual_id,
                 'no_do' => $check->no_do,
                 'jumlah' => $data['jumlah'][$i],
                 'satuan' => $data['satuan'][$i],
@@ -192,7 +236,7 @@ class DeliveryOrderController extends Controller
             ]);
 
             if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            foreach ($getProdukJual->komponen as $komponen ) {
+            foreach ($getProdukTerjual->komponen as $komponen ) {
                 $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                     'produk_terjual_id' => $produk_terjual->id,
                     'kode_produk' => $komponen->kode_produk,
@@ -205,16 +249,13 @@ class DeliveryOrderController extends Controller
                     'harga_total' => $komponen->harga_total
                 ]);
                 if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($data['jumlah'][$i]));
-                $stok->update();
             }
         }
 
         // save data tambahan
         if(isset($data['nama_produk2'][0])){
             for ($i=0; $i < count($data['nama_produk2']); $i++) { 
-                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk2'][$i])->first();
+                $getProdukJual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i]);
                 $produk_terjual = Produk_Terjual::create([
                     'produk_jual_id' => $getProdukJual->id,
                     'no_do' => $check->no_do,
@@ -237,13 +278,18 @@ class DeliveryOrderController extends Controller
                         'harga_satuan' => $komponen->harga_satuan,
                         'harga_total' => $komponen->harga_total
                     ]);
-                    if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                    $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                    $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($data['jumlah2'][$i]));
-                    $stok->update();
+                    if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
             }
         }
+
+        // pengurangan stok
+        foreach ($dataDO as $key => $value) {
+            $inventory = InventoryGallery::where('kode_produk', $key)->where('kondisi_id', $value['kondisi'])->where('lokasi_id', $kontrak->lokasi_id)->first();
+            $inventory->jumlah - intval($value['jumlah']);
+            $inventory->update();
+        }
+
         return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
 
