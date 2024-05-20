@@ -425,6 +425,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kas_gallery}/edit', 'KasController@edit_gallery')->name('kas_gallery.edit');
             Route::patch('/{kas_gallery}/update', 'KasController@update_gallery')->name('kas_gallery.update');
             Route::get('/{kas_gallery}/delete', 'KasController@destroy_gallery')->name('kas_gallery.destroy');
+        });
+        
         Route::group(['prefix' => 'mutasiGG'], function() {
             Route::get('/', 'MutasiController@index_ghgalery')->name('mutasighgalery.index');
             Route::get('/create', 'MutasiController@create_ghgalery')->name('mutasighgalery.create');
