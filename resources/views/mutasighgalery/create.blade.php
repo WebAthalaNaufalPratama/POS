@@ -5,13 +5,13 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi Galery ke Outlet</h3>
+            <h3 class="page-title">Mutasi GreenHouse ke Galery</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="index.html">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    Galery Ke Outlet
+                    GreenHouse Ke Galery
                 </li>
             </ul>
         </div>
@@ -22,11 +22,11 @@
     <div class="card">
         <div class="card-header">
             <h4 class="card-title mb-0">
-                Transaksi Penjualan
+                mutasi Barang
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('mutasigalery.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('mutasighgalery.store') }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
                         @csrf
@@ -125,26 +125,8 @@
                                                         <select id="nama_produk_0" name="nama_produk[]" class="form-control">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                                                @if (substr($produk->kode, 0, 3) === 'TRD')
-                                                                {{ $produk->nama }}
-                                                                @foreach ($produk->komponen as $komponen)
-                                                                @if ($komponen->kondisi)
-                                                                @foreach($kondisis as $kondisi)
-                                                                @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                $found = true;
-                                                                break;
-                                                                @endphp
-                                                                @endif
-                                                                @endforeach
-                                                                @endif
-                                                                @if ($found) @break @endif
-                                                                @endforeach
-                                                                @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                                {{ $produk->nama }}
-                                                                @endif
+                                                            <option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                                                {{ $produk->produk->nama}} - {{ $produk->kondisi->nama}}
                                                             </option>
                                                             @endforeach
                                                         </select>
@@ -392,7 +374,7 @@
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
-        var invoicePrefix = "MGO";
+        var invoicePrefix = "MGG";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -519,29 +501,10 @@
             var newRow = `<tr class="tr_clone" id="row${i}">
                             <td>
                                 <select id="nama_produk_${i}" name="nama_produk[]" class="form-control select2">
-                                    <option value="">Pilih Produk</option>
-                                    @foreach ($produks as $index => $produk)
-                                        <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                            @if (substr($produk->kode, 0, 3) === 'TRD') 
-                                                {{ $produk->nama }}
-                                                @foreach ($produk->komponen as $komponen)
-                                                    @if ($komponen->kondisi)
-                                                        @foreach($kondisis as $kondisi)
-                                                            @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                    $found = true;
-                                                                    break;
-                                                                @endphp
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                    @if ($found) @break @endif
-                                                @endforeach
-                                            @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                {{ $produk->nama }}
-                                            @endif
-                                        </option>
+                                    @foreach ($produks as $produk)
+                                    <option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                        {{ $produk->produk->nama}} - {{ $produk->kondisi->nama}}
+                                    </option>
                                     @endforeach
                                 </select>
                             </td>

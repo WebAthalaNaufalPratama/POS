@@ -15,7 +15,15 @@ class Mutasi extends Model
         return $this->belongsTo(Lokasi::class, 'pengirim', 'id');
     }
 
+    public function lokasi_penerima(){
+        return $this->belongsTo(Lokasi::class, 'penerima', 'id');
+    }
+
     public function produkMutasi(){
-        return $this->hasMany(ProdukMutasi::class, 'no_mutasi', 'no_mutasi');
+        return $this->hasMany(Produk_Terjual::class, 'no_mutasigo', 'no_mutasi');
+    }
+
+    public function produkMutasiOutlet(){
+        return $this->hasMany(Produk_Terjual::class, 'no_mutasiog', 'no_mutasi');
     }
 }

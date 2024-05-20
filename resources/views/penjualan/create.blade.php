@@ -227,77 +227,109 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-3 col-sm-6 col-12 mt-4">
-                                        <div class="form-group">
-                                            <label>Pembayaran</label>
-                                            <select id="cara_bayar" name="cara_bayar" class="form-control" required>
-                                                <option value="">Pilih Pembayaran</option>
-                                                <option value="cash">CASH</option>
-                                                <option value="transfer">TRANSFER</option>
-                                            </select>
-                                        </div>
-                                        <!-- <div id="inputCash" style="display: none;">
-                                            <label for="jumlahCash">Jumlah Pembayaran (CASH): </label>
-                                            <input type="text" id="jumlahCash" name="jumlahCash" class="form-control">
-                                        </div> -->
-                                        <div id="inputTransfer" style="display: none;">
-                                            <label>Rekening Von</label>
-                                            <select id="rekening_id" name="rekening_id" class="form-control">
-                                                <option value="">Pilih Bank</option>
-                                                @foreach($bankpens as $bankpen)
-                                                <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group" style="display:none;">
-                                            <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)"  readonly>
-                                        </div>
-                                        <div class="form-group mt-3">
-                                            <div id="inputPembayaran" style="display: none;">
-                                                <label for="nominal">Nominal</label>
-                                                <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                    <!-- Payment and Shipping Section -->
+                                    <div class="col-lg-6 col-sm-12">
+                                        <div class="row mt-4">
+                                            <!-- Payment Section -->
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Pembayaran</label>
+                                                    <select id="cara_bayar" name="cara_bayar" class="form-control" required>
+                                                        <option value="">Pilih Pembayaran</option>
+                                                        <option value="cash">CASH</option>
+                                                        <option value="transfer">TRANSFER</option>
+                                                    </select>
+                                                </div>
+                                                <div id="inputTransfer" style="display: none;">
+                                                    <label>Rekening Von</label>
+                                                    <select id="rekening_id" name="rekening_id" class="form-control">
+                                                        <option value="">Pilih Bank</option>
+                                                        @foreach($bankpens as $bankpen)
+                                                        <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="form-group" style="display:none;">
+                                                    <label for="no_invoice">Nomor Invoice</label>
+                                                    <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)" readonly>
+                                                </div>
+                                                <div class="form-group mt-3">
+                                                    <div id="inputPembayaran" style="display: none;">
+                                                        <label for="nominal">Nominal</label>
+                                                        <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div id="inputBuktiBayar" style="display: none;">
+                                                        <label for="buktibayar">Unggah Bukti</label>
+                                                        <input type="file" class="form-control" id="bukti" name="bukti">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Shipping Section -->
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Pengiriman</label>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                        <option value="">Pilih Jenis Pengiriman</option>
+                                                        <option value="exspedisi">Ekspedisi</option>
+                                                        <option value="sameday">SameDay</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div id="inputOngkir" style="display: none;">
+                                                        <label for="alamat_tujuan">Alamat Tujuan</label>
+                                                        <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control"></textarea>
+                                                    </div>
+                                                    <div id="inputExspedisi" style="display: none;">
+                                                        <label>Alamat Pengiriman</label>
+                                                        <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                                            <option value="">Pilih Alamat Tujuan</option>
+                                                            @foreach($ongkirs as $ongkir)
+                                                            <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya }}">{{ $ongkir->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group mt-3">
+                                                    <label>Notes</label>
+                                                    <textarea class="form-control" id="notes" name="notes" required></textarea>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div id="inputBuktiBayar" style="display: none;">
-                                                <label for="buktibayar">Unggah Bukti</label>
-                                                <input type="file" class="form-control" id="bukti" name="bukti">
+
+                                        <!-- Table Section -->
+                                        <div class="row mt-4">
+                                            <div class="col-lg-12">
+                                                <table class="table table-responsive border rounded">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Pembuat</th>
+                                                            <th>Penyetuju</th>
+                                                            <th>Pemeriksa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                            <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
-                                        
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-6 mt-4 ">
-                                        <div class="form-group">
-                                            <label>Pengiriman</label>
-                                            <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
-                                                <option value="">Pilih Jenis Pengiriman</option>
-                                                <option value="exspedisi">Ekspedisi</option>
-                                                <option value="sameday">SameDay</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div id="inputOngkir" style="display: none;">
-                                                <label for="alamat_tujuan">Alamat Tujuan </label>
-                                                <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control"></textarea>
-                                            </div>
-                                            <div id="inputExspedisi" style="display: none;">
-                                                <label>Alamat Pengiriman</label>
-                                                <select id="ongkir_id" name="ongkir_id" class="form-control">
-                                                    <option value="">Pilih Alamat Tujuan</option>
-                                                    @foreach($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya}}">{{ $ongkir->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group mt-3">
-                                            <label>Notes</label>
-                                            <textarea class="form-control" id="notes" name="notes" required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 float-md-right">
-                                        <div class="total-order">
+
+                                    <!-- Summary Section -->
+                                    <div class="col-lg-6 col-sm-12">
+                                        <div class="total-order mt-4">
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
@@ -308,7 +340,7 @@
                                                     <h5 class="col-lg-5">
                                                         <div class="row align-items-center">
                                                             <div class="col-9 pe-0">
-                                                                <select id="promo_id" name="promo_id" class="form-control"  disabled>
+                                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
                                                                 </select>
                                                             </div>
                                                             <div class="col-3 ps-0 mb-0">
@@ -317,13 +349,6 @@
                                                         </div>
                                                         <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                                     </h5>
-                                                    <!-- <h5><select id="promo_id" name="promo_id" class="form-control" onchange="updateHargaSatuan(this)">
-                                                            <option value="">Pilih Promo</option>
-                                                            @foreach ($promos as $promo)
-                                                            <option value="{{ $promo->id }}" data-harga="{{ $promo->harga_jual }}">{{ $promo->nama }}</option>
-                                                            @endforeach
-                                                        </select></h5> -->
-                                                    <!-- <h5>$ 0.00 (0.00%)</h5> -->
                                                 </li>
                                                 <li>
                                                     <h4>PPN
@@ -339,7 +364,6 @@
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                         <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" readonly required>
-
                                                     </h5>
                                                 </li>
                                                 <li>
@@ -362,6 +386,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
 

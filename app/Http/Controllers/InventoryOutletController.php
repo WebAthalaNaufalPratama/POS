@@ -65,7 +65,7 @@ class InventoryOutletController extends Controller
          $check = InventoryOutlet::create($data);
          if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
-         return redirect(route('inven_outlet.index'))->with('success', 'Data tersimpan');
+         return redirect()->back()->withInput()->with('success', 'Data tersimpan');
     }
 
     /**

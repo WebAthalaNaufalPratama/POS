@@ -156,7 +156,7 @@
                                                             <select id="nama_produk_0" name="nama_produk[]" class="form-control" required>
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $produk)
-                                                                <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>
+                                                                <option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
@@ -170,16 +170,17 @@
                                                     $i = 0;
                                                     @endphp
                                                     @foreach ($penjualans->produk as $produk)
+                                                    @if($produk->jumlah_dikirim != 0)
                                                     <tr id="row{{ $i }}">
                                                         <td>
                                                             <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
-                                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required></td>
+                                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ old('jumlah.' . $i) ?? $produk->jumlah_dikirim }}" data-produk-id="{{ $produk->id }}" required></td>
                                                         <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ old('satuan.' . $i) ?? 'pcs' }}" required></td>
                                                         <td><input type="text" name="keterangan[]" id="keterangan_{{ $i }}" class="form-control" value="{{ old('ketarangan.' . $i) }}" required></td>
                                                         @if ($i == 0)
@@ -192,6 +193,7 @@
                                                         $i++;
                                                         @endphp
                                                     </tr>
+                                                    @endif 
                                                     @endforeach
                                                     @endif
                                             </tbody>
@@ -361,6 +363,41 @@
     updateDate(document.getElementById('tanggal_pembuat'));
     updateDate(document.getElementById('tanggal_kirim'));
 </script>
+<script>
+    var produkData = [];
+
+    @foreach ($penjualans->produk as $produk)
+        produkData.push({
+            id: {{ $produk->id }},
+            jumlah: {{ $produk->jumlah_dikirim }}
+        });
+    @endforeach
+
+    // console.log('Produk Data:', produkData);
+
+    $(document).on('input', '.jumlah', function() {
+        var inputId = $(this).attr('id');
+        var jumlah = parseInt($(this).val(), 10); // Ensure jumlah is parsed as an integer
+        var produkId = $(this).data('produk-id'); // Extract the product ID from the data attribute
+
+        var produk = produkData.find(function(item) {
+            return item.id == produkId;
+        });
+
+        if (produk) {
+            if (jumlah > produk.jumlah) {
+                alert('Jumlah diterima tidak boleh lebih dari jumlah dikirim');
+                $(this).val(produk.jumlah);
+            } else if (jumlah < 0) {
+                alert('Jumlah diterima tidak boleh kurang dari 0');
+                $(this).val(0);
+            }
+        } else {
+            console.error('Produk not found for ID:', produkId);
+        }
+    });
+</script>
+
 <script>
     $(document).ready(function() {
         var i = 1;
