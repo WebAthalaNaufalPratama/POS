@@ -15,7 +15,10 @@ class CreateAdminUserSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
+    {   $duplicate = User::where('email', 'admin@gmail.com')->first();
+        if($duplicate){
+            $duplicate->delete();
+        }
         $user = User::create([
             'name' => 'Admin', 
             'email' => 'admin@gmail.com',

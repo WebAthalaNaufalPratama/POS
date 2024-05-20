@@ -25,7 +25,7 @@
                     <th>Harga</th>
                     <th>Harga Jual</th>
                     <th>Deskripsi</th>
-                    <th>Komponen</th>
+                    <th class="text-center">Komponen</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -35,13 +35,19 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $gift->nama }}</td>
                             <td>{{ $gift->tipe->nama }}</td>
-                            <td>{{ $gift->harga }}</td>
-                            <td>{{ $gift->harga_jual }}</td>
+                            <td>{{ formatRupiah($gift->harga) }}</td>
+                            <td>{{ formatRupiah($gift->harga_jual) }}</td>
                             <td>{{ $gift->deskripsi }}</td>
                             <td>
-                                @foreach ($gift->komponen as $komponen)
-                                    {{ $komponen->kode_produk }} - {{ $komponen->nama_produk ?? '-' }} x {{ $komponen->jumlah ?? '-' }} <br>
-                                @endforeach
+                                <table class="table table-bordered">
+                                    @foreach ($gift->komponen as $komponen)
+                                    <tr>
+                                        <td>{{ $komponen->kode_produk }}</td>
+                                        <td>{{ $komponen->nama_produk }}</td>
+                                        <td>{{ $komponen->jumlah }}</td>
+                                    </tr>
+                                    @endforeach
+                                </table>
                             </td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -71,27 +77,40 @@
     <script>
 
     function deleteData(id){
-        $.ajax({
-            type: "GET",
-            url: "/gift/"+id+"/delete",
-            success: function(response) {
-                toastr.success(response.msg, 'Success', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-
-                setTimeout(() => {
-                    location.reload()
-                }, 2000);
-            },
-            error: function(error) {
-                toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/gift/"+id+"/delete",
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
                 });
             }
         });

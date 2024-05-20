@@ -23,4 +23,8 @@ class Produk_Terjual extends Model
     public function perangkai(){
         return $this->hasMany(FormPerangkai::class, 'no_form', 'no_form');
     }
+
+    public function do_sewa(){
+        return $this->belongsTo(DeliveryOrder::class, 'no_do', 'no_do');
+    }
 }

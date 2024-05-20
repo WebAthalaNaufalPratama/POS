@@ -132,6 +132,7 @@
                                         <th>Jumlah</th>
                                         <th>Harga Total</th>
                                         <th></th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field">
@@ -148,7 +149,8 @@
                                         <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" disabled></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" disabled></td>
                                         <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
-                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                        <td></td>
+                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary">Perangkai</button></td>
                                         {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
                                     </tr>
                                     @endif
@@ -168,7 +170,12 @@
                                             <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->harga }}" disabled></td>
                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->jumlah }}" disabled></td>
                                             <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual }}" readonly></td>
-                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                            <td>
+                                                @if ($komponen->produk->tipe_produk == 6)
+                                                <button id="btnGift_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-info w-100">Set Gift</button>
+                                                @endif
+                                            </td>
+                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary">Perangkai</button></td>
                                             {{-- @if ($i == 0)
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             @else
@@ -270,7 +277,23 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Subtotal</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="subtotal" name="subtotal" value="{{ $kontraks->subtotal }}" class="form-control" readonly>
+                                        <input type="text" id="subtotal" name="subtotal" value="" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group row mt-1">
+                                    <label class="col-lg-3 col-form-label">Diskon</label>
+                                    <div class="col-lg-9">
+                                        <div class="row align-items-center">
+                                            <div class="col-12">
+                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
+                                                </select>
+                                            </div>
+                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
+                                            {{-- <div class="col-3 ps-0 mb-0">
+                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
+                                            </div> --}}
+                                        </div>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -291,22 +314,6 @@
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
                                         <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Diskon</label>
-                                    <div class="col-lg-9">
-                                        <div class="row align-items-center">
-                                            <div class="col-9 pe-0">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
-                                            <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
-                                            </div>
-                                        </div>
-                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -450,6 +457,68 @@
       </div>
     </div>
 </div>
+<div class="modal fade" id="modalSetGift" aria-labelledby="modalSetGift" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalSetGift">Atur Gift</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+        </div>
+        <div class="modal-body">
+          <form id="form_setGift" action="{{ route('addKomponen') }}" method="POST">
+            @csrf
+            <input type="hidden" name="route" value="{{ request()->route()->getName() }},kontrak,{{ request()->route()->parameter('kontrak') }}">
+            <div class="mb-3">
+                <div class="row">
+                    <div class="col-sm-8">
+                    <label for="data_produk" class="col-form-label">Produk</label>
+                    <input type="text" class="form-control" id="data_produk" readonly required>
+                </div>
+                <input type="hidden" name="data_produk_id" id="data_produk_id" value="">
+                <div class="col-sm-4">
+                    <label for="jml_data_produk" class="col-form-label">Jumlah</label>
+                    <input type="number" class="form-control" id="jml_data_produk" readonly required>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="jml_new_produk" class="col-form-label">Jumlah Bunga/Pot</label>
+              <input type="number" class="form-control" id="jml_new_produk" required>
+            </div>
+            <div class="mb-3">
+                <label for="new_produk" class="col-form-label">Bunga/Pot</label>
+                <div id="div_new_produk" class="form-group">
+                    <div id="div_produk_jumlah_0" class="row">
+                        <div class="col-sm-6">
+                            <select id="new_produk_0" name="new_produk[]" class="form-control" required>
+                                <option value="">Pilih Bunga/Produk</option>
+                                @foreach ($bungapot as $item)
+                                  <option value="{{ $item->id }}">({{ $item->tipe->nama }}) {{ $item->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <select id="new_produk_kondisi_0" name="new_produk_kondisi[]" class="form-control" required>
+                                @foreach ($kondisi as $item)
+                                  <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-2">
+                            <input type="number" class="form-control" id="jml_tambahan_0" name="jml_tambahan[]" placeholder="Jumlah">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+    </form>
+      </div>
+    </div>
+</div>
 {{-- modal end --}}
 @endsection
 
@@ -457,23 +526,23 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            $('#sales').trigger('change');
-            var total_transaksi = $('#total_harga').val();
+            var total_transaksi = $('#subtotal').val();
             var old_promo_id = $('#old_promo_id').val();
             var produk = [];
             var tipe_produk = [];
             $('select[id^="produk_"]').each(function() {
                 produk.push($(this).val());
                 tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
+                
             });
             checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
+            $('#promo_id').trigger('change');
+            $('#sales').trigger('change');
             calculatePromo(old_promo_id);
 
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = 1;
             $('#add').click(function(){
-                console.log('tes')
             var newRow = '<tr id="row'+i+'"><td>' + 
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
@@ -485,7 +554,8 @@
                             '<td><input type="number" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
-                            '<td><button id="btnPerangkai_'+i+'" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>' +
+                            '<td><button id="btnGift_'+i+'" data-produk="{{ $komponen }}" class="btn btn-info">Set Gift</button></td>' +
+                            '<td><button id="btnPerangkai_'+i+'" data-produk="{{ $komponen->id }}" class="btn btn-primary">Perangkai</button></td>' +
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
@@ -525,7 +595,7 @@
         });
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
-            var total_transaksi = $('#total_harga').val();
+            var total_transaksi = $('#subtotal').val();
             var produk = [];
             var tipe_produk = [];
             $('select[id^="produk_"]').each(function() {
@@ -540,6 +610,12 @@
             var promo_id = $(this).select2().find(":selected").val()
             if(!promo_id){
                 $('#total_promo').val(0);
+                var inputs = $('input[name="harga_total[]"]');
+                var subtotal = 0;
+                inputs.each(function() {
+                    subtotal += parseInt($(this).val()) || 0;
+                });
+                $('#subtotal').val(subtotal)
                 total_harga();
                 return 0;
             } 
@@ -558,7 +634,6 @@
             e.preventDefault();
             var jumlah = $(this).val();
             jumlah = parseInt(jumlah) > 10 ? 10 : parseInt(jumlah);
-            console.log(jumlah)
             $('[id^="perangkai_id_"]').each(function() {
                 $(this).select2('destroy');
                 $(this).remove();
@@ -573,7 +648,53 @@
                     '@endforeach' +
                     '</select>';
                 $('#div_perangkai').append(rowPerangkai);
-                $('#perangkai_id_' + i).select2();
+                $('#perangkai_id_' + i).select2({
+                    dropdownParent: $("#modalPerangkai")
+                });
+            }
+        })
+        $('[id^=btnGift]').click(function(e) {
+            e.preventDefault();
+            var produk_id = $(this).data('produk');
+            getKomponenProduk(produk_id);
+        });
+        $('#jml_new_produk').on('input', function(e) {
+            e.preventDefault();
+            var jumlah = $(this).val();
+            jumlah = parseInt(jumlah) > 10 ? 10 : parseInt(jumlah);
+            $('[id^="div_produk_jumlah_"]').each(function() {
+                $(this).remove();
+            });
+            if(jumlah < 1) return 0;
+            for(var i = 0; i < jumlah; i++){
+                var row_bungapot = 
+                    '<div id="div_produk_jumlah_'+i+'" class="row g-0">' +
+                    '<div class="col-sm-6"">' +
+                    '<select id="new_produk_' + i + '" name="new_produk[]" class="form-control">' +
+                    '<option value="">Pilih Bunga/Produk</option>' +
+                    '@foreach ($bungapot as $item)' +
+                    '<option value="{{ $item->id }}">({{ $item->tipe->nama }}){{ $item->nama }}</option>' +
+                    '@endforeach' +
+                    '</select>' +
+                    '</div>' +
+                    '<div class="col-sm-4"">' +
+                    '<select id="new_produk_kondisi_' + i + '" name="new_produk_kondisi[]" class="form-control">' +
+                    '@foreach ($kondisi as $item)' +
+                    '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
+                    '@endforeach' +
+                    '</select>' +
+                    '</div>' +
+                    '<div class="col-sm-2">' +
+                    '<input type="number" class="form-control" id="jml_tambahan_'+i+'" name="jml_tambahan[]" placeholder="Jumlah">' +
+                    '</div>' +
+                    '</div>';
+                $('#div_new_produk').append(row_bungapot);
+                $('#new_produk_' + i).select2({
+                    dropdownParent: $("#modalSetGift")
+                });
+                $('#new_produk_kondisi_' + i).select2({
+                    dropdownParent: $("#modalSetGift")
+                });
             }
         })
         function multiply(element) {
@@ -612,13 +733,7 @@
             var ppn_nominal = $('#ppn_nominal').val() || 0;
             var pph_nominal = $('#pph_nominal').val() || 0;
             var ongkir_nominal = $('#ongkir_nominal').val() || 0;
-            var diskon_nominal = $('#total_promo').val();
-            if (/(poin|TRD|GFT)/.test(diskon_nominal)) {
-                diskon_nominal = 0;
-            } else {
-                diskon_nominal = parseInt(diskon_nominal) || 0;
-            }
-            var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal) - parseInt(diskon_nominal);
+            var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(harga_total);
         }
         function ppn(){
@@ -669,7 +784,6 @@
                         var selectvalue = promo.id == old_promo_id ? 'selected' : '';
                         $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
                     }
-                    // $('#promo_id').attr('disabled', false);
                 },
                 error: function(xhr, status, error) {
                     console.log(error)
@@ -691,11 +805,11 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#total_harga').val());
+                    var sub_total = parseInt($('#subtotal').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            total_promo = sub_total * parseInt(response.diskon_persen) / 100;
                             break;
                         case 'nominal':
                             total_promo = parseInt(response.diskon_nominal);
@@ -710,6 +824,20 @@
                             break;
                     }
                     $('#total_promo').val(total_promo);
+
+                    var inputs = $('input[name="harga_total[]"]');
+                    var subtotal = 0;
+                    inputs.each(function() {
+                        subtotal += parseInt($(this).val()) || 0;
+                    });
+                    $('#subtotal').val(subtotal)
+                    
+                    if (/(poin|TRD|GFT)/.test(total_promo)) {
+                        total_promo = 0;
+                    } else {
+                        total_promo = parseInt(total_promo) || 0;
+                        $('#subtotal').val(subtotal - total_promo);
+                    }
                     total_harga();
                 },
                 error: function(xhr, status, error) {
@@ -729,15 +857,12 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    console.log(response.perangkai, produk_id)
                     $('#prdTerjual').val(response.produk.nama);
                     $('#prdTerjual_id').val(response.id);
                     $('#jml_produk').val(response.jumlah);
                     $('#no_form').val(response.kode_form);
                     $('#jml_perangkai').val(response.perangkai.length);
-                    $('[id^="perangkai_id"]').select2()
                     $('[id^="perangkai_id_"]').each(function() {
-                        $(this).select2('destroy');
                         $(this).remove();
                     });
                     if(response.perangkai.length > 0){
@@ -753,10 +878,80 @@
                             $('#div_perangkai select').each(function(index) {
                                 $(this).val(response.perangkai[index].perangkai_id);
                             });
-                            $('#perangkai_id_' + i).select2();
+                            $('#perangkai_id_' + i).select2({
+                                dropdownParent: $("#modalPerangkai")
+                            });
                         }
                     }
                     $('#modalPerangkai').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.log(error)
+                }
+            });
+        }
+        function getKomponenProduk(produk_id){
+            var data = {
+                produk_id: produk_id,
+            };
+            $.ajax({
+                url: '/getProdukTerjual',
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    console.log(response);
+                    $('#data_produk').val(response.produk.nama);
+                    $('#data_produk_id').val(response.id);
+                    $('#jml_data_produk').val(response.jumlah);
+                    $('#modalSetGift').modal('show');
+                    $('[id^="div_produk_jumlah_"]').each(function() {
+                        $(this).remove();
+                    });
+
+                    var pot_bunga = 0
+                    if(response.komponen.length > 0){
+                        for(var i = 0; i < response.komponen.length; i++){
+                            if(response.komponen[i].tipe_produk == 1 || response.komponen[i].tipe_produk == 2){
+                                pot_bunga++;
+                                var row_bungapot = 
+                                '<div id="div_produk_jumlah_'+i+'" class="row g-0">' +
+                                '<div class="col-sm-6"">' +
+                                '<select id="new_produk_' + i + '" name="new_produk[]" class="form-control">' +
+                                '<option value="">Pilih Bunga/Produk</option>' +
+                                '@foreach ($bungapot as $item)' +
+                                '<option value="{{ $item->id }}">({{ $item->tipe->nama }}){{ $item->nama }}</option>' +
+                                '@endforeach' +
+                                '</select>' +
+                                '</div>' +
+                                '<div class="col-sm-4"">' +
+                                '<select id="new_produk_kondisi_' + i + '" name="new_produk_kondisi[]" class="form-control">' +
+                                '@foreach ($kondisi as $item)' +
+                                '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
+                                '@endforeach' +
+                                '</select>' +
+                                '</div>' +
+                                '<div class="col-sm-2">' +
+                                '<input type="number" class="form-control" id="jml_tambahan_'+i+'" name="jml_tambahan[]" placeholder="Jumlah">' +
+                                '</div>' +
+                                '</div>';
+                                $('#div_new_produk').append(row_bungapot);
+                                $('#new_produk_kondisi_' + i).val(response.komponen[i].kondisi);
+                                $('#jml_tambahan_' + i).val(response.komponen[i].jumlah);
+                                $('#new_produk_' + i).val(response.komponen[i].produk.id);
+                                $('#new_produk_' + i).select2({
+                                    dropdownParent: $("#modalSetGift")
+                                });
+                                $('#new_produk_kondisi_' + i).select2({
+                                    dropdownParent: $("#modalSetGift")
+                                });
+                            }
+                        }
+                    }
+                    $('#jml_new_produk').val(pot_bunga);
+                    $('#modalSetGift').modal('show');
                 },
                 error: function(xhr, status, error) {
                     console.log(error)

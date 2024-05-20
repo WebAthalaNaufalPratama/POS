@@ -27,6 +27,8 @@
   <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
 
   <link rel="stylesheet" href="/assets/css/style.css">
+
+  @yield('css')
 </head>
 
 <body>
@@ -265,6 +267,8 @@
 
     <script src="/assets/js/script.js"></script>
     <script type="text/javascript">
+      var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
       $(document).ready(function() {
         let sessionData = @json(session()->all());
         @if(session('fail'))

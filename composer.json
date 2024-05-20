@@ -31,7 +31,7 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         },
-        "files":[
+        "files": [
             "app/Helpers/helpers.php"
         ]
     },

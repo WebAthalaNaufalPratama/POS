@@ -48,6 +48,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('checkPromo', 'PromoController@checkPromo')->name('checkPromo');
         Route::get('getPromo', 'PromoController@getPromo')->name('getPromo');
         Route::get('getProdukTerjual', 'ProdukTerjualController@getProdukTerjual')->name('getProdukTerjual');
+        Route::post('addKomponen', 'KomponenProdukTerjualController@addKomponen')->name('addKomponen');
 
         /**
          * User Routes
@@ -184,6 +185,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{rekening}/delete', 'RekeningController@destroy')->name('rekening.destroy');
         });
 
+        Route::group(['prefix'=> 'akun'], function() {
+            Route::get('/', 'AkunController@index')->name('akun.index');
+            Route::post('/store', 'AkunController@store')->name('akun.store');
+            Route::get('/store', 'AkunController@show')->name('akun.show');
+            Route::get('/{akun}/edit', 'AkunController@edit')->name('akun.edit');
+            Route::patch('/{akun}/update', 'AkunController@update')->name('akun.update');
+            Route::get('/{akun}/delete', 'AkunController@destroy')->name('akun.destroy');
+        });
+
         Route::group(['prefix'=> 'aset'], function() {
             Route::get('/', 'AsetController@index')->name('aset.index');
             Route::post('/store', 'AsetController@store')->name('aset.store');
@@ -231,6 +241,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{penjualan}/payment', 'PenjualanController@payment')->name('penjualan.payment');
             Route::patch('/{penjualan}/update', 'PenjualanController@update')->name('penjualan.update');
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
+            Route::post('/storekomponen', 'PenjualanController@store_komponen')->name('komponenpenjulan.store');
+            Route::post('/storekomponenmutasi', 'PenjualanController@store_komponen_mutasi')->name('komponenmutasi.store');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -345,6 +357,105 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{jabatan}/delete', 'JabatanController@destroy')->name('jabatan.destroy');
         });
 
+        Route::group(['prefix' => 'kembali_sewa'], function() {
+            Route::get('/', 'KembaliSewaController@index')->name('kembali_sewa.index');
+            Route::get('/create', 'KembaliSewaController@create')->name('kembali_sewa.create');
+            Route::post('/store', 'KembaliSewaController@store')->name('kembali_sewa.store');
+            Route::get('/{kembali_sewa}/show', 'KembaliSewaController@show')->name('kembali_sewa.show');
+            Route::get('/{kembali_sewa}/edit', 'KembaliSewaController@edit')->name('kembali_sewa.edit');
+            Route::patch('/{kembali_sewa}/update', 'KembaliSewaController@update')->name('kembali_sewa.update');
+            Route::get('/{kembali_sewa}/delete', 'KembaliSewaController@destroy')->name('kembali_sewa.destroy');
+        });
+
+        Route::group(['prefix' => 'invoice_sewa'], function() {
+            Route::get('/', 'InvoiceSewaController@index')->name('invoice_sewa.index');
+            Route::get('/create', 'InvoiceSewaController@create')->name('invoice_sewa.create');
+            Route::post('/store', 'InvoiceSewaController@store')->name('invoice_sewa.store');
+            Route::get('/{invoice_sewa}/show', 'InvoiceSewaController@show')->name('invoice_sewa.show');
+            Route::get('/{invoice_sewa}/edit', 'InvoiceSewaController@edit')->name('invoice_sewa.edit');
+            Route::patch('/{invoice_sewa}/update', 'InvoiceSewaController@update')->name('invoice_sewa.update');
+            Route::get('/{invoice_sewa}/delete', 'InvoiceSewaController@destroy')->name('invoice_sewa.destroy');
+        });
+
+        Route::group(['prefix' => 'pembayaran_sewa'], function() {
+            Route::get('/', 'PembayaranController@index_sewa')->name('pembayaran_sewa.index');
+            Route::get('/create', 'PembayaranController@create_sewa')->name('pembayaran_sewa.create');
+            Route::post('/store', 'PembayaranController@store_sewa')->name('pembayaran_sewa.store');
+            Route::get('/{pembayaran_sewa}/show', 'PembayaranController@show_sewa')->name('pembayaran_sewa.show');
+            Route::get('/{pembayaran_sewa}/edit', 'PembayaranController@edit_sewa')->name('pembayaran_sewa.edit');
+            Route::patch('/{pembayaran_sewa}/update', 'PembayaranController@update_sewa')->name('pembayaran_sewa.update');
+            Route::get('/{pembayaran_sewa}/delete', 'PembayaranController@destroy_sewa')->name('pembayaran_sewa.destroy');
+        });
+        Route::group(['prefix' => 'inven_outlet'], function() {
+            Route::get('/', 'InventoryOutletController@index')->name('inven_outlet.index');
+            Route::get('/create', 'InventoryOutletController@create')->name('inven_outlet.create');
+            Route::post('/store', 'InventoryOutletController@store')->name('inven_outlet.store');
+            Route::get('/{inven_outlet}/show', 'InventoryOutletController@show')->name('inven_outlet.show');
+            Route::get('/{inven_outlet}/edit', 'InventoryOutletController@edit')->name('inven_outlet.edit');
+            Route::patch('/{inven_outlet}/update', 'InventoryOutletController@update')->name('inven_outlet.update');
+            Route::get('/{inven_outlet}/delete', 'InventoryOutletController@destroy')->name('inven_outlet.destroy');
+        });
+
+        Route::group(['prefix' => 'mutasiGO'], function() {
+            Route::get('/', 'MutasiController@index_outlet')->name('mutasigalery.index');
+            Route::get('/create', 'MutasiController@create_outlet')->name('mutasigalery.create');
+            Route::post('/store', 'MutasiController@store_outlet')->name('mutasigalery.store');
+            Route::get('/{mutasiGO}/show', 'MutasiController@show_outlet')->name('mutasigalery.show');
+            Route::get('/{mutasiGO}/acc', 'MutasiController@acc_outlet')->name('mutasigalery.acc');
+            Route::get('/{mutasiGO}/edit', 'MutasiController@edit_outlet')->name('mutasigalery.edit');
+            Route::patch('/{mutasiGO}/update', 'MutasiController@update_outlet')->name('mutasigalery.update');
+            Route::get('/{mutasiGO}/delete', 'MutasiController@destroy_outlet')->name('mutasigalery.destroy');
+        });
+
+        Route::group(['prefix' => 'mutasiOG'], function() {
+            Route::get('/', 'MutasiController@index_outletgalery')->name('mutasioutlet.index');
+            Route::get('{returpenjualan}/create', 'MutasiController@create_outletgalery')->name('mutasioutlet.create');
+            Route::post('/store', 'MutasiController@store_outletgalery')->name('mutasioutlet.store');
+            Route::get('/{mutasiOG}/show', 'MutasiController@show_outletgalery')->name('mutasioutlet.show');
+            Route::get('/{mutasiOG}/edit', 'MutasiController@edit_outletgalery')->name('mutasioutlet.edit');
+            Route::patch('/{mutasiOG}/update', 'MutasiController@update_outletgalery')->name('mutasioutlet.update');
+            Route::get('/{mutasiOG}/delete', 'MutasiController@destroy_outletgalery')->name('mutasioutlet.destroy');
+        });
+
+        Route::group(['prefix' => 'kas_pusat'], function() {
+            Route::get('/', 'KasController@index_pusat')->name('kas_pusat.index');
+            Route::get('/create', 'KasController@create_pusat')->name('kas_pusat.create');
+            Route::post('/store', 'KasController@store_pusat')->name('kas_pusat.store');
+            Route::get('/{kas_pusat}/show', 'KasController@show_pusat')->name('kas_pusat.show');
+            Route::get('/{kas_pusat}/edit', 'KasController@edit_pusat')->name('kas_pusat.edit');
+            Route::patch('/{kas_pusat}/update', 'KasController@update_pusat')->name('kas_pusat.update');
+            Route::get('/{kas_pusat}/delete', 'KasController@destroy_pusat')->name('kas_pusat.destroy');
+        });
+
+        Route::group(['prefix' => 'kas_gallery'], function() {
+            Route::get('/', 'KasController@index_gallery')->name('kas_gallery.index');
+            Route::get('/create', 'KasController@create_gallery')->name('kas_gallery.create');
+            Route::post('/store', 'KasController@store_gallery')->name('kas_gallery.store');
+            Route::get('/{kas_gallery}/show', 'KasController@show_gallery')->name('kas_gallery.show');
+            Route::get('/{kas_gallery}/edit', 'KasController@edit_gallery')->name('kas_gallery.edit');
+            Route::patch('/{kas_gallery}/update', 'KasController@update_gallery')->name('kas_gallery.update');
+            Route::get('/{kas_gallery}/delete', 'KasController@destroy_gallery')->name('kas_gallery.destroy');
+        });
+        
+        Route::group(['prefix' => 'mutasiGG'], function() {
+            Route::get('/', 'MutasiController@index_ghgalery')->name('mutasighgalery.index');
+            Route::get('/create', 'MutasiController@create_ghgalery')->name('mutasighgalery.create');
+            Route::post('/store', 'MutasiController@store_ghgalery')->name('mutasighgalery.store');
+            Route::get('/{mutasiGG}/show', 'MutasiController@show_ghgalery')->name('mutasighgalery.show');
+            Route::get('/{mutasiGG}/edit', 'MutasiController@edit_ghgalery')->name('mutasighgalery.edit');
+            Route::patch('/{mutasiGG}/update', 'MutasiController@update_ghgalery')->name('mutasighgalery.update');
+            Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_ghgalery')->name('mutasighgalery.destroy');
+        });
+
+        Route::group(['prefix' => 'inven_greenhouse'], function() {
+            Route::get('/', 'InventoryGreenhouseController@index')->name('inven_greenhouse.index');
+            Route::get('/create', 'InventoryGreenhouseController@create')->name('inven_greenhouse.create');
+            Route::post('/store', 'InventoryGreenhouseController@store')->name('inven_greenhouse.store');
+            Route::get('/{inven_greenhouse}/show', 'InventoryGreenhouseController@show')->name('inven_greenhouse.show');
+            Route::get('/{inven_greenhouse}/edit', 'InventoryGreenhouseController@edit')->name('inven_greenhouse.edit');
+            Route::patch('/{inven_greenhouse}/update', 'InventoryGreenhouseController@update')->name('inven_greenhouse.update');
+            Route::get('/{inven_greenhouse}/delete', 'InventoryGreenhouseController@destroy')->name('inven_greenhouse.destroy');
+        });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');

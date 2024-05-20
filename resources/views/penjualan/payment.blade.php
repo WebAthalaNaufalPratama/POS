@@ -166,7 +166,7 @@
                                                     <th>Jumlah</th>
                                                     <th>Diskon</th>
                                                     <th>Harga Total</th>
-                                                    <th>PIC Perangkai</th>
+                                                    <!-- <th>PIC Perangkai</th> -->
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -204,7 +204,7 @@
                                                         </div> -->
                                                     </td>
                                                     <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
-                                                    <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                    <!-- <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td> -->
                                                     <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                     <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
                                                     </tr>
@@ -246,7 +246,7 @@
                                                         </div> -->
                                                         </td>
                                                         <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual}}" readonly></td>
-                                                        <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        <!-- <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td> -->
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
                                                         @php
@@ -263,60 +263,109 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-3 col-sm-6 col-12 mt-4">
-                                        <div class="form-group">
-                                            <label>Pembayaran</label>
-                                            <select id="cara_bayar" name="cara_bayar" class="form-control" required disabled>
-                                                <option value="">Pilih Pembayaran</option>
-                                                <option value="cash" {{ $penjualans->cara_bayar == 'cash' ? 'selected' : ''}}>CASH</option>
-                                                <option value="transfer" {{ $penjualans->cara_bayar == 'transfer' ? 'selected' : ''}}>TRANSFER</option>
-                                            </select>
+                                    <!-- Payment and Shipping Section -->
+                                    <div class="col-lg-6 col-sm-12">
+                                        <div class="row mt-4">
+                                            <!-- Payment Section -->
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Pembayaran</label>
+                                                    <select id="cara_bayar" name="cara_bayar" class="form-control" required>
+                                                        <option value="">Pilih Pembayaran</option>
+                                                        <option value="cash" {{ $penjualans->cara_bayar == 'cash' ? 'selected' : ''}}>CASH</option>
+                                                        <option value="transfer" {{ $penjualans->cara_bayar == 'transfer' ? 'selected' : ''}}>TRANSFER</option>
+                                                    </select>
+                                                </div>
+                                                <div id="inputTransfer" style="display: none;">
+                                                    <label>Rekening Von</label>
+                                                    <select id="rekening_id" name="rekening_id" class="form-control">
+                                                        <option value="">Pilih Bank</option>
+                                                        @foreach($bankpens as $bankpen)
+                                                        <option value="{{ $bankpen->id }}" {{ $bankpen->id == $penjualans->rekening_id ? 'selected' : ''}}>{{ $bankpen->bank }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="form-group" style="display:none;">
+                                                    <label for="no_invoice">Nomor Invoice</label>
+                                                    <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)" readonly>
+                                                </div>
+                                                <div class="form-group mt-3">
+                                                    <div id="inputPembayaran" style="display: none;">
+                                                        <label for="nominal">Nominal</label>
+                                                        <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div id="inputBuktiBayar" style="display: none;">
+                                                        <label for="buktibayar">Unggah Bukti</label>
+                                                        <input type="file" class="form-control" id="bukti" name="bukti">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Shipping Section -->
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Pengiriman</label>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                        <option value="">Pilih Jenis Pengiriman</option>
+                                                        <option value="exspedisi" {{ $penjualans->pilih_pengiriman == 'exspedisi' ? 'selected' : ''}}>Ekspedisi</option>
+                                                        <option value="sameday" {{ $penjualans->pilih_pengiriman == 'sameday' ? 'selected' : ''}}>SameDay</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div id="inputOngkir" style="display: none;">
+                                                        <label for="alamat_tujuan">Alamat Tujuan</label>
+                                                        <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control">{{ $penjualans->alamat_tujuan}}</textarea>
+                                                    </div>
+                                                    <div id="inputExspedisi" style="display: none;">
+                                                        <label>Alamat Pengiriman</label>
+                                                        <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                                            <option value="">Pilih Alamat Tujuan</option>
+                                                            @foreach($ongkirs as $ongkir)
+                                                            <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya }}" {{$ongkir->id == $penjualans->ongkir_id ? 'selected' : ''}}>{{ $ongkir->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group mt-3">
+                                                    <label>Notes</label>
+                                                    <textarea class="form-control" id="notes" name="notes" required>{{$penjualans->notes}}</textarea>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div id="inputCash" style="display: none;">
-                                            <label for="jumlahCash">Jumlah Pembayaran (CASH): </label>
-                                            <input type="text" id="jumlahCash" name="jumlahCash" class="form-control" value="{{$penjualans->jumlahCash}}" disabled>
-                                        </div>
-                                        <div id="inputTransfer" style="display: none;">
-                                            <label>Bank</label>
-                                            <select id="rekening_id" name="rekening_id" class="form-control" disabled>
-                                                <!-- <option value="">Pilih Bank</option> -->
-                                                @foreach($rekenings as $rekening)
-                                                <option value="{{ $rekening->id }}">{{ $rekening->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group mt-3">
-                                            <label>Notes</label>
-                                            <textarea class="form-control" id="notes" name="notes" value="{{ $penjualans->notes }}" required disabled>{{ $penjualans->notes }}</textarea>
+
+                                        <!-- Table Section -->
+                                        <div class="row mt-4">
+                                            <div class="col-lg-12">
+                                                <table class="table table-responsive border rounded">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Pembuat</th>
+                                                            <th>Penyetuju</th>
+                                                            <th>Pemeriksa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                            <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-6 mt-4 ">
-                                        <div class="form-group">
-                                            <label>Pengiriman</label>
-                                            <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required disabled>
-                                                <option value="">Pilih Jenis Pengiriman</option>
-                                                <option value="exspedisi" {{ $penjualans->pilih_pengiriman == 'exspedisi' ? 'selected' : '' }}>Ekspedisi</option>
-                                                <option value="sameday" {{ $penjualans->pilih_pengiriman == 'sameday' ? 'selected' : '' }}>SameDay</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div id="inputOngkir" style="display: none;">
-                                                <label for="alamat_tujuan">Alamat Tujuan </label>
-                                                <input type="text" id="alamat_tujuan" name="alamat_tujuan" value="{{ $penjualans->alamat_tujuan}}" class="form-control" disabled>
-                                            </div>
-                                            <div id="inputExspedisi" style="display: none;">
-                                                <label>Alamat Pengiriman</label>
-                                                <select id="ongkir_id" name="ongkir_id" class="form-control" disabled>
-                                                    <!-- <option value="">Pilih Alamat Tujuan</option> -->
-                                                    @foreach($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}">{{ $ongkir->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 float-md-right">
-                                        <div class="total-order">
+
+                                    <!-- Summary Section -->
+                                    <div class="col-lg-6 col-sm-12">
+                                        <div class="total-order mt-4">
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
@@ -367,7 +416,7 @@
                                             </ul>
                                         </div>
                                     </div>
-                                </div>
+                                </div>    
                             </div>
                         </div>
 
@@ -622,7 +671,7 @@
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
-        var invoicePrefix = "BYR";
+        var invoicePrefix = "BYJ";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');

@@ -95,7 +95,7 @@ class ProdukTerjualController extends Controller
         if ($validator->fails()) return response()->json(['msg' => $error], 400);
         $data = $req->except(['_token', '_method']);
 
-        $result = Produk_Terjual::with('produk', 'perangkai')->find($data['produk_id']);
+        $result = Produk_Terjual::with('produk', 'perangkai', 'komponen', 'komponen.produk')->find($data['produk_id']);
         $latestForm = FormPerangkai::withTrashed()->orderByDesc('id')->get();
             if(count($latestForm) < 1){
                 $getKode = 'FRM' . date('Ymd') . '00001';

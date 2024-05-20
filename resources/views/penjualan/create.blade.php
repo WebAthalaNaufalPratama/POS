@@ -171,43 +171,41 @@
                                             <tbody id="dynamic_field">
                                                 <tr>
                                                     <td>
-                                                        <select id="nama_produk_0" name="nama_produk[]" class="form-control">
+                                                        <select id="nama_produk_0" name="nama_produk[]" class="form-control" onchange="updateProductDetails(0)">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                                                @if (substr($produk->kode, 0, 3) === 'TRD')
-                                                                {{ $produk->nama }}
-                                                                @foreach ($produk->komponen as $komponen)
-                                                                @if ($komponen->kondisi)
-                                                                @foreach($kondisis as $kondisi)
-                                                                @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                $found = true;
-                                                                break;
-                                                                @endphp
-                                                                @endif
-                                                                @endforeach
-                                                                @endif
-                                                                @if ($found) @break @endif
-                                                                @endforeach
-                                                                @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                                {{ $produk->nama }}
-                                                                @endif
-                                                            </option>
+                                                                <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                                                    @if (substr($produk->kode, 0, 3) === 'TRD')
+                                                                        {{ $produk->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            @if ($found) @break @endif
+                                                                        @endforeach
+                                                                    @elseif (substr($produk->kode, 0, 3) === 'GFT')
+                                                                        {{ $produk->nama }}
+                                                                    @endif
+                                                                </option>
                                                             @endforeach
                                                         </select>
-
-
                                                     </td>
                                                     <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                                                    <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                                                    <td><select id="jenis_diskon_0" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)">
+                                                    <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control" oninput="multiply($(this))" onchange="calculateTotal(0)"></td>
+                                                    <td>
+                                                        <select id="jenis_diskon_0" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)">
                                                             <option value="0">Pilih Diskon</option>
                                                             <option value="Nominal">Nominal</option>
                                                             <option value="persen">Persen</option>
                                                         </select>
-
                                                         <div>
                                                             <div class="input-group">
                                                                 <input type="number" name="diskon[]" id="diskon_0" value="" class="form-control" style="display: none;" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
@@ -215,16 +213,9 @@
                                                                 <span class="input-group-text" id="persenInput_0" style="display: none;">%</span>
                                                             </div>
                                                         </div>
-
-                                                        <!-- <div >
-                                                            <div class="input-group">
-                                                                <input type="number" name="diskon[]" id="diskon_0" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
-                                                                <span class="input-group-text" id="basic-addon3">%</span>
-                                                            </div>
-                                                        </div> -->
                                                     </td>
                                                     <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
-                                                    <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
+                                                    <!-- Tombol Add Produk disini -->
                                                     <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                 </tr>
                                             </tbody>
@@ -236,81 +227,128 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-3 col-sm-6 col-12 mt-4">
-                                        <div class="form-group">
-                                            <label>Pembayaran</label>
-                                            <select id="cara_bayar" name="cara_bayar" class="form-control" required>
-                                                <option value="">Pilih Pembayaran</option>
-                                                <option value="cash">CASH</option>
-                                                <option value="transfer">TRANSFER</option>
-                                            </select>
-                                        </div>
-                                        <!-- <div id="inputCash" style="display: none;">
-                                            <label for="jumlahCash">Jumlah Pembayaran (CASH): </label>
-                                            <input type="text" id="jumlahCash" name="jumlahCash" class="form-control">
-                                        </div> -->
-                                        <div id="inputTransfer" style="display: none;">
-                                            <label>Rekening Von</label>
-                                            <select id="rekening_id" name="rekening_id" class="form-control">
-                                                <option value="">Pilih Bank</option>
-                                                @foreach($bankpens as $bankpen)
-                                                <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group" style="display:none;">
-                                            <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)"  readonly>
-                                        </div>
-                                        <div class="form-group mt-3">
-                                            <div id="inputPembayaran" style="display: none;">
-                                                <label for="nominal">Nominal</label>
-                                                <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                    <!-- Payment and Shipping Section -->
+                                    <div class="col-lg-6 col-sm-12">
+                                        <div class="row mt-4">
+                                            <!-- Payment Section -->
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Pembayaran</label>
+                                                    <select id="cara_bayar" name="cara_bayar" class="form-control" required>
+                                                        <option value="">Pilih Pembayaran</option>
+                                                        <option value="cash">CASH</option>
+                                                        <option value="transfer">TRANSFER</option>
+                                                    </select>
+                                                </div>
+                                                <div id="inputTransfer" style="display: none;">
+                                                    <label>Rekening Von</label>
+                                                    <select id="rekening_id" name="rekening_id" class="form-control">
+                                                        <option value="">Pilih Bank</option>
+                                                        @foreach($bankpens as $bankpen)
+                                                        <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="form-group" style="display:none;">
+                                                    <label for="no_invoice">Nomor Invoice</label>
+                                                    <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)" readonly>
+                                                </div>
+                                                <div class="form-group mt-3">
+                                                    <div id="inputPembayaran" style="display: none;">
+                                                        <label for="nominal">Nominal</label>
+                                                        <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div id="inputBuktiBayar" style="display: none;">
+                                                        <label for="buktibayar">Unggah Bukti</label>
+                                                        <input type="file" class="form-control" id="bukti" name="bukti">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Shipping Section -->
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Pengiriman</label>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                        <option value="">Pilih Jenis Pengiriman</option>
+                                                        <option value="exspedisi">Ekspedisi</option>
+                                                        <option value="sameday">SameDay</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div id="inputOngkir" style="display: none;">
+                                                        <label for="alamat_tujuan">Alamat Tujuan</label>
+                                                        <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control"></textarea>
+                                                    </div>
+                                                    <div id="inputExspedisi" style="display: none;">
+                                                        <label>Alamat Pengiriman</label>
+                                                        <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                                            <option value="">Pilih Alamat Tujuan</option>
+                                                            @foreach($ongkirs as $ongkir)
+                                                            <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya }}">{{ $ongkir->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group mt-3">
+                                                    <label>Notes</label>
+                                                    <textarea class="form-control" id="notes" name="notes" required></textarea>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <div id="inputBuktiBayar" style="display: none;">
-                                                <label for="buktibayar">Unggah Bukti</label>
-                                                <input type="file" class="form-control" id="bukti" name="bukti">
+
+                                        <!-- Table Section -->
+                                        <div class="row mt-4">
+                                            <div class="col-lg-12">
+                                                <table class="table table-responsive border rounded">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Pembuat</th>
+                                                            <th>Penyetuju</th>
+                                                            <th>Pemeriksa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                            <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
-                                        
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-6 mt-4 ">
-                                        <div class="form-group">
-                                            <label>Pengiriman</label>
-                                            <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
-                                                <option value="">Pilih Jenis Pengiriman</option>
-                                                <option value="exspedisi">Ekspedisi</option>
-                                                <option value="sameday">SameDay</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div id="inputOngkir" style="display: none;">
-                                                <label for="alamat_tujuan">Alamat Tujuan </label>
-                                                <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control"></textarea>
-                                            </div>
-                                            <div id="inputExspedisi" style="display: none;">
-                                                <label>Alamat Pengiriman</label>
-                                                <select id="ongkir_id" name="ongkir_id" class="form-control">
-                                                    <option value="">Pilih Alamat Tujuan</option>
-                                                    @foreach($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya}}">{{ $ongkir->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group mt-3">
-                                            <label>Notes</label>
-                                            <textarea class="form-control" id="notes" name="notes" required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 float-md-right">
-                                        <div class="total-order">
+
+                                    <!-- Summary Section -->
+                                    <div class="col-lg-6 col-sm-12">
+                                        <div class="total-order mt-4">
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" readonly required></h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Promo</h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-9 pe-0">
+                                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-3 ps-0 mb-0">
+                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                                    </h5>
                                                 </li>
                                                 <li>
                                                     <h4>PPN
@@ -326,30 +364,7 @@
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                         <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" readonly required>
-
                                                     </h5>
-                                                </li>
-                                                <li>
-                                                    <h4>Promo</h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-9 pe-0">
-                                                                <select id="promo_id" name="promo_id" class="form-control" required disabled>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-3 ps-0 mb-0">
-                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
-                                                    </h5>
-                                                    <!-- <h5><select id="promo_id" name="promo_id" class="form-control" onchange="updateHargaSatuan(this)">
-                                                            <option value="">Pilih Promo</option>
-                                                            @foreach ($promos as $promo)
-                                                            <option value="{{ $promo->id }}" data-harga="{{ $promo->harga_jual }}">{{ $promo->nama }}</option>
-                                                            @endforeach
-                                                        </select></h5> -->
-                                                    <!-- <h5>$ 0.00 (0.00%)</h5> -->
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
@@ -371,6 +386,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
 
@@ -690,80 +706,7 @@
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
-
-            // var picModal = `<div class="modal fade" id="picModal_${i}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            //                     <div class="modal-dialog" role="document">
-            //                         <div class="modal-content">
-            //                             <div class="modal-header">
-            //                                 <h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ${i}</h5>
-            //                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            //                                     <span aria-hidden="true">&times;</span>
-            //                                 </button>
-            //                             </div>
-            //                             <div class="modal-body">
-            //                                 <div class="form-group">
-            //                                     <label for="tglrangkai_${i}">Tanggal Rangkaian</label>
-            //                                     <input type="date" class="form-control" id="tglrangkai_${i}" name="tglrangkai_${i}">
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jnsrangkai_${i}">Jenis Rangkaian</label>
-            //                                     <input type="text" class="form-control" id="jnsrangkai_${i}" name="jnsrangkai_${i}" value="penjualan" readonly>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="no_invoice_rangkai_${i}">Nomor Invoice</label>
-            //                                     <input type="text" class="form-control" id="no_invoice_rangkai_${i}" name="no_invoice_rangkai_${i}" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jumlahStaff_${i}">Jumlah Staff Perangkai</label>
-            //                                     <input type="text" class="form-control" id="jumlahStaff_${i}" name="jumlahStaff_${i}" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="staffPerangkaiContainer_${i}">Pilih PIC Perangkai</label>
-            //                                     <div id="staffPerangkaiContainer_${i}"></div>
-            //                                 </div>
-            //                                 <div class="table-responsive">
-            //                                     <table class="table">
-            //                                         <thead>
-            //                                             <tr>
-            //                                                 <th>Nama</th>
-            //                                                 <th>Jumlah</th>
-            //                                                 <th></th>
-            //                                             </tr>
-            //                                         </thead>
-            //                                         <tbody id="dynamic_field">
-            //                                             <tr>
-            //                                                 <td>
-            //                                                     <select id="nama_produk" name="nama_produk[]" class="form-control">
-            //                                                         <option value="">Pilih Produk</option>`;
-
-            // @foreach($produks as $produk)
-            // picModal += `<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>`;
-            // @endforeach
-
-            // picModal += `                    </select>
-            //                                                     <input type="hidden" name="kode_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="tipe_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
-            //                                                 </td>
-            //                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
-            //                                             </tr>
-            //                                         </tbody>
-            //                                     </table>
-            //                                 </div>
-            //                             </div>
-            //                             <div class="modal-footer justify-content-center">
-            //                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            //                             </div>
-            //                         </div>
-            //                     </div>
-            //                 </div>`;
-
-
-            // $('body').append(picModal);
-
-
-            $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
-            i++
+            i++;
         });
 
         $(document).on('click', '.btn_remove', function() {
@@ -780,20 +723,39 @@
         });
 
         $(document).on('change', '[id^=nama_produk]', function() {
-            var id = $(this).attr('id').split('_')[2];
-            var selectedOption = $(this).find(':selected');
+    var id = $(this).attr('id').split('_')[2];
+    var selectedOption = $(this).find(':selected');
+    var selectedValue = $(this).val();
 
-            var kodeProduk = selectedOption.data('kode');
-            var tipeProduk = selectedOption.data('tipe');
-            var deskripsiProduk = selectedOption.data('deskripsi');
-            // console.log(kodeProduk);
-            $('#kode_produk_' + id).val(kodeProduk);
-            $('#tipe_produk_' + id).val(tipeProduk);
-            $('#deskripsi_komponen_' + id).val(deskripsiProduk);
+    // Menggunakan JSON.stringify untuk mengonversi variabel PHP $produks menjadi string JSON
+    var selectedProduk = {!! json_encode($produks) !!}.find(produk => produk.kode === selectedValue);
 
-            // Panggil fungsi updateHargaSatuan
-            updateHargaSatuan(this);
-        });
+    var kode = selectedValue.substring(0, 3);
+    if (selectedProduk && selectedProduk.komponen && kode === 'GFT') {
+        // Sembunyikan semua baris komponen
+        $('[id^="komponen_row_"]').hide();
+        $('[id^=add_produk_' + id + ']').show(); // Menampilkan tombol tambah produk komponen
+
+    } else {
+        // Sembunyikan semua baris komponen jika tidak ada komponen yang sesuai
+        $('[id^=add_produk_' + id + ']').hide();
+        $('[id^="komponen_row_"]').hide();
+    }
+
+    // Menetapkan nilai data pada elemen HTML
+    var kodeProduk = selectedOption.data('kode');
+    var tipeProduk = selectedOption.data('tipe_produk');
+    var deskripsiProduk = selectedOption.data('deskripsi');
+    $('#kode_produk_' + id).val(kodeProduk);
+    $('#tipe_produk_' + id).val(tipeProduk);
+    $('#deskripsi_komponen_' + id).val(deskripsiProduk);
+
+    // Memanggil fungsi updateHargaSatuan
+    updateHargaSatuan(this);
+});
+
+
+
 
         @foreach($produks as $index => $produk)
         $('#jumlahStaff_{{ $index }}').on('input', function() {
@@ -875,6 +837,56 @@
             }
         });
 
+        // Menggunakan variabel rowCount untuk menghasilkan nomor unik untuk setiap baris produk
+var rowCount = 1;
+
+// Fungsi untuk menambahkan produk
+$(document).on('click', '[id^=add_produk]', function() {
+    var i = $(this).attr('id').split('_')[2]; // Mendapatkan nomor unik untuk tombol yang ditekan
+    var newRow = `
+        <tr class="tr_clone" id="row${i}">
+            <td>
+                <select name="komponen_nama_produk[]" id="komponen_nama_produk_${i}" class="form-control">
+                    <option value="">Pilih Komponen Produk</option>
+                    @foreach ($produkkompos as $produk)
+                        <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                        @if (substr($produk->kode, 0, 3) === 'TRD' || substr($produk->kode, 0, 3) === 'POT')
+                            {{ $produk->nama }}
+                            @foreach ($produk->komponen as $komponen)
+                                @if ($komponen->kondisi)
+                                    @foreach($kondisis as $kondisi)
+                                        @if($kondisi->id == $komponen->kondisi)
+                                            - {{ $kondisi->nama }}
+                                            @php
+                                                $found = true;
+                                                break;
+                                            @endphp
+                                        @endif
+                                    @endforeach
+                                @endif
+                                @if ($found) @break @endif
+                            @endforeach
+                        @endif
+                        </option>
+                    @endforeach
+                </select>
+            </td>
+            <td><input type="number" placeholder="Jumlah" class="form-control" id="jumlahproduk_${i}" name="jumlahproduk[]"></td>
+            <td><button type="button" name="remove_produk" class="btn btn-danger btn_remove">x</button></td>
+        </tr>`;
+        
+    $(newRow).insertAfter('#dynamic_field_komponen tr:last');
+    rowCount++; // Menambahkan nomor unik untuk tombol berikutnya
+});
+
+// Fungsi untuk menghapus baris produk atau komponen
+$(document).on('click', '.btn_remove', function() {
+    $(this).closest('tr').remove();
+    calculateTotal(0); // Memanggil fungsi calculateTotal setelah menghapus baris
+});
+
+
+
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
             var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
@@ -948,6 +960,7 @@
             calculatePromo(promo_id);
         });
 
+
         $('#id_customer').change(function() {
             var pointInput = $('#point_dipakai');
             var selectedOption = $(this).find('option:selected');
@@ -970,6 +983,23 @@
                 pointInput.val(pointValue);
             } else {
                 pointInput.val(0);
+            }
+        });
+
+        $('#nama_produk_0').change(function() {
+            var selectedValue = $(this).val();
+            var kode = selectedValue.substring(0, 3);
+            
+            if (kode === 'GFT') {
+                $('#dynamic_field_nama_produk').show();
+
+                $('#komponen_nama_produk_0').empty().append('<option value="">Pilih Komponen Produk</option>');
+
+                @foreach($komponenproduks as $komponenproduk)
+                    $('#komponen_nama_produk_0').append('<option value="{{ $komponenproduk->kode }}">{{ $komponenproduk->nama }}</option>');
+                @endforeach
+            } else {
+                $('#dynamic_field_nama_produk').hide();
             }
         });
 
@@ -1149,8 +1179,9 @@
             var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
             var diskon_nominal = parseFloat($('#total_promo').val()) || 0;
             // console.log(extot);
-            var ppn = persenPPN * subtotal / 100;
-            var totalTagihan = subtotal + ppn + biayaOngkir + diskon_nominal - dp;
+            var promo = subtotal - diskon_nominal;
+            var ppn = persenPPN * promo / 100;
+            var totalTagihan = promo + ppn + biayaOngkir  - dp;
             var sisaBayar = totalTagihan - dp;
 
             $('#total_tagihan').val(totalTagihan.toFixed(2));

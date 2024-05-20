@@ -18,5 +18,5 @@ if (!function_exists('formatTanggal')) {
     function formatTanggal($date)
     {
         return \Carbon\Carbon::parse($date)->format('d/m/Y');
-}
+    }
 }

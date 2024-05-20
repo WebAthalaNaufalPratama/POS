@@ -35,7 +35,7 @@
                             </div>
                         </div>
                         <div class="col-sm-4">
-                            <label for="lokasi_id" class="col-form-label">Lokasi</label>
+                            <label for="lokasi_id" class="col-form-label">Gallery</label>
                             <div id="div_lokasi" class="form-group">
                                 <select id="lokasi_id" name="lokasi_id" class="form-control" required>
                                     <option value="">Pilih Gallery</option>

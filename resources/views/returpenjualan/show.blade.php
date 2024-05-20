@@ -208,7 +208,7 @@
                                                 @if($returpenjualans->komplain == 'retur')
                                                     @foreach ($penjualans->deliveryorder as $deliveryOrder)
                                                         @foreach ($deliveryOrder->produk_retur as $produk)
-                                                            @if ($produk->jenis == null)
+                                                            @if ($produk->jenis == 'RETUR')
                                                                 <tr id="row{{ $i }}">
                                                                     <td><input type="text" name="no_do1[]" id="no_do_{{ $i }}" class="form-control" value="{{ $deliveryOrder->no_do }}" required disabled></td>
                                                                     <td>

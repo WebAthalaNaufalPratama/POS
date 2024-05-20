@@ -47,9 +47,8 @@ class CustomerController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'route']);
-        $user = Auth::user()->value('id');
-        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
-        $data['lokasi_id'] = $lokasi;
+        $data['lokasi_id'] = Auth::user()->karyawans->lokasi_id;
+        
         // save data
         $check = Customer::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');

@@ -49,7 +49,8 @@
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('returpenjualan.show', ['returpenjualan' => $retur->id]) }}">Show</a>
+                                            <!-- <a class="dropdown-item" href="{{ route('returpenjualan.show', ['returpenjualan' => $retur->id]) }}">Show</a> -->
+                                            <a class="dropdown-item" href="{{ route('mutasioutlet.create', ['returpenjualan' => $retur->id]) }}">Mutasi Outlet Ke Galery</a>
                                         </div>
                                     </div>
                                 </td>

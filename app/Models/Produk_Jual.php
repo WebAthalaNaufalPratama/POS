@@ -28,4 +28,8 @@ class Produk_Jual extends Model
     public function komponen(){
         return $this->hasMany(Komponen_Produk_Jual::class, 'produk_jual_id', 'id');
     }
+
+    public function produk_terjual(){
+        return $this->hasMany(Produk_Terjual::class, 'id', 'produk_jual_id');
+    }
 }
