@@ -229,9 +229,12 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit">Submit</button>
+                    <button class="btn btn-primary" type="submit" {{ $terkirimSemua ? 'disabled' : '' }}>Submit</button>
                     <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
+                @if ($terkirimSemua)
+                    <p class="text-end text-danger">Semua produk sudah dikirim</p>
+                @endif
                 </form>
             </div>
         </div>
