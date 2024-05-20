@@ -218,6 +218,7 @@
                                                         @endphp
                                                         @foreach ($produkjuals as $index => $pj)
                                                             @php
+                                                            if($pj->produk && $produk->produk->kode){
                                                                 $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_do ==  $deliveryOrder->no_do && $pj->jenis != 'TAMBAHAN');
                                                                 $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_do ==  $deliveryOrder->no_do && $pj->jenis != 'TAMBAHAN');
                                                                 if($isSelectedTRD) {
@@ -236,14 +237,17 @@
                                                                         }
                                                                     }
                                                                 }
+                                                            }
                                                             @endphp
-                                                            <option value="{{ $pj->produk->kode }}" data-kondisi="{{ $pj->produk->kode }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT  ? 'selected' : '' }}>
-                                                                @if (substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                            <!-- @if($pj->produk) -->
+                                                            <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                                @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                     {{ $pj->produk->nama }}
-                                                                @elseif (substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
                                                                     {{ $pj->produk->nama }}
                                                                 @endif
                                                             </option>
+                                                            <!-- @endif -->
                                                         @endforeach
                                                     </select>
                                                     @if($isTRDSelected)

@@ -59,6 +59,8 @@ class MutasiController extends Controller
             // dd($produks);
             $bankpens = Rekening::get();
             $Invoice = Mutasi::latest()->first();
+            $lokasipengirim = Lokasi::where('tipe_lokasi', 1)->get();
+            $lokasipenerima = Lokasi::where('tipe_lokasi', 2)->get();
             // dd($bankpens);
             if ($Invoice != null) {
                 $substring = substr($Invoice->no_mutasi, 11);
@@ -82,7 +84,7 @@ class MutasiController extends Controller
             $invoices = Penjualan::get();
         }
 
-        return view('mutasigalery.create', compact('customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
+        return view('mutasigalery.create', compact('lokasipengirim','lokasipenerima','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
     }
 
     public function store_outlet(Request $req)
@@ -322,14 +324,22 @@ class MutasiController extends Controller
         // dd($coba);
         // $produks = Produk_Jual::with('komponen.kondisi')->get();
         $kondisis = Kondisi::all();
-        $produkjuals = Produk_Terjual::all();
+        $produkjuals = Produk_Terjual::where('no_mutasigo', $mutasis->no_mutasi)->with('produk')->get();
 
-            $selectedGFTKomponen = [];
-            $perPendapatan = [];
-            
-            foreach ($mutasis->produkMutasi as $produk) {
-                foreach ($produkjuals as $index => $pj) {
-                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT'&& $pj->no_mutasigo ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
+        $selectedGFTKomponen = [];
+        $perPendapatan = [];
+        
+        foreach ($mutasis->produkMutasi as $produk) {
+            foreach ($produkjuals as $index => $pj) {
+                if ($pj->produk && $produk->produk) {
+                    // dd($produk->produk, $pj->produk);
+                    $isSelectedGFT = (
+                        $pj->produk->kode == $produk->produk->kode &&
+                        substr($produk->produk->kode, 0, 3) === 'GFT' &&
+                        $pj->no_mutasigo == $mutasis->no_mutasi &&
+                        $pj->jenis != 'TAMBAHAN'
+                    );
+    
                     if ($isSelectedGFT) {
                         foreach ($pj->komponen as $komponen) {
                             if ($pj->id == $komponen->produk_terjual_id) {
@@ -347,7 +357,10 @@ class MutasiController extends Controller
                         }
                     }
                 }
-            }
+            }        
+        }
+            
+            
 
             if (!empty($selectedGFTKomponen)) {
                 $perPendapatan += $selectedGFTKomponen;
@@ -361,7 +374,7 @@ class MutasiController extends Controller
         $ongkirs = Ongkir::all();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
 
-        return view('mutasigalery.acc', compact('isSelectedGFT','perPendapatan', 'produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+        return view('mutasigalery.acc', compact('perPendapatan', 'produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
     public function store_outletgalery(Request $req)

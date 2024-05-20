@@ -12,8 +12,19 @@ use Illuminate\Support\Facades\Validator;
 class PembayaranController extends Controller
 {
 
-    public function index()
+    public function index(Request $req)
     {
+        $query = Pembayaran::whereNotNull('invoice_penjualan_id');
+
+        if ($req->metode) {
+            $query->where('cara_bayar', $req->input('metode'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
+        }
         $data = Pembayaran::with('rekening')->orderBy('created_at', 'desc')->get();
 
         return view('pembayaran.index', compact('data'));

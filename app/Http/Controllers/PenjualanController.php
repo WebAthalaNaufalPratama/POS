@@ -140,6 +140,7 @@ class PenjualanController extends Controller
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
         // dd($data);
+        // dd($req->distribusi);
         $data['dibuat_id'] = Auth::user()->id;
         $data['tanggal_dibuat'] = now();
         // dd($data);
@@ -163,7 +164,7 @@ class PenjualanController extends Controller
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
                 $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
                 // dd($getProdukJual);
-                $produk_terjual = Produk_Terjual::create([
+                $produkTerjualData = [
                     'produk_jual_id' => $getProdukJual->id,
                     'no_invoice' => $penjualan->no_invoice,
                     'harga' => $data['harga_satuan'][$i],
@@ -171,7 +172,13 @@ class PenjualanController extends Controller
                     'jenis_diskon' => $data['jenis_diskon'][$i],
                     'diskon' => $data['diskon'][$i],
                     'harga_jual' => $data['harga_total'][$i]
-                ]);
+                ];
+                
+                if ($req->distribusi == 'Dikirim') {
+                    $produkTerjualData['jumlah_dikirim'] = $data['jumlah'][$i];
+                }
+
+                $produk_terjual = Produk_Terjual::create($produkTerjualData);
 
                 if($getProdukJual->tipe_produk == 6){
                     // dd($produk_terjual);
@@ -335,9 +342,13 @@ class PenjualanController extends Controller
         }
 
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
-
+        $exsist = Komponen_Produk_Terjual::where('produk_terjual_id', $req->prdTerjual_id)->get();
+        // dd($req->prdTerjual_id);
         $jumlahItem = count($req->komponen_id);
 
+        if ($exsist) {
+            $exsist->each->forceDelete();
+        }
         // Create new komponen produk terjual and decrement stock
         for ($i = 0; $i < $jumlahItem; $i++) {
             $data['produk_terjual_id'] = $req->prdTerjual_id;

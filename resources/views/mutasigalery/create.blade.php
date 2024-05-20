@@ -40,7 +40,7 @@
                                             <label for="pengirim">Nama Pengirim</label>
                                             <select id="pengirim" name="pengirim" class="form-control" required>
                                                 <option value="">Pilih Nama Pengirim</option>
-                                                @foreach ($lokasis as $lokasi)
+                                                @foreach ($lokasipengirim as $lokasi)
                                                 <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
@@ -51,7 +51,7 @@
                                             <label for="penerima">Nama Penerima</label>
                                             <select id="penerima" name="penerima" class="form-control" required>
                                                 <option value="">Pilih Nama Penerima</option>
-                                                @foreach ($lokasis as $lokasi)
+                                                @foreach ($lokasipenerima as $lokasi)
                                                 <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
