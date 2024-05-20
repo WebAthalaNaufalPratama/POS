@@ -405,6 +405,26 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiOG}/delete', 'MutasiController@destroy_outletgalery')->name('mutasioutlet.destroy');
         });
 
+        Route::group(['prefix' => 'kas_pusat'], function() {
+            Route::get('/', 'KasController@index_pusat')->name('kas_pusat.index');
+            Route::get('/create', 'KasController@create_pusat')->name('kas_pusat.create');
+            Route::post('/store', 'KasController@store_pusat')->name('kas_pusat.store');
+            Route::get('/{kas_pusat}/show', 'KasController@show_pusat')->name('kas_pusat.show');
+            Route::get('/{kas_pusat}/edit', 'KasController@edit_pusat')->name('kas_pusat.edit');
+            Route::patch('/{kas_pusat}/update', 'KasController@update_pusat')->name('kas_pusat.update');
+            Route::get('/{kas_pusat}/delete', 'KasController@destroy_pusat')->name('kas_pusat.destroy');
+        });
+
+        Route::group(['prefix' => 'kas_gallery'], function() {
+            Route::get('/', 'KasController@index_gallery')->name('kas_gallery.index');
+            Route::get('/create', 'KasController@create_gallery')->name('kas_gallery.create');
+            Route::post('/store', 'KasController@store_gallery')->name('kas_gallery.store');
+            Route::get('/{kas_gallery}/show', 'KasController@show_gallery')->name('kas_gallery.show');
+            Route::get('/{kas_gallery}/edit', 'KasController@edit_gallery')->name('kas_gallery.edit');
+            Route::patch('/{kas_gallery}/update', 'KasController@update_gallery')->name('kas_gallery.update');
+            Route::get('/{kas_gallery}/delete', 'KasController@destroy_gallery')->name('kas_gallery.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
