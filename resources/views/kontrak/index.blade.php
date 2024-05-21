@@ -61,7 +61,6 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @if(count($kontraks) > 0)
                     @foreach ($kontraks as $kontrak)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
@@ -101,11 +100,6 @@
                             </td>
                         </tr>
                     @endforeach
-                    @else
-                        <tr class="text-center">
-                            <td colspan="9">Tidak ada data</td>
-                        </tr>
-                    @endif
                 </tbody>
             </table>
             </div>

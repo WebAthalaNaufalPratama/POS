@@ -197,7 +197,7 @@
                   <div class="profilesets">
                     @auth
                         <h6>{{ auth()->user()->name }}</h6>
-                        <h5>{{ auth()->user()->karyawans->jabatan }}</h5>
+                        <h5>{{ auth()->user()->karyawans->jabatan ?? '' }}</h5>
                     @else
                         <h6>Guest</h6>
                         <h5>Not Logged In</h5>
