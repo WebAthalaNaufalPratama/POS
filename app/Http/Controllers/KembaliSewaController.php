@@ -9,6 +9,7 @@ use App\Models\KembaliSewa;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kondisi;
 use App\Models\Kontrak;
+use App\Models\Produk;
 use App\Models\Produk_Jual;
 use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
@@ -71,7 +72,7 @@ class KembaliSewaController extends Controller
 
         // data
         $kontrak = Kontrak::with('produk')->find($data['kontrak']);
-        $do = DeliveryOrder::where('no_referensi', $kontrak->no_kontrak)->get();
+        $do = DeliveryOrder::with('produk', 'produk.komponen', 'produk.produk')->where('no_referensi', $kontrak->no_kontrak)->get();
         $drivers = Karyawan::where('jabatan', 'Driver')->get();
         $produkjuals = Produk_Jual::all();
         $kondisi = Kondisi::all();
@@ -106,12 +107,21 @@ class KembaliSewaController extends Controller
      */
     public function store(Request $req)
     {
+        dd($req);
         // validasi
         $validator = Validator::make($req->all(), [
             'no_kembali' => 'required',
             'no_sewa' => 'required',
             'tanggal_kembali' => 'required',
+            'tanggal_driver' => 'required',
             'driver' => 'required',
+            'no_do_produk' => 'required',
+            'namaKomponen' => 'required',
+            'kondisiKomponen' => 'required',
+            'jumlahKomponen' => 'required',
+            'jumlah' => 'required',
+            'lokasi' => 'required',
+            'file' => 'required|file',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -212,6 +222,8 @@ class KembaliSewaController extends Controller
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
         // save produk kembali
+        $startIdx = 0;
+        $tempNama = $tempKondisi = $tempJumlah = [];
         for ($i=0; $i < count($data['nama_produk']); $i++) { 
             $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
             $produk_terjual = Produk_Terjual::create([
@@ -223,37 +235,46 @@ class KembaliSewaController extends Controller
                 'jenis' => 'KEMBALI_SEWA'
             ]);
 
-            if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            foreach ($getProdukJual->komponen as $komponen ) {
+            // pisahkan array komponen per produk terjual
+            $endIdx = $startIdx + $data['indexKomponen'][$i];
+            $tempNama[$data['nama_produk'][$i]] = array_slice($data['namaKomponen'], $startIdx, $data['indexKomponen'][$i]);
+            $tempKondisi[$data['nama_produk'][$i]] = array_slice($data['kondisiKomponen'], $startIdx, $data['indexKomponen'][$i]);
+            $tempJumlah[$data['nama_produk'][$i]] = array_slice($data['jumlahKomponen'], $startIdx, $data['indexKomponen'][$i]);
+            $startIdx = $endIdx;
+
+            if(!$produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            for ($j=0; $j < count($tempNama[$data['nama_produk'][$i]]); $j++) { 
+                $komponen = Produk::where('kode', $tempNama[$data['nama_produk'][$i]][$j])->first();
                 $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                     'produk_terjual_id' => $produk_terjual->id,
-                    'kode_produk' => $komponen->kode_produk,
-                    'nama_produk' => $komponen->nama_produk,
+                    'kode_produk' => $tempNama[$data['nama_produk'][$i]][$j],
+                    'nama_produk' => $komponen->nama,
                     'tipe_produk' => $komponen->tipe_produk,
-                    'kondisi' => $data['kondisi'][$i],
+                    'kondisi' => $tempKondisi[$data['nama_produk'][$i]][$j],
                     'deskripsi' => $komponen->deskripsi,
-                    'jumlah' => $komponen->jumlah,
-                    'harga_satuan' => $komponen->harga_satuan,
-                    'harga_total' => $komponen->harga_total
+                    'jumlah' => $tempJumlah[$data['nama_produk'][$i]][$j],
+                    'harga_satuan' => 0,
+                    'harga_total' => 0
                 ]);
-                if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
                 // update stok
-                $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $data['kondisi'][$i])->first();
-                if(!$stok){
-                    $stok = InventoryGallery::create([
-                        'kode_produk' => $komponen->kode_produk,
-                        'kondisi_id' => $data['kondisi'][$i],
-                        'lokasi_id' => Auth::user()->karyawans->lokasi_id ?? 1,
-                        'jumlah' => 0,
-                        'min_stok' => 20,
-                    ]);
+                if(in_array($komponen->tipe_produk, [1, 2])){
+                    $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $tempNama[$data['nama_produk'][$i]][$j])->where('kondisi_id', $tempKondisi[$data['nama_produk'][$i]][$j])->first();
+                    if(!$stok){
+                        $stok = InventoryGallery::create([
+                            'kode_produk' => $tempNama[$data['nama_produk'][$i]][$j],
+                            'kondisi_id' => $tempKondisi[$data['nama_produk'][$i]][$j],
+                            'lokasi_id' => $kontrak->lokasi_id,
+                            'jumlah' => 0,
+                            'min_stok' => 20,
+                        ]);
+                    }
+                    $stok->jumlah = intval($stok->jumlah) + (intval($tempJumlah[$data['nama_produk'][$i]][$j]) * intval($data['jumlah'][$i]));
+                    $stok->update();
                 }
-                $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($data['jumlah'][$i]));
-                $stok->update();
             }
         }
-
         return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
 

@@ -83,11 +83,10 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 15%">No DO</th>
-                                        <th>Nama</th>
+                                        <th style="width: 20%">No DO</th>
+                                        <th style="width: 50%">Nama</th>
                                         <th style="width: 10%">Jumlah</th>
-                                        <th>Detail Lokasi</th>
-                                        <th>Kondisi</th>
+                                        <th style="width: 20%">Detail Lokasi</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -103,12 +102,14 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <select id="produk_0" name="nama_produk[]" class="form-control">
+                                            {{-- <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkSewa as $produk)
                                                     <option value="{{ $produk->produk->kode }}">{{ $produk->produk->nama }}</option>
                                                 @endforeach
-                                            </select>
+                                            </select> --}}
+                                            <select id="produk_0" name="nama_produk[]" class="form-control" required disabled></select>
+                                                <div id="komponen_0" class="row mt-2"></div>
                                         </td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control"></td>
                                         <td>
@@ -116,14 +117,6 @@
                                                 <option value="">Pilih Detail Lokasi</option>
                                                 @foreach ($detail_lokasi as $item)
                                                     <option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control">
-                                                <option value="">Pilih Kondisi</option>
-                                                @foreach ($kondisi as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -139,33 +132,27 @@
                                                 <select id="no_do_produk_{{ $i }}" name="no_do_produk[]" class="form-control" required>
                                                     <option value="">Pilih DO</option>
                                                     @foreach ($do as $item)
-                                                        <option value="{{ $item->no_do }}">{{ $item->no_do }}</option>
+                                                        <option value="{{ $item->no_do }}" data-produk="{{ $item }}">{{ $item->no_do }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
                                             <td>
-                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
+                                                {{-- <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
                                                     <option value="">Pilih Produk</option>
                                                     @foreach ($produkSewa as $pj)
                                                         <option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
                                                     @endforeach
-                                                </select>
+                                                </select> --}}
+                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required disabled></select>
+                                                <div id="komponen_{{ $i }}" class="row mt-2"></div>
                                             </td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required></td>
+                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) }}" required disabled></td>
                                             <td>
-                                                <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" required>
+                                                <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" required disabled>
                                                     <option value="">Pilih Detail Lokasi</option>
-                                                    @foreach ($detail_lokasi as $item)
+                                                    {{-- @foreach ($detail_lokasi as $item)
                                                         <option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" required>
-                                                    <option value="">Pilih Kondisi</option>
-                                                    @foreach ($kondisi as $item)
-                                                        <option value="{{ $item->id }}" {{ $item->id == old('kondisi.' . $i) ? 'selected' : '' }}>{{ $item->nama }}</option>
-                                                    @endforeach
+                                                    @endforeach --}}
                                                 </select>
                                             </td>
                                             @if ($i == 0)
@@ -209,7 +196,7 @@
                                                 <input type="date" class="form-control" id="tgl_driver" name="tanggal_driver" value="{{ date('Y-m-d') }}">
                                             </td>
                                             <td id="tgl_pembuat" style="width: 25%;">{{ date('Y-m-d') }}</td>
-                                            <td id="tgl_penyetuju" style="width: 25%;">{{ isset($kontrak->tanggal_penyetujju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetujju)->format('Y-m-d') : '-' }}</td>
+                                            <td id="tgl_penyetuju" style="width: 25%;">{{ isset($kontrak->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetujju)->format('Y-m-d') : '-' }}</td>
                                             <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($kontrak->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontrak->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</td>
                                         </tr>
                                     </tbody>
@@ -248,7 +235,7 @@
             if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
             }
-            $('[id^=produk], #driver_id, [id^=no_do_produk], [id^=kondisi], [id^=lokasi]').select2();
+            $('[id^=produk], #driver_id, [id^=no_do_produk], [id^=kondisi], [id^=lokasi], [id^=namaKomponen]').select2();
             $('#driver_id').trigger('change');
             var i = '{{ count($kontrak->produk) }}';
             $('#add').click(function(){
@@ -257,33 +244,27 @@
                                     '<select id="no_do_produk_'+i+'" name="no_do_produk[]" class="form-control">' +
                                         '<option value="">Pilih DO</option>'+
                                         '@foreach ($do as $item)' +
-                                            '<option value="{{ $item->no_do }}">{{ $item->no_do }}</option>' +
+                                            '<option value="{{ $item->no_do }}" data-produk="{{ $item }}">{{ $item->no_do }}</option>' +
                                         '@endforeach' +
                                     '</select>' +
                                 '</td>' +
                                 '<td>' +
-                                '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
-                                    '<option value="">Pilih Produk</option>'+
-                                    '@foreach ($produkjuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
-                                    '@endforeach'+
-                                '</select>'+
+                                // '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
+                                //     '<option value="">Pilih Produk</option>'+
+                                //     '@foreach ($produkjuals as $pj)'+
+                                //         '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
+                                //     '@endforeach'+
+                                // '</select>'+
+                                '<select id="produk_'+i+'" name="nama_produk[]" class="form-control" required disabled></select>' +
+                                    '<div id="komponen_'+i+'" class="row mt-2"></div>'+
                             '</td>'+
-                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control"></td>'+
+                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control" disabled></td>'+
                             '<td>' +
-                                '<select id="lokasi_'+i+'" name="lokasi[]" class="form-control" required>' +
+                                '<select id="lokasi_'+i+'" name="lokasi[]" class="form-control" required disabled>' +
                                     '<option value="">Pilih Detail Lokasi</option>' +
-                                    '@foreach ($detail_lokasi as $item)' +
-                                        '<option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>' +
-                                    '@endforeach' +
-                                '</select>' +
-                            '</td>' +
-                            '<td>' +
-                                '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control">' +
-                                    '<option value="">Pilih Kondisi</option>' +
-                                    '@foreach ($kondisi as $item)' +
-                                        '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
-                                    '@endforeach' +
+                                    // '@foreach ($detail_lokasi as $item)' +
+                                    //     '<option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>' +
+                                    // '@endforeach' +
                                 '</select>' +
                             '</td>' +
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
@@ -327,6 +308,89 @@
                     $('#preview').attr('src', e.target.result);
                 }
                 reader.readAsDataURL(file);
+            }
+        });
+        $(document).on('change', '[id^=no_do_produk_]', function() {
+            var dataDO = $(this).find(':selected').data('produk');
+            var id = $(this).attr('id').split('_')[3];
+            var selectProduk = $('#produk_' + id);
+            var jumlahProduk = $('#jumlah_' + id);
+            var lokasiProduk = $('#lokasi_' + id);
+            $(jumlahProduk).val(0);
+            $('#komponen_' + id).empty();
+
+            if($(this).val()){
+                for (let i = 0; i < dataDO.produk.length; i++) {
+                    $(selectProduk).attr('disabled', false);
+                    $(selectProduk).empty()
+                    $(selectProduk).append('<option value="">Pilih Produk</option>')
+                    $(selectProduk).append('<option value="' + dataDO.produk[i].produk.kode + '">' + dataDO.produk[i].produk.nama + '</option>');
+
+                    $(lokasiProduk).empty()
+                    $(lokasiProduk).append('<option value="">Pilih Detail Lokasi</option>')
+                    $(lokasiProduk).append('<option value="' + dataDO.produk[i].detail_lokasi + '">' + dataDO.produk[i].detail_lokasi + '</option>');
+                }
+            } else {
+                $(selectProduk).attr('disabled', true);
+                $(jumlahProduk).attr('disabled', true);
+                $(lokasiProduk).attr('disabled', true);
+                $(selectProduk).empty();
+                $(jumlahProduk).val(0);
+                $(lokasiProduk).val('').trigger('change');
+            }
+        });
+        $(document).on('change', '[id^=produk_]', function() {
+            var id = $(this).attr('id').split('_')[1];
+            var jumlahProduk = $('#jumlah_' + id);
+            var lokasiProduk = $('#lokasi_' + id);
+            if($(this).val()){
+                var dataDO = $('#no_do_produk_' + id).find(':selected').data('produk');
+                $('#komponen_' + id).empty();
+                console.log(dataDO.produk)
+                for (let i = 0; i < dataDO.produk.length; i++) {
+                    $(jumlahProduk).attr('disabled', false);
+                    $(lokasiProduk).attr('disabled', false);
+                    $(jumlahProduk).val(dataDO.produk[i].jumlah);
+                    $(lokasiProduk).val(dataDO.produk[i].detail_lokasi).trigger('change');
+
+                    var jmlKomponen = 0;
+                    for (let j = 0; j < dataDO.produk[i].komponen.length; j++) {
+                        if(dataDO.produk[i].jenis == null && (dataDO.produk[i].komponen[j].tipe_produk == 1 || dataDO.produk[i].komponen[j].tipe_produk == 2)) {
+                            var komponenRow = '<div id="komponen_'+id+'" class="row mt-2">'+
+                                                '<div class="col">'+
+                                                    '<select id="namaKomponen_'+id+'_'+j+'" name="namaKomponen[]" class="form-control" required readonly>'+
+                                                        '<option value="' + dataDO.produk[i].komponen[j].kode_produk + '">' + dataDO.produk[i].komponen[j].nama_produk + '</option>'+
+                                                    '</select>'+
+                                                '</div>'+
+                                                '<div class="col">'+
+                                                    '<select id="kondisiKomponen_'+id+'_'+j+'" name="kondisiKomponen[]" class="form-control">' +
+                                                    '<option value="">Pilih Kondisi</option>' +
+                                                    '@foreach ($kondisi as $item)' +
+                                                        '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
+                                                    '@endforeach' +
+                                                '</select>' +
+                                                '</div>' +
+                                                '<div class="col">'+
+                                                    '<input type="number" name="jumlahKomponen[]" id="jumlahKomponen_'+id+'_'+j+'" class="form-control" value="" required>'+
+                                                '</div>'+
+                                            '</div>';
+                            $('#komponen_' + id).append(komponenRow);
+                            jmlKomponen++;
+                        }
+                        $('#jumlahKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].jumlah);
+                        $('#kondisiKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].kondisi).trigger('change');
+                        $('#kondisiKomponen_'+id+'_'+j+'').select2();
+                    }
+                    if(dataDO.produk[i].jenis == null) {
+                        $('#komponen_' + id).append('<input type="hidden" name="indexKomponen[]" value="'+jmlKomponen+'">');
+                    }
+                }
+            } else {
+                $('#komponen_' + id).empty();
+                $(jumlahProduk).attr('disabled', true);
+                $(lokasiProduk).attr('disabled', true);
+                $(jumlahProduk).val(0);
+                $(lokasiProduk).val('').trigger('change');
             }
         });
         function clearFile(){
