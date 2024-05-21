@@ -11,6 +11,7 @@ class Poinden extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity;
     protected $guarded = ['id'];
+    protected $table = 'poinden';
     protected static $logAttributes = [
         'no_po',
         'supplier_id',
@@ -26,14 +27,17 @@ class Poinden extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
     public function pembuat(){
-        return $this->belongsTo(Karyawan::class, 'pembuat', 'id');
+        return $this->belongsTo(User::class, 'pembuat', 'id');
     }
     public function pemeriksa(){
-        return $this->belongsTo(Karyawan::class, 'pemeriksa', 'id');
+        return $this->belongsTo(User::class, 'pemeriksa', 'id');
     }
     public function produkbeli (){
         return $this->hasMany(produkbeli::class);
     }
-    
+    public function invoice (){
+        return $this->hasOne(Invoicepo::class);
+    }
+
 
 }

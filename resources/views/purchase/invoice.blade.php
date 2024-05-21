@@ -27,28 +27,33 @@
                                 <th>Tanggal Invoice</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
+                                <th>Sisa Tagihan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        {{-- <tbody>
-                            @foreach ($penjualans as $penjualan)
+                         <tbody>
+                            @foreach ($invoices as $inv)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $penjualan->no_invoice }}</td>
-                                <td>{{ $penjualan->karyawan->nama }}</td>
-                                <td>{{ $penjualan->tanggal_invoice }}</td>
-                                <td>{{ $penjualan->jatuh_tempo }}</td>
+                                <td>{{ $inv->no_inv }}</td>
+                                <td>{{ $inv->pembelian->no_po }}</td>
+                                <td>{{ $inv->pembelian->supplier->nama }}</td>
+                                <td>{{ $inv->pembelian->lokasi->nama}}</td>
+                                <td>{{ $inv->tgl_inv }}</td>
+                                <td>{{ formatRupiah($inv->total_tagihan) }}</td>
                                 <td>
-                                    @if(isset($latestPayments[$penjualan->id]))
-                                    {{ $latestPayments[$penjualan->id]->status_bayar }}
+                                    @if ( $inv->sisa == 0)
+                                        Lunas
                                     @else
-                                    Belum ada pembayaran
+                                        Belum Lunas
                                     @endif
+
                                 </td>
-                                <td>{{ $penjualan->total_tagihan }}</td>
-                                <td>{{ $penjualan->sisa_bayar }}</td>
-                                <td>{{ $penjualan->status }}</td>
                                 <td>
+                                {{ formatRupiah($inv->sisa) }}
+                                </td>
+                                <td></td>
+                                {{-- <td>
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                         <div class="dropdown-menu">
@@ -60,10 +65,10 @@
                                             <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a>
                                         </div>
                                     </div>
-                                </td>
+                                </td> --}}
                             </tr>
                             @endforeach
-                        </tbody> --}}
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -96,43 +101,32 @@
                                 <th>Tanggal Invoice</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
+                                <th>Sisa Tagihan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        {{-- <tbody>
-                            @foreach ($penjualans as $penjualan)
+                         <tbody>
+                            @foreach ($invoiceinden as $inv)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $penjualan->no_invoice }}</td>
-                                <td>{{ $penjualan->karyawan->nama }}</td>
-                                <td>{{ $penjualan->tanggal_invoice }}</td>
-                                <td>{{ $penjualan->jatuh_tempo }}</td>
+                                <td>{{ $inv->no_inv }}</td>
+                                <td>{{ $inv->poinden->no_po }}</td>
+                                <td>{{ $inv->poinden->supplier->nama }}</td>
+                                <td>{{ $inv->poinden->bulan_inden}}</td>
+                                <td>{{ $inv->tgl_inv}}</td>
+                                <td>{{ formatRupiah($inv->total_tagihan) }}</td>
                                 <td>
-                                    @if(isset($latestPayments[$penjualan->id]))
-                                    {{ $latestPayments[$penjualan->id]->status_bayar }}
+                                    @if ( $inv->sisa == 0)
+                                    Lunas
                                     @else
-                                    Belum ada pembayaran
+                                    Belum Lunas
                                     @endif
                                 </td>
-                                <td>{{ $penjualan->total_tagihan }}</td>
-                                <td>{{ $penjualan->sisa_bayar }}</td>
-                                <td>{{ $penjualan->status }}</td>
-                                <td>
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Perangkai</a>
-                                            <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}">Pembayaran</a>
-                                            @if($penjualan->distribusi == 'Dikirim')
-                                            <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}">Delivery Order</a>
-                                            @endif
-                                            <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a>
-                                        </div>
-                                    </div>
-                                </td>
+                                <td>{{ formatRupiah($inv->sisa) }}</td>
+                                <td></td>
                             </tr>
                             @endforeach
-                        </tbody> --}}
+                        </tbody>
                     </table>
                 </div>
             </div>

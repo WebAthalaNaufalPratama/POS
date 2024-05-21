@@ -71,6 +71,7 @@
                     <ul>
                         <li><a href="{{ route('pembelian.index') }}" class="{{ request()->is('purchase/pembelian*') ? 'active' : '' }}">Purchase Order</a></li>
                         <li><a href="{{ route('invoicebeli.index') }}" class="{{ request()->is('purchase/invoice*') ? 'active' : '' }}">Invoice Pembelian</a></li>
+                        <li><a href="{{ route('returbeli.index') }}" class="{{ request()->is('purchase/retur*') ? 'active' : '' }}">Retur Pembelian</a></li>
                     </ul>
                 </li>
                 

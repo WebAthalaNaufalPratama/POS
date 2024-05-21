@@ -8,7 +8,7 @@
             <h3 class="page-title">Purchase Order</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
-                    <a href="index.html">Purchase Order</a>
+                    <a href="{{ route('pembelian.index') }}">Purchase Order</a>
                 </li>
                 <li class="breadcrumb-item active">
                     PO
@@ -79,7 +79,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="date" class="form-control" id="tgl_terima" name="tgl_terima">
+                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima">
                                                 </div>
                                         </div>
                                         <div class="col-md-3">
@@ -128,7 +128,7 @@
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
                                                     <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
                                                     <td>
-                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
+                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" required>
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
                                                             <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
@@ -145,53 +145,72 @@
                             </div>
                         </div>
 
-                         <div class="row justify-content-start">
-                            <div class="col-md-6 border rounded pt-3 me-1 mt-2">
-                             
+                        <div class="row justify-content-start">
+                            <div class="col-md-8 border rounded pt-3 me-1 mt-2">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
-                                            <th>Dibuat</th>                                              
-                                            <th>Diterima</th>                                              
+                                            <th>Dibuat</th>
+                                            <th>Diterima</th>
                                             <th>Diperiksa</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td id="pembuat">{{ Auth::user()->name }}</td>
-                                            <td id="penerima">-</td>
-                                            <td id="pemeriksa">-</td>
+                                            <td id="pembuat">
+                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                            </td>
+                                            <td id="penerima">
+                                                <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                            </td>
+                                            <td id="pemeriksa">
+                                                <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                            </td>
                                         </tr>
+                                        
                                         <tr>
                                             <td id="status_dibuat">
-                                             <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                <option value="draft">Draft</option>
-                                                <option value="publish">Publish</option>
-                                            </select>
+                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required>
+                                                    <option disabled selected>Pilih Status</option>
+                                                    <option value="draft">Draft</option>
+                                                    <option value="publish">Publish</option>
+                                                </select>
                                             </td>
                                             <td id="status_diterima">
                                                 <select id="status_diterima" name="status_diterima" class="form-control" required>
+                                                    <option disabled selected>Pilih Status</option>
                                                     <option value="pending">Pending</option>
                                                     <option value="acc">Accept</option>
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
+                                                    <option disabled selected>Pilih Status</option>
                                                     <option value="pending">Pending</option>
                                                     <option value="acc">Accept</option>
                                                 </select>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
-                                            <td id="tgl_diterima" style="width: 25%;">-</td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                            <td id="tgl_pembuat">
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="" >
+                                            </td>
+                                            <td id="tgl_diterima">
+                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima" value="" >
+                                            </td>
+                                            <td id="tgl_pemeriksa">
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" >
+                                            </td>
                                         </tr>
                                     </tbody>
-                                </table>  
-                                        <br>                                 
-                               </div>
-                         </div>
+                                </table>
+                                <br>
+                            </div>
+                        </div>
+                        
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="" class="btn btn-secondary" type="button">Back</a>
@@ -203,9 +222,6 @@
 </div>
 </div>
 </div>
-@endsection
-<!-- Modal -->
-
 <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -252,12 +268,31 @@
       </div>
     </div>
 </div>
+@endsection
   
 @section('scripts')
 <script>
 var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
 $(document).ready(function() {
+    // Inisialisasi Select2 dengan konfigurasi tambahan
+    $('#produk_0').select2({
+            placeholder: "----- Pilih Produk ----",
+          
+        });
+
+        // Ketika terjadi perubahan pada dropdown produk
+        $('#produk_0').on('change', function() {
+            // Ambil nilai kode dari atribut data
+            var kode_produk = $(this).find(':selected').data('kode');
+
+            // Masukkan nilai kode ke input kode
+            $('#kode_0').val(kode_produk);
+
+            // Tutup dropdown Select2
+            $('#produk_0').select2('close');
+        });
+
     var i = 1;
     $('#add').click(function(){
         var newRow = '<tr id="row'+i+'">'+
@@ -273,7 +308,7 @@ $(document).ready(function() {
                         '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
                         '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
                         '<td>'+
-                            '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control" onchange="showInputType('+i+')">'+
+                            '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control" onchange="showInputType('+i+') required">'+
                                 '<option value="">Pilih Kondisi</option>'+
                                 '@foreach ($kondisis as $kondisi)'+
                                     '<option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>'+
@@ -308,18 +343,10 @@ $(document).ready(function() {
 
 
 </script>
-<script>
+{{-- <script>
     $(document).ready(function() {
-        $('#produk_0').select2();
-        // Ketika terjadi perubahan pada dropdown produk
-        $('#produk_0').change(function() {
-            // Ambil nilai kode dari atribut data
-            var kode_produk = $(this).find(':selected').data('kode');
-            
-            // Masukkan nilai kode ke input kode
-            $('#kode_0').val(kode_produk);
-        });
+        
     });
-</script>
+</script> --}}
 
 @endsection

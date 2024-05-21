@@ -39,14 +39,17 @@ class Pembelian extends Model
     public function produkbeli (){
         return $this->hasMany(Produkbeli::class);
     }
+    public function invoice (){
+        return $this->hasOne(Invoicepo::class);
+    }
     public function pembuat(){
-        return $this->belongsTo(Karyawan::class, 'pembuat', 'id');
+        return $this->belongsTo(User::class, 'pembuat', 'id');
     }
     public function pemeriksa(){
-        return $this->belongsTo(Karyawan::class, 'pemeriksa', 'id');
+        return $this->belongsTo(User::class, 'pemeriksa', 'id');
     }
     public function penerima(){
-        return $this->belongsTo(Karyawan::class, 'penerima', 'id');
+        return $this->belongsTo(User::class, 'penerima', 'id');
     }
 
 
