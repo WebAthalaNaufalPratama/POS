@@ -102,12 +102,6 @@
                                             </select>
                                         </td>
                                         <td>
-                                            {{-- <select id="produk_0" name="nama_produk[]" class="form-control">
-                                                <option value="">Pilih Produk</option>
-                                                @foreach ($produkSewa as $produk)
-                                                    <option value="{{ $produk->produk->kode }}">{{ $produk->produk->nama }}</option>
-                                                @endforeach
-                                            </select> --}}
                                             <select id="produk_0" name="nama_produk[]" class="form-control" required disabled></select>
                                                 <div id="komponen_0" class="row mt-2"></div>
                                         </td>
@@ -137,12 +131,6 @@
                                                 </select>
                                             </td>
                                             <td>
-                                                {{-- <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
-                                                    <option value="">Pilih Produk</option>
-                                                    @foreach ($produkSewa as $pj)
-                                                        <option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
-                                                    @endforeach
-                                                </select> --}}
                                                 <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required disabled></select>
                                                 <div id="komponen_{{ $i }}" class="row mt-2"></div>
                                             </td>
@@ -150,9 +138,6 @@
                                             <td>
                                                 <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" required disabled>
                                                     <option value="">Pilih Detail Lokasi</option>
-                                                    {{-- @foreach ($detail_lokasi as $item)
-                                                        <option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>
-                                                    @endforeach --}}
                                                 </select>
                                             </td>
                                             @if ($i == 0)
@@ -249,12 +234,6 @@
                                     '</select>' +
                                 '</td>' +
                                 '<td>' +
-                                // '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
-                                //     '<option value="">Pilih Produk</option>'+
-                                //     '@foreach ($produkjuals as $pj)'+
-                                //         '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
-                                //     '@endforeach'+
-                                // '</select>'+
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control" required disabled></select>' +
                                     '<div id="komponen_'+i+'" class="row mt-2"></div>'+
                             '</td>'+
@@ -262,9 +241,6 @@
                             '<td>' +
                                 '<select id="lokasi_'+i+'" name="lokasi[]" class="form-control" required disabled>' +
                                     '<option value="">Pilih Detail Lokasi</option>' +
-                                    // '@foreach ($detail_lokasi as $item)' +
-                                    //     '<option value="{{ $item->detail_lokasi }}" {{ $item->detail_lokasi == old('lokasi.' . $i) ? 'selected' : '' }}>{{ $item->detail_lokasi }}</option>' +
-                                    // '@endforeach' +
                                 '</select>' +
                             '</td>' +
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
@@ -319,7 +295,7 @@
             $(jumlahProduk).val(0);
             $('#komponen_' + id).empty();
 
-            if($(this).val()){
+            if($(this).val()){ // cek jika value kosong
                 for (let i = 0; i < dataDO.produk.length; i++) {
                     $(selectProduk).attr('disabled', false);
                     $(selectProduk).empty()
@@ -330,7 +306,7 @@
                     $(lokasiProduk).append('<option value="">Pilih Detail Lokasi</option>')
                     $(lokasiProduk).append('<option value="' + dataDO.produk[i].detail_lokasi + '">' + dataDO.produk[i].detail_lokasi + '</option>');
                 }
-            } else {
+            } else { // kosongkan input jika value kosong
                 $(selectProduk).attr('disabled', true);
                 $(jumlahProduk).attr('disabled', true);
                 $(lokasiProduk).attr('disabled', true);
@@ -343,10 +319,9 @@
             var id = $(this).attr('id').split('_')[1];
             var jumlahProduk = $('#jumlah_' + id);
             var lokasiProduk = $('#lokasi_' + id);
-            if($(this).val()){
+            if($(this).val()){ // cek jika value kosong
                 var dataDO = $('#no_do_produk_' + id).find(':selected').data('produk');
                 $('#komponen_' + id).empty();
-                console.log(dataDO.produk)
                 for (let i = 0; i < dataDO.produk.length; i++) {
                     $(jumlahProduk).attr('disabled', false);
                     $(lokasiProduk).attr('disabled', false);
@@ -355,7 +330,7 @@
 
                     var jmlKomponen = 0;
                     for (let j = 0; j < dataDO.produk[i].komponen.length; j++) {
-                        if(dataDO.produk[i].jenis == null && (dataDO.produk[i].komponen[j].tipe_produk == 1 || dataDO.produk[i].komponen[j].tipe_produk == 2)) {
+                        if(dataDO.produk[i].jenis == null && (dataDO.produk[i].komponen[j].tipe_produk == 1 || dataDO.produk[i].komponen[j].tipe_produk == 2)) { // filter pot dan bunga saja
                             var komponenRow = '<div id="komponen_'+id+'" class="row mt-2">'+
                                                 '<div class="col">'+
                                                     '<select id="namaKomponen_'+id+'_'+j+'" name="namaKomponen[]" class="form-control" required readonly>'+
@@ -376,16 +351,16 @@
                                             '</div>';
                             $('#komponen_' + id).append(komponenRow);
                             jmlKomponen++;
+                            $('#jumlahKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].jumlah);
+                            $('#kondisiKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].kondisi).trigger('change');
+                            $('#kondisiKomponen_'+id+'_'+j+'').select2();
                         }
-                        $('#jumlahKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].jumlah);
-                        $('#kondisiKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].kondisi).trigger('change');
-                        $('#kondisiKomponen_'+id+'_'+j+'').select2();
                     }
                     if(dataDO.produk[i].jenis == null) {
                         $('#komponen_' + id).append('<input type="hidden" name="indexKomponen[]" value="'+jmlKomponen+'">');
                     }
                 }
-            } else {
+            } else { // kosongkan input jika value kosong
                 $('#komponen_' + id).empty();
                 $(jumlahProduk).attr('disabled', true);
                 $(lokasiProduk).attr('disabled', true);

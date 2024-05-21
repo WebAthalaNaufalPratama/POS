@@ -107,7 +107,6 @@ class KembaliSewaController extends Controller
      */
     public function store(Request $req)
     {
-        dd($req);
         // validasi
         $validator = Validator::make($req->all(), [
             'no_kembali' => 'required',
@@ -129,12 +128,6 @@ class KembaliSewaController extends Controller
         $data['status'] = 'ACTIVE';
         $data['tanggal_pembuat'] = now();
         $data['pembuat'] = Auth::user()->id;
-        if ($req->hasFile('file')) {
-            $file = $req->file('file');
-            $fileName = $req->no_kembali . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_kembali_sewa', $fileName, 'public');
-            $data['file'] = $filePath;
-        }
 
         // check produk and quantity from sewa
         $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_sewa'])->first();
@@ -216,6 +209,13 @@ class KembaliSewaController extends Controller
             return $item['jumlah'] >= 0;
         });
         if (!$sisa) return redirect()->back()->withInput()->with('fail', 'Jumlah barang tidak sesuai');
+
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
+            $fileName = $req->no_kembali . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('bukti_kembali_sewa', $fileName, 'public');
+            $data['file'] = $filePath;
+        }
 
         // save data kembali
         $check = KembaliSewa::create($data);
