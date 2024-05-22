@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice_po;
+
+use App\Models\InventoryGallery;
 use App\Models\Invoicepo;
 use App\Models\Karyawan;
 use App\Models\Kondisi;
@@ -249,9 +250,24 @@ class PembelianController extends Controller
             $produkBeli->produk_id = $produkId;
             $produkBeli->jml_dikirim = $qtyKirim[$index];
             $produkBeli->jml_diterima = $qtyTerima[$index];
-            $produkBeli->kondisi_id = $kondisiIds[$index];
-            // Tambahkan atribut lainnya sesuai kebutuhan
+            $produkBeli->kondisi_id = $kondisiIds[$index];          
             $check2 = $produkBeli->save();
+
+            $lokasi = Lokasi::find($request->id_lokasi);
+            $produk = Produk::find($produkId)->first();
+            if ($lokasi->tipe_lokasi == 1) {
+                $checkInven = InventoryGallery::where('kode_produk', $produk->kode)->where('kondisi_id', $kondisiIds[$index])->where('lokasi_id', $lokasi->id)->first();
+                if($checkInven){
+                    $checkInven->jumlah += $qtyTerima[$index];
+                    $checkInven->update();
+                } else {
+                    $createProduk = new InventoryGallery();
+                    $createProduk->kode_produk = $produk->kode;
+                    $createProduk->kondisi_id = $kondisiIds[$index];
+                    $createProduk->jumlah = $qtyTerima[$index];
+                    $createProduk->lokasi_id = $lokasi->id;
+                }
+            } 
         }
     
         // Periksa keberhasilan penyimpanan data
@@ -399,9 +415,9 @@ class PembelianController extends Controller
                 $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
                 $rekenings = Rekening::all();
                 $no_invpo = $this->generatebayarPONumber();
-                $nomor_inv = $this->generateINVPONumber();
+                // $nomor_inv = $this->generateINVPONumber();
 
-                return view('purchase.createinv', compact('beli', 'produkbelis', 'rekenings', 'no_invpo', 'nomor_inv'));
+                return view('purchase.createinv', compact('beli', 'produkbelis', 'rekenings', 'no_invpo'));
             }
         } elseif ($type === 'poinden') {
             // Jika type adalah poinden (Inden Order)
@@ -410,9 +426,9 @@ class PembelianController extends Controller
                 $produkbelis = Produkbeli::where('poinden_id', $datapo)->get();
                 $rekenings = Rekening::all();
                 $no_invpo = $this->generatebayarPONumber();
-                $nomor_inv = $this->generateINVPONumber();
+                // $nomor_inv = $this->generateINVPONumber();
 
-                return view('purchase.createinvinden', compact('beli', 'produkbelis', 'rekenings', 'no_invpo', 'nomor_inv'));
+                return view('purchase.createinvinden', compact('beli', 'produkbelis', 'rekenings', 'no_invpo'));
             }
         }
 

@@ -61,9 +61,13 @@
                         <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
                         <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasioutlet*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
                         <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasighgalery*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
-                        <li><a href="#" class="">Mutasi Inden ke GH</a></li>
-                        <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
-                        <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
+                        <!--purchase -->
+                        <li><a href="{{ route('mutasiindengalery.index') }}" class="{{ request()->is('mutasiindengalery*') ? 'active' : '' }}">Mutasi Inden ke Galery</a></li>
+                        {{-- <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiindengh*') ? 'active' : '' }}">Mutasi Inden ke Greenhouse</a></li> --}}
+                        {{-- <li><a href="{{ route('mutasigaleryinden.index') }}" class="{{ request()->is('mutasigaleryinden*') ? 'active' : '' }}">Mutasi Galery ke Inden</a></li> --}}
+                        {{-- <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li> --}}
+
+                        
                     </ul>
                 </li>
                 <li class="submenu">
