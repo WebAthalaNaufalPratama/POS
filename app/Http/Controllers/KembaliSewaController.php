@@ -41,7 +41,7 @@ class KembaliSewaController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_kembali', '<=', $req->input('dateEnd'));
         }
-        $data = $query->get();
+        $data = $query->orderByDesc('id')->get();
         $customer = Kontrak::whereHas('kembali_sewa')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')

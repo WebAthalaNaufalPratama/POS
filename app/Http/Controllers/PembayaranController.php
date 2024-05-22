@@ -26,7 +26,7 @@ class PembayaranController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
         }
-        $data = Pembayaran::with('rekening')->orderBy('created_at', 'desc')->get();
+        $data = $query->with('rekening')->orderBy('created_at', 'desc')->get();
 
         return view('pembayaran.index', compact('data'));
     }

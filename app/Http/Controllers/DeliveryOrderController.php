@@ -69,7 +69,9 @@ class DeliveryOrderController extends Controller
         $kontrak = Kontrak::with('produk')->find($data['kontrak']);
         $drivers = Karyawan::where('jabatan', 'driver')->get();
         $produkjuals = Produk_Jual::all();
-        $produkSewa = $kontrak->produk()->whereHas('produk')->get();
+        $produkSewa = $kontrak->produk()->whereHas('produk', function($q){
+            $q->whereColumn('jumlah_dikirim', '<', 'jumlah')->orWhere('jumlah_dikirim', null);
+        })->get();
         $latestDO = DeliveryOrder::withTrashed()->orderByDesc('id')->first();
 
         // kode do
@@ -88,31 +90,31 @@ class DeliveryOrderController extends Controller
         }
 
         // cek jika sudah dikirim semua
-        $sisa_sewa = collect();
-        $terkirimSemua = false;
-        $do_terbuat = DeliveryOrder::with('produk')->where('no_referensi', $kontrak->no_kontrak)->get();
-        if($do_terbuat){
-            foreach ($produkSewa as $item_sewa) {
-                $sisa_produk = $item_sewa->jumlah; // Sisa produk diinisialisasi dengan jumlah awal dari sewa
-                foreach ($do_terbuat as $do) { // Dapatkan DO
-                    foreach ($do->produk as $item_do) { // Dapatkan produk terjual DO
-                        if($item_sewa->produk_jual_id == $item_do->produk_jual_id){ // Periksa produk yang sama antara sewa dan DO
-                            $sisa_produk -= intval($item_do->jumlah); // Kurangi jumlah produk terjual dari sisa produk sewa
-                        }
-                    }
-                }
-                if ($sisa_produk > 0) {
-                    $sisa_sewa->push([ // masukkan sisa produk ke array
-                        'id' => $item_sewa->produk_jual_id,
-                        'kode_produk' => $item_sewa->produk->kode,
-                        'jumlah' => $sisa_produk
-                    ]);
-                }
-            }
-        }
+        // $sisa_sewa = collect();
+        // $do_terbuat = DeliveryOrder::with('produk')->where('no_referensi', $kontrak->no_kontrak)->get();
+        // if($do_terbuat){
+        //     foreach ($produkSewa as $item_sewa) {
+        //         $sisa_produk = $item_sewa->jumlah; // Sisa produk diinisialisasi dengan jumlah awal dari sewa
+        //         foreach ($do_terbuat as $do) { // Dapatkan DO
+        //             foreach ($do->produk as $item_do) { // Dapatkan produk terjual DO
+        //                 if($item_sewa->produk_jual_id == $item_do->produk_jual_id){ // Periksa produk yang sama antara sewa dan DO
+        //                     $sisa_produk -= intval($item_do->jumlah); // Kurangi jumlah produk terjual dari sisa produk sewa
+        //                 }
+        //             }
+        //         }
+        //         if ($sisa_produk > 0) {
+        //             $sisa_sewa->push([ // masukkan sisa produk ke array
+        //                 'id' => $item_sewa->produk_jual_id,
+        //                 'kode_produk' => $item_sewa->produk->kode,
+        //                 'jumlah' => $sisa_produk
+        //             ]);
+        //         }
+        //     }
+        // }
 
         // cek jika sudah terkirim semua
-        if ($sisa_sewa->isEmpty()) {
+        $terkirimSemua = false;
+        if ($produkSewa->isEmpty()) {
             $terkirimSemua = true;
         }
         return view('do_sewa.create', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa', 'terkirimSemua'));
@@ -153,75 +155,86 @@ class DeliveryOrderController extends Controller
 
         // check produk and quantity from sewa
         $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_referensi'])->first();
-        $produkSewa = $kontrak->produk()->whereHas('produk')->get();
+        $produkSewa = $kontrak->produk()->whereHas('produk', function($q){
+            $q->whereColumn('jumlah_dikirim', '<', 'jumlah')->orWhere('jumlah_dikirim', null);
+        })->get();
+
+        // cek jika terkirim semua
+        if ($produkSewa->isEmpty()) {
+            return redirect()->back()->withInput()->with('fail', 'Produk sudah dikirim semua');
+        }
 
         // cek input dengan sewa
         foreach ($produkSewa as $item) {
             for ($i=0; $i < count($data['produk_id']); $i++) {
                 if($data['produk_id'][$i] == $item->id){
-                    if($data['jumlah'][$i] > $item->jumlah){
+                    if($data['jumlah'][$i] > $item->jumlah || $data['jumlah'][$i] > ($item->jumlah - $item->jumlah_dikirim)){
                         return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai dengan kontrak');
                     }
                 }
             }
         }
 
-        // check sisa produk sewa yang belum dikirim
-        $sisa_sewa = collect();
-        $do_terbuat = DeliveryOrder::with('produk')->where('no_referensi', $data['no_referensi'])->get();
-        if($do_terbuat){
-            foreach ($produkSewa as $item_sewa) {
-                $sisa_produk = $item_sewa->jumlah; // Sisa produk diinisialisasi dengan jumlah awal dari sewa
-                foreach ($do_terbuat as $do) { // Dapatkan DO
-                    foreach ($do->produk as $item_do) { // Dapatkan produk terjual DO
-                        if($item_sewa->produk_jual_id == $item_do->produk_jual_id){ // Periksa produk yang sama antara sewa dan DO
-                            $sisa_produk -= intval($item_do->jumlah); // Kurangi jumlah produk terjual dari sisa produk sewa
-                        }
-                    }
-                }
-                if ($sisa_produk > 0) {
-                    $sisa_sewa->push([ // masukkan sisa produk ke array
-                        'id' => $item_sewa->produk_jual_id,
-                        'produk_terjual_id' => $item_sewa->id,
-                        'kode_produk' => $item_sewa->produk->kode,
-                        'jumlah' => $sisa_produk
-                    ]);
-                }
-            }
-        }
+        // cek jumlah input dengan jumlah sewa
+        // foreach ($variable as $key => $value) {
+        //     # code...
+        // }
 
-        // cek jika sudah terkirim semua
-        if ($sisa_sewa->isEmpty()) {
-            return redirect()->back()->withInput()->with('fail', 'Produk sudah dikirim semua');
-        }
+        // check sisa produk sewa yang belum dikirim
+        // $sisa_sewa = collect();
+        // $do_terbuat = DeliveryOrder::with('produk')->where('no_referensi', $data['no_referensi'])->get();
+        // if($do_terbuat){
+        //     foreach ($produkSewa as $item_sewa) {
+        //         $sisa_produk = $item_sewa->jumlah; // Sisa produk diinisialisasi dengan jumlah awal dari sewa
+        //         foreach ($do_terbuat as $do) { // Dapatkan DO
+        //             foreach ($do->produk as $item_do) { // Dapatkan produk terjual DO
+        //                 if($item_sewa->produk_jual_id == $item_do->produk_jual_id){ // Periksa produk yang sama antara sewa dan DO
+        //                     $sisa_produk -= intval($item_do->jumlah); // Kurangi jumlah produk terjual dari sisa produk sewa
+        //                 }
+        //             }
+        //         }
+        //         if ($sisa_produk > 0) {
+        //             $sisa_sewa->push([ // masukkan sisa produk ke array
+        //                 'id' => $item_sewa->produk_jual_id,
+        //                 'produk_terjual_id' => $item_sewa->id,
+        //                 'kode_produk' => $item_sewa->produk->kode,
+        //                 'jumlah' => $sisa_produk
+        //             ]);
+        //         }
+        //     }
+        // }
+
+        // // cek jika sudah terkirim semua
+        // if ($sisa_sewa->isEmpty()) {
+        //     return redirect()->back()->withInput()->with('fail', 'Produk sudah dikirim semua');
+        // }
 
         // cek input dengan sisa produk dari do terbuat
-        if(count($data['produk_id']) > 1){
-            for ($j=0; $j < count($data['produk_id']); $j++) { // loop sisa produk
-                $terkirim = 0;
-                for ($i=0; $i < count($sisa_sewa); $i++) { // loop produk dari input
-                    // dd($sisa_sewa[$j]['produk_terjual_id'] == $data['produk_id'][$i]);
-                    if($sisa_sewa[$i]['produk_terjual_id'] == $data['produk_id'][$j]){ // cek kode produk
-                        if($data['jumlah'][$j] > $sisa_sewa[$i]['jumlah']){ // cek jumlah
-                            return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai');
-                        }
-                    } else {
-                        $terkirim++;
-                        if($terkirim == count($data['nama_produk'])){
-                            return redirect()->back()->withInput()->with('fail', 'Produk sudah dikirim');
-                        }
-                    }
-                }
-            }
-        } else {
-            foreach ($sisa_sewa as $produk) {
-                if($produk['produk_terjual_id'] == $data['produk_id'][0]){
-                    if ($produk['jumlah'] < $data['jumlah'][0]) {
-                        return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai');
-                    }
-                }
-            }
-        }
+        // if(count($data['produk_id']) > 1){
+        //     for ($j=0; $j < count($data['produk_id']); $j++) { // loop sisa produk
+        //         $terkirim = 0;
+        //         for ($i=0; $i < count($sisa_sewa); $i++) { // loop produk dari input
+        //             if($sisa_sewa[$i]['produk_terjual_id'] == $data['produk_id'][$j]){ // cek kode produk
+        //                 if($data['jumlah'][$j] > $sisa_sewa[$i]['jumlah']){ // cek jumlah
+        //                     return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai');
+        //                 }
+        //             } else {
+        //                 $terkirim++;
+        //                 if($terkirim == count($data['nama_produk'])){
+        //                     return redirect()->back()->withInput()->with('fail', 'Produk sudah dikirim');
+        //                 }
+        //             }
+        //         }
+        //     }
+        // } else {
+        //     foreach ($sisa_sewa as $produk) {
+        //         if($produk['produk_terjual_id'] == $data['produk_id'][0]){
+        //             if ($produk['jumlah'] < $data['jumlah'][0]) {
+        //                 return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai');
+        //             }
+        //         }
+        //     }
+        // }
 
         // ambil akumulasi komponen DO
         $dataDO = [];
@@ -286,6 +299,9 @@ class DeliveryOrderController extends Controller
                 'satuan' => $data['satuan'][$i],
                 'detail_lokasi' => $data['detail_lokasi'][$i]
             ]);
+            $getProdukSewa = Produk_Terjual::find($data['produk_id'][$i]);
+            $getProdukSewa->jumlah_dikirim = ($getProdukSewa->jumlah_dikirim ?? 0) + intval($data['jumlah'][$i]);
+            $getProdukSewa->update();
 
             if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             foreach ($getProdukTerjual->komponen as $komponen ) {

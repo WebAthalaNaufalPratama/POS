@@ -121,27 +121,29 @@
                                     $i = 0;
                                     @endphp
                                     @foreach ($kontrak->produk as $produk) 
-                                        <tr id="row{{ $i }}">
-                                            <td>
-                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
-                                                    <option value="">Pilih Produk</option>
-                                                    @foreach ($produkSewa as $pj)
-                                                        <option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}"></td>
-                                            <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ old('satuan.' . $i) ?? 'pcs' }}"></td>
-                                            <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ old('detail_lokasi.' . $i) }}" required></td>
-                                            @if ($i == 0)
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                            @else
-                                                <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                            @endif
-                                            @php
-                                                $i++;
-                                            @endphp
-                                        </tr>
+                                    @if ($produk->jumlah_dikirim < $produk->jumlah)
+                                    <tr id="row{{ $i }}">
+                                        <td>
+                                            <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
+                                                <option value="">Pilih Produk</option>
+                                                @foreach ($produkSewa as $pj)
+                                                    <option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->id == $produk->id ? 'selected' : '' }}>({{ $pj->id }}) {{ $pj->produk->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}"></td>
+                                        <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ old('satuan.' . $i) ?? 'pcs' }}"></td>
+                                        <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ old('detail_lokasi.' . $i) }}" required></td>
+                                        @if ($i == 0)
+                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                        @else
+                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                        @endif
+                                        @php
+                                            $i++;
+                                        @endphp
+                                    </tr>
+                                    @endif
                                     @endforeach
                                     @endif
                                 </tbody>

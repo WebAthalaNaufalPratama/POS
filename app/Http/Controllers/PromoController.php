@@ -15,7 +15,7 @@ class PromoController extends Controller
 {
     public function index()
     {
-        $promos = Promo::all();
+        $promos = Promo::orderByDesc('id')->get();
         $lokasis = Lokasi::all();
         $produk_juals = Produk_Jual::all();
         $tipe_produks = Tipe_Produk::where('kategori', 'Jual')->get();
