@@ -259,14 +259,33 @@ class FormPerangkaiController extends Controller
 
     public function penjualan_index(Request $req)
     {
+        // $query = FormPerangkai::whereHas('produk_terjual');
+        // if($req->jenis_rangkaian){
+        //     $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->orderBy('created_at', 'desc')->get();
+        //     // dd($query->get());
+        // } else {
+        //     $data = $query->get();
+        // }
+        $perangkai = FormPerangkai::select('perangkai_id')
+        ->distinct()
+        ->join('karyawans', 'form_perangkais.perangkai_id', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
         $query = FormPerangkai::whereHas('produk_terjual');
         if($req->jenis_rangkaian){
-            $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->orderBy('created_at', 'desc')->get();
-            // dd($query->get());
-        } else {
-            $data = $query->get();
+            $query->where('jenis_rangkaian', $req->jenis_rangkaian);
         }
-        return view('form_jual.index', compact('data'));
+        if ($req->perangkai) {
+            $query->where('perangkai_id', $req->input('perangkai'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal', '<=', $req->input('dateEnd'));
+        }
+        $data = $query->get();
+        return view('form_jual.index', compact('data', 'perangkai'));
     }
 
     public function penjualan_show($formpenjualan)

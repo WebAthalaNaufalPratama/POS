@@ -139,6 +139,7 @@
                                                                 @endphp
                                                                 @foreach ($produkjuals as $index => $pj)
                                                                     @php
+                                                                    if($pj->produk && $produk->produk->kode){
                                                                         $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_retur ==  $returpenjualans->no_retur && $pj->jenis != 'TAMBAHAN');
                                                                         $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $returpenjualans->no_retur && $pj->jenis != 'TAMBAHAN');
                                                                         if($isSelectedTRD){
@@ -156,11 +157,12 @@
                                                                                 }
                                                                             }
                                                                         }
+                                                                    }
                                                                     @endphp
-                                                                    <option value="{{ $pj->produk->kode }}" data-kondisi="{{ $pj->produk->kode }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT  ? 'selected' : '' }}>
-                                                                        @if (substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                                    <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                                        @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                             {{ $pj->produk->nama }}
-                                                                        @elseif (substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                        @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
                                                                             {{ $pj->produk->nama }}
                                                                         @endif
                                                                     </option>
@@ -186,6 +188,7 @@
                                                                         @foreach ($items as $komponen)
                                                                             <div class="row mt-2">
                                                                                 <div class="col">
+                                                                                    <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
                                                                                     <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                                 </div>
                                                                                 <div class="col">
@@ -893,6 +896,35 @@
                 pointInput.val(pointValue);
             } else {
                 pointInput.val(0);
+            }
+        });
+
+        var produkData = [];
+
+        @foreach ($produks as $produk)
+            produkData.push({
+                id: {{ $produk->id }},
+                jumlah: {{ $produk->jumlah }}
+            });
+        @endforeach
+        console.log('Produk Data:', produkData);
+
+
+        $(document).on('input', '.jumlah_diterima', function() {
+            var inputId = $(this).attr('id');
+            var jumlah = parseInt($(this).val(), 10); // Ensure jumlah is parsed as an integer
+            var produkId = $(this).data('produk-id'); // Extract the product ID from the data attribute
+
+            var produk = produkData.find(function(item) {
+                return item.id == produkId;
+            });
+
+            if (jumlah > produk.jumlah) {
+                alert('jumlah diterima tidak boleh lebih dari jumlah dikirim');
+                $(this).val(produk.jumlah);
+            } else if (jumlah < 0) {
+                alert('jumlah diterima tidak boleh kurang dari 0');
+                $(this).val(0);
             }
         });
 

@@ -243,6 +243,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
             Route::post('/storekomponen', 'PenjualanController@store_komponen')->name('komponenpenjulan.store');
             Route::post('/storekomponenmutasi', 'PenjualanController@store_komponen_mutasi')->name('komponenmutasi.store');
+            Route::post('/storekomponenretur', 'PenjualanController@store_komponen_retur')->name('komponenretur.store');
         });
 
         Route::group(['prefix' => 'purchase'], function() {

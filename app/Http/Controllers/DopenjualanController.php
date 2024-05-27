@@ -29,11 +29,36 @@ use Illuminate\Support\Facades\Http;
 
 class DopenjualanController extends Controller
 {
-    public function index()
+    public function index(Request $req)
     {
-        $dopenjualans = DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc')->get();
+        // $dopenjualans = DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc')->get();
+        $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
+
+        if ($req->customer) {
+            $query->where('customer_id', $req->input('customer'));
+        }
+        if ($req->driver) {
+            $query->where('driver', $req->input('driver'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kirim', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
+        }
+        $dopenjualans = $query->get();
+        $customer = DeliveryOrder::select('customer_id')
+        ->distinct()
+        ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
+        ->orderBy('customers.nama')
+        ->get();
+        $driver = DeliveryOrder::select('driver')
+        ->distinct()
+        ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+        ->orderBy('karyawans.nama')
+        ->get();
         // dd($dopenjualans);
-        return view('dopenjualan.index', compact('dopenjualans'));
+        return view('dopenjualan.index', compact('dopenjualans', 'customer', 'driver'));
     }
 
     public function create($penjualan)

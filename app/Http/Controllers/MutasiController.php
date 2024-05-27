@@ -34,9 +34,18 @@ use Illuminate\Support\Facades\Http;
 
 class MutasiController extends Controller
 {
-    public function index_outlet()
+    public function index_outlet(Request $req)
     {
-        $mutasis = Mutasi::where('no_mutasi', 'like', 'MGO%')->orderBy('created_at', 'desc')->get();
+        $query = Mutasi::where('no_mutasi', 'like', 'MGO%')->orderBy('created_at', 'desc');
+
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+        $mutasis = $query->get();
+        // $mutasis = Mutasi::where('no_mutasi', 'like', 'MGO%')->orderBy('created_at', 'desc')->get();
         return view('mutasigalery.index', compact('mutasis'));
     }
 
@@ -204,16 +213,26 @@ class MutasiController extends Controller
         return redirect(route('mutasigalery.index'))->with('success', 'Data Berhasil Disimpan');
     }
 
-    public function index_outletgalery()
+    public function index_outletgalery(Request $req)
     {
-        $mutasis = Mutasi::where('no_mutasi', 'like', 'MOG%')->orderBy('created_at', 'desc')->get();
+        $query = Mutasi::where('no_mutasi', 'like', 'MOG%')->orderBy('created_at', 'desc');
+
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+        $mutasis = $query->get();
+
+        // $mutasis = Mutasi::where('no_mutasi', 'like', 'MOG%')->orderBy('created_at', 'desc')->get();
         return view('mutasioutlet.index', compact('mutasis'));
     }
 
     public function create_outletgalery($returpenjualan)
     {
-        $roles = Auth::user()->roles()->value('name');
-        if ($roles == 'admin' || $roles == 'kasir') {
+        // $roles = Auth::user()->roles()->value('name');
+        // if ($roles == 'admin' || $roles == 'kasir') {
             $user = Auth::user()->value('id');
             $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
             // dd($karyawans);
@@ -247,9 +266,11 @@ class MutasiController extends Controller
         }
             // $komponen = Kondisi::with('komponen')->get();
             // dd($komponen);
+            $lokasipengirim = Lokasi::where('tipe_lokasi', 2)->get();
+            $lokasipenerima = Lokasi::where('tipe_lokasi', 1)->get();
             $kondisis = Kondisi::all();
             $invoices = Penjualan::get();
-        }
+        // }
 
         $returs = ReturPenjualan::with('produk')->find($returpenjualan);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_retur', $returs->no_retur)->where('jenis', 'LIKE', 'RETUR')->get();
@@ -264,33 +285,37 @@ class MutasiController extends Controller
 
         foreach ($returs->produk_retur as $produk) {
             foreach ($produkjuals as $index => $pj) {
-                $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur == $returs->no_retur && $pj->jenis != 'GANTI');
-                if ($isSelectedGFT) {
-                    foreach ($pj->komponen as $komponen) {
-                        foreach ($kondisis as $kondisi) {
-                            if ($kondisi->id == $komponen->kondisi) {
-                                // Check if the komponen is already added
-                                $komponenExists = false;
-                                if (isset($selectedGFTKomponen[$komponen->produk_terjual_id])) {
-                                    foreach ($selectedGFTKomponen[$komponen->produk_terjual_id] as $existingKomponen) {
-                                        if ($existingKomponen['nama'] == $komponen->nama_produk &&
-                                            $existingKomponen['kondisi'] == $kondisi->nama &&
-                                            $existingKomponen['jumlah'] == $komponen->jumlah &&
-                                            $existingKomponen['produk'] == $komponen->produk_terjual_id) {
-                                            $komponenExists = true;
-                                            break;
+                if($pj->produk && $produk->produk->kode)
+                {
+                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur == $returs->no_retur && $pj->jenis != 'GANTI');
+                    if ($isSelectedGFT) {
+                        foreach ($pj->komponen as $komponen) {
+                            foreach ($kondisis as $kondisi) {
+                                if ($kondisi->id == $komponen->kondisi) {
+                                    // Check if the komponen is already added
+                                    $komponenExists = false;
+                                    if (isset($selectedGFTKomponen[$komponen->produk_terjual_id])) {
+                                        foreach ($selectedGFTKomponen[$komponen->produk_terjual_id] as $existingKomponen) {
+                                            if ($existingKomponen['nama'] == $komponen->nama_produk &&
+                                                $existingKomponen['kondisi'] == $kondisi->nama &&
+                                                $existingKomponen['jumlah'] == $komponen->jumlah &&
+                                                $existingKomponen['produk'] == $komponen->produk_terjual_id) {
+                                                $komponenExists = true;
+                                                break;
+                                            }
                                         }
                                     }
-                                }
 
-                                // Add komponen if it doesn't already exist
-                                if (!$komponenExists) {
-                                    $selectedGFTKomponen[$komponen->produk_terjual_id][] = [
-                                        'nama' => $komponen->nama_produk,
-                                        'kondisi' => $kondisi->nama,
-                                        'jumlah' => $komponen->jumlah,
-                                        'produk' => $komponen->produk_terjual_id,
-                                    ];
+                                    // Add komponen if it doesn't already exist
+                                    if (!$komponenExists) {
+                                        $selectedGFTKomponen[$komponen->produk_terjual_id][] = [
+                                            'kode' => $komponen->kode_produk,
+                                            'nama' => $komponen->nama_produk,
+                                            'kondisi' => $kondisi->nama,
+                                            'jumlah' => $komponen->jumlah,
+                                            'produk' => $komponen->produk_terjual_id,
+                                        ];
+                                    }
                                 }
                             }
                         }
@@ -307,7 +332,7 @@ class MutasiController extends Controller
         // dd($perPendapatan);
         $returpenjualans = ReturPenjualan::with('deliveryorder')->find($returpenjualan);
 
-        return view('mutasioutlet.create', compact('perPendapatan','produkjuals','returpenjualans','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
+        return view('mutasioutlet.create', compact('lokasipengirim','lokasipenerima','perPendapatan','produkjuals','returpenjualans','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
     }
 
     public function acc_outlet($mutasi)
@@ -411,29 +436,10 @@ class MutasiController extends Controller
         // cek produk inventory
         $allStockAvailable = true;
 
-        if($lokasi->tipe_lokasi == 1) {
+        if($lokasi->tipe_lokasi == 2){
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
-                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-    
-                foreach ($getProdukJual->komponen as $komponen ) {
-                    $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
-                                            ->where('kode_produk', $komponen->kode_produk)
-                                            ->where('kondisi_id', $komponen->kondisi)
-                                            ->first();
-                    if (!$stok) {
-                        $allStockAvailable = false;
-                        break;
-                    }
-                }
-    
-                if (!$allStockAvailable) {
-                    return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
-                }
-            }
-        }elseif($lokasi->tipe_lokasi == 2){
-            for ($i = 0; $i < count($data['nama_produk']); $i++) {
-                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-    
+                $getProdukJual = Produk_Terjual::with('komponen')->where('id', $data['nama_produk'][$i])->first();
+
                 foreach ($getProdukJual->komponen as $komponen ) {
                     $stok = InventoryOutlet::where('lokasi_id', $req->pengirim)
                                             ->where('kode_produk', $komponen->kode_produk)
@@ -466,51 +472,91 @@ class MutasiController extends Controller
             if (!$produk_terjual) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
-            $cekgfttrd = substr($data['nama_produk'][$i], 0, 3);
+
+            $cekgfttrd = substr($getProdukJual->produk->kode, 0, 3);
+
             if ($cekgfttrd == 'GFT') {
-                for ($index = 0; $index < count($data['komponengiftproduk_' . $i]); $index++) {
-                    $kondisi = isset($data['kondisigiftproduk_' . $i][$index]) ? Kondisi::where('nama', $data['kondisigiftproduk_' . $i][$index])->value('id') : null;
-                    $jumlah = isset($data['jumlahgiftproduk_' . $i][$index]) ? $data['jumlahgiftproduk_' . $i][$index] : 0;
-                    
-                    foreach ($getProdukJual->komponen as $komponen) {
+                $kode_key = 'kodegiftproduk_' . $i;
+                $komponen_key = 'komponengiftproduk_' . $i;
+                $kondisi_key = 'kondisigiftproduk_' . $i;
+                $jumlah_key = 'jumlahgiftproduk_' . $i;
+                
+
+                if (isset($data[$komponen_key]) && is_array($data[$komponen_key])) {
+                    $cekcount = count($data[$komponen_key]);
+                    $getProduk = Produk::where('kode', $data[$kode_key])->first();
+                    // dd($getProdukJual->komponen);
+                    for ($index = 0; $index < count($data[$komponen_key]); $index++) {
+                        $kondisi = isset($data[$kondisi_key][$index]) ? Kondisi::where('nama', $data[$kondisi_key][$index])->value('id') : null;
+                        $jumlah = isset($data[$jumlah_key][$index]) ? $data[$jumlah_key][$index] : 0;
+
+                        // Buat objek Komponen_Produk_Terjual
                         $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                             'produk_terjual_id' => $produk_terjual->id,
-                            'kode_produk' => $komponen->kode_produk,
-                            'nama_produk' => $komponen->nama_produk,
-                            'tipe_produk' => $komponen->tipe_produk,
+                            'kode_produk' => $getProduk->kode,
+                            'nama_produk' => $getProduk->nama,
+                            'tipe_produk' => $getProduk->tipe_produk,
                             'kondisi' => $kondisi,
-                            'deskripsi' => $komponen->deskripsi,
+                            'deskripsi' => $getProduk->deskripsi,
                             'jumlah' => $jumlah,
-                            'harga_satuan' => $komponen->harga_satuan,
-                            'harga_total' => $komponen->harga_total
+                            'harga_satuan' => 0,
+                            'harga_total' => 0
                         ]);
-                        if (!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    
+
+
+                        if (!$komponen_produk_terjual) {
+                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                        }
+
+                        $stok = $lokasi->tipe_lokasi == 1
+                            ? InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first()
+                            : InventoryOutlet::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
+
+                        if ($stok) {
+                            $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                            $stok->update();
+                        }
                     }
+                                            // dd($komponen_produk_terjual);
                 }
             } elseif ($cekgfttrd == 'TRD') {
-                for ($index = 0; $index < count($data['kondisitradproduk_' . $i]); $index++) {
-                    $kondisi = isset($data['kondisitradproduk_' . $i][$index]) ? Kondisi::where('nama', $data['kondisitradproduk_' . $i][$index])->value('id') : null;
-                    $jumlah = isset($data['jumlahtradproduk_' . $i][$index]) ? $data['jumlahtradproduk_' . $i][$index] : 0;
-                    
-                    foreach ($getProdukJual->komponen as $komponen) {
-                        $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                            'produk_terjual_id' => $produk_terjual->id,
-                            'kode_produk' => $komponen->kode_produk,
-                            'nama_produk' => $komponen->nama_produk,
-                            'tipe_produk' => $komponen->tipe_produk,
-                            'kondisi' => $kondisi,
-                            'deskripsi' => $komponen->deskripsi,
-                            'jumlah' => $jumlah,
-                            'harga_satuan' => $komponen->harga_satuan,
-                            'harga_total' => $komponen->harga_total
-                        ]);
-                        if (!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                $kondisi_key = 'kondisitradproduk_' . $i;
+                $jumlah_key = 'jumlahtradproduk_' . $i;
+
+                if (isset($data[$kondisi_key]) && is_array($data[$kondisi_key])) {
+                    for ($index = 0; $index < count($data[$kondisi_key]); $index++) {
+                        $kondisi = Kondisi::where('nama', $data[$kondisi_key][$index])->value('id');
+                        $jumlah = $data[$jumlah_key][$index];
+
+                        foreach ($getProdukJual->komponen as $komponen) {
+                            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                                'produk_terjual_id' => $produk_terjual->id,
+                                'kode_produk' => $komponen->kode_produk,
+                                'nama_produk' => $komponen->nama_produk,
+                                'tipe_produk' => $komponen->tipe_produk,
+                                'kondisi' => $kondisi,
+                                'deskripsi' => $komponen->deskripsi,
+                                'jumlah' => $jumlah,
+                                'harga_satuan' => $komponen->harga_satuan,
+                                'harga_total' => $komponen->harga_total
+                            ]);
+
+                            if (!$komponen_produk_terjual) {
+                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                            }
+
+                            $stok = $lokasi->tipe_lokasi == 1
+                                ? InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first()
+                                : InventoryOutlet::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
+
+                            if ($stok) {
+                                $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                                $stok->update();
+                            }
+                        }
                     }
-                }                       
-            }
-            
-            if (!$komponen_produk_terjual) {
-                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                }
             }
         }
 
@@ -531,9 +577,13 @@ class MutasiController extends Controller
         $perPendapatan = [];
         
         foreach ($mutasis->produkMutasiOutlet as $produk) {
+            $selectedGFTKomponen = [];
+            
             foreach ($produkjuals as $index => $pj) {
-                $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
-                $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
+                // dd($produkjuals);
+                if($pj->produk && $produk->produk->kode)
+                {
+                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_do ==  $deliveryOrder->no_do && $pj->jenis != 'TAMBAHAN');
                 
                 if ($isSelectedGFT) {
                     foreach ($pj->komponen as $komponen) {
@@ -551,11 +601,13 @@ class MutasiController extends Controller
                         }
                     }
                 }
+                }
+                
             }
-        }
 
-        if (!empty($selectedGFTKomponen)) {
-            $perPendapatan += $selectedGFTKomponen;
+            if (!empty($selectedGFTKomponen)) {
+                $perPendapatan += $selectedGFTKomponen;
+            }
         }
 
         // dd($pj->produk->kode);
@@ -602,9 +654,19 @@ class MutasiController extends Controller
         return redirect(route('mutasioutlet.index'))->with('success', 'Data Berhasil Disimpan');
     }
 
-    public function index_ghgalery()
+    public function index_ghgalery(Request $req)
     {
-        $mutasis = Mutasi::where('no_mutasi', 'like', 'MGG%')->orderBy('created_at', 'desc')->get();
+        $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->orderBy('created_at', 'desc');
+
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+        $mutasis = $query->get();
+
+        // $mutasis = Mutasi::where('no_mutasi', 'like', 'MGG%')->orderBy('created_at', 'desc')->get();
         return view('mutasighgalery.index', compact('mutasis'));
     }
 

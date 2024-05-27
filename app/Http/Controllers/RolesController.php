@@ -95,7 +95,9 @@ class RolesController extends Controller
     {
         $role = $role;
         $rolePermissions = $role->permissions->pluck('name')->toArray();
+        // dd($role);
         $permissions = Permission::where('name', 'NOT LIKE', '%generated::%')->get();
+        // dd($permissions);
     
         return view('roles.edit', compact('role', 'rolePermissions', 'permissions'));
     }
