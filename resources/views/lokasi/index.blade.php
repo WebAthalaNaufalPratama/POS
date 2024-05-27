@@ -22,6 +22,7 @@
                     <th>No</th>
                     <th>Nama</th>
                     <th>Tipe</th>
+                    <th>Operasional</th>
                     <th>Alamat</th>
                     <th>Pic</th>
                     <th>Aksi</th>
@@ -33,6 +34,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->nama }}</td>
                             <td>{{ $item->tipe->nama ?? '-' }}</td>
+                            <td>{{ $item->operasional->nama ?? '-' }}</td>
                             <td>{{ $item->alamat }}</td>
                             <td>{{ $item->pic }}</td>
                             <td class="text-center">
@@ -85,6 +87,17 @@
                 </div>
             </div>
             <div class="mb-3">
+                <label for="operasional_id" class="col-form-label">Operasional</label>
+                <div class="form-group">
+                  <select class="select2" name="operasional_id" id="add_operasional_id" required>
+                    <option value="">Pilih Tipe Lokasi</option>
+                    @foreach ($operasionals as $item)
+                      <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                    @endforeach
+                  </select>
+                </div>
+            </div>
+            <div class="mb-3">
                 <label for="alamat" class="col-form-label">Alamat</label>
                 <textarea class="form-control" name="alamat" id="add_alamat" required></textarea>
             </div>
@@ -128,6 +141,17 @@
                 </div>
             </div>
             <div class="mb-3">
+                <label for="operasional_id" class="col-form-label">Operasional</label>
+                <div class="form-group">
+                  <select class="select2" name="operasional_id" id="edit_operasional_id" required>
+                    <option value="">Pilih Tipe Lokasi</option>
+                    @foreach ($operasionals as $item)
+                      <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                    @endforeach
+                  </select>
+                </div>
+            </div>
+            <div class="mb-3">
                 <label for="alamat" class="col-form-label">Alamat</label>
                 <textarea class="form-control" name="alamat" id="edit_alamat" value="" required></textarea>
             </div>
@@ -150,7 +174,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_tipe_lokasi, #edit_tipe_lokasi').select2()
+        $('#add_tipe_lokasi, #edit_tipe_lokasi, #add_operasional_id, #edit_operasional_id').select2()
     });
 
     function getData(id){
@@ -161,6 +185,7 @@
                 $('#editForm').attr('action', 'lokasi/'+id+'/update');
                 $('#edit_nama').val(response.nama)
                 $('#edit_tipe_lokasi').val(response.tipe_lokasi).trigger('change')
+                $('#edit_operasional_id').val(response.operasional_id).trigger('change')
                 $('#edit_alamat').val(response.alamat)
                 $('#edit_pic').val(response.pic)
             },

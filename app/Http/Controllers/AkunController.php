@@ -44,7 +44,7 @@ class AkunController extends Controller
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $duplicate = Akun::where('no_akun', $req->no_akun)->first();
+        $duplicate = Akun::withTrashed()->where('no_akun', $req->no_akun)->first();
         if($duplicate) return redirect()->back()->withInput()->with('fail', 'No akun sudah terpakai');
         $data = $req->except(['_token', '_method']);
 
