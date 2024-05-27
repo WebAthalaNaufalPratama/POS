@@ -18,7 +18,7 @@ class InventoryGalleryController extends Controller
      */
     public function index()
     {
-        $data = InventoryGallery::all();
+        $data = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->get();
         return view('inven_galeri.index', compact('data'));
     }
 

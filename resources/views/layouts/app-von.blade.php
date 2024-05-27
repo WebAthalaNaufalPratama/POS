@@ -194,10 +194,16 @@
               <div class="profileset">
                 <span class="user-img"><img src="/assets/img/profiles/avator1.jpg" alt="">
                   <span class="status online"></span></span>
-                <div class="profilesets">
-                  <h6>John Doe</h6>
-                  <h5>Admin</h5>
+                  <div class="profilesets">
+                    @auth
+                        <h6>{{ auth()->user()->name }}</h6>
+                        <h5>{{ auth()->user()->karyawans->jabatan ?? '' }}</h5>
+                    @else
+                        <h6>Guest</h6>
+                        <h5>Not Logged In</h5>
+                    @endauth
                 </div>
+                
               </div>
               <hr class="m-0">
               <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> My Profile</a>

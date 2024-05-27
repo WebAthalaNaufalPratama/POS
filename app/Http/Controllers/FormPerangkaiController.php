@@ -40,7 +40,7 @@ class FormPerangkaiController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal', '<=', $req->input('dateEnd'));
         }
-        $data = $query->get();
+        $data = $query->orderByDesc('id')->get();
         return view('form_sewa.index', compact('data', 'perangkai'));
     }
 

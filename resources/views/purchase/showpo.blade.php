@@ -1,3 +1,9 @@
+<?php
+use Carbon\Carbon;
+
+setlocale(LC_TIME, 'id_ID');
+Carbon::setLocale('id');
+?>
 @extends('layouts.app-von')
 
 @section('content')
@@ -8,7 +14,7 @@
             <h3 class="page-title">Show Purchase Order : {{ $beli->no_po }}</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
-                    <a href="index.html">Purchase Order</a>
+                    <a href="{{ route('pembelian.index')}}">Purchase Order</a>
                 </li>
                 <li class="breadcrumb-item active">
                     PO
@@ -26,8 +32,7 @@
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('pembelianpo.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+           
                 <div class="row">
                     <div class="col-sm">
                         @csrf
@@ -69,30 +74,58 @@
                                                     @endforeach
                                                 </select> --}}
                                        </div>
-                                        <div class="form-group">
-                                            <label for="harga_jual">Status</label>
-                                                <input type="text" class="form-control" id="status" name="status" readonly>
-                                            </div>
+                                       <div class="form-group">
+                                        <label for="harga_jual">Status</label>
+                                        <input type="text" class="form-control" id="status" name="status" value="@php
+                                            $latestDate = max($beli->tgl_dibuat, $beli->tgl_diterima, $beli->tgl_diperiksa);
+                                            if ($latestDate == $beli->tgl_dibuat) {
+                                                echo $beli->status_dibuat. ' oleh ' . $pembuat;
+                                            } elseif ($latestDate == $beli->tgl_diterima) {
+                                                $beli->status_diterima . ' oleh ' . $penerima; 
+                                            } else {
+                                                echo $beli->status_diperiksa. ' oleh ' . $pemeriksa;
+                                            }
+                                        @endphp" readonly>
+                                    </div>
+                                    
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim}}">
+                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ \Carbon\Carbon::parse($beli->tgl_dikirim)->translatedFormat('d F Y') }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="date" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ $beli->tgl_diterima }}">
+                                                    <input type="text" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ \Carbon\Carbon::parse($beli->tgl_diterima)->translatedFormat('d F Y') }}" readonly>
                                                 </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="no_do">Nomor DO supplier</label>
-                                                <input type="text" class="form-control" id="no_do" name="no_do" value="{{ $beli->no_do_suplier }}">
+                                                <input type="text" class="form-control" id="no_do" name="no_do" value="{{ $beli->no_do_suplier }}" readonly>
                                             </div>
                                             <div class="form-group">
-                                                <label for="filedo">Delivery Order supplier</label>
-                                                    <input type="file" class="form-control" id="filedo" name="filedo">
-                                                </div>
+                                             
+                                                <form action="{{ route('gambarpo.update', ['datapo' => $beli->id]) }}" method="POST" enctype="multipart/form-data">
+                                                    @csrf
+                                                    @method('patch')
+                                                    <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                        <label>Delivery Order supplier <a href="javascript:void(0)" id="clearFileDO" class="custom-file-container__image-clear" onclick="clearFileDO()" title="Clear Image">clear</a></label>
+                                                        <label class="custom-file-container__custom-file">
+                                                            <input type="file" id="bukti_do" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
+                                                            <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                        </label>
+                                                        <span class="text-danger">max 2mb</span>
+                                                        <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" />
+                                                    </div>
+                                                    <div class="text-end mt-3">
+                                                        <button class="btn btn-primary" type="submit">Upload File</button>
+                                                        <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
+                                                    </div>
+                                                </form>
+                                                
+                                                    {{-- <input type="file" class="form-control" id="filedo" name="filedo"> --}}
+                                               
                                         </div>
                                     </div>
                                 </div>
@@ -118,8 +151,8 @@
                                             <tbody id="dynamic_field">
                                                 @foreach ($produkbelis as $item)
                                                 <tr>
-                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}"></td>
-                                                    <td><input type="text" name="nama[]" id="nama_0" class="form-control" value="{{ $item->produk->nama }}"></td>
+                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
+                                                    <td><input type="text" name="nama[]" id="nama_0" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
 
                                                     {{-- <select id="produk_0" name="produk[]" class="form-control" onchange="showInputType(0)">
                                                         <option value="">----- Pilih Produk ----</option>
@@ -127,9 +160,9 @@
                                                         <option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}">{{ $produk->nama }}</option>
                                                         @endforeach
                                                     </select> --}}
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}"></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_diterima }}"></td>
-                                                    <td><input type="text" name="kondisi[]" id="kondisi_0" class="form-control" value="{{ $item->kondisi->nama }}"></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_diterima }}" readonly></td>
+                                                    <td><input type="text" name="kondisi[]" id="kondisi_0" class="form-control" value="{{ $item->kondisi->nama }}" readonly></td>
 
                                                         {{-- <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
                                                             <option value="">Pilih Kondisi</option>
@@ -146,58 +179,73 @@
                             </div>
                         </div>
 
-                         <div class="row justify-content-start">
-                            <div class="col-md-6 border rounded pt-3 me-1 mt-2">
-                             
+                        <div class="row justify-content-start">
+                            <div class="col-md-7 border rounded pt-3 me-1 mt-2">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
-                                            <th>Dibuat</th>                                              
-                                            <th>Diterima</th>                                              
+                                            <th>Dibuat</th>
+                                            <th>Diterima</th>
                                             <th>Diperiksa</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td id="pembuat">{{ Auth::user()->name }}</td>
-                                            <td id="penerima">-</td>
-                                            <td id="pemeriksa">-</td>
+                                            <td id="pembuat">
+                                                <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
+                                            </td>
+                                            <td id="penerima">
+                                                <input type="text" class="form-control" value="{{ $penerima }} ({{ $penerimajbt }})" disabled>
+                                            </td>
+                                            <td id="pemeriksa">
+                                                <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})"  disabled>
+                                            </td>
                                         </tr>
+                                        
                                         <tr>
                                             <td id="status_dibuat">
-                                             <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                <option value="draft">Draft</option>
-                                                <option value="publish">Publish</option>
-                                            </select>
+                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
+                                                    <option disabled selected>Pilih Status</option>
+                                                    <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
+                                                    <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                </select>
                                             </td>
                                             <td id="status_diterima">
-                                                <select id="status_diterima" name="status_diterima" class="form-control" required>
-                                                    <option value="pending">Pending</option>
-                                                    <option value="acc">Accept</option>
+                                                <select id="status_diterima" name="status_diterima" class="form-control" required disabled>
+                                                    <option disabled selected>Pilih Status</option>
+                                                    <option value="pending" {{ $beli->status_diterima == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="acc" {{ $beli->status_diterima == 'acc' ? 'selected' : '' }}>Accept</option>
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
-                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
-                                                    <option value="pending">Pending</option>
-                                                    <option value="acc">Accept</option>
+                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required disabled>
+                                                    <option disabled selected>Pilih Status</option>
+                                                    <option value="pending" {{ $beli->status_diperiksa == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="acc" {{ $beli->status_diperiksa == 'acc' ? 'selected' : '' }}>Accept</option>
                                                 </select>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
-                                            <td id="tgl_diterima" style="width: 25%;">-</td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                            <td id="tgl_pembuat">
+                                                <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat }}" disabled>
+                                            </td>
+                                            <td id="tgl_diterima">
+                                                <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima_ttd }}" disabled>
+                                            </td>
+                                            <td id="tgl_pemeriksa">
+                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa }}" disabled>
+                                            </td>
                                         </tr>
                                     </tbody>
-                                </table>  
-                                        <br>                                 
-                               </div>
-                         </div>
+                                </table>
+                                <br>
+                            </div>
+                        </div>
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="" class="btn btn-secondary" type="button">Back</a>
                         </div>
-            </form>
+            
         </div>
 
     </div>
@@ -207,120 +255,43 @@
 @endsection
 <!-- Modal -->
 
-<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Tambah Supplier</h5>
-          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <form id="supplierForm" action="{{ route('supplier.store') }}" method="POST">
-                @csrf
-            <div class="mb-3">
-              <label for="nama" class="form-label">Nama Supplier</label>
-              <input type="text" class="form-control" id="nama" name="nama" required>
-            </div>
-            <div class="mb-3">
-              <label for="pic" class="form-label">PIC</label>
-              <input type="text" class="form-control" id="pic" name="pic">
-            </div>
-            <div class="mb-3">
-              <label for="handphone" class="form-label">Handphone</label>
-              <input type="text" class="form-control" id="handphone" name="handphone">
-            </div>
-            <div class="mb-3">
-              <label for="alamat" class="form-label">Alamat</label>
-              <textarea class="form-control" id="alamat" name="alamat" rows="3"></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="tanggal_bergabung" class="form-label">Tanggal bergabung</label>
-              <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung">
-            </div>
-            <div class="mb-3">
-              <label for="tipe_supplier" class="form-label">Tipe Supplier</label>
-              <select class="form-control" id="tipe_supplier" name="tipe_supplier">
-                <option value="tradisional">Tradisional</option>
-                {{-- <option value="inden">Inden</option> --}}
-              </select>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Simpan</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-</div>
-  
-{{-- @section('scripts')
-<script>
-var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-$(document).ready(function() {
-    var i = 1;
-    $('#add').click(function(){
-        var newRow = '<tr id="row'+i+'">'+
-                        '<td><input type="text" name="kode[]" id="kode_'+i+'" class="form-control" readonly></td>'+
-                        '<td>'+
-                            '<select id="produk_'+i+'" name="produk[]" class="form-control">'+
-                                '<option value="">Pilih Produk</option>'+
-                                '@foreach ($produks as $produk)'+
-                                    '<option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}">{{ $produk->nama }}</option>'+
-                                '@endforeach'+
-                            '</select>'+
-                        '</td>'+
-                        '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
-                        '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
-                        '<td>'+
-                            '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control" onchange="showInputType('+i+')">'+
-                                '<option value="">Pilih Kondisi</option>'+
-                                '@foreach ($kondisis as $kondisi)'+
-                                    '<option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>'+
-                                '@endforeach'+
-                            '</select>'+
-                        '</td>'+
-                        '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>'+
-                    '</tr>';
-        $('#dynamic_field').append(newRow);
+@section('scripts')
+    <script>
+        // var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        $(document).ready(function(){
+            if ($('#previewdo').attr('src') === '') {
+                $('#previewdo').attr('src', defaultImg);
+            }
 
-        // Mengaktifkan select2 untuk dropdown produk
-        $('#produk_' + i).select2();
+            $('#bukti_do').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewdo').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
 
-        // Ketika terjadi perubahan pada dropdown produk
-        $('#produk_' + i).change(function() {
-            // Ambil nilai kode dari atribut data
-            var kode_produk = $(this).find(':selected').data('kode');
-            
-            // Masukkan nilai kode ke input kode yang sesuai
-            var id = $(this).attr('id').split('_')[1];
-            $('#kode_' + id).val(kode_produk);
+            // Definisikan fungsi clearFile di sini
         });
 
-        i++;
-    });
+        function clearFileDO(){
+            $('#bukti_do').val('');
+            $('#previewdo').attr('src', defaultImg);
+        }
+    </script>
+@endsection
 
-    $(document).on('click', '.btn_remove', function(){
-        var button_id = $(this).attr("id");
-        $('#row'+button_id+'').remove();
-    });
-});
-
-
-</script>
-<script>
-    $(document).ready(function() {
-        $('#produk_0').select2();
-        // Ketika terjadi perubahan pada dropdown produk
-        $('#produk_0').change(function() {
-            // Ambil nilai kode dari atribut data
-            var kode_produk = $(this).find(':selected').data('kode');
-            
-            // Masukkan nilai kode ke input kode
-            $('#kode_0').val(kode_produk);
-        });
-    });
-</script>
-
-@endsection --}}

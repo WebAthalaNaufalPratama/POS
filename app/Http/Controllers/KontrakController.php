@@ -42,7 +42,7 @@ class KontrakController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_kontrak', '<=', $req->input('dateEnd'));
         }
-        $kontraks = $query->get();
+        $kontraks = $query->orderByDesc('id')->get();
         $customer = Kontrak::select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')

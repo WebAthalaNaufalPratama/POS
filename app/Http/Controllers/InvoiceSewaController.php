@@ -38,7 +38,7 @@ class InvoiceSewaController extends Controller
         if ($req->dateEnd) {
             $query->where('jatuh_tempo', '<=', $req->input('dateEnd'));
         }
-        $data = $query->get();
+        $data = $query->orderByDesc('id')->get();
         $customer = Kontrak::whereHas('invoice')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
