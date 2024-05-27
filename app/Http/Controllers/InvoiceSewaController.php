@@ -26,7 +26,11 @@ class InvoiceSewaController extends Controller
     public function index(Request $req)
     {
         $query = InvoiceSewa::query();
-
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $query->whereHas('kontrak', function($q) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            });
+        }
         if ($req->customer) {
             $query->whereHas('sewa',function($q) use($req){
                 $q->where('customer_id', $req->input('customer'));
@@ -42,6 +46,9 @@ class InvoiceSewaController extends Controller
         $customer = Kontrak::whereHas('invoice')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('customers.nama')
         ->get();
         $Invoice = Pembayaran::latest()->first();
@@ -90,7 +97,14 @@ class InvoiceSewaController extends Controller
                 $getKode = 'INS' . date('Ymd') . $nextInvNumber;
             }
         }
-        return view('invoice_sewa.create', compact('getKode', 'kontrak', 'sales', 'produkSewa', 'ongkirs', 'rekening'));
+        $sisaBayar = $kontrak->total_harga;
+        foreach ($kontrak->invoice as $invoice) {
+            $sisaBayar -= $invoice->dp;
+            foreach ($invoice->pembayaran as $pembayaran) {
+                $sisaBayar -= $pembayaran->nominal;
+            }
+        }
+        return view('invoice_sewa.create', compact('getKode', 'kontrak', 'sales', 'produkSewa', 'ongkirs', 'rekening', 'sisaBayar'));
     }
 
     /**

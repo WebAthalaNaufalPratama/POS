@@ -69,7 +69,7 @@ class Kontrak extends Model
     }
         
     public function data_pembuat(){
-        return $this->belongsTo(Karyawan::class, 'pembuat', 'id');
+        return $this->belongsTo(User::class, 'pembuat', 'id');
     }
         
     public function data_penyetuju(){
