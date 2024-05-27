@@ -458,6 +458,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{inven_greenhouse}/delete', 'InventoryGreenhouseController@destroy')->name('inven_greenhouse.destroy');
         });
 
+        Route::group(['prefix' => 'mutasiGAG'], function() {
+            Route::get('/', 'MutasiController@index_galerygalery')->name('mutasigalerygalery.index');
+            Route::get('{returpenjualan}/create', 'MutasiController@create_galerygalery')->name('mutasigalerygalery.create');
+            Route::post('/store', 'MutasiController@store_galerygalery')->name('mutasigalerygalery.store');
+            Route::get('/{mutasiGAG}/show', 'MutasiController@show_galerygalery')->name('mutasigalerygalery.show');
+            Route::get('/{mutasiGAG}/edit', 'MutasiController@edit_galerygalery')->name('mutasigalerygalery.edit');
+            Route::patch('/{mutasiGAG}/update', 'MutasiController@update_galerygalery')->name('mutasigalerygalery.update');
+            Route::get('/{mutasiGAG}/delete', 'MutasiController@destroy_galerygalery')->name('mutasigalerygalery.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });
