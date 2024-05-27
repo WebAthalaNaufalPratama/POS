@@ -27,4 +27,8 @@ class Produk_Terjual extends Model
     public function do_sewa(){
         return $this->belongsTo(DeliveryOrder::class, 'no_do', 'no_do');
     }
+
+    public function sewa(){
+        return $this->belongsTo(Kontrak::class, 'no_sewa', 'no_kontrak');
+    }
 }

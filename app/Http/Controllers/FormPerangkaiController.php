@@ -10,6 +10,7 @@ use App\Models\InventoryGallery;
 use App\Models\InventoryOutlet;
 use App\Models\Komponen_Produk_Terjual;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class FormPerangkaiController extends Controller
@@ -24,10 +25,18 @@ class FormPerangkaiController extends Controller
         $perangkai = FormPerangkai::select('perangkai_id')
         ->distinct()
         ->join('karyawans', 'form_perangkais.perangkai_id', '=', 'karyawans.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('karyawans.nama')
         ->get();
 
         $query = FormPerangkai::whereHas('produk_terjual');
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $query->whereHas('perangkai', function($q) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            });
+        }
         if($req->jenis_rangkaian){
             $query->where('jenis_rangkaian', $req->jenis_rangkaian);
         }

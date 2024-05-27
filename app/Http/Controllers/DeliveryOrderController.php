@@ -23,7 +23,11 @@ class DeliveryOrderController extends Controller
     public function index_sewa(Request $req)
     {
         $query = DeliveryOrder::where('jenis_do', 'SEWA');
-
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $query->whereHas('kontrak', function($q) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            });
+        }
         if ($req->customer) {
             $query->where('customer_id', $req->input('customer'));
         }
@@ -40,11 +44,17 @@ class DeliveryOrderController extends Controller
         $customer = DeliveryOrder::select('customer_id')
         ->distinct()
         ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('customers.nama')
         ->get();
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('karyawans.nama')
         ->get();
         return view('do_sewa.index', compact('data', 'driver', 'customer'));
