@@ -489,6 +489,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kas_pusat}/delete', 'TransaksiKasController@destroy_pusat')->name('kas_pusat.destroy');
         });
 
+        Route::group(['prefix' => 'kas_gallery'], function() {
+            Route::get('/', 'TransaksiKasController@index_gallery')->name('kas_gallery.index');
+            Route::get('/create', 'TransaksiKasController@create_gallery')->name('kas_gallery.create');
+            Route::post('/store', 'TransaksiKasController@store_gallery')->name('kas_gallery.store');
+            Route::get('/{kas_gallery}/show', 'TransaksiKasController@show_gallery')->name('kas_gallery.show');
+            Route::get('/{kas_gallery}/edit', 'TransaksiKasController@edit_gallery')->name('kas_gallery.edit');
+            Route::patch('/{kas_gallery}/update', 'TransaksiKasController@update_gallery')->name('kas_gallery.update');
+            Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });

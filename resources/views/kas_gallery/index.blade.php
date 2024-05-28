@@ -55,7 +55,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Kas Pusat</h4>
+                    <h4>Kas Galery {{ Auth::user()->karyawans->lokasi->nama ?? '-' }}</h4>
                 </div>
                 <div class="page-btn">
                     <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addkas" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kas</a>
@@ -129,7 +129,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form action="{{ route('kas_pusat.store') }}" method="POST" enctype="multipart/form-data">
+          <form action="{{ route('kas_gallery.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Akun</label>
@@ -194,7 +194,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form id="editForm" action="kas_pusat/0/update" method="POST">
+          <form id="editForm" action="kas_gallery/0/update" method="POST">
             @csrf
             @method('PATCH')
             <div class="mb-3">
@@ -306,10 +306,10 @@
     function getData(id){
         $.ajax({
             type: "GET",
-            url: "/kas_pusat/"+id+"/edit",
+            url: "/kas_gallery/"+id+"/edit",
             success: function(response) {
                 // console.log(response)
-                $('#editForm').attr('action', 'kas_pusat/'+id+'/update');
+                $('#editForm').attr('action', 'kas_gallery/'+id+'/update');
                 $('#edit_akun_id').val(response.akun_id).trigger('change')
                 $('#edit_keterangan').val(response.keterangan)
                 $('#edit_kuantitas').val(response.kuantitas)
@@ -344,7 +344,7 @@
             if (result.isConfirmed) {
               $.ajax({
                   type: "GET",
-                  url: "/kas_pusat/"+id+"/delete",
+                  url: "/kas_gallery/"+id+"/delete",
                   success: function(response) {
                       toastr.success(response.msg, 'Success', {
                           closeButton: true,
