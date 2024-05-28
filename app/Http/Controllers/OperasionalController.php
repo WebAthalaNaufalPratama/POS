@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Akun;
+use App\Models\Operasional;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class AkunController extends Controller
+class OperasionalController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,8 +15,8 @@ class AkunController extends Controller
      */
     public function index()
     {
-        $akuns = Akun::all();
-        return view('akun.index', compact('akuns'));
+        $operasional = Operasional::all();
+        return view('operasional.index', compact('operasional'));
     }
 
     /**
@@ -39,17 +39,15 @@ class AkunController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'no_akun' => 'required',
-            'nama_akun' => 'required',
+            'nama' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $duplicate = Akun::withTrashed()->where('no_akun', $req->no_akun)->first();
-        if($duplicate) return redirect()->back()->withInput()->with('fail', 'No akun sudah terpakai');
+        if (Operasional::where('nama', $req->nama)->exists()) return redirect()->back()->withInput()->with('fail', 'Nama sudah digunakan');
         $data = $req->except(['_token', '_method']);
 
         // save data
-        $check = Akun::create($data);
+        $check = Operasional::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
         return redirect()->back()->with('success', 'Data tersimpan');
     }
@@ -57,10 +55,10 @@ class AkunController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Akun  $akun
+     * @param  \App\Models\Operasional  $operasional
      * @return \Illuminate\Http\Response
      */
-    public function show(Akun $akun)
+    public function show(Operasional $operasional)
     {
         //
     }
@@ -68,12 +66,12 @@ class AkunController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Akun  $akun
+     * @param  \App\Models\Operasional  $operasional
      * @return \Illuminate\Http\Response
      */
-    public function edit($akun)
+    public function edit($operasional)
     {
-        $data = Akun::find($akun);
+        $data = Operasional::find($operasional);
         return response()->json($data);
     }
 
@@ -81,37 +79,35 @@ class AkunController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Akun  $akun
+     * @param  \App\Models\Operasional  $operasional
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $req, $akun)
+    public function update(Request $req, $operasional)
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'no_akun' => 'required',
-            'nama_akun' => 'required',
+            'nama' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $duplicate = Akun::where('no_akun', $req->no_akun)->where('id', '!=', $akun)->first();
-        if($duplicate) return redirect()->back()->withInput()->with('fail', 'No akun sudah terpakai');
+        if (Operasional::where('nama', $req->nama)->where('id', '!=', $operasional)->exists()) return redirect()->back()->withInput()->with('fail', 'Nama sudah digunakan');
         $data = $req->except(['_token', '_method']);
 
         // save data
-        $check = Akun::find($akun)->update($data);
+        $check = Operasional::find($operasional)->update($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
-        return redirect()->back()->with('success', 'Data berhsail diperbarui');
+        return redirect()->back()->with('success', 'Data diperbarui');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Akun  $akun
+     * @param  \App\Models\Operasional  $operasional
      * @return \Illuminate\Http\Response
      */
-    public function destroy($akun)
+    public function destroy($operasional)
     {
-        $data = Akun::find($akun);
+        $data = Operasional::find($operasional);
         if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);

@@ -51,4 +51,9 @@ class Lokasi extends Model
     {
         return $this->hasMany(Mutasi::class, 'id', 'pengirim');
     }
+
+    public function operasional()
+    {
+        return $this->belongsTo(Operasional::class);
+    }
 }

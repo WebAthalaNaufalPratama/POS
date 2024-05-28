@@ -23,7 +23,11 @@ class DeliveryOrderController extends Controller
     public function index_sewa(Request $req)
     {
         $query = DeliveryOrder::where('jenis_do', 'SEWA');
-
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $query->whereHas('kontrak', function($q) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            });
+        }
         if ($req->customer) {
             $query->where('customer_id', $req->input('customer'));
         }
@@ -40,11 +44,17 @@ class DeliveryOrderController extends Controller
         $customer = DeliveryOrder::select('customer_id')
         ->distinct()
         ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('customers.nama')
         ->get();
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('karyawans.nama')
         ->get();
         return view('do_sewa.index', compact('data', 'driver', 'customer'));
@@ -67,7 +77,11 @@ class DeliveryOrderController extends Controller
 
         // data
         $kontrak = Kontrak::with('produk')->find($data['kontrak']);
-        $drivers = Karyawan::where('jabatan', 'driver')->get();
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $drivers = Karyawan::where('jabatan', 'driver')->where('lokasi_id',Auth::user()->karyawans->lokasi_id)->get();
+        } else {
+            $drivers = Karyawan::where('jabatan', 'driver')->get();
+        }
         $produkjuals = Produk_Jual::all();
         $produkSewa = $kontrak->produk()->whereHas('produk', function($q){
             $q->whereColumn('jumlah_dikirim', '<', 'jumlah')->orWhere('jumlah_dikirim', null);
@@ -276,12 +290,12 @@ class DeliveryOrderController extends Controller
         // cek stok inventory
         foreach ($dataDO as $key => $value) {
             $inventory = InventoryGallery::where('kode_produk', $key)->where('kondisi_id', $value['kondisi'])->where('lokasi_id', $kontrak->lokasi_id)->first();
-            if(!$inventory) return redirect()->back()->withInput()->with('fail', 'Stok tidak ada');
+            if(!$inventory) return redirect()->back()->withInput()->with('fail', 'Stok '.$key.' tidak ada');
             if($inventory->jumlah > $value['jumlah']){
                 $sufficient = $inventory->jumlah - $value['jumlah'] >= $inventory->min_stok;
-                if(!$sufficient) return redirect()->back()->withInput()->with('fail', 'Stok dibawah minimum');
+                if(!$sufficient) return redirect()->back()->withInput()->with('fail', 'Stok '.$key.' dibawah minimum');
             } else {
-                return redirect()->back()->withInput()->with('fail', 'Stok tidak mencukupi');
+                return redirect()->back()->withInput()->with('fail', 'Stok '.$key.' tidak mencukupi');
             }
         }
 

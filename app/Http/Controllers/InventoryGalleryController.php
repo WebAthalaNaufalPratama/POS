@@ -7,6 +7,7 @@ use App\Models\Kondisi;
 use App\Models\Lokasi;
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class InventoryGalleryController extends Controller
@@ -18,7 +19,9 @@ class InventoryGalleryController extends Controller
      */
     public function index()
     {
-        $data = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->get();
+        $data = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })->get();
         return view('inven_galeri.index', compact('data'));
     }
 

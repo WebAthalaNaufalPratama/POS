@@ -336,9 +336,12 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit">Submit</button>
+                    <button class="btn btn-primary" type="submit" {{ $data->sisa_bayar == 0 ? 'disabled' : '' }}>Submit</button>
                     <a href="{{ route('invoice_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
+                @if ($data->sisa_bayar == 0)
+                <p class="text-end text-danger">Invoice sudah lunas</p>
+                @endif
                 </form>
             </div>
         </div>

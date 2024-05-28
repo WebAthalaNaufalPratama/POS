@@ -47,6 +47,7 @@ class KaryawanController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
+        $data['user_id'] = 0;
 
         // save data
         $check = Karyawan::create($data);

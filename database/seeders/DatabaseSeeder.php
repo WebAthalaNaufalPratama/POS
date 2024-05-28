@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             KondisiSeeder::class,
             Tipe_LokasiSeeder::class,
             Tipe_ProdukSeeder::class,
+            OperasionalSeeder::class,
         ]);
     }
 }

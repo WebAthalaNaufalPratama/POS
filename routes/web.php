@@ -23,7 +23,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
     /**
      * Home Routes
      */
-    Route::get('/', 'HomeController@index')->name('home.index');
+    Route::redirect('/', '/login');
+    Route::get('/home', 'HomeController@index')->name('home.index');
 
     Route::group(['middleware' => ['guest']], function() {
         /**
@@ -110,6 +111,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{tipe_lokasi}/edit', 'TipeLokasiController@edit')->name('tipe_lokasi.edit');
             Route::patch('/{tipe_lokasi}/update', 'TipeLokasiController@update')->name('tipe_lokasi.update');
             Route::get('/{tipe_lokasi}/delete', 'TipeLokasiController@destroy')->name('tipe_lokasi.destroy');
+        });
+
+        Route::group(['prefix' => 'operasional'], function() {
+            Route::get('/', 'OperasionalController@index')->name('operasional.index');
+            Route::post('/store', 'OperasionalController@store')->name('operasional.store');
+            Route::get('/{operasional}/show', 'OperasionalController@show')->name('operasional.show');
+            Route::get('/{operasional}/edit', 'OperasionalController@edit')->name('operasional.edit');
+            Route::patch('/{operasional}/update', 'OperasionalController@update')->name('operasional.update');
+            Route::get('/{operasional}/delete', 'OperasionalController@destroy')->name('operasional.destroy');
         });
 
         Route::group(['prefix' => 'lokasi'], function() {
