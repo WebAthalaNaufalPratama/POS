@@ -313,6 +313,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/', 'FormPerangkaiController@penjualan_index')->name('formpenjualan.index');
             Route::get('/create', 'FormPerangkaiController@penjualan_create')->name('formpenjualan.create');
             Route::post('/store', 'FormPerangkaiController@penjualan_store')->name('formpenjualan.store');
+            Route::post('/storemutasi', 'FormPerangkaiController@mutasi_store')->name('formmutasi.store');
             Route::get('/{formpenjualan}/show', 'FormPerangkaiController@penjualan_show')->name('formpenjualan.show');
             Route::get('/{formpenjualan}/edit', 'FormPerangkaiController@penjualan_edit')->name('formpenjualan.edit');
             Route::patch('/{formpenjualan}/update', 'FormPerangkaiController@penjualan_update')->name('formpenjualan.update');
@@ -460,7 +461,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'mutasiGAG'], function() {
             Route::get('/', 'MutasiController@index_galerygalery')->name('mutasigalerygalery.index');
-            Route::get('{returpenjualan}/create', 'MutasiController@create_galerygalery')->name('mutasigalerygalery.create');
+            Route::get('/create', 'MutasiController@create_galerygalery')->name('mutasigalerygalery.create');
             Route::post('/store', 'MutasiController@store_galerygalery')->name('mutasigalerygalery.store');
             Route::get('/{mutasiGAG}/show', 'MutasiController@show_galerygalery')->name('mutasigalerygalery.show');
             Route::get('/{mutasiGAG}/edit', 'MutasiController@edit_galerygalery')->name('mutasigalerygalery.edit');

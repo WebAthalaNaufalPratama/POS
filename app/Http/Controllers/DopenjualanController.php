@@ -68,8 +68,9 @@ class DopenjualanController extends Controller
         // dd($penjualans);
         $user = Auth::user();
         $lokasis = Lokasi::find($user);
-        $karyawans = Karyawan::all();
+        $karyawans = Karyawan::where('jabatan', 'Driver')->get();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
+        // dd($produks);
         $customers = Customer::where('id', $penjualans->id_customer)->get();
         // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         $produkjuals = Produk_Jual::all();
@@ -189,74 +190,28 @@ class DopenjualanController extends Controller
             if (!$allStockAvailable) {
                 return redirect()->route('inven_galeri.create')->with('fail', 'Data Produk Belum Ada Di Inventory Atau Stok Kurang');
             }
-        }elseif($lokasi->tipe_lokasi == 2){
-            $accumulateRequiredQuantities = function($productNames, $req, $model, $field) {
-                $requiredQuantities = [];
-
-                for ($i = 0; $i < count($productNames); $i++) {
-                    $getProdukJual = $model::with('komponen')->where($field, $productNames[$i])->first();
-
-                    foreach ($getProdukJual->komponen as $komponen) {
-                        $komponenKey = $komponen->kode_produk . '_' . $komponen->kondisi;
-
-                        if (!isset($requiredQuantities[$komponenKey])) {
-                            $requiredQuantities[$komponenKey] = 0;
-                        }
-
-                        $requiredQuantities[$komponenKey] += intval($req->jumlah[$i]) * intval($komponen->jumlah);
-                    }
-                }
-
-                return $requiredQuantities;
-            };
-
-            // Helper function to merge required quantities
-            $mergeRequiredQuantities = function($quantities1, $quantities2) {
-                foreach ($quantities2 as $key => $quantity) {
-                    if (!isset($quantities1[$key])) {
-                        $quantities1[$key] = 0;
-                    }
-                    $quantities1[$key] += $quantity;
-                }
-                return $quantities1;
-            };
-
-            // Helper function to check stock availability for given required quantities
-            $checkStockAvailability = function($requiredQuantities, $lokasi_id) {
-                foreach ($requiredQuantities as $key => $requiredQuantity) {
-                    list($kode_produk, $kondisi) = explode('_', $key);
-
-                    $stok = InventoryOutlet::where('lokasi_id', $lokasi_id)
-                                            ->where('kode_produk', $kode_produk)
-                                            ->where('kondisi_id', $kondisi)
-                                            ->first();
-
-                    if (!$stok || $stok->jumlah < $requiredQuantity) {
-                        return false;
-                    }
-                }
-
-                return true;
-            };
-
-            // Accumulate required quantities for the first set of products (Produk_Terjual)
-            $requiredQuantities1 = $accumulateRequiredQuantities($req->nama_produk, $req, Produk_Terjual::class, 'id');
-
-            // Accumulate required quantities for the second set of products (Produk_Jual)
-            $requiredQuantities2 = $accumulateRequiredQuantities($req->nama_produk2, $req, Produk_Jual::class, 'kode');
-
-            // Merge the required quantities
-            $requiredQuantities = $mergeRequiredQuantities($requiredQuantities1, $requiredQuantities2);
-
-            // Check stock availability
-            $allStockAvailable = $checkStockAvailability($requiredQuantities, $invoice->lokasi_id);
-            // dd($allStockAvailable);
-
-            // Redirect if any component is out of stock
-            if (!$allStockAvailable) {
-                return redirect()->route('inven_outlet.create')->with('fail', 'Data Produk Belum Ada Di Inventory Atau Stok Kurang');
-            }
         }
+        // elseif($lokasi->tipe_lokasi == 2){
+        //     for ($i = 0; $i < count($data['nama_produk']); $i++) {
+        //         $getProdukJual = Produk_Terjual::with('komponen')->where('id', $data['nama_produk'][$i])->first();
+        //         $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+        //                             ->where('kode_produk', $getProdukJual->produk->kode)
+        //                             ->first();
+        //                 // dd($stok);
+                    
+        //         if (!$stok) {
+        //             return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+        //         }
+
+        //         $requiredQuantity = intval($data['jumlah'][$i]);
+        //     }
+        //     if (!$stok || $stok->jumlah < $requiredQuantity) {
+        //         return false;
+        //     }
+        //     if (!$allStockAvailable) {
+        //         return redirect()->route('inven_outlet.create')->with('fail', 'Data Produk Belum Ada Di Inventory Atau Stok Kurang');
+        //     }
+        // }
         
 
         // save data do
@@ -322,14 +277,20 @@ class DopenjualanController extends Controller
                     if (!$komponen_produk_terjual) {
                         return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
                     }
-                    $stok = InventoryOutlet::where('lokasi_id', $invoice->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                    if(!$stok){
-                        return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory');
-                    }elseif($stok){
-                        $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($produk_terjual->jumlah));
-                        $stok->update();
-                    }
                 }
+
+                //pengurangan inven outlet
+                $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                            ->where('kode_produk', $produk_terjual->produk->kode)
+                            ->first();
+                // dd($stok);
+            
+                if (!$stok) {
+                    return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                }
+
+                $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                $stok->save();
             }else{
                 foreach ($getProdukJual->komponen as $komponen) {
                     $komponen_produk_terjual = Komponen_Produk_Terjual::create([
@@ -413,14 +374,20 @@ class DopenjualanController extends Controller
                         if (!$komponen_produk_terjual) {
                             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
                         }
-                        $stok = InventoryOutlet::where('lokasi_id', $invoice->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                        if(!$stok){
-                            return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory');
-                        }elseif($stok){
-                            $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($produk_terjual->jumlah));
-                            $stok->update();
-                        }
                     }
+
+                    //pengurangan inven outlet
+                    $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                                ->where('kode_produk', $produk_terjual->produk->kode)
+                                ->first();
+                    // dd($stok);
+                
+                    if (!$stok) {
+                        return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                    }
+
+                    $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                    $stok->save();
                 }else{
                     foreach ($getProdukJual->komponen as $komponen) {
                         $komponen_produk_terjual = Komponen_Produk_Terjual::create([

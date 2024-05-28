@@ -11,31 +11,18 @@
                 <form id="form_perangkai" action="{{ route('inven_outlet.store') }}" method="POST">
                     @csrf
                     <div class="row">
-                        <div class="col-sm-4">
+                        <div class="col-sm-6">
                             <label for="kode_produk" class="col-form-label">Produk</label>
                             <div id="div_produk" class="form-group">
                                 <select id="kode_produk" name="kode_produk" class="form-control" required>
                                     <option value="">Pilih Produk</option>
                                     @foreach ($produks as $item)
-                                        @if(substr($item->kode, 0, 3) == 'GFT')
-                                            <option value="{{ $item->kode }}">{{ $item->nama }}</option>
-                                        @endif
+                                        <option value="{{ $item->kode }}">{{ $item->nama }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-                        <div class="col-sm-4">
-                            <label for="kondisi_id" class="col-form-label">Kondisi</label>
-                            <div id="div_kondisi" class="form-group">
-                                <select id="kondisi_id" name="kondisi_id" class="form-control" required>
-                                    <option value="">Pilih Kondisi</option>
-                                    @foreach ($kondisi as $item)
-                                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-6">
                             <label for="lokasi_id" class="col-form-label">Outlet</label>
                             <div id="div_lokasi" class="form-group">
                                 <select id="lokasi_id" name="lokasi_id" class="form-control" required>

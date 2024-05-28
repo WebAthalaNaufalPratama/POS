@@ -85,7 +85,7 @@
                             <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasighgalery*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
                         @endif
                         @if(in_array('mutasigalerygalery.index', $rolePermissions))
-                            <li><a href="#" class="">Mutasi Galery ke Galery</a></li>
+                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasigalerygalery*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
                         @endif
                         <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                         <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>

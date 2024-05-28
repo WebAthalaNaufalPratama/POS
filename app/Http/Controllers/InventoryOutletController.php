@@ -48,7 +48,6 @@ class InventoryOutletController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'kode_produk' => 'required',
-            'kondisi_id' => 'required|integer',
             'lokasi_id' => 'required',
             'jumlah' => 'required',
             'min_stok' => 'required',
@@ -58,7 +57,7 @@ class InventoryOutletController extends Controller
         $data = $req->except(['_token', '_method']);
 
         // check duplikasi
-        $duplicate = InventoryOutlet::where('kode_produk', $data['kode_produk'])->where('kondisi_id', $data['kondisi_id'])->where('lokasi_id', $data['lokasi_id'])->first();
+        $duplicate = InventoryOutlet::where('kode_produk', $data['kode_produk'])->where('lokasi_id', $data['lokasi_id'])->first();
         if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
 
          // save data inven galeri

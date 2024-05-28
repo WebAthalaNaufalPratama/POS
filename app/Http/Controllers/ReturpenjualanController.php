@@ -93,37 +93,40 @@ class ReturpenjualanController extends Controller
             
             foreach ($deliveryOrder->produk as $produk) {
                 foreach ($produkjuals as $index => $pj) {
-                    // dd($produkjuals);
                     if($pj->produk && $produk->produk->kode)
                     {
+                        // dd($pj->produk->kode);
                         $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_do ==  $deliveryOrder->no_do && $pj->jenis != 'TAMBAHAN');
+                        // dd($pj);
                     
-                    if ($isSelectedGFT) {
-                        foreach ($pj->komponen as $komponen) {
-                            if ($pj->id == $komponen->produk_terjual_id) {
-                                foreach ($kondisis as $kondisi) {
-                                    if ($kondisi->id == $komponen->kondisi) {
-                                        $selectedGFTKomponen[$deliveryOrder->no_do][] = [
-                                            'kode' => $komponen->kode_produk,
-                                            'nama' => $komponen->nama_produk,
-                                            'kondisi' => $kondisi->nama,
-                                            'jumlah' => $komponen->jumlah,
-                                            'produk' => $komponen->produk_terjual_id,
-                                            'do' => $deliveryOrder->no_do
-                                        ];
+                        if ($isSelectedGFT) {
+                            foreach ($pj->komponen as $komponen) {
+                                
+                                if ($pj->id == $komponen->produk_terjual_id) {
+                                    foreach ($kondisis as $kondisi) {
+                                        if ($kondisi->id == $komponen->kondisi) {
+                                            $selectedGFTKomponen[$deliveryOrder->no_do][] = [
+                                                'kode' => $komponen->kode_produk,
+                                                'nama' => $komponen->nama_produk,
+                                                'kondisi' => $kondisi->nama,
+                                                'jumlah' => $komponen->jumlah,
+                                                'produk' => $komponen->produk_terjual_id,
+                                                'do' => $deliveryOrder->no_do
+                                            ];
+                                        }
                                     }
                                 }
                             }
+                            // dd($selectedGFTKomponen);
                         }
-                    }
                     }
                     
                 }
+                if (!empty($selectedGFTKomponen)) {
+                    $perPendapatan += $selectedGFTKomponen;
+                }
             }
-
-            if (!empty($selectedGFTKomponen)) {
-                $perPendapatan += $selectedGFTKomponen;
-            }
+            
         }
 
 
@@ -440,7 +443,6 @@ class ReturpenjualanController extends Controller
         for ($i = 0; $i < count($data['nama_produk']); $i++) {
             $getProdukJual = Produk_Terjual::with('komponen')->where('id', $data['nama_produk'][$i])->first();
             
-
             $produk_terjual = Produk_Terjual::create([
                 'produk_jual_id' => $getProdukJual->produk_jual_id,
                 'no_retur' => $returPenjualan->no_retur,
@@ -493,14 +495,32 @@ class ReturpenjualanController extends Controller
                             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
                         }
 
+                        if($lokasi->tipe_lokasi == 1){
+                            $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
+                            if ($stok) {
+                                $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                                $stok->update();
+                            }
+                        }elseif($lokasi->tipe_lokasi == 2){
+                            //pengurangan inven outlet
+                            $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                                                ->where('kode_produk', $produk_terjual->produk->kode)
+                                                ->first();
+                                    // dd($stok);
+                                
+                            if (!$stok) {
+                                return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                            }
+
+                            $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                            $stok->save();
+                        }
+
                         $stok = $lokasi->tipe_lokasi == 1
                             ? InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first()
                             : InventoryOutlet::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
 
-                        if ($stok) {
-                            $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
-                            $stok->update();
-                        }
+                        
                     }
                                             // dd($komponen_produk_terjual);
                 }
