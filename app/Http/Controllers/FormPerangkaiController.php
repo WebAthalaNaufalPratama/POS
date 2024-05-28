@@ -114,6 +114,85 @@ class FormPerangkaiController extends Controller
         return redirect()->back()->with('success', 'Data tersimpan');
     }
 
+    public function mutasi_store(Request $req){
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'no_form' => 'required',
+            'jenis_rangkaian' => 'required',
+            'tanggal' => 'required',
+            'perangkai_id' => 'required',
+            'produk_id' => 'required',
+            'prdTerjual_id' => 'required'
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
+        // dd($req->prdTerjual_i);
+        // delete data
+        $getPerangkai = FormPerangkai::where('no_form', $data['no_form'])->get();
+        if($getPerangkai){
+            $getPerangkai->each->forceDelete();
+        }
+
+        //cek produk
+        $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
+
+        // dd($updateProdukTerjual);
+        $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+        // dd($lokasi);
+        $allStockAvailable = true;
+
+        foreach ($updateProdukTerjual->komponen as $komponen ) {
+            $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
+                                    ->where('kode_produk', $komponen->kode_produk)
+                                    ->where('kondisi_id', $komponen->kondisi)
+                                    ->first();
+            if (!$stok) {
+                $allStockAvailable = false;
+                break;
+            }
+        }
+
+        if (!$allStockAvailable) {
+            return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+        }
+
+        if($updateProdukTerjual->no_form != null){
+            //update penambahan jumlah
+            foreach ($updateProdukTerjual->komponen as $komponen ) {
+                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
+                                            ->where('kode_produk', $komponen->kode_produk)
+                                            ->where('kondisi_id', $komponen->kondisi)
+                                            ->first();
+                $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($req->jml_produk));
+                $stok->update();
+            }
+        }
+
+        //update pengurangan jumlah
+        foreach ($updateProdukTerjual->komponen as $komponen ) {
+            $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
+                                        ->where('kode_produk', $komponen->kode_produk)
+                                        ->where('kondisi_id', $komponen->kondisi)
+                                        ->first();
+            $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($req->jml_produk));
+            $stok->update();
+        }
+        // save data
+        foreach ($req->perangkai_id as $item) {
+            $data['perangkai_id'] = $item;
+            $check = FormPerangkai::create($data);
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        }
+
+        if($updateProdukTerjual) {
+            $updateProdukTerjual->no_form = $req->no_form;
+            $updateProdukTerjual->update();
+        }
+        
+        return redirect()->back()->with('success', 'Data Perangkai tersimpan');
+    }
+
     public function penjualan_store(Request $req)
     {
         // validasi

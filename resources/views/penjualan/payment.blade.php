@@ -619,7 +619,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="no_invoice">Nomor Invoice</label>
-                        <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required readonly>
+                        <input type="text" class="form-control" id="no_invoice_byr" name="no_invoice_bayar" placeholder="Nomor Invoice" required readonly>
                     </div>
                     <div class="form-group">
                         <label for="bayar">Cara Bayar</label>
@@ -666,8 +666,8 @@
 
 @section('scripts')
 <script>
-    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-    // console.log(cekInvoiceNumbers);
+    $(document).ready(function() {
+    var cekInvoiceNumbers = "<?php echo $cekInvoice; ?>";
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
@@ -679,10 +679,12 @@
         var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
         var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_invoice_bayar').val(generatedInvoice);
+        $('#no_invoice_byr').val(generatedInvoice);
     }
 
     generateInvoice();
+});
+
 </script>
 <script>
     function updateDate(element) {

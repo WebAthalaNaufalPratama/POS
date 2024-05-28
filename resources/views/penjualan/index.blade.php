@@ -81,7 +81,13 @@
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Perangkai</a>
+                                            @php
+                                                $user = Auth::user()->first();
+                                                $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                                            @endphp
+                                            @if($lokasi->lokasi->tipe_lokasi != 2)
+                                                <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Perangkai</a>
+                                            @endif
                                             <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}">Pembayaran</a>
                                             @if($penjualan->distribusi == 'Dikirim')
                                             <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}">Delivery Order</a>

@@ -7,10 +7,10 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Mutasi Galery Ke Outlet</h4>
+                        <h4>Mutasi Galery Ke Galery</h4>
                     </div>
                     <div class="page-btn">
-                        <a href="{{ route('mutasigalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
+                        <a href="{{ route('mutasigalerygalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
                     </div>
                 </div>
             </div>
@@ -23,8 +23,8 @@
                     <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
-                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('mutasigalery.index') }}" class="btn btn-info">Filter</a>
-                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('mutasigalery.index') }}" class="btn btn-warning">Clear</a>
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('mutasigalerygalery.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('mutasigalerygalery.index') }}" class="btn btn-warning">Clear</a>
                 </div>
             </div>
                 <div class="table-responsive">
@@ -48,7 +48,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $mutasi->no_mutasi }}</td>
                                 <td>{{ $mutasi->lokasi->nama }}</td>
-                                <td>{{ $mutasi->lokasi->nama }}</td>
+                                <td>{{ $mutasi->lokasi_penerima->nama }}</td>
                                 <td>{{ $mutasi->tanggal_kirim }}</td>
                                 <td>{{ $mutasi->tanggal_diterima }}</td>
                                 <td>{{ $mutasi->tanggal_pembuat }}</td>
@@ -57,8 +57,7 @@
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('mutasigalery.show', ['mutasiGO' => $mutasi->id]) }}">Atur Perangkai</a>
-                                            <a class="dropdown-item" href="{{ route('mutasigalery.acc', ['mutasiGO' => $mutasi->id]) }}">Acc Terima</a>
+                                            <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}">Acc Terima</a>
                                         </div>
                                     </div>
                                 </td>
@@ -102,7 +101,6 @@
         });
     }
 </script>
-
 <script>
     $(document).ready(function(){
         $('#filterCustomer, #filterDriver').select2();
@@ -201,5 +199,4 @@
         });
     }
     </script>
-
 @endsection
