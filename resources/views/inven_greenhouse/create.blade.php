@@ -39,7 +39,7 @@
                                 <select id="lokasi_id" name="lokasi_id" class="form-control" required>
                                     <option value="">Pilih Gallery</option>
                                     @foreach ($gallery as $item)
-                                        <option value="{{ $item->tipe_lokasi }}">{{ $item->nama }}</option>
+                                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                     @endforeach
                                 </select>
                             </div>

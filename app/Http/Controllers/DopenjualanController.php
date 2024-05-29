@@ -229,6 +229,7 @@ class DopenjualanController extends Controller
                 'satuan' => $data['satuan'][$i],
                 'keterangan' => $data['keterangan'][$i]
             ]);
+            
             if($getProdukJual){
                 $getProdukJual->jumlah_dikirim = intval($getProdukJual->jumlah_dikirim) - intval($produk_terjual->jumlah);
                 $getProdukJual->update();

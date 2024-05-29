@@ -49,7 +49,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="penerima">Nama Penerima</label>
-                                            <select id="penerima" name="penerima" class="form-control" required disabled>
+                                            <select id="penerima" name="penerima" class="form-control" required readonly>
                                                 <option value="">Pilih Nama Penerima</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -138,7 +138,7 @@
                                                                 @endphp
                                                                 @foreach ($produkjuals as $index => $pj)
                                                                     @php
-                                                                  
+                                                                    if($pj->produk && $produk->produk->kode){
                                                                         $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
                                                                         $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
                                                                         if($isSelectedTRD){
@@ -156,11 +156,12 @@
                                                                                 }
                                                                             }
                                                                         }
+                                                                    }
                                                                     @endphp
-                                                                    <option value="{{ $produk->id }}" data-kondisi="{{ $pj->produk->kode }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT  ? 'selected' : '' }}>
-                                                                        @if (substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                                    <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                                        @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                             {{ $pj->produk->nama }}
-                                                                        @elseif (substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                        @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
                                                                             {{ $pj->produk->nama }}
                                                                         @endif
                                                                     </option>
@@ -186,6 +187,7 @@
                                                                         @foreach ($items as $komponen)
                                                                             <div class="row mt-2">
                                                                                 <div class="col">
+                                                                                <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
                                                                                     <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                                 </div>
                                                                                 <div class="col">
@@ -692,7 +694,7 @@
         @foreach ($produks as $produk)
             produkData.push({
                 id: {{ $produk->id }},
-                jumlah: {{ $produk->jumlah_diterima }}
+                jumlah: {{ $produk->jumlah }}
             });
         @endforeach
         // console.log('Produk Data:', produkData);
