@@ -167,7 +167,7 @@ class TransaksiKasController extends Controller
         $totalSewa = Pembayaran::whereHas('sewa.sewa.lokasi', function($q) {
             $q->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
         })->get();
-        dd($totalSewa);
+ 
         $totalPenjualan = Pembayaran::whereHas('penjualan.lokasi', function($q) {
             $q->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
         })->get()->sum('nominal');
