@@ -5654,6 +5654,9 @@ span.select2-container.select2-container--default.select2-container--open {
 .dash-widget.dash3 .dash-widgetimg span {
     background: rgba(234, 84, 85, 0.12);
 }
+.dash-widget.dash4 .dash-widgetimg span {
+    background: rgba(150, 150, 150, 0.12);
+}
 .dash-widget .dash-widgetcontent {
     margin-left: 20px;
 }
