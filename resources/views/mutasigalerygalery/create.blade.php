@@ -374,7 +374,136 @@
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
     function generateInvoice() {
-        var invoicePrefix = "MGG";
+        var invoicePrefix = "MGA";
+        var currentDate = new Date();
+        var year = currentDate.getFullYear();
+        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+        var day = currentDate.getDate().toString().padStart(2, '0');
+        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+
+        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+        $('#no_mutasi').val(generatedInvoice);
+    }
+
+    $(document).ready(function() {
+        generateInvoice();
+    });
+
+    function updateDate(element) {
+        var today = new Date().toISOString().split('T')[0];
+        $(element).val(today);
+    }
+
+    // Call the function to set the date to today's date initially
+    $(document).ready(function() {
+        updateDate($('#tanggal_kirim'));
+        updateDate($('#tanggal_diterima'));
+        @foreach($produks as $index => $produk)
+        updateDate($('#tglrangkai_{{ $index }}'));
+        @endforeach
+        updateDate($('#tanggalbayar'));
+    });
+
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    $(document).ready(function() {
+        var i = 1;
+        $('#add').click(function() {
+            var newRow = `<tr class="tr_clone" id="row${i}">
+                            <td>
+                                <select id="nama_produk_${i}" name="nama_produk[]" class="form-control select2">
+                                    @foreach ($produks as $produk)
+                                    <option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                        {{ $produk->produk->nama}} - {{ $produk->kondisi->nama}}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
+                            <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                            <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
+                        </tr>`;
+
+            $('#dynamic_field').append(newRow);
+
+            $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
+            i++
+        });
+
+        $(document).on('click', '.btn_remove', function() {
+            var button_id = $(this).attr("id");
+            $('#row' + button_id + '').remove();
+            calculateTotal(0);
+        });
+
+        $('#pilih_pengiriman').change(function() {
+            var pengiriman = $(this).val();
+            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+
+            $('#inputOngkir').hide();
+            $('#inputExspedisi').hide();
+
+            if (pengiriman === "sameday") {
+                $('#inputOngkir').show();
+                $('#biaya_pengiriman').prop('readonly', false);
+            } else if (pengiriman === "exspedisi") {
+                $('#inputExspedisi').show();
+                $('#biaya_pengiriman').prop('readonly', true);
+                ongkirId();
+            }
+        });
+
+        $('#ongkir_id').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
+            $('#biaya_pengiriman').val(ongkirValue);
+            Totaltagihan();
+        });
+
+        function Totaltagihan() {
+            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+            var totalTagihan = biayaOngkir;
+
+            $('#total_biaya').val(totalTagihan.toFixed(2));
+            $('#sisa_bayar').val(sisaBayar.toFixed(2));
+            $('#jumlah_ppn').val(ppn.toFixed(2));
+        }
+
+        $('#biaya_pengiriman', '#total_biaya').on('input', Totaltagihan);
+
+        $('#bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val('');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function clearFile() {
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        };
+    });
+</script>
+<!-- <script>
+    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+    // console.log(cekInvoiceNumbers);
+    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+
+    function generateInvoice() {
+        var invoicePrefix = "MGA";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -977,6 +1106,6 @@
 
         $('#biaya_pengiriman', '#total_biaya').on('input', Totaltagihan);
     });
-</script>
+</script> -->
 
 @endsection
