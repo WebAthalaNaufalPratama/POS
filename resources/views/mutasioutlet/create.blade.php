@@ -612,8 +612,8 @@
                                     @endforeach
                                 </select>
                             </td>
-                            <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                            <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                            <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}"  class="form-control" onchange="calculateTotal(0)"></td>
+                            <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_${i}"  class="form-control" onchange="calculateTotal(0)" readonly></td>
                             <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
                         </tr>`;
 

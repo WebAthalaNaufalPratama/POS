@@ -472,6 +472,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
 
         //purchase
+
         Route::group(['prefix' => 'mutasiindengalery'], function() {
             Route::get('/', 'MutasiController@index_indengalery')->name('mutasiindengalery.index');
             Route::get('/create', 'MutasiController@create_indengalery')->name('mutasiindengalery.create');
@@ -480,6 +481,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGG}/edit', 'MutasiController@edit_indengalery')->name('mutasiindengalery.edit');
             Route::patch('/{mutasiGG}/update', 'MutasiController@update_indengalery')->name('mutasiindengalery.update');
             Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_indengalery')->name('mutasiindengalery.destroy');
+        });
+
+        Route::group(['prefix' => 'mutasiIG'], function() {
+            Route::get('/', 'MutasiController@index_indengh')->name('mutasiindengh.index');
+            Route::get('/create', 'MutasiController@create_indengh')->name('mutasiindengh.create');
+            Route::post('/store', 'MutasiController@store_indengh')->name('mutasiindengh.store');
+            // Route::get('/{mutasiGG}/show', 'MutasiController@show_ghgreenhouse')->name('mutasighgreenhouse.show');
+            Route::get('/{mutasiIG}/edit', 'MutasiController@edit_indengh')->name('mutasiindengh.edit');
+            Route::patch('/{mutasiIG}/update', 'MutasiController@update_indengh')->name('mutasiindengh.update');
+            Route::get('/{mutasiIG}/delete', 'MutasiController@destroy_indengh')->name('mutasiindengh.destroy');
         });
 
         Route::group(['prefix' => 'inven_inden'], function() {
