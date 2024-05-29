@@ -63,16 +63,16 @@
                 <tbody>
                     @foreach ($kontraks as $kontrak)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $kontrak->no_kontrak }}</td>
-                            <td>{{ $kontrak->customer->nama }}</td>
-                            <td>{{ $kontrak->pic }}</td>
-                            <td>{{ $kontrak->data_sales->nama }}</td>
-                            <td>{{ $kontrak->handphone }}</td>
-                            <td>{{ $kontrak->masa_sewa }} bulan</td>
-                            <td>{{ formatTanggal($kontrak->tanggal_mulai)}} - {{ formatTanggal($kontrak->tanggal_selesai) }}</td>
-                            <td>{{ formatRupiah($kontrak->total_harga) }}</td>
-                            <td>{{ formatTanggal($kontrak->tanggal_kontrak) }}</td>
+                            <td>{{ $loop->iteration ?? '-' }}</td>
+                            <td>{{ $kontrak->no_kontrak ?? '-' }}</td>
+                            <td>{{ $kontrak->customer->nama ?? '-' }}</td>
+                            <td>{{ $kontrak->pic ?? '-'  }}</td>
+                            <td>{{ $kontrak->data_sales->nama ?? '-'  }}</td>
+                            <td>{{ $kontrak->handphone ?? '-' }}</td>
+                            <td>{{ $kontrak->masa_sewa ?? '-' }} bulan</td>
+                            <td>{{ formatTanggal($kontrak->tanggal_mulai)}} - {{ formatTanggal($kontrak->tanggal_selesai) ?? '-' }}</td>
+                            <td>{{ formatRupiah($kontrak->total_harga) ?? '-' }}</td>
+                            <td>{{ formatTanggal($kontrak->tanggal_kontrak) ?? '-'  }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

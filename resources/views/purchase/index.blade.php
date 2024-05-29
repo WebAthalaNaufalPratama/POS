@@ -26,7 +26,9 @@
                                 <th>Tanggal Terima</th>
                                 <th>No DO Supplier</th>
                                 <th>Lokasi</th>
-                                <th>Status PO</th>
+                                <th>Status Purchase</th>
+                                {{-- <th>Status Admin</th>
+                                <th>Status Finance</th> --}}
                                 <th>Status Pembayaran</th>
                                 <th>Aksi</th>
                             </tr>
@@ -42,6 +44,9 @@
                                 <td>{{ $datapo->no_do_suplier}}</td>
                                 <td>{{ $datapo->lokasi->nama}}</td>
                                 <td>{{ $datapo->status_dibuat}}</td>
+                                {{-- <td>{{ $datapo->status_diterima}}</td>
+                                <td>{{ $datapo->status_diperiksa}}</td> --}}
+
                                 <td>
                                 @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
                                     LUNAS
@@ -71,10 +76,10 @@
                                             @endif
                                         </li>
                                         <li>
-                                            <a href="{{ route('pembelian.show', ['datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                            <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                         </li>
                                         <li>
-                                            <a href="" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                            <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                         </li>
                                         <li>
                                             <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
@@ -112,7 +117,8 @@
                                 <th>No Purchase Order</th>
                                 <th>Supplier</th>
                                 <th>Bulan Stok Inden</th>
-                                <th>Status</th>
+                                <th>Status Purchase</th>
+                                {{-- <th>Status Finance</th> --}}
                                 <th>Status Pembayaran</th>
                                 <th>Aksi</th>
                             </tr>
@@ -125,6 +131,7 @@
                                 <td>{{ $inden->supplier->nama }}</td>
                                 <td>{{ $inden->bulan_inden}}</td>
                                 <td>{{ $inden->status_dibuat}}</td>
+                                {{-- <td>{{ $inden->status_diperiksa}}</td> --}}
                                 <td>
                                 @if ($inden->invoice !== null && $inden->invoice->sisa == 0 )
                                     LUNAS
@@ -154,10 +161,10 @@
                                             @endif
                                         </li>
                                         <li>
-                                            <a href="" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                            <a href="{{ route('pembelian.show', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                         </li>
                                         <li>
-                                            <a href="" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                            <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                         </li>
                                         <li>
                                             <a href="#" class="dropdown-item" onclick="deleteData({{ $inden->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>

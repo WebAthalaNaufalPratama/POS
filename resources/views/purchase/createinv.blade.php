@@ -34,7 +34,7 @@ Carbon::setLocale('id');
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_inv">No. Invoice</label>
-                                            <input type="text" class="form-control" id="no_inv" name="no_inv" placeholder="Nomor Invoice" value="{{ $nomor_inv }}" readonly>
+                                            <input type="text" class="form-control" id="no_inv" name="no_inv" placeholder="Nomor Invoice" value="" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="tg_inv">Tanggal Invoice</label>

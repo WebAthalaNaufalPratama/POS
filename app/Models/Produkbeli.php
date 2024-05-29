@@ -36,4 +36,5 @@ class Produkbeli extends Model
     public function poinden (){
         return $this->belongsTo(Poinden::class, 'poinden_id', 'id');
     }
+    
 }

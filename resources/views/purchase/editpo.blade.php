@@ -1,3 +1,4 @@
+
 @extends('layouts.app-von')
 
 @section('content')
@@ -5,7 +6,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Purchase Order</h3>
+            <h3 class="page-title">Edit Purchase Order</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{ route('pembelian.index') }}">Purchase Order</a>
@@ -21,13 +22,14 @@
 <div class="row">
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title mb-0">
-                Transaksi Pembelian
-            </h4>
+            {{-- <h4 class="card-title mb-0">
+                Edit Transaksi Pembelian
+            </h4> --}}
         </div>
         <div class="card-body">
-            <form action="{{ route('pembelianpo.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('pembelian.update',['datapo' => $beli->id ]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                {{-- @method('PUT') --}}
                 <div class="row">
                     <div class="col-sm">
                         @csrf
@@ -37,7 +39,8 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="nopo">No. PO</label>
-                                            <input type="text" class="form-control" id="nopo" name="nopo" placeholder="Nomor Purchase Order" value="{{ $nomor_po }}" readonly>
+                                            <input type="text" class="form-control" id="nopo" name="nopo" placeholder="Nomor Purchase Order" value="{{ $beli->no_po}}" readonly>
+                                            <input type="hidden" class="form-control" id="type" name="type" value="pembelian" readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
@@ -45,9 +48,12 @@
                                                 <select id="id_supplier" name="id_supplier" class="form-control" required>
                                                     <option value="">Pilih Nama Supplier</option>
                                                     @foreach ($suppliers as $supplier)
-                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
+                                                        <option value="{{ $supplier->id }}" {{ $supplier->id == $beli->supplier->id ? 'selected' : '' }}>
+                                                            {{ $supplier->nama }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
+                                                
                                                 <div class="input-group-append">
                                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                                                         <img src="/assets/img/icons/plus1.svg" alt="img" />
@@ -63,34 +69,35 @@
                                                 <select id="id_lokasi" name="id_lokasi" class="form-control" required>
                                                     <option value="">Pilih Lokasi</option>
                                                     @foreach ($lokasis as $lokasi)
-                                                    <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                                                    <option value="{{ $lokasi->id }}" {{ $lokasi->id == $beli->lokasi->id ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
                                                     @endforeach
                                                 </select>
                                        </div>
                                         <div class="form-group">
                                             <label for="harga_jual">Status</label>
-                                                <input type="text" class="form-control" id="status" name="status" value="Draft" readonly>
+                                                <input type="text" class="form-control" id="status" name="status" value="Pending" readonly>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim">
+                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim ?? '' }}">
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" readonly>
+                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima ?? '' }}">
                                                 </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="no_do">Nomor DO supplier</label>
-                                                <input type="text" class="form-control" id="no_do" name="no_do">
+                                                <input type="text" class="form-control" id="no_do" name="no_do" value="{{ $beli->no_do_suplier ?? ''}}">
                                             </div>
                                             <div class="form-group">
                                                 <label for="filedo">Delivery Order supplier</label>
-                                                    <input type="file" class="form-control" id="filedo" name="filedo">
-                                                </div>
+                                                    {{-- <input type="file" class="form-control" id="filedo" name="filedo" value="{{ $beli->file_do_suplier ?? ''}}"> --}}
+                                                    <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -101,7 +108,7 @@
                                 <div class="form-row row">
                                     <div class="mb-4">
                                         <h5>List Produk</h5>
-                                    </div>
+                                        {{-- <button id="ubahButton" class="btn btn-primary">Ubah</button>                                    </div> --}}
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>
@@ -114,39 +121,70 @@
                                                     <th></th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="dynamic_field">
+                                            
+                                            <tbody id="dynamic_field_1">
+                                                @foreach ($produkbelis as $item)
+                                                <tr>
+                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
+                                                    <td><input type="text" name="nama[]" id="nama_0" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}" readonly></td>
+                                                    {{-- <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_diterima ?? '' }}" ></td>
+                                                    <td><input type="text" name="kondisi[]" id="kondisi_0" class="form-control" value="{{ $item->kondisi->nama ?? ''}}" ></td> --}}
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_diterima ?? '' }}" ></td>
+                                                    <td>
+                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
+                                                            <option value="">Pilih Kondisi</option>
+                                                            @foreach ($kondisis as $kondisi)
+                                                                <option value="{{ $kondisi->id }}" {{ $kondisi->id == $item->kondisi_id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        
+                                                    </td>
+                                                
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                        
+                                            {{-- <tbody id="dynamic_field_2" style="display: none;">
                                                 <tr>
                                                     <td><input type="text" name="kode[]" id="kode_0" class="form-control" readonly></td>
                                                     <td>
-                                                    <select id="produk_0" name="produk[]" class="form-control" onchange="showInputType(0)">
-                                                        <option value="">----- Pilih Produk ----</option>
-                                                        @foreach ($produks as $produk)
-                                                        <option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}">{{ $produk->nama }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    </td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                                                    <td>
-                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
-                                                            <option value="" disabled>Pilih Kondisi</option>
-                                                            @foreach ($kondisis as $kondisi)
-                                                            <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
+                                                        <select id="produk_0" name="produk[]" class="form-control" onchange="showInputType(0)">
+                                                            <option value="">----- Pilih Produk ----</option>
+                                                            @foreach ($produks as $produk)
+                                                            <option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}">{{ $produk->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
+                                                    <td>
+                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" required>
+                                                            <option value="">Pilih Kondisi</option>
+                                                            @foreach ($kondisis as $kondisi)
+                                                            <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
                                                     <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                 </tr>
-                                            </tbody>
+                                            </tbody>  --}}
                                         </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        {{-- <script>
+                            document.getElementById('ubahButton').addEventListener('click', function() {
+                                var secondTbody = document.getElementById('dynamic_field_2');
+                                secondTbody.style.display = secondTbody.style.display === 'none' ? '' : 'none';
+                            });
+                        </script> --}}
+                        
 
                         <div class="row justify-content-start">
-                            <div class="col-md-8 border rounded pt-3 me-1 mt-2">
+                            <div class="col-md-9 border rounded pt-3 me-1 mt-2">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
@@ -158,8 +196,9 @@
                                     <tbody>
                                         <tr>
                                             <td id="pembuat">
-                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                {{-- <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}"> --}}
+                                                {{-- <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled> --}}
+                                                <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
                                             <td id="penerima">
                                                 <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
@@ -175,34 +214,34 @@
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="draft">Draft</option>
-                                                    <option value="publish">Publish</option>
+                                                    <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : ''}}>Draft</option>
+                                                    <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : ''}}>Publish</option>
                                                 </select>
                                             </td>
                                             <td id="status_diterima">
-                                                <select id="status_diterima" name="status_diterima" class="form-control" readonly>
+                                                <select id="status_diterima" name="status_diterima" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" disabled>Pending</option>
-                                                    <option value="acc" disabled>Accept</option>
+                                                    <option value="pending" {{ $beli->status_diterima == 'pending' ? 'selected' : ''}}>Pending</option>
+                                                    <option value="acc" {{ $beli->status_diterima == 'acc' ? 'selected' : ''}}>Accept</option>
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
-                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
+                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" disabled>Pending</option>
-                                                    <option value="acc" disabled>Accept</option>
+                                                    <option value="pending" {{ $beli->status_diperiksa == 'pending' ? 'selected' : ''}}>Pending</option>
+                                                    <option value="acc" {{ $beli->status_diperiksa == 'acc' ? 'selected' : ''}}>Accept</option>
                                                 </select>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="" >
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" >
                                             </td>
                                             <td id="tgl_diterima">
-                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="" readonly>
+                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ $beli->tgl_diterima_ttd ?? ''}}" >
                                             </td>
                                             <td id="tgl_pemeriksa">
-                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? ''}}" >
                                             </td>
                                         </tr>
                                     </tbody>
@@ -306,12 +345,12 @@ $(document).ready(function() {
                             '</select>'+
                         '</td>'+
                         '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
-                        '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')" readonly></td>'+
+                        '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
                         '<td>'+
-                            '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control" onchange="showInputType('+i+') required" readonly>'+
-                                '<option value="" disabled>Pilih Kondisi</option>'+
+                            '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control" onchange="showInputType('+i+') required">'+
+                                '<option value="">Pilih Kondisi</option>'+
                                 '@foreach ($kondisis as $kondisi)'+
-                                    '<option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>'+
+                                    '<option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>'+
                                 '@endforeach'+
                             '</select>'+
                         '</td>'+

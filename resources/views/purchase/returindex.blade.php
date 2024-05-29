@@ -10,7 +10,7 @@
                         <h4>Retur Pembelian</h4>
                     </div>
                     <div class="page-btn">
-                        <a href="{{ route('returbeli.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Retur Pembelian</a>
+                        {{-- <a href="{{ route('returbeli.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Retur Pembelian</a> --}}
                     </div>
                 </div>
             </div>

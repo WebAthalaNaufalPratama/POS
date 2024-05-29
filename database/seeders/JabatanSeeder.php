@@ -23,6 +23,12 @@ class JabatanSeeder extends Seeder
             ['nama' => 'Driver', 'deskripsi' => 'Pengantar barang', 'created_at' => now(), 'updated_at' => now()],
             ['nama' => 'Perangkai', 'deskripsi' => 'Perangkai prduk', 'created_at' => now(), 'updated_at' => now()],
             ['nama' => 'Sales', 'deskripsi' => 'Menjualkan produk', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'finance', 'deskripsi' => 'mengatur keuangan', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'auditor', 'deskripsi' => 'validator', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'kasir', 'deskripsi' => 'kasir', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'admin', 'deskripsi' => 'admin', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'sales manager', 'deskripsi' => 'sales manager', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'purchasing', 'deskripsi' => 'purchase', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }
