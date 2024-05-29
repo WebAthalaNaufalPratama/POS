@@ -144,10 +144,10 @@
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
-                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
+                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required readonly>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="pending">Pending</option>
-                                                    <option value="acc">Accept</option>
+                                                    <option value="pending" disabled>Pending</option>
+                                                    <option value="acc" disabled>Accept</option>
                                                 </select>
                                             </td>
                                         </tr>
@@ -156,7 +156,7 @@
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="" >
                                             </td>
                                             <td id="tgl_pemeriksa">
-                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" >
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -263,7 +263,7 @@ $(document).ready(function() {
                                 '@endforeach'+
                             '</select>'+
                         '</td>'+
-                        '<td><input type="text" name="kode[]" id="kode_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
+                        '<td><input type="text" name="kode[]" id="kode_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')" readonly></td>'+
                         '<td><input type="number" name="qty[]" id="qty_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
                         '<td><input type="text" name="ket[]" id="ket_'+i+'" class="form-control"></td>'+
                         '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>'+

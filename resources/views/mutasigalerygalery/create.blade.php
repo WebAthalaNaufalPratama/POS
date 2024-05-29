@@ -26,7 +26,7 @@
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('mutasighgalery.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('mutasigalerygalery.store') }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
                         @csrf
