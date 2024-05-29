@@ -77,20 +77,24 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form action="#" method="POST">
+          <form action="{{ route('pemakaian_sendiri.store') }}" method="POST">
             @csrf
             <label for="lokasi_id" class="col-form-label">Lokasi</label>
             <div class="row">
                 <div class="col">
                     <select id="lokasi_id" name="lokasi_id" class="form-control" required>
+                        @if (Auth::user()->roles()->value('name') != 'admin')
+                        <option value="{{ Auth::user()->karyawans->lokasi_id }}">{{ Auth::user()->karyawans->lokasi->nama }}</option>
+                        @else
                         <option value="">Pilih Lokasi</option>
                         @foreach ($lokasis as $lokasi)
                         <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
                         @endforeach
+                        @endif
                     </select>
                 </div>
-                <div class="col">
-                    <button class="btn btn-info"><img src="assets/img/icons/plus.svg" alt="img" /></button>
+                <div class="col text-end">
+                    <button type="button" class="btn btn-info" id="add"><img src="assets/img/icons/plus.svg" alt="img" /></button>
                 </div>
             </div>
             <table class="table">
@@ -105,75 +109,8 @@
                     </tr>
                 </thead>
                 <tbody id="t_body_pemakaian">
-                    <tr>
-                        <td>1</td>
-                        <td>
-                            <input type="date" class="form-control" name="tanggal[]" id="tanggal" value="{{ date('Y-m-d') }}" required>
-                        </td>
-                        <td>
-                            <select id="produk_jual_id" name="produk_jual_id[]" class="form-control" required>
-                                <option value="">Pilih Produk</option>
-                                @foreach ($produkJuals as $produkJual)
-                                <option value="{{ $produkJual->id }}">{{ $produkJual->nama }}</option>
-                                @endforeach
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control" name="jumlah[]" id="jumlah" required>
-                        </td>
-                        <td>
-                            <select id="karyawan_id" name="karyawan_id[]" class="form-control" required>
-                                <option value="">Pilih Karyawan</option>
-                                @foreach ($karyawans as $karyawan)
-                                    <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
-                                    @endforeach
-                            </select>
-                        </td>
-                        <td>
-                            <textarea name="alasan[]" id="alasan" class="form-control" required></textarea>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
-            {{-- <div class="mb-3">
-              <label for="lokasi_id" class="col-form-label">Lokasi</label>
-              <select id="lokasi_id" name="lokasi_id" class="form-control" required>
-                <option value="">Pilih Lokasi</option>
-                @foreach ($lokasis as $lokasi)
-                    <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-3">
-              <label for="produk_jual_id" class="col-form-label">Produk</label>
-              <select id="produk_jual_id" name="produk_jual_id" class="form-control" required>
-                <option value="">Pilih Produk</option>
-                @foreach ($produkJuals as $produkJual)
-                    <option value="{{ $produkJual->id }}">{{ $produkJual->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="jumlah" class="col-form-label">Jumlah Pemakaian</label>
-                <input type="number" class="form-control" name="jumlah" id="jumlah" required>
-            </div>
-            <div class="mb-3">
-                <label for="tanggal" class="col-form-label">Tanggal Pemakaian</label>
-                <input type="date" class="form-control" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}" required>
-            </div>
-            <div class="mb-3">
-                <label for="karyawan_id" class="col-form-label">Karyawan Pemakai</label>
-                <select id="karyawan_id" name="karyawan_id" class="form-control" required>
-                    <option value="">Pilih Karyawan</option>
-                    @foreach ($karyawans as $karyawan)
-                        <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
-                        @endforeach
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="alasan" class="col-form-label">Alasan Pemakaian</label>
-                <textarea name="alasan" id="alasan" class="form-control" required></textarea>
-            </div> --}}
         </div>
         <div class="modal-footer justify-content-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -189,7 +126,50 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $('#produk_jual_id, #karyawan_id, #lokasi_id').select2()
+            $('#produk_inven_id, #karyawan_id, #lokasi_id').select2()
+            $('#add').click(function() {
+                var i = $('#t_body_pemakaian tr').length + 1;
+                if(i <= 15){
+                    var newRow = '<tr id="row' + i + '">'+
+                            '<td>' + i + '</td>'+
+                            '<td>'+
+                                '<input type="date" class="form-control" name="tanggal[]" id="tanggal_' + i + '" required>'+
+                            '</td>'+
+                            '<td>'+
+                                '<select id="produk_inven_id_' + i + '" name="produk_inven_id[]" class="form-control" required>'+
+                                    '<option value="">Pilih Produk</option>'+
+                                    '@foreach ($produks as $produk)'+
+                                    '<option value="{{ $produk->id }}">{{ $produk->produk->nama }} ({{ $produk->kondisi->nama }})</option>'+
+                                    '@endforeach'+
+                                '</select>'+
+                            '</td>'+
+                            '<td>'+
+                                '<input type="number" class="form-control" name="jumlah[]" id="jumlah_' + i + '" required>'+
+                            '</td>'+
+                            '<td>'+
+                                '<select id="karyawan_id_' + i + '" name="karyawan_id[]" class="form-control" required>'+
+                                    '<option value="">Pilih Karyawan</option>'+
+                                    '@foreach ($karyawans as $karyawan)'+
+                                        '<option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>'+
+                                        '@endforeach'+
+                                '</select>'+
+                            '</td>'+
+                            '<td>'+
+                                '<textarea name="alasan[]" id="alasan_' + i + '" class="form-control" required></textarea>'+
+                            '</td>'+
+                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                            '</tr>';
+                    $('#t_body_pemakaian').append(newRow);
+                    $('#produk_inven_id_' + i + ', #karyawan_id_' + i).select2();
+                    i++
+                }
+            });
+            $(document).on('click', '.btn_remove', function() {
+                var button_id = $(this).attr("id");
+                $('#row'+button_id+'').remove();
+                multiply($('#harga_satuan_0'))
+                multiply($('#jumlah_0'))
+            });
         });
     </script>
 @endsection

@@ -526,6 +526,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
         });
 
+        Route::group(['prefix' => 'pemakaian_sendiri'], function() {
+            Route::get('/', 'PemakaianSendiriController@index')->name('pemakaian_sendiri.index');
+            Route::get('/create', 'PemakaianSendiriController@create')->name('pemakaian_sendiri.create');
+            Route::post('/store', 'PemakaianSendiriController@store')->name('pemakaian_sendiri.store');
+            Route::get('/{pemakaian_sendiri}/show', 'PemakaianSendiriController@show')->name('pemakaian_sendiri.show');
+            Route::get('/{pemakaian_sendiri}/edit', 'PemakaianSendiriController@edit')->name('pemakaian_sendiri.edit');
+            Route::patch('/{pemakaian_sendiri}/update', 'PemakaianSendiriController@update')->name('pemakaian_sendiri.update');
+            Route::get('/{pemakaian_sendiri}/delete', 'PemakaianSendiriController@destroy')->name('pemakaian_sendiri.destroy');
+        });
+
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
     });

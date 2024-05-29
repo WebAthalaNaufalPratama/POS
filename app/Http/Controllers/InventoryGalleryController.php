@@ -21,13 +21,15 @@ class InventoryGalleryController extends Controller
      */
     public function index()
     {
-        $produkJuals = Produk_Jual::all();
+        $produks = InventoryGallery::with('produk')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })->orderBy('kode_produk')->orderBy('kondisi_id')->get();
         $karyawans = Karyawan::all();
         $lokasis = Lokasi::all();
         $data = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->get();
-        return view('inven_galeri.index', compact('data', 'produkJuals', 'karyawans', 'lokasis'));
+        return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis'));
     }
 
     /**
@@ -149,5 +151,31 @@ class InventoryGalleryController extends Controller
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
+    }
+
+    public function addPemakaianSendiri(Request $req)
+    {
+        dd($req);
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'kode_produk' => 'required',
+            'kondisi_id' => 'required|integer',
+            'lokasi_id' => 'required',
+            'jumlah' => 'required',
+            'min_stok' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        $data = $req->except(['_token', '_method']);
+
+        // check duplikasi
+        $duplicate = InventoryGallery::where('kode_produk', $data['kode_produk'])->where('kondisi_id', $data['kondisi_id'])->where('lokasi_id', $data['lokasi_id'])->where('id', '!=', $inventoryGallery)->first();
+        if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
+
+         // save data inven galeri
+         $check = InventoryGallery::find($inventoryGallery)->update($data);
+         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+         return redirect(route('inven_galeri.index'))->with('success', 'Data tersimpan');
     }
 }
