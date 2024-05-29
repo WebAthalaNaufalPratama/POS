@@ -159,22 +159,17 @@ class TransaksiKasController extends Controller
     public function index_gallery()
     {
         $data = TransaksiKas::whereHas('lokasi', function($z){
-            $z->where('operasional_id', Auth::user()->karyawans->lokasi->operasional->id);
+            $z->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
         })->get();
         $lokasis = Lokasi::all();
         $akuns = Akun::all();
         $totalOperasional = $data->sum('harga_total');
-        $totalSewa = Pembayaran::whereHas('sewa', function($q){
-            $q->whereHas('sewa', function($p){
-                $p->whereHas('lokasi', function($z){
-                    $z->where('operasional_id', Auth::user()->karyawans->lokasi->operasional->id);
-                });
-            });
-        })->get()->sum('nominal');
-        $totalPenjualan = Pembayaran::whereHas('penjualan', function($q){
-            $q->whereHas('lokasi', function($p){
-                $p->where('operasional_id', Auth::user()->karyawans->lokasi->operasional->id);
-            });
+        $totalSewa = Pembayaran::whereHas('sewa.sewa.lokasi', function($q) {
+            $q->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
+        })->get();
+        dd($totalSewa);
+        $totalPenjualan = Pembayaran::whereHas('penjualan.lokasi', function($q) {
+            $q->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
         })->get()->sum('nominal');
         $saldo = $totalSewa + $totalPenjualan - $totalOperasional;
         return view('kas_gallery.index', compact('data', 'lokasis', 'akuns', 'saldo', 'totalOperasional', 'totalSewa', 'totalPenjualan'));
