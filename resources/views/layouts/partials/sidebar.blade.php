@@ -77,16 +77,16 @@
                     <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
                     <ul>
                         @if(in_array('mutasigalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
+                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
                         @endif
                         @if(in_array('mutasioutlet.index', $rolePermissions))
-                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasioutlet*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
+                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
                         @endif
                         @if(in_array('mutasighgalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasighgalery*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
+                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
                         @endif
                         @if(in_array('mutasigalerygalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasigalerygalery*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGA*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
                         @endif
                         <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                         <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
