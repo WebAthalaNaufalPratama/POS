@@ -22,7 +22,6 @@
                     <th>No</th>
                     <th>Kode Produk</th>
                     <th>Nama Produk</th>
-                    <th>Kondisi</th>
                     <th>Outlet</th>
                     <th>Jumlah</th>
                     <th>Minimal Stok</th>
@@ -35,7 +34,6 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->kode_produk ?? '-' }}</td>
                             <td>{{ $item->produk->nama ?? '-' }}</td>
-                            <td>{{ $item->kondisi->nama ?? '-' }}</td>
                             <td>{{ $item->outlet->nama ?? '-' }}</td>
                             <td>{{ $item->jumlah ?? '-' }}</td>
                             <td>{{ $item->min_stok ?? '-' }}</td>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lokasi;
+use App\Models\Operasional;
 use App\Models\Tipe_Lokasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,8 @@ class LokasiController extends Controller
     {
         $lokasi = Lokasi::with('tipe')->get();
         $tipe_lokasis = Tipe_Lokasi::all();
-        return view('lokasi.index', compact('lokasi', 'tipe_lokasis'));
+        $operasionals = Operasional::all();
+        return view('lokasi.index', compact('lokasi', 'tipe_lokasis', 'operasionals'));
     }
 
     /**
@@ -46,6 +48,7 @@ class LokasiController extends Controller
             'tipe_lokasi' => 'required|integer',
             'alamat' => 'required',
             'pic' => 'required',
+            'operasional_id' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -94,6 +97,7 @@ class LokasiController extends Controller
             'tipe_lokasi' => 'required|integer',
             'alamat' => 'required',
             'pic' => 'required',
+            'operasional_id' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);

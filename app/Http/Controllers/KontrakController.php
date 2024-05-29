@@ -29,7 +29,9 @@ class KontrakController extends Controller
     public function index(Request $req)
     {
         $query = Kontrak::with('customer');
-
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $query->where('lokasi_id',Auth::user()->karyawans->lokasi_id);
+        }
         if ($req->customer) {
             $query->where('customer_id', $req->input('customer'));
         }
@@ -42,15 +44,22 @@ class KontrakController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_kontrak', '<=', $req->input('dateEnd'));
         }
-        $kontraks = $query->get();
+        $kontraks = $query->orderByDesc('id')->get();
+
         $customer = Kontrak::select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('customers.nama')
         ->get();
         $sales = Kontrak::select('sales')
         ->distinct()
         ->join('karyawans', 'kontraks.sales', '=', 'karyawans.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('karyawans.nama')
         ->get();
         return view('kontrak.index', compact('kontraks', 'customer', 'sales'));
@@ -63,13 +72,23 @@ class KontrakController extends Controller
      */
     public function create()
     {
-        $produkjuals = Produk_Jual::all();
-        $lokasis = Lokasi::all();
-        $customers = Customer::where('tipe', 'sewa')->get();
-        $rekenings = Rekening::all();
-        $promos = Promo::all();
-        $sales = Karyawan::where('jabatan', 'sales')->get();
-        $ongkirs = Ongkir::all();
+        if (Auth::user()->roles()->value('name') != 'admin') {
+            $produkjuals = Produk_Jual::all();
+            $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+            $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $rekenings = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $promos = Promo::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $sales = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'sales')->get();
+            $ongkirs = Ongkir::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+        } else {
+            $produkjuals = Produk_Jual::all();
+            $lokasis = Lokasi::all();
+            $customers = Customer::where('tipe', 'sewa')->get();
+            $rekenings = Rekening::all();
+            $promos = Promo::all();
+            $sales = Karyawan::where('jabatan', 'sales')->get();
+            $ongkirs = Ongkir::all();
+        }
 
         $latestKontrak = Kontrak::withTrashed()->orderByDesc('id')->first();
         if (!$latestKontrak) {
@@ -179,17 +198,28 @@ class KontrakController extends Controller
      */
     public function show($kontrak)
     {
-        $produkjuals = Produk_Jual::all();
-        $lokasis = Lokasi::all();
-        $customers = Customer::where('tipe', 'sewa')->get();
-        $rekenings = Rekening::all();
-        $promos = Promo::all();
-        $sales = Karyawan::where('jabatan', 'sales')->get();
+        if (Auth::user()->roles()->value('name') != 'admin') {
+            $produkjuals = Produk_Jual::all();
+            $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+            $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $rekenings = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $promos = Promo::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $sales = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'sales')->get();
+            $ongkirs = Ongkir::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $perangkai = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'Perangkai')->get();
+        } else {
+            $produkjuals = Produk_Jual::all();
+            $lokasis = Lokasi::all();
+            $customers = Customer::where('tipe', 'sewa')->get();
+            $rekenings = Rekening::all();
+            $promos = Promo::all();
+            $sales = Karyawan::where('jabatan', 'sales')->get();
+            $ongkirs = Ongkir::all();
+            $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        }
         $kontraks = Kontrak::find($kontrak);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
-        $ongkirs = Ongkir::all();
         $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
-        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
         $bungapot = Produk::where('tipe_produk',1)->orWhere('tipe_produk',2)->get();
         $kondisi = Kondisi::all();
         return view('kontrak.show', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat', 'perangkai', 'bungapot', 'kondisi'));
@@ -203,15 +233,28 @@ class KontrakController extends Controller
      */
     public function edit($kontrak)
     {
-        $produkjuals = Produk_Jual::all();
-        $lokasis = Lokasi::all();
-        $customers = Customer::where('tipe', 'sewa')->get();
-        $rekenings = Rekening::all();
-        $promos = Promo::all();
-        $sales = Karyawan::where('jabatan', 'sales')->get();
+        if (Auth::user()->roles()->value('name') != 'admin') {
+            $produkjuals = Produk_Jual::all();
+            $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+            $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $rekenings = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $promos = Promo::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $sales = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'sales')->get();
+            $ongkirs = Ongkir::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            $perangkai = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'Perangkai')->get();
+        } else {
+            $produkjuals = Produk_Jual::all();
+            $lokasis = Lokasi::all();
+            $customers = Customer::where('tipe', 'sewa')->get();
+            $rekenings = Rekening::all();
+            $promos = Promo::all();
+            $sales = Karyawan::where('jabatan', 'sales')->get();
+            $ongkirs = Ongkir::all();
+            $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        }
+
         $kontraks = Kontrak::find($kontrak);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
-        $ongkirs = Ongkir::all();
         $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();        
         return view('kontrak.edit', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat'));
     }
@@ -293,14 +336,6 @@ class KontrakController extends Controller
                 if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
         }
-        // $activity = Activity::create([
-        //     'log_name' => 'Kontrak',
-        //     'description' => $req->log,
-        //     'subject_type' => Kontrak::class,
-        //     'subject_id' => $kontrak,
-        //     'causer_type' => Auth::user() ? get_class(Auth::user()) : null,
-        //     'causer_id' => Auth::id(),
-        // ]);
         return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
 
@@ -334,7 +369,6 @@ class KontrakController extends Controller
         $gift = Kontrak::with('produk')->find($req->kontrak);
         $bungapot = Produk::where('tipe_produk',1)->orWhere('tipe_produk',2)->get();
         $kondisi = Kondisi::all();
-        // dd($gift);
         return view('kontrak.create_gift', compact('gift', 'bungapot', 'kondisi'));
     }
     public function datatable(Request $request)

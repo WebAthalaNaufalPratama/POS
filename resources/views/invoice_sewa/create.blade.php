@@ -264,8 +264,8 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Sisa Bayar</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="sisa_bayar" name="sisa_bayar" value="{{ $kontrak->total_harga }}" class="form-control" required>
-                                        <input type="hidden" id="sisa_bayar_awal" value="{{ $kontrak->total_harga }}">
+                                        <input type="number" id="sisa_bayar" name="sisa_bayar" value="{{ $sisaBayar }}" class="form-control" required readonly>
+                                        <input type="hidden" id="sisa_bayar_awal" value="{{ $sisaBayar }}">
                                     </div>
                                 </div>
                             </div>
@@ -284,9 +284,12 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit">Submit</button>
+                    <button class="btn btn-primary" type="submit" {{ $sisaBayar == 0 ? 'disabled' : '' }}>Submit</button>
                     <a href="{{ route('invoice_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
+                @if ($sisaBayar == 0)
+                <p class="text-end text-danger">Kontrak sudah lunas</p>
+                @endif
                 </form>
             </div>
         </div>

@@ -12,6 +12,7 @@
                         <li><a href="{{ route('produks.index') }}" class="{{ request()->is('produks*') ? 'active' : '' }}">Produk</a></li>
                         <li><a href="{{ route('kondisi.index') }}" class="{{ request()->is('kondisi*') ? 'active' : '' }}">Kondisi</a></li>
                         <li><a href="{{ route('tipe_lokasi.index') }}" class="{{ request()->is('tipe_lokasi*') ? 'active' : ''}}">Tipe Lokasi</a></li>
+                        <li><a href="{{ route('operasional.index') }}" class="{{ request()->is('operasional*') ? 'active' : ''}}">Operasional</a></li>
                         <li><a href="{{ route('lokasi.index') }}" class="{{ request()->is('lokasi*') ? 'active' : '' }}">Lokasi</a></li>
                         <li><a href="{{ route('supplier.index') }}" class="{{ request()->is('supplier*') ? 'active' : '' }}">Supplier</a></li>
                         <li><a href="{{ route('ongkir.index') }}" class="{{ request()->is('ongkir*') ? 'active' : '' }}">Ongkir</a></li>
@@ -43,8 +44,14 @@
                     </ul>
                 </li>
                 <li class="submenu">
-
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan</span> <span class="menu-arrow"></span></a>
+                    @php
+                        $role = Auth::user()->roles()->first();
+                        $user = Auth::user()->first();
+                        $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                        $rolePermissions = $role->permissions->pluck('name')->toArray();
+                    @endphp
+                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
                         <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="{{ request()->is('formpenjualan*') ? 'active' : '' }}">Perangkai</a></li>
@@ -53,21 +60,37 @@
                         <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
+                    @elseif(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 1)
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
+                        <!-- <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="{{ request()->is('formpenjualan*') ? 'active' : '' }}">Perangkai</a></li> -->
+                        <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
+                        <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
+                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
+                        <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
+                    </ul>
+                    @endif
                 </li>
                 <li class="submenu">
 
                     <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
-                        <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasioutlet*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
-                        <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasighgalery*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
-                        <!--purchase -->
-                        <li><a href="{{ route('mutasiindengalery.index') }}" class="{{ request()->is('mutasiindengalery*') ? 'active' : '' }}">Mutasi Inden ke Galery</a></li>
-                        {{-- <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiindengh*') ? 'active' : '' }}">Mutasi Inden ke Greenhouse</a></li> --}}
-                        {{-- <li><a href="{{ route('mutasigaleryinden.index') }}" class="{{ request()->is('mutasigaleryinden*') ? 'active' : '' }}">Mutasi Galery ke Inden</a></li> --}}
-                        {{-- <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li> --}}
-
-                        
+                        @if(in_array('mutasigalery.index', $rolePermissions))
+                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasigalery*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
+                        @endif
+                        @if(in_array('mutasioutlet.index', $rolePermissions))
+                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasioutlet*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
+                        @endif
+                        @if(in_array('mutasighgalery.index', $rolePermissions))
+                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasighgalery*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
+                        @endif
+                        @if(in_array('mutasigalerygalery.index', $rolePermissions))
+                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasigalerygalery*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                        @endif
+                        <li><a href="#" class="">Mutasi Inden ke GH</a></li>
+                        <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
+                        <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
                     </ul>
                 </li>
                 <li class="submenu">

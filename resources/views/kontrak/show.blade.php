@@ -207,7 +207,7 @@
                                     <tbody>
                                         <tr>
                                             <td id="pengaju">{{ $kontraks->pengaju->nama ?? '-' }}</td>
-                                            <td id="pembuat">{{ $kontraks->pembuat->nama ?? '-' }}</td>
+                                            <td id="pembuat">{{ $kontraks->data_pembuat->karyawans->nama ?? '-' }}</td>
                                             <td id="penyetuju">{{ $kontraks->penyetuju->nama ?? '-' }}</td>
                                             <td id="pemeriksa">{{ $kontraks->pemeriksa->nama ?? '-' }}</td>
                                         </tr>

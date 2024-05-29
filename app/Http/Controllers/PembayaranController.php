@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Penjualan;
 use App\Models\Rekening;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class PembayaranController extends Controller
@@ -26,7 +27,8 @@ class PembayaranController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
         }
-        $data = Pembayaran::with('rekening')->orderBy('created_at', 'desc')->get();
+        $data = $query->orderByDesc('id')->get();
+        // $data = Pembayaran::with('rekening')->orderBy('created_at', 'desc')->get();
 
         return view('pembayaran.index', compact('data'));
     }
@@ -141,7 +143,13 @@ class PembayaranController extends Controller
 
     public function index_sewa(Request $req){
         $query = Pembayaran::whereNotNull('invoice_sewa_id');
-
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $query->whereHas('sewa', function($q) {
+                $q->whereHas('kontrak', function($p) {
+                    $p->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+                });
+            });
+        }
         if ($req->metode) {
             $query->where('cara_bayar', $req->input('metode'));
         }

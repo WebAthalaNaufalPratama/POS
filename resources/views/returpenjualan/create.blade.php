@@ -270,6 +270,7 @@
                                                                 @foreach ($items as $komponen)
                                                                     <div class="row mt-2">
                                                                         <div class="col">
+                                                                        <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
                                                                             <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                             </div>
                                                                             <div class="col">

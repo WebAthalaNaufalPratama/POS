@@ -23,7 +23,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
     /**
      * Home Routes
      */
-    Route::get('/', 'HomeController@index')->name('home.index');
+    Route::redirect('/', '/login');
+    Route::get('/home', 'HomeController@index')->name('home.index');
 
     Route::group(['middleware' => ['guest']], function() {
         /**
@@ -110,6 +111,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{tipe_lokasi}/edit', 'TipeLokasiController@edit')->name('tipe_lokasi.edit');
             Route::patch('/{tipe_lokasi}/update', 'TipeLokasiController@update')->name('tipe_lokasi.update');
             Route::get('/{tipe_lokasi}/delete', 'TipeLokasiController@destroy')->name('tipe_lokasi.destroy');
+        });
+
+        Route::group(['prefix' => 'operasional'], function() {
+            Route::get('/', 'OperasionalController@index')->name('operasional.index');
+            Route::post('/store', 'OperasionalController@store')->name('operasional.store');
+            Route::get('/{operasional}/show', 'OperasionalController@show')->name('operasional.show');
+            Route::get('/{operasional}/edit', 'OperasionalController@edit')->name('operasional.edit');
+            Route::patch('/{operasional}/update', 'OperasionalController@update')->name('operasional.update');
+            Route::get('/{operasional}/delete', 'OperasionalController@destroy')->name('operasional.destroy');
         });
 
         Route::group(['prefix' => 'lokasi'], function() {
@@ -243,6 +253,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{penjualan}/delete', 'PenjualanController@destroy')->name('penjualan.destroy');
             Route::post('/storekomponen', 'PenjualanController@store_komponen')->name('komponenpenjulan.store');
             Route::post('/storekomponenmutasi', 'PenjualanController@store_komponen_mutasi')->name('komponenmutasi.store');
+            Route::post('/storekomponenretur', 'PenjualanController@store_komponen_retur')->name('komponenretur.store');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -314,6 +325,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/', 'FormPerangkaiController@penjualan_index')->name('formpenjualan.index');
             Route::get('/create', 'FormPerangkaiController@penjualan_create')->name('formpenjualan.create');
             Route::post('/store', 'FormPerangkaiController@penjualan_store')->name('formpenjualan.store');
+            Route::post('/storemutasi', 'FormPerangkaiController@mutasi_store')->name('formmutasi.store');
             Route::get('/{formpenjualan}/show', 'FormPerangkaiController@penjualan_show')->name('formpenjualan.show');
             Route::get('/{formpenjualan}/edit', 'FormPerangkaiController@penjualan_edit')->name('formpenjualan.edit');
             Route::patch('/{formpenjualan}/update', 'FormPerangkaiController@penjualan_update')->name('formpenjualan.update');
@@ -484,6 +496,35 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         //endpurchase
 
 
+        Route::group(['prefix' => 'mutasiGAG'], function() {
+            Route::get('/', 'MutasiController@index_galerygalery')->name('mutasigalerygalery.index');
+            Route::get('/create', 'MutasiController@create_galerygalery')->name('mutasigalerygalery.create');
+            Route::post('/store', 'MutasiController@store_galerygalery')->name('mutasigalerygalery.store');
+            Route::get('/{mutasiGAG}/show', 'MutasiController@show_galerygalery')->name('mutasigalerygalery.show');
+            Route::get('/{mutasiGAG}/edit', 'MutasiController@edit_galerygalery')->name('mutasigalerygalery.edit');
+            Route::patch('/{mutasiGAG}/update', 'MutasiController@update_galerygalery')->name('mutasigalerygalery.update');
+            Route::get('/{mutasiGAG}/delete', 'MutasiController@destroy_galerygalery')->name('mutasigalerygalery.destroy');
+        });
+
+        Route::group(['prefix' => 'kas_pusat'], function() {
+            Route::get('/', 'TransaksiKasController@index_pusat')->name('kas_pusat.index');
+            Route::get('/create', 'TransaksiKasController@create_pusat')->name('kas_pusat.create');
+            Route::post('/store', 'TransaksiKasController@store_pusat')->name('kas_pusat.store');
+            Route::get('/{kas_pusat}/show', 'TransaksiKasController@show_pusat')->name('kas_pusat.show');
+            Route::get('/{kas_pusat}/edit', 'TransaksiKasController@edit_pusat')->name('kas_pusat.edit');
+            Route::patch('/{kas_pusat}/update', 'TransaksiKasController@update_pusat')->name('kas_pusat.update');
+            Route::get('/{kas_pusat}/delete', 'TransaksiKasController@destroy_pusat')->name('kas_pusat.destroy');
+        });
+
+        Route::group(['prefix' => 'kas_gallery'], function() {
+            Route::get('/', 'TransaksiKasController@index_gallery')->name('kas_gallery.index');
+            Route::get('/create', 'TransaksiKasController@create_gallery')->name('kas_gallery.create');
+            Route::post('/store', 'TransaksiKasController@store_gallery')->name('kas_gallery.store');
+            Route::get('/{kas_gallery}/show', 'TransaksiKasController@show_gallery')->name('kas_gallery.show');
+            Route::get('/{kas_gallery}/edit', 'TransaksiKasController@edit_gallery')->name('kas_gallery.edit');
+            Route::patch('/{kas_gallery}/update', 'TransaksiKasController@update_gallery')->name('kas_gallery.update');
+            Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
+        });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');

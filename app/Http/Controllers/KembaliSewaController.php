@@ -26,7 +26,11 @@ class KembaliSewaController extends Controller
     public function index(Request $req)
     {
         $query = KembaliSewa::query();
-
+        if(Auth::user()->roles()->value('name') != 'admin'){
+            $query->whereHas('sewa', function($q) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            });
+        }
         if ($req->customer) {
             $query->whereHas('sewa',function($q) use($req){
                 $q->where('customer_id', $req->input('customer'));
@@ -41,15 +45,21 @@ class KembaliSewaController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_kembali', '<=', $req->input('dateEnd'));
         }
-        $data = $query->get();
+        $data = $query->orderByDesc('id')->get();
         $customer = Kontrak::whereHas('kembali_sewa')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('customers.nama')
         ->get();
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })
         ->orderBy('karyawans.nama')
         ->get();
         return view('kembali_sewa.index', compact('data', 'driver', 'customer'));
@@ -73,7 +83,9 @@ class KembaliSewaController extends Controller
         // data
         $kontrak = Kontrak::with('produk')->find($data['kontrak']);
         $do = DeliveryOrder::with('produk', 'produk.komponen', 'produk.produk')->where('no_referensi', $kontrak->no_kontrak)->get();
-        $drivers = Karyawan::where('jabatan', 'Driver')->get();
+        $drivers = Karyawan::where('jabatan', 'Driver')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })->get();
         $produkjuals = Produk_Jual::all();
         $kondisi = Kondisi::all();
         $produkSewa = $kontrak->produk()->whereHas('produk')->get();

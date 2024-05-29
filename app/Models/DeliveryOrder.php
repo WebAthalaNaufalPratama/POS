@@ -34,7 +34,7 @@ class DeliveryOrder extends Model
     ];
 
     public function kontrak(){
-        return $this->belongsTo(Kontrak::class, 'no_sewa', 'no_sewa');
+        return $this->belongsTo(Kontrak::class, 'no_referensi', 'no_kontrak');
     }
     public function customer(){
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
