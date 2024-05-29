@@ -191,27 +191,6 @@ class DopenjualanController extends Controller
                 return redirect()->route('inven_galeri.create')->with('fail', 'Data Produk Belum Ada Di Inventory Atau Stok Kurang');
             }
         }
-        // elseif($lokasi->tipe_lokasi == 2){
-        //     for ($i = 0; $i < count($data['nama_produk']); $i++) {
-        //         $getProdukJual = Produk_Terjual::with('komponen')->where('id', $data['nama_produk'][$i])->first();
-        //         $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
-        //                             ->where('kode_produk', $getProdukJual->produk->kode)
-        //                             ->first();
-        //                 // dd($stok);
-                    
-        //         if (!$stok) {
-        //             return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
-        //         }
-
-        //         $requiredQuantity = intval($data['jumlah'][$i]);
-        //     }
-        //     if (!$stok || $stok->jumlah < $requiredQuantity) {
-        //         return false;
-        //     }
-        //     if (!$allStockAvailable) {
-        //         return redirect()->route('inven_outlet.create')->with('fail', 'Data Produk Belum Ada Di Inventory Atau Stok Kurang');
-        //     }
-        // }
         
 
         // save data do

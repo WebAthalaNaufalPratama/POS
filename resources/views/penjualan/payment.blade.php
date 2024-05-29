@@ -270,7 +270,7 @@
                                             <div class="col-lg-6">
                                                 <div class="form-group">
                                                     <label>Pembayaran</label>
-                                                    <select id="cara_bayar" name="cara_bayar" class="form-control" required>
+                                                    <select id="cara_bayar" name="cara_bayar" class="form-control" required readonly>
                                                         <option value="">Pilih Pembayaran</option>
                                                         <option value="cash" {{ $penjualans->cara_bayar == 'cash' ? 'selected' : ''}}>CASH</option>
                                                         <option value="transfer" {{ $penjualans->cara_bayar == 'transfer' ? 'selected' : ''}}>TRANSFER</option>
@@ -307,7 +307,7 @@
                                             <div class="col-lg-6">
                                                 <div class="form-group">
                                                     <label>Pengiriman</label>
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required disabled>
                                                         <option value="">Pilih Jenis Pengiriman</option>
                                                         <option value="exspedisi" {{ $penjualans->pilih_pengiriman == 'exspedisi' ? 'selected' : ''}}>Ekspedisi</option>
                                                         <option value="sameday" {{ $penjualans->pilih_pengiriman == 'sameday' ? 'selected' : ''}}>SameDay</option>
@@ -316,11 +316,11 @@
                                                 <div class="form-group">
                                                     <div id="inputOngkir" style="display: none;">
                                                         <label for="alamat_tujuan">Alamat Tujuan</label>
-                                                        <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control">{{ $penjualans->alamat_tujuan}}</textarea>
+                                                        <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" disabled>{{ $penjualans->alamat_tujuan}}</textarea>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <label>Alamat Pengiriman</label>
-                                                        <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                                        <select id="ongkir_id" name="ongkir_id" class="form-control" disabled>
                                                             <option value="">Pilih Alamat Tujuan</option>
                                                             @foreach($ongkirs as $ongkir)
                                                             <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya }}" {{$ongkir->id == $penjualans->ongkir_id ? 'selected' : ''}}>{{ $ongkir->nama }}</option>
@@ -330,7 +330,7 @@
                                                 </div>
                                                 <div class="form-group mt-3">
                                                     <label>Notes</label>
-                                                    <textarea class="form-control" id="notes" name="notes" required>{{$penjualans->notes}}</textarea>
+                                                    <textarea class="form-control" id="notes" name="notes" required disabled>{{$penjualans->notes}}</textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -881,6 +881,34 @@
             $('#row' + button_id + '').remove();
             calculateTotal(0);
         });
+
+        function togglePaymentFields() {
+            var pembayaran = $('#cara_bayar').val();
+
+            $('#inputCash').hide();
+            $('#inputTransfer').hide();
+
+            if (pembayaran === "cash") {
+                $('#inputCash').show();
+            } else if (pembayaran === "transfer") {
+                $('#inputTransfer').show();
+            }
+        }
+
+        // Add change event listener
+        $('#cara_bayar').change(function() {
+            togglePaymentFields();
+        });
+
+        // Initial value from backend
+        var initialPembayaran = "{{ $penjualans->cara_bayar }}";
+
+        // Set the initial value in the dropdown and trigger the change event
+        if (initialPembayaran) {
+            $('#cara_bayar').val(initialPembayaran).trigger('change');
+        }
+
+
 
         $('[id^=btnPerangkai]').click(function(e) {
             e.preventDefault();

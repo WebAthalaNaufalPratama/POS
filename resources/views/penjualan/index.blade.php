@@ -279,4 +279,11 @@
         $('#no_invoice_bayar').val(generatedInvoice);
     }
 </script>
+
+<!-- mematikan js atau klik kanan js -->
+<!-- <script>
+    document.addEventListener("contextmenu", function(e){
+        e.preventDefault();
+    }, false);
+</script> -->
 @endsection
