@@ -5,13 +5,13 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi GreenHouse ke Galery</h3>
+            <h3 class="page-title">Mutasi Galery ke Galery</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="index.html">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    GreenHouse Ke Galery
+                    Galery Ke Galery
                 </li>
             </ul>
         </div>
@@ -28,7 +28,7 @@
         <div class="card-body">
                 <div class="row">
                     <div class="col-sm">
-                    <form action="{{ route('mutasighgalery.update', ['mutasiGG' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('mutasigalerygalery.update', ['mutasiGAG' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
