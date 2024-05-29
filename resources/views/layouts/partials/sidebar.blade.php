@@ -85,7 +85,8 @@
                         <li><a href="{{ route('inven_galeri.index') }}" class="{{ request()->is('inven_galeri*') ? 'active' : '' }}">Gallery</a></li>
                         <li><a href="{{ route('inven_outlet.index')}}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
                         <li><a href="{{ route('inven_greenhouse.index')}}" class="{{ request()->is('inven_greenhouse*') ? 'active' : '' }}">GreenHouse</a></li>
-                        <li><a href="#" class="">Inden</a></li>
+                        <li><a href="{{ route('inven_inden.index')}}" class="{{ request()->is('inven_inden*') ? 'active' : '' }}">Inden</a></li>
+                        {{-- <li><a href="#" class="">Inden</a></li> --}}
                     </ul>
                 </li>
                 <li class="submenu">

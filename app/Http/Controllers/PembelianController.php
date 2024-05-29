@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 
 use App\Models\InventoryGallery;
+use App\Models\InventoryGreenHouse;
+use App\Models\InventoryInden;
 use App\Models\Invoicepo;
 use App\Models\Karyawan;
 use App\Models\Kondisi;
@@ -19,7 +21,9 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Stmt\Foreach_;
 use Poinden;
+use ProdukBelis;
 use SebastianBergmann\Invoker\Invoker;
 
 class PembelianController extends Controller
@@ -193,7 +197,7 @@ class PembelianController extends Controller
             'id_supplier' => 'required',
             'id_lokasi' => 'required',
             'tgl_kirim' => 'required|date',
-            'tgl_diterima' => 'required|date',
+            // 'tgl_diterima' => 'required|date',
             'no_do' => 'required',
             'status_dibuat' => 'required',
             // Tambahkan validasi lainnya sesuai kebutuhan
@@ -221,7 +225,7 @@ class PembelianController extends Controller
         $pembelian->status_diperiksa = $request->status_diperiksa; // Status pembuatan
        
         $pembelian->tgl_dibuat = $request->tgl_dibuat; // Tanggal pembuatan saat ini
-        $pembelian->tgl_diterima_ttd = $request->tgl_diterima; // Tanggal pembuatan saat ini
+        $pembelian->tgl_diterima_ttd = $request->tgl_diterima_ttd; // Tanggal pembuatan saat ini
         $pembelian->tgl_diperiksa = $request->tgl_diperiksa; // Tanggal pembuatan saat ini
         
         if ($request->hasFile('filedo')) {
@@ -253,21 +257,21 @@ class PembelianController extends Controller
             $produkBeli->kondisi_id = $kondisiIds[$index];          
             $check2 = $produkBeli->save();
 
-            $lokasi = Lokasi::find($request->id_lokasi);
-            $produk = Produk::find($produkId)->first();
-            if ($lokasi->tipe_lokasi == 1) {
-                $checkInven = InventoryGallery::where('kode_produk', $produk->kode)->where('kondisi_id', $kondisiIds[$index])->where('lokasi_id', $lokasi->id)->first();
-                if($checkInven){
-                    $checkInven->jumlah += $qtyTerima[$index];
-                    $checkInven->update();
-                } else {
-                    $createProduk = new InventoryGallery();
-                    $createProduk->kode_produk = $produk->kode;
-                    $createProduk->kondisi_id = $kondisiIds[$index];
-                    $createProduk->jumlah = $qtyTerima[$index];
-                    $createProduk->lokasi_id = $lokasi->id;
-                }
-            } 
+            // $lokasi = Lokasi::find($request->id_lokasi);
+            // $produk = Produk::find($produkId)->first();
+            // if ($lokasi->tipe_lokasi == 1) {
+            //     $checkInven = InventoryGallery::where('kode_produk', $produk->kode)->where('kondisi_id', $kondisiIds[$index])->where('lokasi_id', $lokasi->id)->first();
+            //     if($checkInven){
+            //         $checkInven->jumlah += $qtyTerima[$index];
+            //         $checkInven->update();
+            //     } else {
+            //         $createProduk = new InventoryGallery();
+            //         $createProduk->kode_produk = $produk->kode;
+            //         $createProduk->kondisi_id = $kondisiIds[$index];
+            //         $createProduk->jumlah = $qtyTerima[$index];
+            //         $createProduk->lokasi_id = $lokasi->id;
+            //     }
+            // } 
         }
     
         // Periksa keberhasilan penyimpanan data
@@ -614,66 +618,309 @@ class PembelianController extends Controller
 
         $type = $request->query('type');
 
-    if ($type === 'pembelian') {
-        $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
-        $id_po = $inv_po->pembelian_id;
-        $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
-        $produkbelis = Produkbeli::where('pembelian_id', $id_po)->get();
-        $beli = Pembelian::find($id_po);
+        if ($type === 'pembelian') {
+            $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
+            $id_po = $inv_po->pembelian_id;
+            $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
+            $produkbelis = Produkbeli::where('pembelian_id', $id_po)->get();
+            $beli = Pembelian::find($id_po);
 
-        $pembuat = Karyawan::where('user_id', $inv_po->pembuat)->first()->nama;
-        $pembuatjbt = Karyawan::where('user_id', $inv_po->pembuat)->first()->jabatan;
-        $pembuku = Karyawan::where('user_id', $inv_po->pembuku)->first()->nama;
-        $pembukujbt = Karyawan::where('user_id', $inv_po->pembuku)->first()->jabatan;
-        $rekenings = Rekening::all();
-        $no_bypo = $this->generatebayarPONumber();
-        $nomor_inv = $this->generateINVPONumber();
+            $pembuat = Karyawan::where('user_id', $inv_po->pembuat)->first()->nama;
+            $pembuatjbt = Karyawan::where('user_id', $inv_po->pembuat)->first()->jabatan;
+            $pembuku = Karyawan::where('user_id', $inv_po->pembuku)->first()->nama;
+            $pembukujbt = Karyawan::where('user_id', $inv_po->pembuku)->first()->jabatan;
+            $rekenings = Rekening::all();
+            $no_bypo = $this->generatebayarPONumber();
+            $nomor_inv = $this->generateINVPONumber();
 
-        return view('purchase.editinv', compact('inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.editinv', compact('inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
-    } elseif ($type === 'poinden') {
-        $inv_po = Invoicepo::where('poinden_id', $datapo)->first();
-        // return $inv_po;
-        $id_po = $inv_po->poinden_id;
-        $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
-        $produkbelis = Produkbeli::where('poinden_id', $id_po)->get();
-        $beli = ModelsPoinden::find($id_po);
+        } elseif ($type === 'poinden') {
+            $inv_po = Invoicepo::where('poinden_id', $datapo)->first();
+            // return $inv_po;
+            $id_po = $inv_po->poinden_id;
+            $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
+            $produkbelis = Produkbeli::where('poinden_id', $id_po)->get();
+            $beli = ModelsPoinden::find($id_po);
 
-        $pembuat = Karyawan::where('user_id', $inv_po->pembuat)->first()->nama;
-        $pembuatjbt = Karyawan::where('user_id', $inv_po->pembuat)->first()->jabatan;
-        $pembuku = Karyawan::where('user_id', $inv_po->pembuku)->first()->nama;
-        $pembukujbt = Karyawan::where('user_id', $inv_po->pembuku)->first()->jabatan;
-        $rekenings = Rekening::all();
-        $no_bypo = $this->generatebayarPONumber();
-        $nomor_inv = $this->generateINVPONumber();
+            $pembuat = Karyawan::where('user_id', $inv_po->pembuat)->first()->nama;
+            $pembuatjbt = Karyawan::where('user_id', $inv_po->pembuat)->first()->jabatan;
+            $pembuku = Karyawan::where('user_id', $inv_po->pembuku)->first()->nama;
+            $pembukujbt = Karyawan::where('user_id', $inv_po->pembuku)->first()->jabatan;
+            $rekenings = Rekening::all();
+            $no_bypo = $this->generatebayarPONumber();
+            $nomor_inv = $this->generateINVPONumber();
 
-        return view('purchase.editinvinden', compact('inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.editinvinden', compact('inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
-    } else {
-        return redirect()->back()->withErrors('Tipe tidak valid.');
+        } else {
+            return redirect()->back()->withErrors('Tipe tidak valid.');
+        }
+
+
     }
 
+    public function po_edit ($datapo, Request $request)
+    {
+
+        $type = $request->query('type');
+        
+        if ($type === 'pembelian') {
+            
+            $produks = Produk::get();
+            $suppliers = Supplier::where('tipe_supplier','tradisional')->get();
+            $lokasis = Lokasi::get();
+            $kondisis = Kondisi::get();
+            $beli = Pembelian::find($datapo);
+
+            // return $beli;
+            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
+            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
+            $penerima = Karyawan::where('user_id', $beli->penerima)->first()->nama;
+            $penerimajbt = Karyawan::where('user_id', $beli->penerima)->first()->jabatan;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama;
+            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan;
+            $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
+            
+            return view('purchase.editpo',compact('produks','suppliers','lokasis','kondisis','beli','produkbelis','pembuat','penerima','pemeriksa','pembuatjbt','penerimajbt','pemeriksajbt'));
+        
+        } elseif ($type === 'poinden') {
+            
+            
+            $produks = Produk::get();
+            $suppliers = Supplier::where('tipe_supplier','inden')->get();
+            $lokasis = Lokasi::get();
+            $kondisis = Kondisi::get();
+
+            $beli = ModelsPoinden::find($datapo);
+            // return $beli;
+            // return $beli;
+            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
+            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
+            // $penerima = Karyawan::where('user_id', $beli->penerima)->first()->nama;
+            // $penerimajbt = Karyawan::where('user_id', $beli->penerima)->first()->jabatan;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama;
+            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan;
+            $produkbelis = Produkbeli::where('poinden_id', $datapo)->get();
+            
+            return view('purchase.editpoinden',compact('produks','suppliers','lokasis','kondisis','beli','produkbelis','pembuat','pemeriksa','pembuatjbt','pemeriksajbt'));
+
+        } else {
+            return redirect()->back()->withErrors('Tipe tidak valid.');
+        }
+
+
+    }
+
+    public function po_update(Request $request, $datapo)
+    {
+        // dd($request->all());
+        // Validasi input
+
+        $type = $request->type;
+        // return $type;
+
+        if ($type === 'pembelian') {
+
+            $validator = Validator::make($request->all(), [
+                'tgl_diterima' => 'required|date',
+                'kode' => 'required|array',
+                'kode.*' => 'required|string',
+                'nama' => 'required|array',
+                'nama.*' => 'required|string',
+                'qtykrm' => 'required|array',
+                'qtykrm.*' => 'required|integer',
+                'qtytrm' => 'required|array',
+                'qtytrm.*' => 'required|integer',
+                'kondisi' => 'required|array',
+                'kondisi.*' => 'required|exists:kondisis,id',
+            ]);
     
+        // Periksa apakah validasi gagal
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return redirect()->back()->withInput()->with('fail', $errors);
+        }
+    
+        // Cari pembelian berdasarkan ID
+        $pembelian = Pembelian::find($datapo);
+        if (!$pembelian) {
+            return redirect()->back()->with('fail', 'Pembelian tidak ditemukan');
+        }
+    
+        // Update data pembelian
+
+        // $pembelian->no_po = $request->nopo;
+        $pembelian->supplier_id = $request->id_supplier;
+        $pembelian->lokasi_id = $request->id_lokasi;
+        $pembelian->tgl_kirim = $request->tgl_kirim;
+        $pembelian->no_do_suplier = $request->no_do;
+        
+        $pembelian->tgl_diterima = $request->tgl_diterima;
+        $pembelian->status_diterima = $request->status_diterima;
+        $pembelian->tgl_diterima_ttd = $request->tgl_diterima_ttd;
+        $pembelian->status_diperiksa = $request->status_diperiksa;
+        $pembelian->tgl_diperiksa= $request->tgl_diperiksa; // Update tgl_diterima_ttd juga jika diperlukan
+    
+        $check1 = $pembelian->save();
+    
+            // Update data produk beli
+            $kodeProduk = $request->kode;
+            $namaProduk = $request->nama;
+            $qtyKirim = $request->qtykrm;
+            $qtyTerima = $request->qtytrm;
+            $kondisiIds = $request->kondisi;
+            $check2 = true;
+
+            foreach ($kodeProduk as $index => $kode) {
+                $produkBeli = Produkbeli::where('pembelian_id', $pembelian->id)
+                                        ->whereHas('produk', function($query) use ($kode) {
+                                            $query->where('kode', $kode);
+                                        })
+                                        ->first();
+                
+                if ($produkBeli) {
+                    $produkBeli->jml_diterima = $qtyTerima[$index];
+                    $produkBeli->kondisi_id = $kondisiIds[$index];
+                    $check2 = $produkBeli->save();
+
+                    $lokasi = Lokasi::find($request->id_lokasi);
+                    $produk = Produk::where('kode', $kode)->first();
+                    if ($lokasi && $produk) {
+                        if ($lokasi->tipe_lokasi == 1) {
+                            $checkInven = InventoryGallery::where('kode_produk', $produk->kode)
+                                                        ->where('kondisi_id', $kondisiIds[$index])
+                                                        ->where('lokasi_id', $lokasi->id)
+                                                        ->first();
+                            if($checkInven){
+                                $checkInven->jumlah += $qtyTerima[$index];
+                                $checkInven->update();
+                            } else {
+                                $createProduk = new InventoryGallery();
+                                $createProduk->kode_produk = $produk->kode;
+                                $createProduk->kondisi_id = $kondisiIds[$index];
+                                $createProduk->jumlah = $qtyTerima[$index];
+                                $createProduk->lokasi_id = $lokasi->id;
+                                $createProduk->save();
+                            }
+                        } elseif ($lokasi->tipe_lokasi == 3) {
+                            $checkInven = InventoryGreenHouse::where('kode_produk', $produk->kode)
+                                                            ->where('kondisi_id', $kondisiIds[$index])
+                                                            ->where('lokasi_id', $lokasi->id)
+                                                            ->first();
+                            if($checkInven){
+                                $checkInven->jumlah += $qtyTerima[$index];
+                                $checkInven->update();
+                            } else {
+                                $createProduk = new InventoryGreenHouse();
+                                $createProduk->kode_produk = $produk->kode;
+                                $createProduk->kondisi_id = $kondisiIds[$index];
+                                $createProduk->jumlah = $qtyTerima[$index];
+                                $createProduk->lokasi_id = $lokasi->id;
+                                $createProduk->save();
+                            }
+                        }
+                    }
+                } else {
+                    $check2 = false;
+                }
+            }
+
+            if (!$check1 || !$check2) {
+                return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data');
+            } else {
+                return redirect(route('pembelian.show', ['datapo' => $datapo]))->with('success', 'Data pembelian berhasil diupdate. Nomor PO: ' . $pembelian->no_po);
+            }
+        
+        }elseif ($type === 'poinden') {
+            $validator = Validator::make($request->all(), [
+                'kode_inden' => 'required|array',
+                'kode_inden.*' => 'required|string',
+                'kategori' => 'required|array',
+                'kategori.*' => 'required|string',
+                'kode' => 'required|array',
+                'kode.*' => 'required|string',
+                'qty' => 'required|array',
+                'qty.*' => 'required|integer',
+            ]);
+        
+            if ($validator->fails()) {
+                $errors = $validator->errors()->all();
+                return redirect()->back()->withInput()->with('fail', $errors);
+            }
+        
+            $pembelian = ModelsPoinden::find($datapo);
+            if (!$pembelian) {
+                return redirect()->back()->with('fail', 'Pembelian tidak ditemukan');
+            }
+        
+            $pembelian->supplier_id = $request->id_supplier;
+            $pembelian->bulan_inden = $request->bulan_inden;
+            $pembelian->status_diperiksa = $request->status_diperiksa;
+            $pembelian->tgl_diperiksa = $request->tgl_diperiksa;
+            $pembelian->save();
+        
+            $existingProdukBeli = $pembelian->produkbeli()->pluck('id')->toArray();
+        
+            $kodeProduk = $request->kode;
+            $kodeInden = $request->kode_inden;
+            $kategori = $request->kategori;
+            $jumlah = $request->qty;
+            $keterangan = $request->ket;
+        
+            foreach ($kodeProduk as $index => $kode) {
+                $produkBeliData = [
+                    'produk_id' => $kategori[$index],
+                    'kode_produk_inden' => $kodeInden[$index],
+                    'jumlahInden' => $jumlah[$index],
+                    'keterangan' => $keterangan[$index],
+                ];
+        
+                if (isset($existingProdukBeli[$index])) {
+                    $produkBeli = ProdukBeli::find($existingProdukBeli[$index]);
+                    if ($produkBeli) {
+                        $produkBeli->update($produkBeliData);
+                    }
+                } else {
+                    $pembelian->produkbeli()->create($produkBeliData);
+                }
+            }
+
+            $produkbelis = Produkbeli::where('poinden_id', $datapo )->get();
+            foreach ($produkbelis as $index => $produkbeli) {
+                $kode = $produkbeli->produk->kode;
+                $kode_inden = $produkbeli->kode_produk_inden;
+                $jumlah = $produkbeli->jumlahInden;
+                // return $kode;
 
 
+                 $inventoryInden = InventoryInden::where('kode_produk',$kode )
+                                ->where('supplier_id', $pembelian->supplier_id)
+                                ->where('bulan_inden', $pembelian->bulan_inden)
+                                ->where('kode_produk_inden', $kode_inden)
+                                ->first();
 
-        // $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
-        // $id_inv = $inv_po->id;
-        // $databayars = Pembayaran::where('invoice_purchase_id', $id_inv)
-        //             ->get()
-        //             ->sortByDesc('created_at');
-        // $pembuat = Karyawan::where('user_id', $inv_po->pembuat)->first()->nama;
-        // $pembuatjbt = Karyawan::where('user_id', $inv_po->pembuat)->first()->jabatan;
-        // $pembuku = Karyawan::where('user_id', $inv_po->pembuku)->first()->nama;
-        // $pembukujbt = Karyawan::where('user_id', $inv_po->pembuku)->first()->jabatan;
-        // // return $databayars;
-        // $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
-        // $beli = Pembelian::find($datapo);
-        // $rekenings = Rekening::all();
-        // $no_bypo = $this->generatebayarPONumber(); 
-        // $nomor_inv = $this->generateINVPONumber();
+                // return $inventoryInden;
 
-        // return view('purchase.editinv',compact('inv_po','produkbelis','beli','rekenings','no_bypo','nomor_inv', 'databayars','pembuat','pembuku','pembuatjbt','pembukujbt'));
+                if ($inventoryInden) {
+                        // Update existing InventoryInden
+                        $inventoryInden->jumlah += $jumlah;
+                        $inventoryInden->save();
+                } else {
+                // Create new InventoryInden
+                    InventoryInden::create([
+                            'supplier_id' => $pembelian->supplier_id,
+                            'kode_produk_inden' => $kode_inden,
+                            'bulan_inden' => $pembelian->bulan_inden,
+                            'kode_produk' => $kode,
+                            'jumlah' => $jumlah,
+                    ]);
+                }
+            }
+            
+            return redirect()->route('pembelian.index')->with('success', 'Data pembelian berhasil diupdate');
+        }
 
     }
+
 }
