@@ -43,6 +43,7 @@ class PemakaianSendiriController extends Controller
             'produk_inven_id.*' => 'required|exists:inventory_galleries,id',
             'karyawan_id.*' => 'required|exists:karyawans,id',
             'jumlah.*' => 'required|numeric',
+            'tanggal.*' => 'required|date',
             'alasan' => 'required',
         ]);
         $error = $validator->errors()->all();
@@ -57,6 +58,7 @@ class PemakaianSendiriController extends Controller
                 'produk_id' => $getProduk->produk->id,
                 'kondisi_id' =>$getProduk->kondisi_id,
                 'karyawan_id' => $data['karyawan_id'][$i],
+                'tanggal' => $data['tanggal'][$i],
                 'jumlah' => $data['jumlah'][$i],
                 'alasan' => $data['alasan'][$i],
             ];

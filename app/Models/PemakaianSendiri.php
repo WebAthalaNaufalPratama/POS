@@ -19,4 +19,24 @@ class PemakaianSendiri extends Model
         'jumlah',
         'alasan'
     ];
+
+    public function lokasi()
+    {
+        return $this->belongsTo(Lokasi::class);
+    }
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class);
+    }
+
+    public function kondisi()
+    {
+        return $this->belongsTo(Kondisi::class);
+    }
+
+    public function karyawan()
+    {
+        return $this->belongsTo(Karyawan::class);
+    }
 }

@@ -33,8 +33,8 @@ class InventoryGalleryController extends Controller
 
         $pemakaian_sendiri = PemakaianSendiri::when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        })->get();
-        return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis'));
+        })->orderBy('tanggal', 'desc')->get();
+        return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis', 'pemakaian_sendiri'));
     }
 
     /**

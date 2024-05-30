@@ -11,9 +11,6 @@
                 </div>
                 <div class="page-btn">
                     <a href="{{ route('inven_galeri.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
-                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalPemakaianSendiri" class="btn btn-secondary d-flex justify-content-center align-items-center mt-1">
-                        Pemakaian Sendiri
-                    </a>                    
                 </div>
             </div>
         </div>
@@ -58,6 +55,54 @@
                                     </li>
                                 </ul>
                             </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="card">
+        <div class="card-header">
+            <div class="page-header">
+                <div class="page-title">
+                    <h4>Pemakaian Sendiri</h4>
+                </div>
+                <div class="page-btn">
+                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalPemakaianSendiri" class="btn btn-secondary d-flex justify-content-center align-items-center mt-1"><img src="assets/img/icons/plus.svg" style="filter: brightness(0) invert(1);" alt="img" class="me-1" />
+                        Tambah Pemakaian
+                    </a>                    
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+            <table class="table datanew">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Lokasi</th>
+                    <th>Nama Produk</th>
+                    <th>Kondisi</th>
+                    <th>Pemakai</th>
+                    <th>Tanggal</th>
+                    <th>Jumlah</th>
+                    <th>Alasan</th>
+                </tr>
+                </thead>
+                <tbody>
+                    @foreach ($pemakaian_sendiri as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->lokasi->nama ?? '-' }}</td>
+                            <td>{{ $item->produk->nama ?? '-' }}</td>
+                            <td>{{ $item->kondisi->nama ?? '-' }}</td>
+                            <td>{{ $item->karyawan->nama ?? '-' }}</td>
+                            <td>{{ $item->tanggal ?? '-' }}</td>
+                            <td>{{ $item->jumlah ?? '-' }}</td>
+                            <td>{{ $item->alasan ?? '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
