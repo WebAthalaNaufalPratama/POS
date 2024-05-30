@@ -26,7 +26,7 @@ class AddNullableToInventoryOutlets extends Migration
     public function down()
     {
         Schema::table('inventory_outlets', function (Blueprint $table) {
-            //
+            $table->integer('kondisi_id')->change();
         });
     }
 }

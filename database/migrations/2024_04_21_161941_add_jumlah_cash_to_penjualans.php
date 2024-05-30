@@ -44,7 +44,31 @@ class AddJumlahCashToPenjualans extends Migration
     public function down()
     {
         Schema::table('penjualans', function (Blueprint $table) {
-            //
+            $table->renameColumn('total_promo', 'jumlah_diskon');
+        });
+    
+        Schema::table('penjualans', function (Blueprint $table) {
+            $table->dropColumn('jumlahCash');
+            $table->dropColumn('persen_ppn');
+            $table->dropColumn('dibuat_id');
+            $table->dropColumn('tanggal_dibuat');
+            $table->dropColumn('dibukukan_id');
+            $table->dropColumn('tanggal_dibukukan');
+            $table->dropColumn('auditor_id');
+            $table->dropColumn('tanggal_audit');
+        });
+    
+        Schema::table('penjualans', function (Blueprint $table) {
+            $table->string('jumlah_diskon')->nullable(false)->change();
+            $table->string('cara_bayar')->nullable(false)->change();
+            $table->integer('rekening_id')->nullable(false)->change();
+            $table->string('pilih_pengiriman')->nullable(false)->change();
+            $table->integer('ongkir_id')->nullable(false)->change();
+            $table->string('alamat_tujuan')->nullable(false)->change();
+            $table->integer('biaya_ongkir')->nullable(false)->change();
+            $table->integer('promo_id')->nullable(false)->change();
+            $table->string('jenis_ppn')->nullable(false)->change();
+            $table->integer('jumlah_ppn')->nullable(false)->change();
         });
     }
 }

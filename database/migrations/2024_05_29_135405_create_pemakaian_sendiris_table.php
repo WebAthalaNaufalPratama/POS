@@ -19,6 +19,7 @@ class CreatePemakaianSendirisTable extends Migration
             $table->foreignId('produk_id');
             $table->foreignId('kondisi_id');
             $table->foreignId('karyawan_id');
+            $table->date('tanggal');
             $table->integer('jumlah');
             $table->text('alasan');
             $table->timestamps();

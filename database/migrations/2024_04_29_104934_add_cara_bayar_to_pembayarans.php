@@ -26,7 +26,7 @@ class AddCaraBayarToPembayarans extends Migration
     public function down()
     {
         Schema::table('pembayarans', function (Blueprint $table) {
-            //
+            $table->dropColumn('cara_bayar');
         });
     }
 }

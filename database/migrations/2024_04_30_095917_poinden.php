@@ -37,6 +37,6 @@ class Poinden extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('poinden');
     }
 }

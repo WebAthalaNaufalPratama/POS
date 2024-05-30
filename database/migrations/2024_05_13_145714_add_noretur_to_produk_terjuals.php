@@ -34,7 +34,15 @@ class AddNoreturToProdukTerjuals extends Migration
     public function down()
     {
         Schema::table('produk_terjuals', function (Blueprint $table) {
-            //
+            $table->dropColumn('no_retur');
+            $table->dropColumn('alasan');
+            $table->dropColumn('no_mutasigo');
+            $table->dropColumn('no_mutasiog');
+            $table->dropColumn('no_mutasigg');
+            $table->dropColumn('jumlah_dikirim');
+            $table->dropColumn('jumlah_diterima');
+            $table->dropColumn('kondisi_dikirim');
+            $table->dropColumn('kondisi_diterima');
         });
     }
 }

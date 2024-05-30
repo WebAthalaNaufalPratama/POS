@@ -25,8 +25,8 @@ class ChangeMinStokToInventoryGalleriesTable extends Migration
      */
     public function down()
     {
-        Schema::table('_inventory_galleries', function (Blueprint $table) {
-            //
+        Schema::table('inventory_galleries', function (Blueprint $table) {
+            $table->integer('min_stok')->change();
         });
     }
 }

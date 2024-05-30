@@ -6,6 +6,7 @@ use App\Models\InventoryGallery;
 use App\Models\Karyawan;
 use App\Models\Kondisi;
 use App\Models\Lokasi;
+use App\Models\PemakaianSendiri;
 use App\Models\Produk;
 use App\Models\Produk_Jual;
 use Illuminate\Http\Request;
@@ -27,6 +28,10 @@ class InventoryGalleryController extends Controller
         $karyawans = Karyawan::all();
         $lokasis = Lokasi::all();
         $data = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })->get();
+
+        $pemakaian_sendiri = PemakaianSendiri::when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->get();
         return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis'));
