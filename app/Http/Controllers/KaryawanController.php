@@ -6,6 +6,7 @@ use App\Models\Jabatan;
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
 use App\Models\Lokasi;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class KaryawanController extends Controller
@@ -15,7 +16,8 @@ class KaryawanController extends Controller
         $karyawans = Karyawan::all();
         $lokasis = Lokasi::all();
         $jabatans = Jabatan::all();
-        return view('karyawan.index', compact('karyawans', 'lokasis', 'jabatans'));
+        $users = User::where('name', '!=', 'admin')->doesntHave('karyawans')->get();
+        return view('karyawan.index', compact('karyawans', 'lokasis', 'jabatans', 'users'));
     }
 
     /**
@@ -47,7 +49,7 @@ class KaryawanController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        $data['user_id'] = 0;
+        $data['user_id'] = $data['user_id'] ?? 0;
 
         // save data
         $check = Karyawan::create($data);
@@ -99,6 +101,7 @@ class KaryawanController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
+        $data['user_id'] = $data['user_id'] ?? 0;
 
         // update data
         $check = Karyawan::find($karyawan)->update($data);

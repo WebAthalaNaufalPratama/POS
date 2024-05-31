@@ -20,6 +20,7 @@
                 <thead>
                 <tr>
                     <th>No</th>
+                    <th>Username</th>
                     <th>Nama</th>
                     <th>Jabatan</th>
                     <th>Lokasi</th>
@@ -32,11 +33,12 @@
                     @foreach ($karyawans as $karyawan)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $karyawan->nama }}</td>
-                            <td>{{ $karyawan->jabatan }}</td>
-                            <td>{{ $karyawan->lokasi->nama}}</td>
-                            <td>{{ $karyawan->handphone }}</td>
-                            <td>{{ $karyawan->alamat }}</td>
+                            <td>{{ $karyawan->user->username ?? '-'}}</td>
+                            <td>{{ $karyawan->nama ?? '-'}}</td>
+                            <td>{{ $karyawan->jabatan ?? '-'}}</td>
+                            <td>{{ $karyawan->lokasi->nama?? '-'}}</td>
+                            <td>{{ $karyawan->handphone ?? '-'}}</td>
+                            <td>{{ $karyawan->alamat ?? '-'}}</td>
                             <td class="text-center">
                               <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                   <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -105,6 +107,17 @@
               <label for="alamat" class="col-form-label">Alamat</label>
               <textarea class="form-control" name="alamat" id="add_alamat" required></textarea>
             </div>
+            <div class="mb-3">
+              <label for="user_id" class="col-form-label">User</label>
+              <div class="form-group">
+                <select class="select2" name="user_id" id="add_user_id">
+                  <option value="">Pilih user</option>
+                  @foreach($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->username }}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
         </div>
         <div class="modal-footer justify-content-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -159,6 +172,17 @@
               <label for="alamat" class="col-form-label">Alamat</label>
               <textarea class="form-control" name="alamat" id="edit_alamat" required></textarea>
             </div>
+            <div class="mb-3">
+              <label for="user_id" class="col-form-label">User</label>
+              <div class="form-group">
+                <select class="select2" name="user_id" id="edit_user_id">
+                  <option value="">Pilih user</option>
+                  @foreach($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->username }}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
         </div>
         <div class="modal-footer justify-content-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -174,7 +198,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_lokasi_id, #edit_lokasi_id, #add_jabatan, #edit_jabatan').select2()
+        $('#add_lokasi_id, #edit_lokasi_id, #add_jabatan, #edit_jabatan, #add_user_id, #edit_user_id').select2()
     });
 
     function getData(id){

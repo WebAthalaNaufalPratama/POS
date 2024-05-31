@@ -15,6 +15,7 @@ use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Activitylog\Models\Activity;
 
 class KembaliSewaController extends Controller
 {
@@ -299,9 +300,9 @@ class KembaliSewaController extends Controller
     public function show($kembaliSewa)
     {
         // data
-        $data = KembaliSewa::find($kembaliSewa);
+        $data = KembaliSewa::with('produk', 'produk.komponen', 'produk.produk')->find($kembaliSewa);
         $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_sewa'])->first();
-        $do = DeliveryOrder::where('no_referensi', $kontrak->no_kontrak)->get();
+        $do = DeliveryOrder::with('produk', 'produk.komponen', 'produk.produk')->where('no_referensi', $kontrak->no_kontrak)->get();
         $drivers = Karyawan::where('jabatan', 'Driver')->get();
         $produkjuals = Produk_Jual::all();
         $kondisi = Kondisi::all();
@@ -310,6 +311,7 @@ class KembaliSewaController extends Controller
         $detail_lokasi = Produk_Terjual::whereNotNull('detail_lokasi')->whereHas('do_sewa', function($q) use($kontrak){
             $q->where('no_referensi', $kontrak->no_kontrak);
         })->get();
+        $riwayat = Activity::where('subject_type', KembaliSewa::class)->where('subject_id', $kembaliSewa)->orderBy('id', 'desc')->get();
 
         // kode do
         if(count($latestKembali) < 1){
@@ -319,7 +321,7 @@ class KembaliSewaController extends Controller
             $kode = substr($lastKembali->no_do, -5);
             $getKode = 'KMB' . date('Ymd') . str_pad((int)$kode + 1, 5, '0', STR_PAD_LEFT);
         }
-        return view('kembali_sewa.show', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa', 'do', 'kondisi', 'detail_lokasi'));
+        return view('kembali_sewa.show', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa', 'do', 'kondisi', 'detail_lokasi', 'data', 'riwayat'));
     }
 
     /**
@@ -340,9 +342,22 @@ class KembaliSewaController extends Controller
      * @param  \App\Models\KembaliSewa  $kembaliSewa
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, KembaliSewa $kembaliSewa)
+    public function update(Request $req, $kembaliSewa)
     {
-        //
+        if ($req->hasFile('file')) {
+            $kembali_sewa = KembaliSewa::find($kembaliSewa);
+            $file = $req->file('file');
+            $fileName = $kembali_sewa->no_kembali . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('bukti_kembali_sewa', $fileName, 'public');
+            $data['file'] = $filePath;
+
+            // update bukti kembali_sewa
+            $kembali_sewa->file = $data['file'];
+            $kembali_sewa->update();
+            return redirect()->back()->with('success', 'File tersimpan');
+        } else {
+            return redirect()->back()->with('fail', 'Gagal menyimpan file');
+        }
     }
 
     /**
