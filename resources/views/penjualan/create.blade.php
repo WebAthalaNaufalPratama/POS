@@ -66,7 +66,7 @@
                                             <label for="lokasi_id">Lokasi Pembelian</label>
                                             <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
                                                 @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                                                <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}">{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -529,23 +529,47 @@
 
 @section('scripts')
 <script>
-    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-    // console.log(cekInvoiceNumbers);
-    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+    $(document).ready(function() {
+        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
-    function generateInvoice() {
-        var invoicePrefix = "INV";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+        // Function to generate the invoice number
+        function generateInvoice(kode) {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_invoice').val(generatedInvoice);
-    }
+            var generatedInvoice = kode + year + month + day + formattedNextInvoiceNumber;
+            $('#no_invoice').val(generatedInvoice);
+        }
 
-    generateInvoice();
+        // Handle location change
+        $('#lokasi_id').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            var cektipelokasi = selectedOption.data('tipe');
+            
+            var kode;
+            if (cektipelokasi == 1) {
+                kode = "INV";
+            } else if (cektipelokasi == 2) {
+                kode = "IPO";
+            } else {
+                kode = ""; // Handle unexpected values of cektipelokasi
+            }
+
+            generateInvoice(kode); // Generate the invoice number with the selected prefix
+        });
+
+        // Optionally, generate the invoice number on page load if a location is pre-selected
+        var initialOption = $('#lokasi_id').find('option:selected');
+        if (initialOption.val()) {
+            var initialTipe = initialOption.data('tipe');
+            var initialKode = initialTipe == 1 ? "INV" : (initialTipe == 2 ? "IPO" : "");
+            generateInvoice(initialKode);
+        }
+    });
 </script>
 <script>
     var cekInvoiceNumbers = "0";

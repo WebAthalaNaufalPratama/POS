@@ -58,4 +58,9 @@ class DeliveryOrder extends Model
     public function produk_retur(){
         return $this->hasMany(ProdukReturJual::class, 'no_retur', 'no_referensi');
     }
+
+    public function dibuat()
+    {
+        return $this->hasMany(User::class, 'id', 'pembuat');
+    }
 }

@@ -122,6 +122,9 @@ class MutasiController extends Controller
             // dd($filePath);
             $data['bukti'] = $filePath;
         }
+
+        $data['pembuat_id'] = Auth::user()->id;
+        $data['tanggal_pembuat'] = now();
         
         $mutasi = Mutasi::create($data);
 
@@ -235,6 +238,120 @@ class MutasiController extends Controller
         }        
         
         return redirect(route('mutasigalery.index'))->with('success', 'Data Berhasil Disimpan');
+    }
+
+    public function payment_outlet($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigo', $mutasis->no_mutasi)->get();
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        foreach($mutasis->produkMutasi as $produk)
+        {
+            $coba[] = $produk->id;
+        }
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = Produk_Jual::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+
+        $Invoice = Pembayaran::where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BGO%')->latest()->first();
+
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_invoice_bayar, 11);
+            $cekInvoice = substr($substring, 0, 3);
+            // dd($cekInvoice);
+        } else {
+            $cekInvoice = 000;
+        }
+
+        // // Mengambil daftar nomor invoice dari data retur
+        // $noInvoices = $mutasis->pluck('no_invoice')->toArray();
+
+        // // Mengambil data penjualan yang memiliki nomor invoice yang sama dengan retur
+        // $cekbayar = Penjualan::with('karyawan')->whereIn('no_invoice', $noInvoices)->first();
+        $pembayarans = Pembayaran::with('rekening')->where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BGO%')->orderBy('created_at', 'desc')->get();
+        $totalbiaya = 0;
+        foreach($pembayarans as $tagihanbayar){
+            $totalbiaya += $tagihanbayar->nominal;
+        }
+        $totaltagihan = $mutasis->total_biaya - $totalbiaya;
+
+        // dd($totaltagihan);
+        return view('mutasigalery.payment', compact('totaltagihan','cekInvoice','pembayarans','perangkai','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+    }
+
+    public function paymentmutasi(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'mutasi_id' => 'required',
+            'no_invoice_bayar' => 'required',
+            'nominal' => 'required',
+            'tanggal_bayar' => 'required',
+            'bukti' => 'required|file',
+        ]);
+
+        // dd($validator);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $data = $req->except(['_token', '_method', 'bukti', 'status_bayar']);
+
+        // dd($data);
+
+        if ($req->hasFile('bukti')) {
+            $file = $req->file('bukti');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
+            $data['bukti'] = $filePath;
+        }
+
+        $penjualan = Mutasi::find($req->mutasi_id);
+
+        // dd($penjualan);
+        if ($penjualan) {
+            if(substr($penjualan->no_mutasi, 0, 3) == 'MGO'){
+                $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->mutasi_id)->where('no_invoice_bayar', 'LIKE', 'BGO%')->get();
+            }elseif(substr($penjualan->no_mutasi, 0, 3) == 'MOG'){
+                $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->mutasi_id)->where('no_invoice_bayar', 'LIKE', 'BOG%')->get();
+            }elseif(substr($penjualan->no_mutasi, 0, 3) == 'MGG'){
+                $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->mutasi_id)->where('no_invoice_bayar', 'LIKE', 'BGG%')->get();
+            }elseif(substr($penjualan->no_mutasi, 0, 3) == 'MGA'){
+                $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->mutasi_id)->where('no_invoice_bayar', 'LIKE', 'BGA%')->get();
+            }
+            $totalbiaya = 0;
+            foreach($cekTotalTagihan as $cekTotal){
+                $totalbiaya += $cekTotal->nominal; 
+            }
+            // dd($totalbiaya);
+            // $penjualan->update([
+            //     'sisa_bayar' => $cekTotalTagihan,
+            // ]);
+            $cek = $penjualan->total_biaya - ($totalbiaya + $req->nominal);
+            // dd($cek);
+            if ($cek <= 0) {
+                $data['status_bayar'] = 'LUNAS';
+                $pembayaran = Pembayaran::create($data);
+                return redirect()->back()->with('success', 'Tagihan sudah Lunas');
+            } else {
+                $data['status_bayar'] = 'BELUM LUNAS';
+                $pembayaran = Pembayaran::create($data);
+            }
+        } else {
+            return redirect()->back()->with('fail', 'Tagihan tidak ditemukan.');
+        }
+
+        if ($pembayaran) {
+            return redirect()->back()->with('success', 'Berhasil menyimpan data');
+        } else {
+            return redirect()->back()->with('fail', 'Gagal menyimpan data');
+        }
     }
 
     public function index_outletgalery(Request $req)
@@ -478,6 +595,8 @@ class MutasiController extends Controller
         }
 
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
+        $data['pembuat_id'] = Auth::user()->id;
+        $data['tanggal_pembuat'] = now();
 
         // // cek produk inventory
         // $allStockAvailable = true;
@@ -839,6 +958,83 @@ class MutasiController extends Controller
         return redirect(route('mutasioutlet.index'))->with('success', 'Data Berhasil Disimpan');
     }
 
+    public function payment_outletgalery($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasiog', $mutasis->no_mutasi)->get();
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = Produk_Terjual::all();
+        // dd($produkjuals);
+        $selectedGFTKomponen = [];
+        $perPendapatan = [];
+        
+        foreach ($mutasis->produkMutasiOutlet as $produk) {
+            // dd($produk);
+            $selectedGFTKomponen = [];
+            
+            foreach ($produkjuals as $index => $pj) {
+                // dd($produkjuals);
+                if($pj->produk && $produk->produk->kode)
+                {
+                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_mutasiog ==  $produk->no_mutasiog && $pj->jenis != 'TAMBAHAN');
+                
+                if ($isSelectedGFT) {
+                    foreach ($pj->komponen as $komponen) {
+                        if ($pj->id == $komponen->produk_terjual_id) {
+                            foreach ($kondisis as $kondisi) {
+                                if ($kondisi->id == $komponen->kondisi) {
+                                    $selectedGFTKomponen[$komponen->produk_terjual_id][] = [
+                                        'kode' => $komponen->kode_produk,
+                                        'nama' => $komponen->nama_produk,
+                                        'kondisi' => $kondisi->nama,
+                                        'jumlah' => $komponen->jumlah,
+                                        'produk' => $komponen->produk_terjual_id,
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+                }
+                
+            }
+
+            if (!empty($selectedGFTKomponen)) {
+                $perPendapatan += $selectedGFTKomponen;
+            }
+        }
+
+        // dd($perPendapatan);
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+
+        $Invoice = Pembayaran::where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BOG%')->latest()->first();
+
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_invoice_bayar, 11);
+            $cekInvoice = substr($substring, 0, 3);
+            // dd($cekInvoice);
+        } else {
+            $cekInvoice = 000;
+        }
+
+        $pembayarans = Pembayaran::with('rekening')->where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BOG%')->orderBy('created_at', 'desc')->get();
+        $totalbiaya = 0;
+        foreach($pembayarans as $tagihanbayar){
+            $totalbiaya += $tagihanbayar->nominal;
+        }
+        $totaltagihan = $mutasis->total_biaya - $totalbiaya;
+
+        // dd($totaltagihan);
+        return view('mutasioutlet.payment', compact('perPendapatan','totaltagihan','cekInvoice','pembayarans','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+    }
+
     public function index_ghgalery(Request $req)
     {
         $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->orderBy('created_at', 'desc');
@@ -968,6 +1164,9 @@ class MutasiController extends Controller
         if (!$allStockAvailable) {
             return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
         }
+
+        $data['pembuat_id'] = Auth::user()->id;
+        $data['tanggal_pembuat'] = now();
         
         $mutasi = Mutasi::create($data);
 
@@ -1092,6 +1291,49 @@ class MutasiController extends Controller
         return redirect(route('mutasigalerygalery.index'))->with('success', 'Data Berhasil Disimpan');
     }
 
+    public function payment_galerygalery($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigag', $mutasis->no_mutasi)->get();
+        // dd($produks);
+        foreach($produks as $produk)
+        {
+            // dd($produk);
+        }
+        
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        foreach($mutasis->produkMutasi as $produk)
+        {
+            $coba[] = $produk->id;
+        }
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = InventoryGreenHouse::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+        $Invoice = Pembayaran::where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BGA%')->latest()->first();
+
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_invoice_bayar, 11);
+            $cekInvoice = substr($substring, 0, 3);
+            // dd($cekInvoice);
+        } else {
+            $cekInvoice = 000;
+        }
+
+        $pembayarans = Pembayaran::with('rekening')->where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BGA%')->orderBy('created_at', 'desc')->get();
+        $totalbiaya = 0;
+        foreach($pembayarans as $tagihanbayar){
+            $totalbiaya += $tagihanbayar->nominal;
+        }
+        $totaltagihan = $mutasis->total_biaya - $totalbiaya;
+        // dd($mutasis);
+        return view('mutasigalerygalery.payment', compact('totaltagihan','pembayarans','cekInvoice','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+    }
+
     public function create_ghgalery()
     {
         // $roles = Auth::user()->roles()->value('name');
@@ -1190,6 +1432,9 @@ class MutasiController extends Controller
         if (!$allStockAvailable) {
             return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
         }
+
+        $data['pembuat_id'] = Auth::user()->id;
+        $data['tanggal_pembuat'] = now();
         
         $mutasi = Mutasi::create($data);
 
@@ -1312,6 +1557,49 @@ class MutasiController extends Controller
         }
         
         return redirect(route('mutasighgalery.index'))->with('success', 'Data Berhasil Disimpan');
+    }
+
+    public function payment_ghgalery($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigg', $mutasis->no_mutasi)->get();
+        // dd($produks);
+        foreach($produks as $produk)
+        {
+            // dd($produk);
+        }
+        
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        foreach($mutasis->produkMutasi as $produk)
+        {
+            $coba[] = $produk->id;
+        }
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = InventoryGreenHouse::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+        $Invoice = Pembayaran::where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BGG%')->latest()->first();
+
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_invoice_bayar, 11);
+            $cekInvoice = substr($substring, 0, 3);
+            // dd($cekInvoice);
+        } else {
+            $cekInvoice = 000;
+        }
+
+        $pembayarans = Pembayaran::with('rekening')->where('mutasi_id', $mutasis->id)->where('no_invoice_bayar', 'LIKE', 'BGG%')->orderBy('created_at', 'desc')->get();
+        $totalbiaya = 0;
+        foreach($pembayarans as $tagihanbayar){
+            $totalbiaya += $tagihanbayar->nominal;
+        }
+        $totaltagihan = $mutasis->total_biaya - $totalbiaya;
+        // dd($mutasis);
+        return view('mutasighgalery.payment', compact('totaltagihan','pembayarans','cekInvoice','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
 

@@ -82,15 +82,15 @@
                         @if(in_array('mutasioutlet.index', $rolePermissions))
                             <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasighgalery.index', $rolePermissions))
+                        @if(in_array('mutasighgalery.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2 && $lokasi->lokasi->tipe_lokasi != 1)
                             <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasigalerygalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGA*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                            <li><a href="#" class="">Mutasi Inden ke GH</a></li>
+                            <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
+                            <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
                         @endif
-                        <li><a href="#" class="">Mutasi Inden ke GH</a></li>
-                        <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
-                        <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
                     </ul>
                 </li>
                 <li class="submenu">

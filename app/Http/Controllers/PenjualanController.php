@@ -38,11 +38,11 @@ class PenjualanController extends Controller
         if($lokasi->lokasi->tipe_lokasi == 2){
             $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
             $lokasiIds = $lokasi->pluck('id')->toArray();
-            $query = Penjualan::with('karyawan')->whereIn('lokasi_id', $lokasiIds)->whereNotNull('no_invoice');
+            $query = Penjualan::with('karyawan')->whereIn('lokasi_id', $lokasiIds)->where('no_invoice', 'LIKE', 'IPO%');
         }elseif($lokasi->lokasi->tipe_lokasi == 1){
             $lokasi = Lokasi::where('tipe_lokasi', 1)->get();
             $lokasiIds = $lokasi->pluck('id')->toArray();
-            $query = Penjualan::with('karyawan')->whereIn('lokasi_id', $lokasiIds)->whereNotNull('no_invoice');
+            $query = Penjualan::with('karyawan')->whereIn('lokasi_id', $lokasiIds)->where('no_invoice', 'LIKE', 'INV%');
         }else{
             $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
         }
@@ -92,6 +92,7 @@ class PenjualanController extends Controller
         $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
         $lokasiIds = $lokasi->pluck('id')->toArray();
         $user = Auth::user()->value('id');
+        $ceklokasi = Karyawan::where('user_id', $user)->first();
         $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
         // dd($karyawans);
         $customers = Customer::where('lokasi_id', $lokasi)->get();
@@ -112,7 +113,11 @@ class PenjualanController extends Controller
 
         // dd($produks);
         $bankpens = Rekening::get();
-        $Invoice = Penjualan::latest()->first();
+        if($ceklokasi->lokasi->tipe_lokasi == 2){
+            $Invoice = Penjualan::where('no_invoice', 'LIKE', 'IPO%')->latest()->first();
+        }elseif($ceklokasi->lokasi->tipe_lokasi == 1){
+            $Invoice = Penjualan::where('no_invoice', 'LIKE', 'INV%')->latest()->first();
+        }
         // dd($bankpens);
         if ($Invoice != null) {
             $substring = substr($Invoice->no_invoice, 11);
