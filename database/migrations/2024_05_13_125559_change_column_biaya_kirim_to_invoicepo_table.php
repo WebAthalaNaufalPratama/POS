@@ -26,7 +26,7 @@ class ChangeColumnBiayaKirimToInvoicepoTable extends Migration
     public function down()
     {
         Schema::table('invoicepo', function (Blueprint $table) {
-            //
+            $table->integer('biaya_kirim')->nullable(false)->change();
         });
     }
 }

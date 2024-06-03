@@ -26,8 +26,8 @@ class ChangeMinStokToInventoryGreenHouseTable extends Migration
      */
     public function down()
     {
-        Schema::table('_inventory_green_house', function (Blueprint $table) {
-            //
+        Schema::table('inventory_green_houses', function (Blueprint $table) {
+            $table->integer('min_stok')->change();
         });
     }
 }

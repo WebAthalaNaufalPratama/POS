@@ -224,15 +224,58 @@
                                         <td id="pemeriksa">{{ $data->data_pemeriksa->nama ?? '-' }}</td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 25%;">
-                                            {{ isset($data->tanggal_driver) ? \Carbon\Carbon::parse($data->tanggal_driver)->format('Y-m-d') : '-' }}
-                                        </td>
-                                        <td id="tgl_pembuat" style="width: 25%;">{{ isset($data->tanggal_pembuat) ? \Carbon\Carbon::parse($data->tanggal_pembuat)->format('Y-m-d') : '-' }}</td>
-                                        <td id="tgl_penyetuju" style="width: 25%;">{{ isset($data->tanggal_penyetuju) ? \Carbon\Carbon::parse($data->tanggal_penyetuju)->format('Y-m-d') : '-' }}</td>
-                                        <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($data->tanggal_pemeriksa) ? \Carbon\Carbon::parse($data->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</td>
+                                        <td style="width: 25%;">{{ isset($data->tanggal_driver) ? formatTanggal($data->tanggal_driver) : '-' }}</td>
+                                        <td id="tgl_pembuat" style="width: 25%;">{{ isset($data->tanggal_pembuat) ? formatTanggal($data->tanggal_pembuat) : '-' }}</td>
+                                        <td id="tgl_penyetuju" style="width: 25%;">{{ isset($data->tanggal_penyetuju) ? formatTanggal($data->tanggal_penyetuju) : '-' }}</td>
+                                        <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($data->tanggal_pemeriksa) ? formatTanggal($data->tanggal_pemeriksa) : '-' }}</td>
                                     </tr>
                                 </tbody>
                             </table>
+                            <div class="col-sm-12 mt-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Riwayat</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                        <table class="table datanew">
+                                            <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Tanggal Perubahan</th>
+                                                <th>Customer</th>
+                                                <th>Pengubah</th>
+                                                <th>Log</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($riwayat as $item)
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $item->created_at ?? '-' }}</td>
+                                                    <td>{{ $item->subject->kontrak->customer->nama ?? '-' }}</td>
+                                                    <td>{{ $item->causer->name ?? '-' }}</td>
+                                                    <td>
+                                                        @php
+                                                            $changes = $item->changes();
+                                                            if(isset($changes['old'])){
+                                                                $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                                                                foreach ($diff as $key => $value) {
+                                                                    echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span>" . "<br>";
+                                                                }
+                                                            } else {
+                                                                echo 'Data Delivery Order Terbuat';
+                                                            }
+                                                        @endphp
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-4 border rounded mt-3 pt-3">
                             <form action="{{ route('do_sewa.update', ['do_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">

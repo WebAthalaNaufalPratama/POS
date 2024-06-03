@@ -25,8 +25,8 @@ class AddUserIdToKaryawans extends Migration
      */
     public function down()
     {
-        Schema::table('karyawan', function (Blueprint $table) {
-            //
+        Schema::table('karyawans', function (Blueprint $table) {
+            $table->dropColumn('user_id');
         });
     }
 }

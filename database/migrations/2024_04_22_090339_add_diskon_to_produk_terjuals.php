@@ -27,7 +27,8 @@ class AddDiskonToProdukTerjuals extends Migration
     public function down()
     {
         Schema::table('produk_terjuals', function (Blueprint $table) {
-            //
+            $table->dropColumn('jenis_diskon');
+            $table->dropColumn('diskon');
         });
     }
 }

@@ -20,6 +20,9 @@
                 </div>
             </div>
             <div class="card-body">
+                @if ($data->sisa_bayar == 0)
+                <div class="ribbon ribbon-success ribbon-right">Lunas</div>
+                @endif
                 <form action="{{ route('invoice_sewa.store') }}" method="POST">
                 <div class="row">
                     <div class="col-sm">
@@ -31,26 +34,26 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Customer</label>
-                                                <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') ?? $data->kontrak->customer->nama }}" class="form-control" required disabled>
-                                                <input type="hidden" id="customer_id" name="customer_id" value="{{ old('customer_id') ?? $data->kontrak->customer_id }}" class="form-control" required>
+                                                <input type="text" id="customer_name" name="customer_name" value="{{ old('customer_name') ?? $data->kontrak->customer->nama }}" class="form-control" disabled disabled>
+                                                <input type="hidden" id="customer_id" name="customer_id" value="{{ old('customer_id') ?? $data->kontrak->customer_id }}" class="form-control" disabled>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>PIC</label>
-                                                <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $data->kontrak->pic }}" class="form-control" required readonly>
+                                                <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $data->kontrak->pic }}" class="form-control" disabled>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Handphone</label>
-                                                <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $data->kontrak->handphone }}" class="form-control" required>
+                                                <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $data->kontrak->handphone }}" class="form-control" disabled>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Catatan</label>
-                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ old('catatan') ?? $data->catatan }}</textarea>
+                                                <textarea type="text" id="catatan" name="catatan" class="form-control" disabled>{{ old('catatan') ?? $data->catatan }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -61,15 +64,15 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Invoice</label>
-                                                <input type="text" id="no_invoice" name="no_invoice" value="{{ old('no_invoice') ?? $data->no_invoice }}" class="form-control" required readonly>
+                                                <input type="text" id="no_invoice" name="no_invoice" value="{{ old('no_invoice') ?? $data->no_invoice }}" class="form-control" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Invoice</label>
-                                                <input type="date" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? $data->tanggal_invoice }}" class="form-control" required>
+                                                <input type="date" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? $data->tanggal_invoice }}" class="form-control" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label>Rekening</label>
-                                                <select id="rekening" name="rekening_id" class="form-control" required>
+                                                <select id="rekening" name="rekening_id" class="form-control" disabled>
                                                     <option value="">Pilih Rekening</option>
                                                     @foreach ($rekening as $item)
                                                         <option value="{{ $item->id }}" {{ $data->kontrak->rekening_id == $item->id ? 'selected' : '' }}>{{ $item->nama_akun }}</option>
@@ -80,15 +83,15 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Kontrak</label>
-                                                <input type="text" id="no_sewa" name="no_sewa" value="{{ old('no_sewa') ?? $data->no_sewa }}" class="form-control"  required readonly>
+                                                <input type="text" id="no_sewa" name="no_sewa" value="{{ old('no_sewa') ?? $data->no_sewa }}" class="form-control"  disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label>Jatuh Tempo</label>
-                                                <input type="date" id="jatuh_tempo" name="jatuh_tempo" value="{{ old('jatuh_tempo') ?? $data->jatuh_tempo }}" class="form-control" required>
+                                                <input type="date" id="jatuh_tempo" name="jatuh_tempo" value="{{ old('jatuh_tempo') ?? $data->jatuh_tempo }}" class="form-control" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label>Sales</label>
-                                                <select id="sales_id" name="sales" class="form-control" required>
+                                                <select id="sales_id" name="sales" class="form-control" disabled>
                                                     <option value="">Pilih Sales</option>
                                                     @foreach ($sales as $item)
                                                         <option value="{{ $item->id }}" {{ $data->sales == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
@@ -112,24 +115,22 @@
                                         <th>Harga Satuan</th>
                                         <th>Jumlah</th>
                                         <th>Harga Total</th>
-                                        {{-- <th></th> --}}
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field">
                                     @if(count($data->produk) < 1)
                                     <tr>
                                         <td>
-                                            <select id="produk_0" name="nama_produk[]" class="form-control">
+                                            <select id="produk_0" name="nama_produk[]" class="form-control" disabled>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkSewa as $produk)
                                                     <option value="{{ $produk->produk->kode }}">{{ $produk->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        td><input type="number" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"  required></td>
-                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"  required></td>
-                                        <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control"  required readonly></td>
-                                        {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
+                                        td><input type="number" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" disabled></td>
+                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" disabled></td>
+                                        <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
                                     </tr>
                                     @else
                                     @php
@@ -138,21 +139,16 @@
                                     @foreach ($data->produk as $produk) 
                                         <tr id="row{{ $i }}">
                                             <td>
-                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
+                                                <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
                                                     <option value="">Pilih Produk</option>
                                                     @foreach ($produkSewa as $pj)
                                                         <option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" value="{{ old('satuan.' . $i) ?? $produk->harga }}" class="form-control" required></td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}"></td>
-                                            <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ old('harga_total.' . $i) ?? $produk->harga_jual }}" required readonly></td>
-                                            {{-- @if ($i == 0)
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                            @else
-                                                <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                            @endif --}}
+                                            <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" value="{{ old('satuan.' . $i) ?? $produk->harga }}" class="form-control" disabled></td>
+                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" disabled></td>
+                                            <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ old('harga_total.' . $i) ?? $produk->harga_jual }}" disabled></td>
                                             @php
                                                 $i++;
                                             @endphp
@@ -185,12 +181,10 @@
                                             <td id="pemeriksa">{{ $data->data_pemeriksa->nama ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 25%;">
-                                                <input type="date" class="form-control" id="tgl_sales" name="tanggal_sales" value="{{ isset($data->tanggal_sales) ? \Carbon\Carbon::parse($data->tanggal_sales)->format('Y-m-d') : '-' }}">
-                                            </td>
-                                            <td id="tgl_pembuat" style="width: 25%;">{{ isset($data->tanggal_pembuat) ? \Carbon\Carbon::parse($data->tanggal_pembuat)->format('Y-m-d') : '-' }}</td>
-                                            <td id="tgl_penyetuju" style="width: 25%;">{{ isset($data->tanggal_penyetuju) ? \Carbon\Carbon::parse($data->tanggal_penyetuju)->format('Y-m-d') : '-' }}</td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($data->kontrak->tanggal_pemeriksa) ? \Carbon\Carbon::parse($data->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</td>
+                                            <td style="width: 25%;">{{ isset($data->tanggal_sales) ? formatTanggal($data->tanggal_sales) : '-' }}</td>
+                                            <td id="tgl_pembuat" style="width: 25%;">{{ isset($data->tanggal_pembuat) ? formatTanggal($data->tanggal_pembuat) : '-' }}</td>
+                                            <td id="tgl_penyetuju" style="width: 25%;">{{ isset($data->tanggal_penyetuju) ? formatTanggal($data->tanggal_penyetuju) : '-' }}</td>
+                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($data->tanggal_pemeriksa) ? formatTanggal($data->tanggal_pemeriksa) : '-' }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -266,7 +260,7 @@
                                     <label class="col-lg-3 col-form-label">PPN</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ $data->kontrak->ppn_persen ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ $data->kontrak->ppn_persen ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" disabled>
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
                                         <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ $data->kontrak->ppn_nominal }}" readonly>
@@ -276,7 +270,7 @@
                                     <label class="col-lg-3 col-form-label">PPH</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ $data->kontrak->pph_persen ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ $data->kontrak->pph_persen ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" disabled>
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
                                         <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $data->kontrak->pph_nominal }}" readonly>
@@ -286,7 +280,7 @@
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                            <select id="ongkir_id" name="ongkir_id" class="form-control" disabled>
                                                 <option value="">Pilih Ongkir</option>
                                                 @foreach ($ongkirs as $ongkir)
                                                     <option value="{{ $ongkir->id }}" {{ $ongkir->id == $data->kontrak->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
@@ -299,12 +293,7 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">DP</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="dp" name="dp" value="{{ $data->dp }}" class="form-control" required>
-                                        <div class="d-flex justify-content-between">
-                                            <button type="button" class="btn btn-primary btn-sm w-100 rounded-0 mr-1" onclick="dp_val(10)">10%</button>
-                                            <button type="button" class="btn btn-primary btn-sm w-100 rounded-0 mx-1" onclick="dp_val(20)">20%</button>
-                                            <button type="button" class="btn btn-primary btn-sm w-100 rounded-0 ml-1" onclick="dp_val(50)">50%</button>
-                                        </div>
+                                        <input type="number" id="dp" name="dp" value="{{ $data->dp }}" class="form-control" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -316,7 +305,7 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Sisa Bayar</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="sisa_bayar" name="sisa_bayar" value="{{ $data->sisa_bayar }}" class="form-control" required>
+                                        <input type="number" id="sisa_bayar" name="sisa_bayar" value="{{ $data->sisa_bayar }}" class="form-control" disabled>
                                         <input type="hidden" id="sisa_bayar_awal" value="{{ $data->sisa_bayar }}">
                                     </div>
                                 </div>
@@ -336,12 +325,9 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit" {{ $data->sisa_bayar == 0 ? 'disabled' : '' }}>Submit</button>
+                    <button class="btn btn-primary" type="submit" style="display:{{ $data->sisa_bayar == 0 ? 'none' : '' }}">Submit</button>
                     <a href="{{ route('invoice_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
-                @if ($data->sisa_bayar == 0)
-                <p class="text-end text-danger">Invoice sudah lunas</p>
-                @endif
                 </form>
             </div>
         </div>
@@ -424,28 +410,28 @@
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Nomor Kontrak</label>
-                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" disabled>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
+                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" disabled>
                             <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Total Tagihan</label>
-                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
+                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" disabled>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Sisa Tagihan</label>
-                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
+                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" disabled>
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="bayar">Cara Bayar</label>
-                            <select class="form-control" id="bayar" name="cara_bayar" required>
+                            <select class="form-control" id="bayar" name="cara_bayar" disabled>
                                 <option value="">Pilih Cara Bayar</option>
                                 <option value="cash">Cash</option>
                                 <option value="transfer">Transfer</option>
@@ -453,7 +439,7 @@
                         </div>
                         <div class="form-group col-sm-6" id="div_rekening" style="display: none">
                             <label for="bankpenerima">Rekening Vonflorist</label>
-                            <select class="form-control" id="rekening_id" name="rekening_id" required>
+                            <select class="form-control" id="rekening_id" name="rekening_id" disabled>
                                 <option value="">Pilih Rekening Von</option>
                                 @foreach ($bankpens as $bankpen)
                                 <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
@@ -464,17 +450,17 @@
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="nominal">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" disabled>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="tanggalbayar">Tanggal</label>
-                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
+                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" disabled>
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-12">
                             <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" required>
+                            <input type="file" class="form-control" id="bukti" name="bukti" disabled>
                         </div>
                     </div>
                 </div>
@@ -595,12 +581,12 @@
             var caraBayar = $(this).val();
             if (caraBayar == 'transfer') {
                 $('#div_rekening').show();
-                $('#rekening_id').attr('required', true);
-                $('#bukti').attr('required', true);
+                $('#rekening_id').attr('disabled', true);
+                $('#bukti').attr('disabled', true);
             } else {
                 $('#div_rekening').hide();
-                $('#rekening_id').attr('required', false);
-                $('#bukti').attr('required', false);
+                $('#rekening_id').attr('disabled', false);
+                $('#bukti').attr('disabled', false);
             }
         });
         $('#nominal').on('input', function() {

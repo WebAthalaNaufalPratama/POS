@@ -26,8 +26,8 @@ class AddSupplierIdToInventoryIndenTable extends Migration
      */
     public function down()
     {
-        Schema::table('_inventory_inden', function (Blueprint $table) {
-            //
+        Schema::table('inventory_indens', function (Blueprint $table) {
+            $table->dropColumn('supplier_id');
         });
     }
 }

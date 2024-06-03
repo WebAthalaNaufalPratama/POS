@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\InventoryGallery;
+use App\Models\Karyawan;
 use App\Models\Kondisi;
 use App\Models\Lokasi;
+use App\Models\PemakaianSendiri;
 use App\Models\Produk;
+use App\Models\Produk_Jual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -19,10 +22,19 @@ class InventoryGalleryController extends Controller
      */
     public function index()
     {
+        $produks = InventoryGallery::with('produk')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })->orderBy('kode_produk')->orderBy('kondisi_id')->get();
+        $karyawans = Karyawan::all();
+        $lokasis = Lokasi::all();
         $data = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->get();
-        return view('inven_galeri.index', compact('data'));
+
+        $pemakaian_sendiri = PemakaianSendiri::when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })->orderBy('tanggal', 'desc')->get();
+        return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis', 'pemakaian_sendiri'));
     }
 
     /**
@@ -34,7 +46,9 @@ class InventoryGalleryController extends Controller
     {
         $produks = Produk::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 1)->get();
+        $gallery = Lokasi::where('tipe_lokasi', 1)->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('id', Auth::user()->karyawans->lokasi_id);
+        })->get();
         return view('inven_galeri.create', compact('produks', 'kondisi', 'gallery'));
     }
 
@@ -95,7 +109,9 @@ class InventoryGalleryController extends Controller
         $data = InventoryGallery::find($inventoryGallery);
         $produks = Produk::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 1)->get();
+        $gallery = Lokasi::where('tipe_lokasi', 1)->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+            return $query->where('id', Auth::user()->karyawans->lokasi_id);
+        })->get();
         return view('inven_galeri.edit', compact('data', 'produks', 'kondisi', 'gallery'));
     }
 

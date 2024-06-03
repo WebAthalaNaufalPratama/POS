@@ -50,7 +50,7 @@
                         $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                         $rolePermissions = $role->permissions->pluck('name')->toArray();
                     @endphp
-                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                    @if(Auth::user()->roles()->value('name') == 'admin' || (in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>

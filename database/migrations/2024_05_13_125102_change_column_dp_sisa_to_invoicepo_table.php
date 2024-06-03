@@ -27,7 +27,8 @@ class ChangeColumnDpSisaToInvoicepoTable extends Migration
     public function down()
     {
         Schema::table('invoicepo', function (Blueprint $table) {
-            //
+            $table->integer('dp')->nullable(false)->change();
+            $table->integer('sisa')->nullable(false)->change();
         });
     }
 }

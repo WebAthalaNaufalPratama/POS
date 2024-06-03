@@ -26,7 +26,7 @@ class AddColumnSoftDeleteToInvoicepoTable extends Migration
     public function down()
     {
         Schema::table('invoicepo', function (Blueprint $table) {
-            //
+            $table->dropColumn('deleted_at');
         });
     }
 }
