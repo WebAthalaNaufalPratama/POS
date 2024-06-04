@@ -42,13 +42,13 @@
 
       <div class="header-left active">
         <a href="index.html" class="logo">
-          <img src="/assets/img/logo.png" alt="">
+          <img src="https://system.vonflorist.com/admin/assets/images/logo.png" style="width: 3rem;" alt="">
         </a>
-        <a href="index.html" class="logo-small">
+        <!-- <a href="index.html" class="logo-small">
           <img src="/assets/img/logo-small.png" alt="">
-        </a>
-        <a id="toggle_btn" href="javascript:void(0);">
-        </a>
+        </a> -->
+        <!-- <a id="toggle_btn" href="javascript:void(0);">
+        </a> -->
       </div>
 
       <a id="mobile_btn" class="mobile_btn" href="#sidebar">

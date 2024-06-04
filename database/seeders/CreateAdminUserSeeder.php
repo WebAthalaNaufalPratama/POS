@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Models\Karyawan;
 
 class CreateAdminUserSeeder extends Seeder
 {
@@ -52,56 +53,56 @@ class CreateAdminUserSeeder extends Seeder
             'name' => 'SuperAdmin', 
             'email' => 'superadmin@gmail.com',
             'username' => 'superadmin',
-            'password' => bcrypt('superadmin123')
+            'password' => 'superadmin123'
         ]);
 
         $useradmingallery = User::create([
             'name' => 'AdminGallery', 
             'email' => 'admingallery@gmail.com',
             'username' => 'admingallery',
-            'password' => bcrypt('admingallery123')
+            'password' => 'admingallery123'
         ]);
         
         $userpurchasing = User::create([
             'name' => 'Purchasing', 
             'email' => 'purchasing@gmail.com',
             'username' => 'purchasing',
-            'password' => bcrypt('purchasing123')
+            'password' => 'purchasing123'
         ]);
 
         $usersales = User::create([
             'name' => 'Sales', 
             'email' => 'sales@gmail.com',
             'username' => 'sales',
-            'password' => bcrypt('sales123')
+            'password' => 'sales123'
         ]);
 
         $userkasirgallery = User::create([
             'name' => 'KasirGallery', 
             'email' => 'kasirgallery@gmail.com',
             'username' => 'kasirgallery',
-            'password' => bcrypt('kasirgallery123')
+            'password' => 'kasirgallery123'
         ]);
 
         $userkasiroutlet = User::create([
             'name' => 'KasirOutlet', 
             'email' => 'kasiroutlet@gmail.com',
             'username' => 'kasiroutlet',
-            'password' => bcrypt('kasiroutlet123')
+            'password' => 'kasiroutlet123'
         ]);
 
         $userfinance = User::create([
             'name' => 'Finance', 
             'email' => 'finance@gmail.com',
             'username' => 'finance',
-            'password' => bcrypt('finance123')
+            'password' => 'finance123'
         ]);
 
         $userauditor = User::create([
             'name' => 'Auditor', 
             'email' => 'auditor@gmail.com',
             'username' => 'auditor',
-            'password' => bcrypt('auditor123')
+            'password' => 'auditor123'
         ]);
 
         $role = Role::create(['name' => 'SuperAdmin']);
@@ -114,11 +115,120 @@ class CreateAdminUserSeeder extends Seeder
         $roleauditor = Role::create(['name' => 'Auditor']);
      
         $permissions = Permission::pluck('id','id')->all();
-        $permissionsadmingallery = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
+        $permissionAG = Permission::where(function ($query) {
+            $query->where('name', 'like', 'home%')
+                  ->orWhere('name', 'like', 'register%')
+                  ->orWhere('name', 'like', 'login%')
+                  ->orWhere('name', 'like', 'logout%')
+                  ->orWhere('name', 'like', 'checkpromo%')
+                  ->orWhere('name', 'like', 'getpromo%')
+                  ->orWhere('name', 'like', 'getprodukTerjual%')
+                  ->orWhere('name', 'like', 'addKomponen%')
+                  ->orWhere('name', 'like', 'customer%')
+                  ->orWhere('name', 'like', 'akun%')
+                  ->orWhere('name', 'like', 'aset%')
+                  ->orWhere('name', 'like', 'promo%')
+                  ->orWhere('name', 'like', 'penjualan%')
+                  ->orWhere('name', 'like', 'komponenmutasi%')
+                  ->orWhere('name', 'like', 'komponenretur%')
+                  ->orWhere('name', 'like', 'komponenpenjulan%')
+                  ->orWhere('name', 'like', 'dopenjualan%')
+                  ->orWhere('name', 'like', 'pembayaran%')
+                  ->orWhere('name', 'like', 'formpenjualan%')
+                  ->orWhere('name', 'like', 'returpenjualan%')
+                  ->orWhere('name', 'like', 'inven_galeri%')
+                  ->orWhere('name', 'like', 'mutasigalery%')
+                  ->orWhere('name', 'like', 'kas_galery%')
+                  ->orWhere('name', 'like', 'produks%')
+                  ->orWhere('name', 'like', 'tipe_produk%')
+                  ->orWhere('name', 'like', 'kondisi%')
+                  ->orWhere('name', 'like', 'ongkir%')
+                  ->orWhere('name', 'like', 'tradisional%')
+                  ->orWhere('name', 'like', 'gift%')
+                  ->orWhere('name', 'like', 'kontrak%')
+                  ->orWhere('name', 'like', 'form%')
+                  ->orWhere('name', 'like', 'do_sewa%')
+                  ->orWhere('name', 'like', 'kembali_sewa%')
+                  ->orWhere('name', 'like', 'invoice_sewa%')
+                  ->orWhere('name', 'like', 'formmutasi%')
+                  ->orWhere('name', 'like', 'kas_galery%')
+                  ->orWhere('name', 'like', 'mutasi%')
+                  ->orWhere('name', 'like', 'mutasigalerygalery%');
+        })->pluck('name')->all();
+        
+        $permissionsadmingallery = Permission::whereIn('name',$permissionAG)->pluck('id')->all();
         $permissionspurchasing = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
         $permissionssales = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
-        $permissionskasirgallery = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
-        $permissionskasiroutlet = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
+
+        $permissionKG = Permission::where(function ($query) {
+            $query->where('name', 'like', 'home%')
+                  ->orWhere('name', 'like', 'register%')
+                  ->orWhere('name', 'like', 'login%')
+                  ->orWhere('name', 'like', 'logout%')
+                  ->orWhere('name', 'like', 'checkpromo%')
+                  ->orWhere('name', 'like', 'getpromo%')
+                  ->orWhere('name', 'like', 'getprodukTerjual%')
+                  ->orWhere('name', 'like', 'addKomponen%')
+                  ->orWhere('name', 'like', 'customer%')
+                  ->orWhere('name', 'like', 'akun%')
+                  ->orWhere('name', 'like', 'aset%')
+                  ->orWhere('name', 'like', 'promo%')
+                  ->orWhere('name', 'like', 'penjualan%')
+                  ->orWhere('name', 'like', 'komponenmutasi%')
+                  ->orWhere('name', 'like', 'komponenretur%')
+                  ->orWhere('name', 'like', 'komponenpenjulan%')
+                  ->orWhere('name', 'like', 'dopenjualan%')
+                  ->orWhere('name', 'like', 'pembayaran%')
+                  ->orWhere('name', 'like', 'formpenjualan%')
+                  ->orWhere('name', 'like', 'returpenjualan%')
+                  ->orWhere('name', 'like', 'inven_galeri%')
+                  ->orWhere('name', 'like', 'mutasigalery%')
+                  ->orWhere('name', 'like', 'kas_galery%')
+                  ->orWhere('name', 'like', 'produks%')
+                  ->orWhere('name', 'like', 'tipe_produk%')
+                  ->orWhere('name', 'like', 'kondisi%')
+                  ->orWhere('name', 'like', 'ongkir%')
+                  ->orWhere('name', 'like', 'tradisional%')
+                  ->orWhere('name', 'like', 'gift%')
+                  ->orWhere('name', 'like', 'kontrak%')
+                  ->orWhere('name', 'like', 'form%')
+                  ->orWhere('name', 'like', 'do_sewa%')
+                  ->orWhere('name', 'like', 'kembali_sewa%')
+                  ->orWhere('name', 'like', 'invoice_sewa%')
+                  ->orWhere('name', 'like', 'formmutasi%')
+                  ->orWhere('name', 'like', 'kas_galery%')
+                  ->orWhere('name', 'like', 'mutasi%')
+                  ->orWhere('name', 'like', 'mutasigalerygalery%');
+        })->pluck('name')->all();
+
+        $permissionskasirgallery = Permission::whereIn('name', $permissionKG)->pluck('id')->all();
+
+        $permissionKO = Permission::where(function ($query) {
+            $query->where('name', 'like', 'home%')
+                  ->orWhere('name', 'like', 'register%')
+                  ->orWhere('name', 'like', 'login%')
+                  ->orWhere('name', 'like', 'logout%')
+                  ->orWhere('name', 'like', 'checkpromo%')
+                  ->orWhere('name', 'like', 'getpromo%')
+                  ->orWhere('name', 'like', 'getprodukTerjual%')
+                  ->orWhere('name', 'like', 'addKomponen%')
+                  ->orWhere('name', 'like', 'customer%')
+                  ->orWhere('name', 'like', 'penjualan%')
+                  ->orWhere('name', 'like', 'komponenmutasi%')
+                  ->orWhere('name', 'like', 'komponenretur%')
+                  ->orWhere('name', 'like', 'komponenpenjulan%')
+                  ->orWhere('name', 'like', 'dopenjualan%')
+                  ->orWhere('name', 'like', 'pembayaran%')
+                  ->orWhere('name', 'like', 'formpenjualan%')
+                  ->orWhere('name', 'like', 'returpenjualan%')
+                  ->orWhere('name', 'like', 'inven_outlet%')
+                  ->orWhere('name', 'like', 'mutasi%')
+                  ->orWhere('name', 'like', 'formmutasi%')
+                  ->orWhere('name', 'like', 'mutasioutlet%')
+                  ->orWhere('name', 'like', 'mutasigalery%');
+        })->pluck('name')->all();
+
+        $permissionskasiroutlet = Permission::whereIn('name',$permissionKO)->pluck('id')->all();
         $permissionsfinance = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
         $permissionsauditor = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
    
@@ -139,5 +249,15 @@ class CreateAdminUserSeeder extends Seeder
         $userkasiroutlet->assignRole([$rolekasiroutlet->id]);
         $userfinance->assignRole([$rolefinance->id]);
         $userauditor->assignRole([$roleauditor->id]);
+
+
+        Karyawan::create([
+            'user_id' => $userkasiroutlet->id,
+            'nama' => $userkasiroutlet->name,
+            'jabatan' => 'kasir',
+            'lokasi_id' => 2,
+            'handphone' => 0,
+            'alamat' => 'semarang'
+        ]);
     }
 }
