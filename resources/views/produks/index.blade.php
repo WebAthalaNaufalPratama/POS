@@ -149,6 +149,9 @@
         $.ajax({
             type: "GET",
             url: "/produks/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 $('#editForm').attr('action', 'produks/'+id+'/update');
                 $('#edit_nama').val(response.nama)
@@ -181,6 +184,9 @@
             $.ajax({
                 type: "GET",
                 url: "/produks/"+id+"/delete",
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
                 success: function(response) {
                     toastr.success(response.msg, 'Success', {
                         closeButton: true,

@@ -145,6 +145,9 @@
         $.ajax({
             type: "GET",
             url: "/tipe_produks/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 $('#editForm').attr('action', 'tipe_produks/'+id+'/update');
                 $('#edit_nama').val(response.nama)

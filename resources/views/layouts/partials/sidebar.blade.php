@@ -11,7 +11,7 @@
                 <li class="submenu">
                     <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                 </li>
-                @if($lokasi->lokasi->tipe_lokasi != 2)
+                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->role('admin'))
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -33,7 +33,7 @@
                     </ul>
                 </li>
                 @endif
-                @if($lokasi->lokasi->tipe_lokasi != 2)
+                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->role('admin'))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -56,7 +56,7 @@
                 </li>
                 @endif
                 <li class="submenu">
-                    @if(Auth::user()->roles()->value('name') == 'admin' || (in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2))
+                    @if(Auth::user()->roles()->value('name') == 'admin' || (in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
@@ -88,10 +88,10 @@
                         @if(in_array('mutasioutlet.index', $rolePermissions))
                             <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasighgalery.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2 && $lokasi->lokasi->tipe_lokasi != 1)
+                        @if(in_array('mutasighgalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && $lokasi->lokasi->tipe_lokasi != 1 || Auth::user()->role('admin'))
                             <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->role('admin'))
                             <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
                             <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                             <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
@@ -315,7 +315,7 @@
 <li><a href="customerreport.html">Customer Report</a></li>
 </ul>
 </li> --}}
-                @if($lokasi->lokasi->tipe_lokasi != 2)
+                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->role('admin'))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
                     <ul>

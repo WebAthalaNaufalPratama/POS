@@ -122,6 +122,9 @@
         $.ajax({
             type: "GET",
             url: "/akun/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 // console.log(response)
                 $('#editForm').attr('action', 'akun/'+id+'/update');
@@ -156,6 +159,9 @@
                 $.ajax({
                     type: "GET",
                     url: "/akun/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     success: function(response) {
                         toastr.success(response.msg, 'Success', {
                             closeButton: true,
