@@ -100,7 +100,7 @@
                             <td>{{ $item->produk->nama ?? '-' }}</td>
                             <td>{{ $item->kondisi->nama ?? '-' }}</td>
                             <td>{{ $item->karyawan->nama ?? '-' }}</td>
-                            <td>{{ $item->tanggal ?? '-' }}</td>
+                            <td>{{ $item->tanggal ? formatTanggal($item->tanggal) : '-' }}</td>
                             <td>{{ $item->jumlah ?? '-' }}</td>
                             <td>{{ $item->alasan ?? '-' }}</td>
                         </tr>
@@ -142,20 +142,22 @@
                     <button type="button" class="btn btn-info" id="add"><img src="assets/img/icons/plus.svg" alt="img" /></button>
                 </div>
             </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                       <th style="width: 5%">No</th> 
-                       <th>Tanggal</th> 
-                       <th>Produk</th> 
-                       <th style="width: 5%">Jumlah</th> 
-                       <th>Pemakai</th> 
-                       <th>Alasan</th> 
-                    </tr>
-                </thead>
-                <tbody id="t_body_pemakaian">
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                           <th style="width: 5%">No</th> 
+                           <th>Tanggal</th> 
+                           <th>Produk</th> 
+                           <th style="width: 5%">Jumlah</th> 
+                           <th>Pemakai</th> 
+                           <th>Alasan</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="t_body_pemakaian">
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="modal-footer justify-content-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -172,13 +174,13 @@
     <script>
         $(document).ready(function() {
             $('#produk_inven_id, #karyawan_id, #lokasi_id').select2()
+            var i = 1;
             $('#add').click(function() {
-                var i = $('#t_body_pemakaian tr').length + 1;
-                if(i <= 15){
+                if($('#t_body_pemakaian tr').length < 10){
                     var newRow = '<tr id="row' + i + '">'+
                             '<td>' + i + '</td>'+
                             '<td>'+
-                                '<input type="date" class="form-control" name="tanggal[]" id="tanggal_' + i + '" required>'+
+                                '<input type="date" class="form-control" name="tanggal[]" id="tanggal_' + i + '" value="{{ date('Y-m-d') }}" required>'+
                             '</td>'+
                             '<td>'+
                                 '<select id="produk_inven_id_' + i + '" name="produk_inven_id[]" class="form-control" required>'+
@@ -200,7 +202,7 @@
                                 '</select>'+
                             '</td>'+
                             '<td>'+
-                                '<textarea name="alasan[]" id="alasan_' + i + '" class="form-control" required></textarea>'+
+                                '<textarea name="alasan[]" id="alasan_' + i + '" class="form-control" style="min-width:10rem" required></textarea>'+
                             '</td>'+
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
                             '</tr>';

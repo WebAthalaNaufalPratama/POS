@@ -32,13 +32,13 @@
                 <tbody>
                     @foreach ($promos as $promo)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $promo->nama }}</td>
-                            <td>{{ $promo->tanggal_mulai }}</td>
-                            <td>{{ $promo->tanggal_berakhir }}</td>
-                            <td>{{ $promo->ketentuan }}</td>
-                            <td>{{ $promo->diskon }}</td>
-                            <td>{{ $promo->lokasi->nama}}</td>
+                            <td>{{ $loop->iteration ?? '-' }}</td>
+                            <td>{{ $promo->nama ?? '-' }}</td>
+                            <td>{{ $promo->tanggal_mulai ? formatTanggal($promo->tanggal_mulai) : '-'}}</td>
+                            <td>{{ $promo->tanggal_berakhir ? formatTanggal($promo->tanggal_berakhir) : '-'}}</td>
+                            <td>{{ $promo->ketentuan ?? '-' }}</td>
+                            <td>{{ $promo->diskon ?? '-' }}</td>
+                            <td>{{ $promo->lokasi->nama?? '-' }}</td>
                             <td class="text-center">
                               <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                   <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
