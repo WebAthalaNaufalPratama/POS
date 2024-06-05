@@ -90,7 +90,6 @@ class PembayaranController extends Controller
             'invoice_penjualan_id' => 'required',
             'no_invoice_bayar' => 'required',
             'nominal' => 'required',
-            'rekening_id' => 'required',
             'tanggal_bayar' => 'required',
             'bukti' => 'required|file',
         ]);

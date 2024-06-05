@@ -10,7 +10,13 @@
                         <h4>Mutasi Galery Ke Outlet</h4>
                     </div>
                     <div class="page-btn">
+                    @php
+                        $user = Auth::user()->first();
+                        $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                    @endphp
+                    @if($lokasi->lokasi->tipe_lokasi != 2)
                         <a href="{{ route('mutasigalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
+                    @endif
                     </div>
                 </div>
             </div>
@@ -55,10 +61,16 @@
                                 <td>{{ $mutasi->status }}</td>
                                 <td>
                                     <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('mutasigalery.show', ['mutasiGO' => $mutasi->id]) }}">Atur Perangkai</a>
-                                            <a class="dropdown-item" href="{{ route('mutasigalery.acc', ['mutasiGO' => $mutasi->id]) }}">Acc Terima</a>
+                                        <a class="dropdown-item" href="{{ route('mutasigalery.payment', ['mutasiGO' => $mutasi->id]) }}">pembayaran mutasi</a>
+                                            @if($lokasi->lokasi->tipe_lokasi != 2)
+                                                <a class="dropdown-item" href="{{ route('mutasigalery.show', ['mutasiGO' => $mutasi->id]) }}">Atur Perangkai</a>
+                                            @elseif($lokasi->lokasi->tipe_lokasi != 1)
+                                                <a class="dropdown-item" href="{{ route('mutasigalery.acc', ['mutasiGO' => $mutasi->id]) }}">Acc Terima</a>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

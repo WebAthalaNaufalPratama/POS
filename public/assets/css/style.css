@@ -3052,7 +3052,7 @@ div.dataTables_wrapper div.dataTables_info {
     text-align: center;
     width: 260px;
     z-index: 1;
-    padding: 0 20px;
+    padding: 0 100px;
     -webkit-transition: all 0.2s ease;
     -ms-transition: all 0.2s ease;
     transition: all 0.2s ease;

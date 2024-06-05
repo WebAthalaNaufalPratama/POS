@@ -31,8 +31,20 @@ class DopenjualanController extends Controller
 {
     public function index(Request $req)
     {
+        $user = Auth::user()->first();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
+        if($lokasi->lokasi->tipe_lokasi == 2){
+            $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
+            $lokasiIds = $lokasi->pluck('id')->toArray();
+            $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
+        }elseif($lokasi->lokasi->tipe_lokasi == 1){
+            $lokasi = Lokasi::where('tipe_lokasi', 1)->get();
+            $lokasiIds = $lokasi->pluck('id')->toArray();
+            $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
+        }else{
+            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
+        }
         // $dopenjualans = DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc')->get();
-        $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
 
         if ($req->customer) {
             $query->where('customer_id', $req->input('customer'));
@@ -112,7 +124,7 @@ class DopenjualanController extends Controller
         // dd($data['nama_produk']);
         $data['jenis_do'] = 'PENJUALAN';
         $data['status'] = 'DIKIRIM';
-        // $data['tanggal_pembuat'] = now();
+        $data['tanggal_pembuat'] = now();
         $data['pembuat'] = Auth::user()->id;
         $invoice = Penjualan::where('no_invoice', $req->no_referensi)->first();
         // dd($invoice);

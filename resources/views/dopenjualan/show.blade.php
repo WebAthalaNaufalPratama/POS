@@ -264,6 +264,35 @@
                         </div>
                     </div>
 
+                    <div class="row pt-3 me-1 mt-2">
+                                <div class="col-lg-6 col-sm-12">
+                                            <!-- <div class="col-lg-12"> -->
+                                                <table class="table table-responsive border rounded">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Pembuat</th>
+                                                            <th>Penyetuju</th>
+                                                            <th>Pemeriksa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="pembuat">{{ $dopenjualan->dibuat[0]->name }}</td>
+                                                            <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $dopenjualan->tanggal_pembuat }}</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                     <div class="text-end mt-3">
                         <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
                         <a href="{{ route('dopenjualan.index') }}" class="btn btn-secondary" type="button">Back</a>

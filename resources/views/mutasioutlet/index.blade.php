@@ -55,9 +55,18 @@
                                 <td>{{ $mutasi->status }}</td>
                                 <td>
                                     <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
                                         <div class="dropdown-menu">
+                                        @php
+                                            $user = Auth::user()->first();
+                                            $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                                        @endphp
+                                        <a class="dropdown-item" href="{{ route('mutasioutlet.payment', ['mutasiOG' => $mutasi->id]) }}">pembayaran mutasi</a>
+                                        @if($lokasi->lokasi->tipe_lokasi != 2)
                                             <a class="dropdown-item" href="{{ route('mutasioutlet.show', ['mutasiOG' => $mutasi->id]) }}">ACC DITERIMA</a>
+                                        @endif
                                         </div>
                                     </div>
                                 </td>
