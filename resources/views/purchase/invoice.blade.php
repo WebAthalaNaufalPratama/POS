@@ -52,20 +52,16 @@
                                 <td>
                                 {{ formatRupiah($inv->sisa) }}
                                 </td>
-                                <td></td>
-                                {{-- <td>
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}">Perangkai</a>
-                                            <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}">Pembayaran</a>
-                                            @if($penjualan->distribusi == 'Dikirim')
-                                            <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}">Delivery Order</a>
-                                            @endif
-                                            <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a>
-                                        </div>
-                                    </div>
-                                </td> --}}
+                                <td class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
+                                        </li>
+                                    </ul>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>

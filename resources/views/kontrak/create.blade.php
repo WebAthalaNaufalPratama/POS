@@ -329,7 +329,7 @@
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
-            $('#sales').trigger('cahnge');
+            $('#sales').trigger('change');
             var i = 1;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
