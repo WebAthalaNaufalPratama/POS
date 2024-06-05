@@ -233,6 +233,9 @@ var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
 
 $(document).ready(function() {
+    
+    $('.select2').select2();
+
 
     $('#kategori_0').select2({
             placeholder: "----- Pilih Kategori ----",

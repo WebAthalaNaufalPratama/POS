@@ -82,7 +82,7 @@
                                             <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                         </li>
                                         <li>
-                                            <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                            {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
                                         </li>
                                     </ul>
                                 </td>
@@ -167,7 +167,7 @@
                                             <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                         </li>
                                         <li>
-                                            <a href="#" class="dropdown-item" onclick="deleteData({{ $inden->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                            {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $inden->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
                                         </li>
                                     </ul>
                                 </td>

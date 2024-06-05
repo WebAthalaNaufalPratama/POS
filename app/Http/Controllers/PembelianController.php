@@ -349,8 +349,12 @@ class PembelianController extends Controller
      * @param  \App\Models\Pembelian  $pembelian
      * @return \Illuminate\Http\Response
      */
-    public function show($datapo)
+    public function show ($datapo, Request $request)
     {
+
+        $type = $request->query('type');
+        // return "Type: $type, Datapo: $datapo";
+        if ($type === 'pembelian') {
         $beli = Pembelian::find($datapo);
         // return $beli;
         $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
@@ -362,7 +366,19 @@ class PembelianController extends Controller
         $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
         
         return view('purchase.showpo',compact('beli','produkbelis','pembuat','penerima','pemeriksa','pembuatjbt','penerimajbt','pemeriksajbt'));
-    }
+        }elseif ($type === 'poinden') {
+            $beli = ModelsPoinden::find($datapo);
+            // return $beli;
+            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
+            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama;
+            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan;
+            $produkbelis = Produkbeli::where('poinden_id', $datapo)->get();
+            
+            return view('purchase.showpoinden',compact('beli','produkbelis','pembuat','pemeriksa','pembuatjbt','pemeriksajbt'));
+           
+        }
+     }
 
     /**
      * Show the form for editing the specified resource.

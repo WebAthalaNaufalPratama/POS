@@ -43,6 +43,7 @@ class InventoryIndenController extends Controller
         // dd($data);
         // check duplikasi
         $duplicate = InventoryInden::where('kode_produk', $data['kode_produk'])->where('supplier_id', $data['supplier_id'])
+        ->where('kode_produk_inden', $data['kode_produk_inden'])
         ->where('bulan_inden', $data['bulan_inden'])->first();
         if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
 

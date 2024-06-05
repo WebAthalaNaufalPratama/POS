@@ -60,7 +60,7 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="lokasi">Lokasi</label>
-                                                <select id="id_lokasi" name="id_lokasi" class="form-control" required>
+                                                <select id="id_lokasi" name="id_lokasi" class="form-control select2" required>
                                                     <option value="">Pilih Lokasi</option>
                                                     @foreach ($lokasis as $lokasi)
                                                     <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
@@ -275,6 +275,9 @@
 var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
 $(document).ready(function() {
+    
+     $('.select2').select2();
+  
     // Inisialisasi Select2 dengan konfigurasi tambahan
     $('#produk_0').select2({
             placeholder: "----- Pilih Produk ----",
