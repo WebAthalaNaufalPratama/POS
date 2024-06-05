@@ -26,7 +26,7 @@ class AddMutasigagToProdukTerjuals extends Migration
     public function down()
     {
         Schema::table('produk_terjuals', function (Blueprint $table) {
-            //
+            $table->dropColumn('no_mutasigag');
         });
     }
 }

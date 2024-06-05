@@ -31,10 +31,10 @@ class AddColumnsToDeliveryOrdersTable extends Migration
     {
         Schema::table('delivery_orders', function (Blueprint $table) {
             $table->dropColumn('pic');
-            $table->string('penerima')->change();
+            $table->string('penerima')->nullable(false)->change();
             $table->renameColumn('no_referensi', 'no_sewa');
             $table->renameColumn('tanggal_kirim', 'tanggal_mulai');
-            $table->date('tanggal_selesai')->nullable()->after('tanggal_mulai');
+            $table->date('tanggal_selesai')->nullable();
         });
     }
 }

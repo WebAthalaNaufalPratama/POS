@@ -36,7 +36,7 @@
                             <label for="permissions" class="form-label">Assign Permissions</label>
 
                             <div class="table-responsive">
-                                <table class="table datanew">
+                                <table class="table">
                                     <thead>
                                         <th scope="col" width="1%"><input type="checkbox" name="all_permission"></th>
                                         <th scope="col" width="20%">Name</th>

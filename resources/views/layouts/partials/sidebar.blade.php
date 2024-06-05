@@ -2,9 +2,16 @@
     <div class="sidebar-inner slimscroll">
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
+                @php
+                    $role = Auth::user()->roles()->first();
+                    $user = Auth::user()->first();
+                    $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                    $rolePermissions = $role->permissions->pluck('name')->toArray();
+                @endphp
                 <li class="submenu">
                     <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                 </li>
+                @if($lokasi->lokasi->tipe_lokasi != 2)
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -25,6 +32,8 @@
                         <li><a href="{{ route('promo.index') }}" class="{{ request()->is('promo*') ? 'active' : '' }}">Promo</a></li>
                     </ul>
                 </li>
+                @endif
+                @if($lokasi->lokasi->tipe_lokasi != 2)
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -32,6 +41,8 @@
                         <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li>
                     </ul>
                 </li>
+                @endif
+                @if(in_array('kontrak.index', $rolePermissions))
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="file-text"></i><span> Sewa</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -43,14 +54,9 @@
                         <li><a href="{{ route('pembayaran_sewa.index') }}" class="{{ request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
                     </ul>
                 </li>
+                @endif
                 <li class="submenu">
-                    @php
-                        $role = Auth::user()->roles()->first();
-                        $user = Auth::user()->first();
-                        $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
-                        $rolePermissions = $role->permissions->pluck('name')->toArray();
-                    @endphp
-                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                    @if((in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
@@ -82,36 +88,55 @@
                         @if(in_array('mutasioutlet.index', $rolePermissions))
                             <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasighgalery.index', $rolePermissions))
+                        @if(in_array('mutasighgalery.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2 && $lokasi->lokasi->tipe_lokasi != 1)
                             <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasigalerygalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGA*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                            <li><a href="#" class="">Mutasi Inden ke GH</a></li>
+                            <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
+                            <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
                         @endif
                         <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiIG*') ? 'active' : '' }}">Mutasi Inden Ke GreenHouse</a></li>
                         <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
-                        {{-- <li><a href="#" class="">Mutasi Galery Ke Inden</a></li> --}}
+                        <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
                     </ul>
                 </li>
+                @if(in_array('pembelian.index', $rolePermissions))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/dollar-square.svg" alt="img"><span> Pembelian</span> <span class="menu-arrow"></span></a>
                     <ul>
+                        
                         <li><a href="{{ route('pembelian.index') }}" class="{{ request()->is('purchase/pembelian*') ? 'active' : '' }}">Purchase Order</a></li>
+                        @if(in_array('invoicebeli.index', $rolePermissions))
                         <li><a href="{{ route('invoicebeli.index') }}" class="{{ request()->is('purchase/invoice*') ? 'active' : '' }}">Invoice Pembelian</a></li>
+                        @endif
+                        @if(in_array('returbeli.index', $rolePermissions))
                         <li><a href="{{ route('returbeli.index') }}" class="{{ request()->is('purchase/retur*') ? 'active' : '' }}">Retur Pembelian</a></li>
+                        @endif
                     </ul>
                 </li>
+                @endif
                 
                 <li class="submenu">
                     <a href="javascript:void(0);"><i class="fa fa-archive" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-archive" aria-label="fa fa-archive"></i><span> Inventory</span> <span class="menu-arrow"></span></a>
                     <ul>
+                        @if(in_array('inven_galeri.index', $rolePermissions))
                         <li><a href="{{ route('inven_galeri.index') }}" class="{{ request()->is('inven_galeri*') ? 'active' : '' }}">Gallery</a></li>
+                        @endif
+                        @if(Auth::user()->roles()->value('name') == 'kasir' || (in_array('inven_outlet.index', $rolePermissions)))
                         <li><a href="{{ route('inven_outlet.index')}}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
+                        @endif
+                        @if(in_array('inven_greenhouse.index', $rolePermissions))
                         <li><a href="{{ route('inven_greenhouse.index')}}" class="{{ request()->is('inven_greenhouse*') ? 'active' : '' }}">GreenHouse</a></li>
+                        @endif
+                        @if(in_array('inven_inden.index', $rolePermissions))
                         <li><a href="{{ route('inven_inden.index')}}" class="{{ request()->is('inven_inden*') ? 'active' : '' }}">Inden</a></li>
+                        @endif
                         {{-- <li><a href="#" class="">Inden</a></li> --}}
                     </ul>
                 </li>
+                @if(in_array('kas_galery.index', $rolePermissions))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/wallet1.svg" alt="img"><span> Kas</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -119,6 +144,7 @@
                         <li><a href="{{ route('kas_gallery.index')}}" class="{{ request()->is('kas_gallery*') ? 'active' : '' }}">Gallery</a></li>
                     </ul>
                 </li>
+                @endif
                 <li class="submenu">
                 {{-- <li class="submenu">
 <a href="javascript:void(0);"><img src="/assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
@@ -292,6 +318,7 @@
 <li><a href="customerreport.html">Customer Report</a></li>
 </ul>
 </li> --}}
+                @if($lokasi->lokasi->tipe_lokasi !== 2)
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -301,7 +328,8 @@
                         <li><a href="{{ route('users.index') }}" class="{{ request()->is('users*') ? 'active' : '' }}">User </a></li>
                     </ul>
                 </li>
-                <li class="submenu">
+                @endif
+                <!-- <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/settings.svg" alt="img"><span> Settings</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="generalsettings.html">General Settings</a></li>
@@ -311,7 +339,7 @@
                         <li><a href="grouppermissions.html">Group Permissions</a></li>
                         <li><a href="taxrates.html">Tax Rates</a></li>
                     </ul>
-                </li>
+                </li> -->
             </ul>
         </div>
     </div>

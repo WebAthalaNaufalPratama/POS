@@ -66,7 +66,7 @@
                                             <label for="lokasi_id">Lokasi Pembelian</label>
                                             <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
                                                 @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $penjualans->lokasi_id }}">{{ $lokasi->nama }}</option>
+                                                <option value="{{ $penjualans->lokasi_id }}" data-tipe="{{ $penjualans->lokasi->tipe_lokasi}}">{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -464,7 +464,9 @@
                                                             <td>{{ $pembayaran->status_bayar }}</td>
                                                             <td>
                                                                 <div class="dropdown">
-                                                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
+                                                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                                </a>
                                                                     <div class="dropdown-menu">
                                                                         <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
                                                                     </div>
@@ -636,7 +638,7 @@
 
                     <div class="form-group" id="rekening">
                         <label for="bankpenerima">Rekening Vonflorist</label>
-                        <select class="form-control" id="rekening_id" name="rekening_id" required>
+                        <select class="form-control" id="rekening_id" name="rekening_id">
                             <option value="">Pilih Rekening Von</option>
                             @foreach ($bankpens as $bankpen)
                             <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
@@ -666,24 +668,66 @@
 
 @section('scripts')
 <script>
+    // $(document).ready(function() {
+    //     var cekInvoiceNumbers = "<?php echo $cekInvoice; ?>";
+    //     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+
+    //     function generateInvoice() {
+    //         var invoicePrefix = "BYJ";
+    //         var currentDate = new Date();
+    //         var year = currentDate.getFullYear();
+    //         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    //         var day = currentDate.getDate().toString().padStart(2, '0');
+    //         var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+
+    //         var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+    //         $('#no_invoice_byr').val(generatedInvoice);
+    //     }
+
+    //     generateInvoice();
+    // });
+
     $(document).ready(function() {
-    var cekInvoiceNumbers = "<?php echo $cekInvoice; ?>";
-    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
-    function generateInvoice() {
-        var invoicePrefix = "BYJ";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+        // Function to generate the invoice number
+        function generateInvoice(kode) {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_invoice_byr').val(generatedInvoice);
-    }
+            var generatedInvoice = kode + year + month + day + formattedNextInvoiceNumber;
+            $('#no_invoice_byr').val(generatedInvoice);
+        }
 
-    generateInvoice();
-});
+        // Handle location change
+        $('#lokasi_id').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            var cektipelokasi = selectedOption.data('tipe');
+            
+            var kode;
+            if (cektipelokasi == 1) {
+                kode = "BYJ";
+            } else if (cektipelokasi == 2) {
+                kode = "BYO";
+            } else {
+                kode = ""; // Handle unexpected values of cektipelokasi
+            }
+
+            generateInvoice(kode); // Generate the invoice number with the selected prefix
+        });
+
+        // Optionally, generate the invoice number on page load if a location is pre-selected
+        var initialOption = $('#lokasi_id').find('option:selected');
+        if (initialOption.val()) {
+            var initialTipe = initialOption.data('tipe');
+            var initialKode = initialTipe == 1 ? "BYJ" : (initialTipe == 2 ? "BYO" : "");
+            generateInvoice(initialKode);
+        }
+    });
 
 </script>
 <script>

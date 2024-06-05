@@ -31,12 +31,12 @@
                 <tbody>
                     @foreach ($asets as $aset)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $aset->nama }}</td>
-                            <td>{{ $aset->deskripsi }}</td>
-                            <td>{{ $aset->lokasi->nama}}</td>
-                            <td>{{ $aset->jumlah }}</td>
-                            <td>{{ $aset->tahun_beli }}</td>
+                            <td>{{ $loop->iteration ?? '-' }}</td>
+                            <td>{{ $aset->nama ?? '-' }}</td>
+                            <td>{{ $aset->deskripsi ?? '-' }}</td>
+                            <td>{{ $aset->lokasi->nama ?? '-'}}</td>
+                            <td>{{ $aset->jumlah ?? '-' }}</td>
+                            <td>{{ $aset->tahun_beli? formatTanggal($aset->tahun_beli) : '-' }}</td>
                             <td class="text-center">
                               <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                   <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -92,7 +92,7 @@
             </div>
             <div class="mb-3">
               <label for="jumlah" class="col-form-label">Jumlah</label>
-              <input type="text" class="form-control" name="jumlah" id="add_jumlah" required>
+              <input type="number" class="form-control" name="jumlah" id="add_jumlah" required>
             </div>
             <div class="mb-3">
               <label for="tahun_beli" class="col-form-label">Tahun Beli</label>
@@ -139,7 +139,7 @@
             </div>
             <div class="mb-3">
               <label for="jumlah" class="col-form-label">Jumlah</label>
-              <input type="text" class="form-control" name="jumlah" id="edit_jumlah" required>
+              <input type="number" class="form-control" name="jumlah" id="edit_jumlah" required>
             </div>
             <div class="mb-3">
               <label for="tahun_beli" class="col-form-label">Tahun Beli</label>

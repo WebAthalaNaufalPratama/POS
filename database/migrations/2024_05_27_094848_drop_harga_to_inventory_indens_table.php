@@ -28,7 +28,9 @@ class DropHargaToInventoryIndensTable extends Migration
     public function down()
     {
         Schema::table('inventory_indens', function (Blueprint $table) {
-            //
+            $table->integer('harga')->nullable();
+            $table->integer('produk_id')->nullable();
+            $table->dropColumn('kode_produk');
         });
     }
 }

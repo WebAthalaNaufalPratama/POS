@@ -355,6 +355,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{returpenjualan}/edit', 'ReturpenjualanController@edit')->name('returpenjualan.edit');
             Route::patch('/{returpenjualan}/update', 'ReturpenjualanController@update')->name('returpenjualan.update');
             Route::get('/{returpenjualan}/delete', 'ReturpenjualanController@destroy')->name('returpenjualan.destroy');
+            Route::get('/{returpenjualan}/payment', 'ReturPenjualanController@payment')->name('returpenjualan.payment');
+            Route::post('/paymentretur', 'ReturPenjualanController@paymentretur')->name('returpenjualan.paymentretur');
         });
 
         Route::group(['prefix' => 'inven_galeri'], function() {
@@ -424,6 +426,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGO}/edit', 'MutasiController@edit_outlet')->name('mutasigalery.edit');
             Route::patch('/{mutasiGO}/update', 'MutasiController@update_outlet')->name('mutasigalery.update');
             Route::get('/{mutasiGO}/delete', 'MutasiController@destroy_outlet')->name('mutasigalery.destroy');
+            Route::get('/{mutasiGO}/payment', 'MutasiController@payment_outlet')->name('mutasigalery.payment');
+            Route::post('/paymentmutasi', 'MutasiController@paymentmutasi')->name('mutasi.paymentmutasi');
         });
 
         Route::group(['prefix' => 'mutasiOG'], function() {
@@ -434,6 +438,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiOG}/edit', 'MutasiController@edit_outletgalery')->name('mutasioutlet.edit');
             Route::patch('/{mutasiOG}/update', 'MutasiController@update_outletgalery')->name('mutasioutlet.update');
             Route::get('/{mutasiOG}/delete', 'MutasiController@destroy_outletgalery')->name('mutasioutlet.destroy');
+            Route::get('/{mutasiOG}/payment', 'MutasiController@payment_outletgalery')->name('mutasioutlet.payment');
         });
 
         Route::group(['prefix' => 'kas_pusat'], function() {
@@ -464,6 +469,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGG}/edit', 'MutasiController@edit_ghgalery')->name('mutasighgalery.edit');
             Route::patch('/{mutasiGG}/update', 'MutasiController@update_ghgalery')->name('mutasighgalery.update');
             Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_ghgalery')->name('mutasighgalery.destroy');
+            Route::get('/{mutasiGG}/payment', 'MutasiController@payment_ghgalery')->name('mutasighgalery.payment');
         });
 
         Route::group(['prefix' => 'inven_greenhouse'], function() {
@@ -520,6 +526,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGAG}/edit', 'MutasiController@edit_galerygalery')->name('mutasigalerygalery.edit');
             Route::patch('/{mutasiGAG}/update', 'MutasiController@update_galerygalery')->name('mutasigalerygalery.update');
             Route::get('/{mutasiGAG}/delete', 'MutasiController@destroy_galerygalery')->name('mutasigalerygalery.destroy');
+            Route::get('/{mutasiGAG}/payment', 'MutasiController@payment_galerygalery')->name('mutasigalerygalery.payment');
         });
 
         Route::group(['prefix' => 'kas_pusat'], function() {
@@ -540,6 +547,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kas_gallery}/edit', 'TransaksiKasController@edit_gallery')->name('kas_gallery.edit');
             Route::patch('/{kas_gallery}/update', 'TransaksiKasController@update_gallery')->name('kas_gallery.update');
             Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
+        });
+
+        Route::group(['prefix' => 'pemakaian_sendiri'], function() {
+            Route::get('/', 'PemakaianSendiriController@index')->name('pemakaian_sendiri.index');
+            Route::get('/create', 'PemakaianSendiriController@create')->name('pemakaian_sendiri.create');
+            Route::post('/store', 'PemakaianSendiriController@store')->name('pemakaian_sendiri.store');
+            Route::get('/{pemakaian_sendiri}/show', 'PemakaianSendiriController@show')->name('pemakaian_sendiri.show');
+            Route::get('/{pemakaian_sendiri}/edit', 'PemakaianSendiriController@edit')->name('pemakaian_sendiri.edit');
+            Route::patch('/{pemakaian_sendiri}/update', 'PemakaianSendiriController@update')->name('pemakaian_sendiri.update');
+            Route::get('/{pemakaian_sendiri}/delete', 'PemakaianSendiriController@destroy')->name('pemakaian_sendiri.destroy');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

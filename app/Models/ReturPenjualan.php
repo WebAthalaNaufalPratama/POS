@@ -34,5 +34,9 @@ class ReturPenjualan extends Model
     public function deliveryorder(){
         return $this->hasMany(DeliveryOrder::class, 'no_referensi', 'no_retur');
     }
+    public function dibuat()
+    {
+        return $this->hasMany(User::class, 'id', 'pembuat');
+    }
 
 }

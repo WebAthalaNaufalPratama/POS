@@ -27,7 +27,8 @@ class AddJumlahindenToProdukbelisTable extends Migration
     public function down()
     {
         Schema::table('produkbelis', function (Blueprint $table) {
-            //
+            $table->dropColumn('jumlahInden');
+            $table->dropColumn('keterangan');
         });
     }
 }

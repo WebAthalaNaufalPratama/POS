@@ -66,7 +66,9 @@
                                 <td>{{ $dopenjualan->data_driver->nama }}</td>
                                 <td>
                                     <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="{{ route('dopenjualan.show', ['dopenjualan' => $dopenjualan->id]) }}">Show</a>
                                             <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $dopenjualan->id }})">Delete</a> -->

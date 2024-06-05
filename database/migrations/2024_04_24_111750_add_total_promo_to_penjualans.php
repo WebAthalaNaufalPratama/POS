@@ -26,7 +26,7 @@ class AddTotalPromoToPenjualans extends Migration
     public function down()
     {
         Schema::table('penjualans', function (Blueprint $table) {
-            //
+            $table->string('total_promo')->nullable(false)->change();
         });
     }
 }

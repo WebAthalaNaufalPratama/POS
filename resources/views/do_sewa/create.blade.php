@@ -12,7 +12,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <form action="{{ route('do_sewa.store') }}" method="POST">
+                <form action="{{ route('do_sewa.store') }}" method="POST" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
                             @csrf
@@ -161,7 +161,7 @@
                                         <th>Nama</th>
                                         <th>Jumlah</th>
                                         <th>Satuan</th>
-                                        <th>Detail Lokasi</th>
+                                        <th>Keterangan</th>
                                         <th></th>
                                     </tr>
                                 </thead>

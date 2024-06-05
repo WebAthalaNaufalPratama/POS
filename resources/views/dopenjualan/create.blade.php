@@ -160,7 +160,7 @@
                                                                 @endforeach
                                                             </select>
                                                         </td>
-                                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control" required></td>
+                                                        <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control" required></td>
                                                         <td><input type="text" name="satuan[]" id="satuan_0" class="form-control" required></td>
                                                         <td><input type="text" name="keterangan[]" id="keterangan_0" class="form-control" required></td>
                                                         <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
@@ -173,7 +173,7 @@
                                                     @if($produk->jumlah_dikirim != 0)
                                                     <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
+                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required readonly>
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
                                                                 <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
@@ -241,6 +241,37 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- <div class="row justify-content-around"> -->
+                            <!-- <div class="col-md-12 border rounded pt-3 me-1 mt-2"> -->
+                            <div class="row pt-3 me-1 mt-2">
+                                <div class="col-lg-6 col-sm-12">
+                                            <!-- <div class="col-lg-12"> -->
+                                                <table class="table table-responsive border rounded">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Pembuat</th>
+                                                            <th>Penyetuju</th>
+                                                            <th>Pemeriksa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                            <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <!-- </div> -->
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
@@ -336,22 +367,41 @@
     generateInvoice();
 </script>
 <script>
-    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+    $(document).ready(function() {
+        // Retrieve and parse the next invoice number
+        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
-    function generateDOP() {
-        var invoicePrefix = "DOP";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+        // Function to generate the invoice number
+        function generateInvoice(kode) {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_do').val(generatedInvoice);
-    }
+            var generatedInvoice = kode + year + month + day + formattedNextInvoiceNumber;
+            $('#no_do').val(generatedInvoice);
+        }
 
-    generateDOP();
+        // Get the location type from the server-rendered value
+        var cektipelokasi = "{{ $penjualans->lokasi->tipe_lokasi }}";
+
+        // console.log(cektipelokasi);
+
+        // Determine the prefix based on the location type
+        var kode;
+        if (cektipelokasi == 1) {
+            kode = "DOP";
+        } else if (cektipelokasi == 2) {
+            kode = "DVO";
+        } else {
+            kode = ""; // Handle unexpected values of cektipelokasi
+        }
+
+        // Generate the invoice number with the determined prefix
+        generateInvoice(kode);
+    });
 </script>
 <script>
     // Function to update date to today's date

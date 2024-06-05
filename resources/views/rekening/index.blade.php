@@ -75,7 +75,7 @@
             </div>
             <div class="mb-3">
               <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
-              <input type="text" class="form-control" name="nomor_rekening" id="add_nomor_rekening" required>
+              <input type="number" class="form-control hide-arrow" name="nomor_rekening" id="add_nomor_rekening" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>
@@ -118,7 +118,7 @@
             </div>
             <div class="mb-3">
               <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
-              <input type="text" class="form-control" name="nomor_rekening" id="edit_nomor_rekening" required>
+              <input type="number" class="form-control hide-arrow" name="nomor_rekening" id="edit_nomor_rekening" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>

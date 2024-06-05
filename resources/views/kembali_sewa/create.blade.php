@@ -296,15 +296,16 @@
             $('#komponen_' + id).empty();
 
             if($(this).val()){ // cek jika value kosong
+                $(lokasiProduk).empty()
+                $(lokasiProduk).append('<option value="">Pilih Detail Lokasi</option>')
+                $(selectProduk).attr('disabled', false);
+                $(selectProduk).empty()
+                $(selectProduk).append('<option value="">Pilih Produk</option>')
                 for (let i = 0; i < dataDO.produk.length; i++) {
-                    $(selectProduk).attr('disabled', false);
-                    $(selectProduk).empty()
-                    $(selectProduk).append('<option value="">Pilih Produk</option>')
-                    $(selectProduk).append('<option value="' + dataDO.produk[i].produk.kode + '">' + dataDO.produk[i].produk.nama + '</option>');
-
-                    $(lokasiProduk).empty()
-                    $(lokasiProduk).append('<option value="">Pilih Detail Lokasi</option>')
-                    $(lokasiProduk).append('<option value="' + dataDO.produk[i].detail_lokasi + '">' + dataDO.produk[i].detail_lokasi + '</option>');
+                    if(dataDO.produk[i].jenis != 'TAMBAHAN'){
+                        $(selectProduk).append('<option value="' + dataDO.produk[i].produk.kode + '">' + dataDO.produk[i].produk.nama + '</option>');
+                        $(lokasiProduk).append('<option value="' + dataDO.produk[i].detail_lokasi + '">' + dataDO.produk[i].detail_lokasi + '</option>');
+                    }
                 }
             } else { // kosongkan input jika value kosong
                 $(selectProduk).attr('disabled', true);

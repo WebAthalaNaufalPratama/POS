@@ -26,7 +26,7 @@ class AddSoftDeletesToPembayarans extends Migration
     public function down()
     {
         Schema::table('pembayarans', function (Blueprint $table) {
-            //
+            $table->dropColumn('deleted_at');
         });
     }
 }

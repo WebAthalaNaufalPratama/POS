@@ -55,8 +55,11 @@
                                 <td>{{ $mutasi->status }}</td>
                                 <td>
                                     <div class="dropdown">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
                                         <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{{ route('mutasigalerygalery.payment', ['mutasiGAG' => $mutasi->id]) }}">pembayaran mutasi</a>
                                             <a class="dropdown-item" href="{{ route('mutasigalerygalery.show', ['mutasiGAG' => $mutasi->id]) }}">Acc Terima</a>
                                         </div>
                                     </div>

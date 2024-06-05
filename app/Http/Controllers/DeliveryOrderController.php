@@ -12,6 +12,7 @@ use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Activitylog\Models\Activity;
 
 class DeliveryOrderController extends Controller
 {
@@ -386,7 +387,8 @@ class DeliveryOrderController extends Controller
         $data = DeliveryOrder::find($deliveryOrder);
         $produkJuals = Produk_Jual::all();
         $drivers = Karyawan::where('jabatan', 'DRIVER')->get();
-        return view('do_sewa.show', compact('data', 'produkJuals', 'drivers'));
+        $riwayat = Activity::where('subject_type', DeliveryOrder::class)->where('subject_id', $deliveryOrder)->orderBy('id', 'desc')->get();
+        return view('do_sewa.show', compact('data', 'produkJuals', 'drivers', 'riwayat'));
     }
 
     /**

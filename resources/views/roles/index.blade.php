@@ -49,9 +49,6 @@
                     </tr>
                     @endforeach
                     </table>
-                    <!-- <div class="d-flex">
-                        {!! $roles->links() !!}
-                    </div> -->
                 </div>
             </div>
         </div>

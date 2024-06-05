@@ -29,7 +29,7 @@ class KontrakController extends Controller
     public function index(Request $req)
     {
         $query = Kontrak::with('customer');
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        if(!Auth::user()->role('admin')){
             $query->where('lokasi_id',Auth::user()->karyawans->lokasi_id);
         }
         if ($req->customer) {
@@ -49,7 +49,7 @@ class KontrakController extends Controller
         $customer = Kontrak::select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(!Auth::user()->roles('admin'), function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -57,7 +57,7 @@ class KontrakController extends Controller
         $sales = Kontrak::select('sales')
         ->distinct()
         ->join('karyawans', 'kontraks.sales', '=', 'karyawans.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(!Auth::user()->roles('admin'), function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -72,7 +72,7 @@ class KontrakController extends Controller
      */
     public function create()
     {
-        if (Auth::user()->roles()->value('name') != 'admin') {
+        if (!Auth::user()->roles('admin')) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -146,6 +146,12 @@ class KontrakController extends Controller
         $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
+            $fileName = $req->no_kontrak . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('bukti_kontrak', $fileName, 'public');
+            $data['file'] = $filePath;
+        }
 
         // save data kontrak
         $check = Kontrak::create($data);
@@ -198,7 +204,7 @@ class KontrakController extends Controller
      */
     public function show($kontrak)
     {
-        if (Auth::user()->roles()->value('name') != 'admin') {
+        if (!Auth::user()->roles('admin')) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -233,7 +239,7 @@ class KontrakController extends Controller
      */
     public function edit($kontrak)
     {
-        if (Auth::user()->roles()->value('name') != 'admin') {
+        if (!Auth::user()->roles('admin')) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -292,11 +298,17 @@ class KontrakController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'log']);
-        // dd($data);
+        
         $dataKontrak = Kontrak::find($kontrak);
-        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
+        $data['lokasi_id'] = $dataKontrak->lokasi_id;
         $data['pembuat'] = $dataKontrak->pembuat;
-        $data['tanggal_pembuat'] = now();
+        $data['tanggal_pembuat'] = $dataKontrak->tanggal_pembuat;
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
+            $fileName = $req->no_kontrak . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('bukti_kontrak', $fileName, 'public');
+            $data['file'] = $filePath;
+        }
 
         // save data kontrak
         $check = Kontrak::find($kontrak)->update($data);

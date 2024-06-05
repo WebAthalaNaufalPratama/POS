@@ -26,7 +26,7 @@ class AddReturpembeliansIdToProdukReturTable extends Migration
     public function down()
     {
         Schema::table('produk_retur', function (Blueprint $table) {
-            //
+            $table->dropColumn('returpembelians_id');
         });
     }
 }

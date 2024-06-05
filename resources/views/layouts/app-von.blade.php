@@ -28,6 +28,17 @@
 
   <link rel="stylesheet" href="/assets/css/style.css">
 
+  <style>
+      input[type="number"].hide-arrow::-webkit-inner-spin-button,
+      input[type="number"].hide-arrow::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      
+      input[type="number"].hide-arrow {
+        -moz-appearance: textfield;
+      }
+  </style>
   @yield('css')
 </head>
 
@@ -42,13 +53,13 @@
 
       <div class="header-left active">
         <a href="index.html" class="logo">
-          <img src="/assets/img/logo.png" alt="">
+          <img src="https://system.vonflorist.com/admin/assets/images/logo.png" style="width: 3rem;" alt="">
         </a>
-        <a href="index.html" class="logo-small">
+        <!-- <a href="index.html" class="logo-small">
           <img src="/assets/img/logo-small.png" alt="">
-        </a>
-        <a id="toggle_btn" href="javascript:void(0);">
-        </a>
+        </a> -->
+        <!-- <a id="toggle_btn" href="javascript:void(0);">
+        </a> -->
       </div>
 
       <a id="mobile_btn" class="mobile_btn" href="#sidebar">
@@ -268,6 +279,18 @@
     <script src="/assets/js/script.js"></script>
     <script type="text/javascript">
       var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+      function formatNumber(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+
+      function cleanNumber(value) {
+        return value.replace(/\./g, "");
+      }
+
+      function isNumeric(value) {
+        return /^\d*$/.test(value);
+      }
 
       $(document).ready(function() {
         let sessionData = @json(session()->all());
