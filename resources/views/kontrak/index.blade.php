@@ -196,6 +196,9 @@
                 $.ajax({
                     type: "GET",
                     url: "/kontrak/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     success: function(response) {
                         toastr.success(response.msg, 'Success', {
                             closeButton: true,
