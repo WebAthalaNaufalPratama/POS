@@ -29,7 +29,10 @@ class AddPembuatToReturPenjualans extends Migration
     public function down()
     {
         Schema::table('retur_penjualans', function (Blueprint $table) {
-            //
+            $table->dropColumn('pembuat');
+            $table->dropColumn('tanggal_pembuat');
+            $table->dropColumn('dibukukan');
+            $table->dropColumn('tanggal_dibukukan');
         });
     }
 }
