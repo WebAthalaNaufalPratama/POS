@@ -23,7 +23,6 @@
                 @if ($data->sisa_bayar == 0)
                 <div class="ribbon ribbon-success ribbon-right">Lunas</div>
                 @endif
-                <form action="{{ route('invoice_sewa.store') }}" method="POST">
                 <div class="row">
                     <div class="col-sm">
                             @csrf
@@ -128,9 +127,9 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        td><input type="number" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" disabled></td>
+                                        td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" disabled></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" disabled></td>
-                                        <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
+                                        <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
                                     </tr>
                                     @else
                                     @php
@@ -146,9 +145,9 @@
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" value="{{ old('satuan.' . $i) ?? $produk->harga }}" class="form-control" disabled></td>
+                                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" value="{{ old('satuan.' . $i) ?? $produk->harga }}" class="form-control" disabled></td>
                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" disabled></td>
-                                            <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ old('harga_total.' . $i) ?? $produk->harga_jual }}" disabled></td>
+                                            <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ old('harga_total.' . $i) ?? $produk->harga_jual }}" disabled></td>
                                             @php
                                                 $i++;
                                             @endphp
@@ -189,7 +188,7 @@
                                     </tbody>
                                 </table>
                                 <div class="card">
-                                    <div class="card-header accordion-head" data-toggle="collapse" data-target="#table_log">
+                                    <div class="card-header">
                                         <h4 class="card-title text-center">Riwayat</h4>
                                     </div>
                                     <hr>
@@ -287,25 +286,25 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <input type="number" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $data->kontrak->ongkir_nominal }}" readonly>
+                                        <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $data->kontrak->ongkir_nominal }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">DP</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="dp" name="dp" value="{{ $data->dp }}" class="form-control" disabled>
+                                        <input type="text" id="dp" name="dp" value="{{ $data->dp }}" class="form-control" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Total Harga</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="total_harga" name="total_tagihan" value="{{ $data->kontrak->total_harga }}" class="form-control" readonly>
+                                        <input type="text" id="total_harga" name="total_tagihan" value="{{ $data->kontrak->total_harga }}" class="form-control" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Sisa Bayar</label>
                                     <div class="col-lg-9">
-                                        <input type="number" id="sisa_bayar" name="sisa_bayar" value="{{ $data->sisa_bayar }}" class="form-control" disabled>
+                                        <input type="text" id="sisa_bayar" name="sisa_bayar" value="{{ $data->sisa_bayar }}" class="form-control" disabled>
                                         <input type="hidden" id="sisa_bayar_awal" value="{{ $data->sisa_bayar }}">
                                     </div>
                                 </div>
@@ -325,15 +324,13 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit" style="display:{{ $data->sisa_bayar == 0 ? 'none' : '' }}">Submit</button>
                     <a href="{{ route('invoice_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
-                </form>
             </div>
         </div>
         <div class="col-sm-12">
             <div class="card">
-                <div class="card-header accordion-head" data-toggle="collapse" data-target="#table_pembayaran">
+                <div class="card-header">
                     @if ($data->sisa_bayar != 0)
                     <div class="page-header">
                         <div class="page-title">
@@ -431,7 +428,7 @@
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="bayar">Cara Bayar</label>
-                            <select class="form-control" id="bayar" name="cara_bayar" disabled>
+                            <select class="form-control" id="bayar" name="cara_bayar" required>
                                 <option value="">Pilih Cara Bayar</option>
                                 <option value="cash">Cash</option>
                                 <option value="transfer">Transfer</option>
@@ -439,7 +436,7 @@
                         </div>
                         <div class="form-group col-sm-6" id="div_rekening" style="display: none">
                             <label for="bankpenerima">Rekening Vonflorist</label>
-                            <select class="form-control" id="rekening_id" name="rekening_id" disabled>
+                            <select class="form-control" id="rekening_id" name="rekening_id" required>
                                 <option value="">Pilih Rekening Von</option>
                                 @foreach ($bankpens as $bankpen)
                                 <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
@@ -450,17 +447,17 @@
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="nominal">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" disabled>
+                            <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="tanggalbayar">Tanggal</label>
-                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" disabled>
+                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-12">
                             <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" disabled>
+                            <input type="file" class="form-control" id="bukti" name="bukti">
                         </div>
                     </div>
                 </div>
@@ -531,6 +528,28 @@
                 $('#produk_' + i).select2();
                 i++;
             })
+            $(document).on('input', '[id^=nominal]', function() {
+                let input = $(this);
+                let value = input.val();
+                
+                if (!isNumeric(cleanNumber(value))) {
+                value = value.replace(/[^\d]/g, "");
+                }
+
+                value = cleanNumber(value);
+                let formattedValue = formatNumber(value);
+                
+                input.val(formattedValue);
+            });
+            let inputs = $('.card-body').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, #sisa_bayar, #dp, #nominal');
+            inputs.each(function() {
+                let input = $(this);
+                let value = input.val();
+                let formattedValue = formatNumber(value);
+
+                // Set the cleaned value back to the input
+                input.val(formattedValue);
+            });
         })
         $(document).on('click', '.btn_remove', function() {
                 var button_id = $(this).attr("id");
@@ -541,7 +560,7 @@
         $('#ongkir_id').on('change', function() {
             var ongkir = $("#ongkir_id option:selected").text();
             var biaya = ongkir.split('-')[1];
-            $('#ongkir_nominal').val(parseInt(biaya));
+            $('#ongkir_nominal').val(formatNumber(biaya));
             total_harga();
         });
         $('#ongkir_nominal, #total_promo, #ppn_persen, #pph_persen').on('input', function(){
@@ -563,9 +582,9 @@
                 var inputs = $('input[name="harga_total[]"]');
                 var subtotal = 0;
                 inputs.each(function() {
-                    subtotal += parseInt($(this).val()) || 0;
+                    subtotal += parseInt(cleanNumber($(this).val())) || 0;
                 });
-                $('#subtotal').val(subtotal)
+                $('#subtotal').val(formatNumber(subtotal))
                 total_harga();
                 return 0;
             }
@@ -575,28 +594,28 @@
             var dp = $(this).val();
             var sisa_bayar = $('#sisa_bayar_awal').val();
             sisa_bayar = sisa_bayar - dp;
-            $('#sisa_bayar').val(sisa_bayar);
+            $('#sisa_bayar').val(formatNumber(sisa_bayar));
         });
         $('#bayar').on('change', function() {
             var caraBayar = $(this).val();
             if (caraBayar == 'transfer') {
                 $('#div_rekening').show();
-                $('#rekening_id').attr('disabled', true);
-                $('#bukti').attr('disabled', true);
-            } else {
-                $('#div_rekening').hide();
                 $('#rekening_id').attr('disabled', false);
                 $('#bukti').attr('disabled', false);
+            } else {
+                $('#div_rekening').hide();
+                $('#rekening_id').attr('disabled', true);
+                $('#bukti').attr('disabled', true);
             }
         });
         $('#nominal').on('input', function() {
-            var nominal = parseFloat($(this).val());
-            var sisaTagihan = parseFloat($('#sisa_tagihan').val());
+            var nominal = cleanNumber($(this).val());
+            var sisaTagihan = cleanNumber($('#sisa_tagihan').val());
             if(nominal < 0) {
                 $(this).val(0);
             }
             if(nominal > sisaTagihan) {
-                $(this).val(sisaTagihan);
+                $(this).val(formatNumber(sisaTagihan));
             }
         });
         function multiply(element) {
@@ -607,62 +626,65 @@
             if(jenis.split('_').length == 2){
                 id = $(element).attr('id').split('_')[1];
                 jumlah = $(element).val();
-                harga_satuan = $('#harga_satuan_' + id).val();
+                harga_satuan = cleanNumber($('#harga_satuan_' + id).val());
                 if (harga_satuan) {
-                    $('#harga_total_'+id).val(harga_satuan * jumlah)
+                    var harga_total = harga_satuan * jumlah
+                    $('#harga_total_'+id).val(formatNumber(harga_total))
                 }
             } else if(jenis.split('_').length == 3){
                 id = $(element).attr('id').split('_')[2];
-                harga_satuan = $(element).val();
+                harga_satuan = cleanNumber($(element).val());
                 jumlah = $('#jumlah_' + id).val();
                 if (jumlah) {
-                    $('#harga_total_'+id).val(harga_satuan * jumlah)
+                    var harga_total = harga_satuan * jumlah
+                    $('#harga_total_'+id).val(formatNumber(harga_total))
                 }
             }
 
             var inputs = $('input[name="harga_total[]"]');
             var total = 0;
             inputs.each(function() {
-                total += parseInt($(this).val()) || 0;
+                total += parseInt(cleanNumber($(this).val())) || 0;
             });
-            $('#subtotal').val(total)
+            var promo = cleanNumber($('#total_promo').val() ?? 0);
+            $('#subtotal').val(formatNumber((total - promo)))
             total_harga();
         }
         function total_harga() {
             ppn();
             pph();
-            var subtotal = $('#subtotal').val();
-            var ppn_nominal = $('#ppn_nominal').val() || 0;
-            var pph_nominal = $('#pph_nominal').val() || 0;
-            var ongkir_nominal = $('#ongkir_nominal').val() || 0;
+            var subtotal = cleanNumber($('#subtotal').val()) || 0;
+            var ppn_nominal = cleanNumber($('#ppn_nominal').val()) || 0;
+            var pph_nominal = cleanNumber($('#pph_nominal').val()) || 0;
+            var ongkir_nominal = cleanNumber($('#ongkir_nominal').val()) || 0;
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
-            $('#total_harga').val(harga_total);
+            $('#total_harga').val(formatNumber(harga_total));
         }
         function ppn(){
             var ppn_persen = $('#ppn_persen').val()
-            var subtotal = $('#subtotal').val()
+            var subtotal = cleanNumber($('#subtotal').val())
             var ppn_nominal = ppn_persen * subtotal / 100
-            $('#ppn_nominal').val(ppn_nominal)
+            $('#ppn_nominal').val(formatNumber(ppn_nominal))
         }
         function pph(){
             var pph_persen = $('#pph_persen').val()
-            var subtotal = $('#subtotal').val()
+            var subtotal = cleanNumber($('#subtotal').val())
             var pph_nominal = pph_persen * subtotal / 100
-            $('#pph_nominal').val(pph_nominal)
+            $('#pph_nominal').val(formatNumber(pph_nominal))
         }
         function dp_val(persen){
             var sisa_bayar = $('#sisa_bayar_awal').val();
             var dp = sisa_bayar * persen / 100;
             sisa_bayar = sisa_bayar - dp;
-            $('#dp').val(dp);
-            $('#sisa_bayar').val(sisa_bayar);
+            $('#dp').val(formatNumber(dp));
+            $('#sisa_bayar').val(formatNumber(sisa_bayar));
         }
         function bayar(invoice){
             $('#no_kontrak').val(invoice.no_sewa);
             $('#invoice_sewa_id').val(invoice.id);
             $('#total_tagihan').val(invoice.total_tagihan);
             $('#sisa_tagihan').val(invoice.sisa_bayar);
-            $('#nominal').val(invoice.sisa_bayar);
+            $('#nominal').val(formatNumber(invoice.sisa_bayar));
             $('#rekening_id').select2({
                 dropdownParent: $("#modalBayar")
             });
@@ -740,7 +762,7 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var sub_total = parseInt($('#subtotal').val());
+                    var sub_total = parseInt(cleanNumber($('#subtotal').val()));
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
@@ -758,12 +780,12 @@
                         default:
                             break;
                     }
-                    $('#total_promo').val(total_promo);
+                    $('#total_promo').val(formatNumber(total_promo));
 
                     var inputs = $('input[name="harga_total[]"]');
                     var subtotal = 0;
                     inputs.each(function() {
-                        subtotal += parseInt($(this).val()) || 0;
+                        subtotal += parseInt(cleanNumber($(this).val())) || 0;
                     });
                     $('#subtotal').val(subtotal)
                     
@@ -771,7 +793,7 @@
                         total_promo = 0;
                     } else {
                         total_promo = parseInt(total_promo) || 0;
-                        $('#subtotal').val(subtotal - total_promo);
+                        $('#subtotal').val(formatNumber((subtotal - total_promo)));
                     }
                     total_harga();
                 },

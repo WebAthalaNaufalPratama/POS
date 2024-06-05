@@ -34,15 +34,15 @@
                 <tbody>
                     @foreach ($customer as $custome)
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $custome->nama }}</td>
-                            <td>{{ $custome->tipe }}</td>
-                            <td>{{ $custome->handphone}}</td>
-                            <td>{{ $custome->alamat }}</td>
-                            <td>{{ $custome->tanggal_lahir }}</td>
-                            <td>{{ $custome->poin_loyalty }}</td>
-                            <td>{{ $custome->status_piutang}}</td>
-                            <td>{{ $custome->tanggal_bergabung }}</td>
+                            <td>{{ $loop->iteration ?? '-' }}</td>
+                            <td>{{ $custome->nama ?? '-' }}</td>
+                            <td>{{ $custome->tipe ?? '-' }}</td>
+                            <td>{{ $custome->handphone ?? '-'}}</td>
+                            <td>{{ $custome->alamat ?? '-' }}</td>
+                            <td>{{ $custome->tanggal_lahir ? formatTanggal($custome->tanggal_lahir) : '-' }}</td>
+                            <td>{{ $custome->poin_loyalty ?? '-'}}</td>
+                            <td>{{ $custome->status_piutang ?? '-'}}</td>
+                            <td>{{ $custome->tanggal_bergabung ? formatTanggal($custome->tanggal_bergabung) : '-' }}</td>
                             <td class="text-center">
                               <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                   <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -94,7 +94,7 @@
             </div>
             <div class="mb-3">
               <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="text" class="form-control" name="handphone" id="add_handphone" required>
+              <input type="number" class="form-control hide-arrow" name="handphone" id="add_handphone" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>
@@ -145,7 +145,7 @@
             </div>
             <div class="mb-3">
               <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="integer" class="form-control" name="handphone" id="edit_handphone" required>
+              <input type="number" class="form-control hide-arrow" name="handphone" id="edit_handphone" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>

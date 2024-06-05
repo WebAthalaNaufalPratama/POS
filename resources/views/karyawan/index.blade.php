@@ -101,7 +101,7 @@
             </div>
             <div class="mb-3">
               <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="text" class="form-control" name="handphone" id="add_handphone" required>
+              <input type="number" class="form-control hide-arrow" name="handphone" id="add_handphone" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>
@@ -166,7 +166,7 @@
             </div>
             <div class="mb-3">
               <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="text" class="form-control" name="handphone" id="edit_handphone" required>
+              <input type="number" class="form-control hide-arrow" name="handphone" id="edit_handphone" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>

@@ -194,12 +194,12 @@ class InvoiceSewaController extends Controller
         if (!$Invoice) {
             $invoice_bayar = 'BYR' . date('Ymd') . '00001';
         } else {
-            $lastDate = substr($Invoice->no_kontrak, 3, 8);
+            $lastDate = substr($Invoice->no_invoice_bayar, 3, 8);
             $todayDate = date('Ymd');
             if ($lastDate != $todayDate) {
                 $invoice_bayar = 'BYR' . date('Ymd') . '00001';
             } else {
-                $lastNumber = substr($Invoice->no_kontrak, -5);
+                $lastNumber = substr($Invoice->no_invoice_bayar, -5);
                 $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
                 $invoice_bayar = 'BYR' . date('Ymd') . $nextNumber;
             }

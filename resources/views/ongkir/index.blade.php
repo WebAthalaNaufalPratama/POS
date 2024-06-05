@@ -30,9 +30,9 @@
                     @foreach ($ongkirs as $ongkir)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $ongkir->nama }}</td>
+                            <td>{{ $ongkir->nama ??'-' }}</td>
                             <td>{{ $ongkir->lokasi->nama ?? '-' }}</td>
-                            <td>{{ $ongkir->biaya }}</td>
+                            <td>{{ $ongkir->biaya ? formatRupiah($ongkir->biaya) : 0 }}</td>
                             <td class="text-center">
                               <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                   <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -61,11 +61,11 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addongkirlabel">Tambah ongkir</h5>
+          <h5 class="modal-title" id="addongkirlabel">Tambah Ongkir</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form action="{{ route('ongkir.store') }}" method="POST">
+          <form action="{{ route('ongkir.store') }}" method="POST" id="addForm">
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
@@ -139,8 +139,34 @@
 
 @section('scripts')
     <script>
+    
     $(document).ready(function() {
-        $('#add_lokasi, #edit_lokasi').select2()
+      $('#add_lokasi, #edit_lokasi').select2()
+      $(document).on('input', '#add_biaya', function() {
+        let input = $(this);
+        let value = input.val();
+        let cursorPosition = this.selectionStart;
+        
+        if (!isNumeric(cleanNumber(value))) {
+          value = value.replace(/[^\d]/g, "");
+        }
+
+        value = cleanNumber(value);
+        let formattedValue = formatNumber(value);
+        
+        input.val(formattedValue);
+        this.setSelectionRange(cursorPosition, cursorPosition);
+      });
+
+      $('#addForm').on('submit', function(e) {
+        // add input number
+        let input = $('#add_biaya');
+        let value = input.val();
+        let cleanedValue = cleanNumber(value);
+        input.val(cleanedValue);
+
+        return true;
+      });
     });
 
     function getData(id){

@@ -28,6 +28,17 @@
 
   <link rel="stylesheet" href="/assets/css/style.css">
 
+  <style>
+      input[type="number"].hide-arrow::-webkit-inner-spin-button,
+      input[type="number"].hide-arrow::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      
+      input[type="number"].hide-arrow {
+        -moz-appearance: textfield;
+      }
+  </style>
   @yield('css')
 </head>
 
@@ -268,6 +279,18 @@
     <script src="/assets/js/script.js"></script>
     <script type="text/javascript">
       var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+      function formatNumber(value) {
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+
+      function cleanNumber(value) {
+        return value.replace(/\./g, "");
+      }
+
+      function isNumeric(value) {
+        return /^\d*$/.test(value);
+      }
 
       $(document).ready(function() {
         let sessionData = @json(session()->all());
