@@ -259,5 +259,14 @@ class CreateAdminUserSeeder extends Seeder
             'handphone' => 0,
             'alamat' => 'semarang'
         ]);
+
+        Karyawan::create([
+            'user_id' => $useradmingallery->id,
+            'nama' => $useradmingallery->name,
+            'jabatan' => 'admin',
+            'lokasi_id' => 1,
+            'handphone' => 0,
+            'alamat' => 'semarang'
+        ]);
     }
 }

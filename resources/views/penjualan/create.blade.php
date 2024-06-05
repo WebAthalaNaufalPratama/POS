@@ -1072,13 +1072,46 @@ $(document).on('click', '.btn_remove', function() {
             });
         }
 
+        // function updateHargaSatuan(select) {
+        //     var index = select.selectedIndex;
+        //     var hargaSatuanInput = $('#harga_satuan_0');
+        //     var selectedOption = $(select).find('option').eq(index);
+        //     var hargaProduk = selectedOption.data('harga');
+                
+        //     hargaSatuanInput.val(hargaProduk);
+            
+        // }
+        // $('#nama_produk').on('change', function() {
+        //     updateHargaSatuan(this);
+        // });
+
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
+
         function updateHargaSatuan(select) {
             var index = select.selectedIndex;
             var hargaSatuanInput = $('#harga_satuan_0');
             var selectedOption = $(select).find('option').eq(index);
             var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
+            
+            var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
+            
+            hargaSatuanInput.val(formattedHarga);
         }
+
         $('#nama_produk').on('change', function() {
             updateHargaSatuan(this);
         });

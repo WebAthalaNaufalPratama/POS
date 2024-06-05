@@ -1,9 +1,4 @@
-<?php
-use Carbon\Carbon;
 
-setlocale(LC_TIME, 'id_ID');
-Carbon::setLocale('id');
-?>
 @extends('layouts.app-von')
 
 @section('content')
@@ -14,7 +9,7 @@ Carbon::setLocale('id');
             <h3 class="page-title">Show Purchase Order : {{ $beli->no_po }}</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
-                    <a href="{{ route('pembelian.index')}}">Purchase Order</a>
+                    <a href="{{ route('pembelian.index')}}">Purchase Order Inden</a>
                 </li>
                 <li class="breadcrumb-item active">
                     PO
@@ -41,93 +36,33 @@ Carbon::setLocale('id');
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="nopo">No. PO</label>
+                                            <label for="nopo">No. PO Inden</label>
                                             <input type="text" class="form-control" id="nopo" name="nopo" value="{{ $beli->no_po }}" readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
                                             <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $beli->supplier->nama}}" readonly>
-                                            {{-- <div class="input-group">
-                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
-                                                    <option value="">Pilih Nama Supplier</option>
-                                                    @foreach ($suppliers as $supplier)
-                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                                <div class="input-group-append">
-                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-                                                        <img src="/assets/img/icons/plus1.svg" alt="img" />
-                                                    </button>
-                                                </div>
-                                            </div> --}}
                                         </div>
                                         
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="lokasi">Lokasi</label>
-                                            <input type="text" class="form-control" id="lokasi" name="lokasi"  value="{{ $beli->lokasi->nama }}" readonly>
-                                                {{-- <select id="id_lokasi" name="id_lokasi" class="form-control" required>
-                                                    <option value="">Pilih Lokasi</option>
-                                                    @foreach ($lokasis as $lokasi)
-                                                    <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                                                    @endforeach
-                                                </select> --}}
+                                            <label for="bulan_inden">Bulan Inden</label>
+                                            <input type="text" class="form-control" id="bulan_inden" name="bulan_inden"  value="{{ $beli->bulan_inden }}" readonly>
                                        </div>
                                        <div class="form-group">
                                         <label for="harga_jual">Status</label>
                                         <input type="text" class="form-control" id="status" name="status" value="@php
-                                            $latestDate = max($beli->tgl_dibuat, $beli->tgl_diterima, $beli->tgl_diperiksa);
+                                            $latestDate = max($beli->tgl_dibuat, $beli->tgl_diperiksa);
                                             if ($latestDate == $beli->tgl_dibuat) {
                                                 echo $beli->status_dibuat. ' oleh ' . $pembuat;
-                                            } elseif ($latestDate == $beli->tgl_diterima) {
-                                                $beli->status_diterima . ' oleh ' . $penerima; 
-                                            } else {
-                                                echo $beli->status_diperiksa. ' oleh ' . $pemeriksa;
+                                            } elseif ($latestDate == $beli->tgl_diperiksa) {
+                                                $beli->status_diperiksa. ' oleh ' . $pemeriksa; 
                                             }
                                         @endphp" readonly>
                                     </div>
-                                    
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim ? formatTanggal($beli->tgl_kirim) : '' }}" readonly>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="text" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ $beli->tgl_diterima ? formatTanggal($beli->tgl_diterima) : '' }}" readonly>
-                                                </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="no_do">Nomor DO supplier</label>
-                                                <input type="text" class="form-control" id="no_do" name="no_do" value="{{ $beli->no_do_suplier ?? '-' }}" readonly>
-                                            </div>
-                                            <div class="form-group">
-                                             
-                                                <form action="{{ route('gambarpo.update', ['datapo' => $beli->id]) }}" method="POST" enctype="multipart/form-data">
-                                                    @csrf
-                                                    @method('patch')
-                                                    <div class="custom-file-container" data-upload-id="myFirstImage">
-                                                        <label>Delivery Order supplier <a href="javascript:void(0)" id="clearFileDO" class="custom-file-container__image-clear" onclick="clearFileDO()" title="Clear Image">clear</a></label>
-                                                        <label class="custom-file-container__custom-file">
-                                                            <input type="file" id="bukti_do" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
-                                                            <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                                        </label>
-                                                        <span class="text-danger">max 2mb</span>
-                                                        <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" />
-                                                    </div>
-                                                    <div class="text-end mt-3">
-                                                        <button class="btn btn-primary" type="submit">Upload File</button>
-                                                        <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
-                                                    </div>
-                                                </form>
-                                                
-                                                    {{-- <input type="file" class="form-control" id="filedo" name="filedo"> --}}
-                                               
-                                        </div>
-                                    </div>
+                                </div>
+
                                 </div>
                             </div>
                         </div>
@@ -141,18 +76,19 @@ Carbon::setLocale('id');
                                         <table class="table">
                                             <thead>
                                                 <tr>
+                                                    <th>Kode Inden</th>
+                                                    <th>Kategori Produk</th>
                                                     <th>Kode Produk</th>
-                                                    <th>Nama Produk</th>
-                                                    <th>Jumlah Dikirim</th>
-                                                    <th>Jumlah Diterima</th>
-                                                    <th>Kondisi</th>
+                                                    <th>Jumlah</th>
+                                                    <th>Keterangan</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
                                                 @foreach ($produkbelis as $item)
                                                 <tr>
-                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
+                                                    <td><input type="text" name="kodeinden[]" id="kodeinden_0" class="form-control" value="{{ $item->kode_produk_inden }}" readonly></td>
                                                     <td><input type="text" name="nama[]" id="nama_0" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
+                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
 
                                                     {{-- <select id="produk_0" name="produk[]" class="form-control" onchange="showInputType(0)">
                                                         <option value="">----- Pilih Produk ----</option>
@@ -160,9 +96,8 @@ Carbon::setLocale('id');
                                                         <option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}">{{ $produk->nama }}</option>
                                                         @endforeach
                                                     </select> --}}
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_diterima ?? '' }}" readonly></td>
-                                                    <td><input type="text" name="kondisi[]" id="kondisi_0" class="form-control" value="{{ $item->kondisi->nama ?? ''}}" readonly></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jumlahInden }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->Keterangan ?? '' }}" readonly></td>
 
                                                         {{-- <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
                                                             <option value="">Pilih Kondisi</option>
@@ -185,7 +120,6 @@ Carbon::setLocale('id');
                                     <thead>
                                         <tr>
                                             <th>Dibuat</th>
-                                            <th>Diterima</th>
                                             <th>Diperiksa</th>
                                         </tr>
                                     </thead>
@@ -194,9 +128,7 @@ Carbon::setLocale('id');
                                             <td id="pembuat">
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
-                                            <td id="penerima">
-                                                <input type="text" class="form-control" value="{{ $penerima }} ({{ $penerimajbt }})" disabled>
-                                            </td>
+
                                             <td id="pemeriksa">
                                                 <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})"  disabled>
                                             </td>
@@ -210,13 +142,7 @@ Carbon::setLocale('id');
                                                     <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
                                                 </select>
                                             </td>
-                                            <td id="status_diterima">
-                                                <select id="status_diterima" name="status_diterima" class="form-control" required disabled>
-                                                    <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" {{ $beli->status_diterima == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                    <option value="acc" {{ $beli->status_diterima == 'acc' ? 'selected' : '' }}>Accept</option>
-                                                </select>
-                                            </td>
+                                          
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
@@ -229,9 +155,7 @@ Carbon::setLocale('id');
                                             <td id="tgl_pembuat">
                                                 <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat }}" disabled>
                                             </td>
-                                            <td id="tgl_diterima">
-                                                <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima_ttd ?? ''}}" disabled>
-                                            </td>
+                                           
                                             <td id="tgl_pemeriksa">
                                                 <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '' }}" disabled>
                                             </td>
