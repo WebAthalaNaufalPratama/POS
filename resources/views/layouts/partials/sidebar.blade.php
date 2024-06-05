@@ -56,7 +56,7 @@
                 </li>
                 @endif
                 <li class="submenu">
-                    @if(Auth::user()->roles()->value('name') == 'admin' || (in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2))
+                    @if((in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
@@ -315,7 +315,7 @@
 <li><a href="customerreport.html">Customer Report</a></li>
 </ul>
 </li> --}}
-                @if($lokasi->lokasi->tipe_lokasi != 2)
+                @if($lokasi->lokasi->tipe_lokasi !== 2)
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
                     <ul>
