@@ -120,6 +120,9 @@
         $.ajax({
             type: "GET",
             url: "/do_sewa/"+id+"/delete",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 toastr.success(response.msg, 'Success', {
                     closeButton: true,

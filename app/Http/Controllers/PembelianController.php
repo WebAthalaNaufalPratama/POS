@@ -174,12 +174,13 @@ class PembelianController extends Controller
 
     }
 
-    public function create_retur()
+    public function create_retur(Request $req)
     {
-        $produks = Produk::get();
-        $suppliers = Supplier::where('tipe_supplier','inden')->get();
+        $invoice = Invoicepo::with('pembelian', 'pembelian.produkbeli', 'pembelian.produkbeli.produk')->find($req->invoice);
+        $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
         $nomor_poinden = $this->generatePOIndenNumber();
-        return view('purchase.createretur', compact('produks','suppliers','nomor_poinden'));
+        // dd($invoice->pembelian->produkbeli);
+        return view('purchase.createretur', compact('nomor_poinden', 'lokasi', 'invoice'));
 
     }
 
@@ -254,7 +255,7 @@ class PembelianController extends Controller
             $produkBeli->produk_id = $produkId;
             $produkBeli->jml_dikirim = $qtyKirim[$index];
             $produkBeli->jml_diterima = $qtyTerima[$index];
-            $produkBeli->kondisi_id = $kondisiIds[$index];          
+            $produkBeli->kondisi_id = $kondisiIds[$index] ?? null;          
             $check2 = $produkBeli->save();
 
             // $lokasi = Lokasi::find($request->id_lokasi);
@@ -343,14 +344,23 @@ class PembelianController extends Controller
         }
     }
 
+    public function store_retur(Request $request)
+    {
+        dd($request);
+    }
+
     /**
      * Display the specified resource.
      *
      * @param  \App\Models\Pembelian  $pembelian
      * @return \Illuminate\Http\Response
      */
-    public function show($datapo)
+    public function show ($datapo, Request $request)
     {
+
+        $type = $request->query('type');
+        // return "Type: $type, Datapo: $datapo";
+        if ($type === 'pembelian') {
         $beli = Pembelian::find($datapo);
         // return $beli;
         $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
@@ -362,7 +372,19 @@ class PembelianController extends Controller
         $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
         
         return view('purchase.showpo',compact('beli','produkbelis','pembuat','penerima','pemeriksa','pembuatjbt','penerimajbt','pemeriksajbt'));
-    }
+        }elseif ($type === 'poinden') {
+            $beli = ModelsPoinden::find($datapo);
+            // return $beli;
+            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
+            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama;
+            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan;
+            $produkbelis = Produkbeli::where('poinden_id', $datapo)->get();
+            
+            return view('purchase.showpoinden',compact('beli','produkbelis','pembuat','pemeriksa','pembuatjbt','pemeriksajbt'));
+           
+        }
+     }
 
     /**
      * Show the form for editing the specified resource.

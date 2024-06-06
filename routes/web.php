@@ -44,7 +44,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
     Route::group(['middleware' => ['auth', 'permission']], function() {
         /**
          * Logout Routes
+         * 
          */
+        Route::get('/get-bulan-inden/{supplier_id}', 'MutasiindensController@getBulanInden')->name('getBulan');
+        Route::get('/get-kode-inden/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkodeInden')->name('getKode');
+        Route::get('/get-kategori-inden/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriInden')->name('getKategori');
+
         Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
         Route::get('checkPromo', 'PromoController@checkPromo')->name('checkPromo');
         Route::get('getPromo', 'PromoController@getPromo')->name('getPromo');
@@ -261,23 +266,24 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pembelian', 'PembelianController@index')->name('pembelian.index');
             Route::get('/pembelian/create', 'PembelianController@create')->name('pembelian.create');
             Route::post('/store_po', 'PembelianController@store_po')->name('pembelianpo.store');
-            Route::get('/{datapo}/show', 'PembelianController@show')->name('pembelian.show');
-            Route::get('/{datapo}/edit_po', 'PembelianController@po_edit')->name('pembelian.edit');
+            Route::get('/pembelian/{datapo}/show', 'PembelianController@show')->name('pembelian.show');
+            Route::get('/pembelian/{datapo}/edit_po', 'PembelianController@po_edit')->name('pembelian.edit');
             Route::post('/{datapo}/update_po', 'PembelianController@po_update')->name('pembelian.update');
             
             Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
             Route::get('/invoice/{type}/{datapo}/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
             Route::post('/store_inv', 'PembelianController@storeinvoice')->name('invoicepo.store');
-            Route::get('/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit');
+            Route::get('/invoice/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit');
             Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
             Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
             
             Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
-            Route::post('/pembelian/storeinden', 'PembelianController@store_inden')->name('inden.store');
+            Route::post('/storeinden', 'PembelianController@store_inden')->name('inden.store');
             // Route::get('/createinvinden', 'PembelianController@createinvoiceinden')->name('invoiceinden.create');
 
             Route::get('/retur', 'PembelianController@index_retur')->name('returbeli.index');
             Route::get('/retur/create', 'PembelianController@create_retur')->name('returbeli.create');
+            Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
 
         });
 
@@ -479,14 +485,25 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
 
         //purchase
+        
+        //inden ke galery
         Route::group(['prefix' => 'mutasiindengalery'], function() {
             Route::get('/', 'MutasiController@index_indengalery')->name('mutasiindengalery.index');
             Route::get('/create', 'MutasiController@create_indengalery')->name('mutasiindengalery.create');
             Route::post('/store', 'MutasiController@store_indengalery')->name('mutasiindengalery.store');
-            // Route::get('/{mutasiGG}/show', 'MutasiController@show_ghgalery')->name('mutasighgalery.show');
             Route::get('/{mutasiGG}/edit', 'MutasiController@edit_indengalery')->name('mutasiindengalery.edit');
             Route::patch('/{mutasiGG}/update', 'MutasiController@update_indengalery')->name('mutasiindengalery.update');
             Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_indengalery')->name('mutasiindengalery.destroy');
+        });
+        //inden ke greenhouse
+        Route::group(['prefix' => 'mutasiIG'], function() {
+            Route::get('/', 'MutasiindensController@index_indengh')->name('mutasiindengh.index');
+            Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create');
+            Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');
+            Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store');
+            Route::patch('/{mutasiIG}/update', 'MutasiindensController@update_indengh')->name('mutasiindengh.update');
+            Route::get('/{mutasiIG}/delete', 'MutasiindensController@destroy_indengh')->name('mutasiindengh.destroy');
+           
         });
 
         Route::group(['prefix' => 'inven_inden'], function() {
@@ -546,5 +563,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
         Route::resource('posts', 'PostController');
+
+       
+
     });
+
+
 });

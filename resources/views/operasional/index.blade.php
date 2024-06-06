@@ -109,6 +109,9 @@
         $.ajax({
             type: "GET",
             url: "/operasional/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 $('#editForm').attr('action', 'operasional/'+id+'/update');
                 $('#edit_nama').val(response.nama)
@@ -139,6 +142,9 @@
                 $.ajax({
                     type: "GET",
                     url: "/operasional/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     success: function(response) {
                         toastr.success(response.msg, 'Success', {
                             closeButton: true,
