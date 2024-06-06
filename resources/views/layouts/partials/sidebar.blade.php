@@ -3,10 +3,13 @@
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
                 @php
-                    $role = Auth::user()->roles()->first();
-                    $user = Auth::user()->first();
+                    $roles = Auth::user()->roles()->get();
+                    $user = Auth::user();
                     $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
-                    $rolePermissions = $role->permissions->pluck('name')->toArray();
+                    $rolePermissions = [];
+                    if (!$roles->isEmpty()) {
+                        $rolePermissions = $roles->flatMap->permissions->pluck('name')->toArray();
+                    }
                 @endphp
                 <li class="submenu">
                     <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
@@ -142,7 +145,6 @@
                     </ul>
                 </li>
                 @endif
-                <li class="submenu">
                 {{-- <li class="submenu">
 <a href="javascript:void(0);"><img src="/assets/img/icons/sales1.svg" alt="img"><span> Sales</span> <span class="menu-arrow"></span></a>
 <ul>
@@ -326,6 +328,9 @@
                     </ul>
                 </li>
                 @endif
+
+                
+
                 <!-- <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/settings.svg" alt="img"><span> Settings</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -339,5 +344,10 @@
                 </li> -->
             </ul>
         </div>
+        <img src="/assets/img/bunga.png" alt="Gambar Bunga" id="bawah" style="width:100%">
     </div>
 </div>
+<div class="sidebar-bottom">
+        <!-- Konten lainnya di bagian bawah sidebar -->
+        
+    </div>

@@ -49,9 +49,9 @@
                                 <td>{{ $mutasi->no_mutasi }}</td>
                                 <td>{{ $mutasi->lokasi->nama }}</td>
                                 <td>{{ $mutasi->lokasi_penerima->nama }}</td>
-                                <td>{{ $mutasi->tanggal_kirim }}</td>
-                                <td>{{ $mutasi->tanggal_diterima }}</td>
-                                <td>{{ $mutasi->tanggal_pembuat }}</td>
+                                <td>{{ date('d F Y', strtotime($mutasi->tanggal_kirim)) }}</td>
+                                <td>{{ date('d F Y', strtotime($mutasi->tanggal_diterima)) }}</td>
+                                <td>{{ date('d F Y', strtotime($mutasi->tanggal_pembuat)) }}</td>
                                 <td>{{ $mutasi->status }}</td>
                                 <td>
                                     <div class="dropdown">

@@ -254,6 +254,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/storekomponen', 'PenjualanController@store_komponen')->name('komponenpenjulan.store');
             Route::post('/storekomponenmutasi', 'PenjualanController@store_komponen_mutasi')->name('komponenmutasi.store');
             Route::post('/storekomponenretur', 'PenjualanController@store_komponen_retur')->name('komponenretur.store');
+            Route::get('{penjualan}/pdfinvoicepenjualan', 'PenjualanController@pdfinvoicepenjualan')->name('pdfinvoicepenjualan.generate');
         });
 
         Route::group(['prefix' => 'purchase'], function() {

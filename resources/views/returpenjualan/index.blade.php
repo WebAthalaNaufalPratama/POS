@@ -71,7 +71,7 @@
                                 <td>{{ $retur->customer->nama }}</td>
                                 <td>{{ $retur->lokasi->nama }}</td>
                                 <td>{{ $retur->supplier->nama }}</td>
-                                <td>{{ $retur->tanggal_retur }}</td>
+                                <td>{{ date('d F Y', strtotime($retur->tanggal_retur)) }}</td>
                                 <td>{{ $retur->komplain }}</td>
                                 <td>
                                     <div class="dropdown">

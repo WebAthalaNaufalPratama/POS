@@ -198,7 +198,7 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control" oninput="multiply($(this))" onchange="calculateTotal(0)"></td>
                                                     <td>
                                                         <select id="jenis_diskon_0" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)">
@@ -208,13 +208,13 @@
                                                         </select>
                                                         <div>
                                                             <div class="input-group">
-                                                                <input type="number" name="diskon[]" id="diskon_0" value="" class="form-control" style="display: none;" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
+                                                                <input type="text" name="diskon[]" id="diskon_0" value="" class="form-control" style="display: none;" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
                                                                 <span class="input-group-text" id="nominalInput_0" style="display: none;">.00</span>
                                                                 <span class="input-group-text" id="persenInput_0" style="display: none;">%</span>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
+                                                    <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
                                                     <!-- Tombol Add Produk disini -->
                                                     <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                 </tr>
@@ -256,7 +256,7 @@
                                                 <div class="form-group mt-3">
                                                     <div id="inputPembayaran" style="display: none;">
                                                         <label for="nominal">Nominal</label>
-                                                        <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                                        <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
@@ -606,6 +606,26 @@
     updateDate(document.getElementById('tanggalbayar'));
 </script>
 <script>
+    function formatRupiah(angka, prefix) {
+        var numberString = angka.toString().replace(/[^,\d]/g, ''),
+            split = numberString.split(','),
+            sisa = split[0].length % 3,
+            rupiah = split[0].substr(0, sisa),
+            ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+        if (ribuan) {
+            var separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+
+        rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+        return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+    }
+
+    function parseRupiahToNumber(rupiah) {
+        return parseInt(rupiah.replace(/[^\d]/g, ''));
+    }
+
     function showInputType(index) {
         var selectElement = document.getElementById("jenis_diskon_" + index);
         var selectedValue = selectElement.value;
@@ -618,10 +638,12 @@
             diskonInput.style.display = "block";
             nominalInput.style.display = "block";
             persenInput.style.display = "none";
+            diskonInput.value = 0;
         } else if (selectedValue === "persen") {
             diskonInput.style.display = "block";
             nominalInput.style.display = "none";
             persenInput.style.display = "block";
+            diskonInput.value = 0;
         } else {
             diskonInput.style.display = "none";
             nominalInput.style.display = "none";
@@ -634,38 +656,41 @@
 
     function calculateTotal(index) {
         var diskonType = $('#jenis_diskon_' + index).val();
-        // console.log(diskonType);
-
         var diskonValue = parseFloat($('#diskon_' + index).val());
         var jumlah = parseFloat($('#jumlah_' + index).val());
-        var hargaSatuan = parseFloat($('#harga_satuan_' + index).val());
+        var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_satuan_' + index).val())); // Mengonversi hargaSatuan ke angka
         var hargaTotal = 0;
-        // console.log(diskonValue);
 
         if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
-            hargaTotal = jumlah * hargaSatuan;
+            hargaTotal = jumlah * hargaSatuan; // Mengalikan jumlah dengan hargaSatuan
         }
 
         if (!isNaN(hargaTotal)) {
             if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue;
+                hargaTotal -= diskonValue; 
+                $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
             } else if (diskonType === "persen" && !isNaN(diskonValue)) {
-                hargaTotal -= (hargaTotal * diskonValue / 100);
+                var diskonPersen = (hargaTotal * diskonValue / 100); // Menghitung diskon berdasarkan persentase
+                hargaTotal -= diskonPersen; // Mengurangkan diskon persentase dari hargaTotal
             }
         }
 
-        // Set nilai input harga total
-        $('#harga_total_' + index).val(hargaTotal.toFixed(2));
+        // Set nilai input harga total dengan format Rupiah
+        $('#harga_total_' + index).val(formatRupiah(hargaTotal, 'Rp '));
 
         // Hitung ulang subtotal
         var subtotal = 0;
         $('input[name="harga_total[]"]').each(function() {
-            subtotal += parseFloat($(this).val()) || 0;
+            // Mengonversi format Rupiah menjadi nilai numerik
+            var harga_total = parseRupiahToNumber($(this).val());
+            subtotal += harga_total || 0;
         });
 
-        // Set nilai input subtotal
-        $('#sub_total').val(subtotal.toFixed(2));
+        // Format subtotal kembali ke format Rupiah sebelum menetapkannya ke input
+        $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
     }
+
+
 
     function copyDataToModal(index) {
         var namaProdukValue = $('#nama_produk_' + index).val();
@@ -711,7 +736,7 @@
                                     @endforeach
                                 </select>
                             </td>
-                            <td><input type="number" name="harga_satuan[]" id="harga_satuan_${i}" class="form-control" readonly></td>
+                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control" readonly></td>
                             <td><input type="number" name="jumlah[]" id="jumlah_${i}" class="form-control" oninput="multiply(this)"></td>
                             <td>
                                 <select id="jenis_diskon_${i}" name="jenis_diskon[]" class="form-control" onchange="showInputType(${i})">
@@ -720,12 +745,12 @@
                                     <option value="persen">Persen</option>
                                 </select>
                                 <div class="input-group">
-                                    <input type="number" name="diskon[]" id="diskon_${i}" value="" class="form-control" style="display: none;" aria-label="Recipients username" aria-describedby="basic-addon3" onchange="calculateTotal(${i})">
+                                    <input type="text" name="diskon[]" id="diskon_${i}" value="" class="form-control" style="display: none;" aria-label="Recipients username" aria-describedby="basic-addon3" onchange="calculateTotal(${i})">
                                     <span class="input-group-text" id="nominalInput_${i}" style="display: none;">.00</span>
                                     <span class="input-group-text" id="persenInput_${i}" style="display: none;">%</span>
                                 </div>
                             </td>
-                            <td><input type="number" name="harga_total[]" id="harga_total_${i}" class="form-control" readonly></td>
+                            <td><input type="text" name="harga_total[]" id="harga_total_${i}" class="form-control" readonly></td>
                             <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
                         </tr>`;
 
@@ -747,36 +772,37 @@
         });
 
         $(document).on('change', '[id^=nama_produk]', function() {
-    var id = $(this).attr('id').split('_')[2];
-    var selectedOption = $(this).find(':selected');
-    var selectedValue = $(this).val();
+            var id = $(this).attr('id').split('_')[2];
+            var selectedOption = $(this).find(':selected');
+            var selectedValue = $(this).val();
 
-    // Menggunakan JSON.stringify untuk mengonversi variabel PHP $produks menjadi string JSON
-    var selectedProduk = {!! json_encode($produks) !!}.find(produk => produk.kode === selectedValue);
+            // Menggunakan JSON.stringify untuk mengonversi variabel PHP $produks menjadi string JSON
+            var selectedProduk = {!! json_encode($produks) !!}.find(produk => produk.kode === selectedValue);
 
-    var kode = selectedValue.substring(0, 3);
-    if (selectedProduk && selectedProduk.komponen && kode === 'GFT') {
-        // Sembunyikan semua baris komponen
-        $('[id^="komponen_row_"]').hide();
-        $('[id^=add_produk_' + id + ']').show(); // Menampilkan tombol tambah produk komponen
+            var kode = selectedValue.substring(0, 3);
+            if (selectedProduk && selectedProduk.komponen && kode === 'GFT') {
+                // Sembunyikan semua baris komponen
+                $('[id^="komponen_row_"]').hide();
+                $('[id^=add_produk_' + id + ']').show(); // Menampilkan tombol tambah produk komponen
 
-    } else {
-        // Sembunyikan semua baris komponen jika tidak ada komponen yang sesuai
-        $('[id^=add_produk_' + id + ']').hide();
-        $('[id^="komponen_row_"]').hide();
-    }
+            } else {
+                // Sembunyikan semua baris komponen jika tidak ada komponen yang sesuai
+                $('[id^=add_produk_' + id + ']').hide();
+                $('[id^="komponen_row_"]').hide();
+            }
 
-    // Menetapkan nilai data pada elemen HTML
-    var kodeProduk = selectedOption.data('kode');
-    var tipeProduk = selectedOption.data('tipe_produk');
-    var deskripsiProduk = selectedOption.data('deskripsi');
-    $('#kode_produk_' + id).val(kodeProduk);
-    $('#tipe_produk_' + id).val(tipeProduk);
-    $('#deskripsi_komponen_' + id).val(deskripsiProduk);
+            // Menetapkan nilai data pada elemen HTML
+            var kodeProduk = selectedOption.data('kode');
+            var tipeProduk = selectedOption.data('tipe_produk');
+            var deskripsiProduk = selectedOption.data('deskripsi');
+            // console.log(kodeProduk);
+            $('#kode_produk_' + id).val(kodeProduk);
+            $('#tipe_produk_' + id).val(tipeProduk);
+            $('#deskripsi_komponen_' + id).val(deskripsiProduk);
 
-    // Memanggil fungsi updateHargaSatuan
-    updateHargaSatuan(this);
-});
+            // Memanggil fungsi updateHargaSatuan
+            updateHargaSatuan(this);
+        });
 
 
 
@@ -835,18 +861,19 @@
 
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
-            var total_transaksi = $('#total_tagihan').val();
-            // console.log(total_transaksi);
+            var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); // Mengonversi format Rupiah menjadi numerik
             var produk = [];
             var tipe_produk = [];
+
             $('select[id^="nama_produk_"]').each(function() {
                 produk.push($(this).val());
                 tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
             });
-            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
+
+            $(this).html('<span class="spinner-border spinner-border-sm me-2"></span>'); // Menambahkan penutupan span yang hilang
             checkPromo(total_transaksi, tipe_produk, produk);
         });
+
 
         $('#cara_bayar').change(function() {
             var pembayaran = $(this).val();
@@ -862,54 +889,72 @@
         });
 
         // Menggunakan variabel rowCount untuk menghasilkan nomor unik untuk setiap baris produk
-var rowCount = 1;
+        var rowCount = 1;
 
-// Fungsi untuk menambahkan produk
-$(document).on('click', '[id^=add_produk]', function() {
-    var i = $(this).attr('id').split('_')[2]; // Mendapatkan nomor unik untuk tombol yang ditekan
-    var newRow = `
-        <tr class="tr_clone" id="row${i}">
-            <td>
-                <select name="komponen_nama_produk[]" id="komponen_nama_produk_${i}" class="form-control">
-                    <option value="">Pilih Komponen Produk</option>
-                    @foreach ($produkkompos as $produk)
-                        <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                        @if (substr($produk->kode, 0, 3) === 'TRD' || substr($produk->kode, 0, 3) === 'POT')
-                            {{ $produk->nama }}
-                            @foreach ($produk->komponen as $komponen)
-                                @if ($komponen->kondisi)
-                                    @foreach($kondisis as $kondisi)
-                                        @if($kondisi->id == $komponen->kondisi)
-                                            - {{ $kondisi->nama }}
-                                            @php
-                                                $found = true;
-                                                break;
-                                            @endphp
+        // Fungsi untuk menambahkan produk
+        $(document).on('click', '[id^=add_produk]', function() {
+            var i = $(this).attr('id').split('_')[2]; // Mendapatkan nomor unik untuk tombol yang ditekan
+            var newRow = `
+                <tr class="tr_clone" id="row${i}">
+                    <td>
+                        <select name="komponen_nama_produk[]" id="komponen_nama_produk_${i}" class="form-control">
+                            <option value="">Pilih Komponen Produk</option>
+                            @foreach ($produkkompos as $produk)
+                                <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                @if (substr($produk->kode, 0, 3) === 'TRD' || substr($produk->kode, 0, 3) === 'POT')
+                                    {{ $produk->nama }}
+                                    @foreach ($produk->komponen as $komponen)
+                                        @if ($komponen->kondisi)
+                                            @foreach($kondisis as $kondisi)
+                                                @if($kondisi->id == $komponen->kondisi)
+                                                    - {{ $kondisi->nama }}
+                                                    @php
+                                                        $found = true;
+                                                        break;
+                                                    @endphp
+                                                @endif
+                                            @endforeach
                                         @endif
+                                        @if ($found) @break @endif
                                     @endforeach
                                 @endif
-                                @if ($found) @break @endif
+                                </option>
                             @endforeach
-                        @endif
-                        </option>
-                    @endforeach
-                </select>
-            </td>
-            <td><input type="number" placeholder="Jumlah" class="form-control" id="jumlahproduk_${i}" name="jumlahproduk[]"></td>
-            <td><button type="button" name="remove_produk" class="btn btn-danger btn_remove">x</button></td>
-        </tr>`;
-        
-    $(newRow).insertAfter('#dynamic_field_komponen tr:last');
-    rowCount++; // Menambahkan nomor unik untuk tombol berikutnya
-});
+                        </select>
+                    </td>
+                    <td><input type="number" placeholder="Jumlah" class="form-control" id="jumlahproduk_${i}" name="jumlahproduk[]"></td>
+                    <td><button type="button" name="remove_produk" class="btn btn-danger btn_remove">x</button></td>
+                </tr>`;
+                
+            $(newRow).insertAfter('#dynamic_field_komponen tr:last');
+            rowCount++; // Menambahkan nomor unik untuk tombol berikutnya
+        });
 
-// Fungsi untuk menghapus baris produk atau komponen
-$(document).on('click', '.btn_remove', function() {
-    $(this).closest('tr').remove();
-    calculateTotal(0); // Memanggil fungsi calculateTotal setelah menghapus baris
-});
+        // Fungsi untuk menghapus baris produk atau komponen
+        $(document).on('click', '.btn_remove', function() {
+            $(this).closest('tr').remove();
+            calculateTotal(0); // Memanggil fungsi calculateTotal setelah menghapus baris
+        });
 
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
 
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
+
+        function parseRupiahToNumber(rupiah) {
+            return parseInt(rupiah.replace(/[^\d]/g, ''));
+        }
 
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
@@ -931,7 +976,7 @@ $(document).on('click', '.btn_remove', function() {
         $('#ongkir_id').change(function() {
             var selectedOption = $(this).find('option:selected');
             var ongkirValue = parseFloat(selectedOption.data('biaya_ongkir')) || 0;
-            $('#biaya_ongkir').val(ongkirValue);
+            $('#biaya_ongkir').val(formatRupiah(ongkirValue, 'Rp '));
             Totaltagihan();
         });
 
@@ -956,22 +1001,23 @@ $(document).on('click', '.btn_remove', function() {
 
         $('#dp').on('input', function() {
             var inputNominal = $(this).val();
-            var dpValue = parseFloat($(this).val());
+            var dpValue = parseRupiahToNumber(inputNominal);
 
-            if (parseInt(inputNominal) > 0) {
+            if (dpValue > 0) {
                 $('#inputPembayaran').show();
                 $('#inputRekening').show();
                 $('#inputTanggalBayar').show();
                 $('#inputBuktiBayar').show();
-                $('#nominal').val(dpValue);
-                // alert('Nominal pembayaran tidak boleh lebih dari sisa bayar!');
-                // $(this).val(0);
+                $('#nominal').val(formatRupiah(dpValue, 'Rp '));
             } else {
                 $('#inputPembayaran').hide();
                 $('#inputRekening').hide();
                 $('#inputTanggalBayar').hide();
                 $('#inputBuktiBayar').hide();
             }
+
+            // Update input value to formatted Rupiah
+            $(this).val(formatRupiah(dpValue, 'Rp '));
         });
 
         $('#promo_id').change(function() {
@@ -1085,43 +1131,30 @@ $(document).on('click', '.btn_remove', function() {
         //     updateHargaSatuan(this);
         // });
 
-        function formatRupiah(angka, prefix) {
-            var numberString = angka.toString().replace(/[^,\d]/g, ''),
-                split = numberString.split(','),
-                sisa = split[0].length % 3,
-                rupiah = split[0].substr(0, sisa),
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-
-            if (ribuan) {
-                var separator = sisa ? '.' : '';
-                rupiah += separator + ribuan.join('.');
-            }
-
-            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
-            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
-        }
-
-        function updateHargaSatuan(select) {
-            var index = select.selectedIndex;
-            var hargaSatuanInput = $('#harga_satuan_0');
-            var selectedOption = $(select).find('option').eq(index);
-            var hargaProduk = selectedOption.data('harga');
+        // function updateHargaSatuan(select) {
+        //     var index = select.selectedIndex;
+        //     var hargaSatuanInput = $('#harga_satuan_0');
+        //     var selectedOption = $(select).find('option').eq(index);
+        //     var hargaProduk = selectedOption.data('harga');
             
-            var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
+        //     var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
             
-            hargaSatuanInput.val(formattedHarga);
-        }
+        //     hargaSatuanInput.val(formattedHarga);
+        // }
 
-        $('#nama_produk').on('change', function() {
-            updateHargaSatuan(this);
-        });
+        // $('#nama_produk').on('change', function() {
+        //     updateHargaSatuan(this);
+        // });
 
         function updateHargaSatuan(select) {
             var index = select.selectedIndex;
             var hargaSatuanInput = $('#harga_satuan_' + select.id.split('_')[2]);
             var selectedOption = $(select).find('option').eq(index);
             var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
+            // console.log(hargaSatuanInput);
+            // hargaSatuanInput.val(hargaProduk);
+            var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
+            hargaSatuanInput.val(formattedHarga);
             multiply(hargaSatuanInput);
         }
 
@@ -1136,19 +1169,30 @@ $(document).on('click', '.btn_remove', function() {
             }
             var jumlah = $('#jumlah_' + id).val();
             var harga_satuan = $('#harga_satuan_' + id).val();
+            harga_satuan = parseRupiahToNumber(harga_satuan);
+            // console.log(harga_satuan);
             if (jumlah && harga_satuan) {
-                $('#harga_total_' + id).val(harga_satuan * jumlah);
-            }
-            var inputs = $('input[name="harga_total[]"]');
-            var total = 0;
-            inputs.each(function() {
-                total += parseInt($(this).val()) || 0;
-            });
-            $('#harga').val(total);
+                var harga_total = harga_satuan * jumlah;
+                // Mengatur nilai input untuk harga total dengan format Rupiah
+                $('#harga_total_' + id).val(formatRupiah(harga_total, 'Rp '));
 
-            $('#sub_total').val(total);
-            $('#total_tagihan').val(total);
+                var inputs = $('input[name="harga_total[]"]');
+                var total = 0;
+                inputs.each(function() {
+                    // Mengonversi format Rupiah menjadi nilai numerik
+                    var harga_total = parseRupiahToNumber($(this).val());
+                    total += harga_total || 0;
+                });
+
+                // Format total kembali ke format Rupiah sebelum menetapkannya ke input
+                var formatted_total = formatRupiah(total, 'Rp ');
+                $('#harga').val(formatted_total);
+                $('#sub_total').val(formatted_total);
+                $('#total_tagihan').val(formatted_total);
+            }
         }
+
+
 
         function updateSubTotal() {
             var subTotalInput = $('#sub_total');
@@ -1159,7 +1203,9 @@ $(document).on('click', '.btn_remove', function() {
                 subTotal += parseFloat($(this).val()) || 0;
             });
 
-            subTotalInput.val(subTotal.toFixed(2));
+            // subTotalInput.val(subTotal.toFixed(2));
+            var formatted_total = formatRupiah(subTotal, 'Rp ');
+            subTotalInput.val(formatted_total);
         }
 
         $('#bukti_file').on('change', function() {
@@ -1219,7 +1265,7 @@ $(document).on('click', '.btn_remove', function() {
                         default:
                             break;
                     }
-                    $('#total_promo').val(total_promo);
+                    $('#total_promo').val(formatRupiah(total_promo, 'Rp '));
                     Totaltagihan();
                 },
                 error: function(xhr, status, error) {
@@ -1229,24 +1275,46 @@ $(document).on('click', '.btn_remove', function() {
         }
 
         function Totaltagihan() {
-            var subtotal = parseFloat($('#sub_total').val()) || 0;
+            var subtotal = parseRupiahToNumber($('#sub_total').val()) || 0;
             // var extot = parseFloat($('#jumlah_ppn').val()) || 0;
-            var persenPPN = parseFloat($('#persen_ppn').val()) || 0;
-            var dp = parseFloat($('#dp').val()) || 0;
-            var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
-            var diskon_nominal = parseFloat($('#total_promo').val()) || 0;
+            var persenPPN = parseRupiahToNumber($('#persen_ppn').val()) || 0;
+            var dp = parseRupiahToNumber($('#dp').val()) || 0;
+            var biayaOngkir = parseRupiahToNumber($('#biaya_ongkir').val()) || 0;
+            var diskon_nominal = parseRupiahToNumber($('#total_promo').val()) || 0;
             // console.log(extot);
             var promo = subtotal - diskon_nominal;
             var ppn = persenPPN * promo / 100;
-            var totalTagihan = promo + ppn + biayaOngkir  - dp;
+            var totalTagihan = promo + ppn + biayaOngkir - dp;
             var sisaBayar = totalTagihan - dp;
 
-            $('#total_tagihan').val(totalTagihan.toFixed(2));
-            $('#sisa_bayar').val(sisaBayar.toFixed(2));
-            $('#jumlah_ppn').val(ppn.toFixed(2));
+            $('#total_tagihan').val(formatRupiah(totalTagihan, 'Rp '));
+            $('#sisa_bayar').val(formatRupiah(sisaBayar, 'Rp '));
+            $('#jumlah_ppn').val(formatRupiah(ppn, 'Rp '));
         }
 
+
         $('#sub_total, #jumlah_ppn, #dp, #biaya_ongkir, #total_promo, #persen_ppn').on('input', Totaltagihan);
+
+        $('form').on('submit', function(e) {
+            // Parse semua nilai input yang diformat Rupiah ke angka numerik
+            $('#sub_total').val(parseRupiahToNumber($('#sub_total').val()));
+            $('#persen_ppn').val(parseRupiahToNumber($('#persen_ppn').val()));
+            $('#dp').val(parseRupiahToNumber($('#dp').val()));
+            $('#biaya_ongkir').val(parseRupiahToNumber($('#biaya_ongkir').val()));
+            $('#total_promo').val(parseRupiahToNumber($('#total_promo').val()));
+            $('#total_tagihan').val(parseRupiahToNumber($('#total_tagihan').val()));
+            $('#sisa_bayar').val(parseRupiahToNumber($('#sisa_bayar').val()));
+            $('#jumlah_ppn').val(parseRupiahToNumber($('#jumlah_ppn').val()));
+            $('#nominal').val(parseRupiahToNumber($('#nominal').val()));
+
+            $('input[id^="harga_satuan_"], input[id^="diskon_"], input[id^="harga_total_"]').each(function() {
+                var id = $(this).attr('id').split('_')[2];
+                var value = $(this).val();
+                var hargaRupiah = $(this).val();
+                $(this).val(parseRupiahToNumber(hargaRupiah));
+            });
+
+        });
     });
 </script>
 

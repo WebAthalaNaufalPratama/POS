@@ -222,7 +222,7 @@
                                                                 @endforeach
                                                             </select>
                                                         </td>
-                                                        <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ $komponen->harga }}" onchange="calculateTotal(0)" readonly disabled></td>
+                                                        <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga, 0, ',', '.',) }}" onchange="calculateTotal(0)" readonly disabled></td>
                                                         <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply($(this))" class="form-control" value="{{ $komponen->jumlah }}" onchange="calculateTotal(0)" disabled></td>
                                                         <td><select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)" disabled>
                                                                 <option value="0">Pilih Diskon</option>
@@ -245,7 +245,7 @@
                                                             </div>
                                                         </div> -->
                                                         </td>
-                                                        <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual}}" readonly></td>
+                                                        <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.',)}}" readonly></td>
                                                         <!-- <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td> -->
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
@@ -369,7 +369,7 @@
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
-                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ $penjualans->sub_total}}" readonly required disabled></h5>
+                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.',)}}" readonly required disabled></h5>
                                                 </li>
                                                 <li>
                                                     <h4><select id="jenis_ppn" name="jenis_ppn" class="form-control" required disabled>
@@ -377,7 +377,7 @@
                                                             <option value="exclude" {{ $penjualans->jenis_ppn = 'exclude' ? 'selected' : ''}}> PPN EXCLUDE</option>
                                                             <option value="include" {{ $penjualans->jenis_ppn = 'include' ? 'selected' : ''}}> PPN INCLUDE</option>
                                                         </select></h4>
-                                                    <h5><input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ $penjualans->jumlah_ppn}}" required disabled></h5>
+                                                    <h5><input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.',)}}" required disabled></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Promo</h4>
@@ -394,24 +394,24 @@
                                                                 <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                                             </div>
                                                         </div>
-                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ $penjualans->total_promo }}" readonly readonly>
+                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ 'Rp '. number_format($penjualans->total_promo, 0, ',', '.',) }}" readonly readonly>
                                                     </h5>
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ $penjualans->biaya_ongkir}}" required disabled></h5>
+                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.',)}}" required disabled></h5>
                                                 </li>
                                                 <li>
                                                     <h4>DP</h4>
-                                                    <h5><input type="text" id="dp" name="dp" class="form-control" value="{{$penjualans->dp}}" required disabled></h5>
+                                                    <h5><input type="text" id="dp" name="dp" class="form-control" value="{{'Rp '. number_format($penjualans->dp, 0, ',', '.',)}}" required disabled></h5>
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
-                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ $penjualans->total_tagihan}}" readonly required disabled></h5>
+                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.',)}}" readonly required disabled></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Sisa Bayar</h4>
-                                                    <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ $penjualans->sisa_bayar}}" readonly required disabled></h5>
+                                                    <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ 'Rp '. number_format($penjualans->sisa_bayar, 0, ',', '.',)}}" readonly required disabled></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -453,7 +453,7 @@
                                                         <tr>
                                                             <td>{{ $loop->iteration }}</td>
                                                             <td>{{ $pembayaran->no_invoice_bayar }}</td>
-                                                            <td>{{ $pembayaran->nominal }}</td>
+                                                            <td>{{ 'Rp '. number_format($pembayaran->nominal, 0, ',', '.',) }}</td>
                                                             <td>@if($pembayaran->rekening == null)
                                                                 Pembayaran Cash
                                                                 @else

@@ -61,7 +61,7 @@
                                 <td>{{ $dopenjualan->no_do }}</td>
                                 <td>{{ $dopenjualan->no_referensi }}</td>
                                 <td>{{ $dopenjualan->customer->nama }}</td>
-                                <td>{{ $dopenjualan->tanggal_kirim }}</td>
+                                <td>{{ date('d F Y', strtotime($dopenjualan->tanggal_kirim)) }}</td>
                                 <td>{{ $dopenjualan->status }}</td>
                                 <td>{{ $dopenjualan->data_driver->nama }}</td>
                                 <td>
