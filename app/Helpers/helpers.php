@@ -21,6 +21,14 @@ if (!function_exists('formatTanggal')) {
     }
 }
 
+if (!function_exists('formatTanggalInd')) {
+    function formatTanggalInd($date = null) {
+        \Carbon\Carbon::setLocale('id');
+        $carbonDate = $date ? \Carbon\Carbon::parse($date) : \Carbon\Carbon::now();
+        return $carbonDate->translatedFormat('d F Y');
+    }
+}
+
 if (! function_exists('base64_image')) {
     function base64_image($path)
     {
@@ -28,5 +36,14 @@ if (! function_exists('base64_image')) {
         $data = file_get_contents($path);
         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
         return $base64;
+    }
+}
+
+if (!function_exists('stringToCamelCase')) {
+    function stringToCamelCase($string) {
+        $string = strtolower($string);
+        $string = str_replace('_', ' ', $string);
+        $string = ucwords($string);
+        return $string;
     }
 }

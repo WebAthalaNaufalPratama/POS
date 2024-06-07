@@ -295,6 +295,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/edit', 'KontrakController@edit')->name('kontrak.edit');
             Route::patch('/{kontrak}/update', 'KontrakController@update')->name('kontrak.update');
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
+            Route::get('/{kontrak}/pdf', 'KontrakController@pdf')->name('kontrak.pdf');
         });
 
         Route::group(['prefix' => 'dopenjualan'], function() {
