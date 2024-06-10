@@ -80,10 +80,13 @@
         }
 
         .jawabinvoice .auditor{
-            margin-top: 100px;
             float: right;
             width: 25%;
             text-align: right;
+        }
+        
+        .auditor{
+            margin-top: 80px;
         }
 
         .auditor .name-title {
@@ -106,13 +109,13 @@
         }
 
         .pembuat{
-            margin-top: 120px;
+            margin-top: 80px;
             float: left;
             text-align: center;
         }
 
         .dibukukan{
-            margin-top: 120px;
+            margin-top: 80px;
             float: left;
             width: 60%;
             text-align: center;
@@ -144,11 +147,6 @@
             width: 50%;
         }
 
-        .tabletagihan{
-            width : 45%;
-            float: right;
-        }
-
 
         /* Footer styles */
         footer {
@@ -157,7 +155,7 @@
             margin-top: 20px;
         }
         .garis_bawah{
-            margin-top:140px;
+            margin-top:120px;
         }
 
         @media print {
@@ -206,35 +204,35 @@
         </header>
 
         <div class="judul">
-            <h1><center>INVOICE PENJUALAN</center></h1>
+            <h1><center>DELIVERY ORDER</center></h1>
         </div>
 
         <div class="pelanggan">
-            <p>Customer</p>
+            <p>Penerima</p>
             <p>No Handphone</p>
-            <p>Lokasi Beli</p>
-            <p>Jumlah Point</p>
-            <p>Nama Sales</p>
+            <p>Alamat</p>
+            <p>Driver</p>
         </div>
 
         <div class="jawabpelanggan">
-            <p>: {{$customer}}</p>
-            <p>: {{$no_handphone}}</p>
-            <p>: {{$lokasi}}</p>
-            <p>: {{$point_dipakai}}</p>
-            <p>: {{$sales}}</p>
+            <p>: {{$penerima}}</p>
+            <p>: {{$handphone}}</p>
+            <p>: {{$alamat}}</p>
+            <p>: {{$driver}}</p>
         </div>
 
         <div class="invoice">
+            <p>Pengirim</p>
             <p>No Invoice</p>
             <p>Tanggal Invoice</p>
-            <p>Jatuh Tempo Bayar</p>
+            <p>Tanggal Pengiriman</p>
         </div>
 
         <div class="jawabinvoice">
-            <p>: {{$no_invoice}}</p>
+            <p>: {{$customer}}</p>
+            <p>: {{$no_referensi}}</p>
             <p>: {{date('d F Y', strtotime($tanggal_invoice))}}</p>
-            <p>: {{ date('d F Y', strtotime($jatuh_tempo))}}</p>
+            <p>: {{date('d F Y', strtotime($tanggal_driver))}}</p>
         </div>
 
         <hr class="garis_bawah">
@@ -243,10 +241,9 @@
             <thead>
                 <tr>
                     <th>Nama Barang</th>
-                    <th>Harga Satuan</th>
                     <th>Jumlah</th>
-                    <th>Diskon</th>
-                    <th>Harga Total</th>
+                    <th>Unit Satuan</th>
+                    <th>Keterangan</th>
                 </tr>
             </thead>
             <tbody>
@@ -267,11 +264,10 @@
                     <td>
                         {{$komponen->produk->nama}}
                     </td>
-                    <td>{{ 'Rp '. number_format($komponen->harga, 0, ',', '.') }}</td>
                     <td>{{ $komponen->jumlah }}</td>
-                    <td>{{ $komponen->diskon ? $komponen->diskon : '-'}}
+                    <td>{{ $komponen->satuan ? $komponen->satuan : '-'}}
                     </td>
-                    <td>{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.')}}</td>
+                    <td>{{ $komponen->keterangan ? $komponen->keterangan : '-'}}</td>
                     @php
                     $i++;
                     @endphp
@@ -281,53 +277,11 @@
         </table>
 
         <table class="tabletagihan">
-                <tr>
-                    <th>Sub Total</th>
-                    <td>: {{ 'Rp '. number_format($sub_total, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Promo</th>
-                    <td>: {{ 'Rp '. number_format($total_promo, 0, ',', '.') }}</t>
-                </tr>
-                <tr>
-                    <th>PPN</th>
-                    <td>: {{ 'Rp '. number_format($jumlah_ppn, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Biaya Ongkir</th>
-                    <td>: {{ 'Rp '. number_format($biaya_ongkir, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Down Payment</th>
-                    <td>: {{ 'Rp '. number_format($dp, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Total Tagihan</th>
-                    <td>: {{ 'Rp '. number_format($total_tagihan, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Sisa Bayar</th>
-                    <td>: {{ 'Rp '. number_format($sisa_bayar, 0, ',', '.') }}</td>
-                </tr>
+            <tr>
+                <th>Catatan</th>
+                <td>: {{ $catatan }}</td>
+            </tr>
         </table>
-
-        <h4>Pembayaran Via Rekening</h4>
-        <table class="rekening">
-            <thead>
-                <tr>
-                    <th>Nama Bank</th>
-                    <th>No Rekening</th>
-                    <th>Atas Nama</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>BCA</td>
-                    <td>8030727658</td>
-                    <td>VON</td>
-                </tr>
-            </tbody>
-        </table> 
 
         <div class="pembuat">
                 <p>Pembuat</p>
@@ -335,7 +289,7 @@
                 <br>
                 <br>
                 <p>{{$dibuat ? $dibuat : '-'}}</p>
-                <p>{{$tanggal_dibuat ? date('d F Y', strtotime($tanggal_dibuat)) : '-'}}</p>
+                <p>{{$tanggal_pembuat ? date('d F Y', strtotime($tanggal_pembuat)) : '-'}}</p>
         </div>
 
         
@@ -345,8 +299,8 @@
                 <br>
                 <br>
                 <br>
-                <p>{{$dibukukan ? $dibukukan : '-'}}</p>
-                <p>{{$tanggal_dibukukan ? date('d F Y', strtotime($tanggal_dibukukan)) : '-'}}</p>
+                <p>{{$disetujui ? $disetujui : '-'}}</p>
+                <p>{{$tanggal_penyetuju ? date('d F Y', strtotime($tanggal_penyetuju)) : '-'}}</p>
         </div>
         <center>
         <div class="auditor">
@@ -354,9 +308,9 @@
                 <br>
                 <br>
                 <br>
-                <p>{{$auditor ? $auditor : '-'}}</p>
+                <p>{{$diperiksa ? $diperiksa : '-'}}</p>
                 <div class="name-title">
-                <p>{{$tanggal_audit ? date('d F Y', strtotime($tanggal_audit)) : '-'}}</p>
+                <p>{{$tanggal_pemeriksa ? date('d F Y', strtotime($tanggal_pemeriksa)) : '-'}}</p>
                 </div>
         </div>
         </center>

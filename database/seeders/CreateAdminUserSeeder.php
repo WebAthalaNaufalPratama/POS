@@ -153,6 +153,8 @@ class CreateAdminUserSeeder extends Seeder
                   ->orWhere('name', 'like', 'formmutasi%')
                   ->orWhere('name', 'like', 'kas_galery%')
                   ->orWhere('name', 'like', 'mutasi%')
+                  ->orWhere('name', 'like', 'pdfinvoicepenjualan%')
+                  ->orWhere('name', 'like', 'pdfdopenjualan%')
                   ->orWhere('name', 'like', 'mutasigalerygalery%');
         })->pluck('name')->all();
         
@@ -198,6 +200,8 @@ class CreateAdminUserSeeder extends Seeder
                   ->orWhere('name', 'like', 'formmutasi%')
                   ->orWhere('name', 'like', 'kas_galery%')
                   ->orWhere('name', 'like', 'mutasi%')
+                  ->orWhere('name', 'like', 'pdfinvoicepenjualan%')
+                  ->orWhere('name', 'like', 'pdfdopenjualan%')
                   ->orWhere('name', 'like', 'mutasigalerygalery%');
         })->pluck('name')->all();
 
@@ -225,6 +229,8 @@ class CreateAdminUserSeeder extends Seeder
                   ->orWhere('name', 'like', 'mutasi%')
                   ->orWhere('name', 'like', 'formmutasi%')
                   ->orWhere('name', 'like', 'mutasioutlet%')
+                  ->orWhere('name', 'like', 'pdfinvoicepenjualan%')
+                  ->orWhere('name', 'like', 'pdfdopenjualan%')
                   ->orWhere('name', 'like', 'mutasigalery%');
         })->pluck('name')->all();
 

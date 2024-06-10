@@ -30,3 +30,4 @@ if (! function_exists('base64_image')) {
         return $base64;
     }
 }
+

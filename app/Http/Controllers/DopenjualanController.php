@@ -23,9 +23,11 @@ use App\Models\DeliveryOrder;
 use App\Models\InventoryGallery;
 use App\Models\InventoryOutlet;
 use App\Models\InventoryGreenHouse;
+use App\Models\User;
 use App\Models\Komponen_Produk_Terjual;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use PDF;
 
 class DopenjualanController extends Controller
 {
@@ -437,5 +439,24 @@ class DopenjualanController extends Controller
         } else {
             return redirect()->back()->with('fail', 'Gagal menyimpan file');
         }
+    }
+
+    public function pdfdopenjualan($dopenjualan)
+    {
+        $data = DeliveryOrder::find($dopenjualan)->toArray();
+        $customer = Customer::where('id', $data['customer_id'])->first();
+        $data['customer'] = $customer->nama;
+        $lokasi = Penjualan::where('no_invoice', $data['no_referensi'])->first();
+        $data['tanggal_invoice'] = $lokasi->tanggal_invoice;
+        $data['lokasi'] = Lokasi::where('id', $lokasi->lokasi_id)->value('nama');
+        $data['produks'] = Produk_Terjual::with('komponen', 'produk')->where('no_do', $data['no_do'])->get();
+        $data['driver'] = Karyawan::where('id', $data['driver'])->value('nama');
+        $data['dibuat'] = User::where('id', $data['pembuat'])->value('name');
+        $data['disetujui'] =User::where('id', $data['penyetuju'])->value('name');
+        $data['diperiksa'] = User::where('id', $data['pemeriksa'])->value('name');
+        // dd($data);
+        $pdf = PDF::loadView('dopenjualan.view', $data);
+    
+        return $pdf->stream($data['no_do'] . '_DELIVERY ORDER.pdf');
     }
 }
