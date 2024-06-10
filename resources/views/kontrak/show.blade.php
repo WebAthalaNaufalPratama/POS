@@ -85,7 +85,7 @@
                                         <div class="form-group">
                                             <label>File Kontrak</label>
                                             <div class="input-group">
-                                                <input type="file" id="file" name="file" value="" class="form-control" accept="application/pdf">
+                                                <input type="file" id="file" name="file" value="" class="form-control" accept="application/pdf" disabled>
                                             </div>
                                         </div>
                                         @if ($kontraks->file)
