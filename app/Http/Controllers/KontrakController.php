@@ -417,7 +417,7 @@ class KontrakController extends Controller
         return response()->json($response);
     }
 
-    public function pdf($id)
+    public function pdfKontrak($id)
     {
         $data = Kontrak::with('lokasi', 'lokasi.operasional', 'customer', 'rekening', 'data_sales', 'invoice', 'produk.produk')->find($id)->toArray();
         $pdf = PDF::loadView('kontrak.pdf', $data);

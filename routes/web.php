@@ -55,6 +55,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('getPromo', 'PromoController@getPromo')->name('getPromo');
         Route::get('getProdukTerjual', 'ProdukTerjualController@getProdukTerjual')->name('getProdukTerjual');
         Route::post('addKomponen', 'KomponenProdukTerjualController@addKomponen')->name('addKomponen');
+        Route::get('getProdukDo', 'DeliveryOrderController@getProdukDo')->name('getProdukDo');
 
         /**
          * User Routes
@@ -295,7 +296,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/edit', 'KontrakController@edit')->name('kontrak.edit');
             Route::patch('/{kontrak}/update', 'KontrakController@update')->name('kontrak.update');
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
-            Route::get('/{kontrak}/pdf', 'KontrakController@pdf')->name('kontrak.pdf');
+            Route::get('/{kontrak}/pdfKontrak', 'KontrakController@pdfKontrak')->name('kontrak.pdfKontrak');
         });
 
         Route::group(['prefix' => 'dopenjualan'], function() {

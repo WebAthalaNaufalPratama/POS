@@ -31,4 +31,8 @@ class Produk_Terjual extends Model
     public function sewa(){
         return $this->belongsTo(Kontrak::class, 'no_sewa', 'no_kontrak');
     }
+
+    public function kembali_sewa(){
+        return $this->belongsTo(KembaliSewa::class,'no_kembali_sewa', 'no_kembali');
+    }
 }
