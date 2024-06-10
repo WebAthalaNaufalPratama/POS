@@ -88,4 +88,8 @@ class Kontrak extends Model
     public function invoice(){
         return $this->hasMany(InvoiceSewa::class, 'no_sewa', 'no_kontrak');
     }
+
+    public function do_sewa(){
+        return $this->hasMany(DeliveryOrder::class, 'no_sewa', 'no_kontrak');
+    }
 }

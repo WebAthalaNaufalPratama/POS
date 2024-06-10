@@ -348,6 +348,16 @@
                 $('#produk_' + i).select2();
                 i++;
             })
+            $(document).on('input', '[id^=handhpone]', function() {
+                let input = $(this);
+                let value = input.val();
+                
+                if (!isNumeric(value)) {
+                value = value.replace(/[^\d]/g, "");
+                }
+
+                input.val(value);
+            });
             $(document).on('input', '[id^=harga_satuan]', function() {
                 let input = $(this);
                 let value = input.val();

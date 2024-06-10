@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PergantianExport;
 use App\Models\Customer;
 use App\Models\Karyawan;
 use App\Models\Komponen_Produk_Terjual;
@@ -18,6 +19,7 @@ use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Activitylog\Models\Activity;
 
 class KontrakController extends Controller
@@ -417,11 +419,16 @@ class KontrakController extends Controller
         return response()->json($response);
     }
 
-    public function pdf($id)
+    public function pdfKontrak($id)
     {
         $data = Kontrak::with('lokasi', 'lokasi.operasional', 'customer', 'rekening', 'data_sales', 'invoice', 'produk.produk')->find($id)->toArray();
         $pdf = PDF::loadView('kontrak.pdf', $data);
 
         return $pdf->stream('Kontrak.pdf');
+    }
+
+    public function excelPergantian($id)
+    {
+        return Excel::download(new PergantianExport, 'users.xlsx');
     }
 }

@@ -301,6 +301,8 @@ class KembaliSewaController extends Controller
     {
         // data
         $data = KembaliSewa::with('produk', 'produk.komponen', 'produk.produk')->find($kembaliSewa);
+        $data2 = Produk_Terjual::with('produk', 'komponen', 'kembali_sewa')->where('no_kembali_sewa', $data->no_kembali)->get();
+        // dd($data2[0]);
         $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_sewa'])->first();
         $do = DeliveryOrder::with('produk', 'produk.komponen', 'produk.produk')->where('no_referensi', $kontrak->no_kontrak)->get();
         $drivers = Karyawan::where('jabatan', 'Driver')->get();
@@ -321,7 +323,7 @@ class KembaliSewaController extends Controller
             $kode = substr($lastKembali->no_do, -5);
             $getKode = 'KMB' . date('Ymd') . str_pad((int)$kode + 1, 5, '0', STR_PAD_LEFT);
         }
-        return view('kembali_sewa.show', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa', 'do', 'kondisi', 'detail_lokasi', 'data', 'riwayat'));
+        return view('kembali_sewa.show', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa', 'do', 'kondisi', 'detail_lokasi', 'data', 'riwayat', 'data2'));
     }
 
     /**
