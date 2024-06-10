@@ -1305,7 +1305,7 @@
             $('#total_tagihan').val(parseRupiahToNumber($('#total_tagihan').val()));
             $('#sisa_bayar').val(parseRupiahToNumber($('#sisa_bayar').val()));
             $('#jumlah_ppn').val(parseRupiahToNumber($('#jumlah_ppn').val()));
-            $('#nominal').val(parseRupiahToNumber($('#nominal').val()));
+            $('#nominal').val(parseRupiahToNumber($('#dp').val()));
 
             $('input[id^="harga_satuan_"], input[id^="diskon_"], input[id^="harga_total_"]').each(function() {
                 var id = $(this).attr('id').split('_')[2];

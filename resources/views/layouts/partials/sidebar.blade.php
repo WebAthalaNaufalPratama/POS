@@ -5,10 +5,10 @@
                 @php
                     $roles = Auth::user()->roles()->get();
                     $user = Auth::user();
+                    $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                     if(Auth::user()->roles('SuperAdmin')) {
                         $rolePermissions = \Spatie\Permission\Models\Permission::pluck('name')->toArray();
                     } else {
-                        $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                         $rolePermissions = [];
                         if (!$roles->isEmpty()) {
                             $rolePermissions = $roles->flatMap->permissions->pluck('name')->toArray();

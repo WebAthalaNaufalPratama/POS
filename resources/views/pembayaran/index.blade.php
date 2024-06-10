@@ -66,7 +66,7 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
+                                            <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}"><img src="assets/img/icons/edit-6.svg" class="me-2" alt="img">Edit</a>
                                         </div>
                                     </div>
                                 </td>

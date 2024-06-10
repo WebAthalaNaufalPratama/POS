@@ -65,11 +65,11 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('mutasigalery.payment', ['mutasiGO' => $mutasi->id]) }}">pembayaran mutasi</a>
+                                        <a class="dropdown-item" href="{{ route('mutasigalery.payment', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                             @if($lokasi->lokasi->tipe_lokasi != 2)
-                                                <a class="dropdown-item" href="{{ route('mutasigalery.show', ['mutasiGO' => $mutasi->id]) }}">Atur Perangkai</a>
+                                                <a class="dropdown-item" href="{{ route('mutasigalery.show', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Atur Perangkai</a>
                                             @elseif($lokasi->lokasi->tipe_lokasi != 1)
-                                                <a class="dropdown-item" href="{{ route('mutasigalery.acc', ['mutasiGO' => $mutasi->id]) }}">Acc Terima</a>
+                                                <a class="dropdown-item" href="{{ route('mutasigalery.acc', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
                                             @endif
                                         </div>
                                     </div>

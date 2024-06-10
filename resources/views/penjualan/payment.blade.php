@@ -416,7 +416,50 @@
                                             </ul>
                                         </div>
                                     </div>
-                                </div>    
+                                </div>  
+                                <div class="card">
+                                            <div class="card-header">
+                                                <h4 class="card-title">Riwayat</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                <table class="table datanew">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Tanggal Perubahan</th>
+                                                        <th>Pengubah</th>
+                                                        <th>Log</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach ($riwayat as $item)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>{{ $item->created_at ?? '-' }}</td>
+                                                            <td>{{ $item->causer->name ?? '-' }}</td>
+                                                            <td>
+                                                                @php
+                                                                    $properties = json_decode($item->properties, true);
+                                                                    $changes = $item->changes();
+                                                                    
+                                                                    if (isset($changes['old'])) {
+                                                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                                                                        foreach ($diff as $key => $value) {
+                                                                            echo "$key: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
+                                                                        }
+                                                                    } else {
+                                                                        echo 'Data Invoice Penjualan Terbuat';
+                                                                    }
+                                                                @endphp
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                                </div>
+                                            </div>
+                                        </div>  
                             </div>
                         </div>
 
@@ -468,7 +511,7 @@
                                                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                                                 </a>
                                                                     <div class="dropdown-menu">
-                                                                        <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
+                                                                        <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}"><img src="assets/img/icons/edit-6.svg" class="me-2" alt="img">Edit</a>
                                                                     </div>
                                                                 </div>
                                                             </td>

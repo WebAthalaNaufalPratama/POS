@@ -309,6 +309,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{dopenjualan}/edit', 'DopenjualanController@edit')->name('dopenjualan.edit');
             Route::patch('/{dopenjualan}/update', 'DopenjualanController@update')->name('dopenjualan.update');
             Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
+            Route::get('{dopenjualan}/pdfdopenjualan', 'DoPenjualanController@pdfdopenjualan')->name('pdfdopenjualan.generate');
         });
 
         Route::group(['prefix' => 'pembayaran'], function() {

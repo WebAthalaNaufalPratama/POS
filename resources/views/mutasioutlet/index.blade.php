@@ -63,9 +63,9 @@
                                             $user = Auth::user()->first();
                                             $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                         @endphp
-                                        <a class="dropdown-item" href="{{ route('mutasioutlet.payment', ['mutasiOG' => $mutasi->id]) }}">pembayaran mutasi</a>
+                                        <a class="dropdown-item" href="{{ route('mutasioutlet.payment', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                         @if($lokasi->lokasi->tipe_lokasi != 2)
-                                            <a class="dropdown-item" href="{{ route('mutasioutlet.show', ['mutasiOG' => $mutasi->id]) }}">ACC DITERIMA</a>
+                                            <a class="dropdown-item" href="{{ route('mutasioutlet.show', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">ACC DITERIMA</a>
                                         @endif
                                         </div>
                                     </div>
