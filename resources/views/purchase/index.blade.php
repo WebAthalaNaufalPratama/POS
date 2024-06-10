@@ -39,8 +39,8 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $datapo->no_po }}</td>
                                 <td>{{ $datapo->supplier->nama }}</td>
-                                <td>{{ $datapo->tgl_kirim }}</td>
-                                <td>{{ $datapo->tgl_diterima}}</td>
+                                <td>{{ tanggalindo($datapo->tgl_kirim) }}</td>
+                                <td>{{ tanggalindo($datapo->tgl_diterima)}}</td>
                                 <td>{{ $datapo->no_do_suplier}}</td>
                                 <td>{{ $datapo->lokasi->nama}}</td>
                                 <td>{{ $datapo->status_dibuat}}</td>
