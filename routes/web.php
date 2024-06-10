@@ -259,6 +259,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/storekomponen', 'PenjualanController@store_komponen')->name('komponenpenjulan.store');
             Route::post('/storekomponenmutasi', 'PenjualanController@store_komponen_mutasi')->name('komponenmutasi.store');
             Route::post('/storekomponenretur', 'PenjualanController@store_komponen_retur')->name('komponenretur.store');
+            Route::get('{penjualan}/pdfinvoicepenjualan', 'PenjualanController@pdfinvoicepenjualan')->name('pdfinvoicepenjualan.generate');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -282,6 +283,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
             Route::get('/retur', 'PembelianController@index_retur')->name('returbeli.index');
             Route::get('/retur/create', 'PembelianController@create_retur')->name('returbeli.create');
+            Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
 
         });
 
@@ -293,6 +295,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/edit', 'KontrakController@edit')->name('kontrak.edit');
             Route::patch('/{kontrak}/update', 'KontrakController@update')->name('kontrak.update');
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
+            Route::get('/{kontrak}/pdf', 'KontrakController@pdf')->name('kontrak.pdf');
         });
 
         Route::group(['prefix' => 'dopenjualan'], function() {

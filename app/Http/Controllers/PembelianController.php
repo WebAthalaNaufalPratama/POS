@@ -174,12 +174,13 @@ class PembelianController extends Controller
 
     }
 
-    public function create_retur()
+    public function create_retur(Request $req)
     {
-        $produks = Produk::get();
-        $suppliers = Supplier::where('tipe_supplier','inden')->get();
+        $invoice = Invoicepo::with('pembelian', 'pembelian.produkbeli', 'pembelian.produkbeli.produk')->find($req->invoice);
+        $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
         $nomor_poinden = $this->generatePOIndenNumber();
-        return view('purchase.createretur', compact('produks','suppliers','nomor_poinden'));
+        // dd($invoice->pembelian->produkbeli);
+        return view('purchase.createretur', compact('nomor_poinden', 'lokasi', 'invoice'));
 
     }
 
@@ -254,7 +255,7 @@ class PembelianController extends Controller
             $produkBeli->produk_id = $produkId;
             $produkBeli->jml_dikirim = $qtyKirim[$index];
             $produkBeli->jml_diterima = $qtyTerima[$index];
-            $produkBeli->kondisi_id = $kondisiIds[$index];          
+            $produkBeli->kondisi_id = $kondisiIds[$index] ?? null;          
             $check2 = $produkBeli->save();
 
             // $lokasi = Lokasi::find($request->id_lokasi);
@@ -349,6 +350,11 @@ class PembelianController extends Controller
         } else {
             return redirect(route('pembelian.index'))->with('success', 'Data pembelian berhasil disimpan. Nomor PO: ' . $no_po);
         }
+    }
+
+    public function store_retur(Request $request)
+    {
+        dd($request);
     }
 
     /**

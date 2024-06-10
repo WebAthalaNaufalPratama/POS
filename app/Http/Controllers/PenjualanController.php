@@ -27,17 +27,20 @@ use App\Models\Pembayaran;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use PDF;
 
 class PenjualanController extends Controller
 {
 
     public function index(Request $req)
     {
-        $user = Auth::user()->first();
+        $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
+        // dd($user);
         if($lokasi->lokasi->tipe_lokasi == 2){
             $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
             $lokasiIds = $lokasi->pluck('id')->toArray();
+            // dd($lokasiIds);
             $query = Penjualan::with('karyawan')->whereIn('lokasi_id', $lokasiIds)->where('no_invoice', 'LIKE', 'IPO%');
         }elseif($lokasi->lokasi->tipe_lokasi == 1){
             $lokasi = Lokasi::where('tipe_lokasi', 1)->get();
@@ -89,20 +92,19 @@ class PenjualanController extends Controller
 
     public function create()
     {
-        $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
-        $lokasiIds = $lokasi->pluck('id')->toArray();
-        $user = Auth::user()->value('id');
-        $ceklokasi = Karyawan::where('user_id', $user)->first();
-        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
-        // dd($karyawans);
-        $customers = Customer::where('lokasi_id', $lokasi)->get();
-        $lokasis = Lokasi::where('id', $lokasi)->get();
-        $ongkirs = Ongkir::get();
-        $karyawans = Karyawan::where('lokasi_id', $lokasi)->where('jabatan', 'Sales')->get();
-        $promos = Promo::where(function ($query) use ($lokasi) {
-            $query->where('lokasi_id', $lokasi)
-                ->orWhere('lokasi_id', 'Semua');
-        })->get();
+        // $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
+        // $lokasiIds = $lokasi->pluck('id')->toArray();
+        $user = Auth::user();
+        // $ceklokasi = Karyawan::where('user_id', $user)->first();
+        $lokasi = Karyawan::where('user_id', $user->id)->get();
+        // dd($lokasi->lokasi_id->tipe_lokasi);
+        $customers = Customer::where('lokasi_id', $lokasi[0]->lokasi_id)->get();
+        // dd($customers);
+        $lokasis = Lokasi::where('id', $lokasi[0]->lokasi_id)->get();
+        $ongkirs = Ongkir::where('id', $lokasi[0]->lokasi_id)->get();
+        $karyawans = Karyawan::where('lokasi_id', $lokasi[0]->lokasi_id)->where('jabatan', 'Sales')->get();
+        $promos = Promo::where('lokasi_id', $lokasi[0]->lokasi_id)->orWhere('lokasi_id', 'Semua')->get();
+        // dd($promos);
         $produks = Produk_Jual::with('komponen.kondisi')->get();
         $komponenproduks = Komponen_Produk_Jual::all();
         $produkkompos = Produk_Jual::with('komponen.kondisi')
@@ -112,10 +114,10 @@ class PenjualanController extends Controller
                         })->get();
 
         // dd($produks);
-        $bankpens = Rekening::get();
-        if($ceklokasi->lokasi->tipe_lokasi == 2){
+        $bankpens = Rekening::where('lokasi_id', $lokasi[0]->lokasi_id)->get();
+        if($lokasi[0]->lokasi->tipe_lokasi == 2){
             $Invoice = Penjualan::where('no_invoice', 'LIKE', 'IPO%')->latest()->first();
-        }elseif($ceklokasi->lokasi->tipe_lokasi == 1){
+        }elseif($lokasi[0]->lokasi->tipe_lokasi == 1){
             $Invoice = Penjualan::where('no_invoice', 'LIKE', 'INV%')->latest()->first();
         }
         // dd($bankpens);
@@ -175,7 +177,7 @@ class PenjualanController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
-        // dd($data);
+        dd($data);
         // dd($req->distribusi);
         $data['dibuat_id'] = Auth::user()->id;
         $data['tanggal_dibuat'] = now();
@@ -725,5 +727,17 @@ class PenjualanController extends Controller
         } else{
             return redirect()->back()->with('fail', 'retur penjualan hanya untuk galery');
         }
+    }
+
+    public function pdfinvoicepenjualan($penjualan)
+    {
+        $data = [
+            'title' => 'Contoh PDF',
+            'content' => 'Ini adalah contoh isi PDF.'
+        ];
+    
+        $pdf = PDF::loadView('penjualan.view', $data);
+    
+        return $pdf->stream('contoh.pdf');
     }
 }

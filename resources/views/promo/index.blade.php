@@ -503,8 +503,10 @@
         $.ajax({
             type: "GET",
             url: "/promo/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
-                // console.log(response)
                 $('#editForm').attr('action', 'promo/'+id+'/update');
                 $('#edit_nama').val(response.nama)
                 $('#edit_tanggal_mulai').val(response.tanggal_mulai)
@@ -561,6 +563,9 @@
             $.ajax({
                 type: "GET",
                 url: "/promo/"+id+"/delete",
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
                 success: function(response) {
                     toastr.success(response.msg, 'Success', {
                         closeButton: true,

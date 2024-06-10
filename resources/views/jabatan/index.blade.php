@@ -119,6 +119,9 @@
         $.ajax({
             type: "GET",
             url: "/jabatan/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 $('#editForm').attr('action', 'jabatan/'+id+'/update');
                 $('#edit_nama').val(response.nama)
@@ -150,6 +153,9 @@
                 $.ajax({
                     type: "GET",
                     url: "/jabatan/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     success: function(response) {
                         toastr.success(response.msg, 'Success', {
                             closeButton: true,

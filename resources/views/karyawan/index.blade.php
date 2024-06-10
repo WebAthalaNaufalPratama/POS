@@ -205,6 +205,9 @@
         $.ajax({
             type: "GET",
             url: "/karyawan/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 // console.log(response)
                 $('#editForm').attr('action', 'karyawan/'+id+'/update');
@@ -240,6 +243,9 @@
             $.ajax({
                 type: "GET",
                 url: "/karyawan/"+id+"/delete",
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
                 success: function(response) {
                     toastr.success(response.msg, 'Success', {
                         closeButton: true,

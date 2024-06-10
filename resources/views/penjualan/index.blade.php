@@ -65,8 +65,8 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $penjualan->no_invoice }}</td>
                                 <td>{{ $penjualan->karyawan->nama }}</td>
-                                <td>{{ $penjualan->tanggal_invoice }}</td>
-                                <td>{{ $penjualan->jatuh_tempo }}</td>
+                                <td>{{ date('d F Y', strtotime($penjualan->tanggal_invoice)) }}</td>
+                                <td>{{ date('d F Y', strtotime($penjualan->jatuh_tempo)) }}</td>
                                 <td>
                                     @if(isset($latestPayments[$penjualan->id]))
                                     {{ $latestPayments[$penjualan->id]->status_bayar }}
@@ -74,8 +74,8 @@
                                     Belum ada pembayaran
                                     @endif
                                 </td>
-                                <td>{{ $penjualan->total_tagihan }}</td>
-                                <td>{{ $penjualan->sisa_bayar }}</td>
+                                <td>{{ 'Rp '. number_format($penjualan->total_tagihan, 0, ',', '.',) }}</td>
+                                <td>{{ 'Rp '. number_format($penjualan->sisa_bayar, 0, ',', '.',) }}</td>
                                 <td>{{ $penjualan->status }}</td>
                                 <td>
                                     <div class="dropdown">
@@ -95,6 +95,7 @@
                                             <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}">Delivery Order</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}">Retur</a>
+                                            <a class="dropdown-item" href="{{ route('pdfinvoicepenjualan.generate', ['penjualan' => $penjualan->id]) }}">Cetak Invoice</a>
                                             <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a> -->
                                         </div>
                                     </div>

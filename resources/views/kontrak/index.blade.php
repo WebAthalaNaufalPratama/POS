@@ -79,6 +79,9 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
+                                        <a href="{{ route('kontrak.pdf', ['kontrak' => $kontrak->id]) }}" target="_blank" class="dropdown-item"><img src="assets/img/icons/pdf.svg" class="me-2" alt="img">PDF</a>
+                                    </li>
+                                    <li>
                                         <a href="{{ route('do_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order</a>
                                     </li>
                                     <li>
@@ -196,6 +199,9 @@
                 $.ajax({
                     type: "GET",
                     url: "/kontrak/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     success: function(response) {
                         toastr.success(response.msg, 'Success', {
                             closeButton: true,

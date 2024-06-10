@@ -491,7 +491,6 @@
 
 @section('scripts')
     <script>
-        var csrfToken = $('meta[name="csrf-token"]').attr('content');
         var cekInvoiceNumbers = "{{ $invoice_bayar }}";
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){

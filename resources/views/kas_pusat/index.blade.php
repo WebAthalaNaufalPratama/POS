@@ -307,6 +307,9 @@
         $.ajax({
             type: "GET",
             url: "/kas_pusat/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 // console.log(response)
                 $('#editForm').attr('action', 'kas_pusat/'+id+'/update');
@@ -345,6 +348,9 @@
               $.ajax({
                   type: "GET",
                   url: "/kas_pusat/"+id+"/delete",
+                  headers: {
+                      'X-CSRF-TOKEN': csrfToken
+                  },
                   success: function(response) {
                       toastr.success(response.msg, 'Success', {
                           closeButton: true,

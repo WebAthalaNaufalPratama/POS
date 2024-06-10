@@ -119,6 +119,9 @@
         $.ajax({
             type: "GET",
             url: "/tipe_lokasi/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 $('#editForm').attr('action', 'tipe_lokasi/'+id+'/update');
                 $('#edit_nama').val(response.nama)
@@ -150,6 +153,9 @@
                 $.ajax({
                     type: "GET",
                     url: "/tipe_lokasi/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
                     success: function(response) {
                         toastr.success(response.msg, 'Success', {
                             closeButton: true,

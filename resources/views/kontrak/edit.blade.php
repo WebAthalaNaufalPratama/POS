@@ -89,9 +89,14 @@
                                                 </div>
                                             </div>
                                             <div class="form-group">
-                                                <label>Catatan</label>
-                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ $kontraks->catatan }}</textarea>
+                                                <label>File Kontrak</label>
+                                                <div class="input-group">
+                                                    <input type="file" id="file" name="file" value="" class="form-control" accept="application/pdf">
+                                                </div>
                                             </div>
+                                            @if ($kontraks->file)
+                                                <a href="/storage/{{ $kontraks->file }}" target="_balnk">Lihat File</a>
+                                            @endif
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -119,6 +124,10 @@
                                                         <option value="{{ $rekening->id }}" {{ $kontraks->rekening_id == $rekening->id ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Catatan</label>
+                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ $kontraks->catatan }}</textarea>
                                             </div>
                                         </div>
                                     </div>

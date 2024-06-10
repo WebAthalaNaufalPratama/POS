@@ -14,6 +14,7 @@ use App\Models\Produk_Jual;
 use App\Models\Produk_Terjual;
 use App\Models\Promo;
 use App\Models\Rekening;
+use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -29,7 +30,7 @@ class KontrakController extends Controller
     public function index(Request $req)
     {
         $query = Kontrak::with('customer');
-        if(!Auth::user()->role('admin')){
+        if(!Auth::user()->hasRole('SuperAdmin')){
             $query->where('lokasi_id',Auth::user()->karyawans->lokasi_id);
         }
         if ($req->customer) {
@@ -49,7 +50,7 @@ class KontrakController extends Controller
         $customer = Kontrak::select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(!Auth::user()->roles('admin'), function ($query) {
+        ->when(!Auth::user()->hasRole('SuperAdmin'), function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -57,7 +58,7 @@ class KontrakController extends Controller
         $sales = Kontrak::select('sales')
         ->distinct()
         ->join('karyawans', 'kontraks.sales', '=', 'karyawans.id')
-        ->when(!Auth::user()->roles('admin'), function ($query) {
+        ->when(!Auth::user()->hasRole('SuperAdmin'), function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -72,7 +73,7 @@ class KontrakController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->roles('admin')) {
+        if (!Auth::user()->hasRole('SuperAdmin')) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -204,7 +205,7 @@ class KontrakController extends Controller
      */
     public function show($kontrak)
     {
-        if (!Auth::user()->roles('admin')) {
+        if (!Auth::user()->hasRole('SuperAdmin')) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -239,7 +240,7 @@ class KontrakController extends Controller
      */
     public function edit($kontrak)
     {
-        if (!Auth::user()->roles('admin')) {
+        if (!Auth::user()->hasRole('SuperAdmin')) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -414,5 +415,13 @@ class KontrakController extends Controller
         ];
     
         return response()->json($response);
+    }
+
+    public function pdf($id)
+    {
+        $data = Kontrak::with('lokasi', 'lokasi.operasional', 'customer', 'rekening', 'data_sales', 'invoice', 'produk.produk')->find($id)->toArray();
+        $pdf = PDF::loadView('kontrak.pdf', $data);
+
+        return $pdf->stream('Kontrak.pdf');
     }
 }

@@ -58,7 +58,7 @@
                                     {{ $pembayaran->rekening->bank }}
                                     @endif
                                 </td>
-                                <td>{{ $pembayaran->tanggal_bayar }}</td>
+                                <td>{{ date('d F Y', strtotime($pembayaran->tanggal_bayar)) }}</td>
                                 <td>{{ $pembayaran->status_bayar }}</td>
                                 <td>
                                     <div class="dropdown">

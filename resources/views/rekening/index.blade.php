@@ -157,6 +157,9 @@
         $.ajax({
             type: "GET",
             url: "/rekening/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
             success: function(response) {
                 // console.log(response)
                 $('#editForm').attr('action', 'rekening/'+id+'/update');
@@ -191,6 +194,9 @@
             $.ajax({
                 type: "GET",
                 url: "/rekening/"+id+"/delete",
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
                 success: function(response) {
                     toastr.success(response.msg, 'Success', {
                         closeButton: true,

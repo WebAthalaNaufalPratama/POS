@@ -166,7 +166,7 @@
                                                     <th>Jumlah</th>
                                                     <th>Diskon</th>
                                                     <th>Harga Total</th>
-                                                    <th>PIC Perangkai</th>
+                                                    <!-- <th>PIC Perangkai</th> -->
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -223,7 +223,7 @@
                                                                 @endforeach
                                                             </select>
                                                         </td>
-                                                        <td><input type="number" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ $komponen->harga }}" onchange="calculateTotal(0)" readonly disabled></td>
+                                                        <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga, 0, ',', '.') }}" onchange="calculateTotal(0)" readonly disabled></td>
                                                         <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply($(this))" class="form-control" value="{{ $komponen->jumlah }}" onchange="calculateTotal(0)" disabled></td>
                                                         <td><select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)" disabled>
                                                                 <option value="0">Pilih Diskon</option>
@@ -246,7 +246,7 @@
                                                             </div>
                                                         </div> -->
                                                         </td>
-                                                        <td><input type="number" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual}}" readonly></td>
+                                                        <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.')}}" readonly></td>
                                                         <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
                                                         <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
@@ -272,10 +272,10 @@
                                             <div class="col-lg-6">
                                                 <div class="form-group">
                                                     <label>Pembayaran</label>
-                                                    <select id="cara_bayar" name="cara_bayar" class="form-control" required>
+                                                    <select id="cara_bayar" name="cara_bayar" class="form-control" required disabled>
                                                         <option value="">Pilih Pembayaran</option>
-                                                        <option value="cash">CASH</option>
-                                                        <option value="transfer">TRANSFER</option>
+                                                        <option value="cash" {{ $penjualans->cara_bayar == 'cash' ? 'selected' : ''}}>CASH</option>
+                                                        <option value="transfer" {{ $penjualans->cara_bayar == 'transfer' ? 'selected' : ''}}>TRANSFER</option>
                                                     </select>
                                                 </div>
                                                 <div id="inputTransfer" style="display: none;">
@@ -309,30 +309,30 @@
                                             <div class="col-lg-6">
                                                 <div class="form-group">
                                                     <label>Pengiriman</label>
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required disabled>
                                                         <option value="">Pilih Jenis Pengiriman</option>
-                                                        <option value="exspedisi">Ekspedisi</option>
-                                                        <option value="sameday">SameDay</option>
+                                                        <option value="exspedisi" {{ $penjualans->pilih_pengiriman == 'exspedisi' ? 'selected' : ''}}>Ekspedisi</option>
+                                                        <option value="sameday" {{ $penjualans->pilih_pengiriman == 'sameday' ? 'selected' : ''}}>SameDay</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
                                                     <div id="inputOngkir" style="display: none;">
                                                         <label for="alamat_tujuan">Alamat Tujuan</label>
-                                                        <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control"></textarea>
+                                                        <textarea type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" disabled>{{$penjualans->alamat_tujuan}}</textarea>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <label>Alamat Pengiriman</label>
-                                                        <select id="ongkir_id" name="ongkir_id" class="form-control">
+                                                        <select id="ongkir_id" name="ongkir_id" class="form-control"disabled>
                                                             <option value="">Pilih Alamat Tujuan</option>
                                                             @foreach($ongkirs as $ongkir)
-                                                            <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya }}">{{ $ongkir->nama }}</option>
+                                                            <option value="{{ $ongkir->id }}" data-biaya_ongkir="{{ $ongkir->biaya }}" {{ $ongkir->id == $penjualans->ongkir_id ? 'selected': ''}}>{{ $ongkir->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div class="form-group mt-3">
                                                     <label>Notes</label>
-                                                    <textarea class="form-control" id="notes" name="notes" required></textarea>
+                                                    <textarea class="form-control" id="notes" name="notes" value="{{$penjualans->notes}}" required disabled>{{$penjualans->notes}}</textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -414,7 +414,7 @@
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
-                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ $penjualans->sub_total}}" readonly required></h5>
+                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Promo</h4>
@@ -428,40 +428,40 @@
                                                                 <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                                             </div>
                                                         </div>
-                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{'Rp '. number_format($penjualans->total_promo, 0, ',', '.')}}" readonly>
                                                     </h5>
                                                 </li>
                                                 <li>
                                                     <h4>PPN
-                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
+                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required readonly>
                                                             <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude">EXCLUDE</option>
-                                                            <option value="include">INCLUDE</option>
+                                                            <option value="exclude" {{ $penjualans->jenis_ppn == 'exclude' ? 'selected' : ''}}>EXCLUDE</option>
+                                                            <option value="include" {{ $penjualans->jenis_ppn == 'include' ? 'selected' : ''}}>INCLUDE</option>
                                                         </select>
                                                     </h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" readonly required>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{$penjualans->persen_ppn}}" readonly required>
                                                             <span class="input-group-text">%</span>
                                                         </div>
-                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" readonly required>
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.')}}"readonly required>
                                                     </h5>
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" readonly required></h5>
+                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>DP</h4>
-                                                    <h5><input type="text" id="dp" name="dp" class="form-control" required></h5>
+                                                    <h5><input type="text" id="dp" name="dp" class="form-control" value="{{ 'Rp '. number_format($penjualans->dp, 0, ',', '.')}}" required readonly></h5>
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
-                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" readonly required></h5>
+                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Sisa Bayar</h4>
-                                                    <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly required></h5>
+                                                    <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{'Rp '. number_format($penjualans->sisa_bayar, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -614,6 +614,28 @@
 
 @section('scripts')
 <script>
+    $(document).ready(function() {
+        $('#pilih_pengiriman').change(function() {
+            var pengiriman = $(this).val();
+            var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
+
+            $('#inputOngkir').hide();
+            $('#inputExspedisi').hide();
+
+            if (pengiriman === "sameday") {
+                $('#inputOngkir').show();
+                $('#biaya_ongkir').prop('readonly', false);
+            } else if (pengiriman === "exspedisi") {
+                $('#inputExspedisi').show();
+                $('#biaya_ongkir').prop('readonly', true);
+                ongkirId();
+            }
+        });
+
+        // Panggil perubahan trigger saat halaman dimuat
+        $('#pilih_pengiriman').change();
+    });
+
 
     function copyDataToModal(index) {
         var namaProdukValue = $('#nama_produk_' + index).val();
@@ -734,6 +756,27 @@
             $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
             i++
         });
+
+        function showInputType(index) {
+            var jenisDiskon = $('#jenis_diskon_' + index).val();
+            
+            if (jenisDiskon === 'Nominal') {
+                $('#diskon_' + index).show();
+                $('#nominalInput_' + index).show();
+                $('#persenInput_' + index).hide();
+            } else if (jenisDiskon === 'persen') {
+                $('#diskon_' + index).show();
+                $('#nominalInput_' + index).hide();
+                $('#persenInput_' + index).show();
+            } else {
+                $('#diskon_' + index).hide();
+                $('#nominalInput_' + index).hide();
+                $('#persenInput_' + index).hide();
+            }
+        }
+
+        
+
 
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
