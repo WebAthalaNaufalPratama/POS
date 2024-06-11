@@ -90,6 +90,6 @@ class Kontrak extends Model
     }
 
     public function do_sewa(){
-        return $this->hasMany(DeliveryOrder::class, 'no_sewa', 'no_kontrak');
+        return $this->hasMany(DeliveryOrder::class, 'no_referensi', 'no_kontrak');
     }
 }

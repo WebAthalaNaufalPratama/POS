@@ -324,6 +324,7 @@
                             if($(this).val()){ // cek jika value kosong
                                 var idProdukTerjual = $('#produk_' + id).find(':selected').data('id');
                                 $('#komponen_' + id).empty();
+                                console.log(response)
                                 response.forEach(function(item){
                                     if(item.id == idProdukTerjual){
                                         $(jumlahProduk).attr('disabled', false);
@@ -334,7 +335,6 @@
                                         // komponen
                                         var jmlKomponen = 0;
                                         for (let j = 0; j < item.komponen.length; j++) {
-                                            console.log(item.komponen[j])
                                             if(item.jenis == null && (item.komponen[j].tipe_produk == 1 || item.komponen[j].tipe_produk == 2)){
                                                 var komponenRow = '<div id="komponen_'+id+'" class="row mt-2">'+
                                                                         '<div class="col">'+
@@ -359,7 +359,7 @@
                                                     $('#jumlahKomponen_'+id+'_'+j+'').val(item.komponen[j].jumlah);
                                                     $('#kondisiKomponen_'+id+'_'+j+'').val(item.komponen[j].kondisi).trigger('change');
                                                     $('#kondisiKomponen_'+id+'_'+j+'').select2();
-
+// console.log('s')
                                             }
                                         }
                                         if(item.jenis == null) {

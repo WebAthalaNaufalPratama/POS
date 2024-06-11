@@ -429,6 +429,6 @@ class KontrakController extends Controller
 
     public function excelPergantian($id)
     {
-        return Excel::download(new PergantianExport, 'users.xlsx');
+        return Excel::download(new PergantianExport($id), 'users.xlsx');
     }
 }
