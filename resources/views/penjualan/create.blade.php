@@ -31,8 +31,8 @@
                     <div class="col-sm">
                         @csrf
 
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                        <div class="row">
+                            <div class="col-md-6 border rounded pt-3">
                                 <h5>Informasi Pelanggan</h5>
                                 <div class="row">
                                     <div class="col-md-10">
@@ -109,7 +109,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <h5>Informasi Invoice</h5>
                                 <div class="row">
                                     <div class="col-md-6">
@@ -224,11 +224,11 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row justify-content-around">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
-                                <div class="row">
+                        <div class="row ">
+                            <!-- <div class="col-md-12 border rounded pt-3 me-1 mt-2"> -->
+                                <!-- <div class="row"> -->
                                     <!-- Payment and Shipping Section -->
-                                    <div class="col-lg-6 col-sm-12">
+                                    <div class="col-lg-8 col-sm-12 border rounded mt-2">
                                         <div class="row mt-4">
                                             <!-- Payment Section -->
                                             <div class="col-lg-6">
@@ -328,8 +328,8 @@
                                     </div>
 
                                     <!-- Summary Section -->
-                                    <div class="col-lg-6 col-sm-12">
-                                        <div class="total-order mt-4">
+                                    <div class="col-lg-4 col-sm-12 border rounded mt-2">
+                                        <div class="total-order ">
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
@@ -385,9 +385,9 @@
                                             </ul>
                                         </div>
                                     </div>
-                                </div>
+                                <!-- </div> -->
 
-                            </div>
+                            <!-- </div> -->
                         </div>
 
 
