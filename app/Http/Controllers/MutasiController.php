@@ -113,7 +113,7 @@ class MutasiController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
-        // dd($data);
+        dd($data);
 
         if ($req->hasFile('bukti')) {
             $file = $req->file('bukti');
