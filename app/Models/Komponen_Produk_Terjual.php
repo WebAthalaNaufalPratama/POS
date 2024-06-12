@@ -5,12 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Komponen_Produk_Terjual extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
     protected $table = 'komponen_produk_terjuals';
     protected $guarded = ['id'];
+
+    protected static $logAttributes =[
+        'produk_terjual_id',
+        'kode_produk',
+        'nama_produk',
+        'tipe_produk',
+        'kondisi',
+        'deskripsi',
+        'jumlah',
+        'harga_satuan',
+        'harga_total',
+    ];
 
     public function produk_terjual(){
         return $this->belongsTo(Produk_Terjual::class, 'produk_terjual_id', 'id');

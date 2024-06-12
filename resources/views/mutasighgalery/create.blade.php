@@ -31,8 +31,8 @@
                     <div class="col-sm">
                         @csrf
 
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                        <div class="row">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -420,6 +420,26 @@
             calculateTotal(0);
         });
 
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
+
+        function parseRupiahToNumber(rupiah) {
+            return parseInt(rupiah.replace(/[^\d]/g, ''));
+        }
+
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
             var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
@@ -437,23 +457,32 @@
             }
         });
 
+        $('#biaya_pengiriman').change(function(){
+            var Ongkir = $(this).val();
+            $(this).val(formatRupiah(Ongkir, 'Rp '));
+            $('#total_biaya').val(formatRupiah(Ongkir, 'Rp '));
+        });
+
         $('#ongkir_id').change(function() {
             var selectedOption = $(this).find('option:selected');
             var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
-            $('#biaya_pengiriman').val(ongkirValue);
+            $('#biaya_pengiriman').val(formatRupiah(ongkirValue,'Rp '));
             Totaltagihan();
         });
 
         function Totaltagihan() {
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+            var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
             var totalTagihan = biayaOngkir;
 
-            $('#total_biaya').val(totalTagihan.toFixed(2));
-            $('#sisa_bayar').val(sisaBayar.toFixed(2));
-            $('#jumlah_ppn').val(ppn.toFixed(2));
+            $('#total_biaya').val(formatRupiah(totalTagihan, 'Rp '));
         }
 
         $('#biaya_pengiriman', '#total_biaya').on('input', Totaltagihan);
+
+        $('form').on('submit', function(e){
+            $('#total_biaya').val(parseRupiahToNumber($('#total_biaya').val()));
+            $('#biaya_pengiriman').val(parseRupiahToNumber($('#biaya_pengiriman').val()));
+        });
 
         $('#bukti').on('change', function() {
             const file = $(this)[0].files[0];

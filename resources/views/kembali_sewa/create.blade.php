@@ -287,7 +287,6 @@
             }
         });
         $(document).on('change', '[id^=no_do_produk_]', function() {
-            var dataDO = $(this).find(':selected').data('produk');
             var id = $(this).attr('id').split('_')[3];
             var selectProduk = $('#produk_' + id);
             var jumlahProduk = $('#jumlah_' + id);
@@ -296,17 +295,91 @@
             $('#komponen_' + id).empty();
 
             if($(this).val()){ // cek jika value kosong
-                $(lokasiProduk).empty()
-                $(lokasiProduk).append('<option value="">Pilih Detail Lokasi</option>')
-                $(selectProduk).attr('disabled', false);
-                $(selectProduk).empty()
-                $(selectProduk).append('<option value="">Pilih Produk</option>')
-                for (let i = 0; i < dataDO.produk.length; i++) {
-                    if(dataDO.produk[i].jenis != 'TAMBAHAN'){
-                        $(selectProduk).append('<option value="' + dataDO.produk[i].produk.kode + '">' + dataDO.produk[i].produk.nama + '</option>');
-                        $(lokasiProduk).append('<option value="' + dataDO.produk[i].detail_lokasi + '">' + dataDO.produk[i].detail_lokasi + '</option>');
+                var data = {
+                    no_do: $(this).val(),
+                };
+                $.ajax({
+                    url: '/getProdukDo',
+                    type: 'GET',
+                    data: data,
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        $(lokasiProduk).empty()
+                        $(lokasiProduk).append('<option value="">Pilih Detail Lokasi</option>')
+                        $(selectProduk).attr('disabled', false);
+                        $(selectProduk).empty()
+                        $(selectProduk).append('<option value="">Pilih Produk</option>')
+                        for (let i = 0; i < response.length; i++) {
+                            if(response[i].jenis != 'TAMBAHAN'){
+                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">'+response[i].id+''+response[i].detail_lokasi+'' + response[i].produk.nama + '</option>');
+                                $(lokasiProduk).append('<option value="' + response[i].detail_lokasi + '">' + response[i].detail_lokasi + '</option>');
+                            }
+                        }
+                        $(document).on('change', '[id^=produk_]', function() {
+                            var id = $(this).attr('id').split('_')[1];
+                            var jumlahProduk = $('#jumlah_' + id);
+                            var lokasiProduk = $('#lokasi_' + id);
+                            if($(this).val()){ // cek jika value kosong
+                                var idProdukTerjual = $('#produk_' + id).find(':selected').data('id');
+                                $('#komponen_' + id).empty();
+                                console.log(response)
+                                response.forEach(function(item){
+                                    if(item.id == idProdukTerjual){
+                                        $(jumlahProduk).attr('disabled', false);
+                                        $(lokasiProduk).attr('disabled', false);
+                                        $(jumlahProduk).val(item.jumlah);
+                                        $(lokasiProduk).val(item.detail_lokasi).trigger('change');
+
+                                        // komponen
+                                        var jmlKomponen = 0;
+                                        for (let j = 0; j < item.komponen.length; j++) {
+                                            if(item.jenis == null && (item.komponen[j].tipe_produk == 1 || item.komponen[j].tipe_produk == 2)){
+                                                var komponenRow = '<div id="komponen_'+id+'" class="row mt-2">'+
+                                                                        '<div class="col">'+
+                                                                            '<select id="namaKomponen_'+id+'_'+j+'" name="namaKomponen[]" class="form-control" required readonly>'+
+                                                                                '<option value="' + item.komponen[j].kode_produk + '">' + item.komponen[j].nama_produk + '</option>'+
+                                                                            '</select>'+
+                                                                        '</div>'+
+                                                                        '<div class="col">'+
+                                                                            '<select id="kondisiKomponen_'+id+'_'+j+'" name="kondisiKomponen[]" class="form-control">' +
+                                                                            '<option value="">Pilih Kondisi</option>' +
+                                                                            '@foreach ($kondisi as $item)' +
+                                                                                '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
+                                                                            '@endforeach' +
+                                                                        '</select>' +
+                                                                        '</div>' +
+                                                                        '<div class="col">'+
+                                                                            '<input type="number" name="jumlahKomponen[]" id="jumlahKomponen_'+id+'_'+j+'" class="form-control" value="" required>'+
+                                                                        '</div>'+
+                                                                    '</div>';
+                                                    $('#komponen_' + id).append(komponenRow);
+                                                    jmlKomponen++;
+                                                    $('#jumlahKomponen_'+id+'_'+j+'').val(item.komponen[j].jumlah);
+                                                    $('#kondisiKomponen_'+id+'_'+j+'').val(item.komponen[j].kondisi).trigger('change');
+                                                    $('#kondisiKomponen_'+id+'_'+j+'').select2();
+// console.log('s')
+                                            }
+                                        }
+                                        if(item.jenis == null) {
+                                        $('#komponen_' + id).append('<input type="hidden" name="indexKomponen[]" value="'+jmlKomponen+'">');
+                                    }
+                                    }
+                                })
+                            } else { // kosongkan input jika value kosong
+                                $('#komponen_' + id).empty();
+                                $(jumlahProduk).attr('disabled', true);
+                                $(lokasiProduk).attr('disabled', true);
+                                $(jumlahProduk).val(0);
+                                $(lokasiProduk).val('').trigger('change');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error)
                     }
-                }
+                });
             } else { // kosongkan input jika value kosong
                 $(selectProduk).attr('disabled', true);
                 $(jumlahProduk).attr('disabled', true);
@@ -316,59 +389,7 @@
                 $(lokasiProduk).val('').trigger('change');
             }
         });
-        $(document).on('change', '[id^=produk_]', function() {
-            var id = $(this).attr('id').split('_')[1];
-            var jumlahProduk = $('#jumlah_' + id);
-            var lokasiProduk = $('#lokasi_' + id);
-            if($(this).val()){ // cek jika value kosong
-                var dataDO = $('#no_do_produk_' + id).find(':selected').data('produk');
-                $('#komponen_' + id).empty();
-                for (let i = 0; i < dataDO.produk.length; i++) {
-                    $(jumlahProduk).attr('disabled', false);
-                    $(lokasiProduk).attr('disabled', false);
-                    $(jumlahProduk).val(dataDO.produk[i].jumlah);
-                    $(lokasiProduk).val(dataDO.produk[i].detail_lokasi).trigger('change');
-
-                    var jmlKomponen = 0;
-                    for (let j = 0; j < dataDO.produk[i].komponen.length; j++) {
-                        if(dataDO.produk[i].jenis == null && (dataDO.produk[i].komponen[j].tipe_produk == 1 || dataDO.produk[i].komponen[j].tipe_produk == 2)) { // filter pot dan bunga saja
-                            var komponenRow = '<div id="komponen_'+id+'" class="row mt-2">'+
-                                                '<div class="col">'+
-                                                    '<select id="namaKomponen_'+id+'_'+j+'" name="namaKomponen[]" class="form-control" required readonly>'+
-                                                        '<option value="' + dataDO.produk[i].komponen[j].kode_produk + '">' + dataDO.produk[i].komponen[j].nama_produk + '</option>'+
-                                                    '</select>'+
-                                                '</div>'+
-                                                '<div class="col">'+
-                                                    '<select id="kondisiKomponen_'+id+'_'+j+'" name="kondisiKomponen[]" class="form-control">' +
-                                                    '<option value="">Pilih Kondisi</option>' +
-                                                    '@foreach ($kondisi as $item)' +
-                                                        '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
-                                                    '@endforeach' +
-                                                '</select>' +
-                                                '</div>' +
-                                                '<div class="col">'+
-                                                    '<input type="number" name="jumlahKomponen[]" id="jumlahKomponen_'+id+'_'+j+'" class="form-control" value="" required>'+
-                                                '</div>'+
-                                            '</div>';
-                            $('#komponen_' + id).append(komponenRow);
-                            jmlKomponen++;
-                            $('#jumlahKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].jumlah);
-                            $('#kondisiKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].kondisi).trigger('change');
-                            $('#kondisiKomponen_'+id+'_'+j+'').select2();
-                        }
-                    }
-                    if(dataDO.produk[i].jenis == null) {
-                        $('#komponen_' + id).append('<input type="hidden" name="indexKomponen[]" value="'+jmlKomponen+'">');
-                    }
-                }
-            } else { // kosongkan input jika value kosong
-                $('#komponen_' + id).empty();
-                $(jumlahProduk).attr('disabled', true);
-                $(lokasiProduk).attr('disabled', true);
-                $(jumlahProduk).val(0);
-                $(lokasiProduk).val('').trigger('change');
-            }
-        });
+        
         function clearFile(){
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);

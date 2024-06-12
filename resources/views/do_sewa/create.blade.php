@@ -121,7 +121,6 @@
                                     $i = 0;
                                     @endphp
                                     @foreach ($kontrak->produk as $produk) 
-                                    @if ($produk->jumlah_dikirim < $produk->jumlah)
                                     <tr id="row{{ $i }}">
                                         <td>
                                             <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
@@ -143,7 +142,6 @@
                                             $i++;
                                         @endphp
                                     </tr>
-                                    @endif
                                     @endforeach
                                     @endif
                                 </tbody>
@@ -231,12 +229,9 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit" {{ $terkirimSemua ? 'disabled' : '' }}>Submit</button>
+                    <button class="btn btn-primary" type="submit">Submit</button>
                     <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
-                @if ($terkirimSemua)
-                    <p class="text-end text-danger">Semua produk sudah dikirim</p>
-                @endif
                 </form>
             </div>
         </div>
@@ -277,13 +272,13 @@
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkSewa as $pj)'+
-                                        '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}">{{ $pj->produk->nama }}</option>'+
+                                        '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}">({{ $pj->id }}) {{ $pj->produk->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
-                            '<td><input type="number" name="satuan[]" id="satuan_'+i+'" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control"></td>'+
-                            '<td><input type="number" name="detail_lokasis[]" id="detail_lokasis_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="satuan[]" id="satuan_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_'+i+'" class="form-control"></td>'+
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();

@@ -31,8 +31,8 @@
                     <!-- <form action="{{ route('mutasigalery.update', ['mutasiGO' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data"> -->
                         @csrf
                         @method('patch')
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                        <div class="row ">
+                            <div class="col-md-6 border rounded pt-3 ">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -288,7 +288,7 @@
                                                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                                                 </a>
                                                                     <div class="dropdown-menu">
-                                                                        <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}">Edit</a>
+                                                                        <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}"><img src="assets/img/icons/edit-6.svg" class="me-2" alt="img">Edit</a>
                                                                     </div>
                                                                 </div>
                                                             </td>

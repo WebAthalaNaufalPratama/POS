@@ -55,6 +55,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('getPromo', 'PromoController@getPromo')->name('getPromo');
         Route::get('getProdukTerjual', 'ProdukTerjualController@getProdukTerjual')->name('getProdukTerjual');
         Route::post('addKomponen', 'KomponenProdukTerjualController@addKomponen')->name('addKomponen');
+        Route::get('getProdukDo', 'DeliveryOrderController@getProdukDo')->name('getProdukDo');
 
         /**
          * User Routes
@@ -163,6 +164,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{tradisional}/update', 'ProdukJualController@update')->name('tradisional.update');
             Route::get('/{tradisional}/delete', 'ProdukJualController@destroy')->name('tradisional.destroy');
         });
+
         Route::group(['prefix' => 'gift'], function() {
             Route::get('/', 'ProdukJualController@index')->name('gift.index');
             Route::get('/create', 'ProdukJualController@create')->name('gift.create');
@@ -295,7 +297,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/edit', 'KontrakController@edit')->name('kontrak.edit');
             Route::patch('/{kontrak}/update', 'KontrakController@update')->name('kontrak.update');
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
-            Route::get('/{kontrak}/pdf', 'KontrakController@pdf')->name('kontrak.pdf');
+            Route::get('/{kontrak}/pdfKontrak', 'KontrakController@pdfKontrak')->name('kontrak.pdfKontrak');
+            Route::get('/{kontrak}/excelPergantian', 'KontrakController@excelPergantian')->name('kontrak.excelPergantian');
         });
 
         Route::group(['prefix' => 'dopenjualan'], function() {
@@ -306,6 +309,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{dopenjualan}/edit', 'DopenjualanController@edit')->name('dopenjualan.edit');
             Route::patch('/{dopenjualan}/update', 'DopenjualanController@update')->name('dopenjualan.update');
             Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
+            Route::get('{dopenjualan}/pdfdopenjualan', 'DoPenjualanController@pdfdopenjualan')->name('pdfdopenjualan.generate');
         });
 
         Route::group(['prefix' => 'pembayaran'], function() {
@@ -527,25 +531,25 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGAG}/payment', 'MutasiController@payment_galerygalery')->name('mutasigalerygalery.payment');
         });
 
-        Route::group(['prefix' => 'kas_pusat'], function() {
-            Route::get('/', 'TransaksiKasController@index_pusat')->name('kas_pusat.index');
-            Route::get('/create', 'TransaksiKasController@create_pusat')->name('kas_pusat.create');
-            Route::post('/store', 'TransaksiKasController@store_pusat')->name('kas_pusat.store');
-            Route::get('/{kas_pusat}/show', 'TransaksiKasController@show_pusat')->name('kas_pusat.show');
-            Route::get('/{kas_pusat}/edit', 'TransaksiKasController@edit_pusat')->name('kas_pusat.edit');
-            Route::patch('/{kas_pusat}/update', 'TransaksiKasController@update_pusat')->name('kas_pusat.update');
-            Route::get('/{kas_pusat}/delete', 'TransaksiKasController@destroy_pusat')->name('kas_pusat.destroy');
-        });
+        // Route::group(['prefix' => 'kas_pusat'], function() {
+        //     Route::get('/', 'TransaksiKasController@index_pusat')->name('kas_pusat.index');
+        //     Route::get('/create', 'TransaksiKasController@create_pusat')->name('kas_pusat.create');
+        //     Route::post('/store', 'TransaksiKasController@store_pusat')->name('kas_pusat.store');
+        //     Route::get('/{kas_pusat}/show', 'TransaksiKasController@show_pusat')->name('kas_pusat.show');
+        //     Route::get('/{kas_pusat}/edit', 'TransaksiKasController@edit_pusat')->name('kas_pusat.edit');
+        //     Route::patch('/{kas_pusat}/update', 'TransaksiKasController@update_pusat')->name('kas_pusat.update');
+        //     Route::get('/{kas_pusat}/delete', 'TransaksiKasController@destroy_pusat')->name('kas_pusat.destroy');
+        // });
 
-        Route::group(['prefix' => 'kas_gallery'], function() {
-            Route::get('/', 'TransaksiKasController@index_gallery')->name('kas_gallery.index');
-            Route::get('/create', 'TransaksiKasController@create_gallery')->name('kas_gallery.create');
-            Route::post('/store', 'TransaksiKasController@store_gallery')->name('kas_gallery.store');
-            Route::get('/{kas_gallery}/show', 'TransaksiKasController@show_gallery')->name('kas_gallery.show');
-            Route::get('/{kas_gallery}/edit', 'TransaksiKasController@edit_gallery')->name('kas_gallery.edit');
-            Route::patch('/{kas_gallery}/update', 'TransaksiKasController@update_gallery')->name('kas_gallery.update');
-            Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
-        });
+        // Route::group(['prefix' => 'kas_gallery'], function() {
+        //     Route::get('/', 'TransaksiKasController@index_gallery')->name('kas_gallery.index');
+        //     Route::get('/create', 'TransaksiKasController@create_gallery')->name('kas_gallery.create');
+        //     Route::post('/store', 'TransaksiKasController@store_gallery')->name('kas_gallery.store');
+        //     Route::get('/{kas_gallery}/show', 'TransaksiKasController@show_gallery')->name('kas_gallery.show');
+        //     Route::get('/{kas_gallery}/edit', 'TransaksiKasController@edit_gallery')->name('kas_gallery.edit');
+        //     Route::patch('/{kas_gallery}/update', 'TransaksiKasController@update_gallery')->name('kas_gallery.update');
+        //     Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
+        // });
 
         Route::group(['prefix' => 'pemakaian_sendiri'], function() {
             Route::get('/', 'PemakaianSendiriController@index')->name('pemakaian_sendiri.index');

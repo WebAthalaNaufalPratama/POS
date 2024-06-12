@@ -66,7 +66,6 @@ if (! function_exists('base64_image')) {
         return $base64;
     }
 }
-
 if (!function_exists('stringToCamelCase')) {
     function stringToCamelCase($string) {
         $string = strtolower($string);

@@ -31,8 +31,8 @@
                     <div class="col-sm">
                         @csrf
 
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                        <div class="row ">
+                            <div class="col-md-6 border rounded pt-3 ">
                                 <h5>Informasi Pelanggan</h5>
                                 <div class="row">
                                     <div class="col-md-10">
@@ -111,7 +111,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3 ">
                                 <h5>Informasi Invoice</h5>
                                 <div class="row">
                                     <div class="col-md-6">
@@ -363,49 +363,6 @@
                                                 </table>
                                             </div>
                                         </div>
-                                        <!-- <div class="card">
-                                            <div class="card-header">
-                                                <h4 class="card-title">Riwayat</h4>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive">
-                                                <table class="table datanew">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>No</th>
-                                                        <th>Tanggal Perubahan</th>
-                                                        <th>Customer</th>
-                                                        <th>Pengubah</th>
-                                                        <th>Log</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($riwayat as $item)
-                                                        <tr>
-                                                            <td>{{ $loop->iteration }}</td>
-                                                            <td>{{ $item->created_at ?? '-' }}</td>
-                                                            <td>{{ $item->subject->customer->nama ?? '-' }}</td>
-                                                            <td>{{ $item->causer->name ?? '-' }}</td>
-                                                            <td>
-                                                                @php
-                                                                    $changes = $item->changes();
-                                                                    if(isset($changes['old'])){
-                                                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
-                                                                        foreach ($diff as $key => $value) {
-                                                                            echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span>" . "<br>";
-                                                                        }
-                                                                    } else {
-                                                                        echo 'Data Kontrak Terbuat';
-                                                                    }
-                                                                @endphp
-                                                            </td>
-                                                        </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                                </div>
-                                            </div>
-                                        </div> -->
                                     </div>
 
                                     <!-- Summary Section -->
@@ -467,6 +424,108 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="card">
+                                            <div class="card-header">
+                                                <h4 class="card-title">Riwayat</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                <table class="table datanew">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Tanggal Perubahan</th>
+                                                        <th>Pengubah</th>
+                                                        <th>Log</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach ($riwayat as $item)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>{{ $item->created_at ?? '-' }}</td>
+                                                            <td>{{ $item->causer->name ?? '-' }}</td>
+                                                            <td>
+                                                                @php
+                                                                    $properties = json_decode($item->properties, true);
+                                                                    $changes = $item->changes();
+
+                                                                    $keysToDisplay = ['nama_produk', 'jumlah', 'kondisi'];
+                                                                    $perangkaiDisplay = ['perangkai_id'];
+                                                                    $kondisiMapping = [];
+                                                                    foreach ($kondisis as $kondisi) {
+                                                                        $kondisiMapping[$kondisi->id] = $kondisi->nama;
+                                                                    }
+
+                                                                    $karyawanMapping = [];
+                                                                    foreach($pegawais as $karyawan){
+                                                                        $karyawanMapping[$karyawan->id] = $karyawan->nama;
+                                                                    }
+                                                                    
+                                                                    if ($item->description == 'deleted' && $item->subject_type == 'App\Models\Komponen_Produk_Terjual') {
+                                                                        foreach ($properties['attributes'] as $key => $value) {
+                                                                            if (in_array($key, $keysToDisplay)) {
+                                                                                if ($key == 'kondisi' && isset($kondisiMapping[$value])) {
+                                                                                    echo "$key: <span class='text-danger'>" . $kondisiMapping[$value] . "</span> => <span class='text-success'>Dihapus</span><br>";
+                                                                                } else {
+                                                                                    echo "$key: <span class='text-danger'>{$value}</span> => <span class='text-success'>Dihapus</span><br>";
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                    } else if($item->description == 'created' && $item->subject_type == 'App\Models\Komponen_Produk_Terjual'){
+                                                                        foreach ($properties['attributes'] as $key => $value) {
+                                                                            if (in_array($key, $keysToDisplay)) {
+                                                                                if ($key == 'kondisi' && isset($kondisiMapping[$value])) {
+                                                                                    echo "$key: <span class='text-success'>" . $kondisiMapping[$value] . "</span> => <span class='text-success'>Dibuat</span><br>";
+                                                                                } else {
+                                                                                    echo "$key: <span class='text-success'>{$value}</span> => <span class='text-success'>Dibuat</span><br>";
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    } else if ($item->description == 'deleted' && $item->subject_type == 'App\Models\FormPerangkai') {
+                                                                        foreach ($properties['attributes'] as $key => $value) {
+                                                                            if (in_array($key, $perangkaiDisplay)) {
+                                                                                if ($key == 'perangkai_id' && isset($karyawanMapping[$value])) {
+                                                                                    echo "$key: <span class='text-danger'>" . $karyawanMapping[$value] . "</span> => <span class='text-success'>Dihapus</span><br>";
+                                                                                } else {
+                                                                                    echo "$key: <span class='text-danger'>{$value}</span> => <span class='text-success'>Dihapus</span><br>";
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                    } else if ($item->description == 'created' && $item->subject_type == 'App\Models\FormPerangkai') {
+                                                                        foreach ($properties['attributes'] as $key => $value) {
+                                                                            if (in_array($key, $perangkaiDisplay)) {
+                                                                                if ($key == 'perangkai_id' && isset($karyawanMapping[$value])) {
+                                                                                    echo "$key: <span class='text-danger'>" . $karyawanMapping[$value] . "</span> => <span class='text-success'>Dibuat</span><br>";
+                                                                                } else {
+                                                                                    echo "$key: <span class='text-danger'>{$value}</span> => <span class='text-success'>Dibuat</span><br>";
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                    } else if (isset($changes['old'])) {
+                                                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                                                                        foreach ($diff as $key => $value) {
+                                                                            echo "$key: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
+                                                                        }
+                                                                    } else {
+                                                                        if ($item->subject_type == 'App\Models\Penjualan') {
+                                                                            echo 'Data Invoice Penjualan Terbuat';
+                                                                        } elseif ($item->subject_type == 'App\Models\Produk_Terjual') {
+                                                                            echo 'Data Produk Penjualan Terbuat';
+                                                                        }
+                                                                    }
+                                                                @endphp
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                                </div>
+                                            </div>
+                                        </div>
                             </div>
                         </div>
 

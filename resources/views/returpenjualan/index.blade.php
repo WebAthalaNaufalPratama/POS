@@ -13,33 +13,33 @@
             </div>
             <div class="card-body">
                 <div class="row ps-2 pe-2">
-                <div class="col-sm-2 ps-0 pe-0">
-                    <select id="filterCustomer" name="filterCustomer" class="form-control" title="Customer">
-                        <option value="">Pilih Customer</option>
-                        @foreach ($customers as $item)
-                            <option value="{{ $item->customer->id }}" {{ $item->customer->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->customer->nama }}</option>
-                        @endforeach
-                    </select>
+                    <div class="col-sm-2 ps-0 pe-0">
+                        <select id="filterCustomer" name="filterCustomer" class="form-control" title="Customer">
+                            <option value="">Pilih Customer</option>
+                            @foreach ($customers as $item)
+                                <option value="{{ $item->customer->id }}" {{ $item->customer->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->customer->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-sm-2 ps-0 pe-0">
+                        <select id="filterDriver" name="filterDriver" class="form-control" title="driver">
+                            <option value="">Pilih driver</option>
+                            @foreach ($suppliers as $item)
+                                <option value="{{ $item->supplier->id }}" {{ $item->supplier->id == request()->input('driver') ? 'selected' : '' }}>{{ $item->supplier->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-sm-2 ps-0 pe-0">
+                        <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                    </div>
+                    <div class="col-sm-2 ps-0 pe-0">
+                        <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('returpenjualan.index') }}" class="btn btn-info">Filter</a>
+                        <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('returpenjualan.index') }}" class="btn btn-warning">Clear</a>
+                    </div>
                 </div>
-                <div class="col-sm-2 ps-0 pe-0">
-                    <select id="filterDriver" name="filterDriver" class="form-control" title="driver">
-                        <option value="">Pilih driver</option>
-                        @foreach ($suppliers as $item)
-                            <option value="{{ $item->supplier->id }}" {{ $item->supplier->id == request()->input('driver') ? 'selected' : '' }}>{{ $item->supplier->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
-                </div>
-                <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
-                </div>
-                <div class="col-sm-2">
-                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('returpenjualan.index') }}" class="btn btn-info">Filter</a>
-                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('returpenjualan.index') }}" class="btn btn-warning">Clear</a>
-                </div>
-            </div>
                 <div class="table-responsive">
                     <table class="table datanew">
                         <thead>
@@ -84,10 +84,10 @@
                                                 $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                             @endphp
                                             @if($lokasi->lokasi->tipe_lokasi != 2)
-                                                <a class="dropdown-item" href="{{ route('returpenjualan.show', ['returpenjualan' => $retur->id]) }}">Atur Komponen Ganti</a>
+                                                <a class="dropdown-item" href="{{ route('returpenjualan.show', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Atur Komponen Ganti</a>
                                             @endif
-                                            <a class="dropdown-item" href="{{ route('returpenjualan.payment', ['returpenjualan' => $retur->id]) }}">Pembayaran Retur</a>
-                                            <a class="dropdown-item" href="{{ route('mutasioutlet.create', ['returpenjualan' => $retur->id]) }}">Mutasi Outlet Ke Galery</a>
+                                            <a class="dropdown-item" href="{{ route('returpenjualan.payment', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Pembayaran Retur</a>
+                                            <a class="dropdown-item" href="{{ route('mutasioutlet.create', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Mutasi Outlet Ke Galery</a>
                                         </div>
                                     </div>
                                 </td>

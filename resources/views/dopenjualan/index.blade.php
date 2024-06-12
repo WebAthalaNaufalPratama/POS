@@ -70,7 +70,8 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('dopenjualan.show', ['dopenjualan' => $dopenjualan->id]) }}">Show</a>
+                                            <a class="dropdown-item" href="{{ route('dopenjualan.show', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show</a>
+                                            <a class="dropdown-item" href="{{ route('pdfdopenjualan.generate', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak DO</a>
                                             <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $dopenjualan->id }})">Delete</a> -->
                                         </div>
                                     </div>

@@ -24,6 +24,9 @@ use App\Models\InventoryGallery;
 use App\Models\InventoryGreenHouse;
 use App\Models\InventoryOutlet;
 use App\Models\Pembayaran;
+use App\Models\User;
+use Carbon\Carbon;
+use App\Models\FormPerangkai;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -177,7 +180,7 @@ class PenjualanController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
-        dd($data);
+        // dd($data);
         // dd($req->distribusi);
         $data['dibuat_id'] = Auth::user()->id;
         $data['tanggal_dibuat'] = now();
@@ -417,8 +420,12 @@ class PenjualanController extends Controller
         $Invoice = Penjualan::latest()->first();
         $kondisis = Kondisi::all();
         $invoices = Penjualan::get();
+        $pegawais = Karyawan::all();
+
+        $riwayat = Activity::where('subject_type', Penjualan::class)->where('subject_id', $penjualan)->orderBy('id', 'desc')->get();
+
         // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
-        return view('penjualan.payment', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
+        return view('penjualan.payment', compact('pegawais','riwayat','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
     }
 
     public function show(Request $req, $penjualan)
@@ -429,6 +436,7 @@ class PenjualanController extends Controller
         // dd($penjualans);
         $customers = Customer::where('id', $penjualans->id_customer)->get();
         $karyawans = Karyawan::where('id', $penjualans->employee_id)->get();
+        $pegawais = Karyawan::all(); 
         $promos = Promo::where('id', $penjualans->promo_id)->get();
         $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
@@ -447,11 +455,58 @@ class PenjualanController extends Controller
         $kondisis = Kondisi::all();
         $invoices = Penjualan::get();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
-        $riwayat = Activity::where('subject_type', Penjualan::class)->where('subject_id', $penjualan)->orderBy('id', 'desc')->get();
+        //log activity
+        $riwayatPenjualan = Activity::where('subject_type', Penjualan::class)->where('subject_id', $penjualan)->orderBy('id', 'desc')->get();
+        $riwayatProdukTerjual = Activity::where('subject_type', Produk_Terjual::class)->where('subject_id', $produks[0]->id)->orderBy('id', 'desc')->get();
+        $riwayatPerangkai = Activity::where('subject_type', FormPerangkai::class)->orderBy('id', 'desc')->get();
+        $komponenIds = $produks[0]->komponen->pluck('id')->toArray();
+        $riwayatKomponen = Activity::where('subject_type', Komponen_Produk_Terjual::class)->orderBy('id', 'desc')->get();
+        $produkIds = $produks->pluck('id')->toArray();
+        $filteredRiwayat = $riwayatKomponen->filter(function (Activity $activity) use ($produkIds) {
+            $properties = json_decode($activity->properties, true);
+            return isset($properties['attributes']['produk_terjual_id']) && in_array($properties['attributes']['produk_terjual_id'], $produkIds);
+        });
+        
+        $latestCreatedAt = $filteredRiwayat->max('created_at');
+        
+        $latestRiwayat = $filteredRiwayat->filter(function (Activity $activity) use ($latestCreatedAt) {
+            return $activity->created_at == $latestCreatedAt;
+        });
+
+        $formIds = $produks->pluck('no_form')->toArray();
+        $filteredFormRiwayat = $riwayatPerangkai->filter(function (Activity $activity) use ($formIds) {
+            $properties = json_decode($activity->properties, true);
+            return isset($properties['attributes']['no_form']) && in_array($properties['attributes']['no_form'], $formIds);
+        });
+        
+        $latestFormCreatedAt = $filteredFormRiwayat->max('created_at');
+        
+        $latestFormRiwayat = $filteredFormRiwayat->filter(function (Activity $activity) use ($latestFormCreatedAt) {
+            return $activity->created_at == $latestFormCreatedAt;
+        });
+        
+        // dd($latestFormRiwayat);
+        
+        $mergedriwayat = [
+            'penjualan' => $riwayatPenjualan,
+            'komponen_produk_terjual' => $latestRiwayat,
+            'form_perangkai' => $latestFormRiwayat
+        ];
+        
+        $riwayat = collect($mergedriwayat)
+            ->flatMap(function ($riwayatItem, $jenis) {
+                return $riwayatItem->map(function ($item) use ($jenis) {
+                    $item->jenis = $jenis;
+                    return $item;
+                });
+            })
+            ->sortByDesc('id')
+            ->values()
+            ->all();
         
         // dd($riwayat);
         // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
-        return view('penjualan.show', compact('riwayat','produkKomponens','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai'));
+        return view('penjualan.show', compact('pegawais','riwayat','produkKomponens','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai'));
     }
 
     public function store_komponen(Request $req)
@@ -731,13 +786,19 @@ class PenjualanController extends Controller
 
     public function pdfinvoicepenjualan($penjualan)
     {
-        $data = [
-            'title' => 'Contoh PDF',
-            'content' => 'Ini adalah contoh isi PDF.'
-        ];
-    
+        $data = Penjualan::find($penjualan)->toArray();
+        $data['lokasi'] = Lokasi::where('id', $data['lokasi_id'])->value('nama');
+        $customer = Customer::where('id', $data['id_customer'])->first();
+        $data['customer'] = $customer->nama;
+        $data['no_handphone'] = $customer->handphone;
+        $data['sales'] = Karyawan::where('id', $data['employee_id'])->value('nama');
+        $data['produks'] = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $data['no_invoice'])->get();
+        $data['dibuat'] = User::where('id', $data['dibuat_id'])->value('name');
+        $data['dibukukan'] =User::where('id', $data['dibukukan_id'])->value('name');
+        $data['auditor'] = User::where('id', $data['auditor_id'])->value('name');
+        // dd($data);
         $pdf = PDF::loadView('penjualan.view', $data);
     
-        return $pdf->stream('contoh.pdf');
+        return $pdf->stream($data['no_invoice'] . '_INVOICE PENJUALAN.pdf');
     }
 }

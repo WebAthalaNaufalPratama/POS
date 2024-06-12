@@ -31,8 +31,8 @@
                     <div class="col-sm">
                         @csrf
 
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                        <div class="row">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -228,10 +228,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row justify-content-around">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                        <!-- <div class="row justify-content-around">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2"> -->
                                 <div class="row">
-                                <div class="col-lg-8 col-sm-6 col-12 ">
+                                    <div class="col-lg-8 col-sm-6 col-12">
                                         <div class="row mt-4">
                                             <div class="col-lg-8">
                                                 <table class="table table-responsive border rounded">
@@ -258,7 +258,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4 float-md-right">
+                                    <div class="col-lg-4 float-md-right border radius">
                                         <div class="total-order">
                                             <ul>
                                                 <li>
@@ -297,8 +297,8 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            <!-- </div>
+                        </div> -->
 
 
                         <div class="text-end mt-3">
@@ -527,29 +527,7 @@
             calculateTotal(0);
         });
 
-        $('#pilih_pengiriman').change(function() {
-            var pengiriman = $(this).val();
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
-
-            $('#inputOngkir').hide();
-            $('#inputExspedisi').hide();
-
-            if (pengiriman === "sameday") {
-                $('#inputOngkir').show();
-                $('#biaya_pengiriman').prop('readonly', false);
-            } else if (pengiriman === "exspedisi") {
-                $('#inputExspedisi').show();
-                $('#biaya_pengiriman').prop('readonly', true);
-                ongkirId();
-            }
-        });
-
-        $('#ongkir_id').change(function() {
-            var selectedOption = $(this).find('option:selected');
-            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
-            $('#biaya_pengiriman').val(ongkirValue);
-            Totaltagihan();
-        });
+        
 
         $('#bukti').on('change', function() {
             const file = $(this)[0].files[0];
@@ -577,16 +555,69 @@
             $('#preview').attr('src', defaultImg);
         };
 
-        function Totaltagihan() {
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
+
+        function parseRupiahToNumber(rupiah) {
+            return parseInt(rupiah.replace(/[^\d]/g, ''));
+        }
+
+        $('#pilih_pengiriman').change(function() {
+            var pengiriman = $(this).val();
             var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+
+            $('#inputOngkir').hide();
+            $('#inputExspedisi').hide();
+
+            if (pengiriman === "sameday") {
+                $('#inputOngkir').show();
+                $('#biaya_pengiriman').prop('readonly', false);
+            } else if (pengiriman === "exspedisi") {
+                $('#inputExspedisi').show();
+                $('#biaya_pengiriman').prop('readonly', true);
+                ongkirId();
+            }
+        });
+
+        $('#biaya_pengiriman').change(function(){
+            var Ongkir = $(this).val();
+            $(this).val(formatRupiah(Ongkir, 'Rp '));
+            $('#total_biaya').val(formatRupiah(Ongkir, 'Rp '));
+        });
+
+        $('#ongkir_id').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
+            $('#biaya_pengiriman').val(formatRupiah(ongkirValue,'Rp '));
+            Totaltagihan();
+        });
+
+        function Totaltagihan() {
+            var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
             var totalTagihan = biayaOngkir;
 
-            $('#total_biaya').val(totalTagihan.toFixed(2));
-            $('#sisa_bayar').val(sisaBayar.toFixed(2));
-            $('#jumlah_ppn').val(ppn.toFixed(2));
+            $('#total_biaya').val(formatRupiah(totalTagihan, 'Rp '));
         }
 
         $('#biaya_pengiriman', '#total_biaya').on('input', Totaltagihan);
+
+        $('form').on('submit', function(e){
+            $('#total_biaya').val(parseRupiahToNumber($('#total_biaya').val()));
+            $('#biaya_pengiriman').val(parseRupiahToNumber($('#biaya_pengiriman').val()));
+        });
 
     });
 </script>
