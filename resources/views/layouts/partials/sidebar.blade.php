@@ -6,7 +6,7 @@
                     $roles = Auth::user()->roles()->get();
                     $user = Auth::user();
                     $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
-                    if(Auth::user()->roles('SuperAdmin')) {
+                    if($user->hasRole(['SuperAdmin'])) {
                         $rolePermissions = \Spatie\Permission\Models\Permission::pluck('name')->toArray();
                     } else {
                         $rolePermissions = [];
@@ -18,7 +18,7 @@
                 <li class="submenu">
                     <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                 </li>
-                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && Auth::user()->hasRole('SuperAdmin'))
+                @if($user->hasRole(['SuperAdmin', 'Finance']))
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -40,7 +40,7 @@
                     </ul>
                 </li>
                 @endif
-                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'KasirGallery']))
+                @if(in_array('tradisional.index', $rolePermissions) && in_array('gift.index', $rolePermissions))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -49,7 +49,7 @@
                     </ul>
                 </li>
                 @endif
-                @if(in_array('kontrak.index', $rolePermissions) && Auth::user()->roles()->value('name') == 'AdminGallery' )
+                @if(in_array('kontrak.index', $rolePermissions))
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="file-text"></i><span> Sewa</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -63,7 +63,7 @@
                 </li>
                 @endif
                 <li class="submenu">
-                    @if($user->hasRole(['SuperAdmin', 'AdminGallery', 'KasirGallery']) && (in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
+                    @if((in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
@@ -73,7 +73,8 @@
                         <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
-                    @elseif(in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1) && $user->hasRole(['SuperAdmin', 'KasirOutlet']))
+                    @endif
+                    @if(in_array('penjualan.index', $rolePermissions) && isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1)
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
@@ -85,7 +86,7 @@
                     </ul>
                     @endif
                 </li>
-                @if(in_array('pembelian.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'Purchasing']))
+                @if(in_array('pembelian.index', $rolePermissions))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/dollar-square.svg" alt="img"><span> Pembelian</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -97,6 +98,9 @@
                         @if(in_array('returbeli.index', $rolePermissions))
                         <li><a href="{{ route('returbeli.index') }}" class="{{ request()->is('purchase/retur*') ? 'active' : '' }}">Retur Pembelian</a></li>
                         @endif
+                        @if(in_array('pembayaranbeli.index', $rolePermissions))
+                        <li><a href="{{ route('pembayaranbeli.index') }}" class="{{ request()->is('purchase/pembayaran*') ? 'active' : '' }}">Pembayaran Pembelian</a></li>
+                        @endif
                     </ul>
                 </li>
                 @endif
@@ -104,16 +108,16 @@
 
                     <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        @if(in_array('mutasigalery.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'KasirGallery', 'AdminGallery', 'KasirOutlet']))
+                        @if(in_array('mutasigalery.index', $rolePermissions))
                             <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
                         @endif
-                        @if(in_array('mutasioutlet.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'KasirGallery', 'AdminGallery', 'KasirOutlet']) )
+                        @if(in_array('mutasioutlet.index', $rolePermissions))
                             <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasighgalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
+                        @if(in_array('mutasighgalery.index', $rolePermissions))
                             <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
+                        @if(in_array('mutasigalerygalery.index', $rolePermissions))
                             <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
                             {{-- <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                             <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
@@ -128,16 +132,16 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><i class="fa fa-archive" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-archive" aria-label="fa fa-archive"></i><span> Inventory</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        @if(in_array('inven_galeri.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing', 'KasirGallery']))
+                        @if(in_array('inven_galeri.index', $rolePermissions))
                         <li><a href="{{ route('inven_galeri.index') }}" class="{{ request()->is('inven_galeri*') ? 'active' : '' }}">Gallery</a></li>
                         @endif
-                        @if($user->hasRole(['SuperAdmin', 'KasirOutlet']) && (in_array('inven_outlet.index', $rolePermissions)) && $user->hasRole(['SuperAdmin','KasirOutlet']))
+                        @if((in_array('inven_outlet.index', $rolePermissions)))
                         <li><a href="{{ route('inven_outlet.index')}}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
                         @endif
-                        @if(in_array('inven_greenhouse.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'Purchasing']))
+                        @if(in_array('inven_greenhouse.index', $rolePermissions))
                         <li><a href="{{ route('inven_greenhouse.index')}}" class="{{ request()->is('inven_greenhouse*') ? 'active' : '' }}">GreenHouse</a></li>
                         @endif
-                        @if(in_array('inven_inden.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'Purchasing']))
+                        @if(in_array('inven_inden.index', $rolePermissions))
                         <li><a href="{{ route('inven_inden.index')}}" class="{{ request()->is('inven_inden*') ? 'active' : '' }}">Inden</a></li>
                         @endif
                         {{-- <li><a href="#" class="">Inden</a></li> --}}
