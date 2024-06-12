@@ -247,7 +247,7 @@
 @section('scripts')
 <script>
     $(document).ready(function(){
-        $('#filterSupplier, #filterGallery, #filterStatus').select2();
+        $('[id^=filterSupplier], [id^=filterGallery], [id^=filterStatus]').select2();
     });
     $('[id^=filterBtn]').click(function(){
         var baseUrl = $(this).data('base-url');
