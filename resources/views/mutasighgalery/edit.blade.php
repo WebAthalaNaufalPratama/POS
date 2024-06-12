@@ -183,72 +183,72 @@
                                         <h5>Produk Komplain</h5>
                                     </div>
                                     <div class="table-responsive">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>No Delivery Order</th>
-                <th>Nama</th>
-                <th>Jumlah</th>
-                <th>Alasan</th>
-                <th>Diskon</th>
-                <th>Harga</th>
-                <th>Total Harga</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="dynamic_field">
-            @php
-            $i = 0;
-            @endphp
-            @foreach ($penjualans->deliveryorder as $deliveryOrder)
-            @foreach ($deliveryOrder->produk as $produk)
-            @if ($produk->jenis != 'TAMBAHAN')
-            <tr id="row{{ $i }}">
-                <td><input type="text" name="no_do1[]" id="no_do_{{ $i }}" class="form-control" value="{{ $deliveryOrder->no_do }}" required></td>
-                <td>
-                    <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required readonly>
-                        <option value="">Pilih Produk</option>
-                        @foreach ($produkjuals as $pj)
-                        <option value="{{ $pj->kode }}" data-harga="{{ $pj->harga_jual }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" data-index="{{ $i }}" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" onchange="calculateTotal({{ $i }})" required></td>
-                <td><input type="text" name="alasan[]" id="alasan_{{ $i }}" class="form-control" required></td>
-                <td>
-    <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control">
-        <option value="0">Pilih Diskon</option>
-        <option value="Nominal">Nominal</option>
-        <option value="persen">Persen</option>
-    </select>
-    <div>
-        <div class="input-group">
-            <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
-            <span class="input-group-text hidden" id="nominalInput_{{ $i }}">.00</span>
-            <span class="input-group-text hidden" id="persenInput_{{ $i }}">%</span>
-        </div>
-    </div>
-</td>
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>No Delivery Order</th>
+                                                                    <th>Nama</th>
+                                                                    <th>Jumlah</th>
+                                                                    <th>Alasan</th>
+                                                                    <th>Diskon</th>
+                                                                    <th>Harga</th>
+                                                                    <th>Total Harga</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="dynamic_field">
+                                                                @php
+                                                                $i = 0;
+                                                                @endphp
+                                                                @foreach ($penjualans->deliveryorder as $deliveryOrder)
+                                                                @foreach ($deliveryOrder->produk as $produk)
+                                                                @if ($produk->jenis != 'TAMBAHAN')
+                                                                <tr id="row{{ $i }}">
+                                                                    <td><input type="text" name="no_do1[]" id="no_do_{{ $i }}" class="form-control" value="{{ $deliveryOrder->no_do }}" required></td>
+                                                                    <td>
+                                                                        <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required readonly>
+                                                                            <option value="">Pilih Produk</option>
+                                                                            @foreach ($produkjuals as $pj)
+                                                                            <option value="{{ $pj->kode }}" data-harga="{{ $pj->harga_jual }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </td>
+                                                                    <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" data-index="{{ $i }}" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" onchange="calculateTotal({{ $i }})" required></td>
+                                                                    <td><input type="text" name="alasan[]" id="alasan_{{ $i }}" class="form-control" required></td>
+                                                                    <td>
+                                                        <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control">
+                                                            <option value="0">Pilih Diskon</option>
+                                                            <option value="Nominal">Nominal</option>
+                                                            <option value="persen">Persen</option>
+                                                        </select>
+                                                        <div>
+                                                            <div class="input-group">
+                                                                <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
+                                                                <span class="input-group-text hidden" id="nominalInput_{{ $i }}">.00</span>
+                                                                <span class="input-group-text hidden" id="persenInput_{{ $i }}">%</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
 
-                <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" required></td>
-                <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" required></td>
-                <td>
-                    @if ($i == 0)
-                    <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
-                    @else
-                    <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
-                    @endif
-                </td>
-            </tr>
-            @php
-            $i++;
-            @endphp
-            @endif
-            @endforeach
-            @endforeach
-        </tbody>
-    </table>
-</div>
+                                                    <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" required></td>
+                                                    <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" required></td>
+                                                    <td>
+                                                        @if ($i == 0)
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        @else
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                @php
+                                                $i++;
+                                                @endphp
+                                                @endif
+                                                @endforeach
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
 
                                 </div>
                             </div>
@@ -315,13 +315,34 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-3 col-sm-6 col-12 mt-4">
-                                        
+                                <div class="col-lg-8 col-sm-12 col-12 border radius mt-1">
+                                        <div class="row mt-4">
+                                            <div class="col-lg-12">
+                                                <table class="table table-responsive border rounded">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Pembuat</th>
+                                                            <th>Penyetuju</th>
+                                                            <th>Pemeriksa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
+                                                            <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-6 mt-4 ">
-                                        
-                                    </div>
-                                    <div class="col-lg-6 float-md-right">
+                                    <div class="col-lg-4 float-md-right border radius">
                                         <div class="total-order">
                                             <ul>
                                                 <li>

@@ -148,7 +148,7 @@
                                 <div class="row">
                                 <div class="col-lg-8 col-sm-6 col-12 ">
                                         <div class="row mt-4">
-                                            <div class="col-lg-8">
+                                            <div class="col-lg-12">
                                                 <table class="table table-responsive border rounded">
                                                     <thead>
                                                         <tr>
