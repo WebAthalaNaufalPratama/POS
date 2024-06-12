@@ -16,11 +16,11 @@ class DatabaseSeeder extends Seeder
         
         // \App\Models\User::factory(10)->create();
         $this->call([
-            // JabatanSeeder::class,
-            // KondisiSeeder::class,
-            // Tipe_LokasiSeeder::class,
-            // Tipe_ProdukSeeder::class,
-            // OperasionalSeeder::class,
+            JabatanSeeder::class,
+            KondisiSeeder::class,
+            Tipe_LokasiSeeder::class,
+            Tipe_ProdukSeeder::class,
+            OperasionalSeeder::class,
             CreateAdminUserSeeder::class,
         ]);
     }
