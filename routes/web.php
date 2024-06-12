@@ -435,6 +435,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGO}/delete', 'MutasiController@destroy_outlet')->name('mutasigalery.destroy');
             Route::get('/{mutasiGO}/payment', 'MutasiController@payment_outlet')->name('mutasigalery.payment');
             Route::post('/paymentmutasi', 'MutasiController@paymentmutasi')->name('mutasi.paymentmutasi');
+            Route::get('/{mutasiGO}/view', 'MutasiController@view_outlet')->name('mutasigalery.view');
         });
 
         Route::group(['prefix' => 'mutasiOG'], function() {
@@ -446,6 +447,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{mutasiOG}/update', 'MutasiController@update_outletgalery')->name('mutasioutlet.update');
             Route::get('/{mutasiOG}/delete', 'MutasiController@destroy_outletgalery')->name('mutasioutlet.destroy');
             Route::get('/{mutasiOG}/payment', 'MutasiController@payment_outletgalery')->name('mutasioutlet.payment');
+            Route::get('/{mutasiOG}/view', 'MutasiController@view_outletgalery')->name('mutasioutlet.view');
         });
 
         Route::group(['prefix' => 'kas_pusat'], function() {
@@ -477,6 +479,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{mutasiGG}/update', 'MutasiController@update_ghgalery')->name('mutasighgalery.update');
             Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_ghgalery')->name('mutasighgalery.destroy');
             Route::get('/{mutasiGG}/payment', 'MutasiController@payment_ghgalery')->name('mutasighgalery.payment');
+            Route::get('/{mutasiGG}/view', 'MutasiController@view_ghgalery')->name('mutasighgalery.view');
         });
 
         Route::group(['prefix' => 'inven_greenhouse'], function() {
@@ -534,6 +537,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{mutasiGAG}/update', 'MutasiController@update_galerygalery')->name('mutasigalerygalery.update');
             Route::get('/{mutasiGAG}/delete', 'MutasiController@destroy_galerygalery')->name('mutasigalerygalery.destroy');
             Route::get('/{mutasiGAG}/payment', 'MutasiController@payment_galerygalery')->name('mutasigalerygalery.payment');
+            Route::get('/{mutasiGAG}/view', 'MutasiController@view_galerygalery')->name('mutasigalerygalery.view');
         });
 
         // Route::group(['prefix' => 'kas_pusat'], function() {

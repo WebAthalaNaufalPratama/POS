@@ -232,7 +232,7 @@
                                                             }
                                                             @endphp
                                                             <!-- @if($pj->produk) -->
-                                                            <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                            <option value="{{ $produk->id }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
                                                                 @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                     {{ $pj->produk->nama }}
                                                                 @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
@@ -294,7 +294,7 @@
                                                     </select>
                                                     <div>
                                                         <div class="input-group">
-                                                            <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
+                                                            <input type="text" name="diskon[]" id="diskon_{{ $i }}" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
                                                             <span class="input-group-text" id="nominalInput_{{ $i }}" style="display:none;">.00</span>
                                                             <span class="input-group-text" id="persenInput_{{ $i }}" style="display:none;">%</span>
                                                         </div>
@@ -425,9 +425,9 @@
                                                     <h4>Sub Total</h4>
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="0" readonly required></h5>
                                                 </li>
-                                                <li>
+                                                <li id="cekretur" style="display:none;">
                                                     <h4>Pengiriman
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control">
                                                         <option value="">Pilih Jenis Pengiriman</option>
                                                         <option value="exspedisi">Ekspedisi</option>
                                                         <option value="sameday">SameDay</option>
@@ -449,9 +449,9 @@
                                                     </div> 
                                                     </h5>
                                                 </li>
-                                                <li>
+                                                <li id="cekretur" style="display:none;">
                                                     <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="number" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" readonly required></h5>
+                                                    <h5><input type="text " id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" readonly></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Total</h4>
@@ -657,7 +657,7 @@
             $('[id^=nama_produk]').each(function() {
                 var id = $(this).attr('id').split('_')[2];
                 var kodeProduk = $(this).find(':selected').val();
-                console.log(kodeProduk);
+                // console.log(kodeProduk);
                 $('.kondisi').hide(); // sembunyikan semua input kondisi
                 if (kodeProduk.substr(0, 3) === 'TRD') {
                     $('.kondisi-' + id).show(); // tampilkan input kondisi untuk indeks yang dipilih
@@ -676,29 +676,29 @@
 
         });
 
-        $('#pilih_pengiriman').change(function() {
-                var pengiriman = $(this).val();
-                var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+        // $('#pilih_pengiriman').change(function() {
+        //         var pengiriman = $(this).val();
+        //         var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
 
-                $('#inputOngkir').hide();
-                $('#inputExspedisi').hide();
+        //         $('#inputOngkir').hide();
+        //         $('#inputExspedisi').hide();
 
-                if (pengiriman === "sameday") {
-                    $('#inputOngkir').show();
-                    $('#biaya_pengiriman').prop('readonly', false);
-                } else if (pengiriman === "exspedisi") {
-                    $('#inputExspedisi').show();
-                    $('#biaya_pengiriman').prop('readonly', true);
-                    ongkirId();
-                }
-            });
+        //         if (pengiriman === "sameday") {
+        //             $('#inputOngkir').show();
+        //             $('#biaya_pengiriman').prop('readonly', false);
+        //         } else if (pengiriman === "exspedisi") {
+        //             $('#inputExspedisi').show();
+        //             $('#biaya_pengiriman').prop('readonly', true);
+        //             ongkirId();
+        //         }
+        //     });
 
-        $('#ongkir_id').change(function() {
-            var selectedOption = $(this).find('option:selected');
-            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
-            $('#biaya_pengiriman').val(ongkirValue);
-            Totaltagihan();
-        });
+        // $('#ongkir_id').change(function() {
+        //     var selectedOption = $(this).find('option:selected');
+        //     var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
+        //     $('#biaya_pengiriman').val(ongkirValue);
+        //     Totaltagihan();
+        // });
 
 
         function handleFileInputChange(inputElement, previewElement) {
@@ -739,6 +739,68 @@
             $('#preview').attr('src', defaultImg);
         };
 
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
+
+        function parseRupiahToNumber(rupiah) {
+            return parseInt(rupiah.replace(/[^\d]/g, ''));
+        }
+
+        $('#pilih_pengiriman').change(function() {
+            var pengiriman = $(this).val();
+            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+
+            $('#inputOngkir').hide();
+            $('#inputExspedisi').hide();
+
+            if (pengiriman === "sameday") {
+                $('#inputOngkir').show();
+                $('#biaya_pengiriman').prop('readonly', false);
+                $('#total').val(0);
+                $('#biaya_pengiriman').val(0);
+                InputOngkir();
+            } else if (pengiriman === "exspedisi") {
+                $('#inputExspedisi').show();
+                $('#biaya_pengiriman').prop('readonly', true);
+                $('#total').val(0);
+                $('#biaya_pengiriman').val(0);
+                ongkirId();
+            }
+        });
+
+        function OngkirId(){
+            var Ongkir = $(this).val();
+            $(this).val(formatRupiah(Ongkir, 'Rp '));
+            $('#total_biaya').val(formatRupiah(Ongkir, 'Rp '));
+        }
+        
+
+        $('#ongkir_id').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
+            $('#biaya_pengiriman').val(formatRupiah(ongkirValue, 'Rp '));
+            Totaltagihan();
+        });
+
+        function Totaltagihan() {
+            var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
+            var totalTagihan = biayaOngkir;
+            $('#biaya_pengiriman').val(formatRupiah(totalTagihan, 'Rp '));
+            $('#total').val(formatRupiah(totalTagihan, 'Rp '));
+        }
 
         $('#komplain').on('change', function(){
             var komplain = $(this).val();
@@ -752,12 +814,12 @@
                 var biayakirim = $('#biaya_pengiriman');
 
                 if(komplain == 'retur') {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').show();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
                     hargaSatuanInput.prop('readonly', true);
                 } else {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').hide();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').hide();
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
@@ -825,13 +887,13 @@
                     hargaSatuanInput.val(0);
                     hargaSatuanInput.prop('readonly', true);
                 } else {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').hide();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').hide();
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = hargaProduk * jumlah;
-                    hargaSatuanInput.val(harga);
+                    hargaSatuanInput.val(formatRupiah(harga, 'Rp'));
                     hargaSatuanInput.prop('readonly', true);
                 }
             });
@@ -841,10 +903,10 @@
                 var index = totalhargaInput.attr('id').split('_')[1];
 
                 if(komplain == 'refund' || komplain == 'diskon') {
-                    var hargaSatuan = $('#harga_' + index).val();
+                    var hargaSatuan = parseRupiahToNumber($('#harga_' + index).val());
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
-                    totalhargaInput.val(totalharga);
+                    totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
@@ -914,8 +976,8 @@
                         $('#totalharga_' + index).val(0);
                     } else {
                         var harga = hargaProduk * jumlah;
-                        $('#harga_' + index).val(harga);
-                        $('#totalharga_' + index).val(harga);
+                        $('#harga_' + index).val(formatRupiah(harga, 'Rp '));
+                        $('#totalharga_' + index).val(formatRupiah(harga, 'Rp '));
                     }
 
                     // Panggil updateSubTotal setiap kali input jumlah diubah
@@ -928,10 +990,10 @@
             var subTotal = 0;
             // console.log($('input[name="totalharga[]"]'));
             $('input[name="totalharga[]"]').each(function() {
-                subTotal += parseFloat($(this).val()) || 0;
+                subTotal += parseFloat(parseRupiahToNumber($(this).val())) || 0;
             });
-            $('#sub_total').val(subTotal.toFixed(2));
-            $('#total').val(subTotal.toFixed(2));
+            $('#sub_total').val(formatRupiah(subTotal, 'Rp '));
+            $('#total').val(formatRupiah(subTotal, 'Rp '));
         }
 
         $('#nama_produk_{{ $i }}').change(function(){
@@ -954,43 +1016,49 @@
             $('[id^=diskon_' + index + ']').trigger('input');
         });
 
-        $('[id^=diskon_]').on('input', function(){
+        $('[id^=diskon_]').change('input', function(){
             var hasilInput = $(this);
             var index = hasilInput.attr('id').split('_')[1]; 
             var jenisInput = $('#jenis_diskon_' + index); 
             var selectedValue = jenisInput.val(); 
 
-            var hargaTotal = parseFloat($('#harga_' + index).val()) || 0; // Mengambil harga total berdasarkan index
-
+            var hargaTotal = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0; 
             if (selectedValue === "Nominal") {
                 var diskonValue = parseFloat(hasilInput.val()) || 0; // Mengambil nilai diskon berdasarkan index
                 hargaTotal -= diskonValue; 
+                $(this).val(formatRupiah(diskonValue));
             } else if (selectedValue === "persen") {
                 var diskonValue = parseFloat(hasilInput.val()) || 0; // Mengambil nilai diskon berdasarkan index
                 var diskonAmount = (hargaTotal * diskonValue) / 100; // Hitung jumlah diskon berdasarkan persen
                 hargaTotal -= diskonAmount; // Kurangi harga total dengan jumlah diskon
             }
 
-            $('#totalharga_' + index).val(hargaTotal.toFixed(2));
+            $('#totalharga_' + index).val(formatRupiah(hargaTotal, 'Rp '));
             var subtotal = 0;
             $('input[name="totalharga[]"]').each(function() {
-                subtotal += parseFloat($(this).val()) || 0;
+                subtotal += parseFloat(parseRupiahToNumber($(this).val())) || 0;
             });
 
-            $('#sub_total').val(subtotal.toFixed(2));
-            $('#total').val(subtotal.toFixed(2));
+            $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
+            $('#total').val(formatRupiah(subtotal, 'Rp '));
+        });
+        
+        $('form').on('submit', function(e){
+            $('#biaya_pengiriman').val(parseRupiahToNumber($('#biaya_pengiriman').val()));
+            $('#sub_total').val(parseRupiahToNumber($('#sub_total').val()));
+            $('#total').val(parseRupiahToNumber($('#total').val()));
+
+            $('input[id^="diskon_"], input[id^="harga_"], input[id^="totalharga_"]').each(function() {
+                var id = $(this).attr('id').split('_')[2];
+                var value = $(this).val();
+                var hargaRupiah = $(this).val();
+                $(this).val(parseRupiahToNumber(hargaRupiah));
+            });
         });
 
-        function Totaltagihan() {
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
-            var totalTagihan = biayaOngkir;
-            
+        $('#biaya_pengiriman').change('input', Totaltagihan);
 
-            $('#total').val(totalTagihan.toFixed(2));
-
-        }
-
-        $('#biaya_pengiriman').on('input', Totaltagihan);
+        
 
     });
 </script>

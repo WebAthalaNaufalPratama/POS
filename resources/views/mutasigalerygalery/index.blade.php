@@ -61,7 +61,9 @@
                                         <div class="dropdown-menu">
                                         <a class="dropdown-item" href="{{ route('mutasigalerygalery.payment', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                             <a class="dropdown-item" href="{{ route('mutasigalerygalery.show', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
+                                            <a class="dropdown-item" href="{{ route('mutasigalerygalery.view', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
                                         </div>
+                                        
                                     </div>
                                 </td>
                             </tr>

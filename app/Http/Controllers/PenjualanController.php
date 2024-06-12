@@ -30,6 +30,8 @@ use App\Models\FormPerangkai;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PergantianExport;
 use PDF;
 
 class PenjualanController extends Controller
@@ -800,5 +802,10 @@ class PenjualanController extends Controller
         $pdf = PDF::loadView('penjualan.view', $data);
     
         return $pdf->stream($data['no_invoice'] . '_INVOICE PENJUALAN.pdf');
+    }
+
+    public function excelPergantian($id)
+    {
+        return Excel::download(new PergantianExport, 'users.xlsx');
     }
 }
