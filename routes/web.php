@@ -286,6 +286,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/retur', 'PembelianController@index_retur')->name('returbeli.index');
             Route::get('/retur/create', 'PembelianController@create_retur')->name('returbeli.create');
             Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
+            Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
+            Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
 
         });
 

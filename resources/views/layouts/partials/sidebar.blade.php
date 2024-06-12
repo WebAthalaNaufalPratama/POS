@@ -18,7 +18,7 @@
                 <li class="submenu">
                     <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                 </li>
-                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && Auth::user()->hasRole('SuperAdmin'))
+                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->hasRole('SuperAdmin'))
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -49,7 +49,7 @@
                     </ul>
                 </li>
                 @endif
-                @if(in_array('kontrak.index', $rolePermissions) && Auth::user()->roles()->value('name') == 'AdminGallery' )
+                @if(in_array('kontrak.index', $rolePermissions) || Auth::user()->roles()->value('name') == 'AdminGallery' )
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="file-text"></i><span> Sewa</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -96,6 +96,9 @@
                         @endif
                         @if(in_array('returbeli.index', $rolePermissions))
                         <li><a href="{{ route('returbeli.index') }}" class="{{ request()->is('purchase/retur*') ? 'active' : '' }}">Retur Pembelian</a></li>
+                        @endif
+                        @if(in_array('pembayaranbeli.index', $rolePermissions))
+                        <li><a href="{{ route('pembayaranbeli.index') }}" class="{{ request()->is('purchase/pembayaran*') ? 'active' : '' }}">Pembayaran Pembelian</a></li>
                         @endif
                     </ul>
                 </li>

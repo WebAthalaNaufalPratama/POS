@@ -147,7 +147,7 @@ class PembelianController extends Controller
     public function invoice(Request $req)
     {
        
-        $query= Invoicepo::whereNull('poinden_id')->orderBy('tgl_inv', 'desc');
+        $query= Invoicepo::with('pembelian')->whereNull('poinden_id')->orderBy('tgl_inv', 'desc');
         if ($req->supplier) {
             $query->whereHas('pembelian', function($q) use($req){
                 $q->where('supplier_id', $req->input('supplier'));
@@ -178,7 +178,7 @@ class PembelianController extends Controller
         }
         $invoices = $query->get();
 
-        $query2 = Invoicepo::whereNotNull('poinden_id')
+        $query2 = Invoicepo::with('pembelian')->whereNotNull('poinden_id')
             ->orderBy('tgl_inv', 'desc');
         if ($req->supplierInd) {
             $query->whereHas('pembelian', function($q) use($req){
@@ -225,7 +225,16 @@ class PembelianController extends Controller
         ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
         ->orderBy('lokasis.nama')
         ->get();
-        return view('purchase.invoice', compact('invoices','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd'));
+
+        $Invoice = Pembayaran::latest()->first();
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_invoice_bayar, 11);
+            $invoice_bayar = substr($substring, 0, 3);
+        } else {
+            $invoice_bayar = 0;
+        }
+        $bankpens = Rekening::get();
+        return view('purchase.invoice', compact('invoices','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd', 'bankpens', 'invoice_bayar'));
 
     }
 
