@@ -249,7 +249,6 @@ Carbon::setLocale('id');
                                                 </div>
                                             </div>
                                         </div>
-                            </div>
                                     </div>
                                     <div class="col-lg-5 float-md-right">
                                         <div class="total-order">
