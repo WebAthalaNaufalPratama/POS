@@ -128,7 +128,7 @@ class PembelianController extends Controller
         $lastNumber = intval(substr($lastPayment->no_invoice_bayar, -3));
         $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     
-        return $prefix . $newNumber;
+        return $prefix . $newNumber; 
     }
     
 

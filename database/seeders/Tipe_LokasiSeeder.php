@@ -24,6 +24,7 @@ class Tipe_LokasiSeeder extends Seeder
             ['nama' => 'Outlet', 'deskripsi' => 'Turunan dari galery', 'created_at' => now(), 'updated_at' => now()],
             ['nama' => 'Greenhouse', 'deskripsi' => 'Tempat menanam tanaman', 'created_at' => now(), 'updated_at' => now()],
             ['nama' => 'Gudang', 'deskripsi' => 'Penyimpanan barang di pusat', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'pusat', 'deskripsi' => 'pusat', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

@@ -51,8 +51,8 @@
                                 <td>{{ $mutasi->no_mutasi }}</td>
                                 <td>{{ $mutasi->supplier->nama }}</td>
                                 <td>{{ $mutasi->lokasi->nama }}</td>
-                                <td>{{ $mutasi->tgl_dikirim }}</td>
-                                <td>{{ $mutasi->tgl_diterima }}</td>
+                                <td>{{ tanggalindo($mutasi->tgl_dikirim) }}</td>
+                                <td>{{ tanggalindo($mutasi->tgl_diterima) }}</td>
                                 <td>{{ $mutasi->status_dibuat }}</td>
                                 {{-- <td>{{ $mutasi->status_diterima }}</td>
                                 <td>{{ $mutasi->status_dibukukan }}</td>

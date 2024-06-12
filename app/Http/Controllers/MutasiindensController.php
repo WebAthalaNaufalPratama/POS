@@ -10,11 +10,15 @@ use App\Models\ProdukMutasiInden;
 use Illuminate\Http\Request;
 use App\Models\Kondisi;
 use App\Models\Lokasi;
-use App\Models\InventoryInden;
 use App\Models\Karyawan;
+use App\Models\Rekening;
 use App\Models\Pembayaran;
 use App\Models\Supplier;
 use ProdukMutasiIndens;
+use App\Models\Produk;
+use App\Models\InventoryGallery;
+use App\Models\InventoryGreenHouse;
+use App\Models\InventoryInden;
 
 class MutasiindensController extends Controller
 {
@@ -182,6 +186,23 @@ class MutasiindensController extends Controller
  
     }
 
+    public function generatebayarmutasiNumber() {
+        $date = date('Ymd');  // Tanggal hari ini dalam format YYYYMMDD
+        $prefix = 'BYMI_' . $date . '_';
+        $lastPayment = Pembayaran::where('no_invoice_bayar', 'like', $prefix . '%')
+                        ->orderBy('no_invoice_bayar', 'desc')
+                        ->first();
+    
+        if (!$lastPayment) {
+            return $prefix . '001';
+        }
+    
+        $lastNumber = intval(substr($lastPayment->no_invoice_bayar, -3));
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+    
+        return $prefix . $newNumber;
+    }
+
     /**
      * Display the specified resource.
      *
@@ -189,7 +210,7 @@ class MutasiindensController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show_indengh($mutasiIG)
-    {
+    { 
         
             $data = Mutasiindens::where('id', $mutasiIG)->first();
             $pembuat = Karyawan::where('user_id',$data->pembuat_id)->value('nama');
@@ -204,13 +225,17 @@ class MutasiindensController extends Controller
             $barangmutasi = ProdukMutasiInden::with('kondisi')->where('mutasiinden_id',$data->id)->get();
             // return $barangmutasi;
             $produks = InventoryInden::get();
+            $no_bypo = $this->generatebayarmutasiNumber();
             // $no_mutasi = $this->generatemutasiNumber();
             $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
             $lokasi = Lokasi::all();
             $kondisis = Kondisi::all();
+            $databayars = Pembayaran::where('mutasiinden_id', $data->id)->get()->sortByDesc('created_at');
+            $rekenings = Rekening::all();
+
             // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
             // return view('mutasiindengh.create', compact('lokasipengirim','lokasipenerima','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
-            return view('mutasiindengh.show',compact('data','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','penerima','pembuku','pemeriksa','jabatanbuat','jabatanterima','jabatanbuku','jabatanperiksa'));
+            return view('mutasiindengh.show',compact('data','rekenings','no_bypo','databayars','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','penerima','pembuku','pemeriksa','jabatanbuat','jabatanterima','jabatanbuku','jabatanperiksa'));
         
     }
 
@@ -269,6 +294,7 @@ class MutasiindensController extends Controller
         $mutasiinden->biaya_perawatan = $request->biaya_rwt ?? null;
         $mutasiinden->biaya_pengiriman = $request->biaya_ongkir ?? null;
         $mutasiinden->total_biaya = $request->total_tagihan ?? null;
+        $mutasiinden->sisa_bayar = $request->total_tagihan ?? null;
         $mutasiinden->penerima_id = $request->penerima;
         $mutasiinden->status_diterima = $request->status_diterima;
         $mutasiinden->tgl_diterima_ttd = $request->tgl_diterima_ttd;
@@ -288,7 +314,83 @@ class MutasiindensController extends Controller
         // Tambahkan atribut lainnya sesuai kebutuhan
         $check1 = $mutasiinden->save();
 
-        
+        $produkIds = $request->id;
+        $qty = $request->qtytrm;
+        $kondisi = $request->kondisi;
+        $rawat = $request->rawat;
+        $jml = $request->jumlah;
+    
+        $check2 = true;
+    
+        foreach ($produkIds as $index => $produkId) {
+            $produkmutasi = ProdukMutasiInden::find($produkId);
+            
+            if (!$produkmutasi) {
+                $check2 = false;
+                continue;
+            }
+    
+            $inveninden = InventoryInden::where('id', $produkmutasi->inventoryinden_id)->first();
+    
+            if ($inveninden && $inveninden->jumlah >= $qty[$index]) {
+                $inveninden->jumlah -= $qty[$index];
+                $inveninden->save(); // Simpan perubahan jumlah ke database
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data inven inden/stok di inden kurang');     
+            }
+    
+            $produkmutasi->jml_diterima = $qty[$index];
+            $produkmutasi->kondisi_id = $kondisi[$index];
+            $produkmutasi->biaya_rawat = $rawat[$index];
+            $produkmutasi->totalharga = $jml[$index];
+            $check2 = $produkmutasi->save();
+    
+            $lokasi = Lokasi::find($mutasiinden->lokasi_id);
+            $produk = Produk::where('kode', $request->kategori1[$index])->first();
+    
+            if ($lokasi && $produk) {
+                if ($lokasi->tipe_lokasi == 1) {
+                    $checkInven = InventoryGallery::where('kode_produk', $produk->kode)
+                        ->where('kondisi_id', $kondisi[$index])
+                        ->where('lokasi_id', $lokasi->id)
+                        ->first();
+                    if ($checkInven) {
+                        $checkInven->jumlah += $qty[$index];
+                        $checkInven->update();
+                    } else {
+                        $createProduk = new InventoryGallery();
+                        $createProduk->kode_produk = $produk->kode;
+                        $createProduk->kondisi_id = $kondisi[$index];
+                        $createProduk->jumlah = $qty[$index];
+                        $createProduk->lokasi_id = $lokasi->id;
+                        $createProduk->save();
+                    }
+                } elseif ($lokasi->tipe_lokasi == 3) {
+                    $checkInven = InventoryGreenHouse::where('kode_produk', $produk->kode)
+                        ->where('kondisi_id', $kondisi[$index])
+                        ->where('lokasi_id', $lokasi->id)
+                        ->first();
+                    if ($checkInven) {
+                        $checkInven->jumlah += $qty[$index];
+                        $checkInven->update();
+                    } else {
+                        $createProduk = new InventoryGreenHouse();
+                        $createProduk->kode_produk = $produk->kode;
+                        $createProduk->kondisi_id = $kondisi[$index];
+                        $createProduk->jumlah = $qty[$index];
+                        $createProduk->lokasi_id = $lokasi->id;
+                        $createProduk->save();
+                    }
+                }
+            }
+        }
+    
+        if (!$check1 || !$check2) {
+            return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data');
+        } else {
+            return redirect(route('mutasiindengh.show',['mutasiIG' => $mutasiIG]))->with('success', 'Data berhasil diupdate');
+        }
+
         
     }
 

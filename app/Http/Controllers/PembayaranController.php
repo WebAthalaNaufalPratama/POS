@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoicepo;
 use App\Models\InvoiceSewa;
+use App\Models\Mutasiindens;
 use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Penjualan;
@@ -264,6 +265,97 @@ class PembayaranController extends Controller
     
     }
  
+    public function store_bayar_mutasi(Request $req)
+    {
+        $validator = Validator::make($req->all(), [
+            'mutasiinden_id' => 'required',
+            'no_bay' => 'required',
+            'tgl' => 'required',
+            'nominal' => 'required',
+            'bukti' => 'required|file',
+            'metode' => 'required', // Validasi untuk metode pembayaran
+        ]);
+        
+        // Validasi input dari request
+        if ($validator->fails()) {
+            // Mengembalikan respon jika validasi gagal
+            $errors = $validator->errors()->all();
+            return redirect()->back()->withInput()->with('fail', $errors);
+        }
+
+        $datamutasi = Mutasiindens::find($req->mutasiinden_id);
+
+        if (!$datamutasi) {
+            // Mengembalikan respon jika invoice tidak ditemukan
+            return redirect()->back()->with('fail', 'Tagihan tidak ditemukan.');
+        }
+        if ($req->nominal > $datamutasi->sisa_bayar) {
+            return redirect()->back()->with('fail', 'Nominal melebihi sisa tagihan');
+        }
+    
+    
+        if ($datamutasi->sisa_bayar === 0) {
+            // Mengembalikan respon jika tagihan sudah lunas
+            return redirect()->back()->with('success', 'Tagihan sudah Lunas');
+        }
+    
+        // Mengolah metode pembayaran
+        $metode = $req->input('metode');
+        if (strpos($metode, 'transfer-') === 0) {
+            $cara_bayar = 'transfer';
+            $rekening_id = str_replace('transfer-', '', $metode);
+        } else {
+            $cara_bayar = $metode;
+            $rekening_id = null;
+        }
+    
+        // Menyiapkan data untuk disimpan
+        $data = $req->except(['_token', '_method', 'bukti', 'status_bayar', 'metode']);
+        $data['cara_bayar'] = $cara_bayar;
+        $data['rekening_id'] = $rekening_id;
+    
+        if ($req->hasFile('bukti')) {
+            // Mengunggah file bukti pembayaran
+            $file = $req->file('bukti');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_pembayaran_mutasiinden', $fileName, 'public');
+            $data['bukti'] = $filePath;
+        }
+    
+        // Menghitung sisa tagihan setelah pembayaran
+        $cekTotalTagihan = $datamutasi->sisa_bayar- $req->nominal;
+        $datamutasi->update(['sisa_bayar' => $cekTotalTagihan]);
+
+        // if ($datamutasi->dp === 0) {
+        //     $datamutasi->update(['dp' => $req->nominal]);
+        // }
+    
+        // Menentukan status pembayaran berdasarkan sisa tagihan
+        $data['status_bayar'] = $cekTotalTagihan <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+    
+        // Menyimpan data pembayaran
+        $pembayaran = Pembayaran::create($data);
+    
+        if ($cekTotalTagihan <= 0) {
+            // Mengembalikan respon jika tagihan sudah lunas setelah pembayaran
+            return redirect()->back()->with('success', 'Tagihan sudah Lunas');
+        }
+
+
+        
+       
+
+            if ($pembayaran) {
+                // Mengembalikan respon sukses jika data pembayaran berhasil disimpan
+                return redirect(route('mutasiindengh.show',['mutasiIG' => $req->mutasiinden_id]))->with('success', 'Data Berhasil Disimpan');
+            } else {
+                // Mengembalikan respon gagal jika penyimpanan data pembayaran gagal
+                return redirect()->back()->with('fail', 'Gagal menyimpan data');
+            }
+       
+    
+    }
+
     public function store_sewa(Request $req){
         // validasi
         $validator = Validator::make($req->all(), [

@@ -70,7 +70,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="supplier">Supplier</label>
+                                            <label for="supplier">Supplier Pengirim</label>
                                             <select id="supplier" name="supplier_id" class="form-control select2" required>
                                                 <option value="">Pilih Supplier</option>
                                                 @foreach ($suppliers as $supplier)
@@ -79,7 +79,7 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="penerima">Lokasi</label>
+                                            <label for="penerima">Lokasi Penerima</label>
                                             <select id="penerima" name="lokasi_id" class="form-control select2" required>
                                                 <option value="">Pilih Lokasi</option>
                                                 @foreach ($lokasi as $lok)

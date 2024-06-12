@@ -317,6 +317,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{pembayaran}/update', 'PembayaranController@update')->name('pembayaran.update');
             Route::get('/{pembayaran}/delete', 'PembayaranController@destroy')->name('pembayaran.destroy');
             Route::post('/store_invpo', 'PembayaranController@store_bayar_po')->name('bayarpo.store');
+            Route::post('/store_mutasiinden', 'PembayaranController@store_bayar_mutasi')->name('pembayaranmutasi.store');
         });
 
         Route::group(['prefix' => 'form'], function() {

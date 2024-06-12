@@ -3,13 +3,14 @@
 
 @section('content')
 <style>
-   
+    
     .form-control {
         min-width: 200px; /* Adjust as necessary */
     }
     .form-control-banyak{
         min-width: 200px; /* Adjust as necessary */
     }
+
 </style>
 <div class="page-header">
     <div class="row">
@@ -45,7 +46,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="tgl_kirim">Tanggal Kirim</label>
-                                            <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ formatTanggal($data->tgl_dikirim) }}" readonly>
+                                            <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($data->tgl_dikirim) }}" readonly>
                                          </div>
                                         
                                         {{-- <div class="form-group">
@@ -79,12 +80,11 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="tgl_terima">Tanggal Diterima</label>
-                                            <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ formatTanggal($data->tgl_diterima) }}" readonly>
+                                            <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ tanggalindo($data->tgl_diterima) }}" readonly>
                                          </div>
                                         <div class="form-group">
                                             <label for="tgl_terima">Bukti</label>
-
-                                                <img id="previewdo" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" />                                            
+                                                <img id="preview" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" />                                            
                                         </div>
                                     </div>
                                 </div>
@@ -112,29 +112,24 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
-                                                @foreach ($barangmutasi as $item)        
-                                                <tr>   
+                                                @foreach ($barangmutasi as $index => $item)
+                                                <tr>
                                                     <td>
-                                                        <input type="text" class="form-control" name="bulan_inden[]" id="bulan_inden_0" value="{{ $item->produk->bulan_inden }}" readonly>
-
-                                                        {{-- <select class="form-control" id="bulan_inden_0" name="bulan_inden[]">
-                                                            <option value="">Pilih Bulan Inden</option>
-                                                        </select> --}}
+                                                        <input type="hidden" class="form-control" name="id[]" id="id_{{ $index }}" value="{{ $item->id }}" readonly>
+                                                        <input type="text" class="form-control" name="bulan_inden[]" id="bulan_inden_{{ $index }}" value="{{ $item->produk->bulan_inden }}" readonly>
                                                     </td>
                                                     <td>
-                                                        <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_0" value="{{ $item->produk->kode_produk_inden }}" readonly>
-
-                                                        {{-- <select class="form-control" id="kode_inden_0" name="kode_inden[]">
-                                                            <option value="">Pilih Kode Inden</option>
-                                                        </select> --}}
+                                                        <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_{{ $index }}" value="{{ $item->produk->kode_produk_inden }}" readonly>
                                                     </td>
-                                                    <td><input type="text" class="form-control" name="kategori[]" id="kategori_0" value="{{ $item->produk->produk->nama }}" readonly></td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_diterima }}" readonly></td>
                                                     <td>
-                                                        <input type="text" name="kondisi[]" id="kondisi_0" class="form-control" onchange="calculateTotal(0)" value="{{ $item->kondisi->nama }}" readonly>
-
-                                                        {{-- <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
+                                                    <input type="text" class="form-control" name="kategori[]" id="kategori_{{ $index }}" value="{{ $item->produk->produk->nama }}" readonly>
+                                                    <input type="hidden" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $item->produk->kode_produk}}" readonly>
+                                                    </td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" onchange="calculateTotal({{ $index }})" value="{{ $item->jml_dikirim }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima }}" readonly></td>
+                                                    <td>
+                                                        <input type="text" name="kondisi[]" id="kondisi_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->kondisi->nama }}" readonly>
+                                                        {{-- <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control">
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
@@ -144,18 +139,17 @@
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control-banyak" oninput="calculateTotal(0)" value="{{ $item->biaya_rawat }}" readonly>
-                                                            <input type="hidden" name="rawat[]" id="rawat_0" class="form-control" oninput="calculateTotal(0)">
+                                                            <input type="text" name="rawat2[]" id="rawat2_{{ $index }}" class="form-control-banyak" value="{{ formatRupiah2($item->biaya_rawat) }}" readonly>
+                                                            <input type="hidden" name="rawat[]" id="rawat_{{ $index }}" class="form-control">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="jumlah_display[]" id="jumlah_0" class="form-control-banyak" oninput="calculateTotal(0)" value="{{ $item->totalharga }}" readonly>
-                                                            <input type="hidden" name="jumlah[]" id="jumlahint_0" class="form-control" oninput="calculateTotal(0)">
+                                                            <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control-banyak" value="{{ formatRupiah2($item->totalharga)}}" readonly>
+                                                            <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control">
                                                         </div>
                                                     </td>
-                                                    {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -169,8 +163,8 @@
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
                                         <div class="page-btn">
-                                            Riwayat Pembayaran
-                                            {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
+                                           
+                                            <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table datanew">
@@ -186,19 +180,19 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {{-- @foreach ($datapos as $datapo)
+                                                    @foreach ($databayars as $databayar)
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $datapo->no_po }}</td>
-                                                        <td>{{ $datapo->supplier->nama }}</td>
-                                                        <td>{{ $datapo->tgl_kirim }}</td>
-                                                        <td>{{ $datapo->tgl_diterima}}</td>
-                                                        <td>{{ $datapo->no_do_suplier}}</td>
-                                                        <td>{{ $datapo->lokasi->nama}}</td>
-                                                        <td>{{ $datapo->status_dibuat}}</td>
+                                                        <td>{{ $databayar->no_invoice_bayar }}</td>
+                                                        <td>{{ tanggalindo($databayar->tanggal_bayar) }}</td>
+                                                        <td>{{ $databayar->cara_bayar }}</td>
+                                                        <td>{{ $databayar->nominal}}</td>
+                                                        <td>{{ $databayar->bukti}}</td>
+                                                        <td>{{ $databayar->status_bayar}}</td>
+                                                        <td></td>
                                                        
                                                     </tr>
-                                                    @endforeach --}}
+                                                    @endforeach
                                                 </tbody>
                                             </table>
                                         </div>
@@ -212,20 +206,20 @@
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
                                                             
-                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ $data->subtotal }}" readonly>
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ formatRupiah2($data->subtotal) }}" readonly>
                                                             <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)"   readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Perawatan</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis"  class="form-control" oninput="calculateTotal(0)" value="{{ $data->biaya_perawatan }}" readonly>
-                                                            <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)">
-                                                        </div>
-                                                    </h5>
+                                                        <h5>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span>
+                                                                <input type="text" id="biaya-rawat" name="biaya_rwt_dis" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($data->biaya_perawatan) }}" readonly>
+                                                                <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)">
+                                                            </div>
+                                                        </h5>
 
                                                 </li>
                                                 
@@ -234,7 +228,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)" value="{{ $data->biaya_pengiriman }}" readonly>
+                                                            <input type="text" id="biaya_ong" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($data->biaya_pengiriman) }}" readonly>
                                                             <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)">
                                                         </div>
                                                     </h5>
@@ -244,7 +238,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" value="{{ $data->total_biaya }}" readonly>
+                                                            <input type="text" id="total_tag" name="total_tagihan_dis" class="form-control" value="{{ formatRupiah2($data->total_biaya) }}" readonly>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly>
                                                         </div>
                                                     </h5>
@@ -254,7 +248,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ $data->sisa_bayar }}" readonly>
+                                                            <input type="text" id="sisa" name="sisa_bayar" class="form-control" value="{{ formatRupiah2($data->sisa_bayar) }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -327,16 +321,16 @@
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
-                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ formatTanggal($data->tgl_dibuat) }}"readonly >
+                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($data->tgl_dibuat) }}"readonly >
                                                     </td>
                                                     <td id="tgl_diterima">
-                                                        <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ formatTanggal($data->tgl_diterima_ttd) }}" readonly>
+                                                        <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ tanggalindo($data->tgl_diterima_ttd) }}" readonly>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ formatTanggal($data->tgl_dibukukan) }}"  readonly>
+                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ tanggalindo($data->tgl_dibukukan) }}"  readonly>
                                                     </td>
                                                     <td id="tgl_diperiksa">
-                                                        <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ formatTanggal($data->tgl_diperiksa) }}"  readonly>
+                                                        <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ tanggalindo($data->tgl_diperiksa) }}"  readonly>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -367,12 +361,12 @@
           <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form id="supplierForm" action="" method="POST">
+            <form id="supplierForm" action="{{ route('pembayaranmutasi.store')}}" method="POST" enctype="multipart/form-data">
                 @csrf
             <div class="mb-3">
               <label for="nobay" class="form-label">No Bayar</label>
-              {{-- <input type="text" class="form-control" id="invoice_purchase_id" name="invoice_purchase_id" value="{{ $no_invpo }}" hidden> --}}
-              <input type="text" class="form-control" id="nobay" name="nobay" value="" readonly>
+              <input type="hidden" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $data->id }}">
+              <input type="text" class="form-control" id="nobay" name="nobay" value="{{ $no_bypo }}" readonly>
             </div>
             <div class="mb-3">
               <label for="tgl" class="form-label">Tanggal</label>
@@ -380,17 +374,21 @@
             </div>
             <div class="mb-3">
               <label for="metode" class="form-label">Metode</label>
-              {{-- <select class="form-control select2" id="metode" name="metode">
+              <select class="form-control select2" id="metode" name="metode">
                 <option value="cash">cash</option>
                 @foreach ($rekenings as $item)
                 <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
                 @endforeach
-            </select> --}}
+            </select>
             </div>
             <div class="mb-3">
-              <label for="nominal" class="form-label">Nominal</label>
-              <input type="number" class="form-control" id="nominal" name="nominal">
-            </div>
+                <label for="nominal" class="form-label">Nominal</label>
+                <div class="input-group">
+                  <span class="input-group-text">Rp. </span>
+                  <input type="text" class="form-control"  id="nominal">
+                </div>
+                <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
+              </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
               <input type="file" class="form-control" id="bukti" name="bukti">
@@ -413,6 +411,15 @@
 @section('scripts')
  <script>
 
+    document.getElementById('nominal').addEventListener('keyup', function(e) {
+        var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
+        this.value = formatRupiah(rupiah);
+
+        // Set nilai ke input hidden
+        document.getElementById('nominal2').value = unformatRupiah(this.value);
+    });
+
+           
     // Fungsi untuk mengubah format input menjadi format Rupiah
 function formatRupiah(angka) {
     var reverse = angka.toString().split('').reverse().join('');
