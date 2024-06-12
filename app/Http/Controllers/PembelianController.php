@@ -103,7 +103,7 @@ class PembelianController extends Controller
 
         $galleryTrd = Pembelian::select('lokasis.id', 'lokasis.nama')
         ->distinct()
-        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->join('lokasis', 'pembelians.lokasi_id', '=', 'lokasis.id')
         ->orderBy('lokasis.nama')
         ->get();
        
@@ -135,7 +135,7 @@ class PembelianController extends Controller
         ->distinct()
         ->join('invoicepo', 'returpembelians.invoicepo_id', '=', 'invoicepo.id')
         ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
-        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->join('lokasis', 'pembelians.lokasi_id', '=', 'lokasis.id')
         ->orderBy('lokasis.nama')
         ->get();
        
@@ -222,7 +222,7 @@ class PembelianController extends Controller
         $galleryTrd = Invoicepo::select('lokasis.id', 'lokasis.nama')
         ->distinct()
         ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
-        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->join('lokasis', 'pembelians.lokasi_id', '=', 'lokasis.id')
         ->orderBy('lokasis.nama')
         ->get();
 
