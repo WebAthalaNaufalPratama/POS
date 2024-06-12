@@ -21,6 +21,7 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Activitylog\Models\Activity;
 use PhpParser\Node\Stmt\Foreach_;
 use Poinden;
 use ProdukBelis;
@@ -823,7 +824,37 @@ class PembelianController extends Controller
             $no_bypo = $this->generatebayarPONumber();
             $nomor_inv = $this->generateINVPONumber();
 
-            return view('purchase.editinv', compact('inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            //riwayat
+
+            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $datapo)->orderBy('id', 'desc')->get();
+            $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
+            $produkIds = $inv_po->pluck('id')->toArray();
+            $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
+                $properties = json_decode($activity->properties, true);
+                return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
+            });
+            
+            // dd($filteredRiwayat);
+            
+            $mergedriwayat = [
+                'pembelian' => $riwayatPembelian,
+                'pembayaran' => $filteredRiwayat
+            ];
+            
+            $riwayat = collect($mergedriwayat)
+                ->flatMap(function ($riwayatItem, $jenis) {
+                    return $riwayatItem->map(function ($item) use ($jenis) {
+                        $item->jenis = $jenis;
+                        return $item;
+                    });
+                })
+                ->sortByDesc('id')
+                ->values()
+                ->all();
+
+            // dd($riwayatPembelian);
+
+            return view('purchase.editinv', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } elseif ($type === 'poinden') {
             $inv_po = Invoicepo::where('poinden_id', $datapo)->first();

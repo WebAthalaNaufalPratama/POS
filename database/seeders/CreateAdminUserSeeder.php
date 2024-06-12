@@ -164,7 +164,7 @@ class CreateAdminUserSeeder extends Seeder
                   ->orWhere('name', 'like', 'formmutasi%')
                   ->orWhere('name', 'like', 'kas_galery%')
                   ->orWhere('name', 'like', 'mutasi%')
-                  ->orWhere('n ame', 'like', 'pdfinvoicepenjualan%')
+                  ->orWhere('name', 'like', 'pdfinvoicepenjualan%')
                   ->orWhere('name', 'like', 'pdfdopenjualan%')
                   ->orWhere('name', 'like', 'mutasigalerygalery%');
         })->pluck('name')->all();
@@ -211,7 +211,9 @@ class CreateAdminUserSeeder extends Seeder
                   ->orWhere('name', 'like', 'inven_greenhouse%')
                   ->orWhere('name', 'like', 'mutasigalery%')
                   ->orWhere('name', 'like', 'mutasi%')
-                  ->orWhere('name', 'like', 'mutasigalerygalery%');
+                  ->orWhere('name', 'like', 'mutasigalerygalery%')
+                  ->orWhere('name', 'like', 'pembayaranmutasi%')
+                  ->orWhere('name', 'like', 'mutasiindengh%');
         })->pluck('name')->all();
 
         $permissionKG = Permission::where(function ($query) {
