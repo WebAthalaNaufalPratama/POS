@@ -231,7 +231,7 @@ Carbon::setLocale('id');
                                                                     if (isset($changes['old'])) {
                                                                         $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
                                                                         foreach ($diff as $key => $value) {
-                                                                            echo "$key: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
+                                                                            echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
                                                                         }
                                                                     } else {
                                                                         if ($item->subject_type == 'App\Models\Invoicepo') {
