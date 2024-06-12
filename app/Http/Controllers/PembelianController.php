@@ -33,38 +33,198 @@ class PembelianController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $datapos = Pembelian::orderBy('created_at', 'desc')->get();
-        $datainden = ModelsPoinden::orderBy('created_at', 'desc')->get();
+        $query = Pembelian::orderBy('created_at', 'desc');
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->input('supplier'));
+        }
+        if ($req->gallery) {
+            $query->where('lokasi_id', $req->input('gallery'));
+        }
+        if ($req->status) {
+            if ($req->status == 'Lunas') {
+                $query->whereHas('invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query->whereDoesntHave('invoice')
+                      ->orWhereHas('invoice', function($q) {
+                          $q->where('sisa', '!=', 0);
+                      });
+            }
+        }        
+        if ($req->dateStart) {
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+        }
+        $datapos = $query->get();
+
+        $query2 = ModelsPoinden::orderBy('created_at', 'desc');
+        if ($req->supplierInd) {
+            $query2->where('supplier_id', $req->input('supplierInd'));
+        }
+        if ($req->statusInd) {
+            if ($req->statusInd == 'Lunas') {
+                $query2->whereHas('invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query2->whereDoesntHave('invoice')
+                      ->orWhereHas('invoice', function($q) {
+                          $q->where('sisa', '!=', 0);
+                      });
+            }
+        }        
+        if ($req->dateStartInd) {
+            $query2->where('tgl_dibuat', '>=', $req->input('dateStartInd'));
+        }
+        if ($req->dateEndInd) {
+            $query2->where('tgl_dibuat', '<=', $req->input('dateEndInd'));
+        }
+
+        $datainden = $query2->get();
         $datainv = Invoicepo::get();
+
+        $supplierTrd = Pembelian::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('suppliers', 'pembelians.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $supplierInd = ModelsPoinden::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('suppliers', 'poinden.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $galleryTrd = Pembelian::select('lokasis.id', 'lokasis.nama')
+        ->distinct()
+        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->orderBy('lokasis.nama')
+        ->get();
        
         // $databayars = Pembayaran::where('invoice_purchase_id', $id_inv)->where('status_bayar','LUNAS')->get();
 
-        return view('purchase.index',compact('datapos','datainv','datainden'));
+        return view('purchase.index',compact('datapos','datainv','datainden', 'supplierTrd', 'supplierInd', 'galleryTrd'));
     }
 
-    public function index_retur()
+    public function index_retur(Request $req)
     {
-        $dataretur = Returpembelian::orderBy('created_at', 'desc')->get();
+        $query = Returpembelian::orderBy('created_at', 'desc');
+        if ($req->gallery) {
+            $query->whereHas('invoice', function($r) use($req){
+                $r->whereHas('pembelian', function($q) use($req){
+                    $q->where('lokasi_id', $req->input('gallery'));
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+        }
+        $dataretur = $query->get();
         $datainv = Invoicepo::get();
+
+        $gallery = Returpembelian::select('lokasis.id', 'lokasis.nama')
+        ->distinct()
+        ->join('invoicepo', 'returpembelians.invoicepo_id', '=', 'invoicepo.id')
+        ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
+        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->orderBy('lokasis.nama')
+        ->get();
        
         // $databayars = Pembayaran::where('invoice_purchase_id', $id_inv)->where('status_bayar','LUNAS')->get();
 
-        return view('purchase.returindex',compact('dataretur','datainv'));
+        return view('purchase.returindex',compact('dataretur','datainv', 'gallery'));
     }
 
-    public function invoice()
+    public function invoice(Request $req)
     {
        
-        $invoices = Invoicepo::whereNull('poinden_id')
-            ->orderBy('tgl_inv', 'desc')
-            ->get();
+        $query= Invoicepo::whereNull('poinden_id')->orderBy('tgl_inv', 'desc');
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->input('supplier'));
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->input('gallery'));
+            });
+        }
+        if ($req->status) {
+            if ($req->status == 'Lunas') {
+                $query->whereHas('pembelian.invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query->whereDoesntHave('pembelian.invoice')
+                        ->orWhereHas('pembelian.invoice', function($q) {
+                            $q->where('sisa', '!=', 0);
+                        });
+            }
+        }        
+        if ($req->dateStart) {
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+        }
+        $invoices = $query->get();
 
-        $invoiceinden = Invoicepo::whereNotNull('poinden_id')
-            ->orderBy('tgl_inv', 'desc')
-            ->get();
-        return view('purchase.invoice', compact('invoices','invoiceinden'));
+        $query2 = Invoicepo::whereNotNull('poinden_id')
+            ->orderBy('tgl_inv', 'desc');
+        if ($req->supplierInd) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->input('supplier'));
+            });
+        }
+        if ($req->statusInd) {
+            if ($req->statusInd == 'Lunas') {
+                $query2->whereHas('poinden.invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query2->whereDoesntHave('poinden.invoice')
+                        ->orWhereHas('poinden.invoice', function($q) {
+                            $q->where('sisa', '!=', 0);
+                        });
+            }
+        }        
+        if ($req->dateStartInd) {
+            $query2->where('tgl_dibuat', '>=', $req->input('dateStartInd'));
+        }
+        if ($req->dateEndInd) {
+            $query2->where('tgl_dibuat', '<=', $req->input('dateEndInd'));
+        }
+        $invoiceinden = $query2->get();
+
+        $supplierTrd = Invoicepo::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
+        ->join('suppliers', 'pembelians.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $supplierInd = Invoicepo::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('poinden', 'invoicepo.poinden_id', '=', 'poinden.id')
+        ->join('suppliers', 'poinden.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $galleryTrd = Invoicepo::select('lokasis.id', 'lokasis.nama')
+        ->distinct()
+        ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
+        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->orderBy('lokasis.nama')
+        ->get();
+        return view('purchase.invoice', compact('invoices','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd'));
 
     }
 
