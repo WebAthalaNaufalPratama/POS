@@ -18,7 +18,7 @@
                 <li class="submenu">
                     <a href="index.html"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                 </li>
-                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->hasRole('SuperAdmin'))
+                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && Auth::user()->hasRole('SuperAdmin'))
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -63,7 +63,7 @@
                 </li>
                 @endif
                 <li class="submenu">
-                    @if(Auth::user()->roles()->value('name') == 'SuperAdmin' || (in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
+                    @if($user->hasRole(['SuperAdmin', 'AdminGallery', 'KasirGallery']) || (in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
@@ -134,7 +134,7 @@
                         @if($user->hasRole(['SuperAdmin', 'KasirOutlet']) && (in_array('inven_outlet.index', $rolePermissions)) && $user->hasRole(['SuperAdmin','KasirOutlet']))
                         <li><a href="{{ route('inven_outlet.index')}}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
                         @endif
-                        @if(in_array('inven_greenhouse.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing', 'KasirGallery']))
+                        @if(in_array('inven_greenhouse.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'Purchasing']))
                         <li><a href="{{ route('inven_greenhouse.index')}}" class="{{ request()->is('inven_greenhouse*') ? 'active' : '' }}">GreenHouse</a></li>
                         @endif
                         @if(in_array('inven_inden.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'Purchasing']))
