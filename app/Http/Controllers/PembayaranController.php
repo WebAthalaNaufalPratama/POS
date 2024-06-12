@@ -269,8 +269,8 @@ class PembayaranController extends Controller
     {
         $validator = Validator::make($req->all(), [
             'mutasiinden_id' => 'required',
-            'no_bay' => 'required',
-            'tgl' => 'required',
+            'no_invoice_bayar' => 'required',
+            'tanggal_bayar' => 'required',
             'nominal' => 'required',
             'buktitf' => 'required|file',
             'metode' => 'required', // Validasi untuk metode pembayaran
