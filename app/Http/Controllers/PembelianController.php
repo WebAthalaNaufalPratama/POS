@@ -834,8 +834,6 @@ class PembelianController extends Controller
                 return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
             });
             
-            // dd($filteredRiwayat);
-            
             $mergedriwayat = [
                 'pembelian' => $riwayatPembelian,
                 'pembayaran' => $filteredRiwayat
@@ -851,8 +849,7 @@ class PembelianController extends Controller
                 ->sortByDesc('id')
                 ->values()
                 ->all();
-
-            // dd($riwayatPembelian);
+                
 
             return view('purchase.editinv', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
@@ -872,7 +869,33 @@ class PembelianController extends Controller
             $no_bypo = $this->generatebayarPONumber();
             $nomor_inv = $this->generateINVPONumber();
 
-            return view('purchase.editinvinden', compact('inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            //riwayat
+
+            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $datapo)->orderBy('id', 'desc')->get();
+            $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
+            $produkIds = $inv_po->pluck('id')->toArray();
+            $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
+                $properties = json_decode($activity->properties, true);
+                return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
+            });
+            
+            $mergedriwayat = [
+                'pembelian' => $riwayatPembelian,
+                'pembayaran' => $filteredRiwayat
+            ];
+            
+            $riwayat = collect($mergedriwayat)
+                ->flatMap(function ($riwayatItem, $jenis) {
+                    return $riwayatItem->map(function ($item) use ($jenis) {
+                        $item->jenis = $jenis;
+                        return $item;
+                    });
+                })
+                ->sortByDesc('id')
+                ->values()
+                ->all();
+
+            return view('purchase.editinvinden', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } else {
             return redirect()->back()->withErrors('Tipe tidak valid.');
