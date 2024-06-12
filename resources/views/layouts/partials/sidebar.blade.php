@@ -85,7 +85,7 @@
                     </ul>
                     @endif
                 </li>
-                @if(in_array('pembelian.index', $rolePermissions))
+                @if(in_array('pembelian.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'Purchasing']))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/dollar-square.svg" alt="img"><span> Pembelian</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -118,9 +118,9 @@
                             {{-- <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                             <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
                             <li><a href="#" class="">Mutasi Galery Ke Inden</a></li> --}}
+                            <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiIG*') ? 'active' : '' }}">Mutasi Inden Ke Galery/GreenHouse</a></li>
+                            <li><a href="#" class="">Mutasi Galery/Greenhouse Ke Inden</a></li>
                         @endif
-                        <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiIG*') ? 'active' : '' }}">Mutasi Inden Ke Galery/GreenHouse</a></li>
-                        <li><a href="#" class="">Mutasi Galery/Greenhouse Ke Inden</a></li>
                     </ul>
                 </li>
                 
@@ -128,16 +128,16 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><i class="fa fa-archive" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-archive" aria-label="fa fa-archive"></i><span> Inventory</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        @if(in_array('inven_galeri.index', $rolePermissions))
+                        @if(in_array('inven_galeri.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing', 'KasirGallery']))
                         <li><a href="{{ route('inven_galeri.index') }}" class="{{ request()->is('inven_galeri*') ? 'active' : '' }}">Gallery</a></li>
                         @endif
-                        @if($user->hasRole(['SuperAdmin', 'KasirOutlet']) && (in_array('inven_outlet.index', $rolePermissions)))
+                        @if($user->hasRole(['SuperAdmin', 'KasirOutlet']) && (in_array('inven_outlet.index', $rolePermissions)) && $user->hasRole(['SuperAdmin','KasirOutlet']))
                         <li><a href="{{ route('inven_outlet.index')}}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
                         @endif
-                        @if(in_array('inven_greenhouse.index', $rolePermissions))
+                        @if(in_array('inven_greenhouse.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing', 'KasirGallery']))
                         <li><a href="{{ route('inven_greenhouse.index')}}" class="{{ request()->is('inven_greenhouse*') ? 'active' : '' }}">GreenHouse</a></li>
                         @endif
-                        @if(in_array('inven_inden.index', $rolePermissions))
+                        @if(in_array('inven_inden.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'Purchasing']))
                         <li><a href="{{ route('inven_inden.index')}}" class="{{ request()->is('inven_inden*') ? 'active' : '' }}">Inden</a></li>
                         @endif
                         {{-- <li><a href="#" class="">Inden</a></li> --}}
