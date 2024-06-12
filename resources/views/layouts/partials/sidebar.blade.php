@@ -73,7 +73,7 @@
                         <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
-                    @elseif(in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1))
+                    @elseif(in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1) && $user->hasRole(['SuperAdmin', 'KasirOutlet']))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
