@@ -26,6 +26,13 @@
                         <option value="transfer" {{ 'transfer' == request()->input('metode') ? 'selected' : '' }}>Transfer</option>
                     </select>
                 </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterJenis" name="jenis" class="form-control" title="jenis">
+                        <option value="">Pilih Jenis</option>
+                        <option value="Tradisional" {{ 'Tradisional' == request()->input('jenis') ? 'selected' : '' }}>Tradisional</option>
+                        <option value="Inden" {{ 'Inden' == request()->input('jenis') ? 'selected' : '' }}>Inden</option>
+                    </select>
+                </div>
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-info">Filter</a>
                     <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-warning">Clear</a>
@@ -89,7 +96,7 @@
 @section('scripts')
     <script>
         $(document).ready(function(){
-            $('#rekening_id, #bayar, #filterMetode').select2();
+            $('#rekening_id, #bayar, #filterMetode, #filterJenis').select2();
         });
 
         $('#bayar').on('change', function() {
@@ -129,6 +136,19 @@
                 }
                 urlString += symbol;
                 urlString += filterMetode;
+            }
+
+            var jenis = $('#filterJenis').val();
+            if (jenis) {
+                var filterjenis = 'jenis=' + jenis;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterjenis;
             }
 
             var dateStart = $('#filterDateStart').val();

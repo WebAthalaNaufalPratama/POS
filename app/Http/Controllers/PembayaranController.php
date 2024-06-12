@@ -404,6 +404,15 @@ class PembayaranController extends Controller
         if ($req->metode) {
             $query->where('cara_bayar', $req->input('metode'));
         }
+        if ($req->jenis) {
+            $query->when($req->jenis === 'Tradisional', function ($q) {
+                $q->whereHas('po.pembelian');
+            });
+        
+            $query->when($req->jenis === 'Inden', function ($q) {
+                $q->whereHas('po.poinden');
+            });
+        }        
         if ($req->dateStart) {
             $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
         }
