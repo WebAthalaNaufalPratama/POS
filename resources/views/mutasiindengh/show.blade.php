@@ -170,6 +170,7 @@
                                             <table class="table datanew">
                                                 <thead>
                                                     <tr>
+                                                        <th>No</th>
                                                         <th>No Bayar</th>
                                                         <th>Tanggal</th>
                                                         <th>Metode</th>
@@ -187,7 +188,32 @@
                                                         <td>{{ tanggalindo($databayar->tanggal_bayar) }}</td>
                                                         <td>{{ $databayar->cara_bayar }}</td>
                                                         <td>{{ $databayar->nominal}}</td>
-                                                        <td>{{ $databayar->bukti}}</td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#buktiModal{{ $databayar->id }}">
+                                                                Lihat Bukti
+                                                            </button>
+                                                    
+                                                            <!-- Modal -->
+                                                            <div class="modal fade" id="buktiModal{{ $databayar->id }}" tabindex="-1" role="dialog" aria-labelledby="buktiModalLabel{{ $databayar->id }}" aria-hidden="true">
+                                                                <div class="modal-dialog" role="document">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title" id="buktiModalLabel{{ $databayar->id }}">Bukti Pembayaran</h5>
+                                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                                <span aria-hidden="true">&times;</span>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <img src="{{ asset('storage/'.$databayar->bukti) }}" class="img-fluid" alt="Bukti Pembayaran">
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                
+                                                        </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
                                                         <td></td>
                                                        
@@ -366,11 +392,11 @@
             <div class="mb-3">
               <label for="nobay" class="form-label">No Bayar</label>
               <input type="hidden" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $data->id }}">
-              <input type="text" class="form-control" id="nobay" name="nobay" value="{{ $no_bypo }}" readonly>
+              <input type="text" class="form-control" id="nobay" name="no_invoice_bayar" value="{{ $no_bypo }}" readonly>
             </div>
             <div class="mb-3">
               <label for="tgl" class="form-label">Tanggal</label>
-              <input type="date" class="form-control" id="tgl" name="tgl" value="{{ now()->format('Y-m-d') }}">
+              <input type="date" class="form-control" id="tgl" name="tanggal_bayar" value="{{ now()->format('Y-m-d') }}">
             </div>
             <div class="mb-3">
               <label for="metode" class="form-label">Metode</label>
