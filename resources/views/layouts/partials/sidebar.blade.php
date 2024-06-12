@@ -98,6 +98,9 @@
                         @if(in_array('returbeli.index', $rolePermissions))
                         <li><a href="{{ route('returbeli.index') }}" class="{{ request()->is('purchase/retur*') ? 'active' : '' }}">Retur Pembelian</a></li>
                         @endif
+                        @if(in_array('pembayaranbeli.index', $rolePermissions))
+                        <li><a href="{{ route('pembayaranbeli.index') }}" class="{{ request()->is('purchase/pembayaran*') ? 'active' : '' }}">Pembayaran Pembelian</a></li>
+                        @endif
                     </ul>
                 </li>
                 @endif

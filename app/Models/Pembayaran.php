@@ -51,5 +51,9 @@ class Pembayaran extends Model
     {
         return $this->belongsTo(Mutasiindens::class, 'mutasiinden_id');
     }
+    public function po()
+    {
+        return $this->belongsTo(Invoicepo::class, 'invoice_purchase_id');
+    }
 }
 

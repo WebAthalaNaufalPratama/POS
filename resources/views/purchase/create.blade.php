@@ -75,7 +75,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim">
+                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ old('tgl_inv', now()->format('Y-m-d')) }}" >
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
@@ -88,9 +88,19 @@
                                                 <input type="text" class="form-control" id="no_do" name="no_do">
                                             </div>
                                             <div class="form-group">
-                                                <label for="filedo">Delivery Order supplier</label>
-                                                    <input type="file" class="form-control" id="filedo" name="filedo">
+
+                                                <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                    <label>Delivery Order supplier<a href="javascript:void" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"> clear</a>
+                                                    </label>
+                                                    <label class="custom-file-container__custom-file">
+                                                        <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="filedo" accept="image/*">
+                                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                    </label>
+                                                    <span class="text-danger">max 2mb</span>
+                                                    <img id="preview" src="" alt="your image" />
                                                 </div>
+                                                {{-- <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" /> --}}
+                                        </div>
                                         </div>
                                     </div>
                                 </div>
@@ -274,8 +284,38 @@
 <script>
 var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        }
+
 $(document).ready(function() {
-    
+
+    if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
+            }
+
+            $('#bukti').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
      $('.select2').select2();
   
     // Inisialisasi Select2 dengan konfigurasi tambahan
