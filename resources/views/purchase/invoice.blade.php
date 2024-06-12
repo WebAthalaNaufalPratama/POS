@@ -63,6 +63,7 @@
                                 <th>Nominal</th>
                                 <th>Status</th>
                                 <th>Sisa Tagihan</th>
+                                <th>Komplain</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -87,6 +88,7 @@
                                 <td>
                                 {{ formatRupiah($inv->sisa) }}
                                 </td>
+                                <td></td>
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -163,6 +165,7 @@
                                 <th>Nominal</th>
                                 <th>Status</th>
                                 <th>Sisa Tagihan</th>
+                                <th>Komplain</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -184,6 +187,7 @@
                                     @endif
                                 </td>
                                 <td>{{ formatRupiah($inv->sisa) }}</td>
+                                <td></td>
                                 <td></td>
                             </tr>
                             @endforeach

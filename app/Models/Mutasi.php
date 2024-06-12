@@ -26,4 +26,8 @@ class Mutasi extends Model
     public function produkMutasiOutlet(){
         return $this->hasMany(Produk_Terjual::class, 'no_mutasiog', 'no_mutasi');
     }
+
+    public function dibuat(){
+        return $this->belongsTo(User::class, 'pembuat_id', 'id');
+    }
 }
