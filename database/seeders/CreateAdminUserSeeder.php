@@ -25,6 +25,8 @@ class CreateAdminUserSeeder extends Seeder
         $duplicatekasiroutlet = User::where('email', 'kasiroutlet@gmail.com')->first();
         $duplicatefinance = User::where('email', 'finance@gmail.com')->first();
         $duplicateauditor = User::where('email', 'auditor@gmail.com')->first();
+        $duplicatesalesmanager = User::where('email', 'salesmanager@gmail.com')->first();
+
         if($duplicate){
             $duplicate->delete();
         }
@@ -49,6 +51,10 @@ class CreateAdminUserSeeder extends Seeder
         if($duplicateauditor){
             $duplicateauditor->delete();
         }
+        if($duplicatesalesmanager){
+            $duplicatesalesmanager->delete();
+        }
+
         $user = User::create([
             'name' => 'SuperAdmin', 
             'email' => 'superadmin@gmail.com',
@@ -104,6 +110,12 @@ class CreateAdminUserSeeder extends Seeder
             'username' => 'auditor',
             'password' => 'auditor123'
         ]);
+        $usersalesmanger = User::create([
+            'name' => 'Salesmanager', 
+            'email' => 'salesmanager@gmail.com',
+            'username' => 'salmen',
+            'password' => 'salmen123'
+        ]);
 
         $role = Role::create(['name' => 'SuperAdmin']);
         $roleadmingallery = Role::create(['name' => 'AdminGallery']);
@@ -113,6 +125,7 @@ class CreateAdminUserSeeder extends Seeder
         $rolekasiroutlet = Role::create(['name' => 'KasirOutlet']);
         $rolefinance = Role::create(['name' => 'Finance']);
         $roleauditor = Role::create(['name' => 'Auditor']);
+        $rolesalmen = Role::create(['name' => 'SalesManager']);
      
         $permissions = Permission::pluck('id','id')->all();
         $permissionAG = Permission::where(function ($query) {
@@ -157,8 +170,49 @@ class CreateAdminUserSeeder extends Seeder
         })->pluck('name')->all();
         
         $permissionsadmingallery = Permission::whereIn('name',$permissionAG)->pluck('id')->all();
-        $permissionspurchasing = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
         $permissionssales = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
+
+        $permissionPur = Permission::where(function ($query) {
+            $query->where('name', 'like', 'home%')
+                  ->orWhere('name', 'like', 'register%')
+                  ->orWhere('name', 'like', 'login%')
+                  ->orWhere('name', 'like', 'logout%')
+                  ->orWhere('name', 'like', 'pembelian%')
+                  ->orWhere('name', 'like', 'pembelianpo%')
+                  ->orWhere('name', 'like', 'invoicebeli%')
+                  ->orWhere('name', 'like', 'invoicebiasa%')
+                  ->orWhere('name', 'like', 'invoicepo%')
+                  ->orWhere('name', 'like', 'invoice%')
+                  ->orWhere('name', 'like', 'gambarpo%')
+                  ->orWhere('name', 'like', 'pembelianinden%')
+                  ->orWhere('name', 'like', 'inden%')
+                  ->orWhere('name', 'like', 'returbeli%')
+                  ->orWhere('name', 'like', 'mutasiindengh%')
+                  ->orWhere('name', 'like', 'inven_inden%')
+                  ->orWhere('name', 'like', 'getBulan%')
+                  ->orWhere('name', 'like', 'getKode%')
+                  ->orWhere('name', 'like', 'pembayaran%')
+                  ->orWhere('name', 'like', 'bayarpo%')
+                  ->orWhere('name', 'like', 'getKategori%')
+
+                  ->orWhere('name', 'like', 'produk%')
+                  ->orWhere('name', 'like', 'tipe_produk%')
+                  ->orWhere('name', 'like', 'kondisi%')
+
+                  ->orWhere('name', 'like', 'tipe_lokasi%')
+                  ->orWhere('name', 'like', 'operasional%')
+                  ->orWhere('name', 'like', 'lokasi%')
+                  ->orWhere('name', 'like', 'supplier%')
+                  ->orWhere('name', 'like', 'ongkir%')
+                  ->orWhere('name', 'like', 'rekening%')
+                  ->orWhere('name', 'like', 'akun%')
+
+                  ->orWhere('name', 'like', 'inven_galeri%')
+                  ->orWhere('name', 'like', 'inven_greenhouse%')
+                  ->orWhere('name', 'like', 'mutasigalery%')
+                  ->orWhere('name', 'like', 'mutasi%')
+                  ->orWhere('name', 'like', 'mutasigalerygalery%');
+        })->pluck('name')->all();
 
         $permissionKG = Permission::where(function ($query) {
             $query->where('name', 'like', 'home%')
@@ -204,6 +258,8 @@ class CreateAdminUserSeeder extends Seeder
         })->pluck('name')->all();
 
         $permissionskasirgallery = Permission::whereIn('name', $permissionKG)->pluck('id')->all();
+        $permissionspurchasing = Permission::whereIn('name', $permissionPur)->pluck('id')->all();
+
 
         $permissionKO = Permission::where(function ($query) {
             $query->where('name', 'like', 'home%')

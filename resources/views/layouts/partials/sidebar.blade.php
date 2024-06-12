@@ -49,7 +49,7 @@
                     </ul>
                 </li>
                 @endif
-                @if(in_array('kontrak.index', $rolePermissions))
+                @if(in_array('kontrak.index', $rolePermissions) && Auth::user()->roles()->value('name') == 'AdminGallery' )
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="file-text"></i><span> Sewa</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -85,30 +85,6 @@
                     </ul>
                     @endif
                 </li>
-                <li class="submenu">
-
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
-                    <ul>
-                        @if(in_array('mutasigalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
-                        @endif
-                        @if(in_array('mutasioutlet.index', $rolePermissions))
-                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
-                        @endif
-                        @if(in_array('mutasighgalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1) || Auth::user()->hasRole('SuperAdmin'))
-                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
-                        @endif
-                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->hasRole('SuperAdmin'))
-                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
-                            <li><a href="#" class="">Mutasi Inden ke GH</a></li>
-                            <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
-                            <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
-                        @endif
-                        <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiIG*') ? 'active' : '' }}">Mutasi Inden Ke GreenHouse</a></li>
-                        <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
-                        <li><a href="#" class="">Mutasi Galery Ke Inden</a></li>
-                    </ul>
-                </li>
                 @if(in_array('pembelian.index', $rolePermissions))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/dollar-square.svg" alt="img"><span> Pembelian</span> <span class="menu-arrow"></span></a>
@@ -124,6 +100,30 @@
                     </ul>
                 </li>
                 @endif
+                <li class="submenu">
+
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        @if(in_array('mutasigalery.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'KasirGallery', 'AdminGallery', 'KasirOutlet']))
+                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
+                        @endif
+                        @if(in_array('mutasioutlet.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'KasirGallery', 'AdminGallery', 'KasirOutlet']) )
+                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
+                        @endif
+                        @if(in_array('mutasighgalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1) || $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
+                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
+                        @endif
+                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
+                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                            {{-- <li><a href="#" class="">Mutasi Inden ke GH</a></li>
+                            <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
+                            <li><a href="#" class="">Mutasi Galery Ke Inden</a></li> --}}
+                        @endif
+                        <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiIG*') ? 'active' : '' }}">Mutasi Inden Ke Galery/GreenHouse</a></li>
+                        <li><a href="#" class="">Mutasi Galery/Greenhouse Ke Inden</a></li>
+                    </ul>
+                </li>
+                
                 
                 <li class="submenu">
                     <a href="javascript:void(0);"><i class="fa fa-archive" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-archive" aria-label="fa fa-archive"></i><span> Inventory</span> <span class="menu-arrow"></span></a>
@@ -131,7 +131,7 @@
                         @if(in_array('inven_galeri.index', $rolePermissions))
                         <li><a href="{{ route('inven_galeri.index') }}" class="{{ request()->is('inven_galeri*') ? 'active' : '' }}">Gallery</a></li>
                         @endif
-                        @if(Auth::user()->roles()->value('name') == 'kasir' || (in_array('inven_outlet.index', $rolePermissions)))
+                        @if($user->hasRole(['SuperAdmin', 'KasirOutlet']) && (in_array('inven_outlet.index', $rolePermissions)))
                         <li><a href="{{ route('inven_outlet.index')}}" class="{{ request()->is('inven_outlet*') ? 'active' : '' }}">Outlet</a></li>
                         @endif
                         @if(in_array('inven_greenhouse.index', $rolePermissions))

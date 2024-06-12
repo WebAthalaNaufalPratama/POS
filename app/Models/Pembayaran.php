@@ -16,6 +16,7 @@ class Pembayaran extends Model
     protected static $logAttributes = [
         'invoice_penjualan_id',
         'mutasi_id',
+        'mutasiinden_id',
         'invoice_purchase_id',
         'retur_pembelian_id',
         'no_invoice_bayar',
@@ -46,4 +47,9 @@ class Pembayaran extends Model
     {
         return $this->belongsTo(InvoiceSewa::class, 'invoice_sewa_id');
     }
+    public function mutasiinden()
+    {
+        return $this->belongsTo(Mutasiindens::class, 'mutasiinden_id');
+    }
 }
+

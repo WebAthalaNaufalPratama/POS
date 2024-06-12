@@ -92,11 +92,11 @@ Carbon::setLocale('id');
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim ? formatTanggal($beli->tgl_kirim) : '' }}" readonly>
+                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim ? tanggalindo($beli->tgl_kirim) : '' }}" readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="text" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ $beli->tgl_diterima ? formatTanggal($beli->tgl_diterima) : '' }}" readonly>
+                                                    <input type="text" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ $beli->tgl_diterima ? tanggalindo($beli->tgl_diterima) : '' }}" readonly>
                                                 </div>
                                         </div>
                                         <div class="col-md-3">

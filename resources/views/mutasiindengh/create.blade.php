@@ -14,7 +14,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi Inden ke GreenHouse</h3>
+            <h3 class="page-title">Mutasi Inden ke Galery/GreenHouse</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
@@ -46,7 +46,7 @@
                                         <div class="form-group">
                                             <label for="tgl_kirim">Tanggal Kirim</label>
                                             <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" 
-                                            value="{{ old('tgl_inv', now()->format('Y-m-d')) }}" 
+                                            value="{{ now()->format('Y-m-d') }}" 
                                             min="{{ now()->format('Y-m-d') }}" 
                                             max="{{ now()->addYear()->format('Y-m-d') }}">
                                          </div>
@@ -70,7 +70,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="supplier">Supplier</label>
+                                            <label for="supplier">Supplier Pengirim</label>
                                             <select id="supplier" name="supplier_id" class="form-control select2" required>
                                                 <option value="">Pilih Supplier</option>
                                                 @foreach ($suppliers as $supplier)
@@ -79,7 +79,7 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="penerima">Lokasi</label>
+                                            <label for="penerima">Lokasi Penerima</label>
                                             <select id="penerima" name="lokasi_id" class="form-control select2" required>
                                                 <option value="">Pilih Lokasi</option>
                                                 @foreach ($lokasi as $lok)
@@ -92,9 +92,9 @@
                                         <div class="form-group">
                                             <label for="tgl_terima">Tanggal Diterima</label>
                                             <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" 
-                                            value="{{ old('tgl_inv', now()->format('Y-m-d')) }}" 
+                                            value="" 
                                             min="{{ now()->format('Y-m-d') }}" 
-                                            max="{{ now()->addYear()->format('Y-m-d') }}">
+                                            max="{{ now()->addYear()->format('Y-m-d') }}" readonly>
                                          </div>
                                         <div class="form-group">
                                             <div class="custom-file-container" data-upload-id="myFirstImage">
@@ -148,20 +148,20 @@
                                                         </select>
                                                     </td>
                                                     <td><input type="text" class="form-control" name="kategori[]" id="kategori_0" readonly></td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)"></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)"></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" required></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td>
-                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
+                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
-                                                                <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                                                                <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control-banyak" oninput="calculateTotal(0)">
+                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control-banyak" oninput="calculateTotal(0)" readonly>
                                                             <input type="hidden" name="rawat[]" id="rawat_0" class="form-control" oninput="calculateTotal(0)">
                                                         </div>
                                                     </td>
@@ -238,8 +238,8 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis"  class="form-control" oninput="calculateTotal(0)" required>
-                                                            <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)" required>
+                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis"  class="form-control" oninput="calculateTotal(0)" readonly>
+                                                            <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
 
@@ -250,8 +250,8 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)" required>
-                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" required>
+                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)" readonly>
+                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -261,7 +261,7 @@
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
                                                             <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly>
-                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control">
+                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -270,7 +270,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly required>
+                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -313,7 +313,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" required>
+                                                        <select id="status_dibuat" name="status_dibuat" class="form-control">
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
                                                             <option value="publish" {{ old('status_dibuat') == 'publish' ? 'selected' : '' }}>Publish</option>
@@ -343,7 +343,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
-                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ old('tgl_dibuat', now()->format('Y-m-d')) }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
                                                     </td>
                                                     <td id="tgl_diterima">
                                                         <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" readonly>
@@ -560,20 +560,20 @@ function calculateTotalAll() {
                 </td>
                 <td><input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
                 <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" onchange="calculateTotal(${i})"></td>
-                <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})"></td>
+                <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly></td>
                 <td>
-                    <select id="kondisi_${i}" name="kondisi[]" class="form-control">
+                    <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
                         <option value="">Pilih Kondisi</option>
                         @foreach ($kondisis as $kondisi)
-                         <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                         <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
                         @endforeach
                     </select>
                 </td>
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">Rp. </span>
-                        <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control" oninput="calculateTotal(${i})">
-                        <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" required>
+                        <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control" oninput="calculateTotal(${i})" readonly>
+                        <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" readonly>
                     </div>
                 </td>
                 <td>
@@ -586,40 +586,6 @@ function calculateTotalAll() {
                 <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
             </tr>
         `;
-
-        // var newRow = '<tr id="row'+i+'">'+
-        //         '<td><select class="form-control" id="bulan_inden_'+i+'" name="bulan_inden[]">'+
-        //                 '<option value="">Pilih Bulan Inden</option>'+
-        //            '</select>'+
-        //         '</td>'+
-        //         '<td><select class="form-control" id="kode_inden_'+i+'" name="kode_inden[]">'+
-        //                 '<option value="">Pilih Kode Inden</option>'+
-        //             '</select>'+
-        //         '</td>'+
-        //         '<td><input type="text" class="form-control" name="kategori[]" id="kategori_'+i+'" readonly></td>
-        //         '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
-        //         '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
-        //         '<td><select id="kondisi_'+i+'" name="kondisi[]" class="form-control">'+
-        //             '<option value="" disabled>Pilih Kondisi</option>'+
-        //                         '@foreach ($kondisis as $kondisi)'+
-        //                             '<option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>'+
-        //                         '@endforeach'+
-        //             '</select>'+
-        //         '</td>'+
-        //         '<td><div class="input-group">'+
-        //                 '<span class="input-group-text">Rp. </span>'+
-        //                 '<input type="text" name="rawat2[]" id="rawat2_'+i+'" class="form-control" oninput="calculateTotal('+i+')" required>'+
-        //                 '<input type="hidden" name="rawat[]" id="rawat_'+i+'" class="form-control" required>'+
-        //         '</div>'+
-        //         '</td>'+
-        //         '<td><div class="input-group">'+
-        //                 '<span class="input-group-text">Rp. </span>'+
-        //                 '<input type="text" name="jumlah_display[]" id="jumlah_'+i+'" class="form-control" readonly>'+
-        //                 '<input type="hidden" name="jumlah[]" id="jumlahint_'+i+'" class="form-control" readonly>'+
-        //             '</div>'+
-        //         '</td>'+
-        //         '<td><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove">X</button></td>'+
-        //     '</tr>';
 
         $('#dynamic_field').append(newRow);
         bindSelectEvents(i);
@@ -665,81 +631,96 @@ function calculateTotalAll() {
     }
 
 
-        function bindSelectEvents(index) {
-            $('#bulan_inden_' + index).change(function() {
-                const supplierId = $('#supplier').val();
-                const bulanInden = $(this).val();
-                const kodeIndenDropdown = $('#kode_inden_' + index);
+        // Fungsi untuk mengikat event pada elemen dropdown baru
+function bindSelectEvents(index) {
+    $('#bulan_inden_' + index).change(function() {
+        const supplierId = $('#supplier').val();
+        const bulanInden = $(this).val();
+        const kodeIndenDropdown = $('#kode_inden_' + index);
 
-                kodeIndenDropdown.empty();
-                kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
+        kodeIndenDropdown.empty();
+        kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
 
-                if (bulanInden) {
-                    $.ajax({
-                        url: `/get-kode-inden/${bulanInden}/${supplierId}`,
-                        type: 'GET',
-                        success: function(data) {
-                            data.forEach(function(kodeInden) {
-                                kodeIndenDropdown.append('<option value="' + kodeInden + '">' + kodeInden + '</option>');
-                            });
-                        },
-                        error: function() {
-                            alert('Gagal mengambil data kode inden');
-                        }
-                    });
-                }
-            });
-
-            $('#kode_inden_' + index).change(function() {
-                const supplierId = $('#supplier').val();
-                const bulanInden = $('#bulan_inden_' + index).val();
-                const kodeInden = $(this).val();
-                const kategoriInput = $('#kategori_' + index); 
-
-                if (kodeInden) {
-                    $.ajax({
-                        url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
-                        type: 'GET',
-                        success: function(kategori) {
-                            kategoriInput.val(kategori);
-                        },
-                        error: function() {
-                            alert('Gagal mengambil data kategori');
-                        }
-                    });
+        if (bulanInden) {
+            $.ajax({
+                url: `/get-kode-inden/${bulanInden}/${supplierId}`,
+                type: 'GET',
+                success: function(data) {
+                    if (Array.isArray(data)) {
+                        data.forEach(function(item) {
+                            kodeIndenDropdown.append('<option value="' + item + '">' + item + '</option>');
+                        });
+                    } else {
+                        console.error("Diharapkan array tetapi mendapat", data);
+                    }
+                },
+                error: function() {
+                    alert('Gagal mengambil data kode inden');
                 }
             });
         }
+    });
 
-        $('#supplier').change(function() {
-            const supplierId = $(this).val();
+    $('#kode_inden_' + index).change(function() {
+        const supplierId = $('#supplier').val();
+        const bulanInden = $('#bulan_inden_' + index).val();
+        const kodeInden = $(this).val();
+        const kategoriInput = $('#kategori_' + index); 
 
-            // Kosongkan opsi bulan inden pada setiap dropdown bulan_inden
-            $('select[id^="bulan_inden_"]').each(function() {
-                $(this).empty();
-                $(this).append('<option value="">Pilih Bulan Inden</option>');
+        if (kodeInden) {
+            $.ajax({
+                url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
+                type: 'GET',
+                success: function(kategori) {
+                    kategoriInput.val(kategori);
+                },
+                error: function() {
+                    alert('Gagal mengambil data kategori');
+                }
             });
+        }
+    });
+}
 
-            if (supplierId) {
-                // Ambil data bulan inden dari server
-                $.ajax({
-                    url: `/get-bulan-inden/${supplierId}`,
-                    type: 'GET',
-                    success: function(data) {
-                        bulanIndenData = data; // Simpan data bulan inden
-                        $('select[id^="bulan_inden_"]').each(function() {
-                            var bulanIndenDropdown = $(this);
-                            data.forEach(function(bulanInden) {
-                                bulanIndenDropdown.append('<option value="' + bulanInden + '">' + bulanInden + '</option>');
-                            });
+
+$('#supplier').change(function() {
+    const supplierId = $(this).val();
+
+    // Kosongkan opsi untuk setiap dropdown bulan_inden
+    $('select[id^="bulan_inden_"]').each(function() {
+        $(this).empty();
+        $(this).append('<option value="">Pilih Bulan Inden</option>');
+    });
+    $('select[id^="kode_inden_"]').each(function() {
+        $(this).empty();
+        $(this).append('<option value="">Pilih Kode Inden</option>');
+    });
+    
+
+    if (supplierId) {
+        // Ambil data bulan inden dari server
+        $.ajax({
+            url: `/get-bulan-inden/${supplierId}`,
+            type: 'GET',
+            success: function(data) {
+                if (Array.isArray(data)) {
+                    bulanIndenData = data; // Simpan data bulan inden sebagai array
+                    $('select[id^="bulan_inden_"]').each(function() {
+                        var bulanIndenDropdown = $(this);
+                        data.forEach(function(bulanInden) {
+                            bulanIndenDropdown.append('<option value="' + bulanInden + '">' + bulanInden + '</option>');
                         });
-                    },
-                    error: function() {
-                        alert('Gagal mengambil data bulan inden');
-                    }
-                });
+                    });
+                } else {
+                    console.error("Diharapkan array tetapi mendapat", data);
+                }
+            },
+            error: function() {
+                alert('Gagal mengambil data bulan inden');
             }
         });
+    }
+});
 
        
     });

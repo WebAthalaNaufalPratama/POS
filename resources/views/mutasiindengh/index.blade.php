@@ -51,8 +51,8 @@
                                 <td>{{ $mutasi->no_mutasi }}</td>
                                 <td>{{ $mutasi->supplier->nama }}</td>
                                 <td>{{ $mutasi->lokasi->nama }}</td>
-                                <td>{{ $mutasi->tgl_dikirim }}</td>
-                                <td>{{ $mutasi->tgl_diterima }}</td>
+                                <td>{{ tanggalindo($mutasi->tgl_dikirim) }}</td>
+                                <td>{{ tanggalindo($mutasi->tgl_diterima) }}</td>
                                 <td>{{ $mutasi->status_dibuat }}</td>
                                 {{-- <td>{{ $mutasi->status_diterima }}</td>
                                 <td>{{ $mutasi->status_dibukukan }}</td>
@@ -62,7 +62,8 @@
                                     <div class="dropdown">
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
                                         <div class="dropdown-menu">
-                                            {{-- <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}">Acc Terima</a> --}}
+                                            <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}">Edit</a>
+                                            <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}">Show</a>
                                         </div>
                                     </div>
                                 </td>

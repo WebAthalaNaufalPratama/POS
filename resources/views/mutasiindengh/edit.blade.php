@@ -1,23 +1,26 @@
+
 @extends('layouts.app-von')
 
 @section('content')
-
+<style>
+   
+    .form-control {
+        min-width: 200px; /* Adjust as necessary */
+    }
+    .form-control-banyak{
+        min-width: 200px; /* Adjust as necessary */
+    }
+</style>
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Retur Penjualan</h3>
+            <h3 class="page-title">Edit Mutasi Inden ke Galery/GreenHouse</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
-                    <a href="index.html">Penjualan</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="index.html">Invoice Penjualan</a>
+                    <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    DO Penjualan
-                </li>
-                <li class="breadcrumb-item active">
-                    Retur Penjualan
+                    Inden Ke {{ $data->lokasi->nama}}
                 </li>
             </ul>
         </div>
@@ -26,69 +29,65 @@
 
 <div class="row">
     <div class="card">
-        <div class="card-header">
-            <h4 class="card-title mb-0">
-                Retur Penjualan
-            </h4>
-        </div>
+       
         <div class="card-body">
-            <form action="{{ route('returpenjualan.store', ['penjualan' => $penjualans->id]) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('mutasiindengh.update', $data->id ) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('patch')
                 <div class="row">
                     <div class="col-sm">
-                        @csrf
-
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
-                                <h5>Informasi Pelanggan</h5>
+                        <div class="row justify-content-start">
+                            <div class="col-md-12 border rounded pt-3 me-1">
                                 <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="no_retur">No Retur Penjualan</label>
-                                            <input type="text" class="form-control" id="no_retur" name="no_retur" placeholder="Nomor Delivery Order" value="" onchange="generateDOP(this)" readonly required>
+                                            <label for="no_mutasi">No Mutasi</label>
+                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $data->no_mutasi }}" readonly>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="tgl_kirim">Tanggal Kirim</label>
+                                            <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($data->tgl_dikirim) }}" readonly>
+                                         </div>
+                                        
+                                        {{-- <div class="form-group">
+                                            <label for="supplier">Supplier</label>
+                                            <div class="input-group">
+                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
+                                                    <option value="">Pilih Nama Supplier</option>
+                                                    @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                                                        <img src="/assets/img/icons/plus1.svg" alt="img" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div> --}}
                                     </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="supplier">Supplier</label>
+                                                <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $data->supplier->nama }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="penerima">Lokasi</label>
+                                            <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $data->lokasi->nama }}" readonly>
 
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                        <label for="customer_id">Nama Customer</label>
-                                            <select id="customer_id" name="customer_id" class="form-control">
-                                                <option value=""> Pilih Nama Customer </option>
-                                                @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}">{{ $customer->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="lokasi_id">Lokasi</label>
-                                            <select id="lokasi_id" name="lokasi_id" class="form-control">
-                                                <option value=""> Pilih Lokasi </option>
-                                                @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group" style="display:none;" id="penerima">
-                                            <label for="penerima">Nama Penerima</label>
-                                            <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima">
-                                        </div>
-                                        <div class="form-group" style="display:none;" id="tanggalkirim">
-                                            <label for="tanggal_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" placeholder="Tanggal Kirim" id="tanggal_kirim" name="tanggal_kirim">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
-                                        <label for="supplier_id">Supplier</label>
-                                            <select id="supplier_id" name="supplier_id" class="form-control">
-                                                <option value=""> Pilih Nama Supplier </option>
-                                                @foreach ($suppliers as $supplier)
-                                                <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                            <label for="tgl_terima">Tanggal Diterima</label>
+                                            <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" 
+                                            value="{{ now()->format('Y-m-d') }}"
+                                            min="{{ now()->format('Y-m-d') }}" 
+                                            max="{{ now()->addYear()->format('Y-m-d') }}">
+                                         </div>
                                         <div class="form-group">
                                             <div class="custom-file-container" data-upload-id="myFirstImage">
-                                                <label>Bukti Retur <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                <label>Bukti<a href="javascript:void" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"> clear</a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
                                                     <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*">
@@ -97,82 +96,10 @@
                                                 <span class="text-danger">max 2mb</span>
                                                 <img id="preview" />
                                             </div>
+
+                                            
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-
-                            <div class="col-md-5 border rounded pt-3 ms-1">
-                                <h5>Informasi Komplain</h5>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="tanggal_invoice">Tanggal Invoice</label>
-                                            <input type="date" class="form-control" id="tanggal_invoice" name="tanggal_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->tanggal_invoice}}" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="tanggal_retur">Tanggal Retur</label>
-                                            <input type="date" class="form-control" id="tanggal_retur" name="tanggal_retur" placeholder="Tanggal_retur" onchange="updateDate(this)" required>
-                                        </div>
-                                        <div class="form-group">
-                                        <label for="komplain">Komplain</label>
-                                            <select id="komplain" name="komplain" class="form-control">
-                                                <option value=""> Pilih Komplain </option>
-                                                <option value="refund">Refund</option>
-                                                <option value="diskon">Diskon</option>
-                                                <option value="retur">Retur</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group" style="display:none;" id="driver">
-                                            <label for="driver">Driver</label>
-                                            <select id="driver" name="driver" class="form-control">
-                                                <option value=""> Pilih Driver </option>
-                                                @foreach ($drivers as $driver)
-                                                <option value="{{ $driver->id }}">{{ $driver->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group" style="display:none;" id="alamat">
-                                            <label for="alamat">Alamat Pengiriman</label>
-                                            <textarea id="alamat" name="alamat"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="no_invoice">No Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="no_do">No Delivery Order</label>
-                                            <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Invoice" value="{{ $penjualans->no_do}}" required readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="catatan_komplain">Catatan</label>
-                                            <textarea id="catatan_komplain" name="catatan_komplain"></textarea>
-                                        </div>
-                                        <div class="form-group" style="display:none;" id="bukti_kirim">
-                                            <div class="custom-file-container" data-upload-id="mySecondImage">
-                                                <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                                </label>
-                                                <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_kirim" class="custom-file-container__custom-file__custom-file-input_2" name="file" accept="image/*">
-                                                    <span class="custom-file-container__custom-file__custom-file-control_2"></span>
-                                                </label>
-                                                <span class="text-danger">max 2mb</span>
-                                                <img id="preview_kirim" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row justify-content-around">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="add-icon text-end">
-                                    <button type="button" class="btn btn-primary">Cetak DO</button>
                                 </div>
                             </div>
                         </div>
@@ -180,133 +107,65 @@
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
                                     <div class="mb-4">
-                                        <h5>Produk Komplain</h5>
-                                    </div>
-                                    <div class="table-responsive">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>No Delivery Order</th>
-                <th>Nama</th>
-                <th>Jumlah</th>
-                <th>Alasan</th>
-                <th>Diskon</th>
-                <th>Harga</th>
-                <th>Total Harga</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody id="dynamic_field">
-            @php
-            $i = 0;
-            @endphp
-            @foreach ($penjualans->deliveryorder as $deliveryOrder)
-            @foreach ($deliveryOrder->produk as $produk)
-            @if ($produk->jenis != 'TAMBAHAN')
-            <tr id="row{{ $i }}">
-                <td><input type="text" name="no_do1[]" id="no_do_{{ $i }}" class="form-control" value="{{ $deliveryOrder->no_do }}" required></td>
-                <td>
-                    <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required readonly>
-                        <option value="">Pilih Produk</option>
-                        @foreach ($produkjuals as $pj)
-                        <option value="{{ $pj->kode }}" data-harga="{{ $pj->harga_jual }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" data-index="{{ $i }}" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" onchange="calculateTotal({{ $i }})" required></td>
-                <td><input type="text" name="alasan[]" id="alasan_{{ $i }}" class="form-control" required></td>
-                <td>
-    <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control">
-        <option value="0">Pilih Diskon</option>
-        <option value="Nominal">Nominal</option>
-        <option value="persen">Persen</option>
-    </select>
-    <div>
-        <div class="input-group">
-            <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
-            <span class="input-group-text hidden" id="nominalInput_{{ $i }}">.00</span>
-            <span class="input-group-text hidden" id="persenInput_{{ $i }}">%</span>
-        </div>
-    </div>
-</td>
-
-                <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" required></td>
-                <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" required></td>
-                <td>
-                    @if ($i == 0)
-                    <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
-                    @else
-                    <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
-                    @endif
-                </td>
-            </tr>
-            @php
-            $i++;
-            @endphp
-            @endif
-            @endforeach
-            @endforeach
-        </tbody>
-    </table>
-</div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row justify-content-around">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
-                                <div class="form-row row">
-                                    <div class="mb-4">
-                                        <h5>Produk Ganti</h5>
+                                        <h5>List Produk</h5>
                                     </div>
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th>Nama</th>
-                                                    <th>Jumlah</th>
-                                                    <th>Unit Satuan</th>
-                                                    <th>Keterangan</th>
+                                                    <th>Bulan Inden</th>
+                                                    <th>Kode Inden</th>
+                                                    <th>Kategori</th>
+                                                    <th>QTY Kirim</th>
+                                                    <th>QTY Terima</th>
+                                                    <th>Kondisi</th>
+                                                    <th>Biaya Perawatan</th>
+                                                    <th>Total Biaya Perawatan</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="dynamic_field_tambah">
+                                            <tbody id="dynamic_field">
+                                                @foreach ($barangmutasi as $index => $item)
                                                 <tr>
                                                     <td>
-                                                        <select id="nama_produk2_0" name="nama_produk2[]" class="form-control">
-                                                            <option value="">Pilih Produk</option>
-                                                            @foreach ($produkjuals as $produk)
-                                                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                                                @if (substr($produk->kode, 0, 3) === 'TRD')
-                                                                {{ $produk->nama }}
-                                                                @foreach ($produk->komponen as $komponen)
-                                                                @if ($komponen->kondisi)
-                                                                @foreach($kondisis as $kondisi)
-                                                                @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                $found = true;
-                                                                break;
-                                                                @endphp
-                                                                @endif
-                                                                @endforeach
-                                                                @endif
-                                                                @if ($found) @break @endif
-                                                                @endforeach
-                                                                @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                                {{ $produk->nama }}
-                                                                @endif
-                                                            </option>
+                                                        <input type="hidden" class="form-control" name="id[]" id="id_{{ $index }}" value="{{ $item->id }}" readonly>
+                                                        <input type="text" class="form-control" name="bulan_inden[]" id="bulan_inden_{{ $index }}" value="{{ $item->produk->bulan_inden }}" readonly>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_{{ $index }}" value="{{ $item->produk->kode_produk_inden }}" readonly>
+                                                    </td>
+                                                    <td>
+                                                    <input type="text" class="form-control" name="kategori[]" id="kategori_{{ $index }}" value="{{ $item->produk->produk->nama }}" readonly>
+                                                    <input type="hidden" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $item->produk->kode_produk}}" readonly>
+                                                    </td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" onchange="calculateTotal({{ $index }})" value="{{ $item->jml_dikirim }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})"></td>
+                                                    <td>
+                                                        <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control">
+                                                            <option value="">Pilih Kondisi</option>
+                                                            @foreach ($kondisis as $kondisi)
+                                                                <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control" ></td>
-                                                    <td><input type="text" name="satuan2[]" id="satuan2_0" class="form-control" ></td>
-                                                    <td><input type="text" name="keterangan2[]" id="keterangan2_0" class="form-control" ></td>
-                                                    <td><button type="button" name="addtambah" id="addtambah" class="btn btn-success">+</button></td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" name="rawat2[]" id="rawat2_{{ $index }}" class="form-control-banyak" oninput="calculateTotal({{ $index }})">
+                                                            <input type="hidden" name="rawat[]" id="rawat_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control-banyak" readonly>
+                                                            <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control">
+                                                        </div>
+                                                    </td>
                                                 </tr>
+                                                @endforeach
                                             </tbody>
+                                            
                                         </table>
                                     </div>
                                 </div>
@@ -315,26 +174,96 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-3 col-sm-6 col-12 mt-4">
-                                        
+                                    <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
+                                        <div class="page-btn">
+                                            Riwayat Pembayaran
+                                            {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table datanew">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No Bayar</th>
+                                                        <th>Tanggal</th>
+                                                        <th>Metode</th>
+                                                        <th>Nominal</th>
+                                                        <th>Bukti</th>
+                                                        <th>Status</th>
+                                                        <th>Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {{-- @foreach ($datapos as $datapo)
+                                                    <tr>
+                                                        <td>{{ $loop->iteration }}</td>
+                                                        <td>{{ $datapo->no_po }}</td>
+                                                        <td>{{ $datapo->supplier->nama }}</td>
+                                                        <td>{{ $datapo->tgl_kirim }}</td>
+                                                        <td>{{ $datapo->tgl_diterima}}</td>
+                                                        <td>{{ $datapo->no_do_suplier}}</td>
+                                                        <td>{{ $datapo->lokasi->nama}}</td>
+                                                        <td>{{ $datapo->status_dibuat}}</td>
+                                                       
+                                                    </tr>
+                                                    @endforeach --}}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-6 mt-4 ">
-                                        
-                                    </div>
-                                    <div class="col-lg-6 float-md-right">
+                                    <div class="col-lg-5 float-md-right">
                                         <div class="total-order">
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
-                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="0" readonly required></h5>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" readonly>
+                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" readonly>
+                                                        </div>
+                                                    </h5>
                                                 </li>
                                                 <li>
-                                                    <h4 id="biaya_pengiriman">Biaya Pengiriman</h4>
-                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" required></h5>
+                                                    <h4>Biaya Perawatan</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis"  class="form-control" oninput="calculateTotal(0)">
+                                                            <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)">
+                                                        </div>
+                                                    </h5>
+
+                                                </li>
+                                                
+                                                <li>
+                                                    <h4>Biaya Pengiriman</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)">
+                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)">
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                <li class="total">
+                                                    <h4>Total Tagihan</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly>
+                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly>
+                                                        </div>
+                                                    </h5>
                                                 </li>
                                                 <li>
-                                                    <h4>Total</h4>
-                                                    <h5><input type="text" id="total" name="total" class="form-control" value="0" readonly required></h5>
+                                                    <h4>Sisa Tagihan</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly>
+                                                        </div>
+                                                    </h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -342,10 +271,90 @@
                                 </div>
                             </div>
                         </div>
+                         <div class="row justify-content-start">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2"> 
+                             
+                                        <table class="table table-responsive border rounded">
+                                            <thead>
+                                                <tr>
+                                                    <th>Dibuat</th>                                              
+                                                    <th>Diterima</th>                                              
+                                                    <th>Dibukukan</th>
+                                                    <th>Diperiksa</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td id="pembuat">
+                                                        <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatan ?? '' }})" disabled>
+                                                    </td>
+                                                    <td id=penerima">
+                                                        <input type="hidden" name=penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                    </td>
+                                                    <td id="pembuku">
+                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                    </td>
+                                                    <td id="pemeriksa">
+                                                        <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="status_dibuat">
+                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="draft" {{ $data->status_dibuat == 'draft' ? 'selected' : '' }} disabled>Draft</option>
+                                                            <option value="publish" {{ $data->status_dibuat == 'publish' ? 'selected' : '' }} disabled>Publish</option>
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_diterima">
+                                                        <select id="status_diterima" name="status_diterima" class="form-control">
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="pending" {{ old('status_diterima') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                            <option value="acc" {{ old('status_diterima') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_dibuku">
+                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control">
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_dibuku">
+                                                        <select id="status_diperiksa" name="status_dibuku" class="form-control">
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="pending" {{ old('status_diperiksa') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                            <option value="acc" {{ old('status_diperiksa') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="tgl_dibuat">
+                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ formatTanggal($data->tgl_dibuat) }}" readonly >
+                                                    </td>
+                                                    <td id="tgl_diterima">
+                                                        <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}">
+                                                    </td>
+                                                    <td id="tgl_dibuku">
+                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}">
+                                                    </td>
+                                                    <td id="tgl_diperiksa">
+                                                        <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', now()->format('Y-m-d')) }}" >
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>  
+                                        <br>                                 
+                               </div>
+                         </div>
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="{{ route('dopenjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
+                            <a href="" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>
@@ -354,378 +363,558 @@
 </div>
 </div>
 
+
+
 </div>
+<div class="modal fade" id="myModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Tambah Pembayaran</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="supplierForm" action="" method="POST">
+                @csrf
+            <div class="mb-3">
+              <label for="nobay" class="form-label">No Bayar</label>
+              {{-- <input type="text" class="form-control" id="invoice_purchase_id" name="invoice_purchase_id" value="{{ $no_invpo }}" hidden> --}}
+              <input type="text" class="form-control" id="nobay" name="nobay" value="" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="tgl" class="form-label">Tanggal</label>
+              <input type="date" class="form-control" id="tgl" name="tgl" value="{{ now()->format('Y-m-d') }}">
+            </div>
+            <div class="mb-3">
+              <label for="metode" class="form-label">Metode</label>
+              {{-- <select class="form-control select2" id="metode" name="metode">
+                <option value="cash">cash</option>
+                @foreach ($rekenings as $item)
+                <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
+                @endforeach
+            </select> --}}
+            </div>
+            <div class="mb-3">
+              <label for="nominal" class="form-label">Nominal</label>
+              <input type="number" class="form-control" id="nominal" name="nominal">
+            </div>
+            <div class="mb-3">
+              <label for="bukti" class="form-label">Bukti</label>
+              <input type="file" class="form-control" id="bukti" name="bukti">
+            </div>
+            
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+
+{{-- <input type="text" name="rupiah" id="rupiah"> --}}
+
 @endsection
 
 @section('scripts')
-<script>
-    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+ <script>
 
-    function generateDOP() {
-        var invoicePrefix = "DOP";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+    // Fungsi untuk mengubah format input menjadi format Rupiah
+function formatRupiah(angka) {
+    var reverse = angka.toString().split('').reverse().join('');
+    var ribuan = reverse.match(/\d{1,3}/g);
+    ribuan = ribuan.join('.').split('').reverse().join('');
+    return ribuan;
+}
 
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_do').val(generatedInvoice);
-    }
+function unformatRupiah(formattedValue) {
+    return formattedValue.replace(/\./g, '');
+}
 
-    generateDOP();
-</script>
-<script>
-    var cekInvoiceNumbers = "<?php echo $cekretur ?>";
-    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+function inputToRupiah(inputId) {
+    var inputValue = document.getElementById(inputId).value;
+    var unformattedValue = unformatRupiah(inputValue);
+    var formattedValue = formatRupiah(unformattedValue);
+    document.getElementById(inputId).value = formattedValue;
+}
 
-    function generateRTP() {
-        var invoicePrefix = "RTP";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+function rupiahToInput(inputId) {
+    var inputValue = document.getElementById(inputId).value;
+    var unformattedValue = unformatRupiah(inputValue);
+    document.getElementById(inputId).value = unformattedValue;
+}
 
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_retur').val(generatedInvoice);
-    }
-
-    generateRTP();
-</script>
-<script>
-    // Function to update date to today's date
-    function updateDate(element) {
-        var today = new Date().toISOString().split('T')[0];
-        element.value = today;
-    }
-
-    updateDate(document.getElementById('tanggal_retur'));
-    updateDate(document.getElementById('tanggal_kirim'));
-</script>
-<script>
-    $(document).ready(function() {
-        var i = 1;
-        $('#add').click(function() {
-            var newRow = '<tr class="tr_clone" id="row' + i + '">' +
-                '<td>' +
-                '<select id="nama_produk_' + i + '" name="nama_produk[]" class="form-control select2" required>' +
-                '<option value="">Pilih Produk</option>' +
-                '@foreach ($produkjuals as $index => $produk)' +
-                '<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}">{{ $produk->nama }}</option>' +
-                '@endforeach' +
-                '</select>' +
-                '<input type="hidden" name="kode_produk[]" id="kode_produk_' + i + '" style="display: none;">' +
-                '<input type="hidden" name="tipe_produk[]" id="tipe_produk_' + i + '" style="display: none;">' +
-                '<input type="hidden" name="deskripsi_komponen[]" id="deskripsi_komponen_' + i + '" style="display: none;">' +
-                '</td>' +
-                '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
-                '<td><input type="text" name="unit_satuan[]" id="unit_satuan_' + i + '" class="form-control" required></td>' +
-                '<td><input type="text" name="keterangan[]" id="keterangan_' + i + '" class="form-control" required></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
-                '</tr>';
-            $('#dynamic_field').append(newRow);
-
-            // Menambahkan modal untuk setiap pic
-            var picModal = '<div class="modal fade" id="picModal_' + i + '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">' +
-                '<div class="modal-dialog" role="document">' +
-                '<div class="modal-content">' +
-                '<div class="modal-header">' +
-                '<h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ' + i + '</h5>' +
-                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                '<span aria-hidden="true">&times;</span>' +
-                '</button>' +
-                '</div>' +
-                '<div class="modal-body">' +
-                '<!-- Form untuk PIC Perangkai -->' +
-                '</div>' +
-                '<div class="modal-footer justify-content-center">' +
-                '<button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>';
-            $('body').append(picModal);
-
-            $('#nama_produk_' + i + ', #jenisdiskon_' + i).select2();
-            i++
-        });
-
-        $('#addtambah').click(function() {
-            var newrowtambah = '<tr class="tr_clone" id="row' + i + '">' +
-                '<td>' +
-                '<select id="nama_produk2_' + i + '" name="nama_produk2[]" class="form-control select2">' +
-                '<option value="">Pilih Produk</option>';
-
-            @foreach ($produkjuals as $produk)
-                newrowtambah += '<option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">';
-
-                @if (substr($produk->kode, 0, 3) === 'TRD')
-                    newrowtambah += '{{ $produk->nama }}';
-
-                    @foreach ($produk->komponen as $komponen)
-                        @if ($komponen->kondisi)
-                            @foreach($kondisis as $kondisi)
-                                @if($kondisi->id == $komponen->kondisi)
-                                    newrowtambah += '- {{ $kondisi->nama }}';
-                                    @php $found = true; @endphp
-                                    @break
-                                @endif
-                            @endforeach
-                        @endif
-                        @if ($found) @break @endif
-                    @endforeach
-
-                @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                    newrowtambah += '{{ $produk->nama }}';
-                @endif
-
-                newrowtambah += '</option>';
-            @endforeach
-
-            newrowtambah += '</select>' +
-                '<input type="hidden" name="kode_produk[]" id="kode_produk_' + i + '" style="display: none;">' +
-                '<input type="hidden" name="tipe_produk[]" id="tipe_produk_' + i + '" style="display: none;">' +
-                '<input type="hidden" name="deskripsi_komponen[]" id="deskripsi_komponen_' + i + '" style="display: none;">' +
-                '</td>' +
-                '<td><input type="number" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
-                '<td><input type="text" name="satuan2[]" id="satuan2_' + i + '" class="form-control"></td>' +
-                '<td><input type="text" name="keterangan2[]" id="keterangan2_' + i + '" class="form-control"></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
-                '</tr>';
-
-            $('#dynamic_field_tambah').append(newrowtambah);
-            $('#nama_produk2_' + i).select2(); // Ganti ini
-            i++;
-        });
-
-
-        $(document).on('click', '.btn_remove', function() {
-            var button_id = $(this).attr("id");
-            $('#row' + button_id + '').remove();
-            calculateTotal(0);
-        });
-        $(document).on('change', '[id^=nama_produk]', function() {
-            var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
-            var selectedOption = $(this).find(':selected');
-            $('#kode_produk_' + id).val(selectedOption.data('kode'));
-            $('#tipe_produk_' + id).val(selectedOption.data('tipe'));
-            $('#deskripsi_komponen_' + id).val(selectedOption.data('deskripsi'));
-            updateHargaSatuan(this);
-        });
-        function handleFileInputChange(inputElement, previewElement) {
-            const file = inputElement.files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(inputElement).val('');
-                return;
-            }
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $(previewElement).attr('src', e.target.result);
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        $('#bukti').on('change', function() {
-            handleFileInputChange(this, '#preview');
-        });
-
-        $('#bukti_kirim').on('change', function() {
-            handleFileInputChange(this, '#preview_kirim');
-        });
-
-        
-
-
-
-        function clearFile() {
-            $('#bukti').val('');
-            $('#preview').attr('src', defaultImg);
-        };
-
-
-        $('#komplain').on('change', function(){
-            var komplain = $(this).val();
-
-            $('[id^=harga_]').each(function() {
-                var hargaSatuanInput = $(this);
-                var index = hargaSatuanInput.attr('id').split('_')[1];
-                var biayakirim = $('#biaya_pengiriman');
-
-                if(komplain == 'retur') {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').show();
-                    biayakirim.prop('readonly', false);
-                    hargaSatuanInput.val(0);
-                    hargaSatuanInput.prop('readonly', true);
-                } else {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').hide();
-                    biayakirim.val(0);
-                    biayakirim.prop('readonly', true);
-                    var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
-                    var jumlah = $('#jumlah_' + index).val();
-                    var harga = hargaProduk * jumlah;
-                    hargaSatuanInput.val(harga);
-                    hargaSatuanInput.prop('readonly', true);
-                }
-            });
-
-            $('[id^=totalharga_]').each(function() {
-                var totalhargaInput = $(this);
-                var index = totalhargaInput.attr('id').split('_')[1];
-
-                if(komplain == 'refund' || komplain == 'diskon') {
-                    var hargaSatuan = $('#harga_' + index).val();
-                    var jumlah = $('#jumlah_' + index).val();
-                    var totalharga = hargaSatuan * jumlah;
-                    totalhargaInput.val(totalharga);
-                    totalhargaInput.prop('readonly', true); 
-                } else if(komplain == 'retur'){
-                    totalhargaInput.val(0);
-                    totalhargaInput.prop('readonly', true);
-                }
-            });
-
-            $('[id^=diskon_]').each(function() {
-                var diskonInput = $(this);
-                var index = diskonInput.attr('id').split('_')[1];
-
-                if(komplain == 'refund') {
-                    diskonInput.val(0);
-                    diskonInput.prop('readonly', true);
-                } else if(komplain == 'diskon') {
-                    diskonInput.prop('readonly', false);
-                    showInputType(index);
-                } else if(komplain == 'retur'){
-                    diskonInput.val(0);
-                    diskonInput.prop('readonly', true);
-                }
-            });
-
-            $('[id^=jumlah_]').each(function() {
-                var jumlahInput = $(this);
-                var index = jumlahInput.attr('id').split('_')[1];
-
-                if(komplain == 'refund' || komplain == 'diskon') { // Jika refund atau diskon, aktifkan input jumlah
-                    jumlahInput.prop('readonly', false);
-                } else {
-                    jumlahInput.prop('readonly', true); // Jika selain refund atau diskon, nonaktifkan input jumlah
-                }
-            });
-
-            updateSubTotal();
-        });
-
-        var jumlahDO = [];
-
-        @foreach ($penjualans->deliveryorder as $deliveryOrder)
-            @foreach ($deliveryOrder->produk as $produk)
-                jumlahDO.push({{ $produk->jumlah }});
-            @endforeach
-        @endforeach
-
-        $('[id^=jumlah_]').on('input', function() {
-            var jumlahInput = $(this);
-            var index = jumlahInput.attr('id').split('_')[1];
-            var komplain = $('#komplain').val();
-            var inputJumlah = $(this).val();
-            // console.log(jumlahDO[index]);
-            if (parseInt(inputJumlah) > jumlahDO[index]) {
-
-                alert('Jumlah Komplain harus sesuai dengan jumlah DO!');
-                $(this).val(jumlahDO[index]);
-            } else {
-                if (komplain == 'refund') {
-                    var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
-                    var jumlah = jumlahInput.val();
-
-                    // Jika jumlah tidak valid, berikan harga dan total harga nilai 0
-                    if (isNaN(jumlah) || jumlah <= 0) {
-                        $('#harga_' + index).val(0);
-                        $('#totalharga_' + index).val(0);
-                    } else {
-                        var harga = hargaProduk * jumlah;
-                        $('#harga_' + index).val(harga);
-                        $('#totalharga_' + index).val(harga);
-                    }
-
-                    // Panggil updateSubTotal setiap kali input jumlah diubah
-                    updateSubTotal();
-                }
-            }
-        });
-
-        function updateSubTotal() {
-            var subTotal = 0;
-            // console.log($('input[name="totalharga[]"]'));
-            $('input[name="totalharga[]"]').each(function() {
-                subTotal += parseFloat($(this).val()) || 0;
-            });
-            $('#sub_total').val(subTotal.toFixed(2));
-            $('#total').val(subTotal.toFixed(2));
-        }
-
-        $('[id^=jenis_diskon_]').on('change', function() {
-    var jenisInput = $(this);
-    var index = jenisInput.attr('id').split('_')[1];
-    var selectedValue = jenisInput.val();
-
-    if (selectedValue === "Nominal") {
-        $('#nominalInput_' + index).removeClass('hidden'); 
-        $('#persenInput_' + index).addClass('hidden');  // Sembunyikan input persen jika diskon nominal dipilih
-    } else if (selectedValue === "persen") {
-        $('#persenInput_' + index).removeClass('hidden'); 
-        $('#nominalInput_' + index).addClass('hidden');  // Sembunyikan input nominal jika diskon persen dipilih
-    } else {
-        $('#nominalInput_' + index).addClass('hidden'); 
-        $('#persenInput_' + index).addClass('hidden'); 
-    }
-
-    calculateTotal(index); // Panggil fungsi untuk menghitung total
+document.querySelectorAll('input[id^="rawat2_"], input[id^="biaya_rwt2"], input[id^="biaya_ongkir2"]').forEach(function(input) {
+    input.addEventListener('focus', function() {
+        rupiahToInput(this.id); // Ketika fokus, ubah ke format input biasa
+    });
+    input.addEventListener('blur', function() {
+        inputToRupiah(this.id); // Ketika kehilangan fokus, ubah kembali ke format Rupiah
+        calculateTotal(0); // Hitung kembali total setelah perubahan
+    });
 });
 
+function calculateTotal(index) {
+    var qtyTerimaElem = document.getElementById('qtytrm_' + index);
+    var rawatElem = document.getElementById('rawat2_' + index);
 
-        function calculateTotal(index) {
-            var diskonType = $('#jenis_diskon_' + index).val();
-            var diskonValue = parseFloat($('#diskon_' + index).val()) || 0; // Set default value to 0 if not valid
-            var jumlah = parseFloat($('#jumlah_' + index).val());
-            var hargaSatuan = parseFloat($('#harga_satuan_' + index).val());
-            var hargaTotal = 0;
+    if (qtyTerimaElem && rawatElem) {
+        var qtyTerima = parseFloat(qtyTerimaElem.value) || 0;
+        var rawat = parseFloat(unformatRupiah(rawatElem.value)) || 0;
+        var totalPerBaris = qtyTerima * rawat;
 
-            if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
-                hargaTotal = jumlah * hargaSatuan;
+        document.getElementById('jumlah_' + index).value = formatRupiah(totalPerBaris);
+        document.getElementById('jumlahint_' + index).value = totalPerBaris;
+        document.getElementById('rawat_' + index).value = rawat;
+
+        calculateTotalAll();
+    }
+}
+
+function calculateTotalAll() { 
+    var subTotal = 0;
+    var biaya_ongkir = parseFloat(unformatRupiah(document.getElementById('biaya_ongkir2').value)) || 0;
+    var biaya_perawatan = parseFloat(unformatRupiah(document.getElementById('biaya_rwt2').value)) || 0;
+
+    document.querySelectorAll('input[id^="jumlahint_"]').forEach(function(input) {
+        subTotal += parseFloat(input.value) || 0;
+    });
+
+    var totalTagihan = subTotal + biaya_ongkir + biaya_perawatan;
+
+    document.getElementById('sub_total').value = formatRupiah(subTotal);
+    document.getElementById('total_tagihan').value = formatRupiah(totalTagihan.toString());
+    document.getElementById('sub_total_int').value = subTotal;
+    document.getElementById('biaya_rwt').value = biaya_perawatan;
+    document.getElementById('biaya_ongkir').value = biaya_ongkir;
+    document.getElementById('total_tagihan_int').value = totalTagihan;
+}
+
+
+
+    $(document).ready(function() {
+
+        
+        $('.select2').select2();
+
+        bindSelectEvents(0);
+
+            if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
             }
 
-            if (!isNaN(hargaTotal)) {
-                if (diskonType === "Nominal") {
-                    hargaTotal -= diskonValue;
-                } else if (diskonType === "persen") {
-                    hargaTotal -= (hargaTotal * diskonValue / 100);
+            $('#bukti').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
                 }
-            }
-
-            // Set value for total price input
-            $('#totalharga_' + index).val(hargaTotal.toFixed(2));
-
-            // Recalculate subtotal
-            var subtotal = 0;
-            $('input[name="totalharga[]"]').each(function() {
-                subtotal += parseFloat($(this).val()) || 0;
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
             });
 
-            // Set value for subtotal input
-            $('#sub_total').val(subtotal.toFixed(2));
+           
+         // Tambahkan baris baru
+    var i = 0;
+    var bulanIndenData = [];
+
+    $('#add').click(function() {
+        i++;
+
+        var newRow = `
+            <tr id="row${i}">
+                <td>
+                    <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
+                        <option value="">Pilih Bulan Inden</option>
+                        ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
+                        <option value="">Pilih Kode Inden</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
+                <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" onchange="calculateTotal(${i})"></td>
+                <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly></td>
+                <td>
+                    <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
+                        <option value="">Pilih Kondisi</option>
+                        @foreach ($kondisis as $kondisi)
+                         <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <span class="input-group-text">Rp. </span>
+                        <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control" oninput="calculateTotal(${i})" readonly>
+                        <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" readonly>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <span class="input-group-text">Rp. </span>
+                        <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control" readonly>
+                        <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" readonly>
+                    </div>
+                </td>
+                <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
+            </tr>
+        `;
+
+        // var newRow = '<tr id="row'+i+'">'+
+        //         '<td><select class="form-control" id="bulan_inden_'+i+'" name="bulan_inden[]">'+
+        //                 '<option value="">Pilih Bulan Inden</option>'+
+        //            '</select>'+
+        //         '</td>'+
+        //         '<td><select class="form-control" id="kode_inden_'+i+'" name="kode_inden[]">'+
+        //                 '<option value="">Pilih Kode Inden</option>'+
+        //             '</select>'+
+        //         '</td>'+
+        //         '<td><input type="text" class="form-control" name="kategori[]" id="kategori_'+i+'" readonly></td>
+        //         '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
+        //         '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
+        //         '<td><select id="kondisi_'+i+'" name="kondisi[]" class="form-control">'+
+        //             '<option value="" disabled>Pilih Kondisi</option>'+
+        //                         '@foreach ($kondisis as $kondisi)'+
+        //                             '<option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>'+
+        //                         '@endforeach'+
+        //             '</select>'+
+        //         '</td>'+
+        //         '<td><div class="input-group">'+
+        //                 '<span class="input-group-text">Rp. </span>'+
+        //                 '<input type="text" name="rawat2[]" id="rawat2_'+i+'" class="form-control" oninput="calculateTotal('+i+')" required>'+
+        //                 '<input type="hidden" name="rawat[]" id="rawat_'+i+'" class="form-control" required>'+
+        //         '</div>'+
+        //         '</td>'+
+        //         '<td><div class="input-group">'+
+        //                 '<span class="input-group-text">Rp. </span>'+
+        //                 '<input type="text" name="jumlah_display[]" id="jumlah_'+i+'" class="form-control" readonly>'+
+        //                 '<input type="hidden" name="jumlah[]" id="jumlahint_'+i+'" class="form-control" readonly>'+
+        //             '</div>'+
+        //         '</td>'+
+        //         '<td><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove">X</button></td>'+
+        //     '</tr>';
+
+        $('#dynamic_field').append(newRow);
+        bindSelectEvents(i);
+
+        // Bind event untuk input yang baru ditambahkan
+        document.getElementById(`rawat2_${i}`).addEventListener('focus', function() {
+            rupiahToInput(this.id);
+        });
+        document.getElementById(`rawat2_${i}`).addEventListener('blur', function() {
+            inputToRupiah(this.id);
+            calculateTotal(i);
+        });
+       
+        document.getElementById(`qtytrm_${i}`).addEventListener('input', function() {
+            calculateTotal(i);
+        });
+    });
+
+    $(document).on('click', '.btn_remove', function() {
+        var button_id = $(this).attr("id");
+        $('#row' + button_id).remove();
+        calculateTotal(); // Panggil fungsi calculateTotal tanpa parameter setelah penghapusan baris
+    });
+
+    function calculateTotal() {
+        var totalKeseluruhan = 0;
+        var biaya_ongkir = parseFloat(unformatRupiah(document.getElementById('biaya_ongkir2').value)) || 0;
+        var biaya_perawatan = parseFloat(unformatRupiah(document.getElementById('biaya_rwt2').value)) || 0;
+
+        document.querySelectorAll('input[id^="jumlahint_"]').forEach(function(input) {
+            totalKeseluruhan += parseFloat(input.value) || 0;
+        });
+
+        document.getElementById('sub_total').value = formatRupiah(totalKeseluruhan); 
+        document.getElementById('sub_total_int').value = totalKeseluruhan; 
+
+        var totalTagihan = totalKeseluruhan + biaya_ongkir + biaya_perawatan;
+
+        document.getElementById('total_tagihan').value = formatRupiah(totalTagihan.toString());
+        document.getElementById('total_tagihan_int').value = totalTagihan;
+
+        
+    }
+
+
+        function bindSelectEvents(index) {
+            $('#bulan_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $(this).val();
+                const kodeIndenDropdown = $('#kode_inden_' + index);
+
+                kodeIndenDropdown.empty();
+                kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
+
+                if (bulanInden) {
+                    $.ajax({
+                        url: `/get-kode-inden/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(data) {
+                            data.forEach(function(kodeInden) {
+                                kodeIndenDropdown.append('<option value="' + kodeInden + '">' + kodeInden + '</option>');
+                            });
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kode inden');
+                        }
+                    });
+                }
+            });
+
+            $('#kode_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $('#bulan_inden_' + index).val();
+                const kodeInden = $(this).val();
+                const kategoriInput = $('#kategori_' + index); 
+
+                if (kodeInden) {
+                    $.ajax({
+                        url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(kategori) {
+                            kategoriInput.val(kategori);
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kategori');
+                        }
+                    });
+                }
+            });
         }
 
-    });
-</script>
+        $('#supplier').change(function() {
+            const supplierId = $(this).val();
 
+            // Kosongkan opsi bulan inden pada setiap dropdown bulan_inden
+            $('select[id^="bulan_inden_"]').each(function() {
+                $(this).empty();
+                $(this).append('<option value="">Pilih Bulan Inden</option>');
+            });
+
+            if (supplierId) {
+                // Ambil data bulan inden dari server
+                $.ajax({
+                    url: `/get-bulan-inden/${supplierId}`,
+                    type: 'GET',
+                    success: function(data) {
+                        bulanIndenData = data; // Simpan data bulan inden
+                        $('select[id^="bulan_inden_"]').each(function() {
+                            var bulanIndenDropdown = $(this);
+                            data.forEach(function(bulanInden) {
+                                bulanIndenDropdown.append('<option value="' + bulanInden + '">' + bulanInden + '</option>');
+                            });
+                        });
+                    },
+                    error: function() {
+                        alert('Gagal mengambil data bulan inden');
+                    }
+                });
+            }
+        });
+
+       
+    });
+   
+
+
+
+        function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        }
+
+        
+</script>
 @endsection
+
+
+{{-- <script>
+
+
+    $(document).ready(function() {
+        $('.select2').select2();
+
+            if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
+            }
+
+            $('#bukti').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+           
+        var i = 0;
+        var bulanIndenData = [];
+
+        $('#add').click(function() {
+            i++;
+            var newRow = `
+                <tr id="row${i}">
+                    <td>
+                        <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
+                            <option value="">Pilih Bulan Inden</option>
+                            ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
+                            <option value="">Pilih Kode Inden</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
+                    <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(${i})"></td>
+                    <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(${i})"></td>
+                    <td>
+                        <select id="kondisi_${i}" name="kondisi[]" class="form-control" onchange="showInputType(${i})">
+                            <option value="" disabled>Pilih Kondisi</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp. </span> 
+                            <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control-banyak" oninput="calculateTotal(${i})" value="" required>
+                            <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" oninput="calculateTotal(${i})" value="" required>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp. </span> 
+                            <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control-banyak" value="" readonly>
+                            <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" value="" readonly>
+                        </div>
+                    </td>
+                    <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
+                </tr>
+            `;
+            $('#dynamic_field').append(newRow);
+            bindSelectEvents(i);
+        });
+
+        $(document).on('click', '.btn_remove', function() {
+            var button_id = $(this).attr("id"); 
+            $('#row' + button_id + '').remove();
+        });
+
+        function bindSelectEvents(index) {
+            $('#bulan_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $(this).val();
+                const kodeIndenDropdown = $('#kode_inden_' + index);
+
+                kodeIndenDropdown.empty();
+                kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
+
+                if (bulanInden) {
+                    $.ajax({
+                        url: `/get-kode-inden/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(data) {
+                            data.forEach(function(kodeInden) {
+                                kodeIndenDropdown.append('<option value="' + kodeInden + '">' + kodeInden + '</option>');
+                            });
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kode inden');
+                        }
+                    });
+                }
+            });
+
+            $('#kode_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $('#bulan_inden_' + index).val();
+                const kodeInden = $(this).val();
+                const kategoriInput = $('#kategori_' + index); 
+
+                if (kodeInden) {
+                    $.ajax({
+                        url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(kategori) {
+                            kategoriInput.val(kategori);
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kategori');
+                        }
+                    });
+                }
+            });
+        }
+
+        $('#supplier').change(function() {
+            const supplierId = $(this).val();
+
+            // Kosongkan opsi bulan inden pada setiap dropdown bulan_inden
+            $('select[id^="bulan_inden_"]').each(function() {
+                $(this).empty();
+                $(this).append('<option value="">Pilih Bulan Inden</option>');
+            });
+
+            if (supplierId) {
+                // Ambil data bulan inden dari server
+                $.ajax({
+                    url: `/get-bulan-inden/${supplierId}`,
+                    type: 'GET',
+                    success: function(data) {
+                        bulanIndenData = data; // Simpan data bulan inden
+                        $('select[id^="bulan_inden_"]').each(function() {
+                            var bulanIndenDropdown = $(this);
+                            data.forEach(function(bulanInden) {
+                                bulanIndenDropdown.append('<option value="' + bulanInden + '">' + bulanInden + '</option>');
+                            });
+                        });
+                    },
+                    error: function() {
+                        alert('Gagal mengambil data bulan inden');
+                    }
+                });
+            }
+        });
+
+        bindSelectEvents(0); // Initial binding for the first row
+    });
+   
+
+
+
+        function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        }
+
+        
+</script> --}}

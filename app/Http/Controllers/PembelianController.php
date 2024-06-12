@@ -33,38 +33,198 @@ class PembelianController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $datapos = Pembelian::orderBy('created_at', 'desc')->get();
-        $datainden = ModelsPoinden::orderBy('created_at', 'desc')->get();
+        $query = Pembelian::orderBy('created_at', 'desc');
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->input('supplier'));
+        }
+        if ($req->gallery) {
+            $query->where('lokasi_id', $req->input('gallery'));
+        }
+        if ($req->status) {
+            if ($req->status == 'Lunas') {
+                $query->whereHas('invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query->whereDoesntHave('invoice')
+                      ->orWhereHas('invoice', function($q) {
+                          $q->where('sisa', '!=', 0);
+                      });
+            }
+        }        
+        if ($req->dateStart) {
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+        }
+        $datapos = $query->get();
+
+        $query2 = ModelsPoinden::orderBy('created_at', 'desc');
+        if ($req->supplierInd) {
+            $query2->where('supplier_id', $req->input('supplierInd'));
+        }
+        if ($req->statusInd) {
+            if ($req->statusInd == 'Lunas') {
+                $query2->whereHas('invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query2->whereDoesntHave('invoice')
+                      ->orWhereHas('invoice', function($q) {
+                          $q->where('sisa', '!=', 0);
+                      });
+            }
+        }        
+        if ($req->dateStartInd) {
+            $query2->where('tgl_dibuat', '>=', $req->input('dateStartInd'));
+        }
+        if ($req->dateEndInd) {
+            $query2->where('tgl_dibuat', '<=', $req->input('dateEndInd'));
+        }
+
+        $datainden = $query2->get();
         $datainv = Invoicepo::get();
+
+        $supplierTrd = Pembelian::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('suppliers', 'pembelians.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $supplierInd = ModelsPoinden::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('suppliers', 'poinden.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $galleryTrd = Pembelian::select('lokasis.id', 'lokasis.nama')
+        ->distinct()
+        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->orderBy('lokasis.nama')
+        ->get();
        
         // $databayars = Pembayaran::where('invoice_purchase_id', $id_inv)->where('status_bayar','LUNAS')->get();
 
-        return view('purchase.index',compact('datapos','datainv','datainden'));
+        return view('purchase.index',compact('datapos','datainv','datainden', 'supplierTrd', 'supplierInd', 'galleryTrd'));
     }
 
-    public function index_retur()
+    public function index_retur(Request $req)
     {
-        $dataretur = Returpembelian::orderBy('created_at', 'desc')->get();
+        $query = Returpembelian::orderBy('created_at', 'desc');
+        if ($req->gallery) {
+            $query->whereHas('invoice', function($r) use($req){
+                $r->whereHas('pembelian', function($q) use($req){
+                    $q->where('lokasi_id', $req->input('gallery'));
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+        }
+        $dataretur = $query->get();
         $datainv = Invoicepo::get();
+
+        $gallery = Returpembelian::select('lokasis.id', 'lokasis.nama')
+        ->distinct()
+        ->join('invoicepo', 'returpembelians.invoicepo_id', '=', 'invoicepo.id')
+        ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
+        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->orderBy('lokasis.nama')
+        ->get();
        
         // $databayars = Pembayaran::where('invoice_purchase_id', $id_inv)->where('status_bayar','LUNAS')->get();
 
-        return view('purchase.returindex',compact('dataretur','datainv'));
+        return view('purchase.returindex',compact('dataretur','datainv', 'gallery'));
     }
 
-    public function invoice()
+    public function invoice(Request $req)
     {
        
-        $invoices = Invoicepo::whereNull('poinden_id')
-            ->orderBy('tgl_inv', 'desc')
-            ->get();
+        $query= Invoicepo::whereNull('poinden_id')->orderBy('tgl_inv', 'desc');
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->input('supplier'));
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->input('gallery'));
+            });
+        }
+        if ($req->status) {
+            if ($req->status == 'Lunas') {
+                $query->whereHas('pembelian.invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query->whereDoesntHave('pembelian.invoice')
+                        ->orWhereHas('pembelian.invoice', function($q) {
+                            $q->where('sisa', '!=', 0);
+                        });
+            }
+        }        
+        if ($req->dateStart) {
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+        }
+        $invoices = $query->get();
 
-        $invoiceinden = Invoicepo::whereNotNull('poinden_id')
-            ->orderBy('tgl_inv', 'desc')
-            ->get();
-        return view('purchase.invoice', compact('invoices','invoiceinden'));
+        $query2 = Invoicepo::whereNotNull('poinden_id')
+            ->orderBy('tgl_inv', 'desc');
+        if ($req->supplierInd) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->input('supplier'));
+            });
+        }
+        if ($req->statusInd) {
+            if ($req->statusInd == 'Lunas') {
+                $query2->whereHas('poinden.invoice', function($q) {
+                    $q->where('sisa', 0);
+                });
+            } else {
+                $query2->whereDoesntHave('poinden.invoice')
+                        ->orWhereHas('poinden.invoice', function($q) {
+                            $q->where('sisa', '!=', 0);
+                        });
+            }
+        }        
+        if ($req->dateStartInd) {
+            $query2->where('tgl_dibuat', '>=', $req->input('dateStartInd'));
+        }
+        if ($req->dateEndInd) {
+            $query2->where('tgl_dibuat', '<=', $req->input('dateEndInd'));
+        }
+        $invoiceinden = $query2->get();
+
+        $supplierTrd = Invoicepo::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
+        ->join('suppliers', 'pembelians.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $supplierInd = Invoicepo::select('suppliers.id', 'suppliers.nama')
+        ->distinct()
+        ->join('poinden', 'invoicepo.poinden_id', '=', 'poinden.id')
+        ->join('suppliers', 'poinden.supplier_id', '=', 'suppliers.id')
+        ->orderBy('suppliers.nama')
+        ->get();
+
+        $galleryTrd = Invoicepo::select('lokasis.id', 'lokasis.nama')
+        ->distinct()
+        ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
+        ->join('lokasis', 'pembelians.supplier_id', '=', 'lokasis.id')
+        ->orderBy('lokasis.nama')
+        ->get();
+        return view('purchase.invoice', compact('invoices','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd'));
 
     }
 
@@ -128,7 +288,7 @@ class PembelianController extends Controller
         $lastNumber = intval(substr($lastPayment->no_invoice_bayar, -3));
         $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     
-        return $prefix . $newNumber;
+        return $prefix . $newNumber; 
     }
     
 
@@ -158,7 +318,7 @@ class PembelianController extends Controller
         // Ambil data yang diperlukan
         $produks = Produk::get();
         $suppliers = Supplier::where('tipe_supplier','tradisional')->get();
-        $lokasis = Lokasi::get();
+        $lokasis = Lokasi::whereIn('tipe_lokasi', [1, 3])->get();
         $kondisis = Kondisi::get();
     
         return view('purchase.create', compact('produks', 'suppliers', 'lokasis', 'kondisis', 'nomor_po'));
@@ -199,7 +359,7 @@ class PembelianController extends Controller
             'id_lokasi' => 'required',
             'tgl_kirim' => 'required|date',
             // 'tgl_diterima' => 'required|date',
-            'no_do' => 'required',
+            // 'no_do' => 'required',
             'status_dibuat' => 'required',
             // Tambahkan validasi lainnya sesuai kebutuhan
         ]);
@@ -217,7 +377,7 @@ class PembelianController extends Controller
         $pembelian->lokasi_id = $request->id_lokasi;
         $pembelian->tgl_kirim = $request->tgl_kirim;
         $pembelian->tgl_diterima = $request->tgl_diterima;
-        $pembelian->no_do_suplier = $request->no_do;
+        $pembelian->no_do_suplier = $request->no_do ?? null;
         $pembelian->pembuat = $request->pembuat; // ID pengguna yang membuat pembelian
         $pembelian->pemeriksa = $request->pemeriksa; // ID pengguna yang membuat pembelian
         $pembelian->penerima = $request->penerima; // ID pengguna yang membuat pembelian
@@ -300,6 +460,14 @@ class PembelianController extends Controller
             return redirect()->back()->withInput()->with('fail', $errors);
         }
     
+        // $existingProduct = InventoryInden::where('supplier_id', $request->id_supplier)
+        // ->where('bulan_inden', $request->bulan_inden)
+        // ->first();
+
+        // if ($existingProduct) {
+        // return redirect()->back()->withInput()->with('fail', 'Data dengan supplier dan bulan inden yang sama sudah ada.');
+        // }
+
         // Simpan data pembelian
         $pembelian = new ModelsPoinden();
         $pembelian->no_po = $request->nopo;
@@ -308,9 +476,9 @@ class PembelianController extends Controller
         $pembelian->pembuat = $request->pembuat; // ID pengguna yang membuat pembelian
         $pembelian->pemeriksa = $request->pemeriksa; // ID pengguna yang membuat pembelian
         $pembelian->tgl_dibuat = $request->tgl_dibuat; // Tanggal pembuatan saat ini
-        $pembelian->tgl_diperiksa = $request->tgl_diperiksa; // Tanggal pembuatan saat ini
-        $pembelian->status_dibuat = $request->status_dibuat; // Status pembuatan
-        $pembelian->status_diperiksa = $request->status_diperiksa; // Status pembuatan
+        $pembelian->tgl_diperiksa = $request->tgl_diperiksa ?? null; // Tanggal pembuatan saat ini
+        $pembelian->status_dibuat = $request->status_dibuat ?? null; // Status pembuatan
+        $pembelian->status_diperiksa = $request->status_diperiksa ?? null; // Status pembuatan
        
         $check1 = $pembelian->save();
     
@@ -757,12 +925,12 @@ class PembelianController extends Controller
                 'kondisi' => 'required|array',
                 'kondisi.*' => 'required|exists:kondisis,id',
             ]);
-    
-        // Periksa apakah validasi gagal
-        if ($validator->fails()) {
-            $errors = $validator->errors()->all();
-            return redirect()->back()->withInput()->with('fail', $errors);
-        }
+            
+            // Periksa apakah validasi gagal
+            if ($validator->fails()) {
+                $errors = $validator->errors()->all();
+                return redirect()->back()->withInput()->with('fail', $errors);
+            }
     
         // Cari pembelian berdasarkan ID
         $pembelian = Pembelian::find($datapo);
@@ -773,10 +941,10 @@ class PembelianController extends Controller
         // Update data pembelian
 
         // $pembelian->no_po = $request->nopo;
-        $pembelian->supplier_id = $request->id_supplier;
-        $pembelian->lokasi_id = $request->id_lokasi;
-        $pembelian->tgl_kirim = $request->tgl_kirim;
-        $pembelian->no_do_suplier = $request->no_do;
+        // $pembelian->supplier_id = $request->id_supplier;
+        // $pembelian->lokasi_id = $request->id_lokasi;
+        // $pembelian->tgl_kirim = $request->tgl_kirim;
+        $pembelian->no_do_suplier = $request->no_do ?? '';
         
         $pembelian->tgl_diterima = $request->tgl_diterima;
         $pembelian->status_diterima = $request->status_diterima;
@@ -784,74 +952,76 @@ class PembelianController extends Controller
         $pembelian->status_diperiksa = $request->status_diperiksa;
         $pembelian->tgl_diperiksa= $request->tgl_diperiksa; // Update tgl_diterima_ttd juga jika diperlukan
     
+
+        if ($request->hasFile('bukti')) {
+            $file = $request->file('bukti');
+            $fileName = $pembelian->no_po . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('bukti_do_supplier', $fileName, 'public');
+            $pembelian->file_do_suplier = $filePath; // Simpan path file ke dalam model jika ada
+        }
+
         $check1 = $pembelian->save();
     
-            // Update data produk beli
-            $kodeProduk = $request->kode;
-            $namaProduk = $request->nama;
-            $qtyKirim = $request->qtykrm;
-            $qtyTerima = $request->qtytrm;
-            $kondisiIds = $request->kondisi;
-            $check2 = true;
-
-            foreach ($kodeProduk as $index => $kode) {
-                $produkBeli = Produkbeli::where('pembelian_id', $pembelian->id)
-                                        ->whereHas('produk', function($query) use ($kode) {
-                                            $query->where('kode', $kode);
-                                        })
-                                        ->first();
-                
-                if ($produkBeli) {
-                    $produkBeli->jml_diterima = $qtyTerima[$index];
-                    $produkBeli->kondisi_id = $kondisiIds[$index];
-                    $check2 = $produkBeli->save();
-
-                    $lokasi = Lokasi::find($request->id_lokasi);
-                    $produk = Produk::where('kode', $kode)->first();
-                    if ($lokasi && $produk) {
-                        if ($lokasi->tipe_lokasi == 1) {
-                            $checkInven = InventoryGallery::where('kode_produk', $produk->kode)
-                                                        ->where('kondisi_id', $kondisiIds[$index])
-                                                        ->where('lokasi_id', $lokasi->id)
-                                                        ->first();
-                            if($checkInven){
-                                $checkInven->jumlah += $qtyTerima[$index];
-                                $checkInven->update();
-                            } else {
-                                $createProduk = new InventoryGallery();
-                                $createProduk->kode_produk = $produk->kode;
-                                $createProduk->kondisi_id = $kondisiIds[$index];
-                                $createProduk->jumlah = $qtyTerima[$index];
-                                $createProduk->lokasi_id = $lokasi->id;
-                                $createProduk->save();
-                            }
-                        } elseif ($lokasi->tipe_lokasi == 3) {
-                            $checkInven = InventoryGreenHouse::where('kode_produk', $produk->kode)
-                                                            ->where('kondisi_id', $kondisiIds[$index])
-                                                            ->where('lokasi_id', $lokasi->id)
-                                                            ->first();
-                            if($checkInven){
-                                $checkInven->jumlah += $qtyTerima[$index];
-                                $checkInven->update();
-                            } else {
-                                $createProduk = new InventoryGreenHouse();
-                                $createProduk->kode_produk = $produk->kode;
-                                $createProduk->kondisi_id = $kondisiIds[$index];
-                                $createProduk->jumlah = $qtyTerima[$index];
-                                $createProduk->lokasi_id = $lokasi->id;
-                                $createProduk->save();
-                            }
+        $produkIds = $request->id;
+        $kode = $request->kode;
+        $qtyTerima = $request->qtytrm;
+        $kondisiIds = $request->kondisi;
+        $check2 = true;
+        
+        foreach ($produkIds as $index => $produkId) {
+            $produkBeli = Produkbeli::find($produkId);
+        
+            if ($produkBeli) {
+                $produkBeli->jml_diterima = $qtyTerima[$index];
+                $produkBeli->kondisi_id = $kondisiIds[$index];
+                $check2 = $produkBeli->save();
+        
+                $lokasi = Lokasi::find($pembelian->lokasi_id);
+                $produk = Produk::where('kode', $kode[$index])->first();
+        
+                if ($lokasi && $produk) {
+                    if ($lokasi->tipe_lokasi == 1) {
+                        $checkInven = InventoryGallery::where('kode_produk', $produk->kode)
+                            ->where('kondisi_id', $kondisiIds[$index])
+                            ->where('lokasi_id', $lokasi->id)
+                            ->first();
+                        if ($checkInven) {
+                            $checkInven->jumlah += $qtyTerima[$index];
+                            $checkInven->update();
+                        } else {
+                            $createProduk = new InventoryGallery();
+                            $createProduk->kode_produk = $produk->kode;
+                            $createProduk->kondisi_id = $kondisiIds[$index];
+                            $createProduk->jumlah = $qtyTerima[$index];
+                            $createProduk->lokasi_id = $lokasi->id;
+                            $createProduk->save();
+                        }
+                    } elseif ($lokasi->tipe_lokasi == 3) {
+                        $checkInven = InventoryGreenHouse::where('kode_produk', $produk->kode)
+                            ->where('kondisi_id', $kondisiIds[$index])
+                            ->where('lokasi_id', $lokasi->id)
+                            ->first();
+                        if ($checkInven) {
+                            $checkInven->jumlah += $qtyTerima[$index];
+                            $checkInven->update();
+                        } else {
+                            $createProduk = new InventoryGreenHouse();
+                            $createProduk->kode_produk = $produk->kode;
+                            $createProduk->kondisi_id = $kondisiIds[$index];
+                            $createProduk->jumlah = $qtyTerima[$index];
+                            $createProduk->lokasi_id = $lokasi->id;
+                            $createProduk->save();
                         }
                     }
-                } else {
-                    $check2 = false;
                 }
+            } else {
+                $check2 = false;
             }
-
+        }
             if (!$check1 || !$check2) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data');
             } else {
-                return redirect(route('pembelian.show', ['datapo' => $datapo]))->with('success', 'Data pembelian berhasil diupdate. Nomor PO: ' . $pembelian->no_po);
+                return redirect(route('pembelian.show', ['datapo' => $datapo, 'type'=>'pembelian']))->with('success', 'Data pembelian berhasil diupdate. Nomor PO: ' . $pembelian->no_po);
             }
         
         }elseif ($type === 'poinden') {
@@ -876,7 +1046,7 @@ class PembelianController extends Controller
                 return redirect()->back()->with('fail', 'Pembelian tidak ditemukan');
             }
         
-            $pembelian->supplier_id = $request->id_supplier;
+            // $pembelian->supplier_id = $request->id_supplier;
             $pembelian->bulan_inden = $request->bulan_inden;
             $pembelian->status_diperiksa = $request->status_diperiksa;
             $pembelian->tgl_diperiksa = $request->tgl_diperiksa;
@@ -884,13 +1054,14 @@ class PembelianController extends Controller
         
             $existingProdukBeli = $pembelian->produkbeli()->pluck('id')->toArray();
         
+            $indenid = $request->id;
             $kodeProduk = $request->kode;
             $kodeInden = $request->kode_inden;
             $kategori = $request->kategori;
             $jumlah = $request->qty;
             $keterangan = $request->ket;
         
-            foreach ($kodeProduk as $index => $kode) {
+            foreach ($indenid as $index => $item) {
                 $produkBeliData = [
                     'produk_id' => $kategori[$index],
                     'kode_produk_inden' => $kodeInden[$index],
@@ -940,9 +1111,11 @@ class PembelianController extends Controller
                 }
             }
             
-            return redirect()->route('pembelian.index')->with('success', 'Data pembelian berhasil diupdate');
+            return redirect()->route('pembelian.show', ['datapo' => $datapo, 'type'=>'poinden'])->with('success', 'Data pembelian berhasil diupdate');
         }
 
     }
+
+   
 
 }

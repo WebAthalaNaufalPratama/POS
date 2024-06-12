@@ -321,6 +321,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{pembayaran}/update', 'PembayaranController@update')->name('pembayaran.update');
             Route::get('/{pembayaran}/delete', 'PembayaranController@destroy')->name('pembayaran.destroy');
             Route::post('/store_invpo', 'PembayaranController@store_bayar_po')->name('bayarpo.store');
+            Route::post('/store_mutasiinden', 'PembayaranController@store_bayar_mutasi')->name('pembayaranmutasi.store');
         });
 
         Route::group(['prefix' => 'form'], function() {
@@ -495,21 +496,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         //purchase
         
         //inden ke galery
-        Route::group(['prefix' => 'mutasiindengalery'], function() {
-            Route::get('/', 'MutasiController@index_indengalery')->name('mutasiindengalery.index');
-            Route::get('/create', 'MutasiController@create_indengalery')->name('mutasiindengalery.create');
-            Route::post('/store', 'MutasiController@store_indengalery')->name('mutasiindengalery.store');
-            Route::get('/{mutasiGG}/edit', 'MutasiController@edit_indengalery')->name('mutasiindengalery.edit');
-            Route::patch('/{mutasiGG}/update', 'MutasiController@update_indengalery')->name('mutasiindengalery.update');
-            Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_indengalery')->name('mutasiindengalery.destroy');
-        });
         //inden ke greenhouse
         Route::group(['prefix' => 'mutasiIG'], function() {
             Route::get('/', 'MutasiindensController@index_indengh')->name('mutasiindengh.index');
             Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create');
             Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');
+            Route::get('/{mutasiIG}/show', 'MutasiindensController@show_indengh')->name('mutasiindengh.show');
             Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store');
             Route::patch('/{mutasiIG}/update', 'MutasiindensController@update_indengh')->name('mutasiindengh.update');
+            // Route::patch('/{mutasiIG}/update_gambar', 'MutasiindensController@updategambar_indengh')->name('gambarinden.update');
             Route::get('/{mutasiIG}/delete', 'MutasiindensController@destroy_indengh')->name('mutasiindengh.destroy');
            
         });

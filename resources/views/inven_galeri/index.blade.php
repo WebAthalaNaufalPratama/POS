@@ -128,7 +128,7 @@
             <div class="row">
                 <div class="col">
                     <select id="lokasi_id" name="lokasi_id" class="form-control" required>
-                        @if (Auth::user()->roles()->value('name') != 'admin')
+                        @if (Auth::user()->roles()->value('name') != 'admin' && Auth::user()->roles()->value('name') != 'Purchasing')
                         <option value="{{ Auth::user()->karyawans->lokasi_id }}">{{ Auth::user()->karyawans->lokasi->nama }}</option>
                         @else
                         <option value="">Pilih Lokasi</option>

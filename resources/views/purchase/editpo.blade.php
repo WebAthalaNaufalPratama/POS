@@ -45,10 +45,10 @@
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
                                             <div class="input-group">
-                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
-                                                    <option value="">Pilih Nama Supplier</option>
+                                                <select id="id_supplier" name="id_supplier" class="form-control" readonly>
+                                                    <option value="" disabled>Pilih Nama Supplier</option>
                                                     @foreach ($suppliers as $supplier)
-                                                        <option value="{{ $supplier->id }}" {{ $supplier->id == $beli->supplier->id ? 'selected' : '' }}>
+                                                        <option value="{{ $supplier->id }}" {{ $supplier->id == $beli->supplier->id ? 'selected' : '' }} disabled>
                                                             {{ $supplier->nama }}
                                                         </option>
                                                     @endforeach
@@ -66,10 +66,10 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="lokasi">Lokasi</label>
-                                                <select id="id_lokasi" name="id_lokasi" class="form-control select2" required>
-                                                    <option value="">Pilih Lokasi</option>
+                                                <select id="id_lokasi" name="id_lokasi" class="form-control" readonly>
+                                                    <option value="" disabled>Pilih Lokasi</option>
                                                     @foreach ($lokasis as $lokasi)
-                                                    <option value="{{ $lokasi->id }}" {{ $lokasi->id == $beli->lokasi->id ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
+                                                    <option value="{{ $lokasi->id }}" {{ $lokasi->id == $beli->lokasi->id ? 'selected' : '' }} disabled>{{ $lokasi->nama }}</option>
                                                     @endforeach
                                                 </select>
                                        </div>
@@ -81,7 +81,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim ?? '' }}">
+                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim ?? '' }}" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
@@ -94,9 +94,18 @@
                                                 <input type="text" class="form-control" id="no_do" name="no_do" value="{{ $beli->no_do_suplier ?? ''}}">
                                             </div>
                                             <div class="form-group">
-                                                <label for="filedo">Delivery Order supplier</label>
-                                                    {{-- <input type="file" class="form-control" id="filedo" name="filedo" value="{{ $beli->file_do_suplier ?? ''}}"> --}}
-                                                    <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" />
+
+                                                    <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                        <label>Delivery Order supplier<a href="javascript:void" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"> clear</a>
+                                                        </label>
+                                                        <label class="custom-file-container__custom-file">
+                                                            <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*">
+                                                            <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                        </label>
+                                                        <span class="text-danger">max 2mb</span>
+                                                        <img id="preview" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" />
+                                                    </div>
+                                                    {{-- <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" /> --}}
                                             </div>
                                         </div>
                                     </div>
@@ -112,19 +121,20 @@
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>
-                                                <tr>
+                                                <tr><th hidden></th>
                                                     <th>Kode Produk</th>
                                                     <th>Nama Produk</th>
                                                     <th>Jumlah Dikirim</th>
                                                     <th>Jumlah Diterima</th>
                                                     <th>Kondisi</th>
-                                                    <th></th>
+                                                    
                                                 </tr>
                                             </thead>
                                             
                                             <tbody id="dynamic_field_1">
-                                                @foreach ($produkbelis as $item)
+                                                @foreach ($produkbelis as $index  => $item)
                                                 <tr>
+                                                    <td hidden><input type="text" name="id[]" id="id_0" class="form-control" value="{{ $item->id }}" readonly hidden></td>
                                                     <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
                                                     <td><input type="text" name="nama[]" id="nama_0" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}" readonly></td>
@@ -212,7 +222,7 @@
                                         
                                         <tr>
                                             <td id="status_dibuat">
-                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required>
+                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required readonly>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : ''}}>Draft</option>
                                                     <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : ''}}>Publish</option>
@@ -235,7 +245,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" >
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" readonly >
                                             </td>
                                             <td id="tgl_diterima">
                                                 <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ $beli->tgl_diterima_ttd ?? ''}}" >
@@ -313,7 +323,39 @@
 <script>
 var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        }
+
+        
 $(document).ready(function() {
+    
+    if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
+            }
+
+            $('#bukti').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
     $('.select2').select2();
     // Inisialisasi Select2 dengan konfigurasi tambahan
     $('#produk_0').select2({

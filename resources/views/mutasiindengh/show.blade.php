@@ -1,17 +1,27 @@
+
 @extends('layouts.app-von')
 
 @section('content')
+<style>
+    
+    .form-control {
+        min-width: 200px; /* Adjust as necessary */
+    }
+    .form-control-banyak{
+        min-width: 200px; /* Adjust as necessary */
+    }
 
+</style>
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi GreenHouse ke Galery</h3>
+            <h3 class="page-title">Edit Mutasi Inden ke GreenHouse</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
-                    <a href="index.html">Mutasi</a>
+                    <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    GreenHouse Ke Galery
+                    Inden Ke GreenHouse
                 </li>
             </ul>
         </div>
@@ -20,82 +30,61 @@
 
 <div class="row">
     <div class="card">
-        <div class="card-header">
-            <h4 class="card-title mb-0">
-                Atur Komponen Barang
-            </h4>
-        </div>
+       
         <div class="card-body">
+            {{-- <form action="{{ route('mutasiindengh.update') }}" method="POST" enctype="multipart/form-data"> --}}
+                @csrf
                 <div class="row">
                     <div class="col-sm">
-                    <form action="{{ route('mutasighgalery.update', ['mutasiGG' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('patch')
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
-                                <!-- <h5>Informasi Mutasi</h5> -->
+                        <div class="row justify-content-start">
+                            <div class="col-md-12 border rounded pt-3 me-1">
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="pengirim">Nama Pengirim</label>
-                                            <select id="pengirim" name="pengirim" class="form-control" required disabled>
-                                                <option value="">Pilih Nama Pengirim</option>
-                                                @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->pengirim ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="penerima">Nama Penerima</label>
-                                            <select id="penerima" name="penerima" class="form-control" required readonly>
-                                                <option value="">Pilih Nama Penerima</option>
-                                                @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_mutasi">No Mutasi</label>
-                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
+                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $data->no_mutasi }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tgl_kirim">Tanggal Kirim</label>
+                                            <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($data->tgl_dikirim) }}" readonly>
+                                         </div>
+                                        
+                                        {{-- <div class="form-group">
+                                            <label for="supplier">Supplier</label>
+                                            <div class="input-group">
+                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
+                                                    <option value="">Pilih Nama Supplier</option>
+                                                    @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                                                        <img src="/assets/img/icons/plus1.svg" alt="img" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div> --}}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="supplier">Supplier</label>
+                                                <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $data->supplier->nama }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="penerima">Lokasi</label>
+                                            <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $data->lokasi->nama }}" readonly>
+
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-
-                            <div class="col-md-5 border rounded pt-3 ms-1">
-                                <!-- <h5>Informasi Invoice</h5> -->
-                                <div class="row">
-                                    <div class="col-md-12">
+                                    <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="nama">Tanggal Pengiriman</label>
-                                            <input type="date" class="form-control" id="tanggal_kirim" name="tanggal_kirim" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_kirim}}" required disabled>
-                                        </div>
+                                            <label for="tgl_terima">Tanggal Diterima</label>
+                                            <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ tanggalindo($data->tgl_diterima) }}" readonly>
+                                         </div>
                                         <div class="form-group">
-                                            <label for="nama">Tanggal Diterima</label>
-                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_diterima}}" required disabled>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="status">Status</label>
-                                            <select id="status" name="status" class="form-control" required disabled>
-                                                <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $mutasis->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
-                                            </select>
-                                        </div>
-                                        <div class="custom-file-container" data-upload-id="myFirstImage">
-                                            <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                            </label>
-                                            <label class="custom-file-container__custom-file">
-                                                <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required readonly>
-                                                <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                            </label>
-                                            <span class="text-danger">max 2mb</span>
-                                            <img id="preview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                            <label for="tgl_terima">Bukti</label>
+                                                <img id="preview" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" />                                            
                                         </div>
                                     </div>
                                 </div>
@@ -107,133 +96,161 @@
                                     <div class="mb-4">
                                         <h5>List Produk</h5>
                                     </div>
-                                        
-                                        <div class="table-responsive">
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Nama</th>
-                                                        <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
-                                                        <th></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="dynamic_field">
-                                                @if(count($produks) > 0)
-                                                    @php
-                                                    $i = 0;
-                                                    @endphp
-                                                    @foreach ($produks as $produk)
-                                                    <tr id="row{{ $i }}">
-                                                        <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
-                                                                <option value="">Pilih Produk</option>
-                                                                @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
-                                                                    {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
-                                                                </option>
-                                                                @endforeach
-                                                            </select>
-                                                            <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
-                                                        </td> 
-                                                        <td>
-                                                            <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly>
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
-                                                        </td>
-                                                    </tr>
-                                                    @php
-                                                    $i++;
-                                                    @endphp
-                                                    @endforeach
-                                                @endif
-
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Bulan Inden</th>
+                                                    <th>Kode Inden</th>
+                                                    <th>Kategori</th>
+                                                    <th>QTY Kirim</th>
+                                                    <th>QTY Terima</th>
+                                                    <th>Kondisi</th>
+                                                    <th>Biaya Perawatan</th>
+                                                    <th>Total Biaya Perawatan</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dynamic_field">
+                                                @foreach ($barangmutasi as $index => $item)
+                                                <tr>
+                                                    <td>
+                                                        <input type="hidden" class="form-control" name="id[]" id="id_{{ $index }}" value="{{ $item->id }}" readonly>
+                                                        <input type="text" class="form-control" name="bulan_inden[]" id="bulan_inden_{{ $index }}" value="{{ $item->produk->bulan_inden }}" readonly>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_{{ $index }}" value="{{ $item->produk->kode_produk_inden }}" readonly>
+                                                    </td>
+                                                    <td>
+                                                    <input type="text" class="form-control" name="kategori[]" id="kategori_{{ $index }}" value="{{ $item->produk->produk->nama }}" readonly>
+                                                    <input type="hidden" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $item->produk->kode_produk}}" readonly>
+                                                    </td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" onchange="calculateTotal({{ $index }})" value="{{ $item->jml_dikirim }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima }}" readonly></td>
+                                                    <td>
+                                                        <input type="text" name="kondisi[]" id="kondisi_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->kondisi->nama }}" readonly>
+                                                        {{-- <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control">
+                                                            <option value="">Pilih Kondisi</option>
+                                                            @foreach ($kondisis as $kondisi)
+                                                                <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                                                            @endforeach
+                                                        </select> --}}
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" name="rawat2[]" id="rawat2_{{ $index }}" class="form-control-banyak" value="{{ formatRupiah2($item->biaya_rawat) }}" readonly>
+                                                            <input type="hidden" name="rawat[]" id="rawat_{{ $index }}" class="form-control">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control-banyak" value="{{ formatRupiah2($item->totalharga)}}" readonly>
+                                                            <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-3 col-sm-6 col-12 mt-4">
-                                        <!-- <div class="form-group">
-                                            <label>Pembayaran</label>
-                                            <select id="cara_bayar" name="cara_bayar" class="form-control" required>
-                                                <option value="">Pilih Pembayaran</option>
-                                                <option value="cash">CASH</option>
-                                                <option value="transfer">TRANSFER</option>
-                                            </select>
-                                        </div> -->
-                                        <!-- <div id="inputCash" style="display: none;">
-                                            <label for="jumlahCash">Jumlah Pembayaran (CASH): </label>
-                                            <input type="text" id="jumlahCash" name="jumlahCash" class="form-control">
-                                        </div> -->
-                                        <!-- <div id="inputTransfer" style="display: none;">
-                                            <label>Rekening Von</label>
-                                            <select id="rekening_id" name="rekening_id" class="form-control">
-                                                <option value="">Pilih Bank</option>
-                                                @foreach($bankpens as $bankpen)
-                                                <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
-                                                @endforeach
-                                            </select>
+                                    <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
+                                        <div class="page-btn">
+                                           
+                                            <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
                                         </div>
-                                        <div class="form-group" style="display:none;">
-                                            <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)"  readonly>
+                                        <div class="table-responsive">
+                                            <table class="table datanew">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No Bayar</th>
+                                                        <th>Tanggal</th>
+                                                        <th>Metode</th>
+                                                        <th>Nominal</th>
+                                                        <th>Bukti</th>
+                                                        <th>Status</th>
+                                                        <th>Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($databayars as $databayar)
+                                                    <tr>
+                                                        <td>{{ $loop->iteration }}</td>
+                                                        <td>{{ $databayar->no_invoice_bayar }}</td>
+                                                        <td>{{ tanggalindo($databayar->tanggal_bayar) }}</td>
+                                                        <td>{{ $databayar->cara_bayar }}</td>
+                                                        <td>{{ $databayar->nominal}}</td>
+                                                        <td>{{ $databayar->bukti}}</td>
+                                                        <td>{{ $databayar->status_bayar}}</td>
+                                                        <td></td>
+                                                       
+                                                    </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <div class="form-group mt-3">
-                                            <div id="inputPembayaran" style="display: none;">
-                                                <label for="nominal">Nominal</label>
-                                                <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <div id="inputBuktiBayar" style="display: none;">
-                                                <label for="buktibayar">Unggah Bukti</label>
-                                                <input type="file" class="form-control" id="bukti" name="bukti">
-                                            </div>
-                                        </div> -->
-                                        
                                     </div>
-                                    <div class="col-lg-3 col-sm-6 col-12 mt-4">
-                                    </div>
-                                    <div class="col-lg-6 float-md-right">
+                                    <div class="col-lg-5 float-md-right">
                                         <div class="total-order">
                                             <ul>
                                                 <li>
-                                                    <h4>Pengiriman
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" readonly>
-                                                        <option value="">Pilih Jenis Pengiriman</option>
-                                                        <option value="exspedisi" {{ $mutasis->pilih_pengiriman == 'exspedisi' ? 'selected' : ''}}>Ekspedisi</option>
-                                                        <option value="sameday" {{ $mutasis->pilih_pengiriman == 'sameday' ? 'selected' : ''}}>SameDay</option>
-                                                    </select>
-                                                    </h4>
+                                                    <h4>Sub Total</h4>
                                                     <h5>
-                                                    <div id="inputOngkir" style="display: none;">
-                                                        <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" readonly>
-                                                    </div>
-                                                    <div id="inputExspedisi" style="display: none;">
-                                                        <!-- <label>Alamat Pengiriman</label> -->
-                                                        <select id="ongkir_id" name="ongkir_id" class="form-control" readonly>
-                                                            <option value="">Pilih Alamat Tujuan</option>
-                                                            @foreach($ongkirs as $ongkir)
-                                                            <option value="{{ $ongkir->id }}" data-biaya_pengiriman="{{ $ongkir->biaya}}" {{ $mutasis->ongkir_id == $ongkir->id ? 'selected' : ''}}>{{ $ongkir->nama }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div> 
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ formatRupiah2($data->subtotal) }}" readonly>
+                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)"   readonly>
+                                                        </div>
                                                     </h5>
                                                 </li>
                                                 <li>
-                                                    <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $mutasis->biaya_pengiriman}}" readonly required></h5>
+                                                    <h4>Biaya Perawatan</h4>
+                                                        <h5>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span>
+                                                                <input type="text" id="biaya-rawat" name="biaya_rwt_dis" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($data->biaya_perawatan) }}" readonly>
+                                                                <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)">
+                                                            </div>
+                                                        </h5>
+
+                                                </li>
+                                                
+                                                <li>
+                                                    <h4>Biaya Pengiriman</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="biaya_ong" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($data->biaya_pengiriman) }}" readonly>
+                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)">
+                                                        </div>
+                                                    </h5>
                                                 </li>
                                                 <li class="total">
-                                                    <h4>Total Biaya</h4>
-                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ $mutasis->total_biaya}}" readonly required></h5>
+                                                    <h4>Total Tagihan</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="total_tag" name="total_tagihan_dis" class="form-control" value="{{ formatRupiah2($data->total_biaya) }}" readonly>
+                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Sisa Tagihan</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="sisa" name="sisa_bayar" class="form-control" value="{{ formatRupiah2($data->sisa_bayar) }}" readonly>
+                                                        </div>
+                                                    </h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -241,785 +258,666 @@
                                 </div>
                             </div>
                         </div>
+                         <div class="row justify-content-start">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2"> 
+                             
+                                        <table class="table table-responsive border rounded">
+                                            <thead>
+                                                <tr>
+                                                    <th>Dibuat</th>                                              
+                                                    <th>Diterima</th>                                              
+                                                    <th>Dibukukan</th>
+                                                    <th>Diperiksa</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td id="pembuat">
+                                                        <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatanbuat ?? '' }})" readonly>
+                                                    </td>
+                                                    <td id=penerima">
+                                                        <input type="hidden" name=penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ $penerima ?? '' }} ({{ $jabatanterima ?? '' }})" readonly>
+                                                    </td>
+                                                    <td id="pembuku">
+                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ $pembuku ?? '' }} ({{ $jabatanbuku ?? '' }})" readonly>
+                                                    </td>
+                                                    <td id="pemeriksa">
+                                                        <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ $pemeriksa ?? '' }} ({{ $jabatanperiksa ?? '' }})" readonly>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="status_dibuat">
+                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="draft" {{ $data->status_dibuat == 'draft' ? 'selected' : '' }} disabled>Draft</option>
+                                                            <option value="publish" {{ $data->status_dibuat == 'publish' ? 'selected' : '' }} disabled>Publish</option>
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_diterima">
+                                                        <select id="status_diterima" name="status_diterima" class="form-control" readonly>
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="pending" {{ $data->status_diterima  == 'pending' ? 'selected' : '' }} disabled>Pending</option>
+                                                            <option value="acc" {{  $data->status_diterima == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_dibuku">
+                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="pending" {{  $data->status_dibukukan == 'pending' ? 'selected' : '' }} disabled>Pending</option>
+                                                            <option value="acc" {{  $data->status_dibukukan == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_diperiksa">
+                                                        <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
+                                                            <option disabled selected>Pilih Status</option>
+                                                            <option value="pending" {{  $data->status_diperiksa  == 'pending' ? 'selected' : '' }} disabled>Pending</option>
+                                                            <option value="acc" {{  $data->status_diperiksa  == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="tgl_dibuat">
+                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($data->tgl_dibuat) }}"readonly >
+                                                    </td>
+                                                    <td id="tgl_diterima">
+                                                        <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ tanggalindo($data->tgl_diterima_ttd) }}" readonly>
+                                                    </td>
+                                                    <td id="tgl_dibuku">
+                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ tanggalindo($data->tgl_dibukukan) }}"  readonly>
+                                                    </td>
+                                                    <td id="tgl_diperiksa">
+                                                        <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ tanggalindo($data->tgl_diperiksa) }}"  readonly>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>  
+                                        <br>                                 
+                               </div>
+                         </div>
+
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="{{ route('mutasigalery.index') }}" class="btn btn-secondary" type="button">Back</a>
+                            <a href="" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>
 
     </div>
 </div>
+</div>
 
 
 
-<div class="modal fade" id="modalGiftCoba" tabindex="-1" aria-labelledby="modalGiftLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalGiftLabel">Atur Komponen Gift</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
-            </div>
-            <div class="modal-body">
-                <form id="form_gift" action="{{ route('komponenmutasi.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="route" value="{{ request()->route()->getName() }},penjualan,{{ request()->route()->parameter('penjualan') }}">
-                    <div class="mb-3">
-                        <div class="row">
-                            <div class="col-sm-8">
-                                <label for="prdTerjualGift" class="col-form-label">Produk</label>
-                                <input type="text" class="form-control" name="produk_id" id="prdTerjualGift" readonly required>
-                            </div>
-                            <input type="hidden" name="prdTerjual_id" id="prdTerjualGift_id" value="">
-                            <div class="col-sm-4">
-                                <label for="jmlGift_produk" class="col-form-label">Jumlah</label>
-                                <input type="number" class="form-control" name="jml_produk" id="jmlGift_produk" readonly required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="jml_komponen" class="col-form-label">Jumlah Bunga/POT</label>
-                        <input type="number" class="form-control" name="jml_komponen" id="jml_komponen" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="komponen_id" class="col-form-label">Bunga/POT</label>
-                        <div id="div_komponen" class="form-group">
-                            <div id="div_produk_jumlah_0" class="row">
-                                <div class="col-sm-4">
-                                    <select id="komponen_id_0" name="komponen_id[]" class="form-control" required>
-                                        <option value="">Pilih Bunga/POT</option>
-                                        @foreach ($produkKomponens as $itemkomponen)
-                                        <option value="{{ $itemkomponen->id }}">{{ $itemkomponen->nama }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-sm-4">
-                                    <select id="kondisi_id_0" name="kondisi_id[]" class="form-control" required>
-                                        <option value="">kondisi</option>
-                                        @foreach ($kondisis as $kondisi)
-                                        <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-sm-4">
-                                    <input type="number" class="form-control" name="jumlahproduk_id[]" id="jumlahproduk_id_0">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
-            </div>
-            </form>
+</div>
+<div class="modal fade" id="myModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Tambah Pembayaran</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body">
+            <form id="supplierForm" action="{{ route('pembayaranmutasi.store')}}" method="POST" enctype="multipart/form-data">
+                @csrf
+            <div class="mb-3">
+              <label for="nobay" class="form-label">No Bayar</label>
+              <input type="hidden" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $data->id }}">
+              <input type="text" class="form-control" id="nobay" name="nobay" value="{{ $no_bypo }}" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="tgl" class="form-label">Tanggal</label>
+              <input type="date" class="form-control" id="tgl" name="tgl" value="{{ now()->format('Y-m-d') }}">
+            </div>
+            <div class="mb-3">
+              <label for="metode" class="form-label">Metode</label>
+              <select class="form-control select2" id="metode" name="metode">
+                <option value="cash">cash</option>
+                @foreach ($rekenings as $item)
+                <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
+                @endforeach
+            </select>
+            </div>
+            <div class="mb-3">
+                <label for="nominal" class="form-label">Nominal</label>
+                <div class="input-group">
+                  <span class="input-group-text">Rp. </span>
+                  <input type="text" class="form-control"  id="nominal">
+                </div>
+                <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
+              </div>
+            <div class="mb-3">
+              <label for="bukti" class="form-label">Bukti</label>
+              <input type="file" class="form-control" id="bukti" name="bukti">
+            </div>
+            
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 </div>
 
+{{-- <input type="text" name="rupiah" id="rupiah"> --}}
 
-
-</div>
 @endsection
 
 @section('scripts')
-<script>
-    // Function to update date to today's date
-    function updateDate(element) {
-        var today = new Date().toISOString().split('T')[0];
-        element.value = today;
-    }
+ <script>
 
-    // Call the function to set the date to today's date initially
-    updateDate(document.getElementById('tanggal_kirim'));
-    updateDate(document.getElementById('tanggal_diterima'));
-    @foreach($produks as $index => $produk)
-    updateDate(document.getElementById('tglrangkai_{{ $index }}'), '{{ $index }}');
-    @endforeach
-    updateDate(document.getElementById('tanggalbayar'));
-</script>
-<script>
-    function showInputType(index) {
-        var selectElement = document.getElementById("jenis_diskon_" + index);
-        var selectedValue = selectElement.value;
-        // console.log(selectedValue);
-        var diskonInput = document.getElementById("diskon_" + index);
-        var nominalInput = document.getElementById("nominalInput_" + index);
-        var persenInput = document.getElementById("persenInput_" + index);
+    document.getElementById('nominal').addEventListener('keyup', function(e) {
+        var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
+        this.value = formatRupiah(rupiah);
 
-        if (selectedValue === "Nominal") {
-            diskonInput.style.display = "block";
-            nominalInput.style.display = "block";
-            persenInput.style.display = "none";
-        } else if (selectedValue === "persen") {
-            diskonInput.style.display = "block";
-            nominalInput.style.display = "none";
-            persenInput.style.display = "block";
-        } else {
-            diskonInput.style.display = "none";
-            nominalInput.style.display = "none";
-            persenInput.style.display = "none";
-            diskonInput.value = 0;
-        }
-
-        calculateTotal(index);
-    }
-
-    function calculateTotal(index) {
-        var diskonType = $('#jenis_diskon_' + index).val();
-        // console.log(diskonType);
-
-        var diskonValue = parseFloat($('#diskon_' + index).val());
-        var jumlah = parseFloat($('#jumlah_' + index).val());
-        var hargaSatuan = parseFloat($('#harga_satuan_' + index).val());
-        var hargaTotal = 0;
-        // console.log(diskonValue);
-
-        if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
-            hargaTotal = jumlah * hargaSatuan;
-        }
-
-        if (!isNaN(hargaTotal)) {
-            if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue;
-            } else if (diskonType === "persen" && !isNaN(diskonValue)) {
-                hargaTotal -= (hargaTotal * diskonValue / 100);
-            }
-        }
-
-        // Set nilai input harga total
-        $('#harga_total_' + index).val(hargaTotal.toFixed(2));
-
-        // Hitung ulang subtotal
-        var subtotal = 0;
-        $('input[name="harga_total[]"]').each(function() {
-            subtotal += parseFloat($(this).val()) || 0;
-        });
-
-        // Set nilai input subtotal
-        $('#sub_total').val(subtotal.toFixed(2));
-    }
-
-    function copyDataToModal(index) {
-        var namaProdukValue = $('#nama_produk_' + index).val();
-        var jumlahValue = $('#jumlah_' + index).val();
-        // console.log(namaProdukValue);
-
-        $('#nama_produk_modal_' + index).val(namaProdukValue);
-        $('#jumlah_produk_modal_' + index).val(jumlahValue);
-    }
-</script>
-<script>
-    var produkData = [];
-
-    @foreach ($produks as $produk)
-        produkData.push({
-            id: {{ $produk->id }},
-            jumlah: {{ $produk->jumlah }}
-        });
-    @endforeach
-
-    // console.log('Produk Data:', produkData);
-
-    $(document).on('input', '.jumlah_diterima', function() {
-        var inputId = $(this).attr('id');
-        var jumlah = parseInt($(this).val(), 10); // Ensure jumlah is parsed as an integer
-        var produkId = $(this).data('produk-id'); // Extract the product ID from the data attribute
-
-        var produk = produkData.find(function(item) {
-            return item.id == produkId;
-        });
-
-        if (produk) {
-            if (jumlah > produk.jumlah) {
-                alert('jumlah diterima tidak boleh lebih dari jumlah dikirim');
-                $(this).val(produk.jumlah);
-            } else if (jumlah < 0) {
-                alert('jumlah diterima tidak boleh kurang dari 0');
-                $(this).val(0);
-            }
-        } else {
-            console.error('Produk not found for ID:', produkId);
-        }
+        // Set nilai ke input hidden
+        document.getElementById('nominal2').value = unformatRupiah(this.value);
     });
-</script>
 
-<script>
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+           
+    // Fungsi untuk mengubah format input menjadi format Rupiah
+function formatRupiah(angka) {
+    var reverse = angka.toString().split('').reverse().join('');
+    var ribuan = reverse.match(/\d{1,3}/g);
+    ribuan = ribuan.join('.').split('').reverse().join('');
+    return ribuan;
+}
+
+function unformatRupiah(formattedValue) {
+    return formattedValue.replace(/\./g, '');
+}
+
+function inputToRupiah(inputId) {
+    var inputValue = document.getElementById(inputId).value;
+    var unformattedValue = unformatRupiah(inputValue);
+    var formattedValue = formatRupiah(unformattedValue);
+    document.getElementById(inputId).value = formattedValue;
+}
+
+function rupiahToInput(inputId) {
+    var inputValue = document.getElementById(inputId).value;
+    var unformattedValue = unformatRupiah(inputValue);
+    document.getElementById(inputId).value = unformattedValue;
+}
+
+document.querySelectorAll('input[id^="rawat2_"], input[id^="biaya_rwt2"], input[id^="biaya_ongkir2"]').forEach(function(input) {
+    input.addEventListener('focus', function() {
+        rupiahToInput(this.id); // Ketika fokus, ubah ke format input biasa
+    });
+    input.addEventListener('blur', function() {
+        inputToRupiah(this.id); // Ketika kehilangan fokus, ubah kembali ke format Rupiah
+        calculateTotal(0); // Hitung kembali total setelah perubahan
+    });
+});
+
+function calculateTotal(index) {
+    var qtyTerimaElem = document.getElementById('qtytrm_' + index);
+    var rawatElem = document.getElementById('rawat2_' + index);
+
+    if (qtyTerimaElem && rawatElem) {
+        var qtyTerima = parseFloat(qtyTerimaElem.value) || 0;
+        var rawat = parseFloat(unformatRupiah(rawatElem.value)) || 0;
+        var totalPerBaris = qtyTerima * rawat;
+
+        document.getElementById('jumlah_' + index).value = formatRupiah(totalPerBaris);
+        document.getElementById('jumlahint_' + index).value = totalPerBaris;
+        document.getElementById('rawat_' + index).value = rawat;
+
+        calculateTotalAll();
+    }
+}
+
+function calculateTotalAll() { 
+    var subTotal = 0;
+    var biaya_ongkir = parseFloat(unformatRupiah(document.getElementById('biaya_ongkir2').value)) || 0;
+    var biaya_perawatan = parseFloat(unformatRupiah(document.getElementById('biaya_rwt2').value)) || 0;
+    // console.log($('#biaya_rwt2').val());
+
+       
+    document.querySelectorAll('input[id^="jumlahint_"]').forEach(function(input) {
+            subTotal += parseFloat(input.value) || 0;
+    });
+
+    var totalTagihan = subTotal + biaya_ongkir + biaya_perawatan;
+
+        document.getElementById('sub_total').value = formatRupiah(subTotal);
+        document.getElementById('total_tagihan').value = formatRupiah(totalTagihan.toString());
+        document.getElementById('sub_total_int').value = subTotal;
+        document.getElementById('biaya_rwt').value = biaya_perawatan;
+        document.getElementById('biaya_ongkir').value = biaya_ongkir;
+        document.getElementById('total_tagihan_int').value = totalTagihan;
+
+
+}
+
+
     $(document).ready(function() {
-        var i = 1;
+
+        
+        $('.select2').select2();
+
+        bindSelectEvents(0);
+
+            if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
+            }
+
+            $('#bukti').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+           
+         // Tambahkan baris baru
+    var i = 0;
+    var bulanIndenData = [];
+
+    $('#add').click(function() {
+        i++;
+
+        var newRow = `
+            <tr id="row${i}">
+                <td>
+                    <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
+                        <option value="">Pilih Bulan Inden</option>
+                        ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
+                        <option value="">Pilih Kode Inden</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
+                <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" onchange="calculateTotal(${i})"></td>
+                <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly></td>
+                <td>
+                    <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
+                        <option value="">Pilih Kondisi</option>
+                        @foreach ($kondisis as $kondisi)
+                         <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <span class="input-group-text">Rp. </span>
+                        <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control" oninput="calculateTotal(${i})" readonly>
+                        <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" readonly>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group">
+                        <span class="input-group-text">Rp. </span>
+                        <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control" readonly>
+                        <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" readonly>
+                    </div>
+                </td>
+                <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
+            </tr>
+        `;
+
+        // var newRow = '<tr id="row'+i+'">'+
+        //         '<td><select class="form-control" id="bulan_inden_'+i+'" name="bulan_inden[]">'+
+        //                 '<option value="">Pilih Bulan Inden</option>'+
+        //            '</select>'+
+        //         '</td>'+
+        //         '<td><select class="form-control" id="kode_inden_'+i+'" name="kode_inden[]">'+
+        //                 '<option value="">Pilih Kode Inden</option>'+
+        //             '</select>'+
+        //         '</td>'+
+        //         '<td><input type="text" class="form-control" name="kategori[]" id="kategori_'+i+'" readonly></td>
+        //         '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
+        //         '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
+        //         '<td><select id="kondisi_'+i+'" name="kondisi[]" class="form-control">'+
+        //             '<option value="" disabled>Pilih Kondisi</option>'+
+        //                         '@foreach ($kondisis as $kondisi)'+
+        //                             '<option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>'+
+        //                         '@endforeach'+
+        //             '</select>'+
+        //         '</td>'+
+        //         '<td><div class="input-group">'+
+        //                 '<span class="input-group-text">Rp. </span>'+
+        //                 '<input type="text" name="rawat2[]" id="rawat2_'+i+'" class="form-control" oninput="calculateTotal('+i+')" required>'+
+        //                 '<input type="hidden" name="rawat[]" id="rawat_'+i+'" class="form-control" required>'+
+        //         '</div>'+
+        //         '</td>'+
+        //         '<td><div class="input-group">'+
+        //                 '<span class="input-group-text">Rp. </span>'+
+        //                 '<input type="text" name="jumlah_display[]" id="jumlah_'+i+'" class="form-control" readonly>'+
+        //                 '<input type="hidden" name="jumlah[]" id="jumlahint_'+i+'" class="form-control" readonly>'+
+        //             '</div>'+
+        //         '</td>'+
+        //         '<td><button type="button" name="remove" id="'+i+'" class="btn btn-danger btn_remove">X</button></td>'+
+        //     '</tr>';
+
+        $('#dynamic_field').append(newRow);
+        bindSelectEvents(i);
+
+        // Bind event untuk input yang baru ditambahkan
+        document.getElementById(`rawat2_${i}`).addEventListener('focus', function() {
+            rupiahToInput(this.id);
+        });
+        document.getElementById(`rawat2_${i}`).addEventListener('blur', function() {
+            inputToRupiah(this.id);
+            calculateTotal(i);
+        });
+       
+        document.getElementById(`qtytrm_${i}`).addEventListener('input', function() {
+            calculateTotal(i);
+        });
+    });
+
+    $(document).on('click', '.btn_remove', function() {
+        var button_id = $(this).attr("id");
+        $('#row' + button_id).remove();
+        calculateTotal(); // Panggil fungsi calculateTotal tanpa parameter setelah penghapusan baris
+    });
+
+    function calculateTotal() {
+        var totalKeseluruhan = 0;
+        var biaya_ongkir = parseFloat(unformatRupiah(document.getElementById('biaya_ongkir2').value)) || 0;
+        var biaya_perawatan = parseFloat(unformatRupiah(document.getElementById('biaya_rwt2').value)) || 0;
+
+        document.querySelectorAll('input[id^="jumlahint_"]').forEach(function(input) {
+            totalKeseluruhan += parseFloat(input.value) || 0;
+        });
+
+        document.getElementById('sub_total').value = formatRupiah(totalKeseluruhan); 
+        document.getElementById('sub_total_int').value = totalKeseluruhan; 
+
+        var totalTagihan = totalKeseluruhan + biaya_ongkir + biaya_perawatan;
+
+        document.getElementById('total_tagihan').value = formatRupiah(totalTagihan.toString());
+        document.getElementById('total_tagihan_int').value = totalTagihan;
+
+        
+    }
+
+
+        function bindSelectEvents(index) {
+            $('#bulan_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $(this).val();
+                const kodeIndenDropdown = $('#kode_inden_' + index);
+
+                kodeIndenDropdown.empty();
+                kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
+
+                if (bulanInden) {
+                    $.ajax({
+                        url: `/get-kode-inden/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(data) {
+                            data.forEach(function(kodeInden) {
+                                kodeIndenDropdown.append('<option value="' + kodeInden + '">' + kodeInden + '</option>');
+                            });
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kode inden');
+                        }
+                    });
+                }
+            });
+
+            $('#kode_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $('#bulan_inden_' + index).val();
+                const kodeInden = $(this).val();
+                const kategoriInput = $('#kategori_' + index); 
+
+                if (kodeInden) {
+                    $.ajax({
+                        url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(kategori) {
+                            kategoriInput.val(kategori);
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kategori');
+                        }
+                    });
+                }
+            });
+        }
+
+        $('#supplier').change(function() {
+            const supplierId = $(this).val();
+
+            // Kosongkan opsi bulan inden pada setiap dropdown bulan_inden
+            $('select[id^="bulan_inden_"]').each(function() {
+                $(this).empty();
+                $(this).append('<option value="">Pilih Bulan Inden</option>');
+            });
+
+            if (supplierId) {
+                // Ambil data bulan inden dari server
+                $.ajax({
+                    url: `/get-bulan-inden/${supplierId}`,
+                    type: 'GET',
+                    success: function(data) {
+                        bulanIndenData = data; // Simpan data bulan inden
+                        $('select[id^="bulan_inden_"]').each(function() {
+                            var bulanIndenDropdown = $(this);
+                            data.forEach(function(bulanInden) {
+                                bulanIndenDropdown.append('<option value="' + bulanInden + '">' + bulanInden + '</option>');
+                            });
+                        });
+                    },
+                    error: function() {
+                        alert('Gagal mengambil data bulan inden');
+                    }
+                });
+            }
+        });
+
+       
+    });
+   
+
+
+
+        function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        }
+
+        
+</script>
+@endsection
+
+
+{{-- <script>
+
+
+    $(document).ready(function() {
+        $('.select2').select2();
+
+            if ($('#preview').attr('src') === '') {
+                $('#preview').attr('src', defaultImg);
+            }
+
+            $('#bukti').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+           
+        var i = 0;
+        var bulanIndenData = [];
+
         $('#add').click(function() {
-            var newRow = `<tr class="tr_clone" id="row${i}">
-                            <td>
-                                <select id="nama_produk_${i}" name="nama_produk[]" class="form-control select2">
-                                    <option value="">Pilih Produk</option>
-                                    @foreach ($produks as $index => $produk)
-                                        <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                            @if (substr($produk->kode, 0, 3) === 'TRD') 
-                                                {{ $produk->nama }}
-                                                @foreach ($produk->komponen as $komponen)
-                                                    @if ($komponen->kondisi)
-                                                        @foreach($kondisis as $kondisi)
-                                                            @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                    $found = true;
-                                                                    break;
-                                                                @endphp
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                    @if ($found) @break @endif
-                                                @endforeach
-                                            @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                {{ $produk->nama }}
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </td>
-                            <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                            <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                            <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
-                        </tr>`;
-
+            i++;
+            var newRow = `
+                <tr id="row${i}">
+                    <td>
+                        <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
+                            <option value="">Pilih Bulan Inden</option>
+                            ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
+                            <option value="">Pilih Kode Inden</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
+                    <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(${i})"></td>
+                    <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(${i})"></td>
+                    <td>
+                        <select id="kondisi_${i}" name="kondisi[]" class="form-control" onchange="showInputType(${i})">
+                            <option value="" disabled>Pilih Kondisi</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp. </span> 
+                            <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control-banyak" oninput="calculateTotal(${i})" value="" required>
+                            <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" oninput="calculateTotal(${i})" value="" required>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp. </span> 
+                            <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control-banyak" value="" readonly>
+                            <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" value="" readonly>
+                        </div>
+                    </td>
+                    <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
+                </tr>
+            `;
             $('#dynamic_field').append(newRow);
-
-            // var picModal = `<div class="modal fade" id="picModal_${i}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            //                     <div class="modal-dialog" role="document">
-            //                         <div class="modal-content">
-            //                             <div class="modal-header">
-            //                                 <h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ${i}</h5>
-            //                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            //                                     <span aria-hidden="true">&times;</span>
-            //                                 </button>
-            //                             </div>
-            //                             <div class="modal-body">
-            //                                 <div class="form-group">
-            //                                     <label for="tglrangkai_${i}">Tanggal Rangkaian</label>
-            //                                     <input type="date" class="form-control" id="tglrangkai_${i}" name="tglrangkai_${i}">
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jnsrangkai_${i}">Jenis Rangkaian</label>
-            //                                     <input type="text" class="form-control" id="jnsrangkai_${i}" name="jnsrangkai_${i}" value="penjualan" readonly>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="no_invoice_rangkai_${i}">Nomor Invoice</label>
-            //                                     <input type="text" class="form-control" id="no_invoice_rangkai_${i}" name="no_invoice_rangkai_${i}" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jumlahStaff_${i}">Jumlah Staff Perangkai</label>
-            //                                     <input type="text" class="form-control" id="jumlahStaff_${i}" name="jumlahStaff_${i}" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="staffPerangkaiContainer_${i}">Pilih PIC Perangkai</label>
-            //                                     <div id="staffPerangkaiContainer_${i}"></div>
-            //                                 </div>
-            //                                 <div class="table-responsive">
-            //                                     <table class="table">
-            //                                         <thead>
-            //                                             <tr>
-            //                                                 <th>Nama</th>
-            //                                                 <th>Jumlah</th>
-            //                                                 <th></th>
-            //                                             </tr>
-            //                                         </thead>
-            //                                         <tbody id="dynamic_field">
-            //                                             <tr>
-            //                                                 <td>
-            //                                                     <select id="nama_produk" name="nama_produk[]" class="form-control">
-            //                                                         <option value="">Pilih Produk</option>`;
-
-            // @foreach($produks as $produk)
-            // picModal += `<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>`;
-            // @endforeach
-
-            // picModal += `                    </select>
-            //                                                     <input type="hidden" name="kode_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="tipe_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
-            //                                                 </td>
-            //                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
-            //                                             </tr>
-            //                                         </tbody>
-            //                                     </table>
-            //                                 </div>
-            //                             </div>
-            //                             <div class="modal-footer justify-content-center">
-            //                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            //                             </div>
-            //                         </div>
-            //                     </div>
-            //                 </div>`;
-
-
-            // $('body').append(picModal);
-
-
-            $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
-            i++
+            bindSelectEvents(i);
         });
 
         $(document).on('click', '.btn_remove', function() {
-            var button_id = $(this).attr("id");
+            var button_id = $(this).attr("id"); 
             $('#row' + button_id + '').remove();
-            calculateTotal(0);
         });
 
-        function addModal() {
-            let i = $('.modal').length;
-        }
-        $('#pic_0').on('click', function() {
-            addModal();
-        });
+        function bindSelectEvents(index) {
+            $('#bulan_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $(this).val();
+                const kodeIndenDropdown = $('#kode_inden_' + index);
 
-        $('[id^=btnGift]').click(function(e) {
-            console.log('coba');
-            e.preventDefault();
-            var produk_id = $(this).data('produk_gift');
-            console.log(produk_id);
-            getDataGift(produk_id);
-        });
+                kodeIndenDropdown.empty();
+                kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
 
-        function getDataGift(produk_id) {
-            var data = {
-                produk_id: produk_id,
-            };
-            // console.log(data);
-            $.ajax({
-                url: '/getProdukTerjual',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    // console.log(response.produk.nama)
-                    $('#prdTerjualGift').val(response.produk.nama);
-                    $('#prdTerjualGift_id').val(response.id);
-                    // console.log(response.id);
-                    $('#jmlGift_produk').val(response.jumlah);
-                    $('[id^="komponen_id"]').select2()
-                    $('[id^="div_produk_jumlah_"]').each(function() {
-                        $(this).remove();
+                if (bulanInden) {
+                    $.ajax({
+                        url: `/get-kode-inden/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(data) {
+                            data.forEach(function(kodeInden) {
+                                kodeIndenDropdown.append('<option value="' + kodeInden + '">' + kodeInden + '</option>');
+                            });
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kode inden');
+                        }
                     });
-                    
-                    $('[id^="jumlahproduk_id_"]').remove();
-                    // console.log(response);
-                    var pot_bunga = 0
-                    if(response.komponen.length > 0){
-                        for(var i = 0; i < response.komponen.length; i++){
-                            if(response.komponen[i].tipe_produk == 1 || response.komponen[i].tipe_produk == 2){
-                                pot_bunga++;
-                                    var rowPerangkai =
-                                    '<div id="div_produk_jumlah_'+i+'" class="row">' +
-                                    '<div class="col-sm-4">' +
-                                    '<select id="komponen_id_' + i + '" name="komponen_id[]" class="form-control">' +
-                                    '<option value="">Pilih Bunga/POT</option>' +
-                                    '@foreach ($produkKomponens as $itemkomponen)' +
-                                    '<option value="{{ $itemkomponen->id }}">{{ $itemkomponen->nama }}</option>' +
-                                    '@endforeach' +
-                                    '</select>' +
-                                    '</div>' +
-                                    '<div class="col-sm-4">' +
-                                    '<select id="kondisi_id_' + i + '" name="kondisi_id[]" class="form-control" required>' +
-                                    '<option value="">kondi i</option>' +
-                                    '@foreach ($kondisis as $kondisi)' +
-                                    '<option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>' +
-                                    '@endforeach' +
-                                    '</select>' +
-                                    '</div>' +
-                                    '<div class="col-sm-4">' +
-                                    '<input type="number" class="form-control" id="jumlahproduk_id_'+ i +'" name="jumlahproduk[]">' +
-                                    '</div>' +
-                                    '</div>';
-                                    $('#div_komponen').append(rowPerangkai);
-                                    $('#kondisi_id_' + i).val(response.komponen[i].kondisi);
-                                    $('#jumlahproduk_id_' + i).val(response.komponen[i].jumlah);
-                                    $('#komponen_id_' + i).val(response.komponen[i].produk.id);
-                                    $('#komponen_id_' + i).select2();
-                                    $('#kondisi_id_' + i).select2();
-                                }
-                            }
-                    }
-                    $('#jml_komponen').val(pot_bunga);
-                    $('#modalGiftCoba').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
+                }
+            });
+
+            $('#kode_inden_' + index).change(function() {
+                const supplierId = $('#supplier').val();
+                const bulanInden = $('#bulan_inden_' + index).val();
+                const kodeInden = $(this).val();
+                const kategoriInput = $('#kategori_' + index); 
+
+                if (kodeInden) {
+                    $.ajax({
+                        url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
+                        type: 'GET',
+                        success: function(kategori) {
+                            kategoriInput.val(kategori);
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data kategori');
+                        }
+                    });
                 }
             });
         }
 
-        $('#jml_komponen').on('input', function(e) {
-            e.preventDefault();
-            var jumlah = $(this).val();
-            jumlah = parseInt(jumlah) > 10 ? 10 : parseInt(jumlah);
-            console.log(jumlah)
-            $('[id^="komponen_id_"]').each(function() {
-                $(this).select2('destroy');
-                $(this).remove();
+        $('#supplier').change(function() {
+            const supplierId = $(this).val();
+
+            // Kosongkan opsi bulan inden pada setiap dropdown bulan_inden
+            $('select[id^="bulan_inden_"]').each(function() {
+                $(this).empty();
+                $(this).append('<option value="">Pilih Bulan Inden</option>');
             });
-            $('[id^="kondisi_id_"]').each(function() {
-                $(this).select2('destroy');
-                $(this).remove();
-            });
-            $('[id^="jumlahproduk_id_"]').remove();
-            if (jumlah < 1) return 0;
-            for (var i = 0; i < jumlah; i++) {
-                var rowPerangkai =
-                    '<div class="row">' +
-                    '<div class="col-sm-4">' +
-                    '<select id="komponen_id_' + i + '" name="komponen_id[]" class="form-control">' +
-                    '<option value="">Pilih Bunga/POT</option>' +
-                    '@foreach ($produkKomponens as $itemkomponen)' +
-                    '<option value="{{ $itemkomponen->id }}">{{ $itemkomponen->nama }}</option>' +
-                    '@endforeach' +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-sm-4">' +
-                    '<select id="kondisi_id_' + i + '" name="kondisi_id[]" class="form-control" required>' +
-                    '<option value="">kondisi</option>' +
-                    '@foreach ($kondisis as $kondisi)' +
-                    '<option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>' +
-                    '@endforeach' +
-                    '</select>' +
-                    '</div>' +
-                    '<div class="col-sm-4">' +
-                    '<input type="number" class="form-control" id="jumlahproduk_id_'+ i +'" name="jumlahproduk[]">' +
-                    '</div>' +
-                    '</div>';
-                $('#div_komponen').append(rowPerangkai);
-                $('#komponen_id_' + i).select2();
-                $('#kondisi_id_' + i).select2();
-            }
-        });
 
-
-        $(document).on('change', '[id^=nama_produk]', function() {
-            var id = $(this).attr('id').split('_')[2];
-            var selectedOption = $(this).find(':selected');
-
-            var kodeProduk = selectedOption.data('kode');
-            var tipeProduk = selectedOption.data('tipe');
-            var deskripsiProduk = selectedOption.data('deskripsi');
-            // console.log(kodeProduk);
-            $('#kode_produk_' + id).val(kodeProduk);
-            $('#tipe_produk_' + id).val(tipeProduk);
-            $('#deskripsi_komponen_' + id).val(deskripsiProduk);
-
-            // Panggil fungsi updateHargaSatuan
-            updateHargaSatuan(this);
-        });
-
-        // $('#delivery_order_section').show();
-
-        // $('#distribusi').change(function() {
-        //     if ($(this).val() === 'Diambil') {
-        //         $('#delivery_order_section').hide();
-        //     } else {
-        //         $('#delivery_order_section').show();
-        //     }
-        // });
-
-        $('#btnCheckPromo').click(function(e) {
-            e.preventDefault();
-            var total_transaksi = $('#total_tagihan').val();
-            // console.log(total_transaksi);
-            var produk = [];
-            var tipe_produk = [];
-            $('select[id^="nama_produk_"]').each(function() {
-                produk.push($(this).val());
-                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
-            });
-            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
-            checkPromo(total_transaksi, tipe_produk, produk);
-        });
-
-        $('#cara_bayar').change(function() {
-            var pembayaran = $(this).val();
-
-            $('#inputCash').hide();
-            $('#inputTransfer').hide();
-
-            if (pembayaran === "cash") {
-                $('#inputCash').show();
-            } else if (pembayaran === "transfer") {
-                $('#inputTransfer').show();
-            }
-        });
-
-        var pilihan = "{{ $mutasis->pilih_pengiriman}}";
-        if (pilihan === "sameday") {
-            $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
-        } else if (pilihan === "exspedisi") {
-            $('#inputExspedisi').show();
-            $('#biaya_pengiriman').prop('readonly', true);
-            ongkirId();
-        }
-        $('#pilih_pengiriman').change(function() {
-            var pengiriman = $(this).val();
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
-
-            $('#inputOngkir').hide();
-            $('#inputExspedisi').hide();
-            if (pilihan === "sameday") {
-                $('#inputOngkir').show();
-                $('#biaya_pengiriman').prop('readonly', false);
-            } else if (pilihan === "exspedisi") {
-                $('#inputExspedisi').show();
-                $('#biaya_pengiriman').prop('readonly', true);
-                ongkirId();
-            }
-        });
-
-        $('#ongkir_id').change(function() {
-            var selectedOption = $(this).find('option:selected');
-            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
-            $('#biaya_pengiriman').val(ongkirValue);
-            Totaltagihan();
-        });
-
-        $('#jenis_ppn').change(function() {
-            var ppn = $(this).val();
-            $('#persen_ppn').prop('readonly', true);
-            var subtotal = parseFloat($('#sub_total').val()) || 0;
-            var hitungppn = (11 * subtotal) / 100;
-            console.log(hitungppn);
-
-            if (ppn === "include") {
-                $('#persen_ppn').val(0);
-                $('#jumlah_ppn').val(0);
-                $('#persen_ppn').prop('readonly', true);
-            } else if (ppn === "exclude") {
-                $('#persen_ppn').prop('readonly', false);
-                $('#persen_ppn').val(11);
-                $('#jumlah_ppn').val(hitungppn);
-            }
-            Totaltagihan();
-        });
-
-        $('#dp').on('input', function() {
-            var inputNominal = $(this).val();
-            var dpValue = parseFloat($(this).val());
-
-            if (parseInt(inputNominal) > 0) {
-                $('#inputPembayaran').show();
-                $('#inputRekening').show();
-                $('#inputTanggalBayar').show();
-                $('#inputBuktiBayar').show();
-                $('#nominal').val(dpValue);
-                // alert('Nominal pembayaran tidak boleh lebih dari sisa bayar!');
-                // $(this).val(0);
-            } else {
-                $('#inputPembayaran').hide();
-                $('#inputRekening').hide();
-                $('#inputTanggalBayar').hide();
-                $('#inputBuktiBayar').hide();
-            }
-        });
-
-        $('input[id^="jumlah_diterima_"]').on('input', function() {
-            var inputDiterima = $(this).val();
-            var jumlahkirim = parseFloat($(this).closest('tr').find('input[name^="jumlah_dikirim"]').val());
-
-            if (parseFloat(inputDiterima) > jumlahkirim || inputDiterima < 0) {
-                alert('Jumlah Diterima tidak boleh lebih dari Jumlah yang dikirim atau kurang dari 0!');
-                $(this).val(jumlahkirim);
-            }
-        });
-
-        $('#promo_id').change(function() {
-            var promo_id = $(this).select2().find(":selected").val()
-            if (!promo_id) {
-                $('#total_promo').val(0);
-                total_harga();
-                return 0;
-            }
-            calculatePromo(promo_id);
-        });
-
-        $('#id_customer').change(function() {
-            var pointInput = $('#point_dipakai');
-            var selectedOption = $(this).find('option:selected');
-            var pointValue = selectedOption.data('point');
-            if ($('#cek_point').prop('checked')) {
-                pointInput.val(pointValue);
-            } else {
-                pointInput.val(0);
-            }
-            var hpInput = $('#nohandphone');
-            var hpValue = selectedOption.data('hp');
-            hpInput.val(hpValue);
-        });
-
-        $('#cek_point').change(function() {
-            var pointInput = $('#point_dipakai');
-            var selectedOption = $('#id_customer').find('option:selected');
-            var pointValue = selectedOption.data('point');
-            if ($(this).prop('checked')) {
-                pointInput.val(pointValue);
-            } else {
-                pointInput.val(0);
-            }
-        });
-
-
-        function checkPromo(total_transaksi, tipe_produk, produk) {
-            $('#total_promo').val(0);
-            var data = {
-                total_transaksi: total_transaksi,
-                tipe_produk: tipe_produk,
-                produk: produk
-            };
-            $.ajax({
-                url: '/checkPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    $('#promo_id').empty()
-                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
-
-                    var min_transaksi = response.min_transaksi;
-                    for (var j = 0; j < min_transaksi.length; j++) {
-                        var promo = min_transaksi[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
+            if (supplierId) {
+                // Ambil data bulan inden dari server
+                $.ajax({
+                    url: `/get-bulan-inden/${supplierId}`,
+                    type: 'GET',
+                    success: function(data) {
+                        bulanIndenData = data; // Simpan data bulan inden
+                        $('select[id^="bulan_inden_"]').each(function() {
+                            var bulanIndenDropdown = $(this);
+                            data.forEach(function(bulanInden) {
+                                bulanIndenDropdown.append('<option value="' + bulanInden + '">' + bulanInden + '</option>');
+                            });
+                        });
+                    },
+                    error: function() {
+                        alert('Gagal mengambil data bulan inden');
                     }
-                    var tipe_produk = response.tipe_produk;
-                    for (var j = 0; j < tipe_produk.length; j++) {
-                        var promo = tipe_produk[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    var produk = response.produk;
-                    for (var j = 0; j < produk.length; j++) {
-                        var promo = produk[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    $('#promo_id').attr('disabled', false);
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                },
-                complete: function() {
-                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip"></i>')
-                }
-            });
-        }
-
-        function updateHargaSatuan(select) {
-            var index = select.selectedIndex;
-            var hargaSatuanInput = $('#harga_satuan_0');
-            var selectedOption = $(select).find('option').eq(index);
-            var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
-        }
-        $('#nama_produk').on('change', function() {
-            updateHargaSatuan(this);
-        });
-
-        function updateHargaSatuan(select) {
-            var index = select.selectedIndex;
-            var hargaSatuanInput = $('#harga_satuan_' + select.id.split('_')[2]);
-            var selectedOption = $(select).find('option').eq(index);
-            var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
-            multiply(hargaSatuanInput);
-        }
-
-        function updateSubTotal() {
-            var subTotalInput = $('#sub_total');
-            var hargaTotalInputs = $('input[name="harga_total[]"]');
-            var subTotal = 0;
-
-            hargaTotalInputs.each(function() {
-                subTotal += parseFloat($(this).val()) || 0;
-            });
-
-            subTotalInput.val(subTotal.toFixed(2));
-        }
-
-        $('#bukti_file').on('change', function() {
-            const file = $(this)[0].files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
                 });
-                $(this).val('');
-                return;
-            }
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview').attr('src', e.target.result);
-                }
-                reader.readAsDataURL(file);
             }
         });
 
-        function clearFile() {
-            $('#bukti_file').val('');
-            $('#preview').attr('src', defaultImg);
-        };
-
-        function calculatePromo(promo_id) {
-            var data = {
-                promo_id: promo_id,
-            };
-            $.ajax({
-                url: '/getPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
-                    var total_promo;
-                    switch (response.diskon) {
-                        case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
-                            // console.log(total_promo);
-                            break;
-                        case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
-                            break;
-                        case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
-                            break;
-                        case 'produk':
-                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
-                            break;
-                        default:
-                            break;
-                    }
-                    $('#total_promo').val(total_promo);
-                    Totaltagihan();
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                }
-            });
-        }
-
-        function Totaltagihan() {
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
-            var totalTagihan = biayaOngkir;
-
-            $('#total_biaya').val(totalTagihan.toFixed(2));
-            $('#sisa_bayar').val(sisaBayar.toFixed(2));
-            $('#jumlah_ppn').val(ppn.toFixed(2));
-        }
-
-        $('#biaya_pengiriman').on('input', Totaltagihan);
+        bindSelectEvents(0); // Initial binding for the first row
     });
-</script>
+   
 
-@endsection
+
+
+        function clearFile(){
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        }
+
+        
+</script> --}}

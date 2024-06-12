@@ -41,29 +41,31 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
-                                            <div class="input-group">
-                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
-                                                    <option value="">Pilih Nama Supplier</option>
+                                            {{-- <div class="input-group"> --}}
+                                                <select id="id_supplier" name="id_supplier" class="form-control" readonly>
+                                                    <option value="" disabled>Pilih Nama Supplier</option>
                                                     @foreach ($suppliers as $supplier)
-                                                        <option value="{{ $supplier->id }}" {{ $supplier->id == $beli->supplier->id ? 'selected' : '' }}>
+                                                        <option value="{{ $supplier->id }}" {{ $supplier->id == $beli->supplier->id ? 'selected' : '' }} disabled>
                                                             {{ $supplier->nama }}
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                                <div class="input-group-append">
+                                                {{-- <div class="input-group-append">
                                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                                                         <img src="/assets/img/icons/plus1.svg" alt="img" />
                                                     </button>
-                                                </div>
-                                            </div>
+                                                </div> --}}
+                                            {{-- </div> --}}
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="bulan_inden">Bulan Inden</label>
-                                            <select class="form-control" id="bulanTahun" name="bulan_inden">
+                                            <input type="text" class="form-control" id="bulan" name="bulan_inden" value="{{ $beli->bulan_inden}}" readonly>
+
+                                            {{-- <select class="form-control" id="bulanTahun" name="bulan_inden">
                                                 <!-- Opsi akan diisi oleh JavaScript -->
-                                            </select>
+                                            </select> --}}
                                         </div>
                                         <div class="form-group">
                                             <label for="harga_jual">Status</label>
@@ -79,24 +81,28 @@
                     <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                         <div class="form-row row">
                             <div class="mb-4">
-                                <h5>List Produk  <button type="button" name="add" id="add" class="btn btn-success">+</button></h5>
+                                <h5>List Produk  
+                                    {{-- <button type="button" name="add" id="add" class="btn btn-success">+</button> --}}
+                                </h5>
 
                             </div>
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
-                                        <tr>
+                                        <tr><th hidden></th>
                                             <th>Kode Inden</th>
                                             <th>Kategori Produk</th>
                                             <th>Kode Produk</th>
                                             <th>Jumlah</th>
                                             <th>Keterangan</th>
                                             <th></th>
+                                        
                                         </tr>
                                     </thead>
                                     <tbody id="dynamic_field">
                                         @foreach ($produkbelis as $index => $item)
                                             <tr id="row{{ $index }}">
+                                                <td hidden><input type="text" name="id[]" id="id_{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
                                                 <td><input type="text" name="kode_inden[]" id="kode_inden_{{ $index }}" class="form-control" value="{{ $item->kode_produk_inden }}"></td>
                                                 <td>
                                                     <select id="kategori_{{ $index }}" name="kategori[]" class="form-control kategori-select" style="width: 100%;">
@@ -143,10 +149,10 @@
                                         
                                         <tr>
                                             <td id="status_dibuat">
-                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required>
+                                                <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : ''}}>Draft</option>
-                                                    <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : ''}}>Publish</option>
+                                                    <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : ''}} disabled>Draft</option>
+                                                    <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : ''}} disabled>Publish</option>
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
@@ -159,7 +165,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" >
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" disabled>
                                             </td>
                                             <td id="tgl_pemeriksa">
                                                 <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" required>
@@ -437,7 +443,9 @@ $(document).ready(function() {
     var i = {{ count($produkbelis) }};
     $('#add').click(function() {
         var newRow = `<tr id="row${i}">
-                        <td><input type="text" name="kode_inden[]" id="kode_inden_${i}" class="form-control"></td>
+                       
+                        <td><input type="text" name="kode_inden[]" id="kode_inden_${i}" class="form-control">
+                             <input type="hidden" name="id[]" id="id_${i}" class="form-control"></td>
                         <td>
                             <select id="kategori_${i}" name="kategori[]" class="form-control kategori-select" style="width: 100%;">
                                 <option value="">----- Pilih Kategori ----</option>

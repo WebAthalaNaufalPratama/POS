@@ -9,74 +9,156 @@
 <body>
     <table>
         <tr>
-            <td>Nama Customer: </td>
-            <td>Nama Sales: </td>
+            <td style="text-align: right">Nama Customer: </td>
+            <td>{{ $data->customer->nama }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right">Nama Sales: </td>
+            <td>{{ $data->data_sales->nama }}</td>
         </tr>
         <tr>
-            <td>Tanggal Kontrak: </td>
-            <td>Masa Sewa: </td>
+            <td style="text-align: right">Tanggal Kontrak: </td>
+            <td>{{ formatTanggal($data->tanggal_kontrak) }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right">Masa Sewa: </td>
+            <td>{{ $data->masa_sewa }} bulan</td>
         </tr>
     </table>
     <table>
         <thead>
             <tr>
-                <th rowspan="3" style="text-align: center">Jenis Sewa</th>
-                <th rowspan="3">Tanggal Pergantian</th>
+                <th rowspan="3" valign="center" style="item-align: center">Nomor Referensi</th>
+                <th rowspan="3" valign="center" style="item-align: center">Tanggal Pergantian</th>
                 <th colspan="5" style="text-align: center">Pengiriman</th>
-                <th colspan="4">Kembali Ke Gallery</th>
+                <th colspan="5" style="text-align: center">Kembali Ke Gallery</th>
             </tr>
             <tr>
-                <th rowspan="2">Produk Dikirim</th>
-                <th rowspan="2" colspan="2">Jumlah Pot</th>
-                <th rowspan="2" colspan="2">Jumlah Tanaman</th>
-                <th colspan="2">Tanaman</th>
-                <th colspan="2">Pot</th>
+                <th rowspan="2" valign="center" style="text-align: center">Produk Dikirim</th>
+                <th rowspan="2" valign="center" colspan="2" style="text-align: center">Jumlah Pot</th>
+                <th rowspan="2" valign="center" colspan="2" style="text-align: center">Jumlah Tanaman</th>
+                <th colspan="3" style="text-align: center">Tanaman</th>
+                <th colspan="2" style="text-align: center">Pot</th>
             </tr>
             <tr>
-                <th>Qty</th>
-                <th>Kondisi</th>
-                <th>Qty</th>
-                <th>Jenis</th>
+                <th style="text-align: center">Baik</th>
+                <th style="text-align: center">Afkir</th>
+                <th style="text-align: center">Bonggol</th>
+                <th style="text-align: center">Qty</th>
+                <th style="text-align: center">Jenis</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>1 premium</td>
-                <td>10/10/2024</td>
-                <td>Gift Isi 2 Merah</td>
-                <td>1</td>
-                <td>B1</td>
-                <td>1</td>
-                <td></td>
-                <td>1</td>
-                <td>afkir</td>
-                <td>1</td>
-                <td>B1</td>
-            </tr>
+            @php
+                $totalKirimPot = 0;
+                $totalKirimTanaman = 0;
+                $totalKembaliPot = 0;
+                $totalKembaliTanaman = 0;
+            @endphp
+            @foreach ($data->do_sewa as $item) {{-- loop data do --}}
+                @foreach ($item->produk as $produk) {{-- loop produk terjual --}}
+                    @if ($produk->jenis == null) {{-- get data do --}}
+                    @php // get jumlah kirim pot dan tanaman
+                        $baik = 0;
+                        $afkir = 0;
+                        $bonggol = 0;
+                        $kembaliPot = 0;
+                        $pot = 0;
+                        $tanaman = 0;
+                        $isDO = true;
+                        for ($i=0; $i < count($produk->komponen); $i++) { 
+                            if($produk->komponen[$i]->tipe_produk == 2){
+                                $pot += $produk->komponen[$i]->jumlah * $produk->jumlah;
+                            } else if($produk->komponen[$i]->tipe_produk == 1){
+                                $tanaman += $produk->komponen[$i]->jumlah * $produk->jumlah;
+                            }
+                        }
+                        $totalKirimPot += $pot;
+                        $totalKirimTanaman += $tanaman;
+                    @endphp
+                    @elseif ($produk->jenis == 'KEMBALI_SEWA') {{-- get data kembali --}}
+                    @php // get jumlah kembali pot dan tanaman
+                        $baik = 0;
+                        $afkir = 0;
+                        $bonggol = 0;
+                        $kembaliPot = 0;
+                        $pot = 0;
+                        $tanaman = 0;
+                        $isDO = false;
+                        for ($i=0; $i < count($produk->komponen); $i++) { 
+                            if($produk->komponen[$i]->tipe_produk == 1){
+                                if($produk->komponen[$i]->kondisi == 1){
+                                    $baik += $produk->komponen[$i]->jumlah * $produk->jumlah;
+                                } elseif($produk->komponen[$i]->kondisi == 2){
+                                    $afkir += $produk->komponen[$i]->jumlah * $produk->jumlah;
+                                } elseif($produk->komponen[$i]->kondisi == 3){
+                                    $bonggol += $produk->komponen[$i]->jumlah * $produk->jumlah;
+                                }
+                            } elseif($produk->komponen[$i]->tipe_produk == 2){
+                                if($produk->komponen[$i]->kondisi == 1){
+                                    $kembaliPot += $produk->komponen[$i]->jumlah * $produk->jumlah;
+                                }
+                            }
+                        }
+                        $totalKembaliPot += $kembaliPot;
+                        $totalKembaliTanaman += ($baik + $afkir + $bonggol);
+                    @endphp
+                    @endif
+                        <tr>
+                            <td>{{ $isDO ? $item->no_do : $produk->no_kembali_sewa }}</td>
+                            <td>{{ $isDO ? formatTanggal($item->tanggal_kirim) : formatTanggal($produk->kembali_sewa->tanggal_kembali) }}</td>
+                            <td>{{ $produk->produk->nama }}</td>
+                            <td style="text-align: right">{{ $pot }}</td>
+                            <td>pot</td>
+                            <td style="text-align: right">{{ $tanaman }}</td>
+                            <td>tanaman</td>
+                            <td style="text-align: center">{{ $baik }}</td>
+                            <td style="text-align: center">{{ $afkir }}</td>
+                            <td style="text-align: center">{{ $bonggol }}</td>
+                            <td style="text-align: right">{{ $kembaliPot }}</td>
+                            <td>B1</td>
+                        </tr>
+                @endforeach
+            @endforeach
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3">1</td>
+                <td colspan="2">1</td>
                 <td>Total</td>
-                <td>1</td>
+                <td style="text-align: right">{{ $totalKirimPot }}</td>
                 <td>Pot</td>
-                <td>1</td>
+                <td>{{ $totalKirimTanaman }}</td>
+                <td colspan="2">Tanaman</td>
+                <td style="text-align: right">{{ $totalKembaliTanaman }}</td>
                 <td>Tanaman</td>
-                <td>1</td>
-                <td>Tanaman</td>
-                <td>1</td>
+                <td style="text-align: right">{{ $totalKembaliPot }}</td>
                 <td>Pot</td>
             </tr>
             <tr>
-                <td rowspan="2">Keterangan</td>
-                <td rowspan="2">Jumlah Pergantian sesuai dengan kontrak</td>
-                <td rowspan="2">0 Tanaman</td>
-                <td>Jumlah Tanaman Kembali Sesuai</td>
-                <td>0 | Tanaman</td>
+                <td rowspan="2" colspan="1" valign="center" style="text-align: center">Keterangan</td>
+                <td rowspan="2" colspan="2" valign="center" style="text-align: right">Jumlah Pergantian sesuai dengan kontrak</td>
+                <td style="text-align: right" valign="center" rowspan="2">0</td>
+                <td style="text-align: center" valign="center" rowspan="2" colspan="3">Tanaman</td>
+                <td style="text-align: center" colspan="3">Jumlah Kekurangan Tanaman</td>
+                <td style="text-align: right">{{ $totalKirimTanaman - $totalKembaliTanaman }}</td>
+                <td style="text-align: center">Tanaman</td>
             </tr>
             <tr>
-                <td>Jumlah Pot Kembali Sesuai</td>
-                <td>0 | Pot</td>
+                <td style="text-align: center" colspan="3">Jumlah Kekurangan Pot</td>
+                <td style="text-align: right">{{ $totalKirimPot - $totalKembaliPot }}</td>
+                <td style="text-align: center">Pot</td>
             </tr>
         </tfoot>
     </table>
