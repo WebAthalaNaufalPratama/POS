@@ -272,7 +272,7 @@ class PembayaranController extends Controller
             'no_bay' => 'required',
             'tgl' => 'required',
             'nominal' => 'required',
-            'bukti' => 'required|file',
+            'buktitf' => 'required|file',
             'metode' => 'required', // Validasi untuk metode pembayaran
         ]);
         
@@ -314,9 +314,9 @@ class PembayaranController extends Controller
         $data['cara_bayar'] = $cara_bayar;
         $data['rekening_id'] = $rekening_id;
     
-        if ($req->hasFile('bukti')) {
+        if ($req->hasFile('buktitf')) {
             // Mengunggah file bukti pembayaran
-            $file = $req->file('bukti');
+            $file = $req->file('buktitf');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bukti_pembayaran_mutasiinden', $fileName, 'public');
             $data['bukti'] = $filePath;
