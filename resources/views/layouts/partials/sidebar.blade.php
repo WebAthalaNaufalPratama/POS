@@ -40,7 +40,7 @@
                     </ul>
                 </li>
                 @endif
-                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || Auth::user()->hasRole('SuperAdmin'))
+                @if((isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'KasirGallery']))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Produk Jual</span> <span class="menu-arrow"></span></a>
                     <ul>
@@ -63,7 +63,7 @@
                 </li>
                 @endif
                 <li class="submenu">
-                    @if($user->hasRole(['SuperAdmin', 'AdminGallery', 'KasirGallery']) || (in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
+                    @if($user->hasRole(['SuperAdmin', 'AdminGallery', 'KasirGallery']) && (in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
@@ -110,10 +110,10 @@
                         @if(in_array('mutasioutlet.index', $rolePermissions) && $user->hasRole(['SuperAdmin', 'KasirGallery', 'AdminGallery', 'KasirOutlet']) )
                             <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasighgalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1) || $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
+                        @if(in_array('mutasighgalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
                             <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH ke Galery</a></li>
                         @endif
-                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) || $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
+                        @if(in_array('mutasigalerygalery.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2) && $user->hasRole(['SuperAdmin', 'AdminGallery', 'Purchasing']))
                             <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
                             {{-- <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                             <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>

@@ -258,9 +258,35 @@ class MutasiindensController extends Controller
         $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
         $lokasi = Lokasi::all();
         $kondisis = Kondisi::all();
+
+        //riwayat
+
+        $riwayatPembelian = Activity::where('subject_type', Mutasiindens::class)->where('subject_id', $mutasiIG)->orderBy('id', 'desc')->get();
+        $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
+        $produkIds = $data->pluck('id')->toArray();
+        $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
+            $properties = json_decode($activity->properties, true);
+            return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
+        });
+        
+        $mergedriwayat = [
+            'pembelian' => $riwayatPembelian,
+            'pembayaran' => $filteredRiwayat
+        ];
+        
+        $riwayat = collect($mergedriwayat)
+            ->flatMap(function ($riwayatItem, $jenis) {
+                return $riwayatItem->map(function ($item) use ($jenis) {
+                    $item->jenis = $jenis;
+                    return $item;
+                });
+            })
+            ->sortByDesc('id')
+            ->values()
+            ->all();
         // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
         // return view('mutasiindengh.create', compact('lokasipengirim','lokasipenerima','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
-        return view('mutasiindengh.edit',compact('data','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','jabatan'));
+        return view('mutasiindengh.edit',compact('riwayat','data','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','jabatan'));
     }
 
     /**
