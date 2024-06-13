@@ -9,9 +9,15 @@
                     <div class="page-title">
                         <h4>Mutasi GreenHouse Ke Galery</h4>
                     </div>
+                    @php
+                        $user = Auth::user();
+                        $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                    @endphp
+                    @if($lokasi->lokasi->tipe_lokasi != 1)
                     <div class="page-btn">
                         <a href="{{ route('mutasighgalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
                     </div>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -59,10 +65,14 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('mutasighgalery.payment', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
-                                            <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
+                                            @if($lokasi->lokasi->tipe_lokasi != 1)
+                                                <a class="dropdown-item" href="{{ route('mutasighgalery.payment', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
+                                            @endif
+                                            @if($lokasi->lokasi->tipe_lokasi != 3)
+                                                <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
+                                            @endif
+                                            <a class="dropdown-item" href="{{ route('mutasighgalery.view', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
                                         </div>
-                                        <a class="dropdown-item" href="{{ route('mutasighgalery.view', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
                                     </div>
                                 </td>
                             </tr>

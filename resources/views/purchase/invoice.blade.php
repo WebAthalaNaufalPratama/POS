@@ -95,6 +95,11 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
+                                            <a href="{{ route('invoice.show',['datapo' => $inv->pembelian->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                            </a>
+                                        </li>
+                                        <li>
                                             <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
                                         </li>
                                         <li>
@@ -188,7 +193,24 @@
                                 </td>
                                 <td>{{ formatRupiah($inv->sisa) }}</td>
                                 <td></td>
-                                <td></td>
+                                <td class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="{{ route('invoice.show',['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                                <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                            </a>
+                                        </li>
+                                        {{-- <li>
+                                            <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
+                                        </li> --}}
+                                        <li>
+                                            <a href="javascript:void(0);" onclick="bayar2({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
+                                        </li>
+                                    </ul>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -433,6 +455,21 @@
     });
     function bayar(invoice){
         $('#no_po').val(invoice.pembelian.no_po);
+        $('#invoice_purchase_id').val(invoice.id);
+        $('#total_tagihan').val(invoice.total_tagihan);
+        $('#sisa_tagihan').val(invoice.sisa);
+        $('#nominal').val(invoice.sisa);
+        $('#rekening_id').select2({
+            dropdownParent: $("#modalBayar")
+        });
+        $('#bayar').select2({
+            dropdownParent: $("#modalBayar")
+        });
+        $('#modalBayar').modal('show');
+        generateInvoice();
+    }
+    function bayar2(invoice){
+        $('#no_po').val(invoice.poinden.no_po);
         $('#invoice_purchase_id').val(invoice.id);
         $('#total_tagihan').val(invoice.total_tagihan);
         $('#sisa_tagihan').val(invoice.sisa);
