@@ -58,7 +58,7 @@
                     @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->po->pembelian->no_po }}</td>
+                            <td>{{ $item->po->pembelian->no_po ?? $item->po->poinden->no_po }}</td>
                             <td>{{ $item->po->no_inv }}</td>
                             <td>{{ $item->no_invoice_bayar }}</td>
                             <td>{{ formatRupiah($item->nominal) }}</td>

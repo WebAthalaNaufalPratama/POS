@@ -357,7 +357,7 @@ Carbon::setLocale('id');
                                                        </select>
                                                        </td>
                                                        <td id="status_diterima">
-                                                           <select id="status_dibukukan" name="status_dibukukan" class="form-control" required readonly>
+                                                           <select id="status_dibukukan" name="status_dibukukan" class="form-control" required>
                                                                <option value="pending" {{ $inv_po->status_dibuku == 'pending' ? 'selected' : '' }}>Pending</option>
                                                                <option value="acc" {{ $inv_po->status_dibuku == 'acc' ? 'selected' : '' }}>Accept</option>
                                                            </select>
@@ -365,10 +365,10 @@ Carbon::setLocale('id');
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
-                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $inv_po->tgl_dibuat}}" disabled>
+                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan }}" disabled>
+                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan }}">
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -377,10 +377,10 @@ Carbon::setLocale('id');
                                </div>
                          </div>
 
-                        {{-- <div class="text-end mt-3">
+                        <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="" class="btn btn-secondary" type="button">Back</a>
-                        </div> --}}
+                        </div>
             </form>
         </div>
 

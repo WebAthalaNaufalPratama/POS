@@ -85,7 +85,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima ?? '' }}">
+                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}">
                                                 </div>
                                         </div>
                                         <div class="col-md-3">
@@ -232,14 +232,14 @@
                                                 <select id="status_diterima" name="status_diterima" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="pending" {{ $beli->status_diterima == 'pending' ? 'selected' : ''}}>Pending</option>
-                                                    <option value="acc" {{ $beli->status_diterima == 'acc' ? 'selected' : ''}}>Accept</option>
+                                                    <option value="acc" {{ ($beli->status_diterima == 'acc') || ($beli->status_diterima == null ) ? 'selected' : ''}}>Accept</option>
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="pending" {{ $beli->status_diperiksa == 'pending' ? 'selected' : ''}}>Pending</option>
-                                                    <option value="acc" {{ $beli->status_diperiksa == 'acc' ? 'selected' : ''}}>Accept</option>
+                                                    <option value="acc" {{ ($beli->status_diperiksa == 'acc') || ($beli->status_diperiksa == null) ? 'selected' : ''}}>Accept</option>
                                                 </select>
                                             </td>
                                         </tr>
@@ -248,10 +248,10 @@
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" readonly >
                                             </td>
                                             <td id="tgl_diterima">
-                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ $beli->tgl_diterima_ttd ?? ''}}" >
+                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ now() }}" >
                                             </td>
                                             <td id="tgl_pemeriksa">
-                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? ''}}" >
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ now() }}" >
                                             </td>
                                         </tr>
                                     </tbody>

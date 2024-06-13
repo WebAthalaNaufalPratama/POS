@@ -156,7 +156,7 @@
                         </div>
 
                         <div class="row justify-content-start">
-                            <div class="col-md-8 border rounded pt-3 me-1 mt-2">
+                            <div class="col-md-9 border rounded pt-3 me-1 mt-2">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
@@ -186,7 +186,7 @@
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="draft">Draft</option>
-                                                    <option value="publish">Publish</option>
+                                                    <option value="publish" selected>Publish</option>
                                                 </select>
                                             </td>
                                             <td id="status_diterima">
@@ -206,7 +206,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="" >
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" >
                                             </td>
                                             <td id="tgl_diterima">
                                                 <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="" readonly>
@@ -260,7 +260,7 @@
             </div>
             <div class="mb-3">
               <label for="tanggal_bergabung" class="form-label">Tanggal bergabung</label>
-              <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung">
+              <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung" value="{{ now()->format('Y-m-d') }}">
             </div>
             <div class="mb-3">
               <label for="tipe_supplier" class="form-label">Tipe Supplier</label>

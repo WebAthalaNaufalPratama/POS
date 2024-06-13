@@ -12,7 +12,7 @@ Carbon::setLocale('id');
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Pembayaran Invoice</h3>
+            <h3 class="page-title">Pembayaran Invoice Inden</h3>
         </div>
     </div>
 </div>
@@ -21,18 +21,28 @@ Carbon::setLocale('id');
     <div class="card">
         <div class="card-header">
             <h4 class="card-title mb-0">
-                Invoice Pembelian
+                Invoice Pembelian Inden
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('invoice.update', $inv_po->id )}} " method="POST" enctype="multipart/form-data">
+            {{-- <form action="{{ route('invoice.update', $inv_po->id )}} " method="POST" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
+                @method('PUT') --}}
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-start">
                             <div class="col-md-12 border rounded pt-3 me-1">
                                 <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="suplier">Supplier</label>
+                                            <input type="text" class="form-control" id="suplier" name="suplier" value="{{ $inv_po->poinden->supplier->nama }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="bulan_inden">Bulan Inden</label>
+                                                <input type="text" class="form-control" id="bulan_inden" name="bulan_inden" value="{{ $inv_po->poinden->bulan_inden }}" readonly>
+                                        </div>
+                                    </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_inv">No. Invoice</label>
@@ -63,24 +73,15 @@ Carbon::setLocale('id');
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_po">No. Purchase Order</label>
-                                            <input type="text" class="form-control" id="no_po" name="id_po" value="{{ $inv_po->pembelian_id }}" readonly hidden>
-                                            <input type="text" class="form-control" id="no_po" name="no_po" value="{{ $inv_po->pembelian->no_po }}" readonly>
+                                            <input type="text" class="form-control" id="no_po" name="id_po" value="{{ $inv_po->poinden_id }}" readonly hidden>
+                                            <input type="text" class="form-control" id="no_po" name="no_po" value="{{ $inv_po->poinden->no_po }}" readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="tgl_po">Tanggal PO</label>
-                                                <input type="text" class="form-control" id="tgl_po" name="tgl_po" value="{{ \Carbon\Carbon::parse($inv_po->pembelian->created_at)->translatedFormat('d F Y') }}" readonly>
+                                                <input type="text" class="form-control" id="tgl_po" name="tgl_po" value="{{ \Carbon\Carbon::parse($inv_po->poinden->created_at)->translatedFormat('d F Y') }}" readonly>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label for="suplier">Supplier</label>
-                                            <input type="text" class="form-control" id="suplier" name="suplier" value="{{ $inv_po->pembelian->supplier->nama }}" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="lokasi">Lokasi</label>
-                                                <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $inv_po->pembelian->lokasi->nama }}" readonly>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -96,9 +97,11 @@ Carbon::setLocale('id');
                                                 <tr>
                                                     <th>No</th>
                                                     <th hidden>id</th>
-                                                    <th>Kode Produk</th>
-                                                    <th>Nama Produk</th>
-                                                    <th>QTY</th>
+                                                    <th>Kode Inden</th>
+                                                    <th style="width: 200px">Kategori Produk</th>
+                                                    {{-- <th>Kode Produk</th> --}}
+                                                    {{-- <th>Keterangan</th> --}}
+                                                    <th>Jumlah</th>
                                                     <th>Harga</th>
                                                     <th>Diskon</th>
                                                     <th>Total Harga</th>
@@ -110,9 +113,9 @@ Carbon::setLocale('id');
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
                                                     <td hidden><input type="text" name="id[]" id="id{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
-                                                    <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
-                                                    <td><input type="text" name="nama[]" id="nama_{{ $index }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima }}" readonly></td>
+                                                    <td><input type="text" name="kodeinden[]" id="kodeinden_{{ $index }}" class="form-control" value="{{ $item->kode_produk_inden }}" readonly></td>
+                                                    <td><input type="text" name="kategori[]" id="kategori_{{ $index }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jumlahInden }}" readonly></td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
@@ -143,9 +146,9 @@ Carbon::setLocale('id');
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
-                                        <div class="page-btn">
+                                        {{-- <div class="page-btn">
                                             <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
-                                        </div>
+                                        </div> --}}
                                         <div class="table-responsive">
                                             <table class="table datanew">
                                                 <thead>
@@ -157,14 +160,14 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        {{-- <th>Aksi</th> --}}
+                                                        <th>Aksi</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($databayars as $bayar)
                                                     <tr>
                                                         <td>{{ $bayar->no_invoice_bayar }}</td>
-                                                        <td>{{ tanggalindo($bayar->tanggal_bayar) }}</td>
+                                                        <td>{{ $bayar->tanggal_bayar }}</td>
                                                         <td>{{ $bayar->cara_bayar }}</td>
                                                         <td>{{ $bayar->rekening->bank ?? '-'}}</td>
                                                         <td>{{ formatRupiah($bayar->nominal) }}</td>
@@ -195,7 +198,7 @@ Carbon::setLocale('id');
                                             
                                                     </td>
                                                         <td>{{ $bayar->status_bayar}}</td>
-                                                        {{-- <td></td> --}}
+                                                        <td></td>
                                                        
                                                     </tr>
                                                     @endforeach
@@ -281,7 +284,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
+                                                {{-- <li>
                                                     <h4>Biaya Pengiriman</h4>
                                                     <h5>
                                                         <div class="input-group">
@@ -289,7 +292,7 @@ Carbon::setLocale('id');
                                                             <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($inv_po->biaya_kirim) }}" readonly required>
                                                         </div>    
                                                     </h5>
-                                                </li>
+                                                </li> --}}
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
                                                     <h5>
@@ -354,7 +357,7 @@ Carbon::setLocale('id');
                                                        </select>
                                                        </td>
                                                        <td id="status_diterima">
-                                                           <select id="status_dibukukan" name="status_dibukukan" class="form-control" required>
+                                                           <select id="status_dibukukan" name="status_dibukukan" class="form-control" required disabled>
                                                                <option value="pending" {{ $inv_po->status_dibuku == 'pending' ? 'selected' : '' }}>Pending</option>
                                                                <option value="acc" {{ $inv_po->status_dibuku == 'acc' ? 'selected' : '' }}>Accept</option>
                                                            </select>
@@ -365,7 +368,7 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan ?? now()->format('Y-m-d') }}" >
+                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ tanggalindo($inv_po->tgl_dibukukan) }}" disabled>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -375,10 +378,10 @@ Carbon::setLocale('id');
                          </div>
 
                         <div class="text-end mt-3">
-                            <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            {{-- <button class="btn btn-primary" type="submit">Submit</button> --}}
+                            <a href="{{ route('invoicebeli.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
-            </form>
+            {{-- </form> --}}
         </div>
 
     </div>
@@ -396,12 +399,12 @@ Carbon::setLocale('id');
           <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form id="supplierForm" action="{{ route('bayarpo.store')}}" method="POST" enctype="multipart/form-data">
-                @csrf
+            {{-- <form id="supplierForm" action="{{ route('bayarpo.store')}}" method="POST" enctype="multipart/form-data">
+                @csrf --}}
             <div class="mb-3">
               <label for="nobay" class="form-label">No Bayar</label>
-              <input type="hidden" class="form-control" id="type" name="type" value="pembelian">
-              <input type="hidden" class="form-control" id="idpo" name="id_po" value="{{ $inv_po->pembelian_id }}">
+              <input type="hidden" class="form-control" id="type" name="type" value="poinden">
+              <input type="hidden" class="form-control" id="idpo" name="id_po" value="{{ $inv_po->poinden_id }}">
               <input type="hidden" class="form-control" id="invoice_purchase_id" name="invoice_purchase_id" value="{{ $inv_po->id }}">
               <input type="text" class="form-control" id="nobay" name="no_invoice_bayar" value="{{ $no_bypo }}" readonly>
             </div>
@@ -434,16 +437,14 @@ Carbon::setLocale('id');
             
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Simpan</button>
+              {{-- <button type="submit" class="btn btn-primary">Simpan</button> --}}
             </div>
-          </form>
+          {{-- </form> --}}
         </div>
       </div>
     </div>
 </div>
 
-
-{{-- <input type="text" name="rupiah" id="rupiah"> --}}
 @endsection
 
 @section('scripts')
@@ -454,13 +455,6 @@ Carbon::setLocale('id');
             ribuan = ribuan.join('.').split('').reverse().join('');
             return ribuan;
         }
-    
-
-    // Event listener to format input value
-    // document.getElementById('rupiah').addEventListener('keyup', function(e) {
-    //     var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
-    //     this.value = formatRupiah(rupiah);
-    // });
 
 
     function unformatRupiah(formattedValue) {
@@ -474,108 +468,6 @@ Carbon::setLocale('id');
         // Set nilai ke input hidden
         document.getElementById('nominal2').value = unformatRupiah(this.value);
     });
-
-    // $(document).ready(function() {
-    //     $("#metode").select2({
-    //     dropdownParent: $("#myModalbayar")
-    //     });
-
-    //      $('#jenis_ppn').change(function() {
-    //         var selectedOption = $(this).val();
-    //         if (selectedOption === 'exclude') {
-    //             $('#persen_ppn').prop('readonly', false);
-    //         } else {
-    //             $('#persen_ppn').prop('readonly', true);
-    //             $('#persen_ppn').val(''); // Set nilai input menjadi string kosong
-    //         }
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     });
-
-    //     // Fungsi untuk menghitung total tagihan
-    //     function calculateTotalAll() {
-    //         var subTotal = 0;
-    //         var diskonTotal = parseFloat($('#diskon_total').val()) || 0;
-    //         var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
-    //         var persenPpn = parseFloat($('#persen_ppn').val()) || 0;
-
-    //         // Menghitung sub total
-    //         $('input[name^="jumlah"]').each(function() {
-    //             subTotal += parseFloat($(this).val()) || 0;
-    //         });
-
-    //         // Menghitung PPN berdasarkan jenis_ppn
-    //         var ppn = 0;
-    //         var jenisPpn = $('#jenis_ppn').val();
-    //         if (jenisPpn === 'exclude') {
-    //             ppn = (subTotal - diskonTotal) * persenPpn / 100;
-    //         }
-
-    //         // Menghitung total tagihan
-    //         var totalTagihan = subTotal - diskonTotal + ppn + biayaOngkir;
-
-    //         // Memperbarui nilai total tagihan
-    //         $('#sub_total').val(subTotal.toFixed(2));
-    //         $('#total_tagihan').val(totalTagihan.toFixed(2));
-    //     }
-
-    //     // Panggil fungsi calculateTotal ketika ada perubahan pada input jumlah atau diskon
-    //     $('input[name^="jumlah"], #diskon_total, #biaya_ongkir, #persen_ppn').on('input', function() {
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     });
-
-    //     // Fungsi untuk menghitung total harga per baris
-    //     function calculateTotal(index) {
-    //         var qtytrm = parseFloat($('#qtytrm_' + index).val()) || 0;
-    //         var harga = parseFloat($('#harga_' + index).val()) || 0;
-    //         var diskon = parseFloat($('#diskon_' + index).val()) || 0;
-    //         var jumlah = qtytrm * harga - diskon;
-
-    //         $('#jumlah_' + index).val(jumlah.toFixed(2));
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     }
-
-    //     // Panggil fungsi calculateTotal ketika ada perubahan pada input harga atau diskon per baris
-    //     $('input[name^="harga"], input[name^="diskon"]').on('input', function() {
-    //         var index = $(this).attr('id').split('_')[1];
-    //         calculateTotal(index);
-    //     });
-    // });
-
-
-
-
-//     function formatRupiah(angka) {
-//     var reverse = angka.toString().split('').reverse().join('');
-//     var ribuan = reverse.match(/\d{1,3}/g);
-//     ribuan = ribuan.join('.').split('').reverse().join('');
-//     return ribuan;
-// }
-
-// function unformatRupiah(formattedValue) {
-//     return formattedValue.replace(/\./g, '');
-// }
-
-// document.getElementById('nominal').addEventListener('input', function(e) {
-//     var nominalField = this;
-//     var cursorPosition = nominalField.selectionStart;
-
-//     // Remove non-numeric characters
-//     var unformattedValue = unformatRupiah(nominalField.value);
-
-//     // Format the value
-//     var formattedValue = formatRupiah(unformattedValue);
-//     nominalField.value = formattedValue;
-
-//     // Set the integer value to hidden input
-//     document.getElementById('nominal2').value = unformattedValue;
-
-//     // Adjust cursor position
-//     cursorPosition = cursorPosition - (nominalField.value.length - formattedValue.length);
-//     setTimeout(function() {
-//         nominalField.setSelectionRange(cursorPosition, cursorPosition);
-//     }, 0);
-// });
-
 </script>
 
 
