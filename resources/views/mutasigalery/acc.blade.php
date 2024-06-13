@@ -31,8 +31,8 @@
                     <form action="{{ route('mutasigalery.update', ['mutasiGO' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('patch')
-                        <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                        <div class="row">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -49,7 +49,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="penerima">Nama Penerima</label>
-                                            <select id="penerima" name="penerima" class="form-control" required>
+                                            <select id="penerima" name="penerima" class="form-control" required disabled>
                                                 <option value="">Pilih Nama Penerima</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -254,7 +254,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-6 float-md-right">
+                                    <div class="col-lg-4 float-md-right border radius">
                                         <div class="total-order">
                                             <ul>
                                                 <li>

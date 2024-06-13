@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
+use App\Models\Produkretur;
 use PhpParser\Node\Stmt\Foreach_;
 use Poinden;
 use ProdukBelis;
@@ -349,8 +350,17 @@ class PembelianController extends Controller
         $invoice = Invoicepo::with('pembelian', 'pembelian.produkbeli', 'pembelian.produkbeli.produk')->find($req->invoice);
         $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
         $nomor_poinden = $this->generatePOIndenNumber();
+        $Invoice = ReturPembelian::where('invoicepo_id', 'LIKE', 'RPM%')->latest()->first();
+        // dd($Invoice);
+        if ($Invoice != null) {
+            $substring = substr($Invoice->invoicepo_id, 12);
+            $cekInvoice = substr($substring, 0, 3);
+            // dd($cekInvoice);
+        } else {
+            $cekInvoice = 000;
+        }
         // dd($invoice->pembelian->produkbeli);
-        return view('purchase.createretur', compact('nomor_poinden', 'lokasi', 'invoice'));
+        return view('purchase.createretur', compact('cekInvoice','nomor_poinden', 'lokasi', 'invoice'));
 
     }
 
@@ -524,7 +534,70 @@ class PembelianController extends Controller
 
     public function store_retur(Request $request)
     {
-        dd($request);
+        // dd($request);
+
+        $validator = Validator::make($request->all(), [
+            'invoicepo_id' => 'required',
+            'no_retur' => 'required',
+            'tgl_retur' => 'required',
+            'komplain' => 'required',
+            'subtotal' => 'required',
+            'total_harga' => 'required',
+        ]);
+        // dd($validator);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->withErrors($validator);
+        }
+
+        $data = $request->except(['_token', '_method', 'file']);
+        // dd($data);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_retur_pembelian', $fileName, 'public');
+            // dd($filePath);
+            $data['foto'] = $filePath;
+        }
+
+        $data['ongkir'] = $data['biaya_peniriman'];
+        $data['total'] = $data['total_harga'];
+        $jenis = $data['komplain'];
+
+        $save = ReturPembelian::create($data);
+
+        if ($save) {
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                $produkReturBeli = [
+                    'returpembelians_id' => $save->id,
+                    'produk_id' => $data['nama_produk'][$i],
+                    'alasan' => $data['alasan'][$i],
+                    'jumlah' => $data['jumlah'][$i],
+                    'harga' => $data['harga_satuan'][$i],
+                    'diskon' => $data['diskon'][$i],
+                    'totharga' => $data['harga_total'][$i]
+                ];
+
+                $produk_terjual = Produkretur::create($produkReturBeli);
+
+                $diskon = $produk_terjual->jumlah * $produk_terjual->diskon;
+
+                $updateproduk = [
+                    'type_komplain' => $jenis,
+                    'diskon_retur' => $diskon,  
+                ];
+
+                $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
+
+                if ($update) {
+                    return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
+                }
+
+                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            }
+        }
     }
 
     /**
@@ -581,7 +654,6 @@ class PembelianController extends Controller
      */
     public function update_invoice(Request $request, Pembelian $pembelian, $idinv)
     {
-        // Validasi input
         $validator = Validator::make($request->all(), [
             'status_dibukukan' => 'required',
             'tgl_dibukukan' => 'required|date',
