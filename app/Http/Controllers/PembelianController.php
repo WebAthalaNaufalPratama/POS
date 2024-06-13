@@ -499,10 +499,6 @@ class PembelianController extends Controller
         $pembelian->tgl_diperiksa = $request->tgl_diperiksa ?? null; // Tanggal pembuatan saat ini
         $pembelian->status_dibuat = $request->status_dibuat ?? null; // Status pembuatan
         $pembelian->status_diperiksa = $request->status_diperiksa ?? null; // Status pembuatan
-       
-        $check1 = $pembelian->save();
-    
-        // Ambil nomor PO yang baru dibuat
         $no_po = $pembelian->no_po;
     
         // Simpan data produk beli
@@ -511,7 +507,18 @@ class PembelianController extends Controller
         $jumlah = $request->qty;
         $ket = $request->ket;
         $check2 = true;
+        
+            // Pengecekan duplikasi kode indens
+        if (count($kode_indens) !== count(array_unique($kode_indens))) {
+            return redirect()->back()->withInput()->with('fail', 'kode inden tidak boleh sama');
+        }
+
+
+        $check1 = $pembelian->save();
     
+        // Ambil nomor PO yang baru dibuat
+        
+
         // Loop untuk setiap produk yang ditambahkan
         foreach ($kode_indens as $index => $kode_inden) {
             $produkBeli = new Produkbeli();

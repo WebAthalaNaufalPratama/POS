@@ -139,7 +139,7 @@ Carbon::setLocale('id');
                                                             <input type="text" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
                                                             <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
                                                         </div>
-                                                </td>
+                                                    </td>
                                                     <td>
                                                         
                                                             <div class="input-group">

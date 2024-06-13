@@ -103,7 +103,7 @@ Carbon::setLocale('id');
                                                     {{-- <th>Keterangan</th> --}}
                                                     <th>Jumlah</th>
                                                     <th>Harga</th>
-                                                    <th>Diskon</th>
+                                                    <th>Diskon/item</th>
                                                     <th>Total Harga</th>
                                                     <th></th>
                                                 </tr>
@@ -359,7 +359,7 @@ Carbon::setLocale('id');
                                                        <td id="status_diterima">
                                                            <select id="status_dibukukan" name="status_dibukukan" class="form-control" required>
                                                                <option value="pending" {{ $inv_po->status_dibuku == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                               <option value="acc" {{ $inv_po->status_dibuku == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                               <option value="acc" {{ ($inv_po->status_dibuku == 'acc') || ($inv_po->status_dibuku == null ) ? 'selected' : '' }}>Accept</option>
                                                            </select>
                                                        </td>
                                                 </tr>
@@ -368,7 +368,7 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan }}">
+                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ now()->format('Y-m-d')}}">
                                                     </td>
                                                 </tr>
                                             </tbody>
