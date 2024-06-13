@@ -205,10 +205,10 @@
                                         </li>
                                         {{-- <li>
                                             <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
-                                        </li>
-                                        <li>
-                                            <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
                                         </li> --}}
+                                        <li>
+                                            <a href="javascript:void(0);" onclick="bayar2({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
+                                        </li>
                                     </ul>
                                 </td>
                             </tr>
@@ -455,6 +455,21 @@
     });
     function bayar(invoice){
         $('#no_po').val(invoice.pembelian.no_po);
+        $('#invoice_purchase_id').val(invoice.id);
+        $('#total_tagihan').val(invoice.total_tagihan);
+        $('#sisa_tagihan').val(invoice.sisa);
+        $('#nominal').val(invoice.sisa);
+        $('#rekening_id').select2({
+            dropdownParent: $("#modalBayar")
+        });
+        $('#bayar').select2({
+            dropdownParent: $("#modalBayar")
+        });
+        $('#modalBayar').modal('show');
+        generateInvoice();
+    }
+    function bayar2(invoice){
+        $('#no_po').val(invoice.poinden.no_po);
         $('#invoice_purchase_id').val(invoice.id);
         $('#total_tagihan').val(invoice.total_tagihan);
         $('#sisa_tagihan').val(invoice.sisa);
