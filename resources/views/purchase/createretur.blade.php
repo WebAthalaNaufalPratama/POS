@@ -56,9 +56,12 @@
                                                 <label>Komplain</label>
                                                 <select id="komplain" name="komplain" class="form-control" required>
                                                     <option value="">Pilih Komplain</option>
-                                                    <option value="Refund" {{ old('komplain') == 'Refund' ? 'selected' : '' }}>Refund</option>
+                                                    @if($invoice->sisa == 0)
+                                                        <option value="Refund" {{ old('komplain') == 'Refund' ? 'selected' : '' }}>Refund</option>
+                                                    @else
                                                     <option value="Diskon" {{ old('komplain') == 'Diskon' ? 'selected' : '' }}>Diskon</option>
                                                     <option value="Retur" {{ old('komplain') == 'Retur' ? 'selected' : '' }}>Retur</option>
+                                                    @endif
                                                 </select>
                                             </div>
                                         </div>
@@ -67,6 +70,10 @@
                                                 <label>No PO</label>
                                                 <input type="text" id="no_po" name="no_po" value="{{ $nomor_poinden }}" class="form-control" required readonly>
                                             </div>
+                                            <!-- <div class="form-group">
+                                                <label>No PO Retur</label>
+                                                <input type="text" id="no_po_retur" name="no_po_retur" class="form-control" required readonly>
+                                            </div> -->
                                             <div class="form-group">
                                                 <label>No Invoice</label>
                                                 <input type="text" id="no_invoice" name="no_invoice" value="{{ $invoice->no_inv }}" class="form-control" required readonly>
@@ -113,12 +120,12 @@
                                             <select id="produk_0" name="nama_produk[]" class="form-control" required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($invoice->pembelian->produkbeli as $produk)
-                                                    <option value="{{ $produk->produk->kode }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>
+                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
                                         <td><textarea name="alasan[]" id="alasan_0" class="form-control" cols="30"></textarea></td>
-                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" required></td>
+                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control jumlah_diterima"  data-produk-id="{{ $produk->id }}" required></td>
                                         <td id="tdDiskon_0"><input type="text" name="diskon[]" id="diskon_0" oninput="multiply(this)" class="form-control" required></td>
                                         <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" required readonly></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" required readonly></td>
@@ -247,7 +254,7 @@
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" required>
+                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control">
                                                             <option value="">Pilih Status</option>
                                                             <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
                                                             <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
@@ -298,7 +305,7 @@
                                         '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                             '<option value="">Pilih Produk</option>'+
                                                 '@foreach ($invoice->pembelian->produkbeli as $produk)' +
-                                                    '<option value="{{ $produk->produk->kode }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>' +
+                                                    '<option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>' +
                                                 '@endforeach' +
                                         '</select>'+
                                     '</td>'+
@@ -413,9 +420,10 @@
                 id = $(element).attr('id').split('_')[1];
                 var harga_total = $('#produk_' + id).find(':selected').data('harga_total');
                 diskon = cleanNumber($('#diskon_' + id).val()) || 0;
+                jumlah = $('#jumlah_' + id).val() || 0;
                 harga_satuan = cleanNumber($('#harga_satuan_' + id).val());
                 if (harga_satuan) {
-                    harga_total -= diskon
+                    harga_total -= diskon * jumlah
                     $('#harga_total_'+id).val(formatNumber(harga_total))
                 }
             }
@@ -436,5 +444,58 @@
             var harga_total = parseInt(subtotal) + parseInt(biaya_peniriman);
             $('#total_harga').val(formatNumber(harga_total));
         }
+
+        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+        // console.log(cekInvoiceNumbers);
+        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+
+        function generateInvoice() {
+            var invoicePrefix = "RPM";
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+
+            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+            $('#no_retur').val(generatedInvoice);
+        }
+
+        $(document).ready(function() {
+            generateInvoice();
+        });
+
+        var produkData = [];
+
+        @foreach ($invoice->pembelian->produkbeli as $produk)
+            produkData.push({
+                id: {{ $produk->id }},
+                jumlah: {{ $produk->jml_diterima }}
+            });
+        @endforeach
+
+        // console.log('Produk Data:', produkData);
+
+        $(document).on('input', '.jumlah_diterima', function() {
+            var inputId = $(this).attr('id');
+            var jumlah = parseInt($(this).val(), 10); 
+            var produkId = $(this).data('produk-id');
+
+            var produk = produkData.find(function(item) {
+                return item.id == produkId;
+            });
+
+            if (produk) {
+                if (jumlah > produk.jumlah) {
+                    alert('jumlah tidak boleh lebih dari jumlah diterima');
+                    $(this).val(produk.jumlah);
+                } else if (jumlah < 0) {
+                    alert('jumlah tidak boleh kurang dari 0');
+                    $(this).val(0);
+                }
+            } else {
+                console.error('Produk not found for ID:', produkId);
+            }
+        });
     </script>
 @endsection

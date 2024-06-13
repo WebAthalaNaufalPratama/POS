@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\Karyawan;
+use App\Models\Lokasi;
 
 class CreateAdminUserSeeder extends Seeder
 {
@@ -301,7 +302,24 @@ class CreateAdminUserSeeder extends Seeder
         $userfinance->assignRole([$rolefinance->id]);
         $userauditor->assignRole([$roleauditor->id]);
 
+        Lokasi::create([
+            'id' => 1,
+            'nama' => 'galery semarang',
+            'tipe_lokasi' => 1,
+            'operasional_id' => 2,
+            'alamat' => 'semarang',
+            'pic' => 'yvon'
+        ]);
 
+        Lokasi::create([
+            'id' => 1,
+            'nama' => 'outlet semarang',
+            'tipe_lokasi' => 2,
+            'operasional_id' => 2,
+            'alamat' => 'semarang',
+            'pic' => 'dian'
+        ]);
+        
         Karyawan::create([
             'user_id' => $userkasiroutlet->id,
             'nama' => $userkasiroutlet->name,
@@ -314,6 +332,15 @@ class CreateAdminUserSeeder extends Seeder
         Karyawan::create([
             'user_id' => $useradmingallery->id,
             'nama' => $useradmingallery->name,
+            'jabatan' => 'admin',
+            'lokasi_id' => 1,
+            'handphone' => 0,
+            'alamat' => 'semarang'
+        ]);
+
+        Karyawan::create([
+            'user_id' => $userkasirgallery->id,
+            'nama' => $userkasirgallery->name,
             'jabatan' => 'admin',
             'lokasi_id' => 1,
             'handphone' => 0,

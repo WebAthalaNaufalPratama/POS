@@ -57,6 +57,11 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::post('addKomponen', 'KomponenProdukTerjualController@addKomponen')->name('addKomponen');
         Route::get('getProdukDo', 'DeliveryOrderController@getProdukDo')->name('getProdukDo');
 
+
+        Route::group(['prefix' => 'dashboard'], function() {
+            Route::get('/', 'DashboardController@index')->name('dashboard.index');
+        });
+
         /**
          * User Routes
          */
