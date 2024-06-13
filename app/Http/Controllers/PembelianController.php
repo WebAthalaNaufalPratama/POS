@@ -579,7 +579,9 @@ class PembelianController extends Controller
                     'totharga' => $data['harga_total'][$i]
                 ];
 
-                $diskon = $data['jumlah'][$i] * $data['diskon'][$i];
+                $produk_terjual = Produkretur::create($produkReturBeli);
+
+                $diskon = $produk_terjual->jumlah * $produk_terjual->diskon;
 
                 $updateproduk = [
                     'type_komplain' => $jenis,
@@ -589,10 +591,7 @@ class PembelianController extends Controller
                 $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
 
                 if ($update) {
-                    $produk_terjual = Produkretur::create($produkReturBeli);
-                    if ($produk_terjual) {
-                        return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
-                    }
+                    return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
                 }
 
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
