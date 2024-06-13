@@ -75,7 +75,7 @@
                                 <td>{{ $inv->pembelian->no_po }}</td>
                                 <td>{{ $inv->pembelian->supplier->nama }}</td>
                                 <td>{{ $inv->pembelian->lokasi->nama}}</td>
-                                <td>{{ $inv->tgl_inv }}</td>
+                                <td>{{ tanggalindo($inv->tgl_inv) }}</td>
                                 <td>{{ formatRupiah($inv->total_tagihan) }}</td>
                                 <td>
                                     @if ( $inv->sisa == 0)
@@ -177,7 +177,7 @@
                                 <td>{{ $inv->poinden->no_po }}</td>
                                 <td>{{ $inv->poinden->supplier->nama }}</td>
                                 <td>{{ $inv->poinden->bulan_inden}}</td>
-                                <td>{{ $inv->tgl_inv}}</td>
+                                <td>{{ tanggalindo($inv->tgl_inv)}}</td>
                                 <td>{{ formatRupiah($inv->total_tagihan) }}</td>
                                 <td>
                                     @if ( $inv->sisa == 0)

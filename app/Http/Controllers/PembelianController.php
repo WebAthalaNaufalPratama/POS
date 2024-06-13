@@ -389,15 +389,15 @@ class PembelianController extends Controller
         $pembelian->tgl_diterima = $request->tgl_diterima;
         $pembelian->no_do_suplier = $request->no_do ?? null;
         $pembelian->pembuat = $request->pembuat; // ID pengguna yang membuat pembelian
-        $pembelian->pemeriksa = $request->pemeriksa; // ID pengguna yang membuat pembelian
-        $pembelian->penerima = $request->penerima; // ID pengguna yang membuat pembelian
+        $pembelian->pemeriksa = $request->pemeriksa ?? null; // ID pengguna yang membuat pembelian
+        $pembelian->penerima = $request->penerima ?? null; // ID pengguna yang membuat pembelian
         $pembelian->status_dibuat = $request->status_dibuat; // Status pembuatan
-        $pembelian->status_diterima = $request->status_diterima; // Status pembuatan
-        $pembelian->status_diperiksa = $request->status_diperiksa; // Status pembuatan
+        $pembelian->status_diterima = $request->status_diterima ?? null; // Status pembuatan
+        $pembelian->status_diperiksa = $request->status_diperiksa ?? null; // Status pembuatan
        
         $pembelian->tgl_dibuat = $request->tgl_dibuat; // Tanggal pembuatan saat ini
-        $pembelian->tgl_diterima_ttd = $request->tgl_diterima_ttd; // Tanggal pembuatan saat ini
-        $pembelian->tgl_diperiksa = $request->tgl_diperiksa; // Tanggal pembuatan saat ini
+        $pembelian->tgl_diterima_ttd = $request->tgl_diterima_ttd ?? null; // Tanggal pembuatan saat ini
+        $pembelian->tgl_diperiksa = $request->tgl_diperiksa ?? null; // Tanggal pembuatan saat ini
         
         if ($request->hasFile('filedo')) {
             $file = $request->file('filedo');
@@ -673,10 +673,10 @@ class PembelianController extends Controller
     
             $inv->pembuat = $request->pembuat;
             $inv->status_dibuat = $request->status_dibuat;
-            $inv->pembuku = $request->pembuku;
-            $inv->status_dibuku = $request->status_dibuku;
+            $inv->pembuku = $request->pembuku ?? null;
+            $inv->status_dibuku = $request->status_dibuku ?? null;
             $inv->tgl_dibuat = $request->tgl_dibuat;
-            $inv->tgl_dibukukan = $request->tgl_dibukukan;
+            $inv->tgl_dibukukan = $request->tgl_dibukukan ?? null;
     
             $subtot = $inv->subtotal = $request->sub_total;
             $disk = $inv->diskon = $request->diskon_total;

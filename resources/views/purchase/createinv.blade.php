@@ -215,7 +215,7 @@ Carbon::setLocale('id');
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
                                                             <option value=""> Pilih Jenis PPN</option>
                                                             <option value="exclude">EXCLUDE</option>
-                                                            <option value="include">INCLUDE</option>
+                                                            <option value="include" selected>INCLUDE</option>
                                                         </select>
                                                     </h4>
                                                     <h5 class="col-lg-5">
@@ -295,14 +295,14 @@ Carbon::setLocale('id');
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                            <option value="publish" {{ old('status_dibuat') == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                            <option value="publish" {{ (old('status_dibuat') == 'publish') ||  (old('status_dibuat') == null) ? 'selected' : '' }}>Publish</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" required>
+                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" disabled>
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                            <option value="pending" disabled {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                            <option value="acc" disabled {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
                                                         </select>
                                                     </td>
                                                 </tr>
@@ -311,7 +311,7 @@ Carbon::setLocale('id');
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ old('tgl_dibuat', now()->format('Y-m-d')) }}" >
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="" disabled>
                                                     </td>
                                                 </tr>
                                             </tbody>

@@ -209,10 +209,10 @@
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" >
                                             </td>
                                             <td id="tgl_diterima">
-                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ now() }}" readonly>
+                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="" readonly>
                                             </td>
                                             <td id="tgl_pemeriksa">
-                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ now() }}" readonly>
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
                                             </td>
                                         </tr>
                                     </tbody>
