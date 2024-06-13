@@ -153,7 +153,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="" >
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="" required>
                                             </td>
                                             <td id="tgl_pemeriksa">
                                                 <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
