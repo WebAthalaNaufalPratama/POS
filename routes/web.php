@@ -276,6 +276,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/invoice/{type}/{datapo}/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
             Route::post('/store_inv', 'PembelianController@storeinvoice')->name('invoicepo.store');
             Route::get('/invoice/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit');
+            Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
             Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
             Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
             
