@@ -349,8 +349,8 @@ class PembelianController extends Controller
     {
         $invoice = Invoicepo::with('pembelian', 'pembelian.produkbeli', 'pembelian.produkbeli.produk')->find($req->invoice);
         $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
-        $nomor_poinden = $this->generatePOIndenNumber();
-        $Invoice = ReturPembelian::where('invoicepo_id', 'LIKE', 'RPM%')->latest()->first();
+        // $nomor_poinden = $this->generatePOIndenNumber();
+        $Invoice = ReturPembelian::where('no_retur', 'LIKE', 'RPM%')->latest()->first();
         // dd($Invoice);
         if ($Invoice != null) {
             $substring = substr($Invoice->invoicepo_id, 12);
@@ -360,7 +360,7 @@ class PembelianController extends Controller
             $cekInvoice = 000;
         }
         // dd($invoice->pembelian->produkbeli);
-        return view('purchase.createretur', compact('cekInvoice','nomor_poinden', 'lokasi', 'invoice'));
+        return view('purchase.createretur', compact('cekInvoice', 'lokasi', 'invoice'));
 
     }
 
@@ -969,9 +969,10 @@ class PembelianController extends Controller
 
             //riwayat
 
-            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $datapo)->orderBy('id', 'desc')->get();
+            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $inv_po->id)->orderBy('id', 'desc')->get();
             $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
-            $produkIds = $inv_po->pluck('id')->toArray();
+            $produkIds = is_array($inv_po->id) ? $inv_po->id : [$inv_po->id];
+            // dd($inv_po->id);
             $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
                 $properties = json_decode($activity->properties, true);
                 return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
@@ -992,6 +993,9 @@ class PembelianController extends Controller
                 ->sortByDesc('id')
                 ->values()
                 ->all();
+
+
+            // dd($riwayat);
                 
 
             return view('purchase.editinv', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
