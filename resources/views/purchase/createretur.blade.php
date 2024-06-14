@@ -40,12 +40,12 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal PO</label>
-                                                <input type="date" id="tanggal_po" name="tanggal_po" value="{{ old('tanggal_po') ?? \Carbon\Carbon::parse($invoice->pembelian->tgl_dibuat)->format('Y-m-d') }}" 
+                                                <input type="text" id="tanggal_po" name="tanggal_po" value="{{ old('tanggal_po') ?? tanggalindo($invoice->pembelian->tgl_dibuat) }}" 
                                                     class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Invoice</label>
-                                                <input type="date" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? $invoice->tgl_inv }}" class="form-control" required readonly>
+                                                <input type="text" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? tanggalindo($invoice->tgl_inv) }}" class="form-control" required readonly>
                                             </div>
                                             <input type="hidden" name="invoicepo_id" value="{{ $invoice->id }}">
                                             <div class="form-group">
@@ -68,7 +68,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No PO</label>
-                                                <input type="text" id="no_po" name="no_po" value="{{ $nomor_poinden }}" class="form-control" required readonly>
+                                                <input type="text" id="no_po" name="no_po" value="{{ $invoice->pembelian->no_po }}" class="form-control" required readonly>
                                             </div>
                                             <!-- <div class="form-group">
                                                 <label>No PO Retur</label>
@@ -102,12 +102,12 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Kode Produk</th>
+                                        {{-- <th>Kode Produk</th> --}}
                                         <th>Nama Produk</th>
                                         <th>Alasan</th>
                                         <th>Jumlah</th>
                                         <th id="thDiskon">Diskon</th>
-                                        <th>Harga</th>
+                                        <th>Harga satuan</th>
                                         <th>Harga Total</th>
                                         <th></th>
                                     </tr>
@@ -115,7 +115,7 @@
                                 <tbody id="dynamic_field">
                                     <tr>
                                         <td>1</td>
-                                        <td><input type="text" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly></td>
+                                        <input type="hidden" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly>
                                         <td>
                                             <select id="produk_0" name="nama_produk[]" class="form-control" required>
                                                 <option value="">Pilih Produk</option>
@@ -250,14 +250,14 @@
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                             <option value="">Pilih Status</option>
                                                             <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                            <option value="publish" {{ old('status_dibuat') == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                            <option value="publish" {{ (old('status_dibuat') == 'publish') || (old('status_dibuat') == null )  ? 'selected' : '' }}>Publish</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibuku" class="form-control">
                                                             <option value="">Pilih Status</option>
                                                             <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                            <option value="acc" {{ (old('status_dibukukan') == 'acc') || (old('status_dibukukan') == null) ? 'selected' : '' }}>Accept</option>
                                                         </select>
                                                     </td>
                                                 </tr>
@@ -266,7 +266,7 @@
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ old('tgl_dibuat', now()->format('Y-m-d')) }}" >
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{ old('tgl_dibuku', now()->format('Y-m-d')) }}" >
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -300,7 +300,7 @@
                 if($('[id^=produk_]').length <= 10){
                     var newRow = '<tr id="row'+i+'">'+
                                     '<td>'+(i + 1)+'</td>'+
-                                    '<td><input type="text" name="kode_produk[]" id="kode_produk_'+i+'" class="form-control" required readonly></td>' +
+                                    '<input type="hidden" name="kode_produk[]" id="kode_produk_'+i+'" class="form-control" required readonly>' +
                                     '<td>' + 
                                         '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                             '<option value="">Pilih Produk</option>'+
