@@ -588,7 +588,8 @@ class PembelianController extends Controller
 
                 $produk_terjual = Produkretur::create($produkReturBeli);
 
-                $diskon = $produk_terjual->jumlah * $produk_terjual->diskon;
+                $diskon = ($produk_terjual->jumlah * $produk_terjual->diskon);
+                // dd($produk_terjual->diskon);
 
                 $updateproduk = [
                     'type_komplain' => $jenis,

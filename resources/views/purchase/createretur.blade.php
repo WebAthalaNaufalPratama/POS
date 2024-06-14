@@ -349,7 +349,7 @@
             })
             $('#addForm').on('submit', function(e) {
                 // Add input number cleaning for specific inputs
-                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga');
+                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total],[id^=diskon],#biaya_peniriman, #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga');
                 inputs.each(function() {
                     let input = $(this);
                     let value = input.val();
