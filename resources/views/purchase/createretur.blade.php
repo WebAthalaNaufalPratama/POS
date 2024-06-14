@@ -120,7 +120,7 @@
                                             <select id="produk_0" name="nama_produk[]" class="form-control" required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($invoice->pembelian->produkbeli as $produk)
-                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>
+                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -213,7 +213,7 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="biaya_peniriman" name="biaya_peniriman" value="{{ old('biaya_peniriman') }}" class="form-control"  required>
+                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') }}" class="form-control"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -278,7 +278,7 @@
                 </div>
                 <div class="text-end mt-3">
                     <button class="btn btn-primary" type="submit">Submit</button>
-                    <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
+                    <a href="{{ route('returbeli.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
                 </form>
             </div>
@@ -305,7 +305,7 @@
                                         '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                             '<option value="">Pilih Produk</option>'+
                                                 '@foreach ($invoice->pembelian->produkbeli as $produk)' +
-                                                    '<option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>' +
+                                                    '<option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>' +
                                                 '@endforeach' +
                                         '</select>'+
                                     '</td>'+
@@ -326,7 +326,7 @@
                         }
                 }
             })
-            $(document).on('input', '[id^=biaya_peniriman], [id^=diskon_]', function() {
+            $(document).on('input', '[id^=biaya_pengiriman], [id^=diskon_]', function() {
                 let input = $(this);
                 let value = input.val();
                 
@@ -349,7 +349,7 @@
             })
             $('#addForm').on('submit', function(e) {
                 // Add input number cleaning for specific inputs
-                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga');
+                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga, #biaya_pengiriman');
                 inputs.each(function() {
                     let input = $(this);
                     let value = input.val();
@@ -369,11 +369,12 @@
             var kode = $(this).val();
             if(kode){
                 var jumlah = $(this).find(':selected').data('jumlah');
+                var diskon = $(this).find(':selected').data('diskon');
                 var harga = $(this).find(':selected').data('harga');
                 var harga_total = $(this).find(':selected').data('harga_total');
                 $('#kode_produk_' + nomor).val(kode);
                 $('#jumlah_' + nomor).val(jumlah);
-                $('#harga_satuan_' + nomor).val(formatNumber(harga));
+                $('#harga_satuan_' + nomor).val(formatNumber((harga - diskon)));
                 $('#harga_total_' + nomor).val(formatNumber(harga_total));
             } else {
                 $('#kode_produk_' + nomor).val('');
@@ -395,7 +396,7 @@
                 multiply(this);
             })
         })
-        $(document).on('input', '#biaya_peniriman', function(){
+        $(document).on('input', '#biaya_pengiriman', function(){
             total_harga();
         })
         $(document).on('input', '[id^=diskon_]', function(){
@@ -416,6 +417,7 @@
             var id = 0
             var jenis = $(element).attr('id')
             var diskon = 0;
+            var new_harga_total = 0;
             if(jenis.split('_').length == 2){
                 id = $(element).attr('id').split('_')[1];
                 var harga_total = $('#produk_' + id).find(':selected').data('harga_total');
@@ -423,8 +425,9 @@
                 jumlah = $('#jumlah_' + id).val() || 0;
                 harga_satuan = cleanNumber($('#harga_satuan_' + id).val());
                 if (harga_satuan) {
-                    harga_total -= diskon * jumlah
-                    $('#harga_total_'+id).val(formatNumber(harga_total))
+                    new_harga_total = (harga_satuan - diskon) * jumlah
+                    console.log(harga_satuan, diskon, jumlah)
+                    $('#harga_total_'+id).val(formatNumber(new_harga_total))
                 }
             }
 
@@ -440,8 +443,8 @@
         }
         function total_harga() {
             var subtotal = cleanNumber($('#subtotal').val()) || 0;
-            var biaya_peniriman = cleanNumber($('#biaya_peniriman').val()) || 0;
-            var harga_total = parseInt(subtotal) + parseInt(biaya_peniriman);
+            var biaya_pengiriman = cleanNumber($('#biaya_pengiriman').val()) || 0;
+            var harga_total = parseInt(subtotal) + parseInt(biaya_pengiriman);
             $('#total_harga').val(formatNumber(harga_total));
         }
 

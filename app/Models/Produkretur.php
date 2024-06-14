@@ -28,4 +28,8 @@ class Produkretur extends Model
     public function retur (){
         return $this->belongsTo(Returpembelian::class, 'returpembelian_id', 'id');
     }
+    public function produkbeli()
+    {
+        return $this->belongsTo(Produkbeli::class, 'produk_id');
+    }
 }
