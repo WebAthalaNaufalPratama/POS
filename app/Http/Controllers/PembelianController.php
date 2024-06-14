@@ -541,8 +541,6 @@ class PembelianController extends Controller
 
     public function store_retur(Request $request)
     {
-        // dd($request);
-
         $validator = Validator::make($request->all(), [
             'invoicepo_id' => 'required',
             'no_retur' => 'required',
@@ -551,60 +549,87 @@ class PembelianController extends Controller
             'subtotal' => 'required',
             'total_harga' => 'required',
         ]);
-        // dd($validator);
 
         if ($validator->fails()) {
             return redirect()->back()->withInput()->withErrors($validator);
         }
 
         $data = $request->except(['_token', '_method', 'file']);
-        // dd($data);
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bukti_retur_pembelian', $fileName, 'public');
-            // dd($filePath);
             $data['foto'] = $filePath;
         }
 
-        $data['ongkir'] = $data['biaya_peniriman'];
+        $data['ongkir'] = $data['biaya_pengiriman'];
         $data['total'] = $data['total_harga'];
         $jenis = $data['komplain'];
-
+// dd($data);
         $save = ReturPembelian::create($data);
 
         if ($save) {
+            $newSubtotal = 0;
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
                 $produkReturBeli = [
                     'returpembelians_id' => $save->id,
-                    'produk_id' => $data['nama_produk'][$i],
+                    'produkbeli_id' => $data['nama_produk'][$i],
                     'alasan' => $data['alasan'][$i],
                     'jumlah' => $data['jumlah'][$i],
                     'harga' => $data['harga_satuan'][$i],
                     'diskon' => $data['diskon'][$i],
                     'totharga' => $data['harga_total'][$i]
                 ];
-
+                $newSubtotal += $data['harga_total'][$i];
                 $produk_terjual = Produkretur::create($produkReturBeli);
 
-                $diskon = ($produk_terjual->jumlah * $produk_terjual->diskon);
-                // dd($produk_terjual->diskon);
-
+                $diskon = $produk_terjual->jumlah * $produk_terjual->diskon;
+                $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
                 $updateproduk = [
                     'type_komplain' => $jenis,
                     'diskon_retur' => $diskon,  
+                    'jml_diterima' => $getProdukBeli->jml_diterima - $data['jumlah'][$i],
+                    'totalharga' => ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon),
                 ];
+                $newSubtotal += ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
 
                 $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
 
-                if ($update) {
-                    return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
+                if (!$update) {
+                    return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
-
-                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
             }
+
+            if($jenis == 'Retur' || $jenis == 'Diskon'){
+                // update invoice
+                $getInvoice = Invoicepo::find($data['invoicepo_id']);
+                $getInvoice->subtotal = $newSubtotal;
+                $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim;
+                $getInvoice->sisa = $newSubtotal + $getInvoice->biaya_kirim - $getInvoice->dp;
+                $check = $getInvoice->update();
+                if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
+    
+                // create po retur
+                // $getPO = $getInvoice->pembelian ? Pembelian::find($getInvoice->pembelian_id) : Pembelian::find($getInvoice->poinden_id);
+
+                // if ($getPO) {
+                //     $newPO = $getPO->replicate();
+
+                //     $newPO->no_po = $getPO . '/Retur';
+                //     $newPO->tgl_kirim = now();
+                //     $newPO->tgl_dibuat = $data['tgl_retur'];
+                //     $newPO->tgl_dibuat = $data['tgl_retur'];
+                    
+                //     // Simpan salinan PO baru ke database
+                //     $checkPO = $newPO->save();
+
+                //     // Jika ada relasi yang perlu diduplikasi, lakukan hal yang sama untuk relasi tersebut
+                //     // $this->duplicateRelations($getPO, $newPO);
+
+                // }
+            }
+            return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
         }
     }
 
