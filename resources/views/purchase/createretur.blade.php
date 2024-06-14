@@ -210,7 +210,7 @@
                                         <input type="text" id="subtotal" name="subtotal" value="{{ old('subtotal') }}" class="form-control"  required readonly>
                                     </div>
                                 </div>
-                                <div class="form-group row mt-1">
+                                {{-- <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
                                     <div class="col-lg-9">
                                         <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') }}" class="form-control"  required>
@@ -221,7 +221,7 @@
                                     <div class="col-lg-9">
                                         <input type="text" id="total_harga" name="total_harga" value="{{ old('total_harga') }}" class="form-control"  required readonly>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                         <div class="row justify-content-start">
@@ -295,9 +295,10 @@
             displayDskon(false);
             $('[id^=produk], #ongkir_id, #add_tipe, #komplain').select2();
             $('#komplain').trigger('change');
+            var limitRow = {{ count($invoice->pembelian->produkbeli) }};
             var i = 1;
             $('#add').click(function(){
-                if($('[id^=produk_]').length <= 10){
+                if($('[id^=produk_]').length < limitRow){
                     var newRow = '<tr id="row'+i+'">'+
                                     '<td>'+(i + 1)+'</td>'+
                                     '<input type="hidden" name="kode_produk[]" id="kode_produk_'+i+'" class="form-control" required readonly>' +
@@ -345,7 +346,7 @@
                 multiply($('#diskon_0'));
             });
             $('#total_promo, #ppn_persen, #pph_persen').on('input', function(){
-                total_harga();
+                // total_harga();
             })
             $('#addForm').on('submit', function(e) {
                 // Add input number cleaning for specific inputs
@@ -369,12 +370,11 @@
             var kode = $(this).val();
             if(kode){
                 var jumlah = $(this).find(':selected').data('jumlah');
-                var diskon = $(this).find(':selected').data('diskon');
                 var harga = $(this).find(':selected').data('harga');
                 var harga_total = $(this).find(':selected').data('harga_total');
                 $('#kode_produk_' + nomor).val(kode);
                 $('#jumlah_' + nomor).val(jumlah);
-                $('#harga_satuan_' + nomor).val(formatNumber((harga - diskon)));
+                $('#harga_satuan_' + nomor).val(formatNumber(harga));
                 $('#harga_total_' + nomor).val(formatNumber(harga_total));
             } else {
                 $('#kode_produk_' + nomor).val('');
@@ -397,7 +397,7 @@
             })
         })
         $(document).on('input', '#biaya_pengiriman', function(){
-            total_harga();
+            // total_harga();
         })
         $(document).on('input', '[id^=diskon_]', function(){
             multiply(this);
@@ -426,7 +426,6 @@
                 harga_satuan = cleanNumber($('#harga_satuan_' + id).val());
                 if (harga_satuan) {
                     new_harga_total = (harga_satuan - diskon) * jumlah
-                    console.log(harga_satuan, diskon, jumlah)
                     $('#harga_total_'+id).val(formatNumber(new_harga_total))
                 }
             }
@@ -439,7 +438,7 @@
                 total += parseInt(cleanNumber($(this).val())) || 0;
             });
             $('#subtotal').val(formatNumber(total))
-            total_harga();
+            // total_harga();
         }
         function total_harga() {
             var subtotal = cleanNumber($('#subtotal').val()) || 0;
@@ -490,10 +489,20 @@
 
             if (produk) {
                 if (jumlah > produk.jumlah) {
-                    alert('jumlah tidak boleh lebih dari jumlah diterima');
+                    toastr.warning('jumlah tidak boleh lebih dari jumlah diterima', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
                     $(this).val(produk.jumlah);
                 } else if (jumlah < 0) {
-                    alert('jumlah tidak boleh kurang dari 0');
+                    toastr.warning('jumlah tidak boleh kurang dari 0', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
                     $(this).val(0);
                 }
             } else {

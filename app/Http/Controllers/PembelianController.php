@@ -574,14 +574,14 @@ class PembelianController extends Controller
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
                 $produkReturBeli = [
                     'returpembelians_id' => $save->id,
-                    'produk_id' => $data['nama_produk'][$i],
+                    'produkbeli_id' => $data['nama_produk'][$i],
                     'alasan' => $data['alasan'][$i],
                     'jumlah' => $data['jumlah'][$i],
                     'harga' => $data['harga_satuan'][$i],
                     'diskon' => $data['diskon'][$i],
                     'totharga' => $data['harga_total'][$i]
                 ];
-
+                $newSubtotal += $data['harga_total'][$i];
                 $produk_terjual = Produkretur::create($produkReturBeli);
 
                 $diskon = $produk_terjual->jumlah * $produk_terjual->diskon;
@@ -601,7 +601,7 @@ class PembelianController extends Controller
                 }
             }
 
-            if($jenis == 'Retur'){
+            if($jenis == 'Retur' || $jenis == 'Diskon'){
                 // update invoice
                 $getInvoice = Invoicepo::find($data['invoicepo_id']);
                 $getInvoice->subtotal = $newSubtotal;
