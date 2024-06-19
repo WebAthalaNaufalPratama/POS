@@ -160,7 +160,7 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        <th>Aksi</th>
+                                                        {{-- <th>Aksi</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -198,7 +198,7 @@ Carbon::setLocale('id');
                                             
                                                     </td>
                                                         <td>{{ $bayar->status_bayar}}</td>
-                                                        <td></td>
+                                                        {{-- <td></td> --}}
                                                        
                                                     </tr>
                                                     @endforeach
@@ -265,8 +265,8 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
-                                                    <h4>Diskon</h4>
+                                                {{-- <li>
+                                                    <h4>Total Diskon</h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
@@ -274,7 +274,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                   
-                                                </li>
+                                                </li> --}}
                                                 <li>
                                                     <h4>PPN</h4>
                                                     <h5 class="col-lg-5">

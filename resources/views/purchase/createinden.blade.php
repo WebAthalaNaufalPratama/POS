@@ -102,7 +102,7 @@
                                                         </select>
                                                     </td>
                                                     <td><input type="text" name="kode[]" id="kode_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                                                    <td><input type="number" name="qty[]" id="qty_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
+                                                    <td><input type="number" name="qty[]" id="qty_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" required></td>
                                                     <td><input type="text" name="ket[]" id="ket_0" class="form-control"></td>
                                                     <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                     <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>

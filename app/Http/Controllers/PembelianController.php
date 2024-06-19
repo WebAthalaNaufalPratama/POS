@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\InventoryGallery;
 use App\Models\InventoryGreenHouse;
 use App\Models\InventoryInden;
@@ -235,7 +234,8 @@ class PembelianController extends Controller
             $invoice_bayar = 0;
         }
         $bankpens = Rekening::get();
-        return view('purchase.invoice', compact('invoices','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd', 'bankpens', 'invoice_bayar'));
+        $dataretur = Returpembelian::get();
+        return view('purchase.invoice', compact('invoices','dataretur','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd', 'bankpens', 'invoice_bayar'));
 
     }
 
@@ -480,13 +480,13 @@ class PembelianController extends Controller
             return redirect()->back()->withInput()->with('fail', $errors);
         }
     
-        // $existingProduct = InventoryInden::where('supplier_id', $request->id_supplier)
-        // ->where('bulan_inden', $request->bulan_inden)
-        // ->first();
+        $existingProduct = ModelsPoinden::where('supplier_id', $request->id_supplier)
+        ->where('bulan_inden', $request->bulan_inden)
+        ->first();
 
-        // if ($existingProduct) {
-        // return redirect()->back()->withInput()->with('fail', 'Data dengan supplier dan bulan inden yang sama sudah ada.');
-        // }
+        if ($existingProduct) {
+        return redirect()->back()->withInput()->with('fail', 'Data sudah ada.');
+        }
 
         // Simpan data pembelian
         $pembelian = new ModelsPoinden();
@@ -573,7 +573,7 @@ class PembelianController extends Controller
             $newSubtotal = 0;
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
                 $produkReturBeli = [
-                    'returpembelians_id' => $save->id,
+                    'returpembelian_id' => $save->id,
                     'produkbeli_id' => $data['nama_produk'][$i],
                     'alasan' => $data['alasan'][$i],
                     'jumlah' => $data['jumlah'][$i],
@@ -954,6 +954,17 @@ class PembelianController extends Controller
 
         if ($type === 'pembelian') {
             $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
+            $diskonTot = Produkbeli::where('pembelian_id', $datapo)->get();
+            // return $diskonTot;
+
+            $totalDiskon = 0;
+
+            foreach ($diskonTot as $item) {
+                $totalDiskon += $item->jml_diterima * $item->diskon;
+            }
+
+            $totalDis = formatRupiah2($totalDiskon);
+
             $id_po = $inv_po->pembelian_id;
             $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
             $produkbelis = Produkbeli::where('pembelian_id', $id_po)->get();
@@ -998,10 +1009,21 @@ class PembelianController extends Controller
             // dd($riwayat);
                 
 
-            return view('purchase.editinv', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.editinv', compact('riwayat','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } elseif ($type === 'poinden') {
             $inv_po = Invoicepo::where('poinden_id', $datapo)->first();
+            $diskonTot = Produkbeli::where('poinden_id', $datapo)->get();
+            // return $diskonTot;
+
+            $totalDiskon = 0;
+
+            foreach ($diskonTot as $item) {
+                $totalDiskon += $item->jumlahInden * $item->diskon;
+            }
+
+            $totalDis = formatRupiah2($totalDiskon);
+
             // return $inv_po;
             $id_po = $inv_po->poinden_id;
             $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
@@ -1042,7 +1064,7 @@ class PembelianController extends Controller
                 ->values()
                 ->all();
 
-            return view('purchase.editinvinden', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.editinvinden', compact('riwayat','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } else {
             return redirect()->back()->withErrors('Tipe tidak valid.');
@@ -1414,6 +1436,15 @@ class PembelianController extends Controller
         }
 
     }
+
+    public function show_retur ($retur_id, Request $request)
+    {
+    }
+
+    public function show_returinv ($retur_id, Request $request)
+    {
+    }
+
 
    
 

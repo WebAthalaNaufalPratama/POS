@@ -39,7 +39,8 @@ class Returpembelian extends Model
         return $this->belongsTo(Invoicepo::class, 'invoicepo_id', 'id');
     }
     public function produkretur (){
-        return $this->hasMany(Produkretur::class);
+        return $this->hasMany(Produkretur::class, 'returpembelian_id', 'id');
     }
+    
    
 }

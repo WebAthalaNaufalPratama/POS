@@ -295,6 +295,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
 
+             Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_retur')->name('returbeli.show');
+             Route::get('/returinv/{retur_id}/show', 'PembelianController@show_returinv')->name('returinvoice.show');
+
         });
 
         Route::group(['prefix' => 'kontrak'], function() {

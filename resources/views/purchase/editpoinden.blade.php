@@ -159,7 +159,7 @@
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="pending">Pending</option>
-                                                    <option value="acc">Accept</option>
+                                                    <option value="acc" selected>Accept</option>
                                                 </select>
                                             </td>
                                         </tr>
@@ -168,7 +168,7 @@
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" disabled>
                                             </td>
                                             <td id="tgl_pemeriksa">
-                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" required>
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ now() }}" required>
                                             </td>
                                         </tr>
                                     </tbody>
