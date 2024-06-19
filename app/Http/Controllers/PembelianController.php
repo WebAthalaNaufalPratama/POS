@@ -1083,6 +1083,17 @@ class PembelianController extends Controller
 
         if ($type === 'pembelian') {
             $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
+            $diskonTot = Produkbeli::where('pembelian_id', $datapo)->get();
+            // return $diskonTot;
+
+            $totalDiskon = 0;
+
+            foreach ($diskonTot as $item) {
+                $totalDiskon += $item->jml_diterima * $item->diskon;
+            }
+
+            $totalDis = formatRupiah2($totalDiskon);
+
             $id_po = $inv_po->pembelian_id;
             $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
             $produkbelis = Produkbeli::where('pembelian_id', $id_po)->get();
@@ -1124,10 +1135,21 @@ class PembelianController extends Controller
                 ->all();
                 
 
-            return view('purchase.showinv', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.showinv', compact('riwayat','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } elseif ($type === 'poinden') {
             $inv_po = Invoicepo::where('poinden_id', $datapo)->first();
+            $diskonTot = Produkbeli::where('poinden_id', $datapo)->get();
+            // return $diskonTot;
+
+            $totalDiskon = 0;
+
+            foreach ($diskonTot as $item) {
+                $totalDiskon += $item->jumlahInden * $item->diskon;
+            }
+
+            $totalDis = formatRupiah2($totalDiskon);
+
             // return $inv_po;
             $id_po = $inv_po->poinden_id;
             $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
@@ -1170,7 +1192,7 @@ class PembelianController extends Controller
                 ->values()
                 ->all();
 
-            return view('purchase.showinvinden', compact('riwayat','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.showinvinden', compact('riwayat','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } else {
             return redirect()->back()->withErrors('Tipe tidak valid.');
