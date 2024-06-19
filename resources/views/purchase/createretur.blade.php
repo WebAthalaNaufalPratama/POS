@@ -370,11 +370,12 @@
             var kode = $(this).val();
             if(kode){
                 var jumlah = $(this).find(':selected').data('jumlah');
+                var diskon = $(this).find(':selected').data('diskon');
                 var harga = $(this).find(':selected').data('harga');
                 var harga_total = $(this).find(':selected').data('harga_total');
                 $('#kode_produk_' + nomor).val(kode);
                 $('#jumlah_' + nomor).val(jumlah);
-                $('#harga_satuan_' + nomor).val(formatNumber(harga));
+                $('#harga_satuan_' + nomor).val(formatNumber((harga - diskon)));
                 $('#harga_total_' + nomor).val(formatNumber(harga_total));
             } else {
                 $('#kode_produk_' + nomor).val('');

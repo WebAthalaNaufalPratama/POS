@@ -547,12 +547,11 @@ class PembelianController extends Controller
             'tgl_retur' => 'required',
             'komplain' => 'required',
             'subtotal' => 'required',
-            'total_harga' => 'required',
+            // 'total_harga' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withInput()->withErrors($validator);
-        }
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
 
         $data = $request->except(['_token', '_method', 'file']);
 
@@ -563,10 +562,10 @@ class PembelianController extends Controller
             $data['foto'] = $filePath;
         }
 
-        $data['ongkir'] = $data['biaya_pengiriman'];
-        $data['total'] = $data['total_harga'];
+        $data['ongkir'] = 0;
+        $data['total'] = 0;
         $jenis = $data['komplain'];
-// dd($data);
+
         $save = ReturPembelian::create($data);
 
         if ($save) {
@@ -751,11 +750,14 @@ class PembelianController extends Controller
             $beli = Pembelian::find($datapo);
             if ($beli) {
                 $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
+                $produkkomplains = Produkretur::whereHas('produk', function($q) use($datapo){
+                    $q->where('pembelian_id', $datapo);
+                })->get();
                 $rekenings = Rekening::all();
                 $no_invpo = $this->generatebayarPONumber();
                 // $nomor_inv = $this->generateINVPONumber();
 
-                return view('purchase.createinv', compact('beli', 'produkbelis', 'rekenings', 'no_invpo'));
+                return view('purchase.createinv', compact('beli', 'produkbelis', 'rekenings', 'no_invpo', 'produkkomplains'));
             }
         } elseif ($type === 'poinden') {
             // Jika type adalah poinden (Inden Order)
@@ -1096,8 +1098,9 @@ class PembelianController extends Controller
 
             $id_po = $inv_po->pembelian_id;
             $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
-            $produkbelis = Produkbeli::where('pembelian_id', $id_po)->get();
+            $produkbelis = Produkbeli::with('produkretur')->where('pembelian_id', $id_po)->get();
             $beli = Pembelian::find($id_po);
+            
 
             $pembuat = Karyawan::where('user_id', $inv_po->pembuat)->first()->nama;
             $pembuatjbt = Karyawan::where('user_id', $inv_po->pembuat)->first()->jabatan;
