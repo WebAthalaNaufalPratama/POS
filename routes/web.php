@@ -60,6 +60,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'dashboard'], function() {
             Route::get('/', 'DashboardController@index')->name('dashboard.index');
+            Route::post('/postauditor', 'DashboardController@update_auditor')->name('auditor.update');
         });
 
         /**

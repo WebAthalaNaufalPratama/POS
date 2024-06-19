@@ -921,6 +921,7 @@ class PembelianController extends Controller
 
         if ($type === 'pembelian') {
             $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
+            // dd($inv_po);
             $id_po = $inv_po->pembelian_id;
             $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
             $produkbelis = Produkbeli::where('pembelian_id', $id_po)->get();
@@ -936,9 +937,10 @@ class PembelianController extends Controller
 
             //riwayat
 
-            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $datapo)->orderBy('id', 'desc')->get();
+            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $inv_po->id)->orderBy('id', 'desc')->get();
             $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
-            $produkIds = $inv_po->pluck('id')->toArray();
+            $produkIds = [$inv_po->id];
+            // dd($produkIds);
             $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
                 $properties = json_decode($activity->properties, true);
                 return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
@@ -965,6 +967,7 @@ class PembelianController extends Controller
 
         } elseif ($type === 'poinden') {
             $inv_po = Invoicepo::where('poinden_id', $datapo)->first();
+            // dd($inv_po);
             // return $inv_po;
             $id_po = $inv_po->poinden_id;
             $databayars = Pembayaran::where('invoice_purchase_id', $inv_po->id)->get()->sortByDesc('created_at');
@@ -980,10 +983,12 @@ class PembelianController extends Controller
             $nomor_inv = $this->generateINVPONumber();
 
             //riwayat
+            // dd($inv_po->id);
 
-            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $datapo)->orderBy('id', 'desc')->get();
+            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $inv_po->id)->orderBy('id', 'desc')->get();
             $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
-            $produkIds = $inv_po->pluck('id')->toArray();
+            $produkIds = [$inv_po->id];
+            // dd($produkIds);
             $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
                 $properties = json_decode($activity->properties, true);
                 return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
@@ -1036,9 +1041,10 @@ class PembelianController extends Controller
 
             //riwayat
 
-            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $datapo)->orderBy('id', 'desc')->get();
+            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $inv_po->id)->orderBy('id', 'desc')->get();
             $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
-            $produkIds = $inv_po->pluck('id')->toArray();
+            $produkIds = [$inv_po->id];
+            // dd($produkIds);
             $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
                 $properties = json_decode($activity->properties, true);
                 return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);
@@ -1080,10 +1086,12 @@ class PembelianController extends Controller
             $nomor_inv = $this->generateINVPONumber();
 
             //riwayat
+            // dd($inv_po->id);
 
-            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $datapo)->orderBy('id', 'desc')->get();
+            $riwayatPembelian = Activity::where('subject_type', Invoicepo::class)->where('subject_id', $inv_po->id)->orderBy('id', 'desc')->get();
             $riwayatPembayaran = Activity::where('subject_type', Pembayaran::class)->orderBy('id', 'desc')->get();
-            $produkIds = $inv_po->pluck('id')->toArray();
+            $produkIds = [$inv_po->id];
+            // dd($produkIds);
             $filteredRiwayat = $riwayatPembayaran->filter(function (Activity $activity) use ($produkIds) {
                 $properties = json_decode($activity->properties, true);
                 return isset($properties['attributes']['invoice_purchase_id']) && in_array($properties['attributes']['invoice_purchase_id'], $produkIds);

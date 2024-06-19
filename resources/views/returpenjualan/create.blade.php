@@ -1021,16 +1021,17 @@
             var index = hasilInput.attr('id').split('_')[1]; 
             var jenisInput = $('#jenis_diskon_' + index); 
             var selectedValue = jenisInput.val(); 
+            var jumlah = $('#jumlah_' + index).val();
 
             var hargaTotal = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0; 
             if (selectedValue === "Nominal") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; // Mengambil nilai diskon berdasarkan index
-                hargaTotal -= diskonValue; 
+                var diskonValue = parseFloat(hasilInput.val()) || 0; 
+                hargaTotal -= diskonValue * jumlah; 
                 $(this).val(formatRupiah(diskonValue));
             } else if (selectedValue === "persen") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; // Mengambil nilai diskon berdasarkan index
-                var diskonAmount = (hargaTotal * diskonValue) / 100; // Hitung jumlah diskon berdasarkan persen
-                hargaTotal -= diskonAmount; // Kurangi harga total dengan jumlah diskon
+                var diskonValue = parseFloat(hasilInput.val()) || 0; 
+                var diskonAmount = (hargaTotal * diskonValue) / 100; 
+                hargaTotal -= diskonAmount * jumlah; 
             }
 
             $('#totalharga_' + index).val(formatRupiah(hargaTotal, 'Rp '));

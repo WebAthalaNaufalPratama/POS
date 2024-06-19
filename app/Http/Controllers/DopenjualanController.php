@@ -33,12 +33,31 @@ class DopenjualanController extends Controller
 {
     public function index(Request $req)
     {
-        $user = Auth::user()->first();
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
+        $userroles = Auth::user()->roles()->value('name');
+        // dd($user);
+        if($lokasi->lokasi->tipe_lokasi == 2){
+            $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
+            dd($penjualan);
+            $allDeliveryOrders = [];
+            foreach($penjualan as $jual){
+                $query = DeliveryOrder::where('no_referensi', $jual->no_invoice)->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
+            }
+        }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
+            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('lokasi_id', $lokasi->lokasi_id)->get();
+            $penjualanIds = $lokasi->pluck('id')->toArray();
+            // $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BYR%');
+        }else{
+            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
+        }
+
+        $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         if($lokasi->lokasi->tipe_lokasi == 2){
             $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
             $lokasiIds = $lokasi->pluck('id')->toArray();
-            $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
+            $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where()->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
         }elseif($lokasi->lokasi->tipe_lokasi == 1){
             $lokasi = Lokasi::where('tipe_lokasi', 1)->get();
             $lokasiIds = $lokasi->pluck('id')->toArray();
