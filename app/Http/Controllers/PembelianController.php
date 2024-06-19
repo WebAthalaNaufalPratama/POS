@@ -653,7 +653,6 @@ class PembelianController extends Controller
         $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama;
         $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan;
         $produkbelis = Produkbeli::with('produkretur')->where('pembelian_id', $datapo)->get();
-        
         return view('purchase.showpo',compact('beli','produkbelis','pembuat','penerima','pemeriksa','pembuatjbt','penerimajbt','pemeriksajbt'));
         }elseif ($type === 'poinden') {
             $beli = ModelsPoinden::find($datapo);
