@@ -272,7 +272,7 @@
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
+                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="{{ $no_invpo }}" required readonly>
                             <input type="hidden" id="invoice_purchase_id" name="invoice_purchase_id" value="">
                         </div>
                     </div>
@@ -524,17 +524,7 @@
         $('#modalBayar').modal('show');
         generateInvoice();
     }
-    function generateInvoice() {
-        var invoicePrefix = "BYPO_";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
-        var generatedInvoice = invoicePrefix + year + month + day + '_' + formattedNextInvoiceNumber;
-        $('#no_invoice_bayar').val(generatedInvoice);
-    }
     function deleteData(id) {
         $.ajax({
             type: "GET",
