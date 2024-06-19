@@ -42,7 +42,20 @@ class ReturpenjualanController extends Controller
         //     dd('berhasil');
         // }
         // dd($rolePermissions);
-        $query = ReturPenjualan::orderBy('created_at', 'desc');
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
+        if($lokasi->lokasi->tipe_lokasi == 2){
+            $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
+            $lokasiIds = $lokasi->pluck('id')->toArray();
+            $query = ReturPenjualan::where('no_do', 'LIKE', 'RTO%')->orderBy('created_at', 'desc');
+        }elseif($lokasi->lokasi->tipe_lokasi == 1){
+            $lokasi = Lokasi::where('tipe_lokasi', 1)->get();
+            $lokasiIds = $lokasi->pluck('id')->toArray();
+            $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
+        }else{
+            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
+        }
+        
 
         if ($req->customer) {
             $query->where('customer_id', $req->input('customer'));
