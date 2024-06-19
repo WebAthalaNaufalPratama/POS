@@ -101,9 +101,13 @@
                                                 $invoiceExists = $datainv->contains('pembelian_id', $datapo->id);
                                             @endphp
                                 
-                                            @if ($invoiceExists)
+                                            @if ($invoiceExists && $datapo->invoice->sisa != 0)
                                                 <a href="{{ route('invoice.edit',['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
+                                                </a>
+                                            @elseif($invoiceExists && $datapo->invoice->sisa == 0)
+                                                <a href="{{ route('invoice.show',['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
                                                 </a>
                                             @else
                                             <a href="{{ route('invoicebiasa.create', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
@@ -213,9 +217,13 @@
                                                 $invoiceExists = $datainv->contains('poinden_id', $inden->id);
                                             @endphp
                                 
-                                            @if ($invoiceExists)
+                                            @if ($invoiceExists && $inden->invoice->sisa != 0)
                                                 <a href="{{ route('invoice.edit',['datapo' => $inden->id, 'type' => 'poinden']) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
+                                                </a>
+                                            @elseif($invoiceExists && $inden->invoice->sisa == 0)
+                                                <a href="{{ route('invoice.show',['datapo' => $inden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
                                                 </a>
                                             @else
                                             <a href="{{ route('invoicebiasa.create', ['type' => 'poinden', 'datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice

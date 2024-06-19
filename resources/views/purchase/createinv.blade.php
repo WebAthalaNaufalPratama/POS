@@ -103,6 +103,7 @@ Carbon::setLocale('id');
                                                     <th>QTY</th>
                                                     <th>Harga</th>
                                                     <th>Diskon</th>
+                                                    <th>Diskon Total</th>
                                                     <th>Total Harga</th>
                                                     <th></th>
                                                 </tr>
@@ -130,6 +131,14 @@ Carbon::setLocale('id');
                                                                 <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon_display.'.$index) }}">
                                                                 <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon.'.$index) }}">
                                                             </div>
+                                                    </td>
+                                                    <td>
+                                                        
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
+                                                            <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         
@@ -467,15 +476,19 @@ function calculateTotal(index) {
     var qtytrm = parseFloat(document.getElementById('qtytrm_' + index).value) || 0;
     var harga = parseFloat(unformatRupiah(document.getElementById('harga_' + index).value)) || 0;
     var diskon = parseFloat(unformatRupiah(document.getElementById('diskon_' + index).value)) || 0;
-    var hargasungguh = qtytrm * harga;
-    var jumlah = (qtytrm * harga) - diskon;
+    // var hargasungguh = qtytrm * harga;
+    var distot = (qtytrm * diskon); 
+    var jumlah = (qtytrm * harga) - distot;
 
-    if (diskon > hargasungguh) {
-        jumlah = -Math.abs(jumlah);
+    if (diskon > harga) {
+        alert('Harga diskon tidak boleh melebihi harga');
     }
 
     document.getElementById('jumlahint_' + index).value = jumlah;
     document.getElementById('jumlah_' + index).value = formatRupiah(jumlah.toString());
+    document.getElementById('distot_int_' + index).value = distot;
+    document.getElementById('distot_' + index).value = formatRupiah(distot.toString());
+
 
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
 }

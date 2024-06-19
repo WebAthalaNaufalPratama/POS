@@ -100,7 +100,7 @@ Carbon::setLocale('id');
                                                     <th>Nama Produk</th>
                                                     <th>QTY</th>
                                                     <th>Harga</th>
-                                                    <th>Diskon</th>
+                                                    <th>Diskon/item</th>
                                                     <th>Total Harga</th>
                                                     <th></th>
                                                 </tr>

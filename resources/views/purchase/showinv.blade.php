@@ -100,7 +100,7 @@ Carbon::setLocale('id');
                                                     <th>Nama Produk</th>
                                                     <th>QTY</th>
                                                     <th>Harga</th>
-                                                    <th>Diskon</th>
+                                                    <th>Diskon/item</th>
                                                     <th>Total Harga</th>
                                                     <th></th>
                                                 </tr>
@@ -146,6 +146,7 @@ Carbon::setLocale('id');
                                         {{-- <div class="page-btn">
                                             <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
                                         </div> --}}
+                                        Riwayat Pembayaran
                                         <div class="table-responsive">
                                             <table class="table datanew">
                                                 <thead>

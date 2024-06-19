@@ -140,7 +140,7 @@
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="draft">Draft</option>
-                                                    <option value="publish">Publish</option>
+                                                    <option value="publish" selected>Publish</option>
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
@@ -153,7 +153,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="" >
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" >
                                             </td>
                                             <td id="tgl_pemeriksa">
                                                 <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
@@ -174,9 +174,6 @@
     </div>
 </div>
 </div>
-
-
-
 </div>
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

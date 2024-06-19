@@ -23,7 +23,7 @@ class Produkretur extends Model
       
     ];
     public function produk (){
-        return $this->belongsTo(Produk::class, 'produk_id', 'id');
+        return $this->belongsTo(Produkbeli::class, 'produkbeli_id', 'id');
     }
     public function retur (){
         return $this->belongsTo(Returpembelian::class, 'returpembelian_id', 'id');

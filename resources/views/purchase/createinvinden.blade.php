@@ -107,6 +107,7 @@ Carbon::setLocale('id');
                                                     <th>Jumlah</th>
                                                     <th>Harga</th>
                                                     <th>Diskon</th>
+                                                    <th>Diskon Total</th>
                                                     <th>Total Harga</th>
                                                     <th></th>
                                                 </tr>
@@ -137,6 +138,13 @@ Carbon::setLocale('id');
                                                                 <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon_display.'.$index) }}">
                                                                 <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon.'.$index) }}">
                                                             </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
+                                                            <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         
@@ -222,7 +230,7 @@ Carbon::setLocale('id');
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
                                                             <option value=""> Pilih Jenis PPN</option>
                                                             <option value="exclude">EXCLUDE</option>
-                                                            <option value="include">INCLUDE</option>
+                                                            <option value="include" selected>INCLUDE</option>
                                                         </select>
                                                     </h4>
                                                     <h5 class="col-lg-5">
@@ -302,23 +310,23 @@ Carbon::setLocale('id');
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                            <option value="publish" {{ old('status_dibuat') == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                            <option value="publish" {{ (old('status_dibuat') == 'publish') || (old('status_dibuat') == null) ? 'selected' : '' }}>Publish</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" required>
+                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
+                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
                                                         </select>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
-                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ old('tgl_dibuat', now()->format('Y-m-d')) }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="" disabled>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -474,15 +482,20 @@ function calculateTotal(index) {
     var qtytrm = parseFloat(document.getElementById('qtytrm_' + index).value) || 0;
     var harga = parseFloat(unformatRupiah(document.getElementById('harga_' + index).value)) || 0;
     var diskon = parseFloat(unformatRupiah(document.getElementById('diskon_' + index).value)) || 0;
-    var hargasungguh = qtytrm * harga;
-    var jumlah = (qtytrm * harga) - diskon;
+   
+    var distot = (qtytrm * diskon); 
+    var jumlah = (qtytrm * harga) - distot;
 
-    if (diskon > hargasungguh) {
-        jumlah = -Math.abs(jumlah);
+    if (diskon > harga) {
+        alert('Harga diskon tidak boleh melebihi harga');
     }
 
     document.getElementById('jumlahint_' + index).value = jumlah;
     document.getElementById('jumlah_' + index).value = formatRupiah(jumlah.toString());
+    document.getElementById('distot_int_' + index).value = distot;
+    document.getElementById('distot_' + index).value = formatRupiah(distot.toString());
+
+
 
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
 }

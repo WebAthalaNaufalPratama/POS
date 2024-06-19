@@ -100,7 +100,7 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
+                                            <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
                                         </li>
                                         <li>
                                             <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
@@ -453,11 +453,20 @@
             $('#bukti').attr('required', false);
         }
     });
+
+    function formatRupiah(value) {
+    // Ensure the value is a number
+    var number = parseFloat(value);
+
+    // Format the number with thousand separators and add the Rp prefix
+    return 'Rp ' + number.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+    }
+
     function bayar(invoice){
         $('#no_po').val(invoice.pembelian.no_po);
         $('#invoice_purchase_id').val(invoice.id);
-        $('#total_tagihan').val(invoice.total_tagihan);
-        $('#sisa_tagihan').val(invoice.sisa);
+        $('#total_tagihan').val(formatRupiah(invoice.total_tagihan));
+        $('#sisa_tagihan').val(formatRupiah(invoice.sisa));
         $('#nominal').val(invoice.sisa);
         $('#rekening_id').select2({
             dropdownParent: $("#modalBayar")
@@ -484,14 +493,14 @@
         generateInvoice();
     }
     function generateInvoice() {
-        var invoicePrefix = "BYR";
+        var invoicePrefix = "BYPO_";
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
         var day = currentDate.getDate().toString().padStart(2, '0');
         var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+        var generatedInvoice = invoicePrefix + year + month + day + '_' + formattedNextInvoiceNumber;
         $('#no_invoice_bayar').val(generatedInvoice);
     }
     function deleteData(id) {

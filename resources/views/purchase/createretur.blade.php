@@ -40,12 +40,12 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal PO</label>
-                                                <input type="date" id="tanggal_po" name="tanggal_po" value="{{ old('tanggal_po') ?? \Carbon\Carbon::parse($invoice->pembelian->tgl_dibuat)->format('Y-m-d') }}" 
+                                                <input type="text" id="tanggal_po" name="tanggal_po" value="{{ old('tanggal_po') ?? tanggalindo($invoice->pembelian->tgl_dibuat) }}" 
                                                     class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Invoice</label>
-                                                <input type="date" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? $invoice->tgl_inv }}" class="form-control" required readonly>
+                                                <input type="text" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? tanggalindo($invoice->tgl_inv) }}" class="form-control" required readonly>
                                             </div>
                                             <input type="hidden" name="invoicepo_id" value="{{ $invoice->id }}">
                                             <div class="form-group">
@@ -68,7 +68,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No PO</label>
-                                                <input type="text" id="no_po" name="no_po" value="{{ $nomor_poinden }}" class="form-control" required readonly>
+                                                <input type="text" id="no_po" name="no_po" value="{{ $invoice->pembelian->no_po }}" class="form-control" required readonly>
                                             </div>
                                             <!-- <div class="form-group">
                                                 <label>No PO Retur</label>
@@ -102,12 +102,12 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Kode Produk</th>
+                                        {{-- <th>Kode Produk</th> --}}
                                         <th>Nama Produk</th>
                                         <th>Alasan</th>
                                         <th>Jumlah</th>
                                         <th id="thDiskon">Diskon</th>
-                                        <th>Harga</th>
+                                        <th>Harga satuan</th>
                                         <th>Harga Total</th>
                                         <th></th>
                                     </tr>
@@ -115,12 +115,12 @@
                                 <tbody id="dynamic_field">
                                     <tr>
                                         <td>1</td>
-                                        <td><input type="text" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly></td>
+                                        <input type="hidden" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly>
                                         <td>
                                             <select id="produk_0" name="nama_produk[]" class="form-control" required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($invoice->pembelian->produkbeli as $produk)
-                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>
+                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -210,10 +210,10 @@
                                         <input type="text" id="subtotal" name="subtotal" value="{{ old('subtotal') }}" class="form-control"  required readonly>
                                     </div>
                                 </div>
-                                <div class="form-group row mt-1">
+                                {{-- <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="biaya_peniriman" name="biaya_peniriman" value="{{ old('biaya_peniriman') }}" class="form-control"  required>
+                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') }}" class="form-control"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -221,7 +221,7 @@
                                     <div class="col-lg-9">
                                         <input type="text" id="total_harga" name="total_harga" value="{{ old('total_harga') }}" class="form-control"  required readonly>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                         <div class="row justify-content-start">
@@ -250,14 +250,14 @@
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                             <option value="">Pilih Status</option>
                                                             <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                            <option value="publish" {{ old('status_dibuat') == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                            <option value="publish" {{ (old('status_dibuat') == 'publish') || (old('status_dibuat') == null )  ? 'selected' : '' }}>Publish</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibuku" class="form-control">
                                                             <option value="">Pilih Status</option>
                                                             <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                            <option value="acc" {{ (old('status_dibukukan') == 'acc') || (old('status_dibukukan') == null) ? 'selected' : '' }}>Accept</option>
                                                         </select>
                                                     </td>
                                                 </tr>
@@ -266,7 +266,7 @@
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ old('tgl_dibuat', now()->format('Y-m-d')) }}" >
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{ old('tgl_dibuku', now()->format('Y-m-d')) }}" >
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -278,7 +278,7 @@
                 </div>
                 <div class="text-end mt-3">
                     <button class="btn btn-primary" type="submit">Submit</button>
-                    <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
+                    <a href="{{ route('returbeli.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
                 </form>
             </div>
@@ -295,17 +295,18 @@
             displayDskon(false);
             $('[id^=produk], #ongkir_id, #add_tipe, #komplain').select2();
             $('#komplain').trigger('change');
+            var limitRow = {{ count($invoice->pembelian->produkbeli) }};
             var i = 1;
             $('#add').click(function(){
-                if($('[id^=produk_]').length <= 10){
+                if($('[id^=produk_]').length < limitRow){
                     var newRow = '<tr id="row'+i+'">'+
                                     '<td>'+(i + 1)+'</td>'+
-                                    '<td><input type="text" name="kode_produk[]" id="kode_produk_'+i+'" class="form-control" required readonly></td>' +
+                                    '<input type="hidden" name="kode_produk[]" id="kode_produk_'+i+'" class="form-control" required readonly>' +
                                     '<td>' + 
                                         '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                             '<option value="">Pilih Produk</option>'+
                                                 '@foreach ($invoice->pembelian->produkbeli as $produk)' +
-                                                    '<option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>' +
+                                                    '<option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>' +
                                                 '@endforeach' +
                                         '</select>'+
                                     '</td>'+
@@ -326,7 +327,7 @@
                         }
                 }
             })
-            $(document).on('input', '[id^=biaya_peniriman], [id^=diskon_]', function() {
+            $(document).on('input', '[id^=biaya_pengiriman], [id^=diskon_]', function() {
                 let input = $(this);
                 let value = input.val();
                 
@@ -345,11 +346,11 @@
                 multiply($('#diskon_0'));
             });
             $('#total_promo, #ppn_persen, #pph_persen').on('input', function(){
-                total_harga();
+                // total_harga();
             })
             $('#addForm').on('submit', function(e) {
                 // Add input number cleaning for specific inputs
-                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga');
+                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga, #biaya_pengiriman');
                 inputs.each(function() {
                     let input = $(this);
                     let value = input.val();
@@ -395,8 +396,8 @@
                 multiply(this);
             })
         })
-        $(document).on('input', '#biaya_peniriman', function(){
-            total_harga();
+        $(document).on('input', '#biaya_pengiriman', function(){
+            // total_harga();
         })
         $(document).on('input', '[id^=diskon_]', function(){
             multiply(this);
@@ -416,6 +417,7 @@
             var id = 0
             var jenis = $(element).attr('id')
             var diskon = 0;
+            var new_harga_total = 0;
             if(jenis.split('_').length == 2){
                 id = $(element).attr('id').split('_')[1];
                 var harga_total = $('#produk_' + id).find(':selected').data('harga_total');
@@ -423,8 +425,8 @@
                 jumlah = $('#jumlah_' + id).val() || 0;
                 harga_satuan = cleanNumber($('#harga_satuan_' + id).val());
                 if (harga_satuan) {
-                    harga_total -= diskon * jumlah
-                    $('#harga_total_'+id).val(formatNumber(harga_total))
+                    new_harga_total = (harga_satuan - diskon) * jumlah
+                    $('#harga_total_'+id).val(formatNumber(new_harga_total))
                 }
             }
 
@@ -436,12 +438,12 @@
                 total += parseInt(cleanNumber($(this).val())) || 0;
             });
             $('#subtotal').val(formatNumber(total))
-            total_harga();
+            // total_harga();
         }
         function total_harga() {
             var subtotal = cleanNumber($('#subtotal').val()) || 0;
-            var biaya_peniriman = cleanNumber($('#biaya_peniriman').val()) || 0;
-            var harga_total = parseInt(subtotal) + parseInt(biaya_peniriman);
+            var biaya_pengiriman = cleanNumber($('#biaya_pengiriman').val()) || 0;
+            var harga_total = parseInt(subtotal) + parseInt(biaya_pengiriman);
             $('#total_harga').val(formatNumber(harga_total));
         }
 
@@ -487,10 +489,20 @@
 
             if (produk) {
                 if (jumlah > produk.jumlah) {
-                    alert('jumlah tidak boleh lebih dari jumlah diterima');
+                    toastr.warning('jumlah tidak boleh lebih dari jumlah diterima', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
                     $(this).val(produk.jumlah);
                 } else if (jumlah < 0) {
-                    alert('jumlah tidak boleh kurang dari 0');
+                    toastr.warning('jumlah tidak boleh kurang dari 0', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
                     $(this).val(0);
                 }
             } else {
