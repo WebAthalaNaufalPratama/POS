@@ -90,7 +90,7 @@ Carbon::setLocale('id');
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
                                     <div class="mb-4">
-                                        <h5>List Produk</h5>
+                                        <h5>List Produk PO</h5>
                                     </div>
                                     <div class="table-responsive">
                                         <table class="table">
@@ -136,16 +136,86 @@ Carbon::setLocale('id');
                                                         
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
-                                                            <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
+                                                            <input type="text" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly>
+                                                            <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control" value="{{ old('jumlah_display.'.$index) }}" readonly></td>
-                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control" value="{{ old('jumlah.'.$index) }}" readonly></td>
+                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control" value="{{ old('jumlah_display.'.$index) }}" readonly>
+                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control" value="{{ old('jumlah.'.$index) }}" readonly>
+                                                            </div>
+                                                    </td> 
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-around">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                                <div class="form-row row">
+                                    <div class="mb-4">
+                                        <h5>List Produk Retur</h5>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th hidden>id</th>
+                                                    <th>Kode Produk</th>
+                                                    <th>Nama Produk</th>
+                                                    <th>QTY</th>
+                                                    <th>Harga</th>
+                                                    <th>Diskon</th>
+                                                    <th>Diskon Total</th>
+                                                    <th>Total Harga</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dynamic_field">
+                                                @foreach ($produkkomplains as $index => $item)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td hidden><input type="text" name="id[]" id="id{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
+                                                    <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
+                                                    <td><input type="text" name="nama[]" id="nama_{{ $index }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima }}" readonly></td>
+                                                    <td>
+                                                      
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span> 
+                                                                <input type="text" name="harga_display[]" id="harga2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('harga_display.'.$index) }}" required>
+                                                                <input type="hidden" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('harga.'.$index) }}" required>
+                                                            </div>
+                                                    </td>
+                                                    <td>
+                                                       
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span> 
+                                                                <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon_display.'.$index) }}">
+                                                                <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon.'.$index) }}">
+                                                            </div>
+                                                    </td>
+                                                    <td>
+                                                        
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly>
+                                                            <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span> 
+                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control" value="{{ old('jumlah_display.'.$index) }}" readonly>
+                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control" value="{{ old('jumlah.'.$index) }}" readonly>
                                                             </div>
                                                     </td> 
                                                 </tr>
