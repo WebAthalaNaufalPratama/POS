@@ -562,8 +562,8 @@ class PembelianController extends Controller
             $data['foto'] = $filePath;
         }
 
-        $data['ongkir'] = 0;
-        $data['total'] = 0;
+        $data['ongkir'] = $request->biaya_pengiriman ?? 0;
+        $data['total'] = $request->total_harga;
         $jenis = $data['komplain'];
 
         $save = ReturPembelian::create($data);
@@ -577,22 +577,28 @@ class PembelianController extends Controller
                     'alasan' => $data['alasan'][$i],
                     'jumlah' => $data['jumlah'][$i],
                     'harga' => $data['harga_satuan'][$i],
-                    'diskon' => $data['diskon'][$i],
+                    'diskon' => $data['diskon'][$i] ?? 0,
                     'totharga' => $data['harga_total'][$i]
                 ];
-                $newSubtotal += $data['harga_total'][$i];
                 $produk_terjual = Produkretur::create($produkReturBeli);
-
-                $diskon = $produk_terjual->jumlah * $produk_terjual->diskon;
                 $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
-                $updateproduk = [
-                    'type_komplain' => $jenis,
-                    'diskon_retur' => $diskon,  
-                    'jml_diterima' => $getProdukBeli->jml_diterima - $data['jumlah'][$i],
-                    'totalharga' => ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon),
-                ];
-                $newSubtotal += ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
+                if($jenis == 'Retur'){
+                    $getInven = InventoryGallery::where('kode_produk', $produk_terjual->produkbeli->produk->kode)->where('lokasi_id', $produk_terjual->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_terjual->produkbeli->kondisi_id)->first();
+                    $getInven->jumlah -= $produk_terjual->jumlah;
+                    $getInven->update();
 
+                    $updateproduk = [
+                        'type_komplain' => $jenis,
+                        'jml_diterima' => $getProdukBeli->jml_diterima - $data['jumlah'][$i],
+                        'totalharga' => ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon),
+                    ];
+                } elseif($jenis == 'Diskon') {
+                    $newSubtotal += $data['harga_total'][$i];
+                    $updateproduk = [
+                        'type_komplain' => $jenis,
+                    ];
+                }
+                $newSubtotal += ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
                 $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
 
                 if (!$update) {
@@ -600,33 +606,14 @@ class PembelianController extends Controller
                 }
             }
 
+            // update invoice
             if($jenis == 'Retur' || $jenis == 'Diskon'){
-                // update invoice
                 $getInvoice = Invoicepo::find($data['invoicepo_id']);
                 $getInvoice->subtotal = $newSubtotal;
                 $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim;
                 $getInvoice->sisa = $newSubtotal + $getInvoice->biaya_kirim - $getInvoice->dp;
                 $check = $getInvoice->update();
                 if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
-    
-                // create po retur
-                // $getPO = $getInvoice->pembelian ? Pembelian::find($getInvoice->pembelian_id) : Pembelian::find($getInvoice->poinden_id);
-
-                // if ($getPO) {
-                //     $newPO = $getPO->replicate();
-
-                //     $newPO->no_po = $getPO . '/Retur';
-                //     $newPO->tgl_kirim = now();
-                //     $newPO->tgl_dibuat = $data['tgl_retur'];
-                //     $newPO->tgl_dibuat = $data['tgl_retur'];
-                    
-                //     // Simpan salinan PO baru ke database
-                //     $checkPO = $newPO->save();
-
-                //     // Jika ada relasi yang perlu diduplikasi, lakukan hal yang sama untuk relasi tersebut
-                //     // $this->duplicateRelations($getPO, $newPO);
-
-                // }
             }
             return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
         }

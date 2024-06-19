@@ -210,10 +210,10 @@
                                         <input type="text" id="subtotal" name="subtotal" value="{{ old('subtotal') }}" class="form-control"  required readonly>
                                     </div>
                                 </div>
-                                {{-- <div class="form-group row mt-1">
+                                <div class="form-group row mt-1" id="divOngkir">
                                     <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') }}" class="form-control"  required>
+                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') ?? 0 }}" class="form-control"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -221,7 +221,7 @@
                                     <div class="col-lg-9">
                                         <input type="text" id="total_harga" name="total_harga" value="{{ old('total_harga') }}" class="form-control"  required readonly>
                                     </div>
-                                </div> --}}
+                                </div>
                             </div>
                         </div>
                         <div class="row justify-content-start">
@@ -345,9 +345,9 @@
                 $('#row'+button_id+'').remove();
                 multiply($('#diskon_0'));
             });
-            $('#total_promo, #ppn_persen, #pph_persen').on('input', function(){
-                // total_harga();
-            })
+            // $('#total_promo, #ppn_persen, #pph_persen').on('input', function(){
+            //     // total_harga();
+            // })
             $('#addForm').on('submit', function(e) {
                 // Add input number cleaning for specific inputs
                 let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], [id^=diskon_], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga, #biaya_pengiriman');
@@ -389,8 +389,10 @@
             var jenis = $(this).val();
             if(jenis == 'Diskon'){
                 displayDskon(true);
+                displayOngkir(false);
             } else {
                 displayDskon(false);
+                displayOngkir(true);
             }
             inputDiskon = $('[id^=diskon_]').each(function(){
                 $(this).val('');
@@ -398,7 +400,7 @@
             })
         })
         $(document).on('input', '#biaya_pengiriman', function(){
-            // total_harga();
+            total_harga();
         })
         $(document).on('input', '[id^=diskon_]', function(){
             multiply(this);
@@ -412,6 +414,16 @@
                 $('#thDiskon').hide();
                 $('[id^=tdDiskon_]').hide();
                 $('[id^=diskon_]').attr('required', false);
+            }
+        }
+
+        function displayOngkir(isDisplay){
+            if (isDisplay) {
+                $('[id^=divOngkir]').show();
+                $('[id^=biaya_pengiriman]').attr('required', true);
+            } else {
+                $('[id^=divOngkir]').hide();
+                $('[id^=biaya_pengiriman]').attr('required', false);
             }
         }
         function multiply(element) {
@@ -439,7 +451,7 @@
                 total += parseInt(cleanNumber($(this).val())) || 0;
             });
             $('#subtotal').val(formatNumber(total))
-            // total_harga();
+            total_harga();
         }
         function total_harga() {
             var subtotal = cleanNumber($('#subtotal').val()) || 0;
