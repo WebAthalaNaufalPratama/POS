@@ -235,7 +235,9 @@ class PembelianController extends Controller
         }
         $bankpens = Rekening::get();
         $dataretur = Returpembelian::get();
-        return view('purchase.invoice', compact('invoices','dataretur','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd', 'bankpens', 'invoice_bayar'));
+        $no_invpo = $this->generatebayarPONumber();
+
+        return view('purchase.invoice', compact('invoices','no_invpo','dataretur','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd', 'bankpens', 'invoice_bayar'));
 
     }
 
@@ -321,6 +323,26 @@ class PembelianController extends Controller
         
         return $nomor_inv;
     }
+
+    public function generateReturNumber() {
+        $tgl_today = date('Y-m-d');
+        
+        // Cari urutan terakhir nomor PO pada hari ini
+        $lastInv = Returpembelian::whereDate('created_at', $tgl_today)->orderBy('id', 'desc')->first();
+    
+        // Jika tidak ada nomor PO pada hari ini, urutan diinisialisasi dengan 1
+        $urutan = 1;
+        if ($lastInv) {
+            // Jika ada nomor PO pada hari ini, ambil urutan berikutnya
+            $urutan = intval(substr($lastInv->no_inv, -3)) + 1;
+        }
+    
+        // Format nomor PO dengan pola 'RPM_tgl_urutanpo'
+        $nomor_retur = 'RPM_' . date('Ymd') . '_' . str_pad($urutan, 3, '0', STR_PAD_LEFT);
+        
+        return $nomor_retur;
+    }
+    
     
     public function create() {
         // Generate nomor PO
@@ -334,7 +356,6 @@ class PembelianController extends Controller
     
         return view('purchase.create', compact('produks', 'suppliers', 'lokasis', 'kondisis', 'nomor_po'));
     }
-    
 
     public function createinden()
     {
@@ -349,18 +370,9 @@ class PembelianController extends Controller
     {
         $invoice = Invoicepo::with('pembelian', 'pembelian.produkbeli', 'pembelian.produkbeli.produk')->find($req->invoice);
         $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
-        // $nomor_poinden = $this->generatePOIndenNumber();
-        $Invoice = ReturPembelian::where('no_retur', 'LIKE', 'RPM%')->latest()->first();
-        // dd($Invoice);
-        if ($Invoice != null) {
-            $substring = substr($Invoice->invoicepo_id, 12);
-            $cekInvoice = substr($substring, 0, 3);
-            // dd($cekInvoice);
-        } else {
-            $cekInvoice = 000;
-        }
-        // dd($invoice->pembelian->produkbeli);
-        return view('purchase.createretur', compact('cekInvoice', 'lokasi', 'invoice'));
+        $nomor_retur = $this->generateReturNumber();
+
+        return view('purchase.createretur', compact('nomor_retur', 'lokasi', 'invoice'));
 
     }
 
@@ -750,9 +762,11 @@ class PembelianController extends Controller
             $beli = Pembelian::find($datapo);
             if ($beli) {
                 $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
+
                 $produkkomplains = Produkretur::whereHas('produkbeli', function($q) use($datapo){
                     $q->where('pembelian_id', $datapo);
                 })->get();
+
                 $rekenings = Rekening::all();
                 $no_invpo = $this->generatebayarPONumber();
                 // $nomor_inv = $this->generateINVPONumber();
@@ -815,12 +829,12 @@ class PembelianController extends Controller
             $inv->tgl_dibukukan = $request->tgl_dibukukan ?? null;
     
             $subtot = $inv->subtotal = $request->sub_total;
-            $disk = $inv->diskon = $request->diskon_total;
+            // $disk = $inv->diskon = $request->diskon_total;
             if ($request->persen_ppn == null ) {
                $inv->ppn = 0;
             } else { 
                 $persen_ppn =  $request->persen_ppn;
-                $inv->ppn = $persen_ppn/100 * ($subtot-$disk);
+                $inv->ppn = $persen_ppn/100 * $subtot;
             }
             
     
@@ -895,12 +909,12 @@ class PembelianController extends Controller
             $inv->tgl_dibukukan = $request->tgl_dibukukan;
     
             $subtot = $inv->subtotal = $request->sub_total;
-            $disk = $inv->diskon = $request->diskon_total;
+            // $disk = $inv->diskon = $request->diskon_total;
             if ($request->persen_ppn == null ) {
                $inv->ppn = 0;
             } else { 
                 $persen_ppn =  $request->persen_ppn;
-                $inv->ppn = $persen_ppn/100 * ($subtot-$disk);
+                $inv->ppn = $persen_ppn/100 * $subtot;
             }
             
     

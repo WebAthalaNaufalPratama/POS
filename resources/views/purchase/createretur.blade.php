@@ -80,7 +80,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>No Retur</label>
-                                                <input type="text" id="no_retur" name="no_retur" value="" value="{{ old('no_retur') }}" class="form-control" required>
+                                                <input type="text" id="no_retur" name="no_retur" value="" value="" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>File</label>
@@ -448,20 +448,13 @@
             $('#total_harga').val(formatNumber(harga_total));
         }
 
-        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+        var cekInvoiceNumbers = "<?php echo $nomor_retur ?>";
         // console.log(cekInvoiceNumbers);
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
         function generateInvoice() {
-            var invoicePrefix = "RPM";
-            var currentDate = new Date();
-            var year = currentDate.getFullYear();
-            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            var day = currentDate.getDate().toString().padStart(2, '0');
-            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-            $('#no_retur').val(generatedInvoice);
+            
+            $('#no_retur').val(cekInvoiceNumbers);
         }
 
         $(document).ready(function() {
