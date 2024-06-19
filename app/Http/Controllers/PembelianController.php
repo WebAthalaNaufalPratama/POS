@@ -750,7 +750,7 @@ class PembelianController extends Controller
             $beli = Pembelian::find($datapo);
             if ($beli) {
                 $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
-                $produkkomplains = Produkretur::whereHas('produk', function($q) use($datapo){
+                $produkkomplains = Produkretur::whereHas('produkbeli', function($q) use($datapo){
                     $q->where('pembelian_id', $datapo);
                 })->get();
                 $rekenings = Rekening::all();
