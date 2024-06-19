@@ -87,6 +87,7 @@
                                                 <a class="dropdown-item" href="{{ route('returpenjualan.show', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Atur Komponen Ganti</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('returpenjualan.payment', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Pembayaran Retur</a>
+                                            
                                             <a class="dropdown-item" href="{{ route('mutasioutlet.create', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Mutasi Outlet Ke Galery</a>
                                         </div>
                                     </div>

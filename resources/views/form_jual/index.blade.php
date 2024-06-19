@@ -56,11 +56,11 @@
                             <td>{{ $item->tanggal ?? '-' }}</td>
                             <td>
                                 <div class="dropdown">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Aksi</button>
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
                                     <div class="dropdown-menu">
-                                        {{-- <a class="dropdown-item" href="{{ route('do_sewa.edit', ['do_sewa' => $item->id]) }}">Edit</a> --}}
-                                        <a class="dropdown-item" href="{{ route('formpenjualan.show', ['formpenjualan' => $item->id]) }}">Detail</a>
-                                        {{-- <a class="dropdown-item" href="javascript:void(0);"onclick="deleteData({{ $item->id }})">Delete</a> --}}
+                                        <a class="dropdown-item" href="{{ route('formpenjualan.show', ['formpenjualan' => $item->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </div>
                                 </div>
                             </td>

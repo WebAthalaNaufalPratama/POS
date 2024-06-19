@@ -40,17 +40,14 @@ class PenjualanController extends Controller
     public function index(Request $req)
     {
         $user = Auth::user();
+        // dd($user);
         $lokasi = Karyawan::where('user_id', $user->id)->first();
+        $user = Auth::user()->roles()->value('name');
         // dd($user);
         if($lokasi->lokasi->tipe_lokasi == 2){
-            $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
-            $lokasiIds = $lokasi->pluck('id')->toArray();
-            // dd($lokasiIds);
-            $query = Penjualan::with('karyawan')->whereIn('lokasi_id', $lokasiIds)->where('no_invoice', 'LIKE', 'IPO%');
+            $query = Penjualan::with('karyawan')->where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'IPO%');
         }elseif($lokasi->lokasi->tipe_lokasi == 1){
-            $lokasi = Lokasi::where('tipe_lokasi', 1)->get();
-            $lokasiIds = $lokasi->pluck('id')->toArray();
-            $query = Penjualan::with('karyawan')->whereIn('lokasi_id', $lokasiIds)->where('no_invoice', 'LIKE', 'INV%');
+            $query = Penjualan::with('karyawan')->where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'INV%');
         }else{
             $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
         }
@@ -146,9 +143,12 @@ class PenjualanController extends Controller
             // dd($komponen);
         $kondisis = Kondisi::all();
         $invoices = Penjualan::get();
+        foreach($lokasis as $lokasi){
+            $ceklokasi = $lokasi->tipe_lokasi;
+        }
         // }
 
-        return view('penjualan.create', compact('produkkompos', 'komponenproduks','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
+        return view('penjualan.create', compact('ceklokasi','produkkompos', 'komponenproduks','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
     }
 
 
@@ -413,8 +413,8 @@ class PenjualanController extends Controller
         // $getProdukJual = Produk_Jual::find($penjualan);
         // $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
         $roles = Auth::user()->roles()->value('name');
-        $user = Auth::user()->value('id');
-        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->value('lokasi_id');
         $lokasis = Lokasi::where('id', $lokasi)->get();
         $rekenings = Rekening::get();
         $ongkirs = Ongkir::get();
@@ -425,9 +425,12 @@ class PenjualanController extends Controller
         $pegawais = Karyawan::all();
 
         $riwayat = Activity::where('subject_type', Penjualan::class)->where('subject_id', $penjualan)->orderBy('id', 'desc')->get();
+        foreach($lokasis as $lokasi){
+            $ceklokasi = $lokasi->tipe_lokasi;
+        }
 
         // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
-        return view('penjualan.payment', compact('pegawais','riwayat','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
+        return view('penjualan.payment', compact('ceklokasi','pegawais','riwayat','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
     }
 
     public function show(Request $req, $penjualan)

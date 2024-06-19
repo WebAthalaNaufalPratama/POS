@@ -27,7 +27,8 @@ class AddNoReturToReturpembelians extends Migration
     public function down()
     {
         Schema::table('returpembelians', function (Blueprint $table) {
-            //
+            $table->dropColumn('no_retur');
+            $table->dropColumn('catatan');
         });
     }
 }

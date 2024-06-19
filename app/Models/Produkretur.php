@@ -22,10 +22,10 @@ class Produkretur extends Model
         'totharga',
       
     ];
-    public function produk (){
+    public function produkbeli (){
         return $this->belongsTo(Produkbeli::class, 'produkbeli_id', 'id');
     }
-    public function retur (){
+    public function returbeli (){
         return $this->belongsTo(Returpembelian::class, 'returpembelian_id', 'id');
     }
 }

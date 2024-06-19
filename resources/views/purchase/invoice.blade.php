@@ -88,20 +88,52 @@
                                 <td>
                                 {{ formatRupiah($inv->sisa) }}
                                 </td>
-                                <td></td>
+                                <td>
+                                @php
+                                    // Mengambil data retur pertama yang memiliki 'invoicepo_id' sama dengan $inv->id
+                                    $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $inv->id);
+                                @endphp
+                                @if ($invoiceRetur)
+                                {{ $inv->retur->komplain }}   
+                                @endif
+
+                                </td>
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
+                                        
+                                        <li>
+                                            @php
+                                                // Mengambil data retur pertama yang memiliki 'invoicepo_id' sama dengan $inv->id
+                                                $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $inv->id);
+                                            @endphp
+                                        
+                                            @if ($invoiceRetur)
+                                                <a href="{{ route('returinvoice.show', ['retur_id' => $invoiceRetur->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice retur
+                                                </a>
+                                            @elseif($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan)
+                                                <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain
+                                                </a>
+                                            @endif
+                                        </li>
+                                        
+
                                         <li>
                                             <a href="{{ route('invoice.show',['datapo' => $inv->pembelian->id, 'type' => 'pembelian']) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
                                             </a>
                                         </li>
+
+                                        {{-- @if ($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan)
                                         <li>
                                             <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
                                         </li>
+                                        @endif --}}
+                                        
                                         <li>
                                             <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
                                         </li>

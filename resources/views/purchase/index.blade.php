@@ -96,6 +96,7 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
+                                        @if ($datapo->tgl_diterima_ttd !== null)
                                         <li>
                                             @php
                                                 $invoiceExists = $datainv->contains('pembelian_id', $datapo->id);
@@ -114,12 +115,15 @@
                                                 </a>
                                             @endif
                                         </li>
+                                        @endif
                                         <li>
-                                            <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                            <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
                                         </li>
+                                        @if ($datapo->tgl_diterima_ttd === null)
                                         <li>
-                                            <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                            <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>
+                                        @endif
                                         <li>
                                             {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
                                         </li>
@@ -212,6 +216,7 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
+                                        @if ($inden->tgl_diperiksa !== null)
                                         <li>
                                             @php
                                                 $invoiceExists = $datainv->contains('poinden_id', $inden->id);
@@ -230,12 +235,16 @@
                                             </a>
                                             @endif
                                         </li>
+                                        @endif
+
                                         <li>
-                                            <a href="{{ route('pembelian.show', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                            <a href="{{ route('pembelian.show', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
                                         </li>
+                                        @if ($inden->tgl_diperiksa === null)
                                         <li>
-                                            <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                            <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>
+                                         @endif
                                         <li>
                                             {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $inden->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
                                         </li>

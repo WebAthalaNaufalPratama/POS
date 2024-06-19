@@ -263,11 +263,11 @@ Carbon::setLocale('id');
                                                     </h5>
                                                 </li>
                                                 <li>
-                                                    <h4>Diskon</h4>
+                                                    <h4>Total Diskon</h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ formatRupiah2($inv_po->diskon)}}" readonly>
+                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
                                                         </div>
                                                     </h5>
                                                   

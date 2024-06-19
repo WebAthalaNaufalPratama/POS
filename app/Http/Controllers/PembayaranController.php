@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Penjualan;
 use App\Models\Rekening;
+use App\Models\Karyawan;
+use App\Models\Lokasi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,7 +19,21 @@ class PembayaranController extends Controller
 
     public function index(Request $req)
     {
-        $query = Pembayaran::whereNotNull('invoice_penjualan_id');
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
+        $userroles = Auth::user()->roles()->value('name');
+        // dd($user);
+        if($lokasi->lokasi->tipe_lokasi == 2){
+            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'IPO%')->where('lokasi_id', $lokasi->lokasi_id)->get();
+            $penjualanIds = $lokasi->pluck('id')->toArray();
+            $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BOT%');
+        }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
+            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('lokasi_id', $lokasi->lokasi_id)->get();
+            $penjualanIds = $lokasi->pluck('id')->toArray();
+            $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BYR%');
+        }else{
+            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
+        }
 
         if ($req->metode) {
             $query->where('cara_bayar', $req->input('metode'));

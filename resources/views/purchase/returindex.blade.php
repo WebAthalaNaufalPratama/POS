@@ -41,43 +41,54 @@
                             <tr>
                                 <th>No</th>
                                 <th>No Retur</th>
+                                <th>Tanggal</th>
+                                <th>Suplier</th>
                                 <th>Lokasi</th>
                                 <th>Produk</th>
                                 <th>Alasan</th>
                                 <th>Jumlah</th>
                                 <th>Komplain</th>
                                 <th>Harga</th>
-                                <th>Tanggal</th>
-                                <th>Suplier</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {{-- @foreach ($datapos as $datapo)
+                        <tbody> 
+                            @foreach ($dataretur as $data)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $datapo->no_po }}</td>
-                                <td>{{ $datapo->supplier->nama }}</td>
-                                <td>{{ $datapo->tgl_kirim }}</td>
-                                <td>{{ $datapo->tgl_diterima}}</td>
-                                <td>{{ $datapo->no_do_suplier}}</td>
-                                <td>{{ $datapo->lokasi->nama}}</td>
-                                <td>{{ $datapo->status_dibuat}}</td>
+                                <td>{{ $data->no_retur }}</td>
+                                <td>{{ tanggalindo($data->tgl_retur)}}</td>
+                                <td>{{ $data->invoice->pembelian->supplier->nama }}</td>
+                                <td>{{ $data->invoice->pembelian->lokasi->nama }}</td>
                                 <td>
-                                @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
-                                    LUNAS
-                                @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
-                                    BELUM LUNAS
-                                @endif
+                                    <ul>
+                                        @foreach($data->produkretur as $produkretur)
+                                            <li>{{ $produkretur->produkbeli->produk->nama }}</li>
+                                        @endforeach
+                                    </ul>
                                 </td>
-                                
-                            
+                                <td>
+                                    <ul>
+                                        @foreach($data->produkretur as $produkretur)
+                                            <li>{{ $produkretur->alasan }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($data->produkretur as $produkretur)
+                                            <li>{{ $produkretur->jumlah }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>{{ $data->komplain}}</td>
+                                <td>{{ formatRupiah($data->total)}}</td>
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li>
+                                        {{-- <li>
                                             @php
                                                 $invoiceExists = $datainv->contains('pembelian_id', $datapo->id);
                                             @endphp
@@ -90,20 +101,20 @@
                                             <a href="{{ route('invoicebiasa.create', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
                                                 </a>
                                             @endif
+                                        </li> --}}
+                                        <li>
+                                            <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur</a>
                                         </li>
                                         <li>
-                                            <a href="{{ route('pembelian.show', ['datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                            <a href="{{ route('returinvoice.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>
                                         </li>
-                                        <li>
-                                            <a href="" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                        </li>
-                                        <li>
+                                        {{-- <li>
                                             <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
-                                        </li>
+                                        </li> --}}
                                     </ul>
                                 </td>
                             </tr>
-                            @endforeach --}}
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

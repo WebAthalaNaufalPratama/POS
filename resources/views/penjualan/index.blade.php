@@ -10,7 +10,22 @@
                         <h4>Invoice Penjualan</h4>
                     </div>
                     <div class="page-btn">
-                        <a href="{{ route('penjualan.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Penjualan</a>
+                        @php
+                            $roles = Auth::user()->roles()->get();
+                            $user = Auth::user();
+                            $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                            if($user->hasRole(['SuperAdmin'])) {
+                                $rolePermissions = \Spatie\Permission\Models\Permission::pluck('name')->toArray();
+                            } else {
+                                $rolePermissions = [];
+                                if (!$roles->isEmpty()) {
+                                    $rolePermissions = $roles->flatMap->permissions->pluck('name')->toArray();
+                                }
+                            }
+                        @endphp
+                        @if(in_array('penjualan.create', $rolePermissions))
+                            <a href="{{ route('penjualan.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Penjualan</a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -83,18 +98,18 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
-                                            @php
-                                                $user = Auth::user()->first();
-                                                $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
-                                            @endphp
-                                            @if($lokasi->lokasi->tipe_lokasi != 2)
+                                            @if($lokasi->lokasi->tipe_lokasi != 2 && in_array('penjualan.show', $rolePermissions))
                                                 <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Perangkai</a>
                                             @endif
-                                            <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Pembayaran</a>
-                                            @if($penjualan->distribusi == 'Dikirim')
+                                            @if(in_array('penjualan.payment', $rolePermissions))
+                                                <a class="dropdown-item" href="{{ route('penjualan.payment', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Pembayaran</a>
+                                            @endif
+                                            @if($penjualan->distribusi == 'Dikirim' && in_array('dopenjualan.create', $rolePermissions))
                                             <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order</a>
                                             @endif
-                                            <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
+                                            @if(in_array('returpenjualan.create', $rolePermissions))
+                                                <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
+                                            @endif
                                             <a class="dropdown-item" href="{{ route('pdfinvoicepenjualan.generate', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak Invoice</a>
                                             <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a> -->
                                         </div>

@@ -60,6 +60,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'dashboard'], function() {
             Route::get('/', 'DashboardController@index')->name('dashboard.index');
+            Route::post('/postauditor', 'DashboardController@update_auditor')->name('auditor.update');
         });
 
         /**
@@ -294,6 +295,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
             Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
+
+             Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_retur')->name('returbeli.show');
+             Route::get('/returinv/{retur_id}/show', 'PembelianController@show_returinv')->name('returinvoice.show');
 
         });
 

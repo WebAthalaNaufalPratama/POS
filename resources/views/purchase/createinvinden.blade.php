@@ -106,8 +106,8 @@ Carbon::setLocale('id');
                                                     {{-- <th>Keterangan</th> --}}
                                                     <th>Jumlah</th>
                                                     <th>Harga</th>
-                                                    <th>Diskon</th>
-                                                    <th>Diskon Total</th>
+                                                    <th>Diskon/item</th>
+                                                    {{-- <th>Diskon Total</th> --}}
                                                     <th>Total Harga</th>
                                                     <th></th>
                                                 </tr>
@@ -139,13 +139,13 @@ Carbon::setLocale('id');
                                                                 <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon.'.$index) }}">
                                                             </div>
                                                     </td>
-                                                    <td>
+                                                    <input type="hidden" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
+                                                    <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
+                                                    {{-- <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
-                                                            <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
                                                         </div>
-                                                    </td>
+                                                    </td> --}}
                                                     <td>
                                                         
                                                             <div class="input-group">
@@ -180,7 +180,7 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        <th>Aksi</th>
+                                                        {{-- <th>Aksi</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -216,12 +216,12 @@ Carbon::setLocale('id');
                                                     </h5>
                                                 </li>
                                                 <li>
-                                                    <h4>Diskon</h4>
+                                                    <h4>Total Diskon</h4>
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total2" oninput="calculateTotal(0)"  value="{{ old('diskon_total_dis') }}">
-                                                            <input type="hidden" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total') }}" >
+                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total_dis') }}" readonly>
+                                                            {{-- <input type="hidden" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total') }}" > --}}
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -415,18 +415,19 @@ function unformatRupiah(formattedValue) {
 }
 
     // Event listener untuk diskon_total2
-    document.getElementById('diskon_total2').addEventListener('input', function(e) {
-            var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
-            if (rupiah === "") {
-                this.value = "";
-                document.getElementById('diskon_total').value = "";
-            } else {
-                this.value = formatRupiah(rupiah);
-                // Set nilai ke input hidden
-                document.getElementById('diskon_total').value = unformatRupiah(this.value);
-            }
-            calculateTotalAll(); // Recalculate total on change
-        });
+
+    // document.getElementById('diskon_total2').addEventListener('input', function(e) {
+    //         var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
+    //         if (rupiah === "") {
+    //             this.value = "";
+    //             document.getElementById('diskon_total').value = "";
+    //         } else {
+    //             this.value = formatRupiah(rupiah);
+    //             // Set nilai ke input hidden
+    //             document.getElementById('diskon_total').value = unformatRupiah(this.value);
+    //         }
+    //         calculateTotalAll(); // Recalculate total on change
+    //     });
 
         // // Event listener untuk biaya_ongkir2
         // document.getElementById('biaya_ongkir2').addEventListener('input', function(e) {
@@ -462,6 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Event listener untuk diskon2_{{ $index }}
+
     document.getElementById('diskon2_{{ $index }}').addEventListener('input', function(e) {
         var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
         if (rupiah === "") {
@@ -474,6 +476,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         calculateTotal({{ $index }}); // Recalculate total on change
     });
+
     @endforeach
 });
 
@@ -495,15 +498,14 @@ function calculateTotal(index) {
     document.getElementById('distot_int_' + index).value = distot;
     document.getElementById('distot_' + index).value = formatRupiah(distot.toString());
 
-
-
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
 }
 
 // Fungsi untuk menghitung total tagihan
 function calculateTotalAll() {
     var subTotal = 0;
-    var diskonTotal = parseFloat(unformatRupiah(document.getElementById('diskon_total').value)) || 0;
+    var Totaldis = 0;
+    // var diskonTotal = parseFloat(unformatRupiah(document.getElementById('diskon_total').value)) || 0;
     // var biayaOngkir = parseFloat(unformatRupiah(document.getElementById('biaya_ongkir').value)) || 0;
     var persenPpn = parseFloat(document.getElementById('persen_ppn').value) || 0;
 
@@ -511,24 +513,28 @@ function calculateTotalAll() {
     document.querySelectorAll('input[id^="jumlahint_"]').forEach(function(input) {
         subTotal += parseFloat(input.value) || 0;
     });
+    document.querySelectorAll('input[id^="distot_int_"]').forEach(function(input) {
+        Totaldis += parseFloat(input.value) || 0;
+    });
 
     // Menghitung PPN berdasarkan jenis_ppn
     var ppn = 0;
     var jenisPpn = document.getElementById('jenis_ppn').value;
     if (jenisPpn === 'exclude') {
-        ppn = (subTotal - diskonTotal) * persenPpn / 100;
+        ppn = subTotal * persenPpn / 100;
     }
 
     // Menghitung total tagihan
     // var totalTagihan = subTotal - diskonTotal + ppn + biayaOngkir;
-    var totalTagihan = subTotal - diskonTotal + ppn ;
+    var totalTagihan = subTotal + ppn ;
 
     // Menampilkan hasil yang benar jika diskon lebih besar dari subtotal
-    if (diskonTotal > subTotal) {
-        totalTagihan = -Math.abs(totalTagihan);
-    }
+    // if (diskonTotal > subTotal) {
+    //     totalTagihan = -Math.abs(totalTagihan);
+    // }
 
     document.getElementById('sub_total').value = formatRupiah(subTotal.toString());
+    document.getElementById('diskon_total').value = formatRupiah(Totaldis.toString());
     document.getElementById('sub_total_int').value = subTotal;
 
     document.getElementById('total_tagihan').value = formatRupiah(totalTagihan.toString());
