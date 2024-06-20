@@ -344,6 +344,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{form}/edit', 'FormPerangkaiController@edit')->name('form.edit');
             Route::patch('/{form}/update', 'FormPerangkaiController@update')->name('form.update');
             Route::get('/{form}/delete', 'FormPerangkaiController@destroy')->name('form.destroy');
+            Route::get('/{form}/cetak', 'FormPerangkaiController@cetak')->name('form.cetak');
         });
 
         Route::group(['prefix' => 'formpenjualan'], function() {
