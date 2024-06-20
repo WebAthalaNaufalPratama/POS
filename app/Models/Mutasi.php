@@ -30,4 +30,8 @@ class Mutasi extends Model
     public function dibuat(){
         return $this->belongsTo(User::class, 'pembuat_id', 'id');
     }
+
+    public function diterima(){
+        return $this->belongsTo(User::class, 'penerima_id', 'id');
+    }
 }
