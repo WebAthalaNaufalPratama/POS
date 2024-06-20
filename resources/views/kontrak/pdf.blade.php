@@ -112,7 +112,7 @@
         <table class="full-width">
             <tr>
                 <td class="text-start"><small>www.vonflorist.com</small></td>
-                <td class="text-end"><small>IG; @von.florist</small></td>
+                <td class="text-end"><small>IG : @von.florist</small></td>
                 <td class="text-end"><small>Email : vonflorist@gmail.com</small></td>
             </tr>
         </table>

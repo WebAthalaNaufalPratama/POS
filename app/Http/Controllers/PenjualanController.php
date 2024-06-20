@@ -179,7 +179,7 @@ class PenjualanController extends Controller
 
         // dd($validator);
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()->with('fail',$validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
         // dd($data);
