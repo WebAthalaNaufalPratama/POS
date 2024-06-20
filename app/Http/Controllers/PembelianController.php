@@ -594,6 +594,7 @@ class PembelianController extends Controller
                 ];
                 $produk_terjual = Produkretur::create($produkReturBeli);
                 $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
+
                 if($jenis == 'Retur'){
                     $getInven = InventoryGallery::where('kode_produk', $produk_terjual->produkbeli->produk->kode)->where('lokasi_id', $produk_terjual->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_terjual->produkbeli->kondisi_id)->first();
                     $getInven->jumlah -= $produk_terjual->jumlah;
@@ -1086,6 +1087,8 @@ class PembelianController extends Controller
         if ($type === 'pembelian') {
             $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
             $diskonTot = Produkbeli::where('pembelian_id', $datapo)->get();
+            $idinv = $inv_po->id;
+            $retur = Returpembelian::where('invoicepo_id', $idinv)->first();
             // return $diskonTot;
 
             $totalDiskon = 0;
@@ -1137,8 +1140,11 @@ class PembelianController extends Controller
                 ->values()
                 ->all();
                 
+                $produkkomplains = Produkretur::whereHas('produkbeli', function($q) use($datapo){
+                    $q->where('pembelian_id', $datapo);
+                })->get();
 
-            return view('purchase.showinv', compact('riwayat','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.showinv', compact('riwayat','produkkomplains','retur','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } elseif ($type === 'poinden') {
             $inv_po = Invoicepo::where('poinden_id', $datapo)->first();
