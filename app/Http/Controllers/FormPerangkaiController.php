@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Models\Penjualan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use PDF;
 
 class FormPerangkaiController extends Controller
 {
@@ -113,6 +114,14 @@ class FormPerangkaiController extends Controller
             }
         }
         return redirect()->back()->with('success', 'Data tersimpan');
+    }
+
+    public function cetak($id)
+    {
+        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.sewa', 'produk_terjual.produk', 'produk_terjual.sewa.data_sales', 'produk_terjual.sewa.lokasi')->find($id)->toArray();
+        $pdf = PDF::loadView('kontrak.formpdf', $data);
+
+        return $pdf->stream('Form-Perangkai.pdf');
     }
 
     public function mutasi_store(Request $req){

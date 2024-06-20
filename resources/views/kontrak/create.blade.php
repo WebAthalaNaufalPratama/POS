@@ -348,7 +348,7 @@
                 $('#produk_' + i).select2();
                 i++;
             })
-            $(document).on('input', '[id^=handhpone]', function() {
+            $(document).on('input', '[id^=handhpone], #add_handphone', function() {
                 let input = $(this);
                 let value = input.val();
                 

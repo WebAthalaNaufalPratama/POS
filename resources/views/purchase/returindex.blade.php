@@ -48,7 +48,7 @@
                                 <th>Alasan</th>
                                 <th>Jumlah</th>
                                 <th>Komplain</th>
-                                <th>Harga</th>
+                                <th>Total Harga</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>

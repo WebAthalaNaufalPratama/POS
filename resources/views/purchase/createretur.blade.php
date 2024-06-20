@@ -80,7 +80,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>No Retur</label>
-                                                <input type="text" id="no_retur" name="no_retur" value="" value="{{ old('no_retur') }}" class="form-control" required>
+                                                <input type="text" id="no_retur" name="no_retur" value="" value="" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>File</label>
@@ -139,34 +139,6 @@
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-around">
-                            {{-- <div class="col-md-8 pt-3 ps-0 pe-0">
-                                <table class="table table-responsive border rounded">
-                                    <thead>
-                                        <tr>
-                                            <th>Pengaju</th>
-                                            <th>Pembuat</th>
-                                            <th>Penyetuju</th>
-                                            <th>Pemeriksa</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td id="pengaju">-</td>
-                                            <td id="pembuat">{{ Auth::user()->name }}</td>
-                                            <td id="penyetuju">-</td>
-                                            <td id="pemeriksa">-</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 25%;">
-                                                <input type="date" id="tanggal_sales" name="tanggal_sales" value="{{ date('Y-m-d') }}" class="form-control"  required>
-                                            </td>
-                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
-                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div> --}}
                             <div class="col-lg-8 col-md-8 col-sm-6 col-6 border rounded mt-3 pt-3">
                                 <div class="page-btn">
                                     Riwayat Pembayaran
@@ -182,7 +154,7 @@
                                                 <th>Nominal</th>
                                                 <th>Bukti</th>
                                                 <th>Status</th>
-                                                <th>Aksi</th>
+                                                {{-- <th>Aksi</th> --}}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -210,10 +182,10 @@
                                         <input type="text" id="subtotal" name="subtotal" value="{{ old('subtotal') }}" class="form-control"  required readonly>
                                     </div>
                                 </div>
-                                {{-- <div class="form-group row mt-1">
+                                <div class="form-group row mt-1" id="divOngkir">
                                     <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') }}" class="form-control"  required>
+                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') ?? 0 }}" class="form-control"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -221,7 +193,7 @@
                                     <div class="col-lg-9">
                                         <input type="text" id="total_harga" name="total_harga" value="{{ old('total_harga') }}" class="form-control"  required readonly>
                                     </div>
-                                </div> --}}
+                                </div>
                             </div>
                         </div>
                         <div class="row justify-content-start">
@@ -345,12 +317,12 @@
                 $('#row'+button_id+'').remove();
                 multiply($('#diskon_0'));
             });
-            $('#total_promo, #ppn_persen, #pph_persen').on('input', function(){
-                // total_harga();
-            })
+            // $('#total_promo, #ppn_persen, #pph_persen').on('input', function(){
+            //     // total_harga();
+            // })
             $('#addForm').on('submit', function(e) {
                 // Add input number cleaning for specific inputs
-                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga, #biaya_pengiriman');
+                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], [id^=diskon_], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #total_harga, #biaya_pengiriman');
                 inputs.each(function() {
                     let input = $(this);
                     let value = input.val();
@@ -370,11 +342,12 @@
             var kode = $(this).val();
             if(kode){
                 var jumlah = $(this).find(':selected').data('jumlah');
+                var diskon = $(this).find(':selected').data('diskon');
                 var harga = $(this).find(':selected').data('harga');
                 var harga_total = $(this).find(':selected').data('harga_total');
                 $('#kode_produk_' + nomor).val(kode);
                 $('#jumlah_' + nomor).val(jumlah);
-                $('#harga_satuan_' + nomor).val(formatNumber(harga));
+                $('#harga_satuan_' + nomor).val(formatNumber((harga - diskon)));
                 $('#harga_total_' + nomor).val(formatNumber(harga_total));
             } else {
                 $('#kode_produk_' + nomor).val('');
@@ -388,8 +361,10 @@
             var jenis = $(this).val();
             if(jenis == 'Diskon'){
                 displayDskon(true);
+                displayOngkir(false);
             } else {
                 displayDskon(false);
+                displayOngkir(true);
             }
             inputDiskon = $('[id^=diskon_]').each(function(){
                 $(this).val('');
@@ -397,7 +372,7 @@
             })
         })
         $(document).on('input', '#biaya_pengiriman', function(){
-            // total_harga();
+            total_harga();
         })
         $(document).on('input', '[id^=diskon_]', function(){
             multiply(this);
@@ -411,6 +386,16 @@
                 $('#thDiskon').hide();
                 $('[id^=tdDiskon_]').hide();
                 $('[id^=diskon_]').attr('required', false);
+            }
+        }
+
+        function displayOngkir(isDisplay){
+            if (isDisplay) {
+                $('[id^=divOngkir]').show();
+                $('[id^=biaya_pengiriman]').attr('required', true);
+            } else {
+                $('[id^=divOngkir]').hide();
+                $('[id^=biaya_pengiriman]').attr('required', false);
             }
         }
         function multiply(element) {
@@ -438,7 +423,7 @@
                 total += parseInt(cleanNumber($(this).val())) || 0;
             });
             $('#subtotal').val(formatNumber(total))
-            // total_harga();
+            total_harga();
         }
         function total_harga() {
             var subtotal = cleanNumber($('#subtotal').val()) || 0;
@@ -447,20 +432,13 @@
             $('#total_harga').val(formatNumber(harga_total));
         }
 
-        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+        var cekInvoiceNumbers = "<?php echo $nomor_retur ?>";
         // console.log(cekInvoiceNumbers);
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
         function generateInvoice() {
-            var invoicePrefix = "RPM";
-            var currentDate = new Date();
-            var year = currentDate.getFullYear();
-            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            var day = currentDate.getDate().toString().padStart(2, '0');
-            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-            $('#no_retur').val(generatedInvoice);
+            
+            $('#no_retur').val(cekInvoiceNumbers);
         }
 
         $(document).ready(function() {

@@ -38,7 +38,7 @@ class Produkbeli extends Model
     }
     public function produkretur()
     {
-        return $this->hasOne(Produkretur::class, 'id', 'produk_id');
+        return $this->hasOne(Produkretur::class, 'produkbeli_id', 'id');
     }
     
 }

@@ -10,7 +10,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm">
-                        <form action="{{ route('tradisional.store') }}" method="POST">
+                        <form id="addForm" action="{{ route('tradisional.store') }}" method="POST">
                             @csrf
                             <div class="form-row row">
                                 <div class="col-md-4 mb-3">
@@ -31,14 +31,14 @@
                                     <label for="harga">Harga</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="number" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ old('harga') }}" aria-describedby="inputGroupPrepend2" required readonly>
+                                        <input type="text" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ old('harga') }}" aria-describedby="inputGroupPrepend2" required readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="harga_jual">Harga Jual</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="number" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="{{ old('harga_jual') }}" aria-describedby="inputGroupPrepend2" required>
+                                        <input type="text" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="{{ old('harga_jual') }}" aria-describedby="inputGroupPrepend2" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -78,9 +78,9 @@
                                                         @endforeach
                                                     </select>
                                                 </td>
-                                                <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"></td>
+                                                <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"></td>
                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"></td>
-                                                <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control"></td>
+                                                <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"></td>
                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                             </tr>
                                         </tbody>
@@ -121,20 +121,45 @@
                 '@endforeach' +
                 '</select>' +
                 '</td>' +
-                '<td><input type="number" name="harga_satuan[]" id="harga_satuan_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
+                '<td><input type="text" name="harga_satuan[]" id="harga_satuan_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
-                '<td><input type="number" name="harga_total[]" id="harga_total_' + i + '" class="form-control"></td>' +
+                '<td><input type="text" name="harga_total[]" id="harga_total_' + i + '" class="form-control"></td>' +
                 '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
                 '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#kode_produk_' + i + ', #kondisi_' + i).select2();
                 i++
             });
+            $(document).on('input', '[id^=harga]', function() {
+                let input = $(this);
+                let value = input.val();
+                
+                if (!isNumeric(cleanNumber(value))) {
+                value = value.replace(/[^\d]/g, "");
+                }
+
+                value = cleanNumber(value);
+                let formattedValue = formatNumber(value);
+                
+                input.val(formattedValue);
+            });
             $(document).on('click', '.btn_remove', function() {
                 var button_id = $(this).attr("id");
                 $('#row'+button_id+'').remove();
                 multiply($('#harga_satuan_0'))
                 multiply($('#jumlah_0'))
+            });
+            $('#addForm').on('submit', function(e) {
+                let inputs = $('#addForm').find('[id^=harga]');
+                inputs.each(function() {
+                    let input = $(this);
+                    let value = input.val();
+                    let cleanedValue = cleanNumber(value);
+
+                    input.val(cleanedValue);
+                });
+
+                return true;
             });
         });
         function multiply(element) {
@@ -147,24 +172,24 @@
                 jumlah = $(element).val();
                 harga_satuan = $('#harga_satuan_' + id).val();
                 if (harga_satuan) {
-                    $('#harga_total_'+id).val(harga_satuan * jumlah)
+                    $('#harga_total_'+id).val(formatNumber(cleanNumber(harga_satuan) * jumlah))
                 }
             } else if(jenis.split('_').length == 3){
                 id = $(element).attr('id').split('_')[2];
                 harga_satuan = $(element).val();
                 jumlah = $('#jumlah_' + id).val();
                 if (jumlah) {
-                    $('#harga_total_'+id).val(harga_satuan * jumlah)
+                    $('#harga_total_'+id).val(formatNumber(cleanNumber(harga_satuan) * jumlah))
                 }
             }
 
             var inputs = $('input[name="harga_total[]"]');
             var total = 0;
             inputs.each(function() {
-                total += parseInt($(this).val()) || 0;
+                total += parseInt(cleanNumber($(this).val())) || 0;
             });
-            $('#harga').val(total)
-            $('#harga_jual').val(total)
+            $('#harga').val(formatNumber(total))
+            $('#harga_jual').val(formatNumber(total))
         }
     </script>
 @endsection
