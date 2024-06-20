@@ -783,6 +783,14 @@ class PembelianController extends Controller
         }
      }
 
+     public function show_returpo(Request $req, $id)
+     {
+        $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+        $data = Returpembelian::with('invoice', 'produkretur')->find($id);
+
+        return view('purchase.showreturpo', compact('data', 'lokasi'));
+     }
+
     /**
      * Show the form for editing the specified resource.
      *
