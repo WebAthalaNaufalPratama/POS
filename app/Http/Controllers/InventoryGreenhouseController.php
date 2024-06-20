@@ -92,4 +92,13 @@ class InventoryGreenhouseController extends Controller
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
     }
+
+    public function show($inventoryGreenhouse)
+    {
+        $data = InventoryGreenHouse::find($inventoryGreenhouse);
+        $produks = Produk::all();
+        $kondisi = Kondisi::all();
+        $gallery = Lokasi::where('tipe_lokasi', 3)->get();
+        return view('inven_greenhouse.show', compact('data', 'produks', 'kondisi', 'gallery'));
+    }
 }
