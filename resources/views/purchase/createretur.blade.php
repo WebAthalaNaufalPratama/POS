@@ -139,34 +139,6 @@
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-around">
-                            {{-- <div class="col-md-8 pt-3 ps-0 pe-0">
-                                <table class="table table-responsive border rounded">
-                                    <thead>
-                                        <tr>
-                                            <th>Pengaju</th>
-                                            <th>Pembuat</th>
-                                            <th>Penyetuju</th>
-                                            <th>Pemeriksa</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td id="pengaju">-</td>
-                                            <td id="pembuat">{{ Auth::user()->name }}</td>
-                                            <td id="penyetuju">-</td>
-                                            <td id="pemeriksa">-</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="width: 25%;">
-                                                <input type="date" id="tanggal_sales" name="tanggal_sales" value="{{ date('Y-m-d') }}" class="form-control"  required>
-                                            </td>
-                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
-                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div> --}}
                             <div class="col-lg-8 col-md-8 col-sm-6 col-6 border rounded mt-3 pt-3">
                                 <div class="page-btn">
                                     Riwayat Pembayaran
@@ -182,7 +154,7 @@
                                                 <th>Nominal</th>
                                                 <th>Bukti</th>
                                                 <th>Status</th>
-                                                <th>Aksi</th>
+                                                {{-- <th>Aksi</th> --}}
                                             </tr>
                                         </thead>
                                         <tbody>

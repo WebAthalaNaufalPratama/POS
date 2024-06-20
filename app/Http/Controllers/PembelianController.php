@@ -551,8 +551,92 @@ class PembelianController extends Controller
         }
     }
 
+    // public function store_retur(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'invoicepo_id' => 'required',
+    //         'no_retur' => 'required',
+    //         'tgl_retur' => 'required',
+    //         'komplain' => 'required',
+    //         'subtotal' => 'required',
+    //         // 'total_harga' => 'required',
+    //     ]);
+
+    //     $error = $validator->errors()->all();
+    //     if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+    //     $data = $request->except(['_token', '_method', 'file']);
+
+    //     if ($request->hasFile('file')) {
+    //         $file = $request->file('file');
+    //         $fileName = time() . '_' . $file->getClientOriginalName();
+    //         $filePath = $file->storeAs('bukti_retur_pembelian', $fileName, 'public');
+    //         $data['foto'] = $filePath;
+    //     }
+
+    //     $data['ongkir'] = $request->biaya_pengiriman ?? 0;
+    //     $data['total'] = $request->total_harga;
+    //     $jenis = $data['komplain'];
+
+    //     $save = ReturPembelian::create($data);
+
+    //     if ($save) {
+    //         $newSubtotal = 0;
+    //         for ($i = 0; $i < count($data['nama_produk']); $i++) {
+    //             $produkReturBeli = [
+    //                 'returpembelian_id' => $save->id,
+    //                 'produkbeli_id' => $data['nama_produk'][$i],
+    //                 'alasan' => $data['alasan'][$i],
+    //                 'jumlah' => $data['jumlah'][$i],
+    //                 'harga' => $data['harga_satuan'][$i],
+    //                 'diskon' => $data['diskon'][$i] ?? 0,
+    //                 'totharga' => $data['harga_total'][$i]
+    //             ];
+    //             $produk_terjual = Produkretur::create($produkReturBeli);
+    //             $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
+
+    //             if($jenis == 'Retur'){
+    //                 $getInven = InventoryGallery::where('kode_produk', $produk_terjual->produkbeli->produk->kode)->where('lokasi_id', $produk_terjual->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_terjual->produkbeli->kondisi_id)->first();
+    //                 $getInven->jumlah -= $produk_terjual->jumlah;
+    //                 $getInven->update();
+
+    //                 $updateproduk = [
+    //                     'type_komplain' => $jenis,
+    //                     'jml_diterima' => $getProdukBeli->jml_diterima - $data['jumlah'][$i],
+    //                     'totalharga' => ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon),
+    //                 ];
+    //             } elseif($jenis == 'Diskon') {
+    //                 $newSubtotal += $data['harga_total'][$i];
+    //                 $updateproduk = [
+    //                     'type_komplain' => $jenis,
+    //                 ];
+    //             }
+    //             $newSubtotal += ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
+    //             $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
+
+    //             if (!$update) {
+    //                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+    //             }
+    //         }
+
+    //         // update invoice
+    //         if($jenis == 'Retur' || $jenis == 'Diskon'){
+    //             $getInvoice = Invoicepo::find($data['invoicepo_id']);
+    //             $getInvoice->subtotal = $newSubtotal;
+    //             $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim;
+    //             $getInvoice->sisa = $newSubtotal + $getInvoice->biaya_kirim - $getInvoice->dp;
+    //             $check = $getInvoice->update();
+    //             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
+    //         }
+    //         return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
+    //     }
+    // }
+
+
     public function store_retur(Request $request)
     {
+        // dd($request);
+
         $validator = Validator::make($request->all(), [
             'invoicepo_id' => 'required',
             'no_retur' => 'required',
@@ -592,42 +676,73 @@ class PembelianController extends Controller
                     'diskon' => $data['diskon'][$i] ?? 0,
                     'totharga' => $data['harga_total'][$i]
                 ];
-                $produk_terjual = Produkretur::create($produkReturBeli);
+        $produk_retur = Produkretur::create($produkReturBeli);
+
                 $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
 
                 if($jenis == 'Retur'){
-                    $getInven = InventoryGallery::where('kode_produk', $produk_terjual->produkbeli->produk->kode)->where('lokasi_id', $produk_terjual->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_terjual->produkbeli->kondisi_id)->first();
-                    $getInven->jumlah -= $produk_terjual->jumlah;
-                    $getInven->update();
+                    if ($produk_retur->produkbeli->pembelian->lokasi->tipe == 1 ) {
+                        $getInven = InventoryGallery::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
+                        $getInven->jumlah -= $produk_retur->jumlah;
+                        $getInven->update();
+                    }elseif($produk_retur->produkbeli->pembelian->lokasi->tipe == 3 ){
+                        $getInven = InventoryGreenHouse::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
+                        $getInven->jumlah -= $produk_retur->jumlah;
+                        $getInven->update();
+                    }
+
+
 
                     $updateproduk = [
                         'type_komplain' => $jenis,
-                        'jml_diterima' => $getProdukBeli->jml_diterima - $data['jumlah'][$i],
+                        'qty_komplain' => $data['jumlah'][$i],
                         'totalharga' => ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon),
                     ];
+
+                        $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
+
+                        $newSubtotal += ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
+                
+                        $getInvoice = Invoicepo::find($data['invoicepo_id']);
+                        $getInvoice->subtotal = $newSubtotal;
+                        $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + $getInvoice->ppn + $data['ongkir'];
+                        $getInvoice->sisa = $getInvoice->total_tagihan;
+                        $check = $getInvoice->update();
+
                 } elseif($jenis == 'Diskon') {
+
                     $newSubtotal += $data['harga_total'][$i];
+                    $totalharga = ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
+
                     $updateproduk = [
                         'type_komplain' => $jenis,
+                        'qty_komplain' => $data['jumlah'][$i],
+                        'totalharga' => $totalharga
                     ];
-                }
-                $newSubtotal += ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
+
+
                 $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
+
+                $newSubtotal += $totalharga;
+                
+                $getInvoice = Invoicepo::find($data['invoicepo_id']);
+                $getInvoice->subtotal = $newSubtotal;
+                $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + $getInvoice->ppn;
+                $getInvoice->sisa = $getInvoice->total_tagihan;
+                $check = $getInvoice->update();
+                
+                if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
+
+                }
+
 
                 if (!$update) {
                     return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
             }
 
-            // update invoice
-            if($jenis == 'Retur' || $jenis == 'Diskon'){
-                $getInvoice = Invoicepo::find($data['invoicepo_id']);
-                $getInvoice->subtotal = $newSubtotal;
-                $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim;
-                $getInvoice->sisa = $newSubtotal + $getInvoice->biaya_kirim - $getInvoice->dp;
-                $check = $getInvoice->update();
-                if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
-            }
+          
+
             return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
         }
     }
