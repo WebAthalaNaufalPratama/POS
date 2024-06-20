@@ -100,17 +100,20 @@
     <div class="header">
         <table class="full-width">
             <tr>
-                {{-- <td style="width: 20%; vertical-align: bottom;">
-                    <img src="{{ base64_image(public_path('assets/img/logo_von.jpg')) }}" alt="logo von">
-                </td> --}}
+                <td style="width: 30%; vertical-align: bottom;">
+                    <img src="{{ base64_image(public_path('assets/img/von.png')) }}" alt="image">
+                </td>
                 <td style="vertical-align: bottom;">
-                    <h1 style="margin-bottom: 0;" class="text-center">FORM RANGKAIAN</h1>
+                    <h1 style="margin-bottom: 0;" class="text-start">FORM RANGKAIAN</h1>
                 </td>
             </tr>
         </table>
         <table class="full-width">
             <tr>
-                <td class="text-center"><small>{{ $no_form }}</small></td>
+                <td class="text-center"><small>{{ $produk_terjual['sewa']['lokasi']['alamat'] }}</small></td>
+            </tr>
+            <tr>
+                <td class="text-center"><small>No. {{ $no_form }}</small></td>
             </tr>
         </table>
     </div>
