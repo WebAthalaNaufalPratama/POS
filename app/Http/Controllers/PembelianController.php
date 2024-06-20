@@ -679,7 +679,7 @@ class PembelianController extends Controller
                     'diskon' => $data['diskon'][$i] ?? 0,
                     'totharga' => $data['harga_total'][$i]
                 ];
-        $produk_retur = Produkretur::create($produkReturBeli);
+            $produk_retur = Produkretur::create($produkReturBeli);
 
                 $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
 
