@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Retur Pembelian</h4>
+                        <h4>Retur Pembelian No. Retur</h4>
                     </div>
                     <div class="page-btn">
                         {{-- <a href="{{ route('returbeli.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Retur Pembelian</a> --}}

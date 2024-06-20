@@ -80,7 +80,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>No Retur</label>
-                                                <input type="text" id="no_retur" name="no_retur" value="" value="" class="form-control" required readonly>
+                                                <input type="text" id="no_retur" name="no_retur" value="{{ $nomor_retur ?? '' }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>File</label>
@@ -116,11 +116,11 @@
                                     <tr>
                                         <td>1</td>
                                         <input type="hidden" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly>
-                                        <td>
+                                        <td style="width: 250px;">
                                             <select id="produk_0" name="nama_produk[]" class="form-control" required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($invoice->pembelian->produkbeli as $produk)
-                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>
+                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }} ({{$produk->kondisi->nama}})</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -278,7 +278,7 @@
                                         '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                             '<option value="">Pilih Produk</option>'+
                                                 '@foreach ($invoice->pembelian->produkbeli as $produk)' +
-                                                    '<option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }}</option>' +
+                                                    '<option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }} ({{$produk->kondisi->nama}})</option>' +
                                                 '@endforeach' +
                                         '</select>'+
                                     '</td>'+
@@ -432,18 +432,7 @@
             $('#total_harga').val(formatNumber(harga_total));
         }
 
-        var cekInvoiceNumbers = "<?php echo $nomor_retur ?>";
-        // console.log(cekInvoiceNumbers);
-        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
-
-        function generateInvoice() {
-            
-            $('#no_retur').val(cekInvoiceNumbers);
-        }
-
-        $(document).ready(function() {
-            generateInvoice();
-        });
+      
 
         var produkData = [];
 
