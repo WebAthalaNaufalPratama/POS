@@ -8,7 +8,7 @@
                 <h5 class="card-title">Edit Data Inventory Greenhouse</h5>
             </div>
             <div class="card-body">
-                <form id="form_perangkai" action="{{ route('inven_greenhouse.update', ['inven_outlet' => $data->id]) }}" method="POST">
+                <form id="form_perangkai" action="{{ route('inven_greenhouse.update', ['inven_greenhouse' => $data->id]) }}" method="POST">
                     @csrf
                     @method('patch')
                     <div class="row">

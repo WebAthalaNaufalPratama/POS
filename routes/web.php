@@ -268,6 +268,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/storekomponenmutasi', 'PenjualanController@store_komponen_mutasi')->name('komponenmutasi.store');
             Route::post('/storekomponenretur', 'PenjualanController@store_komponen_retur')->name('komponenretur.store');
             Route::get('{penjualan}/pdfinvoicepenjualan', 'PenjualanController@pdfinvoicepenjualan')->name('pdfinvoicepenjualan.generate');
+            Route::get('/{penjualan}/audit', 'PenjualanController@audit')->name('auditpenjualan.edit');
+            Route::patch('/storeaudit', 'PenjualanController@audit_update')->name('auditpenjualan.update');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -296,7 +298,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
 
-             Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_retur')->name('returbeli.show');
+             Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show');
              Route::get('/returinv/{retur_id}/show', 'PembelianController@show_returinv')->name('returinvoice.show');
 
         });
@@ -322,6 +324,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/{dopenjualan}/update', 'DopenjualanController@update')->name('dopenjualan.update');
             Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
             Route::get('{dopenjualan}/pdfdopenjualan', 'DoPenjualanController@pdfdopenjualan')->name('pdfdopenjualan.generate');
+            Route::get('{dopenjualan}/auditdopenjualan', 'DopenjualanController@audit')->name('auditdopenjualan.edit');
+            Route::patch('/auditdopernjualan', 'DopenjualanController@audit_update')->name('auditdopenjualan.update');
         });
 
         Route::group(['prefix' => 'pembayaran'], function() {
@@ -378,6 +382,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{returpenjualan}/delete', 'ReturpenjualanController@destroy')->name('returpenjualan.destroy');
             Route::get('/{returpenjualan}/payment', 'ReturPenjualanController@payment')->name('returpenjualan.payment');
             Route::post('/paymentretur', 'ReturPenjualanController@paymentretur')->name('returpenjualan.paymentretur');
+            Route::get('/{returpenjualan}/auditretur', 'ReturPenjualanController@audit')->name('auditretur.edit');
+            Route::patch('/storeauditretur', 'ReturPenjualanController@auditretur_update')->name('auditretur.update');
         });
 
         Route::group(['prefix' => 'inven_galeri'], function() {
@@ -451,6 +457,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGO}/payment', 'MutasiController@payment_outlet')->name('mutasigalery.payment');
             Route::post('/paymentmutasi', 'MutasiController@paymentmutasi')->name('mutasi.paymentmutasi');
             Route::get('/{mutasiGO}/view', 'MutasiController@view_outlet')->name('mutasigalery.view');
+            Route::get('/{mutasiGO}/auditGO', 'MutasiController@audit_GO')->name('auditmutasigalery.edit');
+            Route::patch('/auditmutasiGO', 'MutasiController@audit_GOUpdate')->name('auditmutasigalery.update');
         });
 
         Route::group(['prefix' => 'mutasiOG'], function() {
@@ -463,6 +471,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiOG}/delete', 'MutasiController@destroy_outletgalery')->name('mutasioutlet.destroy');
             Route::get('/{mutasiOG}/payment', 'MutasiController@payment_outletgalery')->name('mutasioutlet.payment');
             Route::get('/{mutasiOG}/view', 'MutasiController@view_outletgalery')->name('mutasioutlet.view');
+            Route::get('/{mutasiOG}/auditOG', 'MutasiController@audit_OG')->name('auditmutasioutlet.edit');
+            Route::patch('/auditmutasiOG', 'MutasiController@audit_OGUpdate')->name('auditmutasioutlet.update');
         });
 
         Route::group(['prefix' => 'kas_pusat'], function() {
@@ -495,6 +505,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGG}/delete', 'MutasiController@destroy_ghgalery')->name('mutasighgalery.destroy');
             Route::get('/{mutasiGG}/payment', 'MutasiController@payment_ghgalery')->name('mutasighgalery.payment');
             Route::get('/{mutasiGG}/view', 'MutasiController@view_ghgalery')->name('mutasighgalery.view');
+            Route::get('/{mutasiGG}/auditGG', 'MutasiController@audit_GG')->name('auditmutasighgalery.edit');
+            Route::patch('/auditmutasiGG', 'MutasiController@audit_GGUpdate')->name('auditmutasighgalery.update');
         });
 
         Route::group(['prefix' => 'inven_greenhouse'], function() {
@@ -547,6 +559,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGAG}/delete', 'MutasiController@destroy_galerygalery')->name('mutasigalerygalery.destroy');
             Route::get('/{mutasiGAG}/payment', 'MutasiController@payment_galerygalery')->name('mutasigalerygalery.payment');
             Route::get('/{mutasiGAG}/view', 'MutasiController@view_galerygalery')->name('mutasigalerygalery.view');
+            Route::get('/{mutasiGAG}/auditGAG', 'MutasiController@audit_GAG')->name('auditmutasigalerygalery.edit');
+            Route::patch('/auditmutasiGAG', 'MutasiController@audit_GAGUpdate')->name('auditmutasigalerygalery.update');
         });
 
         // Route::group(['prefix' => 'kas_pusat'], function() {

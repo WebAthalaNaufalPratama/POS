@@ -39,33 +39,16 @@ class DopenjualanController extends Controller
         // dd($user);
         if($lokasi->lokasi->tipe_lokasi == 2){
             $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
-            dd($penjualan);
-            $allDeliveryOrders = [];
-            foreach($penjualan as $jual){
-                $query = DeliveryOrder::where('no_referensi', $jual->no_invoice)->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
-            }
+            $dopenjualan = $penjualan->pluck('no_invoice')->toArray();
+            $query = DeliveryOrder::whereIn('no_referensi', $dopenjualan)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
         }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
-            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $lokasi->pluck('id')->toArray();
-            // $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BYR%');
+            $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
+            $dopenjualan = $penjualan->pluck('no_invoice')->toArray();
+            // dd($dopenjualan);
+            $query = DeliveryOrder::whereIn('no_referensi', $dopenjualan)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
         }else{
             $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
         }
-
-        $user = Auth::user();
-        $lokasi = Karyawan::where('user_id', $user->id)->first();
-        if($lokasi->lokasi->tipe_lokasi == 2){
-            $lokasi = Lokasi::where('tipe_lokasi', 2)->get();
-            $lokasiIds = $lokasi->pluck('id')->toArray();
-            $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where()->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
-        }elseif($lokasi->lokasi->tipe_lokasi == 1){
-            $lokasi = Lokasi::where('tipe_lokasi', 1)->get();
-            $lokasiIds = $lokasi->pluck('id')->toArray();
-            $query = DeliveryOrder::where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
-        }else{
-            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
-        }
-        // $dopenjualans = DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc')->get();
 
         if ($req->customer) {
             $query->where('customer_id', $req->input('customer'));
@@ -477,5 +460,47 @@ class DopenjualanController extends Controller
         $pdf = PDF::loadView('dopenjualan.view', $data);
     
         return $pdf->stream($data['no_do'] . '_DELIVERY ORDER.pdf');
+    }
+
+    public function audit($dopenjualan)
+    {
+        $dopenjualan = DeliveryOrder::find($dopenjualan);
+        $produkjuals = Produk_Jual::all();
+        $customers = Customer::all();
+        $karyawans = Karyawan::all();
+        $Invoice = DeliveryOrder::latest()->first();
+        if ($Invoice != null) {
+            $substring = substr($Invoice->no_do, 11);
+            $cekInvoice = substr($substring, 0, 3);
+        } else {
+            $cekInvoice = 0;
+        }
+        return view('dopenjualan.audit', compact('dopenjualan', 'produkjuals', 'karyawans', 'customers', 'cekInvoice'));
+    }
+
+    public function audit_update(Request $req)
+    {
+        // dd($req);
+        $dopenjualanIds = $req->input('dopenjualan');
+
+        $data = $req->except(['_token', '_method','dopenjualan', 'nama_produk', 'jumlah', 'satuan', 'keterangan', 'nama_produk2', 'jumlah2', 'satuan2', 'keterangan2']);
+        $data['penyetuju'] = Auth::user()->id;
+        $data['tanggal_penyetuju'] = now();
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_do_penjualan', $fileName, 'public');
+            // dd($filePath);
+            $data['file'] = $filePath;
+        }
+        // dd($data);
+
+        $update = DeliveryOrder::where('id', $dopenjualanIds)->update($data);
+        if($update){
+            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+        }else{
+            return redirect()->back()->with('fail', 'Gagal Menyimpan Data');
+        }
+
     }
 }
