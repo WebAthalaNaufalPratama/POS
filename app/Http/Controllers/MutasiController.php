@@ -1737,5 +1737,179 @@ class MutasiController extends Controller
         return view('mutasighgalery.payment', compact('totaltagihan','pembayarans','cekInvoice','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
+    public function audit_GO($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigo', $mutasis->no_mutasi)->get();
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        foreach($mutasis->produkMutasi as $produk)
+        {
+            $coba[] = $produk->id;
+        }
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = Produk_Jual::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+
+        // dd($mutasis);
+        return view('mutasigalery.audit', compact('perangkai','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+    }
+
+    public function audit_GOUpdate(Request $req)
+    {
+        // dd($req);
+
+        $mutasis = $req->input('mutasiGO');
+        $data = $req->except(['_method', '_token', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO']);
+        dd($data);
+
+        $data['dibukukan_id'] = Auth::user()->id;
+        $data['tanggal_dibukukan'] = now();
+
+        $update = Mutasi::where('id', $mutasis)->update($data);
+        if($update){
+            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+        }else{
+            return redirect()->back()->with('fail', 'Gagal Mengupdate Data');
+        }
+
+    }
+
+    public function audit_OG($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasiog', $mutasis->no_mutasi)->get();
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = Produk_Terjual::all();
+        // dd($produkjuals);
+        $selectedGFTKomponen = [];
+        $perPendapatan = [];
+        
+        foreach ($mutasis->produkMutasiOutlet as $produk) {
+            // dd($produk);
+            $selectedGFTKomponen = [];
+            
+            foreach ($produkjuals as $index => $pj) {
+                // dd($produkjuals);
+                if($pj->produk && $produk->produk->kode)
+                {
+                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_mutasiog ==  $produk->no_mutasiog && $pj->jenis != 'TAMBAHAN');
+                
+                if ($isSelectedGFT) {
+                    foreach ($pj->komponen as $komponen) {
+                        if ($pj->id == $komponen->produk_terjual_id) {
+                            foreach ($kondisis as $kondisi) {
+                                if ($kondisi->id == $komponen->kondisi) {
+                                    $selectedGFTKomponen[$komponen->produk_terjual_id][] = [
+                                        'kode' => $komponen->kode_produk,
+                                        'nama' => $komponen->nama_produk,
+                                        'kondisi' => $kondisi->nama,
+                                        'jumlah' => $komponen->jumlah,
+                                        'produk' => $komponen->produk_terjual_id,
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+                }
+                
+            }
+
+            if (!empty($selectedGFTKomponen)) {
+                $perPendapatan += $selectedGFTKomponen;
+            }
+        }
+
+        // dd($perPendapatan);
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+
+        // dd($mutasis);
+        return view('mutasioutlet.audit', compact('perPendapatan','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+    }
+
+    public function audit_OGUpdate()
+    {
+
+    }
+
+    public function audit_GAG($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigag', $mutasis->no_mutasi)->get();
+        // dd($produks);
+        foreach($produks as $produk)
+        {
+            // dd($produk);
+        }
+        
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        foreach($mutasis->produkMutasi as $produk)
+        {
+            $coba[] = $produk->id;
+        }
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = InventoryGreenHouse::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+
+        // dd($mutasis);
+        return view('mutasigalerygalery.audit', compact('produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+    }
+
+    public function audit_GAGUpdate()
+    {
+
+    }
+
+    public function audit_GG($mutasi)
+    {
+        $lokasis = Lokasi::all();
+        $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigg', $mutasis->no_mutasi)->get();
+        // dd($produks);
+        foreach($produks as $produk)
+        {
+            // dd($produk);
+        }
+        
+        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
+        foreach($mutasis->produkMutasi as $produk)
+        {
+            $coba[] = $produk->id;
+        }
+        // dd($coba);
+        // $produks = Produk_Jual::with('komponen.kondisi')->get();
+        $kondisis = Kondisi::all();
+        $produkjuals = InventoryGreenHouse::all();
+        $bankpens = Rekening::all();
+        $ongkirs = Ongkir::all();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+
+        // dd($mutasis);
+        return view('mutasighgalery.audit', compact('produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
+    }
+
+    public function audit_GGUpdate()
+    {
+
+    }
+
 
 }

@@ -25,12 +25,15 @@ class PembayaranController extends Controller
         // dd($user);
         if($lokasi->lokasi->tipe_lokasi == 2){
             $penjualan = Penjualan::where('no_invoice', 'LIKE', 'IPO%')->where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $lokasi->pluck('id')->toArray();
+            $penjualanIds = $penjualan->pluck('id')->toArray();
+            // dd($penjualanIds);
             $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BOT%');
         }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
             $penjualan = Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $lokasi->pluck('id')->toArray();
+            $penjualanIds = $penjualan->pluck('id')->toArray();
+            // dd($penjualan);
             $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BYR%');
+            // dd($query);
         }else{
             $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
         }

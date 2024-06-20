@@ -21,7 +21,7 @@ class ReturPenjualan extends Model
 
     public function lokasi()
     {
-        return $this->belongsTo(Lokasi::class, 'lokasi_id');
+        return $this->belongsTo(Lokasi::class, 'lokasi_id', 'id');
     }
 
     public function produk(){

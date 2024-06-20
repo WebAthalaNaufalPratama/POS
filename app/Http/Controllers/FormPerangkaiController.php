@@ -10,6 +10,7 @@ use App\Models\InventoryGallery;
 use App\Models\InventoryOutlet;
 use App\Models\Komponen_Produk_Terjual;
 use Illuminate\Http\Request;
+use App\Models\Penjualan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use PDF;
@@ -363,12 +364,27 @@ class FormPerangkaiController extends Controller
         // } else {
         //     $data = $query->get();
         // }
+
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
+        // dd($lokasi);
+        if($lokasi->lokasi->tipe_lokasi == 1){
+            $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
+            $penjualanIds = $penjualan->pluck('no_invoice')->toArray();
+            $pj = Produk_Terjual::whereIn('no_invoice', $penjualanIds)->get();
+            $no_form = $pj->pluck('no_form')->toArray();
+            // dd($pj);
+            $query = FormPerangkai::whereHas('produk_terjual')->whereIn('no_form', $no_form);
+        }else{
+            $query = FormPerangkai::whereHas('produk_terjual');
+        }
+
         $perangkai = FormPerangkai::select('perangkai_id')
         ->distinct()
         ->join('karyawans', 'form_perangkais.perangkai_id', '=', 'karyawans.id')
         ->orderBy('karyawans.nama')
         ->get();
-        $query = FormPerangkai::whereHas('produk_terjual');
+        // $query = FormPerangkai::whereHas('produk_terjual');
         if($req->jenis_rangkaian){
             $query->where('jenis_rangkaian', $req->jenis_rangkaian);
         }
