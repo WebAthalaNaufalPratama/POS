@@ -54,7 +54,7 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_sewa }}</td>
                             <td>{{ $item->no_invoice }}</td>
-                            <td>{{ $item->sewa->customer->nama }}</td>
+                            <td>{{ $item->kontrak->customer->nama }}</td>
                             <td>{{ formatTanggal($item->jatuh_tempo) }}</td>
                             <td>{{ formatRupiah($item->total_tagihan) }}</td>
                             <td>{{ formatRupiah($item->dp) }}</td>
@@ -65,6 +65,9 @@
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                 </a>
                                 <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{{ route('invoice_sewa.cetak', ['invoice_sewa' => $item->id]) }}" class="dropdown-item" target="blank"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
+                                    </li>
                                     <li>
                                         <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
+use PDF;
 
 class InvoiceSewaController extends Controller
 {
@@ -239,5 +240,14 @@ class InvoiceSewaController extends Controller
     public function destroy(InvoiceSewa $invoiceSewa)
     {
         //
+    }
+
+    public function cetak($id)
+    {
+        $data = InvoiceSewa::with('kontrak', 'produk', 'produk.produk', 'data_sales', 'data_pembuat', 'data_pemeriksa', 'data_penyetuju', 'kontrak.lokasi', 'kontrak.customer')->find($id)->toArray();
+        // dd($data);
+        $pdf = PDF::loadView('invoice_sewa.invoicepdf', $data);
+
+        return $pdf->stream('Invoice.pdf');
     }
 }

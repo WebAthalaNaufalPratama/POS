@@ -417,6 +417,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{invoice_sewa}/edit', 'InvoiceSewaController@edit')->name('invoice_sewa.edit');
             Route::patch('/{invoice_sewa}/update', 'InvoiceSewaController@update')->name('invoice_sewa.update');
             Route::get('/{invoice_sewa}/delete', 'InvoiceSewaController@destroy')->name('invoice_sewa.destroy');
+            Route::get('/{invoice_sewa}/cetak', 'InvoiceSewaController@cetak')->name('invoice_sewa.cetak');
         });
 
         Route::group(['prefix' => 'pembayaran_sewa'], function() {
