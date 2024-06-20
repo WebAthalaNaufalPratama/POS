@@ -161,7 +161,7 @@ Carbon::setLocale('id');
                                                         @endforeach
                                                     </select> --}}
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->produkretur ? ($item->jml_diterima + $item->produkretur->jumlah) : $item->jml_diterima }}"
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{( $item->produkretur) ? ($item->jml_diterima + $item->produkretur->jumlah) : $item->jml_diterima }}"
                                                         readonly></td>
                                                     <td><input type="text" name="kondisi[]" id="kondisi_0" class="form-control" value="{{ $item->kondisi->nama ?? ''}}" readonly></td>
 
