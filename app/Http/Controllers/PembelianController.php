@@ -684,11 +684,11 @@ class PembelianController extends Controller
                 $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
 
                 if($jenis == 'Retur'){
-                    if ($produk_retur->produkbeli->pembelian->lokasi->tipe == 'Galery' ) {
+                    if ($produk_retur->produkbeli->pembelian->lokasi->tipe_lokasi == 1 ) {
                         $getInven = InventoryGallery::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
                         $getInven->jumlah -= $produk_retur->jumlah;
                         $getInven->update();
-                    }elseif($produk_retur->produkbeli->pembelian->lokasi->tipe == 'Greenhouse' ){
+                    }elseif($produk_retur->produkbeli->pembelian->lokasi->tipe_lokasi == 3 ){
                         $getInven = InventoryGreenHouse::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
                         $getInven->jumlah -= $produk_retur->jumlah;
                         $getInven->update();
