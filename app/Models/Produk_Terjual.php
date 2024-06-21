@@ -64,4 +64,12 @@ class Produk_Terjual extends Model
     public function kembali_sewa(){
         return $this->belongsTo(KembaliSewa::class,'no_kembali_sewa', 'no_kembali');
     }
+
+    public function penjualan(){
+        return $this->belongsTo(Penjualan::class, 'no_invoice', 'no_invoice');
+    }
+
+    public function mutasi(){
+        return $this->belongsTo(Mutasi::class, 'no_mutasigo', 'no_mutasi');
+    }
 }

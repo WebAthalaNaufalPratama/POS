@@ -61,6 +61,11 @@
                                     </a>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" href="{{ route('formpenjualan.show', ['formpenjualan' => $item->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        @if($jenis == 'Penjualan')
+                                            <a href="{{ route('formpenjualan.cetak', ['formpenjualan' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak</a>
+                                        @elseif($jenis == 'MUTASIGO')
+                                            <a href="{{ route('formmutasigalery.cetak', ['mutasiGO' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak</a>
+                                        @endif
                                     </div>
                                 </div>
                             </td>

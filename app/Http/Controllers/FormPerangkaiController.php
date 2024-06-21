@@ -11,6 +11,7 @@ use App\Models\InventoryOutlet;
 use App\Models\Komponen_Produk_Terjual;
 use Illuminate\Http\Request;
 use App\Models\Penjualan;
+use App\Models\Mutasi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use PDF;
@@ -120,6 +121,22 @@ class FormPerangkaiController extends Controller
     {
         $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.sewa', 'produk_terjual.produk', 'produk_terjual.sewa.data_sales', 'produk_terjual.sewa.lokasi')->find($id)->toArray();
         $pdf = PDF::loadView('kontrak.formpdf', $data);
+
+        return $pdf->stream('Form-Perangkai.pdf');
+    }
+
+    public function cetak_penjualan($id)
+    {
+        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.penjualan', 'produk_terjual.produk', 'produk_terjual.penjualan.karyawan', 'produk_terjual.penjualan.lokasi')->find($id)->toArray();
+        $pdf = PDF::loadView('penjualan.formpdf', $data);
+
+        return $pdf->stream('Form-Perangkai.pdf');
+    }
+
+    public function cetak_mutasigalery($id)
+    {
+        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.mutasi', 'produk_terjual.produk', 'produk_terjual.mutasi.dibuat', 'produk_terjual.mutasi.pengirim')->find($id)->toArray();
+        $pdf = PDF::loadView('mutasigalery.formpdf', $data);
 
         return $pdf->stream('Form-Perangkai.pdf');
     }
@@ -368,16 +385,31 @@ class FormPerangkaiController extends Controller
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         // dd($lokasi);
-        if($lokasi->lokasi->tipe_lokasi == 1){
-            $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $penjualan->pluck('no_invoice')->toArray();
-            $pj = Produk_Terjual::whereIn('no_invoice', $penjualanIds)->get();
-            $no_form = $pj->pluck('no_form')->toArray();
+        if($req->jenis_rangkaian == 'Penjualan')
+        {
+            if($lokasi->lokasi->tipe_lokasi == 1){
+                $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
+                $penjualanIds = $penjualan->pluck('no_invoice')->toArray();
+                $pj = Produk_Terjual::whereIn('no_invoice', $penjualanIds)->get();
+                $no_form = $pj->pluck('no_form')->toArray();
+                // dd($pj);
+                $query = FormPerangkai::whereHas('produk_terjual')->whereIn('no_form', $no_form);
+            }else{
+                $query = FormPerangkai::whereHas('produk_terjual');
+            }
+        }elseif($req->jenis_rangkaian == 'MUTASIGO')
+        {
+            $penjualan = Mutasi::where('pengirim', $lokasi->lokasi_id)->get();
+            $penjualanIds = $penjualan->pluck('no_mutasi')->toArray();
+            // dd($penjualanIds);
+            $pj = Produk_Terjual::whereNotNull('no_form')->whereIn('no_mutasigo', $penjualanIds)->get();
             // dd($pj);
+            $no_form = $pj->pluck('no_form')->toArray();
+            // dd($no_form);
             $query = FormPerangkai::whereHas('produk_terjual')->whereIn('no_form', $no_form);
-        }else{
-            $query = FormPerangkai::whereHas('produk_terjual');
         }
+
+        $jenis = $req->jenis_rangkaian;
 
         $perangkai = FormPerangkai::select('perangkai_id')
         ->distinct()
@@ -398,7 +430,7 @@ class FormPerangkaiController extends Controller
             $query->where('tanggal', '<=', $req->input('dateEnd'));
         }
         $data = $query->get();
-        return view('form_jual.index', compact('data', 'perangkai'));
+        return view('form_jual.index', compact('jenis', 'data', 'perangkai'));
     }
 
     public function penjualan_show($formpenjualan)
