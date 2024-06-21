@@ -246,8 +246,14 @@
                                                         </div> -->
                                                         </td>
                                                         <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.',)}}"></td>
-                                                        <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
-                                                        <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @php
+                                                            $user = Auth::user();
+                                                            $karyawan = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                                                        @endphp
+                                                        @if($karyawan->lokasi->tipe_lokasi == 1)
+                                                            <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
+                                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @endif
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
                                                         @php
                                                         $i++;

@@ -667,6 +667,8 @@
             getDataGift(produk_id);
         });
 
+        
+
         function getDataGift(produk_id) {
             var data = {
                 produk_id: produk_id,
@@ -779,6 +781,16 @@
                 $('#komponen_id_' + i).select2();
                 $('#kondisi_id_' + i).select2();
             }
+        });
+
+        function parseRupiahToNumber(rupiah) {
+            return parseInt(rupiah.replace(/[^\d]/g, ''));
+        }
+
+        $('form').on('submit', function(e) {
+            $('#biaya_pengiriman').val(parseRupiahToNumber($('#biaya_pengiriman').val()));
+            $('#total_biaya').val(parseRupiahToNumber($('#total_biaya').val()));
+
         });
 
 
@@ -1094,16 +1106,6 @@
                 }
             });
         }
-
-        function parseRupiahToNumber(rupiah) {
-            return parseInt(rupiah.replace(/[^\d]/g, ''));
-        }
-
-        $('form').on('.submit', function(e) {
-            $('#biaya_pengiriman').val(parseRupiahToNumber($('#biaya_pengiriman').val()));
-            $('#total_biaya').val(parseRupiahToNumber($('#total_biaya').val()));
-
-        });
 
         function Totaltagihan() {
             var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
