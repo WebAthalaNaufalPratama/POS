@@ -83,8 +83,8 @@
                                                 $user = Auth::user();
                                                 $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                             @endphp
-                                            @if($user->hasRole(['Auditor']))
-                                                <a class="dropdown-item" href="{{ route('auditretur.edit', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Auditor</a>
+                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                                <a class="dropdown-item" href="{{ route('auditretur.edit', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Auditor</a>
                                             @endif
                                             @if($lokasi->lokasi->tipe_lokasi != 2)
                                                 <a class="dropdown-item" href="{{ route('returpenjualan.show', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Atur Komponen Ganti</a>

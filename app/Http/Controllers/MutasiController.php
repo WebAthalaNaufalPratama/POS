@@ -1766,7 +1766,7 @@ class MutasiController extends Controller
 
         $mutasis = $req->input('mutasiGO');
         $data = $req->except(['_method', '_token', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO']);
-        dd($data);
+        // dd($data);
 
         $data['dibukukan_id'] = Auth::user()->id;
         $data['tanggal_dibukukan'] = now();
@@ -1840,9 +1840,35 @@ class MutasiController extends Controller
         return view('mutasioutlet.audit', compact('perPendapatan','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
-    public function audit_OGUpdate()
+    public function audit_OGUpdate(Request $req)
     {
+        // dd($req);
+        $mutasis = $req->input('mutasiOG');
 
+        $allkeys = array_keys($req->all());
+
+        $komponens = ['_token', '_method','nama_produk', 'kodegiftproduk', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk', 'kondisitradproduk', 'jumlahtradproduk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiOG'];
+
+        $filter = array_filter($allkeys, function($key) use ($komponens){
+            foreach($komponens as $komponen){
+                if(strpos($key, $komponen)  === 0){
+                    return true;
+                }
+            }
+        });
+        $data = $req->except($filter);
+        // dd($data);
+
+        $data['dibukukan_id'] = Auth::user()->id;
+        $data['tanggal_dibukukan'] = now();
+        // dd($data);
+
+        $update = Mutasi::where('id', $mutasis)->update($data);
+        if($update){
+            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+        }else{
+            return redirect()->back()->with('fail', 'Gagal Mengupdate Data');
+        }
     }
 
     public function audit_GAG($mutasi)
@@ -1873,9 +1899,22 @@ class MutasiController extends Controller
         return view('mutasigalerygalery.audit', compact('produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
-    public function audit_GAGUpdate()
+    public function audit_GAGUpdate(Request $req)
     {
+        // dd($req);
+        $mutasis = $req->input('mutasiGAG');
+        $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG']);
+        // dd($data);
 
+        $data['dibukukan_id'] = Auth::user()->id;
+        $data['tanggal_dibukukan'] = now();
+
+        $update = Mutasi::where('id', $mutasis)->update($data);
+        if($update){
+            return redirect()->back()->with('success', 'Berhasil Menyimpan Data');
+        }else{
+            return redirect()->back()->with('fail', 'Gagal Menyimpan Data');
+        }
     }
 
     public function audit_GG($mutasi)
@@ -1906,8 +1945,34 @@ class MutasiController extends Controller
         return view('mutasighgalery.audit', compact('produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
-    public function audit_GGUpdate()
+    public function audit_GGUpdate(Request $req)
     {
+        // dd($req);
+
+        $mutasis = $req->input('mutasiGG');
+
+        $allkeys = array_keys($req->all());
+        $keys = ['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGG'];
+        $filter = array_filter($allkeys, function($key) use ($keys){
+            foreach($keys as $ke){
+                if(strpos($ke, $key) === 0){
+                    return true;
+                }
+            }
+        });
+
+        $data = $req->except($filter);
+
+        // dd($data);
+        $data['dibukukan_id'] = Auth::user()->id;
+        $data['tanggal_dibukukan'] = now();
+
+        $update = Mutasi::where('id', $mutasis)->update($data);
+        if($update){
+            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+        }else{
+            return redirect()->back()->with('fail', 'Gagal Menyimpan Data');
+        }
 
     }
 

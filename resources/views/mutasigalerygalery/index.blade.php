@@ -63,8 +63,8 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
-                                        @if($user->hasRole(['Auditor']))
-                                            <a class="dropdown-item" href="{{ route('auditmutasigalerygalery.edit', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Audit</a>
+                                        @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                            <a class="dropdown-item" href="{{ route('auditmutasigalerygalery.edit', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
                                         @endif
                                         @if($lokasi->lokasi_id == $mutasi->lokasi_id)
                                             <a class="dropdown-item" href="{{ route('mutasigalerygalery.payment', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
