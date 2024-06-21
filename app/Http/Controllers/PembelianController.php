@@ -667,8 +667,8 @@ class PembelianController extends Controller
 
         $save = ReturPembelian::create($data);
 
-        if ($save) {
-            $newSubtotal = 0;
+        if ($save) {        
+
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
                 $produkReturBeli = [
                     'returpembelian_id' => $save->id,
@@ -679,74 +679,82 @@ class PembelianController extends Controller
                     'diskon' => $data['diskon'][$i] ?? 0,
                     'totharga' => $data['harga_total'][$i]
                 ];
-        $produk_retur = Produkretur::create($produkReturBeli);
 
+                $produk_retur = Produkretur::create($produkReturBeli);
+                
                 $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
-
-                if($jenis == 'Retur'){
-                    if ($produk_retur->produkbeli->pembelian->lokasi->tipe == 'Galery' ) {
-                        $getInven = InventoryGallery::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
-                        $getInven->jumlah -= $produk_retur->jumlah;
+                if($jenis == 'Retur' || 'Refund'){
+                    if ($getProdukBeli->pembelian->lokasi->tipe_lokasi == 1 ) {
+                        $getInven = InventoryGallery::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
+                        $getInven->jumlah -=  $data['jumlah'][$i];
                         $getInven->update();
-                    }elseif($produk_retur->produkbeli->pembelian->lokasi->tipe == 'Greenhouse' ){
-                        $getInven = InventoryGreenHouse::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
-                        $getInven->jumlah -= $produk_retur->jumlah;
+                    }elseif($getProdukBeli->pembelian->lokasi->tipe_lokasi == 3 ){
+                        $getInven = InventoryGreenHouse::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
+                        $getInven->jumlah -=  $data['jumlah'][$i];
                         $getInven->update();
                     }
+                } 
 
-
-
-                    $updateproduk = [
-                        'type_komplain' => $jenis,
-                        'qty_komplain' => $data['jumlah'][$i],
-                        'totalharga' => ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon),
-                    ];
-
-                        $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
-
-                        $newSubtotal += ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
-                
-                        $getInvoice = Invoicepo::find($data['invoicepo_id']);
-                        $getInvoice->subtotal = $newSubtotal;
-                        $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + $getInvoice->ppn + $data['ongkir'];
-                        $getInvoice->sisa = $getInvoice->total_tagihan;
-                        $check = $getInvoice->update();
-
-                } elseif($jenis == 'Diskon') {
-
-                    $newSubtotal += $data['harga_total'][$i];
-                    $totalharga = ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
-
-                    $updateproduk = [
-                        'type_komplain' => $jenis,
-                        'qty_komplain' => $data['jumlah'][$i],
-                        'totalharga' => $totalharga
-                    ];
-
+                $totalharga = ($getProdukBeli->jml_diterima - $data['jumlah'][$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
+                $updateproduk = [
+                    'type_komplain' => $jenis,
+                    'qty_komplain' => $data['jumlah'][$i],
+                    'totalharga' =>  $totalharga
+                ];
 
                 $update = Produkbeli::where('id', $data['nama_produk'][$i])->update($updateproduk);
-
-                $newSubtotal += $totalharga;
-                
-                $getInvoice = Invoicepo::find($data['invoicepo_id']);
-                $getInvoice->subtotal = $newSubtotal;
-                $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + $getInvoice->ppn;
-                $getInvoice->sisa = $getInvoice->total_tagihan;
-                $check = $getInvoice->update();
-                
-                if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
-
-                }
-
 
                 if (!$update) {
                     return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
             }
+            
+            $getInvoice = Invoicepo::find($data['invoicepo_id']);
+            $newSubtotal = $getInvoice->subtotal;
+            $getretur = Returpembelian::where('id',$save->id)->first();
+            // $getProdukbeli = Produkbeli::where('pembelian_id',  $getInvoice->pembelian_id)->get();
+            $getProdukretur = Produkretur::where('returpembelian_id',$save->id)->get();
 
-          
+           
+            
+            // Menjumlahkan seluruh nilai totalharga dari getProdukbeli
 
-            return redirect()->back()->withInput()->with('success', 'Berhasil Menyimpan Data');
+            // foreach ($getProdukbeli as $produkbeli) {
+            //     $sumProdukbeli -= $produkbeli->totalharga;
+            // }
+            
+            // Menghitung nilai newSubtotal
+            // $newSubtotal = $sumProdukretur + $sumProdukbeli;
+
+
+            if($jenis == 'Retur'){
+                $subretur = $newSubtotal - $getretur->subtotal;
+                $getInvoice->subtotal = $subretur ;
+                $getInvoice->total_tagihan = $subretur  + $getInvoice->biaya_kirim + $getInvoice->ppn + $getretur->ongkir;
+                $getInvoice->sisa = $getInvoice->total_tagihan;
+                $check = $getInvoice->update();
+            }elseif($jenis == 'Refund'){
+                $subrefund = $newSubtotal - $getretur->subtotal;
+                $getInvoice->subtotal = $subrefund ;
+                $getInvoice->total_tagihan = $subrefund  + $getInvoice->biaya_kirim + $getInvoice->ppn + $getretur->ongkir;
+                // $getInvoice->sisa = $getInvoice->total_tagihan;
+                $check = $getInvoice->update();
+            }else{
+
+                foreach ($getProdukretur as $produkretur) {
+                    $newSubtotal -= ($produkretur->jumlah * $produkretur->diskon);
+                }
+                $getInvoice->subtotal = $newSubtotal;
+                $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + $getInvoice->ppn;
+                $getInvoice->sisa = $getInvoice->total_tagihan;
+                $check = $getInvoice->update(); 
+            }
+            
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
+
+            // return redirect('returbeli.show',)->withInput()->with('success', 'Berhasil Menyimpan Data');
+            return redirect(route('returbeli.show', ['retur_id' => $save->id]))->with('success', 'Berhasil Menyimpan Data');
+
         }
     }
 
