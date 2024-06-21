@@ -326,22 +326,24 @@ class PembelianController extends Controller
 
     public function generateReturNumber() {
         $tgl_today = date('Y-m-d');
-        
-        // Cari urutan terakhir nomor PO pada hari ini
+    
+        // Cari urutan terakhir nomor retur pada hari ini
         $lastInv = Returpembelian::whereDate('created_at', $tgl_today)->orderBy('id', 'desc')->first();
     
-        // Jika tidak ada nomor PO pada hari ini, urutan diinisialisasi dengan 1
+        // Jika tidak ada nomor retur pada hari ini, urutan diinisialisasi dengan 1
         $urutan = 1;
         if ($lastInv) {
-            // Jika ada nomor PO pada hari ini, ambil urutan berikutnya
-            $urutan = intval(substr($lastInv->no_inv, -3)) + 1;
+            // Jika ada nomor retur pada hari ini, ambil urutan berikutnya
+            $lastNumber = substr($lastInv->no_retur, -3);
+            $urutan = intval($lastNumber) + 1;
         }
     
-        // Format nomor PO dengan pola 'RPM_tgl_urutanpo'
+        // Format nomor retur dengan pola 'RPM_tgl_urutanretur'
         $nomor_retur = 'RPM_' . date('Ymd') . '_' . str_pad($urutan, 3, '0', STR_PAD_LEFT);
         
         return $nomor_retur;
     }
+    
     
     
     public function create() {
@@ -371,6 +373,7 @@ class PembelianController extends Controller
         $invoice = Invoicepo::with('pembelian', 'pembelian.produkbeli', 'pembelian.produkbeli.produk')->find($req->invoice);
         $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
         $nomor_retur = $this->generateReturNumber();
+        // return $nomor_retur;
 
         return view('purchase.createretur', compact('nomor_retur', 'lokasi', 'invoice'));
 
@@ -681,11 +684,11 @@ class PembelianController extends Controller
                 $getProdukBeli = Produkbeli::where('id', $data['nama_produk'][$i])->first();
 
                 if($jenis == 'Retur'){
-                    if ($produk_retur->produkbeli->pembelian->lokasi->tipe == 1 ) {
+                    if ($produk_retur->produkbeli->pembelian->lokasi->tipe == 'Galery' ) {
                         $getInven = InventoryGallery::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
                         $getInven->jumlah -= $produk_retur->jumlah;
                         $getInven->update();
-                    }elseif($produk_retur->produkbeli->pembelian->lokasi->tipe == 3 ){
+                    }elseif($produk_retur->produkbeli->pembelian->lokasi->tipe == 'Greenhouse' ){
                         $getInven = InventoryGreenHouse::where('kode_produk', $produk_retur->produkbeli->produk->kode)->where('lokasi_id', $produk_retur->produkbeli->pembelian->lokasi_id)->where('kondisi_id', $produk_retur->produkbeli->kondisi_id)->first();
                         $getInven->jumlah -= $produk_retur->jumlah;
                         $getInven->update();
@@ -781,6 +784,14 @@ class PembelianController extends Controller
             return view('purchase.showpoinden',compact('beli','produkbelis','pembuat','pemeriksa','pembuatjbt','pemeriksajbt'));
            
         }
+     }
+
+     public function show_returpo(Request $req, $id)
+     {
+        $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+        $data = Returpembelian::with('invoice', 'produkretur')->find($id);
+
+        return view('purchase.showreturpo', compact('data', 'lokasi'));
      }
 
     /**

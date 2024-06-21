@@ -112,7 +112,7 @@ Carbon::setLocale('id');
                                                     <td hidden><input type="text" name="id[]" id="id{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
                                                     <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
                                                     <td><input type="text" name="nama[]" id="nama_{{ $index }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ ($item->jml_diterima - $item->qty_komplain )}}" readonly></td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
@@ -351,6 +351,17 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
+                                                @if ( $retur->ongkir !== null)
+                                                <li>
+                                                    <h4>Biaya Pengiriman {{ $retur->komplain }}</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($inv_po->retur->ongkir) }}" readonly required>
+                                                        </div>    
+                                                    </h5>
+                                                </li>
+                                                @endif
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
                                                     <h5>
