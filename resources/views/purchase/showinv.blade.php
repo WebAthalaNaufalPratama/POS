@@ -351,7 +351,7 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
-                                                @if ( $retur->ongkir !== null)
+                                                @if ( $retur && $retur->ongkir !== null)
                                                 <li>
                                                     <h4>Biaya Pengiriman {{ $retur->komplain }}</h4>
                                                     <h5>

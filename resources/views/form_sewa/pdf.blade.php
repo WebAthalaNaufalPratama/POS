@@ -148,15 +148,29 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- @foreach ($produk_terjual as $item) --}}
-                    <tr>
-                        {{-- <td>{{ $loop->iteration }}</td> --}}
-                        <td>1</td>
-                        <td>{{ $produk_terjual['produk']['nama'] }}</td>
-                        <td>{{ $produk_terjual['jumlah'] }}</td>
-                        <td>-</td>
-                    </tr>
-                {{-- @endforeach --}}
+                @php
+                    $jmlRow = count($produk_terjual['komponen']);
+                @endphp
+                <tr>
+                    <td>1</td>
+                    <td>{{ $produk_terjual['produk']['nama'] }}</td>
+                    <td>{{ $produk_terjual['jumlah'] }}</td>
+                    <td style="padding: 0;">
+                        <table class="full-width" style="border-collapse: collapse;">
+                            @foreach ($produk_terjual['komponen'] as $key => $item)
+                            <tr>
+                                @if($key != $jmlRow - 1)
+                                    <td style="border-left: none; border-top: none; border-right: none; border-bottom: 1px solid black; padding: 5px;">{{ $item['nama_produk'] }}</td>
+                                    <td style="border-left: 1px solid black; border-top: none; border-right: none; border-bottom: 1px solid black; padding: 5px;">{{ $item['jumlah'] }}</td>
+                                @else
+                                    <td style="border-left: none; border-top: none; border-right: none; border-bottom:none; padding: 5px;">{{ $item['nama_produk'] }}</td>
+                                    <td style="border-left: 1px solid black; border-top: none; border-right: none; border-bottom: none; padding: 5px;">{{ $item['jumlah'] }}</td>
+                                @endif
+                            </tr>
+                            @endforeach
+                        </table>
+                    </td>                    
+                </tr>
             </tbody>
         </table>
         <br><br><br>
