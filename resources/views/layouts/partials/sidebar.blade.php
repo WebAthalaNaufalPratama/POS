@@ -114,7 +114,7 @@
                     <ul>
                         @if(in_array('mutasigalery.index', $rolePermissions))
                             <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
-                            <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'MUTASIGO']) }}" class="{{ request()->is('formpenjualan*') ? 'active' : '' }}">Perangkai Mutasi GO</a></li>
+                            <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'MUTASIGO']) }}" class="{{ request()->is('formpenjualan?jenis_rangkaian=MUTASIGO') ? 'active' : '' }}">Perangkai Mutasi GO</a></li>
                         @endif
                         @if(in_array('mutasioutlet.index', $rolePermissions))
                             <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>

@@ -151,6 +151,8 @@ class PenjualanController extends Controller
         return view('penjualan.create', compact('ceklokasi','produkkompos', 'komponenproduks','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
     }
 
+    
+
 
     public function store(Request $req)
     {
@@ -182,7 +184,8 @@ class PenjualanController extends Controller
             return redirect()->back()->with('fail',$validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
-        // dd($data);
+        
+        
         // dd($req->distribusi);
         $data['dibuat_id'] = Auth::user()->id;
         $data['tanggal_dibuat'] = now();
@@ -199,6 +202,29 @@ class PenjualanController extends Controller
         {
             $data['jumlahCash'] = $req->nominal;
         }
+
+        function extractNumber($string) {
+            if (empty($string)) {
+                return 0;
+            }
+            $string = preg_replace('/[^\d,.]/', '', $string);
+            $string = str_replace(',', '.', $string);
+            return floatval($string);
+        }
+
+        $checkpromo = Promo::where('id', $data['promo_id'])->first();
+        if($checkpromo->diskon == 'poin'){
+            $totpromo = extractNumber($data['total_promo']);
+            $pakai = Customer::where('id', $data['id_customer'])->first();
+            // dd($pakai->poin_loyalty);
+            $num =  $pakai->poin_loyalty;
+            $num1 = floatval($num);
+            // dd($totpromo);
+            $poin['poin_loyalty'] = $totpromo + $num1;
+            // dd($poin);
+            $custpoin = Customer::where('id', $data['id_customer'])->update($poin);
+        }
+        // dd($checkpromo);
         
         //buat penjualan
         $penjualan = Penjualan::create($data);
@@ -211,6 +237,10 @@ class PenjualanController extends Controller
                 for ($i = 0; $i < count($data['nama_produk']); $i++) {
                     $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
                     // dd($getProdukJual);
+                    if($data['diskon'][$i] == 'NaN'){
+                        $data['diskon'][$i] = 0;
+                    }
+
                     $produkTerjualData = [
                         'produk_jual_id' => $getProdukJual->id,
                         'no_invoice' => $penjualan->no_invoice,
@@ -220,6 +250,8 @@ class PenjualanController extends Controller
                         'diskon' => $data['diskon'][$i],
                         'harga_jual' => $data['harga_total'][$i]
                     ];
+                    
+                    // dd($data);
                     
                     if ($req->distribusi == 'Dikirim') {
                         $produkTerjualData['jumlah_dikirim'] = $data['jumlah'][$i];
