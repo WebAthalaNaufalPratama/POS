@@ -68,7 +68,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Driver</label>
-                                            <select id="driver_id" name="driver_id" class="form-control" disabled>
+                                            <select id="driver_id" name="driver" class="form-control" disabled>
                                                 <option value="">Pilih Driver</option>
                                                 @foreach ($drivers as $driver)
                                                     <option value="{{ $driver->id }}" {{ $driver-> id == $data->driver ? 'selected' : '' }}>{{ $driver->nama }}</option>
@@ -278,14 +278,14 @@
                             </div>
                         </div>
                         <div class="col-md-4 border rounded mt-3 pt-3">
-                            <form action="{{ route('do_sewa.update', ['do_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">
+                            {{-- <form action="{{ route('do_sewa.update', ['do_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            @method('patch')
+                            @method('patch') --}}
                             <div class="custom-file-container" data-upload-id="myFirstImage">
                                 <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
                                 </label>
                                 <label class="custom-file-container__custom-file">
-                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
+                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" disabled>
                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                 </label>
                                 <span class="text-danger">max 2mb</span>
@@ -296,10 +296,10 @@
                 </div>
             </div>
             <div class="text-end mt-3">
-                <button class="btn btn-primary" type="submit">Upload File</button>
+                {{-- <button class="btn btn-primary" type="submit">Upload File</button> --}}
                 <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
             </div>
-            </form>
+            {{-- </form> --}}
             </div>
         </div>
     </div>

@@ -313,7 +313,7 @@
                         $(selectProduk).append('<option value="">Pilih Produk</option>')
                         for (let i = 0; i < response.length; i++) {
                             if(response[i].jenis != 'TAMBAHAN'){
-                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">'+response[i].id+''+response[i].detail_lokasi+'' + response[i].produk.nama + '</option>');
+                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">' + response[i].produk.nama + '</option>');
                                 $(lokasiProduk).append('<option value="' + response[i].detail_lokasi + '">' + response[i].detail_lokasi + '</option>');
                             }
                         }

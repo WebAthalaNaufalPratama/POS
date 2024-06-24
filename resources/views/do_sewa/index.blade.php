@@ -74,6 +74,9 @@
                                     <li>
                                         <a href="{{ route('do_sewa.show', ['do_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
+                                    <li>
+                                        <a href="{{ route('do_sewa.edit', ['do_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li>
                                 </ul>
                             </td>
                         </tr>
