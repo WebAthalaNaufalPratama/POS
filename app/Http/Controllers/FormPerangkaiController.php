@@ -119,8 +119,8 @@ class FormPerangkaiController extends Controller
 
     public function cetak($id)
     {
-        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.sewa', 'produk_terjual.produk', 'produk_terjual.sewa.data_sales', 'produk_terjual.sewa.lokasi')->find($id)->toArray();
-        $pdf = PDF::loadView('kontrak.formpdf', $data);
+        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.sewa', 'produk_terjual.produk', 'produk_terjual.sewa.data_sales', 'produk_terjual.sewa.lokasi', 'produk_terjual.komponen')->find($id)->toArray();
+        $pdf = PDF::loadView('form_sewa.pdf', $data);
 
         return $pdf->stream('Form-Perangkai.pdf');
     }

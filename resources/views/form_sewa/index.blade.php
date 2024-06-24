@@ -60,7 +60,7 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="{{ route('form.cetak', ['form' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
+                                        <a href="{{ route('form.cetak', ['form' => $item->id]) }}" target="_blank" class="dropdown-item"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
                                     </li>
                                     <li>
                                         <a href="{{ route('form.show', ['form' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
