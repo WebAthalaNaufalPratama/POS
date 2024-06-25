@@ -11,6 +11,7 @@ use App\Models\Penjualan;
 use App\Models\Rekening;
 use App\Models\Karyawan;
 use App\Models\Lokasi;
+use App\Models\Returpembelian;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -454,6 +455,7 @@ class PembayaranController extends Controller
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'bukti']);
         $invoice_tagihan = Invoicepo::find($data['invoice_purchase_id']);
+        
 
         // cek sisa bayar
         if($invoice_tagihan->sisa > 0){
@@ -465,7 +467,7 @@ class PembayaranController extends Controller
             if ($req->hasFile('bukti')) {
                 $file = $req->file('bukti');
                 $fileName = $invoice_tagihan->no_inv . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_po', $fileName, 'public');
+                $filePath = $file->storeAs('bukti_pembayaran_purchase', $fileName, 'public');
                 $data['bukti'] = $filePath;
             }
 
@@ -475,6 +477,11 @@ class PembayaranController extends Controller
             } else {
                 $data['status_bayar'] = 'BELUM LUNAS';
             }
+
+            if ($invoice_tagihan->dp === 0) {
+                $invoice_tagihan->update(['dp' => $req->nominal]);
+            }
+
             $pembayaran = Pembayaran::create($data);
 
             if(!$pembayaran) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
@@ -483,6 +490,64 @@ class PembayaranController extends Controller
         } else {
             return redirect()->back()->withInput()->with('fail', 'Invoice sudah lunas');
         }
+    }
+    public function bayar_refund(Request $req){
+        $validator = Validator::make($req->all(), [
+            'retur_pembelian_id' => 'required',
+            'no_invoice_bayar' => 'required',
+            'nominal' => 'required',
+            'tanggal_bayar' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+         // Mengolah metode pembayaran
+         $metode = $req->input('metode');
+         if (strpos($metode, 'transfer-') === 0) {
+             $cara_bayar = 'transfer';
+             $rekening_id = str_replace('transfer-', '', $metode);
+         } else {
+             $cara_bayar = $metode;
+             $rekening_id = null;
+         }
+
+        $data = $req->except(['_token', '_method', 'bukti','metode']);
+    
+        $tagihan_refund = Returpembelian::find($data['retur_pembelian_id']);
+
+        // cek sisa bayar
+        if($tagihan_refund->sisa > 0){
+            $tagihan_refund->sisa = intval($tagihan_refund->sisa) - intval($data['nominal']);
+            $check = $tagihan_refund->update();
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            // store file
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
+                $fileName = $tagihan_refund->no_retur . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = $file->storeAs('bukti_pembayaran_refundpurchase', $fileName, 'public');
+                $data['bukti'] = $filePath;
+            }
+
+            $new_refund_tagihan = Returpembelian::find($data['retur_pembelian_id']);
+            if($new_refund_tagihan->sisa <= 0){
+                $data['status_bayar'] = 'LUNAS';
+            } else {
+                $data['status_bayar'] = 'BELUM LUNAS';
+            }
+
+            $data['cara_bayar'] = $cara_bayar;
+            $data['rekening_id'] = $rekening_id;
+
+            $pembayaran = Pembayaran::create($data);
+
+            if(!$pembayaran) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            return redirect()->back()->with('success', 'Pembayaran berhasil');
+        } else {
+            return redirect()->back()->withInput()->with('fail', 'Invoice sudah lunas');
+        }
+
     }
 
 }

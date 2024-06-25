@@ -127,7 +127,7 @@
                             <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
                             <li><a href="#" class="">Mutasi Galery Ke Inden</a></li> --}}
                             <li><a href="{{ route('mutasiindengh.index') }}" class="{{ request()->is('mutasiIG*') ? 'active' : '' }}">Mutasi Inden Ke Galery/GreenHouse</a></li>
-                            <li><a href="#" class="">Mutasi Galery/Greenhouse Ke Inden</a></li>
+                            <li><a href="#" class="">Retur Inden</a></li>
                         @endif
                     </ul>
                 </li>

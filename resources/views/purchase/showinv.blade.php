@@ -8,6 +8,7 @@ Carbon::setLocale('id');
 @extends('layouts.app-von')
 
 @section('content')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <div class="page-header">
     <div class="row">
@@ -144,8 +145,18 @@ Carbon::setLocale('id');
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
                                     <div class="mb-4">
-                                        <h5>List Produk {{ $retur->komplain }}</h5>
-                                    </div>
+                                        <h5>List Produk {{ $retur->komplain }}</h5> 
+                                        <h6>Nomor: 
+                                            <span id="returNumber">{{ $retur->no_retur }}</span>
+                                            <i class="fa fa-copy" id="copyIcon" style="cursor: pointer; margin-left: 10px;"></i>
+                                        </h6>
+                                    </br>
+                                        @if($retur->komplain == "Retur")
+                                        <a href="{{ route('pembelian.create') }}" class="btn btn-primary" target="_blank">Buat Pembelian Baru</a>
+                                        @endif
+
+                                        
+                                   </div>
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>
@@ -321,18 +332,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                @if (!$retur)
-                                                <li>
-                                                    <h4>Total Diskon</h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span>
-                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
-                                                        </div>
-                                                    </h5>
-                                                  
-                                                </li>
-                                                @endif
+                                               
                                                 <li>
                                                     <h4>PPN</h4>
                                                     <h5 class="col-lg-5">
@@ -351,7 +351,18 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
-                                                @if ( $retur->ongkir !== null)
+                                                @if ($retur && $retur->komplain == 'Refund')
+                                                <li>
+                                                    <h4>Total Tagihan barang</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ formatRupiah2($inv_po->subtotal + $inv_po->ppn + $inv_po->biaya_kirim ) }}" readonly required>
+                                                        </div>    
+                                                    </h5>
+                                                </li>
+                                                @endif
+                                                @if ($retur)
                                                 <li>
                                                     <h4>Biaya Pengiriman {{ $retur->komplain }}</h4>
                                                     <h5>
@@ -371,6 +382,17 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
+                                                @if (!$retur)
+                                                <li>
+                                                    <h4>Total Diskon</h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
+                                                        </div>
+                                                    </h5>
+                                                  
+                                                </li>
                                                 <li>
                                                     <h4>DP</h4>
                                                     <h5>
@@ -382,6 +404,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
+                                                @endif
                                                 <li>
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>
@@ -518,6 +541,20 @@ Carbon::setLocale('id');
 
 @section('scripts')
 <script>
+
+    document.getElementById('copyIcon').addEventListener('click', function() {
+        var returNumber = document.getElementById('returNumber').innerText;
+        var tempInput = document.createElement('input');
+        tempInput.style.position = 'absolute';
+        tempInput.style.left = '-9999px';
+        tempInput.value = returNumber;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        alert('Nomor retur berhasil disalin: ' + returNumber);
+    });
+
     function formatRupiah(angka) {
             var reverse = angka.toString().split('').reverse().join('');
             var ribuan = reverse.match(/\d{1,3}/g);
