@@ -34,4 +34,8 @@ class Mutasi extends Model
     public function diterima(){
         return $this->belongsTo(User::class, 'penerima_id', 'id');
     }
+
+    public function pengirim(){
+        return $this->belongsTo(Lokasi::class, 'pengirim', 'id');
+    }
 }

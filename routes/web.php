@@ -361,6 +361,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{formpenjualan}/edit', 'FormPerangkaiController@penjualan_edit')->name('formpenjualan.edit');
             Route::patch('/{formpenjualan}/update', 'FormPerangkaiController@penjualan_update')->name('formpenjualan.update');
             Route::get('/{formpenjualan}/delete', 'FormPerangkaiController@penjualan_destroy')->name('formpenjualan.destroy');
+            Route::get('/{formpenjualan}/cetakpenjualan', 'FormPerangkaiController@cetak_penjualan')->name('formpenjualan.cetak');
         });
 
         Route::group(['prefix' => 'do_sewa'], function() {
@@ -460,6 +461,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGO}/view', 'MutasiController@view_outlet')->name('mutasigalery.view');
             Route::get('/{mutasiGO}/auditGO', 'MutasiController@audit_GO')->name('auditmutasigalery.edit');
             Route::patch('/auditmutasiGO', 'MutasiController@audit_GOUpdate')->name('auditmutasigalery.update');
+            Route::get('/{mutasiGO}/cetakmutasigalery', 'FormPerangkaiController@cetak_mutasigalery')->name('formmutasigalery.cetak');
         });
 
         Route::group(['prefix' => 'mutasiOG'], function() {

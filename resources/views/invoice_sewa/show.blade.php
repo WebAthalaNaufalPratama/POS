@@ -618,6 +618,12 @@
             }
         });
         function multiply(element) {
+            let input = $(element);
+            let value = input.val();
+            
+            if (!isNumeric(cleanNumber(value))) {
+            return false;
+            }
             var id = 0
             var jumlah = 0
             var harga_satuan = 0

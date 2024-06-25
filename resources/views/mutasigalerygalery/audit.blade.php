@@ -173,12 +173,12 @@
                                                         <tr>
                                                             <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
                                                             <td id="penyetuju">-</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            <td id="pemeriksa">{{ Auth::user()->name}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td id="tgl_pembuat" style="width: 25%;">{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}</td>
                                                             <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ date('Y-m-d')}}</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
