@@ -74,6 +74,9 @@
                     <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalPemakaianSendiri" class="btn btn-secondary d-flex justify-content-center align-items-center mt-1"><img src="assets/img/icons/plus.svg" style="filter: brightness(0) invert(1);" alt="img" class="me-1" />
                         Tambah Pemakaian
                     </a>                    
+                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalLog" class="btn btn-secondary d-flex justify-content-center align-items-center mt-1"><img src="assets/img/icons/plus.svg" style="filter: brightness(0) invert(1);" alt="img" class="me-1" />
+                        Log
+                    </a>                    
                 </div>
             </div>
         </div>
@@ -164,6 +167,66 @@
             <button type="submit" class="btn btn-primary">Simpan</button>
         </div>
     </form>
+      </div>
+    </div>
+</div>
+<div class="modal fade" id="modalLog" tabindex="-1" aria-labelledby="modalLoglabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLoglabel">Log</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+        </div>
+        <div class="modal-body">
+            <div class="table-responsive">
+                <table class="table datanew">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Waktu</th>
+                            <th>Pengubah</th>
+                            <th>Referensi</th>
+                            <th>Produk</th>
+                            <th>Komponen</th>
+                            <th>Kondisi</th>
+                            <th>Masuk</th>
+                            <th>Keluar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{-- @php
+                            $previousId = null;
+                        @endphp --}}
+                        @foreach ($mergedCollection as $key => $item)
+                            <tr>
+                                {{-- @if ($item['Id Produk Terjual'] == $previousId)
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                @else --}}
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item['Waktu'] }}</td>
+                                    <td>{{ $item['Pengubah'] }}</td>
+                                    <td>{{ $item['No Referensi'] }}</td>
+                                    <td>({{ $item['Kode Produk Jual'] }}) {{ $item['Nama Produk Jual'] }}</td>
+                                    {{-- @php
+                                        $previousId = $item['Id Produk Terjual'];
+                                    @endphp
+                                @endif --}}
+                                <td>({{ $item['Kode Komponen'] }}) {{ $item['Nama Komponen'] }}</td>
+                                <td>{{ $item['Kondisi'] }}</td>
+                                <td>{{ $item['Masuk'] }}</td>
+                                <td>{{ $item['Keluar'] }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>                
+            </div>
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
       </div>
     </div>
 </div>
