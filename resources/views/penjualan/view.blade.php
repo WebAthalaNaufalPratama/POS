@@ -32,7 +32,7 @@
             text-align: left;
         }
         header .nota-details h4{
-            width: 45%;
+            width: 100%;
         }
         header .nota {
             float: right;
@@ -198,12 +198,13 @@
             <div class="logo">
                 <img src="{{ base64_image(public_path('assets/img/von.png')) }}" alt="image">
             </div>
-            <div class="nota-details"> <!-- Perbaiki penulisan nama kelas -->
+            <div class="nota-details">
                 <h1>VONFLORIST</h1>
-                <h4><center>alamat : {{$lokasi}}</center></h4>
+                <h4>alamat : {{$lokasi}}</h4>
             </div>
-            <hr>
+            
         </header>
+        <hr>
 
         <div class="judul">
             <h1><center>INVOICE PENJUALAN</center></h1>
@@ -321,10 +322,15 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>BCA</td>
-                    <td>8030727658</td>
-                    <td>VON</td>
+                <tr>@if($cara_bayar == 'transfer')
+                        <td>{{ $bank ? $bank : '-' }}</td>
+                        <td>{{ $norek ? $norek : '-' }}</td>
+                        <td>{{ $akun ? $norek : '-'}}</td>
+                    @else
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    @endif
                 </tr>
             </tbody>
         </table> 

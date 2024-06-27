@@ -811,7 +811,9 @@ class ReturpenjualanController extends Controller
     {
         $penjualans = ReturPenjualan::with('produk_retur', 'deliveryorder')->find($returpenjualan);
         $returpenjualans = ReturPenjualan::with('deliveryorder')->find($returpenjualan);
-        $lokasis = Lokasi::all();
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->value('lokasi_id');
+        $lokasis = Lokasi::where('id', $karyawan)->get();
         $karyawans = Karyawan::all();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_retur', $returpenjualans->no_retur)->get();
         $produkjuals = Produk_Terjual::all();

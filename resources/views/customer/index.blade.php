@@ -49,6 +49,25 @@
                               </a>
                               <ul class="dropdown-menu">
                                   <li>
+                                    @php
+                                      $user = Auth::user();
+                                    @endphp
+                                    @if($user->hasRole(['SuperAdmin', 'Finance']))
+                                    <form action="{{ route('bukakunci.store', ['custome' => $custome->id]) }}" method="POST">
+                                        @csrf
+                                        @if($custome->status_buka == 'TUTUP')
+                                        <button type="submit" class="dropdown-item">
+                                            <img src="assets/img/icons/openlock.svg" class="me-2" alt="img">Buka Kunci
+                                        </button>
+                                        @else 
+                                        <button type="submit" class="dropdown-item">
+                                            <img src="assets/img/icons/lock.svg" class="me-2" alt="img">Tutup Kunci
+                                        </button>
+                                        @endif
+                                    </form>
+                                    @endif
+                                  </li>
+                                  <li>
                                       <a href="javascript:void(0);" onclick="getData({{ $custome->id }})" data-bs-toggle="modal" data-bs-target="#editcustomer" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                   </li>
                                   <li>

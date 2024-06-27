@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Models\Pembelian;
 use Illuminate\Support\Facades\Route;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +63,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::group(['prefix' => 'dashboard'], function() {
             Route::get('/', 'DashboardController@index')->name('dashboard.index');
             Route::post('/postauditor', 'DashboardController@update_auditor')->name('auditor.update');
+            Route::post('/bukakuncistore', 'DashboardController@bukakunci')->name('bukakunci.store');
         });
 
         /**

@@ -38,14 +38,9 @@ class DopenjualanController extends Controller
         $userroles = Auth::user()->roles()->value('name');
         // dd($user);
         if($lokasi->lokasi->tipe_lokasi == 2){
-            $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
-            $dopenjualan = $penjualan->pluck('no_invoice')->toArray();
-            $query = DeliveryOrder::whereIn('no_referensi', $dopenjualan)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
+            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
         }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
-            $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
-            $dopenjualan = $penjualan->pluck('no_invoice')->toArray();
-            // dd($dopenjualan);
-            $query = DeliveryOrder::whereIn('no_referensi', $dopenjualan)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
+            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
         }else{
             $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
         }
@@ -125,8 +120,10 @@ class DopenjualanController extends Controller
             // dd($filePath);
             $data['file'] = $filePath;
         }
+        $lokasipengirim = Penjualan::where('no_invoice', $req->referensi)->value('lokasi_pengirim');
+        $data['lokasi_pengirim'] = $lokasipengirim;
         // dd($data['nama_produk']);
-        $data['jenis_do'] = 'PENJUALAN';
+        $data['jenis_do'] = 'PENJUALAN'; 
         $data['status'] = 'DIKIRIM';
         $data['tanggal_pembuat'] = now();
         $data['pembuat'] = Auth::user()->id;
@@ -248,7 +245,7 @@ class DopenjualanController extends Controller
                     if (!$komponen_produk_terjual) {
                         return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
                     }
-                    $stok = InventoryGallery::where('lokasi_id', $invoice->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
+                    $stok = InventoryGallery::where('lokasi_id', $lokasipengirim)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
                     if(!$stok){
                         return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory');
                     }elseif($stok){
@@ -276,7 +273,7 @@ class DopenjualanController extends Controller
                 }
 
                 //pengurangan inven outlet
-                $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                $stok = InventoryOutlet::where('lokasi_id', $lokasipengirim)
                             ->where('kode_produk', $produk_terjual->produk->kode)
                             ->first();
                 // dd($stok);
@@ -345,7 +342,7 @@ class DopenjualanController extends Controller
                         if (!$komponen_produk_terjual) {
                             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
                         }
-                        $stok = InventoryGallery::where('lokasi_id', $invoice->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
+                        $stok = InventoryGallery::where('lokasi_id', $lokasipengirim)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
                         if(!$stok){
                             return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory');
                         }elseif($stok){
@@ -373,7 +370,7 @@ class DopenjualanController extends Controller
                     }
 
                     //pengurangan inven outlet
-                    $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                    $stok = InventoryOutlet::where('lokasi_id', $lokasipengirim)
                                 ->where('kode_produk', $produk_terjual->produk->kode)
                                 ->first();
                     // dd($stok);
