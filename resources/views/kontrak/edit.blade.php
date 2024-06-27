@@ -59,11 +59,9 @@
                                             <div class="form-group">
                                                 <label>Status</label>
                                                 <select id="status" name="status" class="form-control">
-                                                    <option value="">Pilih Status</option>
-                                                    <option value="DRAFT" {{ $kontraks->status == 'DRAFT' ? 'selected' : '' }}>Draft</option>
-                                                    <option value="AKTIF" {{ $kontraks->status == 'AKTIF' ? 'selected' : '' }}>Aktif</option>
-                                                    <option value="TIDAK AKTIF" {{ $kontraks->status == 'TIDAK AKTIF' ? 'selected' : '' }}>Tidak Aktif</option>
-                                                    <option value="SELESAI" {{ $kontraks->status == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
+                                                    <option value="TUNDA" {{ $kontraks->status == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $kontraks->status == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                    <option value="BATAL" {{ $kontraks->status == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -289,7 +287,7 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        <div class="row align-items-center">
+                                        {{-- <div class="row align-items-center">
                                             <div class="col-9 pe-0">
                                                 <select id="promo_id" name="promo_id" class="form-control" disabled>
                                                 </select>
@@ -298,42 +296,46 @@
                                             <div class="col-3 ps-0 mb-0">
                                                 <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
                                             </div>
+                                        </div> --}}
+                                        <div class="input-group">
+                                            <input type="text" id="promo_persen" name="promo_persen" value="{{ $kontraks->promo_persen ?? 0 }}" class="form-control" required aria-describedby="basic-addon3" oninput="validatePersen(this)">
+                                            <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ $kontraks->total_promo ?? 0 }}" required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPN</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ $kontraks->ppn_persen ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="ppn_persen" name="ppn_persen" value="{{ $kontraks->ppn_persen ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ $kontraks->ppn_nominal }}" readonly>
+                                        <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ $kontraks->ppn_nominal }}" required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">PPH</label>
                                     <div class="col-lg-9">
                                         <div class="input-group">
-                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ $kontraks->pph_persen ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                            <input type="number" id="pph_persen" name="pph_persen" value="{{ $kontraks->pph_persen ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" readonly>
+                                        <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
-                                        <div class="input-group">
+                                        {{-- <div class="input-group">
                                             <select id="ongkir_id" name="ongkir_id" class="form-control">
                                                 <option value="">Pilih Ongkir</option>
                                                 @foreach ($ongkirs as $ongkir)
                                                     <option value="{{ $ongkir->id }}" {{ $ongkir->id == $kontraks->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
                                                 @endforeach
                                             </select>
-                                        </div>
-                                        <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontraks->ongkir_nominal }}" readonly>
+                                        </div> --}}
+                                        <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontraks->ongkir_nominal }}" required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -412,20 +414,6 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            var total_transaksi = $('#subtotal').val();
-            var old_promo_id = $('#old_promo_id').val();
-            var produk = [];
-            var tipe_produk = [];
-            $('select[id^="produk_"]').each(function() {
-                produk.push($(this).val());
-                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
-            });
-            checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
-            $('#promo_id').trigger('change');
-            $('#sales').trigger('change');
-            calculatePromo(old_promo_id);
-
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = $('[id^=produk]').length;
             $('#add').click(function(){
@@ -445,28 +433,142 @@
                 $('#produk_' + i).select2();
                 i++;
            })
-           $(document).on('input', '[id^=harga_satuan]', function() {
+           $(document).on('input', '[id^=handhpone], #add_handphone, #ppn_persen, #pph_persen', function() {
                 let input = $(this);
                 let value = input.val();
                 
-                if (!isNumeric(cleanNumber(value))) {
+                if (!isNumeric(value)) {
                 value = value.replace(/[^\d]/g, "");
                 }
 
+                input.val(value);
+            });
+            $(document).on('input', '[id^=harga_satuan], #total_promo, #pph_nominal, #ppn_nominal, #ongkir_nominal', function() {
+                let input = $(this);
+                let value = input.val();
+                if (!isNumeric(cleanNumber(value))) {
+                    value = value.replace(/[^\d]/g, "");
+                }
                 value = cleanNumber(value);
                 let formattedValue = formatNumber(value);
                 
                 input.val(formattedValue);
             });
-           $(document).on('click', '.btn_remove', function() {
+            $(document).on('click', '.btn_remove', function() {
                 var button_id = $(this).attr("id");
                 $('#row'+button_id+'').remove();
                 multiply($('#harga_satuan_0'))
                 multiply($('#jumlah_0'))
             });
-            $('#ongkir_nominal, #total_promo, #ppn_persen, #pph_persen').on('input', function(){
+            // diskon start
+            $('#total_promo').on('input', function(){
+                $('#promo_persen').val(0);
+                var value = $(this).val().trim();
+
+                if (isNaN(value) || value === "") {
+                    return;
+                }
+                var total_promo = $(this).val();
+                var inputs = $('input[name="harga_total[]"]');
+                var total = 0;
+                inputs.each(function() {
+                    total += parseInt(cleanNumber($(this).val())) || 0;
+                });
+                $('#subtotal').val(formatNumber((total) - (cleanNumber(total_promo)))) 
+                update_pajak(cleanNumber($('#subtotal').val()));
                 total_harga();
-            })
+            });
+            $('#promo_persen').on('input', function(){
+                var promo_persen = $(this).val()
+                var inputs = $('input[name="harga_total[]"]');
+                var total = 0;
+                inputs.each(function() {
+                    total += parseInt(cleanNumber($(this).val())) || 0;
+                });
+                var total_promo = promo_persen * total / 100
+                $('#total_promo').val(formatNumber(total_promo))
+                $('#subtotal').val(formatNumber((total) - (total_promo)))
+                update_pajak(cleanNumber($('#subtotal').val()));
+                total_harga();
+            });
+            // diskon end
+
+
+            // ppn start
+            $('#ppn_nominal').on('input', function(){
+                $('#ppn_persen').val(0);
+                var value = $(this).val().trim();
+
+                if (isNaN(value) || value === "") {
+                    return;
+                }
+                var total_promo = $('#total_promo').val();
+                var inputs = $('input[name="harga_total[]"]');
+                var total = 0;
+                inputs.each(function() {
+                    total += parseInt(cleanNumber($(this).val())) || 0;
+                });
+                $('#subtotal').val(formatNumber((total) - (cleanNumber(total_promo)))) 
+                total_harga();
+            });
+            $('#ppn_persen').on('input', function(){
+                var total_promo = $('#total_promo').val();
+                var inputs = $('input[name="harga_total[]"]');
+                var total = 0;
+                inputs.each(function() {
+                    total += parseInt(cleanNumber($(this).val())) || 0;
+                });
+                $('#subtotal').val(formatNumber((total) - cleanNumber(total_promo)))
+
+                var subtotal = $('#subtotal').val();
+                var ppn_persen = $(this).val()
+                var ppn_nominal = ppn_persen * cleanNumber(subtotal) / 100
+                $('#ppn_nominal').val(formatNumber(ppn_nominal))
+                total_harga();
+            });
+            // ppn end
+
+
+            // pph start
+            $('#pph_nominal').on('input', function(){
+                $('#pph_persen').val(0);
+                var value = $(this).val().trim();
+
+                if (isNaN(value) || value === "") {
+                    return;
+                }
+                var total_promo = $('#total_promo').val();
+                var inputs = $('input[name="harga_total[]"]');
+                var total = 0;
+                inputs.each(function() {
+                    total += parseInt(cleanNumber($(this).val())) || 0;
+                });
+                $('#subtotal').val(formatNumber((total) - (cleanNumber(total_promo)))) 
+                total_harga();
+            });
+            $('#pph_persen').on('input', function(){
+                var total_promo = $('#total_promo').val();
+                var inputs = $('input[name="harga_total[]"]');
+                var total = 0;
+                inputs.each(function() {
+                    total += parseInt(cleanNumber($(this).val())) || 0;
+                });
+                $('#subtotal').val(formatNumber((total) - cleanNumber(total_promo)))
+
+                var subtotal = $('#subtotal').val();
+                var pph_persen = $(this).val()
+                var pph_nominal = pph_persen * cleanNumber(subtotal) / 100
+                $('#pph_nominal').val(formatNumber(pph_nominal))
+                total_harga();
+            });
+            // pph end
+
+
+            // ongkir start
+            $('#ongkir_nominal').on('input', function(){
+                total_harga();
+            });
+            // ongkir end
             let inputs = $('#editForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga');
             inputs.each(function() {
                 let input = $(this);
@@ -506,40 +608,6 @@
             var tanggalAkhir = tgl_mulai.toISOString().slice(0,10);
             $('#tanggal_selesai').val(tanggalAkhir);
             $('#masa_sewa').val(12);
-        });
-        $('#ongkir_id').on('change', function() {
-            var ongkir = $("#ongkir_id option:selected").text();
-            var biaya = ongkir.split('-')[1];
-            $('#ongkir_nominal').val(parseInt(biaya));
-            total_harga();
-        });
-        $('#btnCheckPromo').click(function(e) {
-            e.preventDefault();
-            var total_transaksi = $('#subtotal').val();
-            var produk = [];
-            var tipe_produk = [];
-            $('select[id^="produk_"]').each(function() {
-                produk.push($(this).val());
-                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
-            });
-            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
-            checkPromo(total_transaksi, tipe_produk, produk);
-        });
-        $('#promo_id').change(function() {
-            var promo_id = $(this).select2().find(":selected").val()
-            if(!promo_id){
-                $('#total_promo').val(0);
-                var inputs = $('input[name="harga_total[]"]');
-                var subtotal = 0;
-                inputs.each(function() {
-                    subtotal += parseInt(cleanNumber($(this).val())) || 0;
-                });
-                $('#subtotal').val(formatNumber(subtotal))
-                total_harga();
-                return 0;
-            } 
-            calculatePromo(promo_id);
         });
         $('#btnAddCustomer').click(function(e) {
             e.preventDefault()
@@ -590,11 +658,18 @@
             });
             var promo = cleanNumber($('#total_promo').val() ?? 0);
             $('#subtotal').val(formatNumber((total - promo)))
+
+            var ppn_persen = $('#ppn_persen').val();
+            var ppn_nominal = ppn_persen * (total - promo) / 100
+            $('#ppn_nominal').val(formatNumber(ppn_nominal))
+
+            var pph_persen = $('#pph_persen').val();
+            var pph_nominal = pph_persen * (total - promo) / 100
+            $('#pph_nominal').val(formatNumber(pph_nominal))
+
             total_harga();
         }
         function total_harga() {
-            ppn();
-            pph();
             var subtotal = cleanNumber($('#subtotal').val()) || 0;
             var ppn_nominal = cleanNumber($('#ppn_nominal').val()) || 0;
             var pph_nominal = cleanNumber($('#pph_nominal').val()) || 0;
@@ -602,115 +677,17 @@
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(formatNumber(harga_total));
         }
-        function ppn(){
-            var ppn_persen = $('#ppn_persen').val()
-            var subtotal = cleanNumber($('#subtotal').val())
-            var ppn_nominal = ppn_persen * subtotal / 100
-            $('#ppn_nominal').val(formatNumber(ppn_nominal))
-        }
-        function pph(){
-            var pph_persen = $('#pph_persen').val()
-            var subtotal = cleanNumber($('#subtotal').val())
-            var pph_nominal = pph_persen * subtotal / 100
-            $('#pph_nominal').val(formatNumber(pph_nominal))
-        }
-        function checkPromo(total_transaksi, tipe_produk, produk, old_promo_id){
-            $('#total_promo').val(0);
-            var data = {
-                total_transaksi: total_transaksi,
-                tipe_produk: tipe_produk,
-                produk: produk
-            };
-            $.ajax({
-                url: '/checkPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    $('#promo_id').empty()
-                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
-
-                    var min_transaksi = response.min_transaksi;
-                    for (var j = 0; j < min_transaksi.length; j++) {
-                        var promo = min_transaksi[j];
-                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
-                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
-                    }
-                    var tipe_produk = response.tipe_produk;
-                    for (var j = 0; j < tipe_produk.length; j++) {
-                        var promo = tipe_produk[j];
-                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
-                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
-                    }
-                    var produk = response.produk;
-                    for (var j = 0; j < produk.length; j++) {
-                        var promo = produk[j];
-                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
-                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
-                    }
-                    $('#promo_id').attr('disabled', false);
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                },
-                complete: function() {
-                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i>')
-                }
-            });
-        }
-        function calculatePromo(promo_id){
-            var data = {
-                promo_id: promo_id,
-            };
-            $.ajax({
-                url: '/getPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    var sub_total = parseInt(cleanNumber($('#subtotal').val()));
-                    var total_promo;
-                    switch (response.diskon) {
-                        case 'persen':
-                            total_promo = sub_total * parseInt(response.diskon_persen) / 100;
-                            break;
-                        case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
-                            break;
-                        case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
-                            break;
-                        case 'produk':
-                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
-                            break;
-                        default:
-                            break;
-                    }
-                    $('#total_promo').val(formatNumber(total_promo));
-
-                    var inputs = $('input[name="harga_total[]"]');
-                    var subtotal = 0;
-                    inputs.each(function() {
-                        subtotal += parseInt(cleanNumber($(this).val())) || 0;
-                    });
-                    $('#subtotal').val(formatNumber(subtotal))
-                    
-                    if (/(poin|TRD|GFT)/.test(total_promo)) {
-                        total_promo = 0;
-                    } else {
-                        total_promo = parseInt(total_promo) || 0;
-                        $('#subtotal').val(formatNumber((subtotal - total_promo)));
-                    }
-                    total_harga();
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                }
-            });
+        function update_pajak(subtotal){
+            var ppn_persen = $('#ppn_persen').val() || 0;
+            var pph_persen = $('#pph_persen').val() || 0;
+            if(ppn_persen != 0){
+                var ppn_nominal = ppn_persen * subtotal / 100;
+                $('#ppn_nominal').val(formatNumber(parseInt(ppn_nominal)));
+            }
+            if(pph_persen != 0){
+                var pph_nominal = pph_persen * subtotal / 100;
+                $('#pph_nominal').val(formatNumber(parseInt(pph_nominal)));
+            }
         }
     </script>
 @endsection

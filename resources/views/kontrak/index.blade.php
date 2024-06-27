@@ -57,6 +57,7 @@
                     <th>Rentang Tanggal</th>
                     <th>Total Biaya</th>
                     <th>Tanggal Dibuat</th>
+                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -73,6 +74,7 @@
                             <td>{{ formatTanggal($kontrak->tanggal_mulai)}} - {{ formatTanggal($kontrak->tanggal_selesai) ?? '-' }}</td>
                             <td>{{ formatRupiah($kontrak->total_harga) ?? '-' }}</td>
                             <td>{{ formatTanggal($kontrak->tanggal_kontrak) ?? '-'  }}</td>
+                            <td>{{ $kontrak->status ?? '-'  }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -81,6 +83,7 @@
                                     <li>
                                         <a href="{{ route('kontrak.pdfKontrak', ['kontrak' => $kontrak->id]) }}" target="_blank" class="dropdown-item"><img src="assets/img/icons/pdf.svg" class="me-2" alt="img">Kontrak</a>
                                     </li>
+                                    @if($kontrak->status == 'DIKONFIRMASI')
                                     <li>
                                         <a href="{{ route('kontrak.excelPergantian', ['kontrak' => $kontrak->id]) }}" target="_blank" class="dropdown-item"><img src="assets/img/icons/reverse-alt.svg" class="me-2" alt="img">Pergantian</a>
                                     </li>
@@ -93,9 +96,16 @@
                                     <li>
                                         <a href="{{ route('invoice_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Invoice Sewa</a>
                                     </li>
+                                    @endif
+                                    @if($kontrak->status == 'DIKONFIRMASI')
                                     <li>
                                         <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
+                                    @else
+                                    <li>
+                                        <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
+                                    </li>
+                                    @endif
                                     <li>
                                         <a href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
