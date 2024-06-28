@@ -106,12 +106,14 @@
                                         <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
                                     </li>
                                     @endif
+                                    @if( ($kontrak->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($kontrak->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
                                     <li>
                                         <a href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
                                     <li>
-                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $kontrak->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $kontrak->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
                                     </li>
+                                    @endif
                                 </ul>
                             </td>
                         </tr>
@@ -199,13 +201,12 @@
     });
     function deleteData(id){
         Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data ini akan dihapus secara permanen!",
+            title: 'Batalkan kontrak?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
+            confirmButtonText: 'Ya, batalkan!',
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {

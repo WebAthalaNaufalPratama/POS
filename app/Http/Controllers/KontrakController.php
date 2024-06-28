@@ -384,20 +384,25 @@ class KontrakController extends Controller
     public function destroy($kontrak)
     {
         $data = Kontrak::find($kontrak);
-        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
-        $getProduks = Produk_Terjual::where('no_sewa', $data->no_kontrak)->get();
-        $check = $data->delete();
-        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
-        if($getProduks){
-            $getProduks->each->delete();
-        }
-        foreach ($getProduks as $item) {
-            $getKomponenProduks = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->get();
-            if($getKomponenProduks){
-                $getKomponenProduks->each->delete();
-            }
-        }
-        return response()->json(['msg' => 'Data berhasil dihapus']);
+        if(!$data) return response()->json(['msg' => 'Kontrak tidak ditemukan']);
+        $data->status = 'BATAL';
+        $check = $data->update();
+        if(!$check) return response()->json(['msg' => 'Gagal membatalkan kontrak']);
+        // $data = Kontrak::find($kontrak);
+        // if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        // $getProduks = Produk_Terjual::where('no_sewa', $data->no_kontrak)->get();
+        // $check = $data->delete();
+        // if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
+        // if($getProduks){
+        //     $getProduks->each->delete();
+        // }
+        // foreach ($getProduks as $item) {
+        //     $getKomponenProduks = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->get();
+        //     if($getKomponenProduks){
+        //         $getKomponenProduks->each->delete();
+        //     }
+        // }
+        return response()->json(['msg' => 'Berhasil membatalkan kontrak']);
     }
 
     public function create_gift(Request $req)

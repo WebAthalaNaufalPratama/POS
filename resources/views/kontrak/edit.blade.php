@@ -414,6 +414,7 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
+            $('#sales').trigger('change');
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = $('[id^=produk]').length;
             $('#add').click(function(){
