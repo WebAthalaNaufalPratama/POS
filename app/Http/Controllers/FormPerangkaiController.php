@@ -127,7 +127,7 @@ class FormPerangkaiController extends Controller
 
     public function cetak_penjualan($id)
     {
-        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.penjualan', 'produk_terjual.produk', 'produk_terjual.penjualan.karyawan', 'produk_terjual.penjualan.lokasi')->find($id)->toArray();
+        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.penjualan', 'produk_terjual.produk', 'produk_terjual.penjualan.karyawan', 'produk_terjual.penjualan.lokasi', 'produk_terjual.komponen')->find($id)->toArray();
         $pdf = PDF::loadView('penjualan.formpdf', $data);
 
         return $pdf->stream('Form-Perangkai.pdf');
@@ -135,7 +135,7 @@ class FormPerangkaiController extends Controller
 
     public function cetak_mutasigalery($id)
     {
-        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.mutasi', 'produk_terjual.produk', 'produk_terjual.mutasi.dibuat', 'produk_terjual.mutasi.pengirim')->find($id)->toArray();
+        $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.mutasi', 'produk_terjual.produk', 'produk_terjual.mutasi.dibuat', 'produk_terjual.mutasi.pengirim', 'produk_terjual.komponen')->find($id)->toArray();
         $pdf = PDF::loadView('mutasigalery.formpdf', $data);
 
         return $pdf->stream('Form-Perangkai.pdf');

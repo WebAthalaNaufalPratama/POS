@@ -232,7 +232,7 @@
 
                                                             <div>
                                                                 <div class="input-group">
-                                                                    <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="{{ $komponen->diskon}}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
+                                                                    <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="{{ $komponen->diskon}}" style="display:none;" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
                                                                     <span class="input-group-text" id="nominalInput_0" style="display: none;">.00</span>
                                                                     <span class="input-group-text" id="persenInput_0" style="display: none;">%</span>
                                                                 </div>
@@ -1394,6 +1394,14 @@
 
         calculateTotal(index);
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var elements = document.querySelectorAll("[id^='jenis_diskon_']");
+        elements.forEach(function(element) {
+            var index = element.id.split("_")[2];
+            showInputType(index);
+        });
+    });
 
     function calculateTotal(index) {
         var diskonType = $('#jenis_diskon_' + index).val();

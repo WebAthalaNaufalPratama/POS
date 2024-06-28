@@ -41,7 +41,7 @@
                                             <select id="id_customer" name="id_customer" class="form-control" required>
                                                 <option value="">Pilih Nama Customer</option>
                                                 @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}" data-point="{{ $customer->poin_loyalty }}" data-hp="{{ $customer->handphone }}">{{ $customer->nama }}</option>
+                                                <option value="{{ $customer->id }}" data-point="{{ $customer->poin_loyalty }}" data-hp="{{ $customer->handphone }}" {{ $customer->status_piutang == 'LUNAS' || $customer->status_buka != 'TUTUP' ? '' : 'disabled'}}>{{ $customer->nama }} - {{ $customer->handphone}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -145,6 +145,20 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        @php
+                                            $user = Auth::user();
+                                            $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                                        @endphp
+                                        @if($lokasi->tipe_lokasi == 1)
+                                            <div class="form-group">
+                                                <label for="lokasi_pengirim">Lokasi Pengiriman</label>
+                                                <select id="lokasi_pengirim" name="lokasi_pengirim" class="form-control">
+                                                    @foreach ($lokasigalery as $galery)
+                                                    <option value="{{ $galery->id }}">{{ $galery->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -245,7 +259,7 @@
                                                     <select id="rekening_id" name="rekening_id" class="form-control">
                                                         <option value="">Pilih Bank</option>
                                                         @foreach($bankpens as $bankpen)
-                                                        <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
+                                                        <option value="{{ $bankpen->id }}">{{ $bankpen->bank }} - {{ $bankpen->nomor_rekening }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -696,6 +710,12 @@
         $('#nama_produk_modal_' + index).val(namaProdukValue);
         $('#jumlah_produk_modal_' + index).val(jumlahValue);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if ('{{ session('success') }}' || '{{ session('fail') }}') {
+            window.location.reload();
+        }
+    });
 </script>
 
 <script>
@@ -981,7 +1001,7 @@
             $('#persen_ppn').prop('readonly', true);
             var subtotal = parseFloat($('#sub_total').val()) || 0;
             var hitungppn = (11 * subtotal) / 100;
-            console.log(hitungppn);
+            // console.log(hitungppn);
 
             if (ppn === "include") {
                 $('#persen_ppn').val(0);
@@ -1253,7 +1273,14 @@
                             total_promo = parseInt(response.diskon_nominal);
                             break;
                         case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
+                            var pointInput = parseFloat($('#point_dipakai').val()) || 0;
+
+                            if ($('#cek_point').prop('checked')) {
+                                total_promo = 'poin ' + response.diskon_poin;
+                            }else{
+                                total_promo = 'poin ' + response.diskon_poin;
+                            }
+                            
                             break;
                         case 'produk':
                             total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
@@ -1261,13 +1288,33 @@
                         default:
                             break;
                     }
-                    $('#total_promo').val(formatRupiah(total_promo, 'Rp '));
+                    switch (response.diskon){
+                        case 'nominal' :
+                            $('#total_promo').val(formatRupiah(total_promo, 'Rp '));
+                            break;
+                        case 'poin' :
+                            $('#total_promo').val(total_promo);
+                            break;
+                        case 'produk' :
+                            $('#total_promo').val(total_promo);
+                            break;
+                        case 'persen':
+                            $('#total_promo').val(total_promo);
+                            break;
+                    }
+                    
                     Totaltagihan();
                 },
                 error: function(xhr, status, error) {
                     console.log(error)
                 }
             });
+        }
+        function parseNumber(rupiah) {
+            rupiah = String(rupiah);
+            rupiah = rupiah.replace(/[^\d,]/g, '');
+            rupiah = rupiah.replace(',', '.');
+            return parseFloat(rupiah);
         }
 
         function Totaltagihan() {
@@ -1276,9 +1323,22 @@
             var persenPPN = parseRupiahToNumber($('#persen_ppn').val()) || 0;
             var dp = parseRupiahToNumber($('#dp').val()) || 0;
             var biayaOngkir = parseRupiahToNumber($('#biaya_ongkir').val()) || 0;
-            var diskon_nominal = parseRupiahToNumber($('#total_promo').val()) || 0;
-            // console.log(extot);
-            var promo = subtotal - diskon_nominal;
+            var diskon_nominal = $('#total_promo').val() || 0;
+
+
+            var pointInput = parseFloat($('#point_dipakai').val()) || 0;
+
+            if ($('#cek_point').prop('checked')) {
+                point = pointInput;
+            }else{
+                point = 0;
+                if(String(diskon_nominal).substring(0, 4) == 'poin'){
+                    diskon_nominal = 0;
+                }
+            }
+        
+            var promo = subtotal - (parseNumber(diskon_nominal) + point);
+            // console.log(diskon_nominal);
             var ppn = persenPPN * promo / 100;
             var totalTagihan = promo + ppn + biayaOngkir - dp;
             var sisaBayar = totalTagihan - dp;

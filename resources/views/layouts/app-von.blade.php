@@ -29,6 +29,21 @@
   <link rel="stylesheet" href="/assets/css/style.css">
 
   <style>
+
+      .same-size-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 200px; /* Set a fixed width */
+          height: 50px; /* Set a fixed height */
+          padding: 0; /* Remove any padding */
+      }
+
+      .same-size-btn img {
+          width: 20px; /* Adjust the width of the icon if needed */
+          height: auto; /* Maintain the aspect ratio */
+      }
+
       input[type="number"].hide-arrow::-webkit-inner-spin-button,
       input[type="number"].hide-arrow::-webkit-outer-spin-button {
         -webkit-appearance: none;
@@ -39,6 +54,7 @@
         -moz-appearance: textfield;
       }
   </style>
+  
   @yield('css')
 </head>
 
@@ -85,7 +101,7 @@
                     $user = Auth::user();                    
                     $lokasis = \App\Models\Lokasi::all();
                   @endphp
-                  @if($user->hasRole(['Auditor']))
+                  @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance']))
                   <div class="form-group">
                       <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
                           <option value="">Pilih Lokasi</option>

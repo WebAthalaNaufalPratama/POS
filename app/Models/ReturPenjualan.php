@@ -4,11 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class ReturPenjualan extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
     protected $guarded = ['id'];
+    protected static $logAttributes =[
+        'no_retur',
+        'customer_id',
+        'lokasi_id',
+        'supplier_id',
+        'bukti',
+        'tanggal_invoice',
+        'no_invoice',
+        'tanggal_retur',
+        'no_do',
+        'komplain',
+        'catatan_komplain',
+        'pilih_pengiriman',
+        'ongkir_id',
+        'sub_total',
+        'biaya_pengiriman',
+        'total',
+        'pembuat',
+        'tanggal_pembuat',
+        'dibukukan',
+        'tanggal_dibukukan',
+    ];
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');

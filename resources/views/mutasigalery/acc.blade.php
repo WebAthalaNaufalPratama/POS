@@ -49,7 +49,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="penerima">Nama Penerima</label>
-                                            <select id="penerima" name="penerima" class="form-control" required disabled>
+                                            <select id="penerima" name="penerima" class="form-control" required readonly>
                                                 <option value="">Pilih Nama Penerima</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -233,20 +233,20 @@
                                                 <table class="table table-responsive border rounded">
                                                     <thead>
                                                         <tr>
-                                                            <th>Pembuat</th>
-                                                            <th>Penyetuju</th>
+                                                            <th>Pengirim</th>
+                                                            <th>Penerima</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
                                                             <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
-                                                            <td id="penyetuju">-</td>
+                                                            <td id="penyetuju">{{ Auth::user()->name}}</td>
                                                             <td id="pemeriksa">-</td>
                                                         </tr>
                                                         <tr>
                                                             <td id="tgl_pembuat" style="width: 25%;">{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">{{ date('Y-m-d')}}</td>
                                                             <td id="tgl_pemeriksa" style="width: 25%;">-</td>
                                                         </tr>
                                                     </tbody>
