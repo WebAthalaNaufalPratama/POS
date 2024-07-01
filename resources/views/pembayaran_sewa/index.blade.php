@@ -71,7 +71,10 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->sewa->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->sewa->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Invoice</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" onclick="editbayar({{ $item->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
                                 </ul>
                             </td>
@@ -84,10 +87,92 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Form Pembayaran</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="" method="POST" id="editBayarForm" enctype="multipart/form-data">
+                @csrf
+                @method('patch')
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Nomor Kontrak</label>
+                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Nomor Invoice</label>
+                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
+                            <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Total Tagihan</label>
+                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Sisa Tagihan</label>
+                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="bayar">Cara Bayar</label>
+                            <select class="form-control" id="bayar" name="cara_bayar" required>
+                                <option value="">Pilih Cara Bayar</option>
+                                <option value="cash">Cash</option>
+                                <option value="transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-6" id="rekening" style="display: none">
+                            <label for="bankpenerima">Rekening Vonflorist</label>
+                            <select class="form-control" id="rekening_id" name="rekening_id" required>
+                                <option value="">Pilih Rekening Von</option>
+                                @foreach ($bankpens as $bankpen)
+                                <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="nominal">Nominal</label>
+                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="tanggalbayar">Tanggal</label>
+                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <label for="buktibayar">Unggah Bukti</label>
+                            <input type="file" class="form-control" id="bukti" name="bukti">
+                        </div>
+                        <img id="preview" src="" alt="your image" style="max-width: 100%"/>
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
     <script>
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
             $('#rekening_id, #bayar, #filterMetode').select2();
         });
@@ -166,16 +251,67 @@
             }
             return 0;
         });
+        $('#bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
         
-        function bayar(invoice){
-            console.log(invoice)
-            $('#no_kontrak').val(invoice.no_sewa);
-            $('#invoice_sewa_id').val(invoice.id);
-            $('#total_tagihan').val(invoice.total_tagihan);
-            $('#sisa_tagihan').val(invoice.sisa_bayar);
-            $('#nominal').val(invoice.sisa_bayar);
-            $('#modalBayar').modal('show');
-            generateInvoice();
+        function editbayar(id){
+            $.ajax({
+                    type: "GET",
+                    url: "/pembayaran_sewa/"+id+"/show",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        $('#editBayarForm').attr('action', `{{ route("pembayaran_sewa.update", ":id") }}`.replace(':id', id));
+                        $('#no_kontrak').val(response.sewa.no_sewa);
+                        $('#no_invoice_bayar').val(response.sewa.no_invoice);
+                        $('#invoice_sewa_id').val(response.sewa.id);
+                        $('#total_tagihan').val(response.sewa.total_tagihan);
+                        $('#sisa_tagihan').val((parseInt(response.sewa.sisa_bayar) + parseInt(response.nominal)));
+                        $('#nominal').val(response.nominal);
+                        $('#tanggal_bayar').val(response.tanggal_bayar);
+                        $('#rekening_id').val(response.rekening_id).change();
+                        $('#bayar').val(response.cara_bayar).change();
+                        if(response.bukti){
+                            $('#preview').attr('src', '/storage/'+response.bukti);
+                        } else {
+                            $('#preview').attr('src', defaultImg);
+                        }
+                        $('#rekening_id').select2({
+                            dropdownParent: $("#modalBayar")
+                        });
+                        $('#bayar').select2({
+                            dropdownParent: $("#modalBayar")
+                        });
+                        $('#modalBayar').modal('show');
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
+                });
         }
 
         function generateInvoice() {
