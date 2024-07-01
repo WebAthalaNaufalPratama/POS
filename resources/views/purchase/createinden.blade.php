@@ -88,7 +88,6 @@
                                                     <th style="width: 300px;">Keterangan</th>
                                                     <th></th>
                                                 </tr>
-                                                
                                             </thead>
                                             <tbody id="dynamic_field">
                                                 <tr>

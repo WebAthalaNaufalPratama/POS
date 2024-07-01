@@ -30,7 +30,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label>Catatan</label>
-                                            <textarea type="text" id="catatan" name="catatan" class="form-control" readonly>{{ old('catatan') }}</textarea>
+                                            <textarea type="text" id="catatan" name="catatan" class="form-control" readonly>{{ $data->catatan }}</textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -40,12 +40,11 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal PO</label>
-                                                <input type="text" id="tanggal_po" name="tanggal_po" value="{{ old('tanggal_po') ?? tanggalindo($data->invoice->pembelian->tgl_dibuat) }}" 
-                                                    class="form-control" required readonly>
+                                                <input type="text" id="tanggal_po" name="tanggal_po" value="{{ tanggalindo($data->invoice->pembelian->tgl_dibuat) }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Invoice</label>
-                                                <input type="text" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? tanggalindo($data->invoice->tgl_inv) }}" class="form-control" required readonly>
+                                                <input type="text" id="tanggal_invoice" name="tanggal_invoice" value="{{ tanggalindo($data->invoice->tgl_inv) }}" class="form-control" required readonly>
                                             </div>
                                             <input type="hidden" name="invoicepo_id" value="{{ $data->invoice->id }}">
                                             <div class="form-group">
@@ -56,12 +55,11 @@
                                                 <label>Komplain</label>
                                                 <select id="komplain" name="komplain" class="form-control" required disabled>
                                                     <option value="">Pilih Komplain</option>
-                                                    @if($data->invoice->sisa == 0)
-                                                        <option value="Refund" {{ $data->komplain == 'Refund' ? 'selected' : '' }}>Refund</option>
-                                                    @else
+                                                   
+                                                    <option value="Refund" {{ $data->komplain == 'Refund' ? 'selected' : '' }}>Refund</option>
                                                     <option value="Diskon" {{ $data->komplain == 'Diskon' ? 'selected' : '' }}>Diskon</option>
                                                     <option value="Retur" {{ $data->komplain == 'Retur' ? 'selected' : '' }}>Retur</option>
-                                                    @endif
+                                                
                                                 </select>
                                             </div>
                                         </div>
@@ -205,64 +203,25 @@
                                 </div>
                             </div>
                             <div class="col-sm">
-                            {{-- <div class="col-lg-5 float-md-right"> --}}
                                 <div class="total-order">
                                     <ul>
                                         <li>
                                             <h4>Sub Total</h4>
                                             <h5>
-                                                {{-- <div class="input-group"> --}}
-                                                    {{-- <span class="input-group-text">Rp. </span> --}}
-                                                    <input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ formatRupiah($data->subtotal) }}" readonly>
-                                                {{-- </div> --}}
+                                                    <input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ formatRupiah($data->subtotal) }}" readonly>
                                             </h5>
                                         </li>
-                                       
-                                       
                                         <li>
                                             <h4>Biaya Pengiriman</h4>
                                             <h5>
-                                                {{-- <div class="input-group"> --}}
-                                                    {{-- <span class="input-group-text">Rp. </span> --}}
-                                                    <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah($data->ongkir) }}" readonly required>
-                                                {{-- </div>     --}}
+                                                    <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ formatRupiah($data->ongkir ?? 0) }}" readonly required>
                                             </h5>
                                         </li>
-                                        {{-- <li class="total">
-                                            <h4>Total Tagihan</h4>
-                                            <h5>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">Rp. </span>
-                                                    <input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ formatRupiah($data->total) }}">
-                                                </div>    
-                                            </h5>
-                                        </li> --}}
-                                       
-                                        
+                                
                                     </ul>
                                 </div>
                             </div>
 
-                            {{-- <div class="col-md-4 border rounded mt-3 pt-3">
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Subtotal</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="subtotal" name="subtotal" value="{{ formatRupiah($data->subtotal) }}" class="form-control" required readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1" id="divOngkir">
-                                    <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ formatRupiah($data->ongkir ?? 0) }}" class="form-control" required readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Total Harga</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="total_harga" name="total_harga" value="{{ formatRupiah($data->total ?? 0) }}" class="form-control" required readonly>
-                                    </div>
-                                </div>
-                            </div> --}}
                             
                         </div>
                         <div class="row justify-content-start">
@@ -363,24 +322,23 @@
                                 </table>  
                                 <br>                                 
                             </div>
-                            <div class="col-md-4 border rounded mt-3 pt-3">
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Subtotal</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="subtotal" name="subtotal" value="{{ $data->subtotal }}" class="form-control" required readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1" id="divOngkir">
-                                    <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ $data->ongkir ?? 0 }}" class="form-control" required readonly>
-                                    </div>
-                                </div>
-                                <div class="form-group row mt-1">
-                                    <label class="col-lg-3 col-form-label">Total Harga</label>
-                                    <div class="col-lg-9">
-                                        <input type="text" id="total_harga" name="total_harga" value="{{$data->total ?? 0 }}" class="form-control" required readonly>
-                                    </div>
+                            <div class="col-sm">
+                                <div class="total-order">
+                                    <ul>
+                                        <li>
+                                            <h4>Sub Total</h4>
+                                            <h5>
+                                                    <input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ formatRupiah($data->subtotal) }}" readonly>
+                                            </h5>
+                                        </li>
+                                        <li>
+                                            <h4>Biaya Pengiriman</h4>
+                                            <h5>
+                                                    <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ formatRupiah($data->ongkir ?? 0) }}" readonly required>
+                                            </h5>
+                                        </li>
+                                
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -453,16 +411,6 @@
 
 @section('scripts')
 <script>
-    function formatRupiah(angka) {
-            var reverse = angka.toString().split('').reverse().join('');
-            var ribuan = reverse.match(/\d{1,3}/g);
-            ribuan = ribuan.join('.').split('').reverse().join('');
-            return ribuan;
-        }
-
-    function unformatRupiah(formattedValue) {
-        return formattedValue.replace(/\./g, '');
-    }
 
     document.addEventListener('DOMContentLoaded', function() {
          // Initialize input field with formatted value

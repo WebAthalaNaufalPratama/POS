@@ -3,13 +3,21 @@
 
 @section('content')
 <style>
-   
     .form-control {
         min-width: 200px; /* Adjust as necessary */
     }
     .form-control-banyak{
         min-width: 200px; /* Adjust as necessary */
     }
+    input[readonly] {
+    background-color: #e9ecef; /* Warna latar belakang abu-abu */
+    color: #6c757d; /* Warna teks abu-abu */
+    }
+    .input-group .form-control-banyak {
+        border: 1px solid #ced4da; /* Nilai border default */
+        border-radius: 0.25rem; /* Radius default untuk border */
+    }
+
 </style>
 <div class="page-header">
     <div class="row">
@@ -315,8 +323,8 @@
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control">
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                            <option value="publish" {{ old('status_dibuat') == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                            <option value="draft">Draft</option>
+                                                            <option value="publish" selected>Publish</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_diterima">

@@ -81,16 +81,16 @@
                                         @endforeach
                                     </ul>
                                 </td>
-                                <td>{{ $data->komplain }} |
+                                <td>{{ $data->komplain }} 
                                     @if($data->komplain == "Refund")
                                         @if($data->sisa == 0)
-                                            Lunas
+                                           | Lunas
                                         @else
-                                            belum Lunas
+                                           | Belum Lunas
                                         @endif
                                     @endif
                                 </td>
-                                <td>{{ formatRupiah($data->total)}}</td>
+                                <td>{{ formatRupiah($data->subtotal)}}</td>
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -115,7 +115,7 @@
                                             <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> @if($data->komplain == "Refund") Input Refund @else Detail Retur @endif</a>
                                         </li>
                                         <li>
-                                            <a href="{{ route('returinvoice.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>
+                                            <a href="{{ route('invoice.show', ['datapo' => $data->invoice->pembelian_id, 'type'=>"pembelian"]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>
                                         </li>
                                         {{-- <li>
                                             <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
