@@ -72,6 +72,9 @@
                                     <li>
                                         <a href="{{ route('kembali_sewa.show', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
+                                    <li>
+                                        <a href="{{ route('kembali_sewa.edit', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li>
                                 </ul>
                             </td>
                         </tr>

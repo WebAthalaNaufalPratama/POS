@@ -52,7 +52,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>No Kembali Sewa</label>
-                                            <input type="text" id="no_kembali" name="no_kembali" value="{{ old('no_kembali') ?? $getKode }}" class="form-control" disabled readonly>
+                                            <input type="text" id="no_kembali" name="no_kembali" value="{{ $data->no_kembali }}" class="form-control" disabled readonly>
                                         </div>
                                         <div class="form-group">
                                             <label>Tanggal kembali</label>
@@ -244,14 +244,14 @@
                             </div>
                         </div>
                         <div class="col-md-4 border rounded mt-3 pt-3">
-                            <form action="{{ route('kembali_sewa.update', ['kembali_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">
+                            {{-- <form action="{{ route('kembali_sewa.update', ['kembali_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                @method('patch')
+                                @method('patch') --}}
                             <div class="custom-file-container" data-upload-id="myFirstImage">
                                 <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
                                 </label>
                                 <label class="custom-file-container__custom-file">
-                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
+                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" disabled>
                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                 </label>
                                 <span class="text-danger">max 2mb</span>
@@ -262,10 +262,10 @@
                 </div>
             </div>
             <div class="text-end mt-3">
-                <button class="btn btn-primary" type="submit">Upload File</button>
+                {{-- <button class="btn btn-primary" type="submit">Upload File</button> --}}
                 <a href="{{ route('kembali_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
             </div>
-            </form>
+            {{-- </form> --}}
             </div>
         </div>
     </div>

@@ -41,7 +41,7 @@
                                             <select id="id_customer" name="id_customer" class="form-control" required>
                                                 <option value="">Pilih Nama Customer</option>
                                                 @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}" data-point="{{ $customer->poin_loyalty }}" data-hp="{{ $customer->handphone }}">{{ $customer->nama }}</option>
+                                                <option value="{{ $customer->id }}" data-point="{{ $customer->poin_loyalty }}" data-hp="{{ $customer->handphone }}" {{ $customer->status_piutang == 'LUNAS' || $customer->status_buka != 'TUTUP' ? '' : 'disabled'}}>{{ $customer->nama }} - {{ $customer->handphone}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -145,6 +145,20 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        @php
+                                            $user = Auth::user();
+                                            $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
+                                        @endphp
+                                        @if($lokasi->tipe_lokasi == 1)
+                                            <div class="form-group">
+                                                <label for="lokasi_pengirim">Lokasi Pengiriman</label>
+                                                <select id="lokasi_pengirim" name="lokasi_pengirim" class="form-control">
+                                                    @foreach ($lokasigalery as $galery)
+                                                    <option value="{{ $galery->id }}">{{ $galery->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -245,7 +259,7 @@
                                                     <select id="rekening_id" name="rekening_id" class="form-control">
                                                         <option value="">Pilih Bank</option>
                                                         @foreach($bankpens as $bankpen)
-                                                        <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
+                                                        <option value="{{ $bankpen->id }}">{{ $bankpen->bank }} - {{ $bankpen->nomor_rekening }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -696,6 +710,12 @@
         $('#nama_produk_modal_' + index).val(namaProdukValue);
         $('#jumlah_produk_modal_' + index).val(jumlahValue);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if ('{{ session('success') }}' || '{{ session('fail') }}') {
+            window.location.reload();
+        }
+    });
 </script>
 
 <script>

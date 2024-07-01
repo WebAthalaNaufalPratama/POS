@@ -321,9 +321,9 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>BCA</td>
-                    <td>8030727658</td>
-                    <td>VON</td>
+                    <td>{{ $rekening['bank'] }}</td>
+                    <td>{{ $rekening['nomor_rekening'] }}</td>
+                    <td>{{ $rekening['nama_akun'] }}</td>
                 </tr>
             </tbody>
         </table> 

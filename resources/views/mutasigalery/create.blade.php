@@ -170,8 +170,8 @@
                                                 <table class="table table-responsive border rounded">
                                                     <thead>
                                                         <tr>
-                                                            <th>Pembuat</th>
-                                                            <th>Penyetuju</th>
+                                                            <th>Pengirim</th>
+                                                            <th>Penerima</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
                                                     </thead>

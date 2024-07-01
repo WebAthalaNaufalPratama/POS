@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Activity;
 
 class Komponen_Produk_Terjual extends Model
 {
@@ -34,6 +35,16 @@ class Komponen_Produk_Terjual extends Model
     }
 
     public function kondisi(){
+        return $this->belongsTo(Kondisi::class, 'kondisi', 'id');
+    }
+
+    public function activityLogs()
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
+    public function data_kondisi()
+    {
         return $this->belongsTo(Kondisi::class, 'kondisi', 'id');
     }
 }

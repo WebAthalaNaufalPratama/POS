@@ -8,8 +8,11 @@
                 <h5 class="card-title">Detail Kontrak</h5>
             </div>
             <div class="card-body">
+                <form action="{{ route('kontrak.update', ['kontrak' => $kontraks->id]) }}" method="POST" id="editForm" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-sm">
+                        @csrf
+                        @method('PATCH')
                         <div class="row justify-content-around">
                             <div class="col-md-6 border rounded pt-3">
                                 <h5 class="card-title">Informasi Pelanggan</h5>
@@ -53,11 +56,9 @@
                                         <div class="form-group">
                                             <label>Status</label>
                                             <select id="status" name="status" class="form-control" disabled>
-                                                <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $kontraks->status == 'DRAFT' ? 'selected' : '' }}>Draft</option>
-                                                <option value="AKTIF" {{ $kontraks->status == 'AKTIF' ? 'selected' : '' }}>Aktif</option>
-                                                <option value="TIDAK AKTIF" {{ $kontraks->status == 'TIDAK AKTIF' ? 'selected' : '' }}>Tidak Aktif</option>
-                                                <option value="SELESAI" {{ $kontraks->status == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
+                                                <option value="TUNDA" {{ $kontraks->status == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $kontraks->status == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                    <option value="BATAL" {{ $kontraks->status == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                             </select>
                                         </div>
                                     </div>
@@ -286,23 +287,24 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Subtotal</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="subtotal" name="subtotal" value="" class="form-control" readonly>
+                                        <input type="text" id="subtotal" name="subtotal" value="{{ $kontraks->subtotal }}" class="form-control" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        <div class="row align-items-center">
+                                        {{-- <div class="row align-items-center">
                                             <div class="col-12">
                                                 <select id="promo_id" name="promo_id" class="form-control" disabled>
                                                 </select>
                                             </div>
                                             <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
-                                            {{-- <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
-                                            </div> --}}
+                                        </div> --}}
+                                        <div class="input-group">
+                                            <input type="text" id="promo_persen" name="promo_persen" value="{{ $kontraks->promo_persen ?? 0 }}" class="form-control" readonly aria-describedby="basic-addon3" oninput="validatePersen(this)">
+                                            <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ $kontraks->total_promo }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -328,14 +330,14 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
-                                        <div class="input-group">
+                                        {{-- <div class="input-group">
                                             <select id="ongkir_id" name="ongkir_id" class="form-control" disabled>
                                                 <option value="">Pilih Ongkir</option>
                                                 @foreach ($ongkirs as $ongkir)
                                                     <option value="{{ $ongkir->id }}" {{ $ongkir->id == $kontraks->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
                                                 @endforeach
                                             </select>
-                                        </div>
+                                        </div> --}}
                                         <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontraks->ongkir_nominal }}" readonly>
                                     </div>
                                 </div>
@@ -350,8 +352,14 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
+                    <input type="hidden" name="konfirmasi" id="hiddenActionInput" value="">
+                    @if($kontraks->status == 'TUNDA')
+                    <button class="btn btn-success confirm-btn" data-action="confirm" type="button">Konfirmasi</button>
+                    <button class="btn btn-danger confirm-btn" data-action="cancel" type="button">Batal</button>
+                    @endif
                     <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
+            </form>
             </div>
         </div>
     </div>
@@ -535,20 +543,6 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
-            var total_transaksi = $('#subtotal').val();
-            var old_promo_id = $('#old_promo_id').val();
-            var produk = [];
-            var tipe_produk = [];
-            $('select[id^="produk_"]').each(function() {
-                produk.push($(this).val());
-                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-                
-            });
-            checkPromo(total_transaksi, tipe_produk, produk, old_promo_id);
-            $('#promo_id').trigger('change');
-            $('#sales').trigger('change');
-            calculatePromo(old_promo_id);
-
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = 1;
             $('#add').click(function(){
@@ -715,6 +709,34 @@
                 });
             }
         })
+        $('.confirm-btn').on('click', function() {
+            var action = $(this).data('action');
+            var message = (action === 'confirm') 
+                        ? "Apakah Anda yakin ingin mengkonfirmasi kontrak ini?" 
+                        : "Apakah Anda yakin ingin membatalkan kontrak ini?";
+            var confirmButtonText = (action === 'confirm') ? "Ya, Konfirmasi!" : "Ya, Batalkan!";
+            
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: confirmButtonText,
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (action === 'confirm') {
+                        $('#hiddenActionInput').val('confirm');
+                    } else if (action === 'cancel') {
+                        $('#hiddenActionInput').val('cancel');
+                    }
+
+                    $('#editForm').submit();
+                }
+            });
+        });
         function multiply(element) {
             var id = 0
             var jumlah = 0
@@ -755,115 +777,6 @@
             var ongkir_nominal = cleanNumber($('#ongkir_nominal').val()) || 0;
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(formatNumber(harga_total));
-        }
-        function ppn(){
-            var ppn_persen = $('#ppn_persen').val()
-            var subtotal = cleanNumber($('#subtotal').val())
-            var ppn_nominal = ppn_persen * subtotal / 100
-            $('#ppn_nominal').val(formatNumber(ppn_nominal))
-        }
-        function pph(){
-            var pph_persen = $('#pph_persen').val()
-            var subtotal = cleanNumber($('#subtotal').val())
-            var pph_nominal = pph_persen * subtotal / 100
-            $('#pph_nominal').val(formatNumber(pph_nominal))
-        }
-        function checkPromo(total_transaksi, tipe_produk, produk, old_promo_id){
-            $('#total_promo').val(0);
-            var data = {
-                total_transaksi: total_transaksi,
-                tipe_produk: tipe_produk,
-                produk: produk
-            };
-            $.ajax({
-                url: '/checkPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    $('#promo_id').empty()
-                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
-
-                    var min_transaksi = response.min_transaksi;
-                    for (var j = 0; j < min_transaksi.length; j++) {
-                        var promo = min_transaksi[j];
-                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
-                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
-                    }
-                    var tipe_produk = response.tipe_produk;
-                    for (var j = 0; j < tipe_produk.length; j++) {
-                        var promo = tipe_produk[j];
-                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
-                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
-                    }
-                    var produk = response.produk;
-                    for (var j = 0; j < produk.length; j++) {
-                        var promo = produk[j];
-                        var selectvalue = promo.id == old_promo_id ? 'selected' : '';
-                        $('#promo_id').append('<option value="' + promo.id + '" '+ selectvalue +'>' + promo.nama + '</option>');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                },
-                complete: function() {
-                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i>')
-                }
-            });
-        }
-        function calculatePromo(promo_id){
-            var data = {
-                promo_id: promo_id,
-            };
-            $.ajax({
-                url: '/getPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    var sub_total = parseInt(cleanNumber($('#subtotal').val()));
-                    var total_promo;
-                    switch (response.diskon) {
-                        case 'persen':
-                            total_promo = sub_total * parseInt(response.diskon_persen) / 100;
-                            break;
-                        case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
-                            break;
-                        case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
-                            break;
-                        case 'produk':
-                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
-                            break;
-                        default:
-                            break;
-                    }
-                    $('#total_promo').val(formatNumber(total_promo));
-
-                    var inputs = $('input[name="harga_total[]"]');
-                    var subtotal = 0;
-                    inputs.each(function() {
-                        subtotal += parseInt(cleanNumber($(this).val())) || 0;
-                    });
-                    $('#subtotal').val(formatNumber(subtotal))
-                    
-                    if (/(poin|TRD|GFT)/.test(total_promo)) {
-                        total_promo = 0;
-                    } else {
-                        total_promo = parseInt(total_promo) || 0;
-                        $('#subtotal').val(formatNumber((subtotal - total_promo)));
-                    }
-                    total_harga();
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                }
-            });
         }
         function getDataPerangkai(produk_id){
             var data = {

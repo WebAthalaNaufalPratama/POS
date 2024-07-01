@@ -57,4 +57,8 @@ class InvoiceSewa extends Model
     public function pembayaran(){
         return $this->hasMany(Pembayaran::class, 'invoice_sewa_id', 'id');
     }
+
+    public function rekening(){
+        return $this->belongsTo(Rekening::class);
+    }
 }
