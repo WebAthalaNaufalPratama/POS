@@ -30,7 +30,18 @@ Carbon::setLocale('id');
             <h4 class="card-title mb-0">
                 Transaksi Pembelian
             </h4>
+        </hr>
+        <label>
+            <input type="checkbox" id="returCheckbox" @if($beli->no_retur !== null)  checked @endif disabled> Pembelian Retur
+        </label>
+    </br>
+        @if($beli->no_retur !== null)
+        <div>
+            <label for="nomerRetur">Nomor Retur:</label>
+            <input type="text" class="form-control" id="nomerRetur" name="no_retur" value="{{ $beli->no_retur}}" style="width: 20%;" disabled>
         </div>
+        @endif
+    </div>
         <div class="card-body">
            
                 <div class="row">

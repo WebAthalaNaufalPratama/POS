@@ -96,7 +96,7 @@
                                 @if ($invoiceRetur)
                                 {{ $inv->retur->komplain }}   
                                 @endif
-
+ 
                                 </td>
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -111,17 +111,22 @@
                                             @endphp
                                         
                                             @if ($invoiceRetur)
-                                                <a href="{{ route('returinvoice.show', ['retur_id' => $invoiceRetur->id]) }}" class="dropdown-item">
+                                                {{-- <a href="{{ route('returinvoice.show', ['retur_id' => $invoiceRetur->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice retur
-                                                </a>
+                                                </a> --}}
                                             @elseif($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan)
                                                 <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain
                                                 </a>
                                             @endif
                                         </li>
-                                        
-
+                                        @if($inv->sisa !== 0)
+                                        <li>
+                                            <a href="{{ route('invoice.edit',['datapo' => $inv->pembelian->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
+                                            </a>
+                                        </li>
+                                        @endif
                                         <li>
                                             <a href="{{ route('invoice.show',['datapo' => $inv->pembelian->id, 'type' => 'pembelian']) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
@@ -230,14 +235,19 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
+                                        @if($inv->sisa !== 0)
+                                        <li>
+                                            <a href="{{ route('invoice.edit',['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
+                                            </a>
+                                        </li>
+                                        @endif
                                         <li>
                                             <a href="{{ route('invoice.show',['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
-                                        </li> --}}
+                                    
                                         <li>
                                             <a href="javascript:void(0);" onclick="bayar2({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
                                         </li>
@@ -318,7 +328,7 @@
                     <div class="row">
                         <div class="form-group col-sm-12">
                             <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" required>
+                            <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*" required>
                         </div>
                     </div>
                 </div>

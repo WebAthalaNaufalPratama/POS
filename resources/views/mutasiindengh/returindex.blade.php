@@ -7,10 +7,10 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Mutasi Inden ke GreenHouse</h4>
+                        <h4>Retur Mutasi Inden</h4>
                     </div>
                     <div class="page-btn">
-                        <a href="{{ route('mutasiindengh.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
+                        {{-- <a href="{{ route('mutasiindengh.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a> --}}
                     </div>
                 </div>
             </div>
@@ -23,8 +23,8 @@
                     <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
-                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('mutasiindengh.index') }}" class="btn btn-info">Filter</a>
-                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('mutasiindengh.index') }}" class="btn btn-warning">Clear</a>
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('returinden.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('returinden.index') }}" class="btn btn-warning">Clear</a>
                 </div>
             </div>
                 <div class="table-responsive">
@@ -32,52 +32,49 @@
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>No Retur</th>
                                 <th>No Mutasi</th>
-                                <th>Supplier</th>
-                                <th>Penerima</th>
+                                <th>Kode Inden</th>
+                                <th>Nama Produk</th>
+                                <th>QTY</th>
                                 <th>Tanggal Kirim</th>
-                                <th>Tanggal Diterima</th>
-                                <th>Status Dibuat</th>
-                                {{-- <th>Status Diterima</th>
-                                <th>Status Dibukukan</th>
-                                <th>Status Diperiksa</th> --}}
-                                <th>Tagihan</th>
-                                <th>Sisa Tagihan</th>
-                                <th>Status Pembayaran</th>
-                                <th>Refund</th>
+                                <th>Tanggal Komplain</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($mutasis as $mutasi)
+                            @foreach ($returs as $retur)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $mutasi->no_mutasi }}</td>
-                                <td>{{ $mutasi->supplier->nama }}</td>
-                                <td>{{ $mutasi->lokasi->nama }}</td>
-                                <td>{{ tanggalindo($mutasi->tgl_dikirim) }}</td>
-                                <td>{{ $mutasi->tgl_diterima ? tanggalindo($mutasi->tgl_diterima) : ''}}</td>
-                                <td>{{ $mutasi->status_dibuat }}</td>
-                                {{-- <td>{{ $mutasi->status_diterima }}</td>
-                                <td>{{ $mutasi->status_dibukukan }}</td>
-                                <td>{{ $mutasi->status_diperiksa }}</td> --}}
-                                <td>{{ formatRupiah($mutasi->total_biaya) }}</td>
-                                <td>{{ formatRupiah($mutasi->sisa_bayar) }}</td>
+                                <td>{{ $retur->no_retur }}</td>
+                                <td>{{ $retur->mutasiinden->no_mutasi}}</td>
                                 <td>
-                                    @if ( $mutasi->sisa_bayar == 0 && $mutasi->sisa_bayar !== null  ) 
-                                        Lunas
-                                    @else
-                                        Belum Lunas
-                                    @endif
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->produk->produk->kode_produk_inden }}</li>
+                                        @endforeach
+                                    </ul>
                                 </td>
                                 <td>
-                                    @if ( $mutasi->returinden !== null  ) 
-                                        {{ formatRupiah($mutasi->returinden->refund) }}
-                                    @else
-                                        -
-                                    @endif
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->produk->produk->produk->nama }}</li>
+                                        @endforeach
+                                    </ul>
                                 </td>
-                                <td class="text-center">
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->jml_diretur }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>{{ tanggalindo($retur->mutasiinden->tgl_dikirim) }}</td>
+                                <td>{{ tanggalindo($retur->tgl_dibuat) }}</td>
+                                <td></td>
+                               
+                               
+                                {{-- <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
@@ -87,22 +84,20 @@
                                             <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>
                                         @endif
-                                    @if ($mutasi->returinden !== null)
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi/Input Refund</a>
-                                        </li>
-                                    @else
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi</a>
-                                        </li>
-                                        @if($mutasi->sisa_bayar !== 0)
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
-                                        </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi</a>
+                                    </li>
+                                    <li>
+
+                                        @if ($mutasi->returinden !== null)
+                                        <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Lihat Komplain</a>
+
+                                        @else              
+                                        <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
                                         @endif
-                                    @endif
+                                    </li>
                                     </ul>
-                                </td>
+                                </td> --}}
                             </tr>
                             @endforeach
                         </tbody>

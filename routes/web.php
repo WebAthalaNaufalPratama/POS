@@ -300,6 +300,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
             Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
+            Route::post('/refund/store', 'PembayaranController@bayar_refund')->name('bayarrefund.store');
 
              Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show'); 
              Route::get('/returinv/{retur_id}/show', 'PembelianController@show_returinv')->name('returinvoice.show');
@@ -533,11 +534,19 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create');
             Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');
             Route::get('/{mutasiIG}/show', 'MutasiindensController@show_indengh')->name('mutasiindengh.show');
+            Route::post('/store/retur', 'MutasiindensController@store_retur')->name('retur.store');
             Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store');
             Route::patch('/{mutasiIG}/update', 'MutasiindensController@update_indengh')->name('mutasiindengh.update');
             // Route::patch('/{mutasiIG}/update_gambar', 'MutasiindensController@updategambar_indengh')->name('gambarinden.update');
             Route::get('/{mutasiIG}/delete', 'MutasiindensController@destroy_indengh')->name('mutasiindengh.destroy');
-           
+            
+        });
+        
+        Route::group(['prefix' => 'returinden'], function() {
+            Route::get('/{mutasiIG}/create/retur', 'MutasiindensController@create_retur')->name('create.retur');
+            Route::get('/', 'MutasiindensController@index_returinden')->name('returinden.index');
+            Route::get('/{mutasiIG}/show', 'MutasiindensController@show_returinden')->name('show.returinden');
+
         });
 
         Route::group(['prefix' => 'inven_inden'], function() {

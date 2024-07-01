@@ -7,7 +7,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Pembayaran PO</h4>
+                    <h4>Pembayaran Keluar</h4>
                 </div>
             </div>
         </div>
@@ -20,19 +20,110 @@
                     <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <select id="filterMetode" name="metode" class="form-control" title="metode">
+                    <select id="filterMetodekeluar" name="metode_keluar" class="form-control" title="metode">
                         <option value="">Pilih Metode</option>
                         <option value="cash" {{ 'cash' == request()->input('metode') ? 'selected' : '' }}>Cash</option>
                         <option value="transfer" {{ 'transfer' == request()->input('metode') ? 'selected' : '' }}>Transfer</option>
                     </select>
                 </div>
-                <div class="col-sm-2 ps-0 pe-0">
+                {{-- <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterJenis" name="jenis" class="form-control" title="jenis">
                         <option value="">Pilih Jenis</option>
                         <option value="Tradisional" {{ 'Tradisional' == request()->input('jenis') ? 'selected' : '' }}>Tradisional</option>
                         <option value="Inden" {{ 'Inden' == request()->input('jenis') ? 'selected' : '' }}>Inden</option>
                     </select>
+                </div> --}}
+                <div class="col-sm-2">
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-warning">Clear</a>
                 </div>
+            </div>
+            <div class="table-responsive">
+            <table class="table datanew">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    <th>No PO</th>
+                    <th>No Invoice Tagihan</th>
+                    <th>No Invoice Pembayaran</th>
+                    <th>Nominal</th>
+                    <th>Tanggal Bayar</th>
+                    <th>Metode</th>
+                    <th>Rekening</th>
+                    <th class="text-center">Status</th>
+                    {{-- <th>Aksi</th> --}}
+                </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data as $item)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $item->po->pembelian->no_po ?? $item->po->poinden->no_po }}</td>
+                            <td>{{ $item->po->no_inv }}</td>
+                            <td>{{ $item->no_invoice_bayar }}</td>
+                            <td>{{ formatRupiah($item->nominal) }}</td>
+                            <td>{{ tanggalindo($item->tanggal_bayar) }}</td>
+                            <td>{{ $item->cara_bayar }}</td>
+                            <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
+                            <td class="text-center">
+                                @if ($item->status_bayar == 'LUNAS')
+                                    <span class="badge bg-success">{{ $item->status_bayar }}</span>
+                                @elseif ($item->status_bayar == 'BELUM LUNAS')
+                                    <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
+                                @endif
+                            </td>
+                            {{-- <td class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="{{ route('invoicepo.show', ['invoicepo' => $item->po->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                    </li>
+                                </ul>
+                            </td> --}}
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+        <div class="card-header">
+            <div class="page-header">
+                <div class="page-title">
+                    <h4>Pembayaran Masuk</h4>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row ps-2 pe-2">
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterMetodemasuk" name="metode_masuk" class="form-control" title="metode">
+                        <option value="">Pilih Metode</option>
+                        <option value="cash" {{ 'cash' == request()->input('metode') ? 'selected' : '' }}>Cash</option>
+                        <option value="transfer" {{ 'transfer' == request()->input('metode') ? 'selected' : '' }}>Transfer</option>
+                    </select>
+                </div>
+                {{-- <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterJenis" name="jenis" class="form-control" title="jenis">
+                        <option value="">Pilih Jenis</option>
+                        <option value="Tradisional" {{ 'Tradisional' == request()->input('jenis') ? 'selected' : '' }}>Tradisional</option>
+                        <option value="Inden" {{ 'Inden' == request()->input('jenis') ? 'selected' : '' }}>Inden</option>
+                    </select>
+                </div> --}}
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-info">Filter</a>
                     <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-warning">Clear</a>
@@ -96,7 +187,7 @@
 @section('scripts')
     <script>
         $(document).ready(function(){
-            $('#rekening_id, #bayar, #filterMetode, #filterJenis').select2();
+            $('#rekening_id, #bayar, #filterMetodemasuk, #filterMetodekeluar, #filterJenis').select2();
         });
 
         $('#bayar').on('change', function() {

@@ -112,7 +112,7 @@ Carbon::setLocale('id');
                                                     <td hidden><input type="text" name="id[]" id="id{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
                                                     <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
                                                     <td><input type="text" name="nama[]" id="nama_{{ $index }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima - $item->qty_komplain  }}" readonly></td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
@@ -139,6 +139,63 @@ Carbon::setLocale('id');
                                 </div>
                             </div>
                         </div>
+                        @if ($retur)
+                        <div class="row justify-content-around">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                                <div class="form-row row">
+                                    <div class="mb-4">
+                                        <h5>List Produk {{ $retur->komplain }}</h5>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th hidden>id</th>
+                                                    <th>Kode Produk</th>
+                                                    <th>Nama Produk</th>
+                                                    <th>QTY</th>
+                                                    <th>Harga</th>
+                                                    <th>Diskon/item</th>
+                                                    <th>Total Harga</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dynamic_field">
+                                                @foreach ($produkkomplains as $index => $item)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td hidden><input type="text" name="id[]" id="id{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
+                                                    <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produkbeli->produk->kode }}" readonly></td>
+                                                    <td><input type="text" name="nama[]" id="nama_{{ $index }}" class="form-control" value="{{ $item->produkbeli->produk->nama }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jumlah }}" readonly></td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{formatRupiah2($item->harga) }}" readonly>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}" readonly>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" name="jumlah[]" id="jumlah_{{ $index }}" class="form-control" value="{{ formatRupiah2($item->totharga) }}" readonly>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
@@ -262,16 +319,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
-                                                    <h4>Total Diskon</h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span>
-                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
-                                                        </div>
-                                                    </h5>
-                                                  
-                                                </li>
+                                             
                                                 <li>
                                                     <h4>PPN</h4>
                                                     <h5 class="col-lg-5">
@@ -290,6 +338,28 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
+                                                @if ($retur && $retur->komplain == 'Refund')
+                                                <li>
+                                                    <h4>Total Tagihan barang</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ formatRupiah2($inv_po->subtotal + $inv_po->ppn + $inv_po->biaya_kirim ) }}" readonly required>
+                                                        </div>    
+                                                    </h5>
+                                                </li>
+                                                @endif
+                                                @if ($retur)
+                                                <li>
+                                                    <h4>Biaya Pengiriman {{ $retur->komplain }}</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($inv_po->retur->ongkir) }}" readonly required>
+                                                        </div>    
+                                                    </h5>
+                                                </li>
+                                                @endif
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
                                                     <h5>
@@ -298,6 +368,17 @@ Carbon::setLocale('id');
                                                             <input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ formatRupiah2($inv_po->total_tagihan) }}" readonly required>
                                                         </div>    
                                                     </h5>
+                                                </li>
+                                                @if (!$retur)
+                                                <li>
+                                                    <h4>Total Diskon</h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
+                                                        </div>
+                                                    </h5>
+                                                  
                                                 </li>
                                                 <li>
                                                     <h4>DP</h4>
@@ -310,6 +391,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
+                                                @endif
                                                 <li>
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>
@@ -423,13 +505,13 @@ Carbon::setLocale('id');
               <label for="nominal" class="form-label">Nominal</label>
               <div class="input-group">
                 <span class="input-group-text">Rp. </span>
-                <input type="text" class="form-control"  id="nominal">
+                <input type="text" class="form-control"  id="nominal" value="">
               </div>
               <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
             </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="bukti" name="bukti">
+              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
             </div>
             
             <div class="modal-footer">
@@ -467,12 +549,23 @@ Carbon::setLocale('id');
         return formattedValue.replace(/\./g, '');
     }
 
+    document.addEventListener('DOMContentLoaded', function() {
+         // Initialize input field with formatted value
+         var nominalInput = document.getElementById('nominal');
+         var nominalInput2 = document.getElementById('nominal2');
+            var initialNominalValue = '{{ $inv_po->sisa }}';
+            nominalInput.value = formatRupiah(initialNominalValue);
+            nominalInput2.value = unformatRupiah(initialNominalValue);
+
+            
+
     document.getElementById('nominal').addEventListener('keyup', function(e) {
         var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
         this.value = formatRupiah(rupiah);
 
         // Set nilai ke input hidden
         document.getElementById('nominal2').value = unformatRupiah(this.value);
+    });
     });
 
     // $(document).ready(function() {

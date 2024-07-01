@@ -17,17 +17,25 @@
         </div>
     </div>
 </div>
-
+<form action="{{ route('pembelianpo.store') }}" method="POST" enctype="multipart/form-data">
+    @csrf
 <div class="row">
     <div class="card">
         <div class="card-header">
             <h4 class="card-title mb-0">
                 Transaksi Pembelian
             </h4>
+        </hr>
+            <label>
+                <input type="checkbox" id="returCheckbox"> Pembelian Retur
+            </label>
         </div>
+        <div id="returDropdown" style="display:none; margin-top: 10px;">
+            <label for="nomerRetur">Nomor Retur:</label>
+            <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;">
+        </div>
+        
         <div class="card-body">
-            <form action="{{ route('pembelianpo.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
                 <div class="row">
                     <div class="col-sm">
                         @csrf
@@ -284,12 +292,23 @@
 <script>
 var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+
+
 function clearFile(){
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
         }
 
 $(document).ready(function() {
+
+    document.getElementById('returCheckbox').addEventListener('change', function() {
+        var returDropdown = document.getElementById('returDropdown');
+        if (this.checked) {
+            returDropdown.style.display = 'block';
+        } else {
+            returDropdown.style.display = 'none';
+        }
+    });
 
     if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);

@@ -96,8 +96,8 @@
                                                         <option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}">{{ $produk->nama }}</option>
                                                         @endforeach
                                                     </select> --}}
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->jumlahInden }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" value="{{ $item->Keterangan ?? '' }}" readonly></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0"  class="form-control" value="{{ $item->jumlahInden }}" readonly></td>
+                                                    <td><input type="text" name="ket[]" id="ket_0"  class="form-control" value="{{ $item->keterangan }}" readonly></td>
 
                                                         {{-- <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
                                                             <option value="">Pilih Kondisi</option>
