@@ -123,7 +123,7 @@
                                         @foreach ($data2 as $produk) 
                                             <tr id="row{{ $i }}">
                                                 <td>
-                                                    <select id="no_do_produks_{{ $i }}" name="no_do_produk[]" class="form-control" disabled>
+                                                    <select id="no_do_produks_{{ $i }}" name="no_do_produk[]" class="form-control" required>
                                                         <option value="">Pilih DO</option>
                                                         @foreach ($do as $item)
                                                             <option value="{{ $item->no_do }}" data-produk="{{ $item }}" {{ $produk->no_do == $item->no_do ? 'selected' : '' }}>{{ $item->no_do }}</option>
@@ -131,18 +131,18 @@
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
+                                                    <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
                                                         <option value="{{ $produk->produk->kode }}">({{ $produk->id }}) {{ $produk->produk->nama }}</option>
                                                     </select>
                                                     @for ($j = 0; $j < count($produk->komponen); $j++)
                                                         <div id="komponen_{{ $i }}" class="row mt-2">
                                                             <div class="col">
-                                                                <select id="namaKomponen_{{ $i }}_{{ $j }}" name="namaKomponen[]" class="form-control" required disabled>
+                                                                <select id="namaKomponen_{{ $i }}_{{ $j }}" name="namaKomponen[]" class="form-control" disabled>
                                                                     <option value="{{ $produk->komponen[$j]->kode_produk }}">{{ $produk->komponen[$j]->nama_produk }}</option>
                                                                 </select>
                                                             </div>
                                                             <div class="col">
-                                                                <select id="kondisiKomponen_{{ $i }}_{{ $j }}" name="kondisiKomponen[]" class="form-control" disabled>
+                                                                <select id="kondisiKomponen_{{ $i }}_{{ $j }}" name="kondisiKomponen[]" class="form-control" required>
                                                                 <option value="">Pilih Kondisi</option>
                                                                 @foreach ($kondisi as $item)
                                                                     <option value="{{ $item->id }}" {{ $produk->komponen[$j]->kondisi == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
@@ -150,14 +150,14 @@
                                                             </select>
                                                             </div>
                                                             <div class="col">
-                                                                <input type="number" name="jumlahKomponen[]" id="jumlahKomponen_{{ $i }}_{{ $j }}" class="form-control" value="{{ $produk->komponen[$j]->jumlah }}" required disabled>
+                                                                <input type="number" name="jumlahKomponen[]" id="jumlahKomponen_{{ $i }}_{{ $j }}" class="form-control" value="{{ $produk->komponen[$j]->jumlah }}" required required>
                                                             </div>
                                                         </div>
                                                     @endfor
                                                 </td>
-                                                <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" disabled></td>
+                                                <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" required></td>
                                                 <td>
-                                                    <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" disabled>
+                                                    <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" required>
                                                         <option value="{{ $produk->detail_lokasi }}">{{ $produk->detail_lokasi }}</option>
                                                     </select>
                                                 </td>

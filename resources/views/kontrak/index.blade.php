@@ -119,9 +119,11 @@
                                     </li>
                                     @endif
                                     @if( ($kontrak->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($kontrak->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
+                                    @if(!$kontrak->hasKembali)
                                     <li>
                                         <a href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
+                                    @endif
                                     <li>
                                         <a href="#" class="dropdown-item" onclick="deleteData({{ $kontrak->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
                                     </li>

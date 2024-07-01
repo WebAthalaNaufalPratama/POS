@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\PergantianExport;
 use App\Models\Customer;
 use App\Models\Karyawan;
+use App\Models\KembaliSewa;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kondisi;
 use App\Models\Kontrak;
@@ -48,6 +49,9 @@ class KontrakController extends Controller
             $query->where('tanggal_kontrak', '<=', $req->input('dateEnd'));
         }
         $kontraks = $query->orderByDesc('id')->get();
+        $kontraks->map(function($kontrak){
+            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
+        });
 
         $customer = Kontrak::select('customer_id')
         ->distinct()
