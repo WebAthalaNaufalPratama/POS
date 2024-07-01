@@ -68,13 +68,24 @@
                                     <li>
                                         <a href="{{ route('invoice_sewa.cetak', ['invoice_sewa' => $item->id]) }}" class="dropdown-item" target="blank"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
                                     </li>
+                                    @if($item->status == 'DIKONFIRMASI' || $item->status == 'BATAL')
                                     <li>
                                         <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
+                                    @else
                                     <li>
-                                        <a href="{{ route('invoice_sewa.edit', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Konfirmasi</a>
                                     </li>
-                                    @if ($item->sisa_bayar != 0)
+                                    @endif
+                                    @if( ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($item->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
+                                    {{-- <li>
+                                        <a href="{{ route('invoice_sewa.edit', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li> --}}
+                                    <li>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
+                                    </li>
+                                    @endif
+                                    @if ($item->sisa_bayar != 0 && $item->status == 'DIKONFIRMASI')
                                     <li>
                                         <a href="javascript:void(0);" onclick="bayar({{ $item }})" class="dropdown-item"><img src="assets/img/icons/cash.svg" class="me-2" alt="img">Bayar</a>
                                     </li>
@@ -285,5 +296,46 @@
             var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
             $('#no_invoice_bayar').val(generatedInvoice);
         }
+        function deleteData(id){
+        Swal.fire({
+            title: 'Batalkan kontrak?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, batalkan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/invoice_sewa/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
+                });
+            }
+        });
+    }
     </script>
 @endsection

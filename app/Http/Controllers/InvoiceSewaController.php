@@ -105,7 +105,8 @@ class InvoiceSewaController extends Controller
                 $sisaBayar -= $pembayaran->nominal;
             }
         }
-        return view('invoice_sewa.create', compact('getKode', 'kontrak', 'sales', 'produkSewa', 'ongkirs', 'rekening', 'sisaBayar'));
+        $hasInvoice = InvoiceSewa::where('no_sewa', $kontrak->no_kontrak)->exists();
+        return view('invoice_sewa.create', compact('getKode', 'kontrak', 'sales', 'produkSewa', 'ongkirs', 'rekening', 'sisaBayar', 'hasInvoice'));
     }
 
     /**
@@ -135,7 +136,8 @@ class InvoiceSewaController extends Controller
         $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
         $data['pembuat'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
-        $data['status'] = 'DRAFT';
+        $data['status'] = 'TUNDA';
+        $data['sisa_bayar'] = $data['total_tagihan'] - $data['dp'];
 
         // save data invoice
         $check = InvoiceSewa::create($data);
@@ -205,7 +207,9 @@ class InvoiceSewaController extends Controller
                 $invoice_bayar = 'BYR' . date('Ymd') . $nextNumber;
             }
         }
-        return view('invoice_sewa.show', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa', 'riwayat', 'pembayaran', 'bankpens', 'invoice_bayar'));
+        $firstInvoice = InvoiceSewa::where('no_sewa', $kontrak->no_kontrak)->first();
+        $isFirst = $firstInvoice->id == $invoiceSewa;
+        return view('invoice_sewa.show', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa', 'riwayat', 'pembayaran', 'bankpens', 'invoice_bayar', 'isFirst'));
     }
 
     /**
@@ -239,7 +243,9 @@ class InvoiceSewaController extends Controller
                 $invoice_bayar = 'BYR' . date('Ymd') . $nextNumber;
             }
         }
-        return view('invoice_sewa.edit', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa', 'riwayat', 'pembayaran', 'bankpens', 'invoice_bayar'));
+        $firstInvoice = InvoiceSewa::where('no_sewa', $kontrak->no_kontrak)->first();
+        $isFirst = $firstInvoice->id == $invoiceSewa;
+        return view('invoice_sewa.edit', compact('data', 'kontrak', 'sales', 'ongkirs', 'rekening', 'produkSewa', 'riwayat', 'pembayaran', 'bankpens', 'invoice_bayar', 'isFirst'));
     }
 
     /**
@@ -251,60 +257,72 @@ class InvoiceSewaController extends Controller
      */
     public function update(Request $req, $invoiceSewa)
     {
-        // validasi
-        $validator = Validator::make($req->all(), [
-            // 'no_invoice' => 'required',
-            // 'no_sewa' => 'required',
-            // 'tanggal_invoice' => 'required',
-            // 'jatuh_tempo' => 'required',
-            'rekening_id' => 'required',
-            'total_tagihan' => 'required',
-            'sisa_bayar' => 'required',
-            'sales' => 'required',
-            'rekening_id' => 'required',
-            // 'tanggal_sales' => 'required',
-        ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
-        // $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
-        // $data['pembuat'] = Auth::user()->id;
-        // $data['tanggal_pembuat'] = now();
-        // $data['status'] = 'DRAFT';
+        if($req->konfirmasi){
+            $invoice = InvoiceSewa::find($invoiceSewa);
+            if($req->konfirmasi == 'confirm'){
+                $invoice->status = 'DIKONFIRMASI';
+                $msg = 'Dikonfirmasi';
+            } else if($req->konfirmasi == 'cancel'){
+                $invoice->status = 'BATAL';
+                $msg = 'Dibatalkan';
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');
+            }
+            $check = $invoice->update();
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');
+            return redirect()->back()->withInput()->with('success', 'Data Berhasil ' . $msg);
+        } else {
+            // validasi
+            $validator = Validator::make($req->all(), [
+                // 'no_invoice' => 'required',
+                // 'no_sewa' => 'required',
+                // 'tanggal_invoice' => 'required',
+                // 'jatuh_tempo' => 'required',
+                'rekening_id' => 'required',
+                'total_tagihan' => 'required',
+                'sisa_bayar' => 'required',
+                'sales' => 'required',
+                'rekening_id' => 'required',
+                // 'tanggal_sales' => 'required',
+            ]);
+            $error = $validator->errors()->all();
+            if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+            $data = $req->except(['_token', '_method']);
 
-        // save data invoice
-        $check = InvoiceSewa::find($invoiceSewa)->update($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-        
-        // // update data produk invoice
-        // $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
+            // save data invoice
+            $check = InvoiceSewa::find($invoiceSewa)->update($data);
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            
+            // // update data produk invoice
+            // $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
 
-        // for ($i=0; $i < count($data['nama_produk']); $i++) { 
-        //     $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-        //     $produk_terjual = Produk_Terjual::create([
-        //         'produk_jual_id' => $getProdukJual->id,
-        //         'no_invoice' => $check->no_invoice,
-        //         'harga' => $data['harga_satuan'][$i],
-        //         'jumlah' => $data['jumlah'][$i],
-        //         'harga_jual' => $data['harga_total'][$i]
-        //     ]);
+            // for ($i=0; $i < count($data['nama_produk']); $i++) { 
+            //     $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
+            //     $produk_terjual = Produk_Terjual::create([
+            //         'produk_jual_id' => $getProdukJual->id,
+            //         'no_invoice' => $check->no_invoice,
+            //         'harga' => $data['harga_satuan'][$i],
+            //         'jumlah' => $data['jumlah'][$i],
+            //         'harga_jual' => $data['harga_total'][$i]
+            //     ]);
 
-        //     if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-        //     foreach ($getProdukJual->komponen as $komponen ) {
-        //         $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-        //             'produk_terjual_id' => $produk_terjual->id,
-        //             'kode_produk' => $komponen->kode_produk,
-        //             'nama_produk' => $komponen->nama_produk,
-        //             'tipe_produk' => $komponen->tipe_produk,
-        //             'kondisi' => $komponen->kondisi,
-        //             'deskripsi' => $komponen->deskripsi,
-        //             'jumlah' => $komponen->jumlah,
-        //             'harga_satuan' => $komponen->harga_satuan,
-        //             'harga_total' => $komponen->harga_total
-        //         ]);
-        //         if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-        //     }
-        // }
+            //     if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            //     foreach ($getProdukJual->komponen as $komponen ) {
+            //         $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+            //             'produk_terjual_id' => $produk_terjual->id,
+            //             'kode_produk' => $komponen->kode_produk,
+            //             'nama_produk' => $komponen->nama_produk,
+            //             'tipe_produk' => $komponen->tipe_produk,
+            //             'kondisi' => $komponen->kondisi,
+            //             'deskripsi' => $komponen->deskripsi,
+            //             'jumlah' => $komponen->jumlah,
+            //             'harga_satuan' => $komponen->harga_satuan,
+            //             'harga_total' => $komponen->harga_total
+            //         ]);
+            //         if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            //     }
+            // }
+        }
 
         return redirect(route('invoice_sewa.index'))->with('success', 'Data tersimpan');
     }
@@ -316,9 +334,14 @@ class InvoiceSewaController extends Controller
      * @param  \App\Models\InvoiceSewa  $invoiceSewa
      * @return \Illuminate\Http\Response
      */
-    public function destroy(InvoiceSewa $invoiceSewa)
+    public function destroy($invoiceSewa)
     {
-        //
+        $data = InvoiceSewa::find($invoiceSewa);
+        if(!$data) return response()->json(['msg' => 'Invoice tidak ditemukan']);
+        $data->status = 'BATAL';
+        $check = $data->update();
+        if(!$check) return response()->json(['msg' => 'Gagal membatalkan invoice']);
+        return response()->json(['msg' => 'Berhasil membatalkan invoice']);
     }
 
     public function cetak($id)

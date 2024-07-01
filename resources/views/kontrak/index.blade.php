@@ -87,15 +87,6 @@
                                     <li>
                                         <a href="{{ route('kontrak.excelPergantian', ['kontrak' => $kontrak->id]) }}" target="_blank" class="dropdown-item"><img src="assets/img/icons/reverse-alt.svg" class="me-2" alt="img">Pergantian</a>
                                     </li>
-                                    {{-- @php
-                                    $allSet = false;
-                                        foreach ($kontrak->produk as $produk) {
-                                            if($produk->no_form){
-                                                $allSet = true;
-                                            }
-                                        }
-                                    @endphp --}}
-                                    {{-- @if($allSet) --}}
                                     <li>
                                         <a href="{{ route('do_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order</a>
                                     </li>
@@ -103,11 +94,22 @@
                                         <a href="{{ route('kembali_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Kembali Sewa</a>
                                     </li>
                                     {{-- @endif --}}
+                                    @php
+                                        $total_invoice = 0;
+                                        foreach ($kontrak->invoice as $invoice) {
+                                            if($invoice->status != 'BATAL'){
+                                                $total_invoice += $invoice->total_tagihan;
+                                            }
+                                        }
+                                        $canMakeInvoice = $kontrak->total_harga > $total_invoice ? true : false;
+                                    @endphp
+                                    @if($canMakeInvoice)
                                     <li>
                                         <a href="{{ route('invoice_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Invoice Sewa</a>
                                     </li>
                                     @endif
-                                    @if($kontrak->status == 'DIKONFIRMASI')
+                                    @endif
+                                    @if(in_array($kontrak->status, ['DIKONFIRMASI', 'BATAL']))
                                     <li>
                                         <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
