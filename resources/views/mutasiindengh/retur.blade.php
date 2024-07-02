@@ -255,7 +255,7 @@
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        <th>Aksi</th>
+                                                        {{-- <th>Aksi</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -265,7 +265,7 @@
                                                         <td>{{ $databayar->no_invoice_bayar }}</td>
                                                         <td>{{ tanggalindo($databayar->tanggal_bayar) }}</td>
                                                         <td>{{ $databayar->cara_bayar }}</td>
-                                                        <td>{{ $databayar->nominal}}</td>
+                                                        <td>{{ formatRupiah($databayar->nominal)}}</td>
                                                         <td>
                                                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#buktiModal{{ $databayar->id }}">
                                                                 Lihat Bukti
@@ -293,7 +293,7 @@
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                        <td></td>
+                                                        {{-- <td></td> --}}
                                                        
                                                     </tr>
                                                     @endforeach

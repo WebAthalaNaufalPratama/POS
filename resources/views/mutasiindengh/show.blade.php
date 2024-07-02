@@ -471,7 +471,7 @@
               </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="buktitf" name="buktitf">
+              <input type="file" class="form-control" id="buktitf" name="buktitf" accept="image/*">
             </div>
             
             <div class="modal-footer">
