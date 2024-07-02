@@ -115,6 +115,7 @@
                                                     @endforeach
                                                 </select>
                                             </td>
+                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                         </tr>
                                         @else
                                         @php
@@ -123,7 +124,7 @@
                                         @foreach ($data2 as $produk) 
                                             <tr id="row{{ $i }}">
                                                 <td>
-                                                    <select id="no_do_produks_{{ $i }}" name="no_do_produk[]" class="form-control" required>
+                                                    <select id="no_do_produk_{{ $i }}" name="no_do_produk[]" class="form-control" required>
                                                         <option value="">Pilih DO</option>
                                                         @foreach ($do as $item)
                                                             <option value="{{ $item->no_do }}" data-produk="{{ $item }}" {{ $produk->no_do == $item->no_do ? 'selected' : '' }}>{{ $item->no_do }}</option>
@@ -132,35 +133,43 @@
                                                 </td>
                                                 <td>
                                                     <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
-                                                        <option value="{{ $produk->produk->kode }}">({{ $produk->id }}) {{ $produk->produk->nama }}</option>
+                                                        <option value="">Pilih Produk</option>
+                                                        <option value="{{ $produk->produk->kode }}" data-id="{{ $produk->id }}" selected>({{ $produk->id }}) {{ $produk->produk->nama }}</option>
                                                     </select>
-                                                    @for ($j = 0; $j < count($produk->komponen); $j++)
-                                                        <div id="komponen_{{ $i }}" class="row mt-2">
-                                                            <div class="col">
-                                                                <select id="namaKomponen_{{ $i }}_{{ $j }}" name="namaKomponen[]" class="form-control" disabled>
-                                                                    <option value="{{ $produk->komponen[$j]->kode_produk }}">{{ $produk->komponen[$j]->nama_produk }}</option>
-                                                                </select>
+                                                    <div id="komponen_{{ $i }}" class="row mt-2">
+                                                        @for ($j = 0; $j < count($produk->komponen); $j++)
+                                                            <div class="row mt-2">
+                                                                <div class="col">
+                                                                    <select id="namaKomponen_{{ $i }}_{{ $j }}" name="namaKomponen[]" class="form-control" disabled>
+                                                                        <option value="{{ $produk->komponen[$j]->kode_produk }}">{{ $produk->komponen[$j]->nama_produk }}</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <select id="kondisiKomponen_{{ $i }}_{{ $j }}" name="kondisiKomponen[]" class="form-control" required>
+                                                                        <option value="">Pilih Kondisi</option>
+                                                                        @foreach ($kondisi as $item)
+                                                                            <option value="{{ $item->id }}" {{ $produk->komponen[$j]->kondisi == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <input type="number" name="jumlahKomponen[]" id="jumlahKomponen_{{ $i }}_{{ $j }}" class="form-control" value="{{ $produk->komponen[$j]->jumlah }}" required required>
+                                                                </div>
                                                             </div>
-                                                            <div class="col">
-                                                                <select id="kondisiKomponen_{{ $i }}_{{ $j }}" name="kondisiKomponen[]" class="form-control" required>
-                                                                <option value="">Pilih Kondisi</option>
-                                                                @foreach ($kondisi as $item)
-                                                                    <option value="{{ $item->id }}" {{ $produk->komponen[$j]->kondisi == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            </div>
-                                                            <div class="col">
-                                                                <input type="number" name="jumlahKomponen[]" id="jumlahKomponen_{{ $i }}_{{ $j }}" class="form-control" value="{{ $produk->komponen[$j]->jumlah }}" required required>
-                                                            </div>
-                                                        </div>
-                                                    @endfor
+                                                        @endfor
+                                                    </div>
                                                 </td>
                                                 <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" required></td>
                                                 <td>
-                                                    <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" required>
+                                                    <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" disabled>
                                                         <option value="{{ $produk->detail_lokasi }}">{{ $produk->detail_lokasi }}</option>
                                                     </select>
                                                 </td>
+                                                @if ($i == 0)
+                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                @else
+                                                    <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                @endif
                                                 @php
                                                     $i++;
                                                 @endphp
@@ -281,8 +290,36 @@
             }
             $('[id^=produk], #driver_id, [id^=no_do_produk], [id^=kondisi], [id^=lokasi]').select2();
             $('#driver_id').trigger('change');
-            $('[id^=no_do_produk_]').trigger('change');
             var i = '{{ count($kontrak->produk) }}';
+            $('#add').click(function(){
+                var newRow = '<tr id="row'+i+'">' + 
+                               '<td>' +
+                                    '<select id="no_do_produk_'+i+'" name="no_do_produk[]" class="form-control">' +
+                                        '<option value="">Pilih DO</option>'+
+                                        '@foreach ($do as $item)' +
+                                            '<option value="{{ $item->no_do }}" data-produk="{{ $item }}">{{ $item->no_do }}</option>' +
+                                        '@endforeach' +
+                                    '</select>' +
+                                '</td>' +
+                                '<td>' +
+                                '<select id="produk_'+i+'" name="nama_produk[]" class="form-control" required disabled></select>' +
+                                    '<div id="komponen_'+i+'" class="row mt-2"></div>'+
+                            '</td>'+
+                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control" disabled></td>'+
+                            '<td>' +
+                                '<select id="lokasi_'+i+'" name="lokasi[]" class="form-control" required disabled>' +
+                                    '<option value="">Pilih Detail Lokasi</option>' +
+                                '</select>' +
+                            '</td>' +
+                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                            '</tr>';
+                $('#dynamic_field').append(newRow);
+                $('#produk_' + i).select2();
+                $('#no_do_produk_' + i).select2();
+                $('#kondisi_' + i).select2();
+                $('#lokasi_' + i).select2();
+                i++;
+            })
         })
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
@@ -317,18 +354,143 @@
                 reader.readAsDataURL(file);
             }
         });
-        $(document).on('change', '[id^=no_do_produk_]', function() {
-            var id = $(this).attr('id').split('_')[3];
-            var selectProduk = $('#produk_' + id);
-            var jumlahProduk = $('#jumlah_' + id);
-            var lokasiProduk = $('#lokasi_' + id);
-            $(jumlahProduk).val(0);
-            $('#komponen_' + id).empty();
 
-            if($(this).val()){ // cek jika value kosong
-                var data = {
-                    no_do: $(this).val(),
-                };
+        $(document).on('change', '[id^=no_do_produk_]', async function() {
+            var id = $(this).attr('id').split('_')[3];
+            if ($(this).val()) {
+                var jumlahProduk = $('#jumlah_' + id);
+                var lokasiProduk = $('#lokasi_' + id);
+                try {
+                    var data = await getProdukDo(id);
+                    populateSelectProduk(data, id)
+                } catch (error) {
+                    toastr.danger('Gagal mengambil data produk DO', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    resetFields(id);
+                }
+            } else {
+                resetProduk(id);
+            }
+        });
+
+        $(document).on('change', '[id^=produk_]',  async function() {
+            var id = $(this).attr('id').split('_')[1];
+            var idProdukTerjual = $(this).find(':selected').data('id');
+            
+            try {
+                var data = await getProdukDo(id);
+                if ($(this).val()) { // Check if value is not empty
+                    $('#komponen_' + id).empty();
+                    data.forEach(function(item) {
+                        populateLokasiProduk(data, id)
+                        if (item.id == idProdukTerjual) {
+                            $('#jumlah_' + id).attr('disabled', false);
+                            $('#jumlah_' + id).val(item.jumlah);
+                            populateKomponen(item, id);
+                        }
+                    });
+                } else { // Clear inputs if value is empty
+                    resetFields(id);
+                }
+            } catch (error) {
+                toastr.danger('Gagal mengambil data produk DO', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                resetFields(id);
+            }
+        });
+
+        function populateLokasiProduk(response, id) {
+           $('#lokasi_' + id).empty();
+           $('#lokasi_' + id).attr('disabled', false);
+           $('#lokasi_' + id).append('<option value="">Pilih Detail Lokasi</option>');
+            response.forEach(function(item) {
+                if (item.jenis != 'TAMBAHAN' && item.no_kembali_sewa == null) {
+                   $('#lokasi_' + id).append('<option value="' + item.detail_lokasi + '">' + item.detail_lokasi + '</option>');
+                }
+            });
+        }
+
+        function populateSelectProduk(response, id) {
+            var selectProduk = $('#produk_' + id);
+
+            selectProduk.attr('disabled', false);
+            selectProduk.empty();
+            selectProduk.append('<option value="">Pilih Produk</option>');
+
+            response.forEach(function(item) {
+                if (item.jenis != 'TAMBAHAN' && item.no_kembali_sewa == null) {
+                    selectProduk.append('<option value="' + item.produk.kode + '" data-id="' + item.id + '">' + item.produk.nama + '</option>');
+                }
+            });
+        }
+
+        function populateKomponen(item, id) {
+            var komponenContainer = $('#komponen_' + id);
+            komponenContainer.empty();
+
+            var jmlKomponen = 0;
+            var jumlah_kembali = {{ count($data2) }};
+            item.komponen.forEach(function(komponen, index) {
+                if ((item.jenis == null || id < jumlah_kembali) && (komponen.tipe_produk == 1 || komponen.tipe_produk == 2) && (item.no_kembali_sewa == null || id < jumlah_kembali)) {
+                    var komponenRow = '<div class="row mt-2">' +
+                                        '<div class="col">' +
+                                            '<select id="namaKomponen_' + id + '_' + index + '" name="namaKomponen[]" class="form-control" required readonly>' +
+                                                '<option value="' + komponen.kode_produk + '">' + komponen.nama_produk + '</option>' +
+                                            '</select>' +
+                                        '</div>' +
+                                        '<div class="col">' +
+                                            '<select id="kondisiKomponen_' + id + '_' + index + '" name="kondisiKomponen[]" class="form-control">' +
+                                                '<option value="">Pilih Kondisi</option>' +
+                                                '@foreach ($kondisi as $item)' +
+                                                    '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
+                                                '@endforeach' +
+                                            '</select>' +
+                                        '</div>' +
+                                        '<div class="col">' +
+                                            '<input type="number" name="jumlahKomponen[]" id="jumlahKomponen_' + id + '_' + index + '" class="form-control" value="" required>' +
+                                        '</div>' +
+                                    '</div>';
+                    komponenContainer.append(komponenRow);
+                    jmlKomponen++;
+                    $('#jumlahKomponen_' + id + '_' + index).val(komponen.jumlah);
+                    $('#kondisiKomponen_' + id + '_' + index).val(komponen.kondisi).trigger('change');
+                    $('#kondisiKomponen_' + id + '_' + index).select2();
+                }
+            });
+
+            if (item.jenis == null) {
+                komponenContainer.append('<input type="hidden" name="indexKomponen[]" value="' + jmlKomponen + '">');
+            }
+        }
+
+        function resetFields(id) {
+            $('#komponen_' + id).empty();
+            $('#jumlah_' + id).attr('disabled', true);
+            $('#lokasi_' + id).attr('disabled', true);
+            $('#jumlah_' + id).val(0);
+            $('#lokasi_' + id).val('').trigger('change');
+        }
+
+        function resetProduk(id){
+            $('#produk_' + id).attr('disabled', true);
+            $('#produk_' + id).val('').trigger('change');
+            resetFields(id)
+        }
+
+        async function getProdukDo(id) {
+            var data = {
+                no_do: $('#no_do_produk_' + id).find(':selected').val(),
+            };
+
+            return new Promise((resolve, reject) => {
                 $.ajax({
                     url: '/getProdukDo',
                     type: 'GET',
@@ -337,147 +499,15 @@
                         'X-CSRF-TOKEN': csrfToken
                     },
                     success: function(response) {
-                        $(lokasiProduk).empty()
-                        $(lokasiProduk).append('<option value="">Pilih Detail Lokasi</option>')
-                        $(selectProduk).attr('disabled', false);
-                        $(selectProduk).empty()
-                        $(selectProduk).append('<option value="">Pilih Produk</option>')
-                        for (let i = 0; i < response.length; i++) {
-                            if(response[i].jenis != 'TAMBAHAN' && response[i].no_kembali_sewa != null){
-                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">'+response[i].id+''+response[i].detail_lokasi+'' + response[i].produk.nama + '</option>');
-                                $(lokasiProduk).append('<option value="' + response[i].detail_lokasi + '">' + response[i].detail_lokasi + '</option>');
-                            }
-                        }
-                        for (let i = 0; i < response.length; i++) {
-                            if(response[i].jenis != 'TAMBAHAN' && response[i].no_kembali_sewa != null){
-                                $(selectProduk).val(response[i].produk.kode).trigger('change');
-                            }
-                        }
-                        $(document).on('change', '[id^=produk_]', function() {
-                            var id = $(this).attr('id').split('_')[1];
-                            var jumlahProduk = $('#jumlah_' + id);
-                            var lokasiProduk = $('#lokasi_' + id);
-                            if($(this).val()){ // cek jika value kosong
-                                var idProdukTerjual = $('#produk_' + id).find(':selected').data('id');
-                                $('#komponen_' + id).empty();
-                                response.forEach(function(item){
-                                    if(item.id == idProdukTerjual){
-                                        $(jumlahProduk).attr('disabled', false);
-                                        $(lokasiProduk).attr('disabled', false);
-                                        $(jumlahProduk).val(item.jumlah);
-                                        $(lokasiProduk).val(item.detail_lokasi).trigger('change');
-
-                                        // komponen
-                                        var jmlKomponen = 0;
-                                        for (let j = 0; j < item.komponen.length; j++) {
-                                            console.log(item.komponen[j])
-                                            if(item.jenis == null && (item.komponen[j].tipe_produk == 1 || item.komponen[j].tipe_produk == 2)){
-                                                var komponenRow = '<div id="komponen_'+id+'" class="row mt-2">'+
-                                                                        '<div class="col">'+
-                                                                            '<select id="namaKomponen_'+id+'_'+j+'" name="namaKomponen[]" class="form-control" required readonly>'+
-                                                                                '<option value="' + item.komponen[j].kode_produk + '">' + item.komponen[j].nama_produk + '</option>'+
-                                                                            '</select>'+
-                                                                        '</div>'+
-                                                                        '<div class="col">'+
-                                                                            '<select id="kondisiKomponen_'+id+'_'+j+'" name="kondisiKomponen[]" class="form-control">' +
-                                                                            '<option value="">Pilih Kondisi</option>' +
-                                                                            '@foreach ($kondisi as $item)' +
-                                                                                '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
-                                                                            '@endforeach' +
-                                                                        '</select>' +
-                                                                        '</div>' +
-                                                                        '<div class="col">'+
-                                                                            '<input type="number" name="jumlahKomponen[]" id="jumlahKomponen_'+id+'_'+j+'" class="form-control" value="" required>'+
-                                                                        '</div>'+
-                                                                    '</div>';
-                                                    $('#komponen_' + id).append(komponenRow);
-                                                    jmlKomponen++;
-                                                    $('#jumlahKomponen_'+id+'_'+j+'').val(item.komponen[j].jumlah);
-                                                    $('#kondisiKomponen_'+id+'_'+j+'').val(item.komponen[j].kondisi).trigger('change');
-                                                    $('#kondisiKomponen_'+id+'_'+j+'').select2();
-
-                                            }
-                                        }
-                                        if(item.jenis == null) {
-                                        $('#komponen_' + id).append('<input type="hidden" name="indexKomponen[]" value="'+jmlKomponen+'">');
-                                    }
-                                    }
-                                })
-                            } else { // kosongkan input jika value kosong
-                                $('#komponen_' + id).empty();
-                                $(jumlahProduk).attr('disabled', true);
-                                $(lokasiProduk).attr('disabled', true);
-                                $(jumlahProduk).val(0);
-                                $(lokasiProduk).val('').trigger('change');
-                            }
-                        });
+                        resolve(response);
                     },
                     error: function(xhr, status, error) {
-                        console.log(error)
+                        reject(error);
                     }
                 });
-            } else { // kosongkan input jika value kosong
-                $(selectProduk).attr('disabled', true);
-                $(jumlahProduk).attr('disabled', true);
-                $(lokasiProduk).attr('disabled', true);
-                $(selectProduk).empty();
-                $(jumlahProduk).val(0);
-                $(lokasiProduk).val('').trigger('change');
-            }
-        });
-        $(document).on('change', '[id^=produk_]', function() {
-            var id = $(this).attr('id').split('_')[1];
-            var jumlahProduk = $('#jumlah_' + id);
-            var lokasiProduk = $('#lokasi_' + id);
-            if($(this).val()){ // cek jika value kosong
-                var dataDO = $('#no_do_produk_' + id).find(':selected').data('produk');
-                $('#komponen_' + id).empty();
-                for (let i = 0; i < dataDO.produk.length; i++) {
-                    $(jumlahProduk).attr('disabled', true);
-                    $(lokasiProduk).attr('disabled', true);
-                    $(jumlahProduk).val(dataDO.produk[i].jumlah);
-                    $(lokasiProduk).val(dataDO.produk[i].detail_lokasi).trigger('change');
+            });
+        }
 
-                    var jmlKomponen = 0;
-                    for (let j = 0; j < dataDO.produk[i].komponen.length; j++) {
-                        if(dataDO.produk[i].jenis == 'KEMBALI_SEWA' && (dataDO.produk[i].komponen[j].tipe_produk == 1 || dataDO.produk[i].komponen[j].tipe_produk == 2)) { // filter pot dan bunga saja
-                            var komponenRow = '<div id="komponen_'+id+'" class="row mt-2">'+
-                                                '<div class="col">'+
-                                                    '<select id="namaKomponen_'+id+'_'+j+'" name="namaKomponen[]" class="form-control" disabled readonly>'+
-                                                        '<option value="' + dataDO.produk[i].komponen[j].kode_produk + '">' + dataDO.produk[i].komponen[j].nama_produk + '</option>'+
-                                                    '</select>'+
-                                                '</div>'+
-                                                '<div class="col">'+
-                                                    '<select id="kondisiKomponen_'+id+'_'+j+'" name="kondisiKomponen[]" class="form-control" disabled>' +
-                                                    '<option value="">Pilih Kondisi</option>' +
-                                                    '@foreach ($kondisi as $item)' +
-                                                        '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
-                                                    '@endforeach' +
-                                                '</select>' +
-                                                '</div>' +
-                                                '<div class="col">'+
-                                                    '<input type="number" name="jumlahKomponen[]" id="jumlahKomponen_'+id+'_'+j+'" class="form-control" value="" disabled>'+
-                                                '</div>'+
-                                            '</div>';
-                            $('#komponen_' + id).append(komponenRow);
-                            jmlKomponen++;
-                            $('#jumlahKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].jumlah);
-                            $('#kondisiKomponen_'+id+'_'+j+'').val(dataDO.produk[i].komponen[j].kondisi).trigger('change');
-                            $('#kondisiKomponen_'+id+'_'+j+'').select2();
-                        }
-                    }
-                    if(dataDO.produk[i].jenis == null) {
-                        $('#komponen_' + id).append('<input type="hidden" name="indexKomponen[]" value="'+jmlKomponen+'">');
-                    }
-                }
-            } else { // kosongkan input jika value kosong
-                $('#komponen_' + id).empty();
-                $(jumlahProduk).attr('disabled', true);
-                $(lokasiProduk).attr('disabled', true);
-                $(jumlahProduk).val(0);
-                $(lokasiProduk).val('').trigger('change');
-            }
-        });
         function clearFile(){
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
