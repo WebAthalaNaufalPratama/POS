@@ -615,9 +615,13 @@ class MutasiindensController extends Controller
             'tgl_dibuat' => $request->tgl_dibuat,
         ]);
 
+
+        $lokasi_id = Mutasiindens::where('mutasiinden_id', $request->mutasiinden_id)->first()->lokasi_id;
+
         // Loop melalui data produk dan masukkan ke tabel Produkreturinden
         $allInserted = true;
         foreach ($validated['produk_mutasi_inden_id'] as $index => $produk_mutasi_inden_id) {
+
             $check = Produkreturinden::create([
                 'returinden_id' => $returinden->id,
                 'produk_mutasi_inden_id' => $produk_mutasi_inden_id,
@@ -626,6 +630,33 @@ class MutasiindensController extends Controller
                 'harga_satuan' => $validated['harga_satuan'][$index],
                 'totalharga' => $validated['totalharga'][$index],
             ]);
+
+            $lokasi = Lokasi::find($lokasi_id);
+            $produkmutasi = ProdukMutasiInden::where('id', $produk_mutasi_inden_id)->first();
+            $kondisi = $produkmutasi->kondisi_id;
+            $kode_produk = $produkmutasi->produk->kode_produk;
+    
+            if ($lokasi && $kode_produk) {
+                if ($lokasi->tipe_lokasi == 1) {
+                    $checkInven = InventoryGallery::where('kode_produk', $kode_produk)
+                        ->where('kondisi_id', $kondisi[$index])
+                        ->where('lokasi_id', $lokasi->id)
+                        ->first();
+                    if ($checkInven) {
+                        $checkInven->jumlah -= $validated['jml_diretur'][$index];
+                        $checkInven->update();
+                    }
+                } elseif ($lokasi->tipe_lokasi == 3) {
+                    $checkInven = InventoryGreenHouse::where('kode_produk', $kode_produk)
+                        ->where('kondisi_id', $kondisi[$index])
+                        ->where('lokasi_id', $lokasi->id)
+                        ->first();
+                    if ($checkInven) {
+                        $checkInven->jumlah -= $validated['jml_diretur'][$index];
+                        $checkInven->update();
+                    }
+                }
+            }
 
             if (!$check) {
                 $allInserted = false;
