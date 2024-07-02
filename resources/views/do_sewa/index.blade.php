@@ -71,12 +71,27 @@
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                 </a>
                                 <ul class="dropdown-menu">
+                                    @if($item->status == 'TUNDA')
+                                    <li>
+                                        <a href="{{ route('do_sewa.show', ['do_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
+                                    </li>
+                                    @else
                                     <li>
                                         <a href="{{ route('do_sewa.show', ['do_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
+                                    @endif
+                                    @if(
+                                        (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')) 
+                                        ||
+                                        (Auth::user()->hasRole('AdminGallery') && $item->status == 'TUNDA')
+                                    )
                                     <li>
                                         <a href="{{ route('do_sewa.edit', ['do_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
+                                    <li>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
+                                    </li>
+                                    @endif
                                 </ul>
                             </td>
                         </tr>
@@ -163,27 +178,39 @@
         return 0;
     });
     function deleteData(id){
-        $.ajax({
-            type: "GET",
-            url: "/do_sewa/"+id+"/delete",
-            success: function(response) {
-                toastr.success(response.msg, 'Success', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
+        Swal.fire({
+            title: 'Batalkan delivery order?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, batalkan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/do_sewa/"+id+"/delete",
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
 
-                setTimeout(() => {
-                    location.reload()
-                }, 2000);
-            },
-            error: function(error) {
-                toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
                 });
             }
         });

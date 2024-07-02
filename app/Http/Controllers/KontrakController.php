@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\PergantianExport;
 use App\Models\Customer;
 use App\Models\Karyawan;
+use App\Models\KembaliSewa;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kondisi;
 use App\Models\Kontrak;
@@ -31,7 +32,7 @@ class KontrakController extends Controller
      */
     public function index(Request $req)
     {
-        $query = Kontrak::with('customer');
+        $query = Kontrak::with('customer', 'invoice');
         if(!Auth::user()->hasRole('SuperAdmin')){
             $query->where('lokasi_id',Auth::user()->karyawans->lokasi_id);
         }
@@ -48,6 +49,9 @@ class KontrakController extends Controller
             $query->where('tanggal_kontrak', '<=', $req->input('dateEnd'));
         }
         $kontraks = $query->orderByDesc('id')->get();
+        $kontraks->map(function($kontrak){
+            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
+        });
 
         $customer = Kontrak::select('customer_id')
         ->distinct()
@@ -384,20 +388,11 @@ class KontrakController extends Controller
     public function destroy($kontrak)
     {
         $data = Kontrak::find($kontrak);
-        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
-        $getProduks = Produk_Terjual::where('no_sewa', $data->no_kontrak)->get();
-        $check = $data->delete();
-        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
-        if($getProduks){
-            $getProduks->each->delete();
-        }
-        foreach ($getProduks as $item) {
-            $getKomponenProduks = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->get();
-            if($getKomponenProduks){
-                $getKomponenProduks->each->delete();
-            }
-        }
-        return response()->json(['msg' => 'Data berhasil dihapus']);
+        if(!$data) return response()->json(['msg' => 'Kontrak tidak ditemukan']);
+        $data->status = 'BATAL';
+        $check = $data->update();
+        if(!$check) return response()->json(['msg' => 'Gagal membatalkan kontrak']);
+        return response()->json(['msg' => 'Berhasil membatalkan kontrak']);
     }
 
     public function create_gift(Request $req)

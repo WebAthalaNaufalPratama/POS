@@ -93,11 +93,23 @@
                                     <li>
                                         <a href="{{ route('kembali_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Kembali Sewa</a>
                                     </li>
+                                    {{-- @endif --}}
+                                    @php
+                                        $total_invoice = 0;
+                                        foreach ($kontrak->invoice as $invoice) {
+                                            if($invoice->status != 'BATAL'){
+                                                $total_invoice += $invoice->total_tagihan;
+                                            }
+                                        }
+                                        $canMakeInvoice = $kontrak->total_harga > $total_invoice ? true : false;
+                                    @endphp
+                                    @if($canMakeInvoice)
                                     <li>
                                         <a href="{{ route('invoice_sewa.create', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Invoice Sewa</a>
                                     </li>
                                     @endif
-                                    @if($kontrak->status == 'DIKONFIRMASI')
+                                    @endif
+                                    @if(in_array($kontrak->status, ['DIKONFIRMASI', 'BATAL']))
                                     <li>
                                         <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
@@ -106,12 +118,16 @@
                                         <a href="{{ route('kontrak.show', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
                                     </li>
                                     @endif
+                                    @if( ($kontrak->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($kontrak->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
+                                    @if(!$kontrak->hasKembali)
                                     <li>
                                         <a href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
+                                    @endif
                                     <li>
-                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $kontrak->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $kontrak->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
                                     </li>
+                                    @endif
                                 </ul>
                             </td>
                         </tr>
@@ -199,13 +215,12 @@
     });
     function deleteData(id){
         Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data ini akan dihapus secara permanen!",
+            title: 'Batalkan kontrak?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
+            confirmButtonText: 'Ya, batalkan!',
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {

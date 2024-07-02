@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h5 class="card-title">Buat Delivery order</h5>
+                        <h5 class="card-title">Buat Delivery Order</h5>
                     </div>
                 </div>
             </div>
@@ -18,7 +18,7 @@
                             @csrf
                             <div class="row justify-content-around">
                                 <div class="col-md-6 border rounded pt-3">
-                                    <h5 class="card-title">Informasi Pelanggan</h5>
+                                    <h5 class="card-title">Informasi Customer</h5>
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
@@ -30,13 +30,13 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>PIC</label>
-                                                <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $kontrak->pic }}" class="form-control" required readonly>
+                                                <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $kontrak->pic }}" class="form-control" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Handphone</label>
-                                                <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $kontrak->handphone }}" class="form-control" required>
+                                                <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $kontrak->handphone }}" class="form-control" required oninput="validatePhoneNumber(this)">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -57,13 +57,13 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Kirim</label>
-                                                <input type="date" id="tanggal_kirim" name="tanggal_kirim" value="{{ old('tanggal_kirim') ?? date('Y-m-d') }}" class="form-control" required>
+                                                <input type="date" id="tanggal_kirim" name="tanggal_kirim" value="{{ old('tanggal_kirim') ?? $kontrak->tanggal_mulai }}" class="form-control" required min="{{ $kontrak->tanggal_mulai }}" max="{{ $kontrak->tanggal_selesai }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Kontrak</label>
-                                                <input type="text" id="no_referensi" name="no_referensi" value="{{ old('no_referensi') ?? $kontrak->no_kontrak }}" class="form-control"  required readonly>
+                                                <input type="text" id="no_referensi" name="no_referensi" value="{{ old('no_referensi') ?? $kontrak->no_kontrak }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Driver</label>
@@ -289,13 +289,13 @@
                                 '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-id="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
+                                        '<option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
-                            '<td><input type="number" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah2[]" id="jumlah2_'+i+'" class="form-control"></td>'+
-                            '<td><input type="number" name="detail_lokasis2[]" id="detail_lokasis2_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="detail_lokasis2[]" id="detail_lokasis2_'+i+'" class="form-control"></td>'+
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();
@@ -318,6 +318,16 @@
             } else {
                 $('#driver').text('-')
             }
+        });
+        $(document).on('input', '[id^=handhpone]', function() {
+            let input = $(this);
+            let value = input.val();
+            
+            if (!isNumeric(value)) {
+            value = value.replace(/[^\d]/g, "");
+            }
+
+            input.val(value);
         });
     </script>
 @endsection

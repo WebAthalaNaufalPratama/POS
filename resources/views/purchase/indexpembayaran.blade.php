@@ -22,8 +22,8 @@
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterMetodekeluar" name="metode_keluar" class="form-control" title="metode">
                         <option value="">Pilih Metode</option>
-                        <option value="cash" {{ 'cash' == request()->input('metode') ? 'selected' : '' }}>Cash</option>
-                        <option value="transfer" {{ 'transfer' == request()->input('metode') ? 'selected' : '' }}>Transfer</option>
+                        <option value="cash" {{ 'cash' == request()->input('metode_keluar') ? 'selected' : '' }}>Cash</option>
+                        <option value="transfer" {{ 'transfer' == request()->input('metode_keluar') ? 'selected' : '' }}>Transfer</option>
                     </select>
                 </div>
                 {{-- <div class="col-sm-2 ps-0 pe-0">
@@ -105,16 +105,16 @@
         <div class="card-body">
             <div class="row ps-2 pe-2">
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                    <input type="date" class="form-control" name="filterDateStart2" id="filterDateStart2" value="{{ request()->input('dateStart2') }}" title="Tanggal Awal">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                    <input type="date" class="form-control" name="filterDateEnd2" id="filterDateEnd2" value="{{ request()->input('dateEnd2') }}" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterMetodemasuk" name="metode_masuk" class="form-control" title="metode">
                         <option value="">Pilih Metode</option>
-                        <option value="cash" {{ 'cash' == request()->input('metode') ? 'selected' : '' }}>Cash</option>
-                        <option value="transfer" {{ 'transfer' == request()->input('metode') ? 'selected' : '' }}>Transfer</option>
+                        <option value="cash" {{ 'cash' == request()->input('metode_masuk') ? 'selected' : '' }}>Cash</option>
+                        <option value="transfer" {{ 'transfer' == request()->input('metode_masuk') ? 'selected' : '' }}>Transfer</option>
                     </select>
                 </div>
                 {{-- <div class="col-sm-2 ps-0 pe-0">
@@ -125,8 +125,8 @@
                     </select>
                 </div> --}}
                 <div class="col-sm-2">
-                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-info">Filter</a>
-                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-warning">Clear</a>
+                    <a href="javascript:void(0);" id="filterBtn2" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn2" data-base-url="{{ route('pembayaranbeli.index') }}" class="btn btn-warning">Clear</a>
                 </div>
             </div>
             <div class="table-responsive">
@@ -146,7 +146,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $item)
+                    @foreach ($data2 as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->po->pembelian->no_po ?? $item->po->poinden->no_po }}</td>
@@ -210,15 +210,15 @@
                 $(this).val(sisaTagihan);
             }
         });
-        $('#filterBtn').click(function(){
+        $('#filterBtn, #filterBtn2').click(function(){
             var baseUrl = $(this).data('base-url');
             var urlString = baseUrl;
             var first = true;
             var symbol = '';
 
-            var metode = $('#filterMetode').val();
+            var metode = $('#filterMetodekeluar').val();
             if (metode) {
-                var filterMetode = 'metode=' + metode;
+                var filterMetode = 'metode_keluar=' + metode;
                 if (first == true) {
                     symbol = '?';
                     first = false;
@@ -227,19 +227,6 @@
                 }
                 urlString += symbol;
                 urlString += filterMetode;
-            }
-
-            var jenis = $('#filterJenis').val();
-            if (jenis) {
-                var filterjenis = 'jenis=' + jenis;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterjenis;
             }
 
             var dateStart = $('#filterDateStart').val();
@@ -267,9 +254,48 @@
                 urlString += symbol;
                 urlString += filterDateEnd;
             }
+
+            var metode2 = $('#filterMetodemasuk').val();
+            if (metode2) {
+                var filterMetode2 = 'metode_masuk=' + metode2;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterMetode2;
+            }
+
+            var dateStart2 = $('#filterDateStart2').val();
+            if (dateStart2) {
+                var filterDateStart2 = 'dateStart2=' + dateStart2;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterDateStart2;
+            }
+
+            var dateEnd2 = $('#filterDateEnd2').val();
+            if (dateEnd2) {
+                var filterDateEnd2 = 'dateEnd2=' + dateEnd2;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterDateEnd2;
+            }
             window.location.href = urlString;
         });
-        $('#clearBtn').click(function(){
+        $('#clearBtn, #clearBtn2').click(function(){
             var baseUrl = $(this).data('base-url');
             var url = window.location.href;
             if(url.indexOf('?') !== -1){

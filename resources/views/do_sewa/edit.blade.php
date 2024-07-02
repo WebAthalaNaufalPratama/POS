@@ -34,13 +34,13 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>PIC</label>
-                                            <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $data->pic }}" class="form-control" readonly>
+                                            <input type="text" id="pic" name="pic" value="{{ old('pic') ?? $data->pic }}" class="form-control" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Handphone</label>
-                                            <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $data->handphone }}" class="form-control" required>
+                                            <input type="text" id="handhpone" name="handphone" value="{{ old('handphone') ?? $data->handphone }}" class="form-control" required oninput="validatePhoneNumber(this)">
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -101,6 +101,7 @@
                                     <th>Jumlah</th>
                                     <th>Satuan</th>
                                     <th>Detail Lokasi</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody id="dynamic_field">
@@ -109,14 +110,15 @@
                                     <td>
                                         <select id="produk_0" name="nama_produk[]" class="form-control" required>
                                             <option value="">Pilih Produk</option>
-                                            @foreach ($produkJuals as $produk)
-                                                <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                            @foreach ($produkSewa as $produk)
+                                                <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}">{{ $produk->nama }}</option>
                                             @endforeach
                                         </select>
                                     </td>
                                     <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control"></td>
                                     <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
                                     <td><input type="number" name="detail_lokasi[]" id="detail_lokasi_0" class="form-control"></td>
+                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                 </tr>
                                 @else
                                 @php
@@ -126,16 +128,21 @@
                                 @if ($produk->jenis == null)
                                     <tr id="row{{ $i }}">
                                         <td>
-                                            <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
+                                            <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
                                                 <option value="">Pilih Produk</option>
-                                                @foreach ($produkJuals as $pj)
-                                                    <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                @foreach ($produkSewa as $ps)
+                                                    <option value="{{ $ps->produk->kode }}" data-id="{{ $ps->id }}" data-tipe_produk="{{ $ps->produk->tipe_produk }}" {{ $ps->produk->kode == $produk->produk->kode ? 'selected' : '' }}>({{ $ps->id }}) {{ $ps->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" disabled></td>
-                                        <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" disabled></td>
-                                        <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ $produk->detail_lokasi }}" disabled></td>
+                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" required></td>
+                                        <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" required></td>
+                                        <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ $produk->detail_lokasi }}" required></td>
+                                        @if ($i == 0)
+                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                        @else
+                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                        @endif
                                     </tr>
                                 @endif 
                                 @php
@@ -179,27 +186,53 @@
                                 @else
                                 @php
                                 $i = 0;
+                                $hasTambahan = false;
                                 @endphp
                                 @foreach ($data->produk as $produk)
                                 @if ($produk->jenis == 'TAMBAHAN')
                                     <tr id="row{{ $i }}">
                                         <td>
-                                            <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control" required>
+                                            <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkJuals as $pj)
-                                                    <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                    <option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" required></td>
-                                        <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" required></td>
-                                        <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" required></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}"></td>
+                                        <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}"></td>
+                                        <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}"></td>
+                                        @if ($hasTambahan == false)
+                                            <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                        @else
+                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                        @endif
+                                        @php
+                                            $i++;
+                                            $hasTambahan = true;
+                                        @endphp
                                     </tr>
                                 @endif 
                                 @php
                                     $i++;
                                 @endphp
                                 @endforeach
+                                @if(!$hasTambahan)
+                                <tr>
+                                    <td>
+                                        <select id="produk2_0" name="nama_produk2[]" class="form-control">
+                                            <option value="">Pilih Produk</option>
+                                            @foreach ($produkJuals as $produk)
+                                                <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}">{{ $produk->nama }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
+                                    <td><input type="text" name="satuan2[]" id="satuan2_0" class="form-control"></td>
+                                    <td><input type="text" name="keterangan2[]" id="keterangan2_0" class="form-control"></td>
+                                    <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                </tr>
+                                @endif
                                 @endif
                             </tbody>
                         </table>
@@ -310,6 +343,26 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
+            $('form').on('submit', function(event) {
+                $('select[name="nama_produk[]"]').each(function() {
+                    var selectedOption = $(this).find('option:selected');
+                    var productId = selectedOption.data('id');
+                    var hiddenInput = $('<input>')
+                        .attr('type', 'hidden')
+                        .attr('name', 'produk_id[]')
+                        .val(productId);
+                    $(this).closest('form').append(hiddenInput);
+                });
+                $('select[name="nama_produk2[]"]').each(function() {
+                    var selectedOption = $(this).find('option:selected');
+                    var productId = selectedOption.data('id');
+                    var hiddenInput = $('<input>')
+                        .attr('type', 'hidden')
+                        .attr('name', 'produk_id2[]')
+                        .val(productId);
+                    $(this).closest('form').append(hiddenInput);
+                });
+            });
             if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
             }
@@ -319,14 +372,14 @@
                 var newRow = '<tr id="row'+i+'"><td>' + 
                                 '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
-                                    '@foreach ($produkJuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
+                                    '@foreach ($produkSewa as $ps)'+
+                                        '<option value="{{ $ps->produk->kode }}" data-id="{{ $ps->id }}" data-tipe_produk="{{ $ps->produk->tipe_produk }}">({{ $ps->id }}) {{ $ps->produk->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
-                            '<td><input type="number" name="satuan[]" id="satuan_'+i+'" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control"></td>'+
-                            '<td><input type="number" name="detail_lokasis[]" id="detail_lokasis_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="satuan[]" id="satuan_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_'+i+'" class="form-control"></td>'+
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
@@ -337,13 +390,13 @@
                                 '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkJuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
+                                        '<option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}">{{ $pj->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
-                            '<td><input type="number" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah2[]" id="jumlah2_'+i+'" class="form-control"></td>'+
-                            '<td><input type="number" name="detail_lokasis2[]" id="detail_lokasis2_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="keterangan2[]" id="keterangan2_'+i+'" class="form-control"></td>'+
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();

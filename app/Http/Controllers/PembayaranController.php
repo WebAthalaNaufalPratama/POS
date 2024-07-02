@@ -180,7 +180,102 @@ class PembayaranController extends Controller
             $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
         }
         $data = $query->orderByDesc('id')->get();
-        return view('pembayaran_sewa.index', compact('data'));
+        $bankpens = Rekening::get();
+        return view('pembayaran_sewa.index', compact('data', 'bankpens'));
+    }
+
+    public function store_sewa(Request $req){
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'invoice_sewa_id' => 'required',
+            'no_invoice_bayar' => 'required',
+            'nominal' => 'required',
+            'tanggal_bayar' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        $data = $req->except(['_token', '_method', 'bukti']);
+        $invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+
+        // cek sisa bayar
+        if($invoice_tagihan->sisa_bayar > 0){
+            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->sisa_bayar) - intval($data['nominal']);
+            $check = $invoice_tagihan->update();
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            // store file
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
+                $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
+                $data['bukti'] = $filePath;
+            }
+
+            $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+            if($new_invoice_tagihan->sisa_bayar <= 0){
+                $data['status_bayar'] = 'LUNAS';
+            } else {
+                $data['status_bayar'] = 'BELUM LUNAS';
+            }
+            $pembayaran = Pembayaran::create($data);
+
+            if(!$pembayaran) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            return redirect()->back()->with('success', 'Pembayaran berhasil');
+        } else {
+            return redirect()->back()->withInput()->with('fail', 'Invoice sudah lunas');
+        }
+    }
+
+    public function show_sewa(Request $req, $id)
+    {
+        $data = Pembayaran::with('rekening', 'sewa', 'sewa.kontrak')->find($id);
+        if(!$data) return response()->json('Data tidak ditemukan', 404);
+        return response()->json($data);
+    }
+
+    public function update_sewa(Request $req, $id){
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'invoice_sewa_id' => 'required',
+            'no_invoice_bayar' => 'required',
+            'nominal' => 'required',
+            'tanggal_bayar' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        $data = $req->except(['_token', '_method', 'bukti']);
+        $invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+        $pembayaran = Pembayaran::find($id);
+
+        // cek sisa bayar
+        // if($invoice_tagihan->sisa_bayar > 0){
+            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->sisa_bayar) + intval($pembayaran->nominal) - intval($data['nominal']);
+            $check = $invoice_tagihan->update();
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            // store file
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
+                $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
+                $data['bukti'] = $filePath;
+            }
+
+            $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+            if($new_invoice_tagihan->sisa_bayar <= 0){
+                $data['status_bayar'] = 'LUNAS';
+            } else {
+                $data['status_bayar'] = 'BELUM LUNAS';
+            }
+            $update = $pembayaran->update($data);
+
+            if(!$update) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            return redirect()->back()->with('success', 'Pembayaran berhasil');
+        // } else {
+        //     return redirect()->back()->withInput()->with('fail', 'Invoice sudah lunas');
+        // }
     }
 
     public function store_bayar_po(Request $req)
@@ -376,63 +471,11 @@ class PembayaranController extends Controller
     
     }
 
-    public function store_sewa(Request $req){
-        // validasi
-        $validator = Validator::make($req->all(), [
-            'invoice_sewa_id' => 'required',
-            'no_invoice_bayar' => 'required',
-            'nominal' => 'required',
-            'tanggal_bayar' => 'required',
-        ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method', 'bukti']);
-        $invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
-
-        // cek sisa bayar
-        if($invoice_tagihan->sisa_bayar > 0){
-            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->sisa_bayar) - intval($data['nominal']);
-            $check = $invoice_tagihan->update();
-            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-            // store file
-            if ($req->hasFile('bukti')) {
-                $file = $req->file('bukti');
-                $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
-                $data['bukti'] = $filePath;
-            }
-
-            $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
-            if($new_invoice_tagihan->sisa_bayar <= 0){
-                $data['status_bayar'] = 'LUNAS';
-            } else {
-                $data['status_bayar'] = 'BELUM LUNAS';
-            }
-            $pembayaran = Pembayaran::create($data);
-
-            if(!$pembayaran) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-            return redirect()->back()->with('success', 'Pembayaran berhasil');
-        } else {
-            return redirect()->back()->withInput()->with('fail', 'Invoice sudah lunas');
-        }
-    }
-    
     public function index_po(Request $req){
         $query = Pembayaran::whereNotNull('invoice_purchase_id');
-        if ($req->metode) {
-            $query->where('cara_bayar', $req->input('metode'));
+        if ($req->metode_keluar) {
+            $query->where('cara_bayar', $req->input('metode_keluar'));
         }
-        if ($req->jenis) {
-            $query->when($req->jenis === 'Tradisional', function ($q) {
-                $q->whereHas('po.pembelian');
-            });
-        
-            $query->when($req->jenis === 'Inden', function ($q) {
-                $q->whereHas('po.poinden');
-            });
-        }        
         if ($req->dateStart) {
             $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
         }
@@ -440,7 +483,19 @@ class PembayaranController extends Controller
             $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
         }
         $data = $query->orderByDesc('id')->get();
-        return view('purchase.indexpembayaran', compact('data'));
+
+        $query2 = Pembayaran::where('no_invoice_bayar', 'LIKE', '%Refundpo%');
+        if ($req->metode_masuk) {
+            $query2->where('cara_bayar', $req->input('metode_masuk'));
+        }
+        if ($req->dateStart2) {
+            $query2->where('tanggal_bayar', '>=', $req->input('dateStart2'));
+        }
+        if ($req->dateEnd2) {
+            $query2->where('tanggal_bayar', '<=', $req->input('dateEnd2'));
+        }
+        $data2 = $query2->orderByDesc('id')->get();
+        return view('purchase.indexpembayaran', compact('data', 'data2'));
     }
 
     public function store_po(Request $req){

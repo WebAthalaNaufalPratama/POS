@@ -138,7 +138,7 @@ class KembaliSewaController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        $data['status'] = 'ACTIVE';
+        $data['status'] = 'TUNDA';
         $data['tanggal_pembuat'] = now();
         $data['pembuat'] = Auth::user()->id;
 
