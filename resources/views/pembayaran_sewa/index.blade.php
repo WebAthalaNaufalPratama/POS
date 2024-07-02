@@ -282,7 +282,7 @@
                     success: function(response) {
                         $('#editBayarForm').attr('action', `{{ route("pembayaran_sewa.update", ":id") }}`.replace(':id', id));
                         $('#no_kontrak').val(response.sewa.no_sewa);
-                        $('#no_invoice_bayar').val(response.sewa.no_invoice);
+                        $('#no_invoice_bayar').val(response.no_invoice_bayar);
                         $('#invoice_sewa_id').val(response.sewa.id);
                         $('#total_tagihan').val(response.sewa.total_tagihan);
                         $('#sisa_tagihan').val((parseInt(response.sewa.sisa_bayar) + parseInt(response.nominal)));

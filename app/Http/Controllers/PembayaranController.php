@@ -473,18 +473,9 @@ class PembayaranController extends Controller
 
     public function index_po(Request $req){
         $query = Pembayaran::whereNotNull('invoice_purchase_id');
-        if ($req->metode) {
-            $query->where('cara_bayar', $req->input('metode'));
+        if ($req->metode_keluar) {
+            $query->where('cara_bayar', $req->input('metode_keluar'));
         }
-        if ($req->jenis) {
-            $query->when($req->jenis === 'Tradisional', function ($q) {
-                $q->whereHas('po.pembelian');
-            });
-        
-            $query->when($req->jenis === 'Inden', function ($q) {
-                $q->whereHas('po.poinden');
-            });
-        }        
         if ($req->dateStart) {
             $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
         }
@@ -492,7 +483,19 @@ class PembayaranController extends Controller
             $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
         }
         $data = $query->orderByDesc('id')->get();
-        return view('purchase.indexpembayaran', compact('data'));
+
+        $query2 = Pembayaran::where('no_invoice_bayar', 'LIKE', '%Refundpo%');
+        if ($req->metode_masuk) {
+            $query2->where('cara_bayar', $req->input('metode_masuk'));
+        }
+        if ($req->dateStart2) {
+            $query2->where('tanggal_bayar', '>=', $req->input('dateStart2'));
+        }
+        if ($req->dateEnd2) {
+            $query2->where('tanggal_bayar', '<=', $req->input('dateEnd2'));
+        }
+        $data2 = $query2->orderByDesc('id')->get();
+        return view('purchase.indexpembayaran', compact('data', 'data2'));
     }
 
     public function store_po(Request $req){
