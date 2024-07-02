@@ -137,10 +137,11 @@
                                                         <option value="{{ $produk->produk->kode }}" data-id="{{ $produk->id }}" selected>({{ $produk->id }}) {{ $produk->produk->nama }}</option>
                                                     </select>
                                                     <div id="komponen_{{ $i }}" class="row mt-2">
+                                                        <input type="hidden" name="indexKomponen[]" value="{{ count($produk->komponen) }}">
                                                         @for ($j = 0; $j < count($produk->komponen); $j++)
                                                             <div class="row mt-2">
                                                                 <div class="col">
-                                                                    <select id="namaKomponen_{{ $i }}_{{ $j }}" name="namaKomponen[]" class="form-control" disabled>
+                                                                    <select id="namaKomponen_{{ $i }}_{{ $j }}" name="namaKomponen[]" class="form-control" readonly>
                                                                         <option value="{{ $produk->komponen[$j]->kode_produk }}">{{ $produk->komponen[$j]->nama_produk }}</option>
                                                                     </select>
                                                                 </div>
@@ -161,7 +162,7 @@
                                                 </td>
                                                 <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" required></td>
                                                 <td>
-                                                    <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" disabled>
+                                                    <select id="lokasi_{{ $i }}" name="lokasi[]" class="form-control" readonly>
                                                         <option value="{{ $produk->detail_lokasi }}">{{ $produk->detail_lokasi }}</option>
                                                     </select>
                                                 </td>
@@ -397,12 +398,6 @@
                     resetFields(id);
                 }
             } catch (error) {
-                toastr.danger('Gagal mengambil data produk DO', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
                 resetFields(id);
             }
         });
@@ -466,7 +461,8 @@
                 }
             });
 
-            if (item.jenis == null) {
+            if ((item.jenis == null || id < jumlah_kembali) && (item.no_kembali_sewa == null || id < jumlah_kembali)) {
+                console.log(jmlKomponen)
                 komponenContainer.append('<input type="hidden" name="indexKomponen[]" value="' + jmlKomponen + '">');
             }
         }
