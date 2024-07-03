@@ -301,6 +301,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
             Route::post('/refund/store', 'PembayaranController@bayar_refund')->name('bayarrefund.store');
+            Route::post('/refundinden/store', 'PembayaranController@refundInden')->name('refundinden.store');
 
              Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show'); 
              Route::get('/returinv/{retur_id}/show', 'PembelianController@show_returinv')->name('returinvoice.show');

@@ -411,7 +411,7 @@
             </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="bukti" name="bukti">
+              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
             </div>
             
             <div class="modal-footer">

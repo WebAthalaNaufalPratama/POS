@@ -30,6 +30,23 @@ class MutasiindensController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+     public function generateRefundIndenNumber() {
+        $date = date('Ymd');  // Tanggal hari ini dalam format YYYYMMDD
+        $prefix = 'RefundInden_' . $date . '_';
+        $lastPayment = Pembayaran::where('no_invoice_bayar', 'like', $prefix . '%')
+                        ->orderBy('no_invoice_bayar', 'desc')
+                        ->first();
+    
+        if (!$lastPayment) {
+            return $prefix . '001';
+        }
+    
+        $lastNumber = intval(substr($lastPayment->no_invoice_bayar, -3));
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+    
+        return $prefix . $newNumber; 
+    }
+
      public function generatemutasiNumber() {
         // Ambil tanggal hari ini dalam format 'Y-m-d'
         $tgl_today = date('Y-m-d');
@@ -156,6 +173,23 @@ class MutasiindensController extends Controller
             $errors = $validator->errors()->all();
             return redirect()->back()->withInput()->with('fail', $errors);
         }
+        
+         // Pengecekan stok sebelum menyimpan data ke tabel Mutasiindens
+        foreach ($request->bulan_inden as $key => $bulanInden) {
+            $inventoryInden = InventoryInden::where('kode_produk_inden', $request->kode_inden[$key])
+                ->where('bulan_inden', $bulanInden)
+                ->where('supplier_id', $request->supplier_id)
+                ->first();
+
+            if (!$inventoryInden) {
+                return redirect()->back()->withInput()->with('fail', 'Tidak ditemukan record di InventoryInden');
+            }
+
+            if ($request->qtykrm[$key] > $inventoryInden->jumlah) {
+                return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data inven inden/stok di inden kurang');
+            }
+        }
+
         // Simpan data ke tabel mutasiindens
         $mutasiinden = new Mutasiindens();
         $no_mutasi = $mutasiinden->no_mutasi = $request->no_mutasi;
@@ -604,24 +638,29 @@ class MutasiindensController extends Controller
 
         $validated = $validator->validated();
 
+        $lokasi_id = Mutasiindens::where('id', $request->mutasiinden_id)->first()->lokasi_id;
+        $lokasi = Lokasi::find($lokasi_id);
+        // return $lokasi;
+
+
         // Buat entri baru di tabel Returinden
         $returinden = Returinden::create([
             'no_retur' => $request->no_retur,
             'mutasiinden_id' => $request->mutasiinden_id,
             'refund' => $request->refund,
+            'sisa_refund' => $request->refund,
             'total_akhir' => $request->total_akhir,
             'pembuat_id' => $request->pembuat_id,
             'status_dibuat' => $request->status_dibuat,
             'tgl_dibuat' => $request->tgl_dibuat,
         ]);
-
-
-        $lokasi_id = Mutasiindens::where('mutasiinden_id', $request->mutasiinden_id)->first()->lokasi_id;
-
+        
+        
         // Loop melalui data produk dan masukkan ke tabel Produkreturinden
         $allInserted = true;
         foreach ($validated['produk_mutasi_inden_id'] as $index => $produk_mutasi_inden_id) {
 
+            
             $check = Produkreturinden::create([
                 'returinden_id' => $returinden->id,
                 'produk_mutasi_inden_id' => $produk_mutasi_inden_id,
@@ -630,16 +669,17 @@ class MutasiindensController extends Controller
                 'harga_satuan' => $validated['harga_satuan'][$index],
                 'totalharga' => $validated['totalharga'][$index],
             ]);
-
-            $lokasi = Lokasi::find($lokasi_id);
+            
+            
             $produkmutasi = ProdukMutasiInden::where('id', $produk_mutasi_inden_id)->first();
             $kondisi = $produkmutasi->kondisi_id;
             $kode_produk = $produkmutasi->produk->kode_produk;
+            // return $kode_produk;
     
             if ($lokasi && $kode_produk) {
                 if ($lokasi->tipe_lokasi == 1) {
                     $checkInven = InventoryGallery::where('kode_produk', $kode_produk)
-                        ->where('kondisi_id', $kondisi[$index])
+                        ->where('kondisi_id', $kondisi)
                         ->where('lokasi_id', $lokasi->id)
                         ->first();
                     if ($checkInven) {
@@ -648,7 +688,7 @@ class MutasiindensController extends Controller
                     }
                 } elseif ($lokasi->tipe_lokasi == 3) {
                     $checkInven = InventoryGreenHouse::where('kode_produk', $kode_produk)
-                        ->where('kondisi_id', $kondisi[$index])
+                        ->where('kondisi_id', $kondisi)
                         ->where('lokasi_id', $lokasi->id)
                         ->first();
                     if ($checkInven) {
@@ -707,6 +747,7 @@ class MutasiindensController extends Controller
         $produks = InventoryInden::get();
         $no_bypo = $this->generatebayarmutasiNumber();
         $no_retur = $this->generateReturNumber();
+        $no_bayar = $this->generateRefundIndenNumber();
         // $no_mutasi = $this->generatemutasiNumber();
         $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
         $lokasi = Lokasi::all();
@@ -743,9 +784,11 @@ class MutasiindensController extends Controller
 
         // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
         // return view('mutasiindengh.create', compact('lokasipengirim','lokasipenerima','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
-        return view('mutasiindengh.showretur',compact('riwayat','barangretur','dataretur','no_retur','data','rekenings','no_bypo','databayars','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','penerima','pembuku','pemeriksa','jabatanbuat','jabatanterima','jabatanbuku','jabatanperiksa'));
+        return view('mutasiindengh.showretur',compact('riwayat','no_bayar','barangretur','dataretur','no_retur','data','rekenings','no_bypo','databayars','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','penerima','pembuku','pemeriksa','jabatanbuat','jabatanterima','jabatanbuku','jabatanperiksa'));
     
     }
+
+
     
 
 }

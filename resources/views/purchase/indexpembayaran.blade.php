@@ -7,7 +7,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Pembayaran Keluar</h4>
+                    <h4>Pembayaran Keluar (Pembelian)</h4>
                 </div>
             </div>
         </div>
@@ -72,19 +72,10 @@
                                     <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
                                 @endif
                             </td>
-                            {{-- <td class="text-center">
-                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="{{ route('invoicepo.show', ['invoicepo' => $item->po->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
-                                    </li>
-                                </ul>
-                            </td> --}}
                         </tr>
                     @endforeach
                 </tbody>
+                
             </table>
             </div>
         </div>
@@ -98,7 +89,7 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Pembayaran Masuk</h4>
+                    <h4>Pembayaran Masuk (Refund)</h4>
                 </div>
             </div>
         </div>
@@ -149,11 +140,11 @@
                     @foreach ($data2 as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->po->pembelian->no_po ?? $item->po->poinden->no_po }}</td>
-                            <td>{{ $item->po->no_inv }}</td>
+                            <td>{{ $item->retur->invoice->pembelian->no_po ?? $item->retur->invoice->poinden->no_po }}</td>
+                            <td>{{ $item->retur->invoice->no_inv }}</td>
                             <td>{{ $item->no_invoice_bayar }}</td>
                             <td>{{ formatRupiah($item->nominal) }}</td>
-                            <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
+                            <td>{{ tanggalindo($item->tanggal_bayar) }}</td>
                             <td>{{ $item->cara_bayar }}</td>
                             <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
                             <td class="text-center">
@@ -163,19 +154,10 @@
                                     <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
                                 @endif
                             </td>
-                            {{-- <td class="text-center">
-                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="{{ route('invoicepo.show', ['invoicepo' => $item->po->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
-                                    </li>
-                                </ul>
-                            </td> --}}
                         </tr>
                     @endforeach
                 </tbody>
+                
             </table>
             </div>
         </div>

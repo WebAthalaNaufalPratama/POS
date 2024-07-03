@@ -55,5 +55,13 @@ class Pembayaran extends Model
     {
         return $this->belongsTo(Invoicepo::class, 'invoice_purchase_id');
     }
+    public function retur()
+    {
+        return $this->belongsTo(Returpembelian::class, 'retur_pembelian_id');
+    }
+    public function returinden()
+    {
+        return $this->belongsTo(Returinden::class, 'returinden_id');
+    }
 }
 

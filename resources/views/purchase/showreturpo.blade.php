@@ -206,9 +206,15 @@
                                 <div class="total-order">
                                     <ul>
                                         <li>
-                                            <h4>Sub Total</h4>
+                                            <h4>Sub Total  {{ $data->komplain }} </h4>
                                             <h5>
                                                     <input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ formatRupiah($data->subtotal) }}" readonly>
+                                            </h5>
+                                        </li>
+                                        <li>
+                                            <h4>Sisa Piutang {{ $data->komplain }} </h4>
+                                            <h5>
+                                                    <input type="text" id="sisa" name="sisa" class="form-control" value="{{ formatRupiah($data->sisa) }}" readonly>
                                             </h5>
                                         </li>
                                         <li>
@@ -326,7 +332,7 @@
                                 <div class="total-order">
                                     <ul>
                                         <li>
-                                            <h4>Sub Total</h4>
+                                            <h4>Sub Total {{ $data->komplain }}</h4>
                                             <h5>
                                                     <input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ formatRupiah($data->subtotal) }}" readonly>
                                             </h5>
@@ -389,9 +395,9 @@
               <label for="nominal" class="form-label">Nominal</label>
               <div class="input-group">
                 <span class="input-group-text">Rp. </span>
-                <input type="text" class="form-control"  id="nominal" value="{{ $data->subtotal}}">
+                <input type="text" class="form-control"  id="nominal" value="{{ $data->sisa}}">
               </div>
-              <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
+              <input type="text" class="form-control"  id="nominal2" name="nominal" value="{{ $data->sisa}}" hidden>
             </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
