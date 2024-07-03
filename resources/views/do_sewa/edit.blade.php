@@ -131,7 +131,25 @@
                                             <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkSewa as $ps)
-                                                    <option value="{{ $ps->produk->kode }}" data-id="{{ $ps->id }}" data-tipe_produk="{{ $ps->produk->tipe_produk }}" {{ $ps->produk->kode == $produk->produk->kode ? 'selected' : '' }}>({{ $ps->id }}) {{ $ps->produk->nama }}</option>
+                                                @php
+                                                if($ps->produk->tipe_produk == 6){
+
+                                                    $descArray = [];
+                                                    foreach ($ps->komponen as $komponen) {
+                                                        if (in_array($komponen->tipe_produk, [1, 2])) {
+                                                            $descArray[] = $komponen->produk->nama;
+                                                        }
+                                                    }
+                                                    $desc = implode(', ', $descArray);
+                                                } else {
+                                                    $desc = '';
+                                                }
+                                                @endphp
+                                                    <option value="{{ $ps->produk->kode }}" data-id="{{ $ps->id }}" data-tipe_produk="{{ $ps->produk->tipe_produk }}"
+                                                    @if ($ps->produk->tipe_produk == 6)
+                                                        data-tooltip="{{ $desc }}"
+                                                    @endif    
+                                                    {{ $ps->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $ps->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -343,6 +361,7 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip({ html: true });
             $('form').on('submit', function(event) {
                 $('select[name="nama_produk[]"]').each(function() {
                     var selectedOption = $(this).find('option:selected');
@@ -366,23 +385,50 @@
             if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
             }
-            $('[id^=produk], #driver_id').select2();
+            $('[id^=produk], #driver_id').select2({
+                templateResult: formatState,
+                templateSelection: formatState,
+            });
             var i = '{{ count($data->produk) }}';
             $('#add').click(function(){
-                var newRow = '<tr id="row'+i+'"><td>' + 
-                                '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
-                                    '<option value="">Pilih Produk</option>'+
-                                    '@foreach ($produkSewa as $ps)'+
-                                        '<option value="{{ $ps->produk->kode }}" data-id="{{ $ps->id }}" data-tipe_produk="{{ $ps->produk->tipe_produk }}">({{ $ps->id }}) {{ $ps->produk->nama }}</option>'+
-                                    '@endforeach'+
-                                '</select>'+
-                            '</td>'+
-                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control"></td>'+
-                            '<td><input type="text" name="satuan[]" id="satuan_'+i+'" class="form-control"></td>'+
-                            '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_'+i+'" class="form-control"></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
+                var newRow = '<tr id="row' + i + '">' +
+                '<td>' +
+                    '<select id="produk_' + i + '" name="nama_produk[]" class="form-control">' +
+                        '<option value="">Pilih Produk</option>';
+                @foreach ($produkSewa as $ps)
+                    @php
+                    $desc = '';
+                    if ($ps->produk->tipe_produk == 6) {
+                        $descArray = [];
+                        foreach ($ps->komponen as $komponen) {
+                            if (in_array($komponen->tipe_produk, [1, 2])) {
+                                $descArray[] = $komponen->produk->nama;
+                            }
+                        }
+                        $desc = implode(', ', $descArray);
+                    }
+                    @endphp
+
+                    newRow += '<option value="{{ $ps->produk->kode }}" data-id="{{ $ps->id }}" data-tipe_produk="{{ $ps->produk->tipe_produk }}"';
+                    @if ($ps->produk->tipe_produk == 6)
+                        newRow += ' data-tooltip="{{ $desc }}"';
+                    @endif
+                    newRow += '>';
+                    newRow += '{{ $ps->produk->nama }}</option>';
+                @endforeach
+
+                newRow += '</select>' +
+                                '</td>' +
+                                '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
+                                '<td><input type="text" name="satuan[]" id="satuan_' + i + '" class="form-control"></td>' +
+                                '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_' + i + '" class="form-control"></td>' +
+                                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                            '</tr>';
                 $('#dynamic_field').append(newRow);
-                $('#produk_' + i).select2();
+                $('#produk_' + i).select2({
+                    templateResult: formatState,
+                    templateSelection: formatState
+                });
                 i++;
             });
             $('#add2').click(function(){
@@ -444,5 +490,14 @@
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
         };
+        function formatState(state) {
+            if (!$(state.element).attr('data-tooltip')) {
+                return state.text;
+            }
+            var $state = $(
+                '<span>' + state.text + ' <i class="fas fa-info-circle ml-1" data-toggle="tooltip" title="' + $(state.element).attr('data-tooltip') + '"></i></span>'
+            );
+            return $state;
+        }
     </script>
 @endsection

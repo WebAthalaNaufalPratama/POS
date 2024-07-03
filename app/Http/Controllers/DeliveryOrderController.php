@@ -277,9 +277,11 @@ class DeliveryOrderController extends Controller
     {
         $data = DeliveryOrder::find($deliveryOrder);
         $produkJuals = Produk_Jual::all();
+        $kontrak = Kontrak::where('no_kontrak', $data->kontrak->no_kontrak)->first();
+        $produkSewa = $kontrak->produk()->whereHas('produk')->get();
         $drivers = Karyawan::where('jabatan', 'DRIVER')->get();
         $riwayat = Activity::where('subject_type', DeliveryOrder::class)->where('subject_id', $deliveryOrder)->orderBy('id', 'desc')->get();
-        return view('do_sewa.show', compact('data', 'produkJuals', 'drivers', 'riwayat'));
+        return view('do_sewa.show', compact('data', 'produkJuals', 'drivers', 'riwayat', 'produkSewa'));
     }
 
     /**
