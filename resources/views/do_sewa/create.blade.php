@@ -144,8 +144,7 @@
                                                         @if ($pj->produk->tipe_produk == 6)
                                                             data-tooltip="{{ $desc }}"
                                                         @endif
-                                                        {{ $pj->id == $produk->id ? 'selected' : '' }}>
-                                                        ({{ $pj->id }}) {{ $pj->produk->nama }}
+                                                        {{ $pj->id == $produk->id ? 'selected' : '' }}>{{ $pj->produk->nama }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -316,7 +315,7 @@
                                     newRow += ' data-tooltip="{{ $desc }}"';
                                 @endif
                                 newRow += '{{ $pj->id == $produk->id ? " selected" : "" }}>';
-                                newRow += '(' + {{ $pj->id }} + ') {{ $pj->produk->nama }}</option>';
+                                newRow += '{{ $pj->produk->nama }}</option>';
                             @endforeach
 
                             newRow += '</select>' +

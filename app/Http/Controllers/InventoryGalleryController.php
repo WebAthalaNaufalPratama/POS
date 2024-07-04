@@ -196,6 +196,32 @@ class InventoryGalleryController extends Controller
         });
 
         $mergedCollection = $mergedCollection->merge($produkMutasiKeluar)->sortByDesc('Waktu');
+
+        $dataPenjualanDiambil = Produk_Terjual::whereHas('penjualan', function($q) use($isSuperAdmin){
+            if (!$isSuperAdmin) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            }
+            $q->where('distribusi', 'Diambil');
+        })->get();
+
+        $mergedCollection = $mergedCollection->merge($dataPenjualanDiambil)->sortByDesc('Waktu');
+
+        $dataPenjualanDikirim = Produk_Terjual::whereHas('do_penjualan', function($q) use($isSuperAdmin){
+            if (!$isSuperAdmin) {
+                $q->where('lokasi_pengirim', Auth::user()->karyawans->lokasi_id);
+            }
+            $q->where('jenis_do', 'PENJUALAN');
+        })->get();
+
+        $mergedCollection = $mergedCollection->merge($dataPenjualanDikirim)->sortByDesc('Waktu');
+        
+        // $dataReturPenjualan = Produk_Terjual::whereHas('retur_penjualan', function($q) use($isSuperAdmin){
+        //     if (!$isSuperAdmin) {
+        //         $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        //     }
+        // })->get();
+
+        // $mergedCollection = $mergedCollection->merge($dataReturPenjualan)->sortByDesc('Waktu');
         // dd($mergedCollection);
         return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis', 'pemakaian_sendiri', 'mergedCollection'));
     }

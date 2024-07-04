@@ -140,7 +140,25 @@
                                                     <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
                                                         <option value="">Pilih Produk</option>
                                                         @foreach ($produkSewa as $pj)
-                                                            <option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
+                                                        @php
+                                                        if($pj->produk->tipe_produk == 6){
+        
+                                                            $descArray = [];
+                                                            foreach ($pj->komponen as $komponen) {
+                                                                if (in_array($komponen->tipe_produk, [1, 2])) {
+                                                                    $descArray[] = $komponen->produk->nama;
+                                                                }
+                                                            }
+                                                            $desc = implode(', ', $descArray);
+                                                        } else {
+                                                            $desc = '';
+                                                        }
+                                                        @endphp
+                                                            <option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}"
+                                                            @if ($pj->produk->tipe_produk == 6)
+                                                                data-tooltip="{{ $desc }}"
+                                                            @endif    
+                                                            {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </td>
@@ -506,23 +524,53 @@
         var cekInvoiceNumbers = "{{ $invoice_bayar }}";
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){
-            $('[id^=produk], #sales_id, #ongkir_id, #rekening, #rekening_id, #bayar').select2();
+        isKelebihan()
+            $('[data-toggle="tooltip"]').tooltip({ html: true });
+            $('[id^=produk], #sales_id, #ongkir_id, #rekening, #rekening_id, #bayar').select2({
+                templateResult: formatState,
+                templateSelection: formatState,
+            });
             var i = '{{ count($data->kontrak->produk) }}';
             $('#add').click(function(){
-                var newRow = '<tr id="row'+i+'"><td>' + 
-                                '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
-                                    '<option value="">Pilih Produk</option>'+
-                                    '@foreach ($produkSewa as $pj)'+
-                                        '<option value="{{ $pj->produk->kode }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}">{{ $pj->produk->nama }}</option>'+
-                                    '@endforeach'+
-                                '</select>'+
-                            '</td>'+
-                            '<td><input type="number" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
-                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
-                            '<td><input type="number" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
+                var newRow = '<tr id="row' + i + '">' +
+                '<td>' +
+                    '<select id="produk_' + i + '" name="nama_produk[]" class="form-control">' +
+                        '<option value="">Pilih Produk</option>';
+                            @foreach ($produkSewa as $pj)
+                                @php
+                                if ($pj->produk->tipe_produk == 6) {
+                                    $descArray = [];
+                                    foreach ($pj->komponen as $komponen) {
+                                        if (in_array($komponen->tipe_produk, [1, 2])) {
+                                            $descArray[] = $komponen->produk->nama;
+                                        }
+                                    }
+                                    $desc = implode(', ', $descArray);
+                                } else {
+                                    $desc = '';
+                                }
+                                @endphp
+
+                                newRow += '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}"';
+                                @if ($pj->produk->tipe_produk == 6)
+                                    newRow += ' data-tooltip="{{ $desc }}"';
+                                @endif
+                                newRow += '{{ $pj->id == $produk->id ? " selected" : "" }}>';
+                                newRow += '{{ $pj->produk->nama }}</option>';
+                            @endforeach
+
+                            newRow += '</select>' +
+                                            '</td>' +
+                                            '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
+                                            '<td><input type="text" name="satuan[]" id="satuan_' + i + '" class="form-control"></td>' +
+                                            '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_' + i + '" class="form-control"></td>' +
+                                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                                        '</tr>';
                 $('#dynamic_field').append(newRow);
-                $('#produk_' + i).select2();
+                $('#produk_' + i).select2({
+                    templateResult: formatState,
+                    templateSelection: formatState
+                });
                 i++;
             })
             $(document).on('input', '[id^=harga_satuan], #dp, #ongkir_nominal, #pph_nominal, #ppn_nominal, #total_promo', function() {
@@ -863,6 +911,15 @@
                 $('#btnSubmit').attr('disabled', false);
                 $('#isKelebihan').addClass('d-none');
             }
+        }
+        function formatState(state) {
+            if (!$(state.element).attr('data-tooltip')) {
+                return state.text;
+            }
+            var $state = $(
+                '<span>' + state.text + ' <i class="fas fa-info-circle ml-1" data-toggle="tooltip" title="' + $(state.element).attr('data-tooltip') + '"></i></span>'
+            );
+            return $state;
         }
     </script>
 @endsection

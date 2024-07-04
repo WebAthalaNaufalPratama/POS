@@ -274,10 +274,10 @@ class InvoiceSewaController extends Controller
         } else {
             // validasi
             $validator = Validator::make($req->all(), [
-                // 'no_invoice' => 'required',
-                // 'no_sewa' => 'required',
-                // 'tanggal_invoice' => 'required',
-                // 'jatuh_tempo' => 'required',
+                'no_invoice' => 'required',
+                'no_sewa' => 'required',
+                'tanggal_invoice' => 'required',
+                'jatuh_tempo' => 'required',
                 'rekening_id' => 'required',
                 'total_tagihan' => 'required',
                 'sisa_bayar' => 'required',
@@ -292,36 +292,44 @@ class InvoiceSewaController extends Controller
             // save data invoice
             $check = InvoiceSewa::find($invoiceSewa)->update($data);
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            // update data produk invoice
+            $datainvoice = InvoiceSewa::find($invoiceSewa);
+            $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
+
+            $dataProduk = Produk_Terjual::where('no_invoice', $datainvoice->no_invoice)->get();
+            // delete data
+            foreach ($dataProduk as $item) {
+                $komponen = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
+                $produkTerjual = Produk_terjual::find($item->id)->forceDelete();
+            }
             
-            // // update data produk invoice
-            // $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
+            for ($i=0; $i < count($data['nama_produk']); $i++) { 
+                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
+                $produk_terjual = Produk_Terjual::create([
+                    'produk_jual_id' => $getProdukJual->id,
+                    'no_invoice' => $datainvoice->no_invoice,
+                    'harga' => $data['harga_satuan'][$i],
+                    'jumlah' => $data['jumlah'][$i],
+                    'harga_jual' => $data['harga_total'][$i]
+                ]);
 
-            // for ($i=0; $i < count($data['nama_produk']); $i++) { 
-            //     $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-            //     $produk_terjual = Produk_Terjual::create([
-            //         'produk_jual_id' => $getProdukJual->id,
-            //         'no_invoice' => $check->no_invoice,
-            //         'harga' => $data['harga_satuan'][$i],
-            //         'jumlah' => $data['jumlah'][$i],
-            //         'harga_jual' => $data['harga_total'][$i]
-            //     ]);
-
-            //     if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            //     foreach ($getProdukJual->komponen as $komponen ) {
-            //         $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-            //             'produk_terjual_id' => $produk_terjual->id,
-            //             'kode_produk' => $komponen->kode_produk,
-            //             'nama_produk' => $komponen->nama_produk,
-            //             'tipe_produk' => $komponen->tipe_produk,
-            //             'kondisi' => $komponen->kondisi,
-            //             'deskripsi' => $komponen->deskripsi,
-            //             'jumlah' => $komponen->jumlah,
-            //             'harga_satuan' => $komponen->harga_satuan,
-            //             'harga_total' => $komponen->harga_total
-            //         ]);
-            //         if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            //     }
-            // }
+                if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                foreach ($getProdukJual->komponen as $komponen ) {
+                    $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                        'produk_terjual_id' => $produk_terjual->id,
+                        'kode_produk' => $komponen->kode_produk,
+                        'nama_produk' => $komponen->nama_produk,
+                        'tipe_produk' => $komponen->tipe_produk,
+                        'kondisi' => $komponen->kondisi,
+                        'deskripsi' => $komponen->deskripsi,
+                        'jumlah' => $komponen->jumlah,
+                        'harga_satuan' => $komponen->harga_satuan,
+                        'harga_total' => $komponen->harga_total
+                    ]);
+                    if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                }
+            }
         }
 
         return redirect(route('invoice_sewa.index'))->with('success', 'Data tersimpan');
