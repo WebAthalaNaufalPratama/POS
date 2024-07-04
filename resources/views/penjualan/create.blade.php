@@ -676,16 +676,20 @@
 
         if (!isNaN(hargaTotal)) {
             if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue * jumlah;
+                hargaTotal -= diskonValue;
                 if(hargaTotal <= 0){
                     hargaTotal = 0;
+                    alert('nominal tidak boleh melebihi harga total');
+                    diskonValue = 0;
                 }
                 $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
             } else if (diskonType === "persen" && !isNaN(diskonValue)) {
                 var diskonPersen = (hargaTotal * diskonValue / 100); 
-                hargaTotal -= diskonPersen * jumlah; 
+                hargaTotal -= diskonPersen; 
                 if(hargaTotal <= 0){
                     hargaTotal = 0;
+                    alert('diskon tidak boleh melebihi harga total');
+                    diskonPersen = 0;
                 }
             }
         }
