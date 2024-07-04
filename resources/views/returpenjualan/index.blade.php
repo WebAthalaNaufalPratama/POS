@@ -93,7 +93,7 @@
                                             @if($retur->deliveryorder->first()->status != 'DIBATALKAN')
                                             @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                                 <a class="dropdown-item" href="{{ route('auditretur.edit', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Auditor</a>
-                                            @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirAdmin']))
+                                            @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirAdmin']) && $retur->deliveryorder->first()->status != 'DIKONFIRMASI')
                                                 <a class="dropdown-item" href="{{ route('auditretur.edit', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                             @endif
                                             @if($lokasi->lokasi->tipe_lokasi != 2)

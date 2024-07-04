@@ -129,7 +129,7 @@
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA">TUNDA</option>
-                                                <option value="DIKONFIRMASI">DIKONFRIMASI</option>
+                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
                                                 <option value="DIBATALKAN">DIBATALKAN</option>
                                             </select>
                                         </div>

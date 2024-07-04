@@ -129,7 +129,7 @@
                                             <select id="status" name="status" class="form-control" required disabled>
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA" {{ $dopenjualans->status == 'TUNDA' ? 'seledcted' : ''}}>TUNDA</option>
-                                                <option value="DIKONFIRMASI" {{ $dopenjualans->status == 'DIKONFIRMASI' ? 'selected':''}}>DIKONFRIMASI</option>
+                                                <option value="DIKONFIRMASI" {{ $dopenjualans->status == 'DIKONFIRMASI' ? 'selected':''}}>DIKONFIRMASI</option>
                                                 <option value="DIBATALKAN" {{$dopenjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
                                         </div>
