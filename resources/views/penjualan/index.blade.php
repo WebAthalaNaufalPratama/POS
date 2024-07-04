@@ -97,7 +97,13 @@
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
+                                    @if($penjualan->status != 'DIBATALKAN')
                                         <div class="dropdown-menu">
+                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                                <a class="dropdown-item" href="{{ route('auditpenjualan.edit', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
+                                            @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $penjualan->status != 'DIKONFIRMASI')
+                                                <a class="dropdown-item" href="{{ route('auditpenjualan.edit', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
+                                            @endif
                                             @if($lokasi->lokasi->tipe_lokasi != 2 && in_array('penjualan.show', $rolePermissions))
                                                 <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Perangkai</a>
                                             @endif
@@ -107,15 +113,18 @@
                                             @if($penjualan->distribusi == 'Dikirim' && in_array('dopenjualan.create', $rolePermissions))
                                             <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order</a>
                                             @endif
+                                            <!-- && $penjualan->dibukukan_id != null && $penjualan->auditor_id != null && $penjualan->status == 'DIKONFIRMASI' -->
                                             @if(in_array('returpenjualan.create', $rolePermissions))
                                                 <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
-                                            @endif
-                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
-                                                <a class="dropdown-item" href="{{ route('auditpenjualan.edit', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('pdfinvoicepenjualan.generate', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak Invoice</a>
                                             <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a> -->
                                         </div>
+                                    @else
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="{{ route('auditpenjualan.show', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Show</a>
+                                        </div>
+                                    @endif
                                     </div>
                                 </td>
                             </tr>

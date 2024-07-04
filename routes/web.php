@@ -273,6 +273,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('{penjualan}/pdfinvoicepenjualan', 'PenjualanController@pdfinvoicepenjualan')->name('pdfinvoicepenjualan.generate');
             Route::get('/{penjualan}/audit', 'PenjualanController@audit')->name('auditpenjualan.edit');
             Route::patch('/storeaudit', 'PenjualanController@audit_update')->name('auditpenjualan.update');
+            Route::get('/{penjualan}/showaudit', 'PenjualanController@audit_show')->name('auditpenjualan.show');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -328,7 +329,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
             Route::get('{dopenjualan}/pdfdopenjualan', 'DoPenjualanController@pdfdopenjualan')->name('pdfdopenjualan.generate');
             Route::get('{dopenjualan}/auditdopenjualan', 'DopenjualanController@audit')->name('auditdopenjualan.edit');
-            Route::patch('/auditdopernjualan', 'DopenjualanController@audit_update')->name('auditdopenjualan.update');
+            Route::patch('/auditdopenjualan', 'DopenjualanController@audit_update')->name('auditdopenjualan.update');
         });
 
         Route::group(['prefix' => 'pembayaran'], function() {

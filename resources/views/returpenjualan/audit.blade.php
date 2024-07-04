@@ -69,11 +69,11 @@
                                         </div>
                                         <div class="form-group" style="display:none;" id="penerima">
                                             <label for="penerima">Nama Penerima</label>
-                                            <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima" value="{{ $penjualans->penerima}}">
+                                            <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima" value="{{ $dopenjualans->penerima}}">
                                         </div>
                                         <div class="form-group" style="display:none;" id="tanggalkirim">
                                             <label for="tanggal_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" placeholder="Tanggal Kirim" id="tanggal_kirim" name="tanggal_kirim" value="{{$penjualans->tanggal_kirim}}">
+                                            <input type="date" class="form-control" placeholder="Tanggal Kirim" id="tanggal_kirim" name="tanggal_kirim" value="{{$dopenjualans->tanggal_kirim}}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -124,18 +124,33 @@
                                                 <option value="retur" {{ $penjualans->komplain == 'retur' ? 'selected' : ''}}>Retur</option>
                                             </select>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="status">Status</label>
+                                            <select id="status" name="status" class="form-control" required>
+                                                <option value="">Pilih Status</option>
+                                                <option value="TUNDA">TUNDA</option>
+                                                <option value="DIKONFIRMASI">DIKONFRIMASI</option>
+                                                <option value="DIBATALKAN">DIBATALKAN</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan_batal" id="alasan"></textarea>
+                                            </div>
+                                        </div>
                                         <div class="form-group" style="display:none;" id="driver">
                                             <label for="driver">Driver</label>
                                             <select id="driver" name="driver" class="form-control">
                                                 <option value=""> Pilih Driver </option>
                                                 @foreach ($drivers as $driver)
-                                                <option value="{{ $driver->id }}" {{$driver->id == $penjualans->driver ? 'selected' : ''}}>{{ $driver->nama }}</option>
+                                                <option value="{{ $driver->id }}" {{$driver->id == $dopenjualans->driver ? 'selected' : ''}}>{{ $driver->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="form-group" style="display:none;" id="alamat">
                                             <label for="alamat">Alamat Pengiriman</label>
-                                            <textarea id="alamat" name="alamat" value="{{ $penjualans->alamat}}">{{ $penjualans->alamat}}</textarea>
+                                            <textarea id="alamat" name="alamat" value="{{ $dopenjualans->alamat}}">{{ $dopenjualans->alamat}}</textarea>
                                         </div>
                                     </div>
 
@@ -161,7 +176,7 @@
                                                     <span class="custom-file-container__custom-file__custom-file-control_2"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <img id="preview_kirim" />
+                                                <img id="preview_kirim" src="{{ $dopenjualans->file ? '/storage/' . $dopenjualans->file : ''}}" />
                                             </div>
                                         </div>
                                     </div>
@@ -230,7 +245,7 @@
                                                             }
                                                             @endphp
                                                             <!-- @if($pj->produk) -->
-                                                            <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                            <option value="{{ $produk->id }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
                                                                 @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                     {{ $pj->produk->nama }}
                                                                 @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
@@ -243,7 +258,7 @@
                                                     @if($isTRDSelected)
                                                         <div class="row mt-2">
                                                             <div class="col">
-                                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" >
                                                                     <option value=""> Pilih Kondisi </option>
                                                                     @foreach ($kondisis as $kondisi)
                                                                     <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
@@ -251,7 +266,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col">
-                                                                <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                                <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}">
                                                             </div>
                                                         </div>
                                                     @elseif($perPendapatan)
@@ -260,7 +275,8 @@
                                                                 @foreach ($items as $komponen)
                                                                     <div class="row mt-2">
                                                                         <div class="col">
-                                                                        <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
+                                                                            <input type="hidden" name="idgiftproduk_{{ $i }}[]" id="idgiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['id'] }}">
+                                                                            <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
                                                                             <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                             </div>
                                                                             <div class="col">
@@ -301,13 +317,13 @@
 
                                                     <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" value="{{ $produk->harga}}" required></td>
                                                     <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" value="{{ $produk->totalharga}}"></td>
-                                                    <!-- <td>
+                                                    <td>
                                                         @if ($i == 0)
                                                         <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
                                                         @else
                                                         <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
                                                         @endif
-                                                    </td> -->
+                                                    </td>
 
 
                                                     </tr>
@@ -352,40 +368,46 @@
                                                     @if($produk->jenis == 'GANTI')
                                                         <tr>
                                                         <td>
-                                                            <select id="nama_produk2_{{$i}}" name="nama_produk2[]" class="form-control" readonly>
+                                                            <input type="hidden" value="{{$produk->id}}" name="nama_produk2[]">
+                                                            <select id="kode_produk2_{{$i}}" name="kode_produk2[]" class="form-control">
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($juals as $pj)
                                                                 <option value="{{ $pj->kode }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>
-                                                                    @if (substr($pj->kode, 0, 3) === 'TRD')
+                                                                @if (substr($pj->kode, 0, 3) === 'TRD')
                                                                     {{ $pj->nama }}
-                                                                    @foreach ($produk->komponen as $komponen)
-                                                                    @if ($komponen->kondisi)
-                                                                    @foreach($kondisis as $kondisi)
-                                                                    @if($kondisi->id == $komponen->kondisi)
-                                                                    - {{ $kondisi->nama }}
                                                                     @php
-                                                                    $found = true;
-                                                                    break;
+                                                                    $found = false;
                                                                     @endphp
-                                                                    @endif
+                                                                    @foreach ($produk->komponen as $komponen)
+                                                                        @if ($komponen->kondisi)
+                                                                            @php
+                                                                            $found = false;
+                                                                            @endphp
+                                                                            @foreach($kondisis as $kondisi)
+                                                                                @if($kondisi->id == $komponen->kondisi)
+                                                                                    - {{ $kondisi->nama }}
+                                                                                    @php
+                                                                                    $found = true;
+                                                                                    break;
+                                                                                    @endphp
+                                                                                @endif
+                                                                            @endforeach
+                                                                        @endif
+                                                                        @if ($found) @break @endif
                                                                     @endforeach
-                                                                    @endif
-                                                                    @if ($found) @break @endif
-                                                                    @endforeach
-                                                                    @elseif (substr($produk->kode, 0, 3) === 'GFT')
+                                                                @elseif (substr($pj->kode, 0, 3) === 'GFT')
                                                                     {{ $pj->nama }}
-                                                                    @endif
+                                                                @endif
+
                                                                 </option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
-                                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{$i}}" class="form-control" value="{{$produk->jumlah}}" readonly></td>
-                                                        <td><input type="text" name="satuan2[]" id="satuan2_{{$i}}" class="form-control" value="{{$produk->satuan}}" readonly></td>
-                                                        <td><input type="text" name="keterangan2[]" id="keterangan2_{{$i}}" class="form-control" value="{{$produk->keterangan}}" readonly></td>
+                                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{$i}}" class="form-control" value="{{$produk->jumlah}}" ></td>
+                                                        <td><input type="text" name="satuan2[]" id="satuan2_{{$i}}" class="form-control" value="{{$produk->satuan}}" ></td>
+                                                        <td><input type="text" name="keterangan2[]" id="keterangan2_{{$i}}" class="form-control" value="{{$produk->keterangan}}"></td>
                                                         <td>
-                                                            <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
-                                                                Set Gift
-                                                            </button>
+                                                            <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
                                                         </td>
                                                     </tr>
                                                     @endif
@@ -439,7 +461,7 @@
                                                     <h4>Sub Total</h4>
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="0" readonly required></h5>
                                                 </li>
-                                                <li>
+                                                <li id="cekretur" style="display:none;">
                                                     <h4>Pengiriman
                                                     <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
                                                         <option value="">Pilih Jenis Pengiriman</option>
@@ -463,13 +485,13 @@
                                                     </div> 
                                                     </h5>
                                                 </li>
-                                                <li>
+                                                <li id="cekretur" style="display:none;">
                                                     <h4>Biaya Ongkir</h4>
                                                     <h5><input type="number" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $penjualans->biaya_pengiriman }}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Total</h4>
-                                                    <h5><input type="text" id="total" name="total" class="form-control" value="0" readonly required></h5>
+                                                    <h5><input type="text" id="total" name="total" class="form-control" value="{{$penjualans->total}}" readonly required></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -718,8 +740,82 @@
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
             $('#row' + button_id + '').remove();
+            updateIndices();
             calculateTotal(0);
         });
+
+        function updateIndices() {
+            // Reinitialize the counter
+            var i = 0;
+
+            // Iterate over each row and update the indices
+            $('tr[id^="row"]').each(function() {
+                // Update the row id
+                $(this).attr('id', 'row' + i);
+
+                // Update the no_do1 field
+                $(this).find('[id^="no_do_"]').attr('id', 'no_do_' + i).attr('name', 'no_do1[]');
+
+                // Update the nama_produk field
+                $(this).find('[id^="nama_produk_"]').attr('id', 'nama_produk_' + i).attr('name', 'nama_produk[]').attr('data-index', i);
+
+                // Update the kondisi fields if they exist
+                $(this).find('[id^="kondisitradproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'kondisitradproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'kondisitradproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                // Update the jumlah fields if they exist
+                $(this).find('[id^="jumlahtradproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'jumlahtradproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'jumlahtradproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                // Update the gift component fields if they exist
+                $(this).find('[id^="kodegiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'kodegiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'kodegiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                $(this).find('[id^="komponengiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'komponengiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'komponengiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                $(this).find('[id^="kondisigiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'kondisigiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'kondisigiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                $(this).find('[id^="jumlahgiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'jumlahgiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'jumlahgiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                // Update the other fields similarly
+                $(this).find('[id^="jumlah_"]').attr('id', 'jumlah_' + i).attr('name', 'jumlah[]').attr('data-index', i);
+                $(this).find('[id^="alasan_"]').attr('id', 'alasan_' + i).attr('name', 'alasan[]');
+                $(this).find('[id^="jenis_diskon_"]').attr('id', 'jenis_diskon_' + i).attr('name', 'jenis_diskon[]');
+                $(this).find('[id^="diskon_"]').attr('id', 'diskon_' + i).attr('name', 'diskon[]');
+                $(this).find('[id^="harga_"]').attr('id', 'harga_' + i).attr('name', 'harga[]');
+                $(this).find('[id^="totalharga_"]').attr('id', 'totalharga_' + i).attr('name', 'totalharga[]');
+                $(this).find('[id^="nominalInput_"]').attr('id', 'nominalInput_' + i);
+                $(this).find('[id^="persenInput_"]').attr('id', 'persenInput_' + i);
+
+                // Update the remove button id
+                $(this).find('.btn_remove').attr('id', i);
+
+                // Increment the counter
+                i++;
+            });
+        }
+
 
         $('[id^=btnGift]').click(function(e) {
                 e.preventDefault();
@@ -856,6 +952,26 @@
             });
         });
 
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
+
+        function parseRupiahToNumber(rupiah) {
+            return parseInt(rupiah.replace(/[^\d]/g, ''));
+        }
+
         $(document).on('change', '[id^=nama_produk]', function() {
             var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
             var selectedOption = $(this).find(':selected');
@@ -865,68 +981,28 @@
 
         });
 
-        $('#pilih_pengiriman').change(function() {
-                var pengiriman = $(this).val();
-                var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+        $('form').on('submit', function(e){
+            $('#biaya_pengiriman').val(parseRupiahToNumber($('#biaya_pengiriman').val()));
+            $('#sub_total').val(parseRupiahToNumber($('#sub_total').val()));
+            $('#total').val(parseRupiahToNumber($('#total').val()));
 
-                $('#inputOngkir').hide();
-                $('#inputExspedisi').hide();
-
-                if (pengiriman === "sameday") {
-                    $('#inputOngkir').show();
-                    $('#biaya_pengiriman').prop('readonly', false);
-                } else if (pengiriman === "exspedisi") {
-                    $('#inputExspedisi').show();
-                    $('#biaya_pengiriman').prop('readonly', true);
-                    ongkirId();
-                }
+            $('input[id^="diskon_"], input[id^="harga_"], input[id^="totalharga_"]').each(function() {
+                var id = $(this).attr('id').split('_')[2];
+                var value = $(this).val();
+                var hargaRupiah = $(this).val();
+                $(this).val(parseRupiahToNumber(hargaRupiah));
             });
-        
-        $('#pilih_pengiriman').trigger('change');
-
-        $('#ongkir_id').change(function() {
-            var selectedOption = $(this).find('option:selected');
-            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
-            $('#biaya_pengiriman').val(ongkirValue);
-            Totaltagihan();
         });
 
-
-        function handleFileInputChange(inputElement, previewElement) {
-            const file = inputElement.files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(inputElement).val('');
-                return;
+        $('#status').change(function(){
+            var status = $(this).val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan').hide();
             }
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $(previewElement).attr('src', e.target.result);
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        $('#bukti').on('change', function() {
-            handleFileInputChange(this, '#preview');
         });
-
-        $('#bukti_kirim').on('change', function() {
-            handleFileInputChange(this, '#preview_kirim');
-        });
-
-
-        function clearFile() {
-            $('#bukti').val('');
-            $('#preview').attr('src', defaultImg);
-        };
-
 
         $('#komplain').on('change', function(){
             var komplain = $(this).val();
@@ -940,12 +1016,12 @@
                 var biayakirim = $('#biaya_pengiriman');
 
                 if(komplain == 'retur') {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').show();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
                     hargaSatuanInput.prop('readonly', true);
                 } else {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').hide();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').hide();
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
@@ -1010,18 +1086,18 @@
                 var biayakirim = $('#biaya_pengiriman');
 
                 if(komplain == 'retur') {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').show();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
                     hargaSatuanInput.prop('readonly', true);
                 } else {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').hide();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').hide();
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = hargaProduk * jumlah;
-                    hargaSatuanInput.val(harga);
+                    hargaSatuanInput.val(formatRupiah(harga, 'Rp '));
                     hargaSatuanInput.prop('readonly', true);
                 }
             });
@@ -1031,18 +1107,16 @@
                 var index = totalhargaInput.attr('id').split('_')[1];
 
                 if(komplain == 'refund' || komplain == 'diskon') {
-                    var hargaSatuan = $('#harga_' + index).val();
+                    var hargaSatuan = parseRupiahToNumber($('#harga_' + index).val());
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
-                    totalhargaInput.val(totalharga);
+                    totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
                     totalhargaInput.prop('readonly', true);
                 }
             });
-
-            
 
             $('[id^=diskon_]').each(function() {
                 var diskonInput = $(this);
@@ -1064,16 +1138,136 @@
                 var jumlahInput = $(this);
                 var index = jumlahInput.attr('id').split('_')[1];
 
-                if(komplain == 'refund' || komplain == 'diskon') { // Jika refund atau diskon, aktifkan input jumlah
+                if(komplain == 'refund' || komplain == 'diskon') { 
                     jumlahInput.prop('readonly', false);
                 } else {
-                    jumlahInput.prop('readonly', true); // Jika selain refund atau diskon, nonaktifkan input jumlah
+                    jumlahInput.prop('readonly', true); 
                 }
             });
 
             updateSubTotal();
             }
         });
+
+        $(document).ready(function() {
+            $('#komplain').trigger('change');
+        });
+
+        $('[id^=jenis_diskon_]').on('change', function() {
+            var jenisInput = $(this);
+            var index = jenisInput.attr('id').split('_')[2]; 
+            var selectedValue = jenisInput.val();
+            var diskonValue = parseFloat($('#diskon_' + index).val()) || 0; 
+            var hargaTotal = parseFloat($('#harga_' + index).val()) || 0; 
+
+            $('[id^=diskon_' + index + ']').trigger('input');
+        });
+
+        $('[id^=diskon_]').change('input', function(){
+            var hasilInput = $(this);
+            var index = hasilInput.attr('id').split('_')[1]; 
+            var jenisInput = $('#jenis_diskon_' + index); 
+            var selectedValue = jenisInput.val(); 
+            var jumlah = $('#jumlah_' + index).val();
+
+            var hargaTotal = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0; 
+            if (selectedValue === "Nominal") {
+                var diskonValue = parseFloat(hasilInput.val()) || 0; 
+                hargaTotal -= diskonValue * jumlah; 
+                $(this).val(formatRupiah(diskonValue));
+            } else if (selectedValue === "persen") {
+                var diskonValue = parseFloat(hasilInput.val()) || 0; 
+                var diskonAmount = (hargaTotal * diskonValue) / 100; 
+                hargaTotal -= diskonAmount * jumlah; 
+            }
+
+            $('#totalharga_' + index).val(formatRupiah(hargaTotal, 'Rp '));
+            var subtotal = 0;
+            $('input[name="totalharga[]"]').each(function() {
+                subtotal += parseFloat(parseRupiahToNumber($(this).val())) || 0;
+            });
+
+            $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
+            $('#total').val(formatRupiah(subtotal, 'Rp '));
+        });
+
+
+        $('#pilih_pengiriman').change(function() {
+                var pengiriman = $(this).val();
+                var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+
+                $('#inputOngkir').hide();
+                $('#inputExspedisi').hide();
+
+                if (pengiriman === "sameday") {
+                    $('#inputOngkir').show();
+                    $('#biaya_pengiriman').prop('readonly', false);
+                } else if (pengiriman === "exspedisi") {
+                    $('#inputExspedisi').show();
+                    $('#biaya_pengiriman').prop('readonly', true);
+                    ongkirId();
+                }
+            });
+        
+        $('#pilih_pengiriman').trigger('change');
+
+        function OngkirId(){
+            var Ongkir = $(this).val();
+            $(this).val(formatRupiah(Ongkir, 'Rp '));
+            $('#total_biaya').val(formatRupiah(Ongkir, 'Rp '));
+        }
+        
+
+        $('#ongkir_id').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
+            $('#biaya_pengiriman').val(formatRupiah(ongkirValue, 'Rp '));
+            Totaltagihan();
+        });
+
+        function Totaltagihan() {
+            var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
+            var totalTagihan = biayaOngkir;
+            $('#biaya_pengiriman').val(formatRupiah(totalTagihan, 'Rp '));
+            $('#total').val(formatRupiah(totalTagihan, 'Rp '));
+        }
+
+
+        function handleFileInputChange(inputElement, previewElement) {
+            const file = inputElement.files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(inputElement).val('');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $(previewElement).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        $('#bukti').on('change', function() {
+            handleFileInputChange(this, '#preview');
+        });
+
+        $('#bukti_kirim').on('change', function() {
+            handleFileInputChange(this, '#preview_kirim');
+        });
+        
+
+
+        function clearFile() {
+            $('#bukti').val('');
+            $('#preview').attr('src', defaultImg);
+        };
 
         var jumlahDO = [];
 
@@ -1104,8 +1298,8 @@
                         $('#totalharga_' + index).val(0);
                     } else {
                         var harga = hargaProduk * jumlah;
-                        $('#harga_' + index).val(harga);
-                        $('#totalharga_' + index).val(harga);
+                        $('#harga_' + index).val(formatRupiah(harga, 'Rp '));
+                        $('#totalharga_' + index).val(formatRupiah(harga, 'Rp '));
                     }
 
                     // Panggil updateSubTotal setiap kali input jumlah diubah
@@ -1118,10 +1312,10 @@
             var subTotal = 0;
             // console.log($('input[name="totalharga[]"]'));
             $('input[name="totalharga[]"]').each(function() {
-                subTotal += parseFloat($(this).val()) || 0;
+                subTotal += parseFloat(parseRupiahToNumber($(this).val())) || 0;
             });
-            $('#sub_total').val(subTotal.toFixed(2));
-            $('#total').val(subTotal.toFixed(2));
+            $('#sub_total').val(formatRupiah(subTotal, 'Rp '));
+            $('#total').val(formatRupiah(subTotal, 'Rp '));
         }
 
         $('#nama_produk_{{ $i }}').change(function(){
@@ -1133,54 +1327,12 @@
                 $('.kondisi').hide();
             }
         });
+        
+        
 
-        $('[id^=jenis_diskon_]').on('change', function() {
-            var jenisInput = $(this);
-            var index = jenisInput.attr('id').split('_')[2]; 
-            var selectedValue = jenisInput.val();
-            var diskonValue = parseFloat($('#diskon_' + index).val()) || 0; 
-            var hargaTotal = parseFloat($('#harga_' + index).val()) || 0; 
+        $('#biaya_pengiriman').change('input', Totaltagihan);
 
-            $('[id^=diskon_' + index + ']').trigger('input');
-        });
-
-        $('[id^=diskon_]').on('input', function(){
-            var hasilInput = $(this);
-            var index = hasilInput.attr('id').split('_')[1]; 
-            var jenisInput = $('#jenis_diskon_' + index); 
-            var selectedValue = jenisInput.val(); 
-
-            var hargaTotal = parseFloat($('#harga_' + index).val()) || 0; // Mengambil harga total berdasarkan index
-
-            if (selectedValue === "Nominal") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; // Mengambil nilai diskon berdasarkan index
-                hargaTotal -= diskonValue; 
-            } else if (selectedValue === "persen") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; // Mengambil nilai diskon berdasarkan index
-                var diskonAmount = (hargaTotal * diskonValue) / 100; // Hitung jumlah diskon berdasarkan persen
-                hargaTotal -= diskonAmount; // Kurangi harga total dengan jumlah diskon
-            }
-
-            $('#totalharga_' + index).val(hargaTotal.toFixed(2));
-            var subtotal = 0;
-            $('input[name="totalharga[]"]').each(function() {
-                subtotal += parseFloat($(this).val()) || 0;
-            });
-
-            $('#sub_total').val(subtotal.toFixed(2));
-            $('#total').val(subtotal.toFixed(2));
-        });
-
-        function Totaltagihan() {
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
-            var totalTagihan = biayaOngkir;
-            
-
-            $('#total').val(totalTagihan.toFixed(2));
-
-        }
-
-        $('#biaya_pengiriman').on('input', Totaltagihan);
+        
 
     });
 </script>
