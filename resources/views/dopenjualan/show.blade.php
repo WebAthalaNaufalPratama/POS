@@ -89,6 +89,21 @@
                                             <label for="catatan">Catatan</label>
                                             <textarea class="form-control" id="catatan" name="catatan" value="{{ $dopenjualan->catatan}}" disabled>{{ $dopenjualan->catatan}}</textarea>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="status">Status</label>
+                                            <select id="status" name="status" class="form-control" required disabled>
+                                                <option value="">Pilih Status</option>
+                                                <option value="TUNDA" {{ $dopenjualan->status == 'TUNDA' ? 'selected':''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $dopenjualan->status == 'DIKONFIRMASI' ? 'selected':''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{ $dopenjualan->status == 'DIBATALKAN' ? 'selected':''}}>DIBATALKAN</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan" id="alasan" disabled>{{ $dopenjualan->alasan}}</textarea>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="col-md-6">
@@ -106,9 +121,9 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                        <form action="{{ route('dopenjualan.update', ['dopenjualan' => $dopenjualan->id]) }}" method="POST" enctype="multipart/form-data">
+                                        <!-- <form action="{{ route('dopenjualan.update', ['dopenjualan' => $dopenjualan->id]) }}" method="POST" enctype="multipart/form-data">
                                                 @csrf
-                                                @method('patch')
+                                                @method('patch') -->
                                                 <div class="custom-file-container" data-upload-id="myFirstImage">
                                                     <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                     </label>
@@ -120,10 +135,10 @@
                                                     <img id="preview" src="{{ $dopenjualan->file ? '/storage/' . $dopenjualan->file : '' }}" alt="your image" />
                                                 </div>
                                                 <div class="text-end mt-3">
-                                                    <button class="btn btn-primary" type="submit">Upload File</button>
+                                                    <!-- <button class="btn btn-primary" type="submit">Upload File</button> -->
                                                     <!-- <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a> -->
                                                 </div>
-                                            </form>
+                                            <!-- </form> -->
                                         </div>
                                     </div>
                                 </div>
@@ -496,6 +511,18 @@
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
         };
+
+        function status(){
+            var status = $('#status').val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan'),hide();
+            }
+        };
+        
+        $('#status').on('change', status());
 
     });
 </script>

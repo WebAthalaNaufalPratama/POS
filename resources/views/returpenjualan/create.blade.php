@@ -44,7 +44,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="no_retur">No Retur Penjualan</label>
-                                            <input type="text" class="form-control" id="no_retur" name="no_retur" placeholder="Silahkan Pilih Lokasi Terlebih Dahulu" value="" onchange="generateDOP(this)" readonly required>
+                                            <input type="text" class="form-control" id="no_retur" name="no_retur" placeholder="Silahkan Pilih Lokasi Terlebih Dahulu"  readonly required>
                                         </div>
                                     </div>
 
@@ -59,14 +59,16 @@
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <label for="lokasi_id">Lokasi</label>
+                                            <label for="customer_id">Lokasi Retur</label>
                                             <select id="lokasi_id" name="lokasi_id" class="form-control" required>
-                                                <option value=""> Pilih Lokasi </option>
+                                                <option value="">Pilih Lokasi</option>
                                                 @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}">{{ $lokasi->nama }}</option>
+                                                    <option value="{{ $lokasi->id }}" data-tipelokasi="{{ $lokasi->tipe_lokasi }}">{{ $lokasi->nama }}</option>
+                                                    
                                                 @endforeach
                                             </select>
                                         </div>
+
                                         <div class="form-group" style="display:none;" id="penerima">
                                             <label for="penerima">Nama Penerima</label>
                                             <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima">
@@ -123,6 +125,20 @@
                                                 <option value="diskon">Diskon</option>
                                                 <option value="retur">Retur</option>
                                             </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="status">Status</label>
+                                            <select id="status" name="status" class="form-control" required>
+                                                <option value="">Pilih Status</option>
+                                                <option value="TUNDA">TUNDA</option>
+                                                <option value="DIKONFIRMASI">DIKONFRIMASI</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan_batal" id="alasan"></textarea>
+                                            </div>
                                         </div>
                                         <div class="form-group" style="display:none;" id="driver">
                                             <label for="driver">Driver</label>
@@ -245,7 +261,7 @@
                                                     @if($isTRDSelected)
                                                         <div class="row mt-2">
                                                             <div class="col">
-                                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}">
+                                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect">
                                                                     <option value=""> Pilih Kondisi </option>
                                                                     @foreach ($kondisis as $kondisi)
                                                                     <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
@@ -262,7 +278,7 @@
                                                                 @foreach ($items as $komponen)
                                                                     <div class="row mt-2">
                                                                         <div class="col">
-                                                                        <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
+                                                                            <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control myselect" value="{{ $komponen['kode'] }}" readonly>
                                                                             <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                             </div>
                                                                             <div class="col">
@@ -480,64 +496,52 @@
 
 @section('scripts')
 <script>
-    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
-
-    function generateDOP() {
-        var invoicePrefix = "DOP";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_do').val(generatedInvoice);
-    }
-
-    generateDOP();
-</script>
-<script>
     $(document).ready(function() {
-        var cekInvoiceNumbers = "<?php echo $cekretur ?>";
+        // These variables simulate server-side PHP data injection
+        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+        var cekInvoiceRetur = "<?php echo $cekretur ?>";
+        var nextInvoiceRetur = parseInt(cekInvoiceRetur) + 1;
+        var lokasi = "<?php echo $tipe?>";
 
-        // Function to generate the invoice number
-        function generateRTP(kode) {
+        // Function to generate Delivery Order Number (DO)
+        function generateDOP() {
+            var invoicePrefix = "DOP";
             var currentDate = new Date();
             var year = currentDate.getFullYear();
             var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
             var day = currentDate.getDate().toString().padStart(2, '0');
             var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
+            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+            $('#no_do').val(generatedInvoice);
+        }
+
+        // Function to generate Return Invoice Number (RTP/RTO)
+        function generateRTP(kode) {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceRetur.toString().padStart(3, '0');
+
             var generatedInvoice = kode + year + month + day + formattedNextInvoiceNumber;
             $('#no_retur').val(generatedInvoice);
         }
 
-        // Handle location change
-        $('#lokasi_id').on('change', function() {
-            var selectedOption = $(this).find('option:selected');
-            var cektipelokasi = selectedOption.data('tipe');
-            
-            var kode;
-            if (cektipelokasi == 1) {
-                kode = "RTP";
-            } else if (cektipelokasi == 2) {
-                kode = "RTO";
-            } else {
-                kode = ""; // Handle unexpected values of cektipelokasi
-            }
+        // Generate DO on page load
+        generateDOP();
 
-            generateRTP(kode); // Generate the invoice number with the selected prefix
-        });
-
-        // Optionally, generate the invoice number on page load if a location is pre-selected
-        var initialOption = $('#lokasi_id').find('option:selected');
-        if (initialOption.val()) {
-            var initialTipe = initialOption.data('tipe');
-            var initialKode = initialTipe == 1 ? "RTP" : (initialTipe == 2 ? "RTO" : "");
-            generateRTP(initialKode);
+        var kode;
+        if (lokasi == 1) {
+            kode = "RTP";
+        } else if (lokasi == 2) { 
+            kode = "RTO";
+        } else {
+            kode = ""; 
         }
+
+        generateRTP(kode);
     });
 </script>
 <script>
@@ -650,8 +654,82 @@
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
             $('#row' + button_id + '').remove();
+            updateIndices();
             calculateTotal(0);
         });
+
+        function updateIndices() {
+            // Reinitialize the counter
+            var i = 0;
+
+            // Iterate over each row and update the indices
+            $('tr[id^="row"]').each(function() {
+                // Update the row id
+                $(this).attr('id', 'row' + i);
+
+                // Update the no_do1 field
+                $(this).find('[id^="no_do_"]').attr('id', 'no_do_' + i).attr('name', 'no_do1[]');
+
+                // Update the nama_produk field
+                $(this).find('[id^="nama_produk_"]').attr('id', 'nama_produk_' + i).attr('name', 'nama_produk[]').attr('data-index', i);
+
+                // Update the kondisi fields if they exist
+                $(this).find('[id^="kondisitradproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'kondisitradproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'kondisitradproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                // Update the jumlah fields if they exist
+                $(this).find('[id^="jumlahtradproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'jumlahtradproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'jumlahtradproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                // Update the gift component fields if they exist
+                $(this).find('[id^="kodegiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'kodegiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'kodegiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                $(this).find('[id^="komponengiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'komponengiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'komponengiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                $(this).find('[id^="kondisigiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'kondisigiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'kondisigiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                $(this).find('[id^="jumlahgiftproduk_"]').each(function(index, element) {
+                    var $element = $(element);
+                    var newId = 'jumlahgiftproduk_' + i;
+                    $element.attr('id', newId).attr('name', 'jumlahgiftproduk_' + i + '[]').attr('data-produk', $element.data('produk'));
+                });
+
+                // Update the other fields similarly
+                $(this).find('[id^="jumlah_"]').attr('id', 'jumlah_' + i).attr('name', 'jumlah[]').attr('data-index', i);
+                $(this).find('[id^="alasan_"]').attr('id', 'alasan_' + i).attr('name', 'alasan[]');
+                $(this).find('[id^="jenis_diskon_"]').attr('id', 'jenis_diskon_' + i).attr('name', 'jenis_diskon[]');
+                $(this).find('[id^="diskon_"]').attr('id', 'diskon_' + i).attr('name', 'diskon[]');
+                $(this).find('[id^="harga_"]').attr('id', 'harga_' + i).attr('name', 'harga[]');
+                $(this).find('[id^="totalharga_"]').attr('id', 'totalharga_' + i).attr('name', 'totalharga[]');
+                $(this).find('[id^="nominalInput_"]').attr('id', 'nominalInput_' + i);
+                $(this).find('[id^="persenInput_"]').attr('id', 'persenInput_' + i);
+
+                // Update the remove button id
+                $(this).find('.btn_remove').attr('id', i);
+
+                // Increment the counter
+                i++;
+            });
+        }
+
         // $('.kondisi').hide();
         $(document).ready(function() {
             $('[id^=nama_produk]').each(function() {
@@ -699,7 +777,7 @@
         //     $('#biaya_pengiriman').val(ongkirValue);
         //     Totaltagihan();
         // });
-
+        
 
         function handleFileInputChange(inputElement, previewElement) {
             const file = inputElement.files[0];
@@ -730,7 +808,10 @@
             handleFileInputChange(this, '#preview_kirim');
         });
 
-        
+        $('[id^=nama_produk_]').on('mousedown click focus', function(e) {
+            e.preventDefault();
+        });
+
 
 
 
@@ -914,6 +995,15 @@
                 }
             });
 
+            $('#status').change(function(){
+                var status = $(this).val();
+                if(status == 'DIBATALKAN')
+                {
+                    $('#alasan').show();
+                }else{
+                    $('#alasan').hide();
+                }
+            });
             
 
             $('[id^=diskon_]').each(function() {

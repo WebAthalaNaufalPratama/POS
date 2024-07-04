@@ -33,21 +33,25 @@
     <div class="row">
         <div class="col-sm-12">
             <h3 class="page-title">Retur Mutasi Inden</h3>
-            <ul class="breadcrumb">
+            {{-- <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
                     Retur Inden
                 </li>
-            </ul>
+            </ul> --}}
         <form action="{{ route('retur.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
             <div class="form-group-retur">
                 <label for="no_retur" class="label-retur">Nomor Retur :</label>
                 <input type="text" class="form-control" id="no_retur" name="no_retur" value="{{ $dataretur->no_retur }}" readonly>
             </div>
-            
+            <br>
+            <div class="form-group-retur">
+                <label for="no_retur" class="label-retur">Tanggal Retur :</label>
+                <input type="text" class="form-control" id="no_retur" name="tgl_retur" value="{{ tanggalindo($dataretur->created_at) }}" readonly>
+            </div>
         </div>
     </div>
 </div>
@@ -241,7 +245,7 @@
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        <th>Aksi</th>
+                                                        {{-- <th>Aksi</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -251,7 +255,7 @@
                                                         <td>{{ $databayar->no_invoice_bayar }}</td>
                                                         <td>{{ tanggalindo($databayar->tanggal_bayar) }}</td>
                                                         <td>{{ $databayar->cara_bayar }}</td>
-                                                        <td>{{ $databayar->nominal}}</td>
+                                                        <td>{{ formatRupiah($databayar->nominal)}}</td>
                                                         <td>
                                                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#buktiModal{{ $databayar->id }}">
                                                                 Lihat Bukti
@@ -279,7 +283,7 @@
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                        <td></td>
+                                                        {{-- <td></td> --}}
                                                        
                                                     </tr>
                                                     @endforeach
@@ -400,6 +404,16 @@
                                                         </div>
                                                     </h5>
                                                 </li>
+                                                <li>
+                                                    <h4>Sisa Refund</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="sisa_refund_dis" name="sisa_refund_dis" class="form-control" value="{{ formatRupiah2($dataretur->sisa_refund) }}" readonly>
+                                                            <input type="hidden" id="sisa_refund" name="sisa_refund" class="form-control" value="{{ $dataretur->sisa_refund }}" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -510,33 +524,34 @@
           <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form id="supplierForm" action="" method="POST">
+            <form id="supplierForm" action="{{ route('refundinden.store')}}" method="POST" enctype="multipart/form-data">
                 @csrf
             <div class="mb-3">
               <label for="nobay" class="form-label">No Bayar</label>
-              {{-- <input type="text" class="form-control" id="invoice_purchase_id" name="invoice_purchase_id" value="{{ $no_invpo }}" hidden> --}}
-              <input type="text" class="form-control" id="nobay" name="nobay" value="" readonly>
+              <input type="text" class="form-control" id="returinden_id" name="returinden_id" value="{{ $dataretur->id }}" hidden>
+              <input type="text" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $dataretur->mutasiinden_id }}" hidden>
+              <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" value="{{ $no_bayar }}" readonly>
             </div>
             <div class="mb-3">
               <label for="tgl" class="form-label">Tanggal</label>
-              <input type="date" class="form-control" id="tgl" name="tgl" value="{{ now()->format('Y-m-d') }}">
+              <input type="date" class="form-control" id="tgl" name="tanggal_bayar" value="{{ now()->format('Y-m-d') }}">
             </div>
             <div class="mb-3">
               <label for="metode" class="form-label">Metode</label>
-              {{-- <select class="form-control select2" id="metode" name="metode">
+              <select class="form-control select2" id="metode" name="metode">
                 <option value="cash">cash</option>
                 @foreach ($rekenings as $item)
                 <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
                 @endforeach
-            </select> --}}
+            </select>
             </div>
             <div class="mb-3">
               <label for="nominal" class="form-label">Nominal</label>
-              <input type="number" class="form-control" id="nominal" name="nominal">
+              <input type="text" class="form-control" id="nominal" name="nominal" value="{{ $dataretur->sisa_refund }}">
             </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="bukti" name="bukti">
+              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
             </div>
             
             <div class="modal-footer">

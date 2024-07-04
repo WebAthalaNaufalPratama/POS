@@ -41,7 +41,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="no_do">No Delivery Order</label>
-                                            <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Delivery Order" value="{{ $dopenjualan->no_do}}"  required >
+                                            <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Delivery Order" value="{{ $dopenjualan->no_do}}"  required readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -82,7 +82,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="no_referensi">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_referensi" name="no_referensi" placeholder="Nomor Invoice" value="{{ $dopenjualan->no_referensi}}" required >
+                                            <input type="text" class="form-control" id="no_referensi" name="no_referensi" placeholder="Nomor Invoice" value="{{ $dopenjualan->no_referensi}}" required readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="tanggal_kirim">Tanggal Kirim</label>
@@ -91,6 +91,21 @@
                                         <div class="form-group">
                                             <label for="catatan">Catatan</label>
                                             <textarea class="form-control" id="catatan" name="catatan" value="{{ $dopenjualan->catatan}}" >{{ $dopenjualan->catatan}}</textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="status">Status</label>
+                                            <select id="status" name="status" class="form-control" required>
+                                                <option value="">Pilih Status</option>
+                                                <option value="TUNDA">TUNDA</option>
+                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN">DIBATALKAN</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan" id="alasan"></textarea>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -175,13 +190,14 @@
                                                         <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produkjuals as $pj)
-                                                            <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                            <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
+                                                    <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}"></td>
                                                     <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
                                                     <td><input type="text" name="keterangan[]" id="ketarangan_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
+                                                    <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
                                                 </tr>
                                                 @endif
                                                 @php
@@ -219,7 +235,7 @@
                                                     <select id="nama_produk2_0" name="nama_produk2[]" class="form-control" >
                                                         <option value="">Pilih Produk</option>
                                                         @foreach ($produkjuals as $produk)
-                                                        <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                        <option value="{{ $produk->id }}">{{ $produk->nama }}</option>
                                                         @endforeach
                                                     </select>
                                                 </td>
@@ -238,13 +254,14 @@
                                                         <select id="nama_produk2_{{ $i }}" name="nama_produk2[]" class="form-control" >
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produkjuals as $pj)
-                                                            <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                            <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
                                                     <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
                                                     <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
                                                     <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
+                                                    <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
                                                 </tr>
                                                 @endif
                                                 @php
@@ -496,10 +513,53 @@
             }
         });
 
+        $('#status').change(function(){
+            var status = $(this).val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan').hide();
+            }
+        });
+
         function clearFile() {
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
         };
+
+        var produkData = [];
+
+        @foreach ($dopenjualan->produk as $produk)
+            produkData.push({
+                id: {{ $produk->id }},
+                jumlah: {{ $produk->jumlah }}
+            });
+        @endforeach
+
+        console.log('Produk Data:', produkData);
+
+        $(document).on('input', '.jumlah', function() {
+            var inputId = $(this).attr('id');
+            var jumlah = parseInt($(this).val(), 10); // Ensure jumlah is parsed as an integer
+            var produkId = $(this).data('produk-id'); // Extract the product ID from the data attribute
+
+            var produk = produkData.find(function(item) {
+                return item.id == produkId;
+            });
+
+            if (produk) {
+                if (jumlah > produk.jumlah) {
+                    alert('Jumlah diterima tidak boleh lebih dari jumlah sebelumnya');
+                    $(this).val(produk.jumlah);
+                } else if (jumlah < 0) {
+                    alert('Jumlah diterima tidak boleh kurang dari 0');
+                    $(this).val(0);
+                }
+            } else {
+                console.error('Produk not found for ID:', produkId);
+            }
+        });
 
     });
 </script>

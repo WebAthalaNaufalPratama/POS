@@ -679,11 +679,12 @@ class PembelianController extends Controller
             $data['foto'] = $filePath;
         }
 
+        $data['sisa'] = $request->subtotal;
         $data['ongkir'] = $request->biaya_pengiriman ?? 0;
-        $data['total'] = $request->total_harga;
+        // $data['total'] = $request->total_harga;
         $jenis = $data['komplain'];
-
         $save = ReturPembelian::create($data);
+       
 
         if ($save) {        
 
@@ -774,6 +775,9 @@ class PembelianController extends Controller
                 $getInvoice->sisa = $getInvoice->total_tagihan;
                 $check = $getInvoice->update(); 
             }
+
+            $data['sisa'] = $request->subtotal;
+            $save = ReturPembelian::create($data);
             
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
 

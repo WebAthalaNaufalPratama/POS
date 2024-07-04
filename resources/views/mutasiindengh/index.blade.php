@@ -95,10 +95,12 @@
                                         <li>
                                             <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi</a>
                                         </li>
-                                       
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
-                                        </li>
+                                       @if ( $mutasi->sisa_bayar == $mutasi->total_biaya || $mutasi->sisa_bayar == 0  ) 
+                                       <li>
+                                           <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
+                                       </li>
+                                           
+                                       @endif
                                       
                                     @endif
                                     </ul>

@@ -125,8 +125,7 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT">DRAFT</option>
-                                                <option value="PUBLISH">PUBLISH</option>
+                                                <option value="TUNDA">TUNDA</option>
                                             </select>
                                         </div>
                                     </div>
@@ -149,7 +148,7 @@
                                             $user = Auth::user();
                                             $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                         @endphp
-                                        @if($lokasi->tipe_lokasi == 1)
+                                        @if($lokasi->lokasi->tipe_lokasi == 1)
                                             <div class="form-group">
                                                 <label for="lokasi_pengirim">Lokasi Pengiriman</label>
                                                 <select id="lokasi_pengirim" name="lokasi_pengirim" class="form-control">
@@ -1023,7 +1022,7 @@
                 $('#inputPembayaran').show();
                 $('#inputRekening').show();
                 $('#inputTanggalBayar').show();
-                $('#inputBuktiBayar').show();
+                $('#inputBuktiBayar').hide();
                 $('#nominal').val(formatRupiah(dpValue, 'Rp '));
             } else {
                 $('#inputPembayaran').hide();

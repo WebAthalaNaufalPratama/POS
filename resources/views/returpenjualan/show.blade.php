@@ -124,6 +124,21 @@
                                                 <option value="retur" {{ $penjualans->komplain == 'retur' ? 'selected' : ''}}>Retur</option>
                                             </select>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="status">Status</label>
+                                            <select id="status" name="status" class="form-control" required disabled>
+                                                <option value="">Pilih Status</option>
+                                                <option value="TUNDA" {{ $dopenjualans->status == 'TUNDA' ? 'seledcted' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $dopenjualans->status == 'DIKONFIRMASI' ? 'selected':''}}>DIKONFRIMASI</option>
+                                                <option value="DIBATALKAN" {{$dopenjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan_batal" id="alasan" disabled>{{ $dopenjualans->alasan_batal}}</textarea>
+                                            </div>
+                                        </div>
                                         <div class="form-group" style="display:none;" id="driver">
                                             <label for="driver">Driver</label>
                                             <select id="driver" name="driver" class="form-control" disabled>
@@ -383,9 +398,11 @@
                                                         <td><input type="text" name="satuan2[]" id="satuan2_{{$i}}" class="form-control" value="{{$produk->satuan}}" readonly></td>
                                                         <td><input type="text" name="keterangan2[]" id="keterangan2_{{$i}}" class="form-control" value="{{$produk->keterangan}}" readonly></td>
                                                         <td>
+                                                            @if($dopenjualans->status != 'DIBATALKAN')
                                                             <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                 Set Gift
                                                             </button>
+                                                            @endif
                                                         </td>
                                                     </tr>
                                                     @endif
@@ -788,6 +805,18 @@
             $('#deskripsi_komponen_' + id).val(selectedOption.data('deskripsi'));
 
         });
+
+        $('#status').change(function(){
+            var status = $(this).val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan'),hide();
+            }
+        });
+
+        $('#status').trigger('change');
 
         function choosepengiriman(){
             var pengiriman = $('#pilih_pengiriman').val();

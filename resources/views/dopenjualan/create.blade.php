@@ -92,6 +92,14 @@
                                             <label for="catatan">Catatan</label>
                                             <textarea id="catatan" name="catatan"></textarea>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="status">Status</label>
+                                            <select id="status" name="status" class="form-control" required>
+                                                <option value="">Pilih Status</option>
+                                                <option value="TUNDA">TUNDA</option>
+                                                <option value="DIKONFIRMASI">DIKONFRIMASI</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div class="col-md-6">
