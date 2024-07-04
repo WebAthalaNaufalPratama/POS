@@ -30,6 +30,10 @@ class KembaliSewa extends Model
         return $this->belongsTo(Karyawan::class, 'driver', 'id');
     }
 
+    public function data_pembuat(){
+        return $this->belongsTo(User::class, 'pembuat', 'id');
+    }
+
     public function produk(){
         return $this->hasMany(Produk_Terjual::class, 'no_kembali_sewa', 'no_kembali');
     }

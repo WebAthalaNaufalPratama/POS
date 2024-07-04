@@ -303,6 +303,23 @@ class PembelianController extends Controller
     
         return $prefix . $newNumber; 
     }
+
+    public function generatebayarrefundNumber() {
+        $date = date('Ymd');  // Tanggal hari ini dalam format YYYYMMDD
+        $prefix = 'Refundpo_' . $date . '_';
+        $lastPayment = Pembayaran::where('no_invoice_bayar', 'like', $prefix . '%')
+                        ->orderBy('no_invoice_bayar', 'desc')
+                        ->first();
+    
+        if (!$lastPayment) {
+            return $prefix . '001';
+        }
+    
+        $lastNumber = intval(substr($lastPayment->no_invoice_bayar, -3));
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+    
+        return $prefix . $newNumber; 
+    }
     
 
     public function generateINVPONumber() {
@@ -408,6 +425,7 @@ class PembelianController extends Controller
         // Simpan data pembelian
         $pembelian = new Pembelian();
         $pembelian->no_po = $request->nopo;
+        $pembelian->no_retur = $request->no_retur ?? null;
         $pembelian->supplier_id = $request->id_supplier;
         $pembelian->lokasi_id = $request->id_lokasi;
         $pembelian->tgl_kirim = $request->tgl_kirim;
@@ -661,11 +679,12 @@ class PembelianController extends Controller
             $data['foto'] = $filePath;
         }
 
+        $data['sisa'] = $request->subtotal;
         $data['ongkir'] = $request->biaya_pengiriman ?? 0;
-        $data['total'] = $request->total_harga;
+        // $data['total'] = $request->total_harga;
         $jenis = $data['komplain'];
-
         $save = ReturPembelian::create($data);
+       
 
         if ($save) {        
 
@@ -736,9 +755,16 @@ class PembelianController extends Controller
             }elseif($jenis == 'Refund'){
                 $subrefund = $newSubtotal - $getretur->subtotal;
                 $getInvoice->subtotal = $subrefund ;
-                $getInvoice->total_tagihan = $subrefund  + $getInvoice->biaya_kirim + $getInvoice->ppn + $getretur->ongkir;
-                // $getInvoice->sisa = $getInvoice->total_tagihan;
+                // $getInvoice->total_tagihan = $subrefund  + $getInvoice->biaya_kirim + $getInvoice->ppn + $getretur->ongkir;
+                $getInvoice->total_tagihan = $getretur->ongkir;
+                $getInvoice->sisa = $getretur->ongkir;
                 $check = $getInvoice->update();
+                $getretur->sisa = $subrefund;
+                $check2=$getretur->update();
+                
+                if(!$check2) return redirect()->back()->withInput()->with('fail', 'Gagal Update');
+
+                
             }else{
 
                 foreach ($getProdukretur as $produkretur) {
@@ -749,6 +775,9 @@ class PembelianController extends Controller
                 $getInvoice->sisa = $getInvoice->total_tagihan;
                 $check = $getInvoice->update(); 
             }
+
+            $data['sisa'] = $request->subtotal;
+            $save = ReturPembelian::create($data);
             
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
 
@@ -798,8 +827,12 @@ class PembelianController extends Controller
      {
         $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
         $data = Returpembelian::with('invoice', 'produkretur')->find($id);
+        $rekenings = Rekening::all();
+        $databayars = Pembayaran::where('retur_pembelian_id', $data->id)->get()->sortByDesc('created_at');
 
-        return view('purchase.showreturpo', compact('data', 'lokasi'));
+        $no_byre = $this->generatebayarrefundNumber();
+
+        return view('purchase.showreturpo', compact('data','rekenings','databayars', 'lokasi','no_byre'));
      }
 
     /**
@@ -1092,6 +1125,7 @@ class PembelianController extends Controller
         if ($type === 'pembelian') {
             $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
             $diskonTot = Produkbeli::where('pembelian_id', $datapo)->get();
+            $retur = Returpembelian::where('invoicepo_id', $inv_po->id)->first();
             // return $diskonTot;
 
             $totalDiskon = 0;
@@ -1144,9 +1178,11 @@ class PembelianController extends Controller
 
 
             // dd($riwayat);
-                
+            $produkkomplains = Produkretur::whereHas('produkbeli', function($q) use($datapo){
+                $q->where('pembelian_id', $datapo);
+            })->get();
 
-            return view('purchase.editinv', compact('riwayat','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.editinv', compact('riwayat','retur','produkkomplains','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } elseif ($type === 'poinden') {
             $inv_po = Invoicepo::where('poinden_id', $datapo)->first();

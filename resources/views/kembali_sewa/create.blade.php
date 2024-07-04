@@ -57,7 +57,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal kembali</label>
-                                                <input type="date" id="tanggal_kembali" name="tanggal_kembali" value="{{ old('tanggal_kembali') ?? date('Y-m-d') }}" class="form-control" required>
+                                                <input type="date" id="tanggal_kembali" name="tanggal_kembali" value="{{ old('tanggal_kembali') ?? $kontrak->tanggal_mulai }}" class="form-control" min="{{ $kontrak->tanggal_mulai }}" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -313,7 +313,7 @@
                         $(selectProduk).append('<option value="">Pilih Produk</option>')
                         for (let i = 0; i < response.length; i++) {
                             if(response[i].jenis != 'TAMBAHAN'){
-                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">'+response[i].id+''+response[i].detail_lokasi+'' + response[i].produk.nama + '</option>');
+                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">' + response[i].produk.nama + '</option>');
                                 $(lokasiProduk).append('<option value="' + response[i].detail_lokasi + '">' + response[i].detail_lokasi + '</option>');
                             }
                         }
@@ -324,7 +324,6 @@
                             if($(this).val()){ // cek jika value kosong
                                 var idProdukTerjual = $('#produk_' + id).find(':selected').data('id');
                                 $('#komponen_' + id).empty();
-                                console.log(response)
                                 response.forEach(function(item){
                                     if(item.id == idProdukTerjual){
                                         $(jumlahProduk).attr('disabled', false);
@@ -359,7 +358,6 @@
                                                     $('#jumlahKomponen_'+id+'_'+j+'').val(item.komponen[j].jumlah);
                                                     $('#kondisiKomponen_'+id+'_'+j+'').val(item.komponen[j].kondisi).trigger('change');
                                                     $('#kondisiKomponen_'+id+'_'+j+'').select2();
-// console.log('s')
                                             }
                                         }
                                         if(item.jenis == null) {

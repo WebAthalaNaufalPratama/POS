@@ -194,12 +194,15 @@
                                         <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ old('biaya_pengiriman') ?? 0 }}" class="form-control"  required>
                                     </div>
                                 </div>
-                                <div class="form-group row mt-1">
+
+                                <div class="form-group row mt-1" style="display: none;">
                                     <label class="col-lg-3 col-form-label">Total Harga</label>
                                     <div class="col-lg-9">
                                         <input type="text" id="total_harga" name="total_harga" value="{{ old('total_harga') }}" class="form-control"  required readonly>
                                     </div>
                                 </div>
+                                
+
                             </div>
                         </div>
                         <div class="row justify-content-start">

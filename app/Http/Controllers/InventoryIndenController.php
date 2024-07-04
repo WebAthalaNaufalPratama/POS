@@ -76,8 +76,8 @@ class InventoryIndenController extends Controller
         $data = $req->except(['_token', '_method']);
 
         // check duplikasi
-        $duplicate = InventoryInden::where('kode_produk', $data['kode_produk'])->where('supplier_id', $data['supplier_id'])->where('bulan_inden', $data['bulan_inden'])->where('id', '!=', $inventoryinden)->first();
-        if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
+        // $duplicate = InventoryInden::where('kode_produk', $data['kode_produk'])->where('supplier_id', $data['supplier_id'])->where('bulan_inden', $data['bulan_inden'])->where('id', '!=', $inventoryinden)->first();
+        // if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
 
          // save data inven galeri
          $check = InventoryInden::find($inventoryinden)->update($data);

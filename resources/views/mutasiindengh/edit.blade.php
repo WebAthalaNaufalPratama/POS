@@ -10,6 +10,15 @@
     .form-control-banyak{
         min-width: 200px; /* Adjust as necessary */
     }
+        input[readonly] {
+        background-color: #e9ecef; /* Warna latar belakang abu-abu */
+        color: #6c757d; /* Warna teks abu-abu */
+    }
+    .input-group .form-control-banyak {
+        border: 1px solid #ced4da; /* Nilai border default */
+        border-radius: 0.25rem; /* Radius default untuk border */
+    }
+
 </style>
 <div class="page-header">
     <div class="row">
@@ -72,7 +81,7 @@
                                                 <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $data->supplier->nama }}" readonly>
                                         </div>
                                         <div class="form-group">
-                                            <label for="penerima">Lokasi</label>
+                                            <label for="lokasi">Lokasi</label>
                                             <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $data->lokasi->nama }}" readonly>
 
                                         </div>
@@ -289,8 +298,10 @@
                                                         <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatan ?? '' }})" disabled>
                                                     </td>
-                                                    <td id=penerima">
-                                                        <input type="hidden" name=penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                    <td id=penerima_id">
+                                                        <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
+
+                                                        {{-- <input type="hidden" name=penerima_id" value="{{ Auth::user()->id ?? '' }}"> --}}
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                                     </td>
                                                     <td id="pembuku">
@@ -314,21 +325,21 @@
                                                         <select id="status_diterima" name="status_diterima" class="form-control">
                                                             <option selected>Pilih Status</option>
                                                             <option value="pending" {{ old('status_diterima') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_diterima') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                            <option value="acc" {{ old('status_diterima') == 'acc'|| old('status_diterima') == null ? 'selected' : '' }}>Accept</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control">
+                                                        <select id="status_dibukukan" name="status_dibukukan" class="form-control">
                                                             <option selected>Pilih Status</option>
                                                             <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' || old('status_dibukukan') == null ? 'selected' : '' }}>Accept</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status_diperiksa" name="status_dibuku" class="form-control">
+                                                        <select id="status_diperiksa" name="status_diperiksa" class="form-control">
                                                             <option selected>Pilih Status</option>
                                                             <option value="pending" {{ old('status_diperiksa') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_diperiksa') == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                            <option value="acc" {{ old('status_diperiksa') == 'acc' || old('status_diperiksa') == null ? 'selected' : '' }}>Accept</option>
                                                         </select>
                                                     </td>
                                                 </tr>
@@ -400,7 +411,7 @@
             </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="bukti" name="bukti">
+              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
             </div>
             
             <div class="modal-footer">

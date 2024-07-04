@@ -10,12 +10,19 @@
     .form-control-banyak{
         min-width: 200px; /* Adjust as necessary */
     }
-
+    input[readonly] {
+    background-color: #e9ecef; /* Warna latar belakang abu-abu */
+    color: #6c757d; /* Warna teks abu-abu */
+    }
+    .input-group .form-control-banyak {
+        border: 1px solid #ced4da; /* Nilai border default */
+        border-radius: 0.25rem; /* Radius default untuk border */
+    }
 </style>
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Edit Mutasi Inden ke GreenHouse</h3>
+            <h3 class="page-title">Show Mutasi Inden ke Galery/GreenHouse</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
@@ -177,7 +184,7 @@
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        <th>Aksi</th>
+                                                       
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -187,7 +194,7 @@
                                                         <td>{{ $databayar->no_invoice_bayar }}</td>
                                                         <td>{{ tanggalindo($databayar->tanggal_bayar) }}</td>
                                                         <td>{{ $databayar->cara_bayar }}</td>
-                                                        <td>{{ $databayar->nominal}}</td>
+                                                        <td>{{ formatRupiah($databayar->nominal)}}</td>
                                                         <td>
                                                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#buktiModal{{ $databayar->id }}">
                                                                 Lihat Bukti
@@ -215,7 +222,7 @@
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                        <td></td>
+                                                       
                                                        
                                                     </tr>
                                                     @endforeach
@@ -413,8 +420,8 @@
                          </div>
 
                         <div class="text-end mt-3">
-                            <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            {{-- <button class="btn btn-primary" type="submit">Submit</button> --}}
+                            <a href="{{ route('mutasiindengh.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>
@@ -464,7 +471,7 @@
               </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="buktitf" name="buktitf">
+              <input type="file" class="form-control" id="buktitf" name="buktitf" accept="image/*">
             </div>
             
             <div class="modal-footer">

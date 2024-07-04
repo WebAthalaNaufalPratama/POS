@@ -65,6 +65,7 @@
                                 {{-- <th>Status Admin</th>
                                 <th>Status Finance</th> --}}
                                 <th>Status Pembayaran</th>
+                                <th>Retur</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -87,6 +88,13 @@
                                     LUNAS
                                 @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
                                     BELUM LUNAS
+                                @endif
+                                </td>
+                                <td>
+                                @if($datapo->no_retur !== null) 
+                                {{ $datapo->no_retur }}
+                                @else
+                                -
                                 @endif
                                 </td>
                                 
@@ -129,6 +137,7 @@
                                         </li>
                                     </ul>
                                 </td>
+
                             </tr>
                             @endforeach
                         </tbody>
