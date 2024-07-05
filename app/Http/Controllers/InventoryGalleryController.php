@@ -136,7 +136,7 @@ class InventoryGalleryController extends Controller
             $dataPenjualanDiambil = $komponenPenjualanDiambil->map(function($komponen){
                 return [
                     'Id' => $komponen->produk_terjual->id,
-                    'Pengubah' => optional($komponen->produk_terjual->penjualan->dibuat)->name,
+                    'Pengubah' => optional($komponen->produk_terjual->penjualan->dibuat[0])->name,
                     'No Referensi' => $komponen->produk_terjual->penjualan->no_invoice ?? null,
                     'Kode Produk Jual' => $komponen->produk_terjual->produk->kode ?? null,
                     'Nama Produk Jual' => $komponen->produk_terjual->produk->nama ?? null,
