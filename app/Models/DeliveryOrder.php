@@ -63,4 +63,9 @@ class DeliveryOrder extends Model
     {
         return $this->hasMany(User::class, 'id', 'pembuat');
     }
+
+    public function penjualan()
+    {
+        return $this->belongsTo(Penjualan::class, 'no_referensi', 'no_invoice');
+    }
 }

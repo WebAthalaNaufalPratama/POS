@@ -184,9 +184,9 @@ class PenjualanController extends Controller
         ]);
 
         // dd($validator);
-        if ($validator->fails()) {
-            return redirect()->back()->with('fail',$validator)->withInput();
-        }
+        $error = $validator->errors()->all();
+        // dd($error);
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
 
         $cust = Customer::where('id', $data['id_customer'])->first();
