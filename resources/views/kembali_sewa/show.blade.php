@@ -11,6 +11,9 @@
                     </div>
                 </div>
             </div>
+            <form id="editForm" action="{{ route('kembali_sewa.update', ['kembali_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('patch')
             <div class="card-body">
             <div class="row">
                 <div class="col-sm">
@@ -52,7 +55,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>No Kembali Sewa</label>
-                                            <input type="text" id="no_kembali" name="no_kembali" value="{{ $data->no_kembali }}" class="form-control" disabled readonly>
+                                            <input type="text" id="no_kembali" name="no_kembali" value="{{ $data->no_kembali }}" class="form-control" readonly readonly>
                                         </div>
                                         <div class="form-group">
                                             <label>Tanggal kembali</label>
@@ -244,9 +247,6 @@
                             </div>
                         </div>
                         <div class="col-md-4 border rounded mt-3 pt-3">
-                            {{-- <form action="{{ route('kembali_sewa.update', ['kembali_sewa' => $data->id]) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                @method('patch') --}}
                             <div class="custom-file-container" data-upload-id="myFirstImage">
                                 <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
                                 </label>
@@ -262,10 +262,14 @@
                 </div>
             </div>
             <div class="text-end mt-3">
-                {{-- <button class="btn btn-primary" type="submit">Upload File</button> --}}
+                <input type="hidden" name="konfirmasi" id="hiddenActionInput" value="">
+                @if($data->status == 'TUNDA')
+                <button class="btn btn-success confirm-btn" data-action="confirm" type="button">Konfirmasi</button>
+                <button class="btn btn-danger confirm-btn" data-action="cancel" type="button">Batal</button>
+                @endif
                 <a href="{{ route('kembali_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
             </div>
-            {{-- </form> --}}
+            </form>
             </div>
         </div>
     </div>
@@ -477,6 +481,34 @@
                 $(jumlahProduk).val(0);
                 $(lokasiProduk).val('').trigger('change');
             }
+        });
+        $('.confirm-btn').on('click', function() {
+            var action = $(this).data('action');
+            var message = (action === 'confirm') 
+                        ? "Apakah Anda yakin ingin mengkonfirmasi kembali sewa ini?" 
+                        : "Apakah Anda yakin ingin membatalkan kembali sewa ini?";
+            var confirmButtonText = (action === 'confirm') ? "Ya, Konfirmasi!" : "Ya, Batalkan!";
+            
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: confirmButtonText,
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (action === 'confirm') {
+                        $('#hiddenActionInput').val('confirm');
+                    } else if (action === 'cancel') {
+                        $('#hiddenActionInput').val('cancel');
+                    }
+
+                    $('#editForm').submit();
+                }
+            });
         });
         function clearFile(){
             $('#bukti').val('');
