@@ -5,10 +5,10 @@
     <div class="col-sm-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">Buat Data Inventory Greenhouse</h5>
+                <h5 class="card-title">Buat Data Inventory Gudang</h5>
             </div>
             <div class="card-body">
-                <form id="form_perangkai" action="{{ route('inven_greenhouse.store') }}" method="POST">
+                <form id="form_perangkai" action="{{ route('inven_gudang.store') }}" method="POST">
                     @csrf
                     <div class="row">
                         <div class="col-sm-4">
@@ -37,7 +37,7 @@
                             <label for="lokasi_id" class="col-form-label">Lokasi</label>
                             <div id="div_lokasi" class="form-group">
                                 <select id="lokasi_id" name="lokasi_id" class="form-control" required>
-                                    <option value="">Pilih GreenHouse</option>
+                                    <option value="">Pilih Gudang</option>
                                     @foreach ($gallery as $item)
                                         <option value="{{ $item->id }}">{{ $item->nama }}</option>
                                     @endforeach
@@ -57,7 +57,7 @@
                     </div>
                     <div class="text-end mt-3">
                         <button class="btn btn-primary" type="submit">Submit</button>
-                        <a href="{{ route('inven_greenhouse.index') }}" class="btn btn-secondary" type="button">Back</a>
+                        <a href="{{ route('inven_gudang.index') }}" class="btn btn-secondary" type="button">Back</a>
                     </div>
                 </form>
             </div>

@@ -22,9 +22,10 @@ class Tipe_LokasiSeeder extends Seeder
         Tipe_Lokasi::insert([
             ['nama' => 'Galery', 'deskripsi' => 'Tempat menyimpan barang per daerah', 'created_at' => now(), 'updated_at' => now()],
             ['nama' => 'Outlet', 'deskripsi' => 'Turunan dari galery', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Greenhouse', 'deskripsi' => 'Tempat menanam tanaman', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Gudang', 'deskripsi' => 'Penyimpanan barang di pusat', 'created_at' => now(), 'updated_at' => now()],
-            ['nama' => 'Pusat', 'deskripsi' => 'pusat', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Greenhouse', 'deskripsi' => 'Tempat menanam tanaman (pusat)', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Gudang', 'deskripsi' => 'Penyimpanan barang (pusat)', 'created_at' => now(), 'updated_at' => now()],
+            
+            ['nama' => 'Pusat', 'deskripsi' => 'untuk kas', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

@@ -414,6 +414,16 @@
                                                         </div>
                                                     </h5>
                                                 </li>
+                                                <li>
+                                                    <h4>Sisa Tagihan</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="sisa_bayar_dis" name="sisa_bayar_dis" class="form-control" value="{{ formatRupiah2($dataretur->mutasiinden->sisa_bayar) }}" readonly>
+                                                            <input type="hidden" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ $dataretur->mutasiinden->sisa_bayar }}" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -516,52 +526,107 @@
 
 </div>
 
-<div class="modal fade" id="myModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+ <!-- Modal -->
+ <div class="modal fade" id="myModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Tambah Pembayaran</h5>
-          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tambah Pembayaran</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Tab Navigation inside Modal -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="bayar-tab" data-toggle="tab" href="#bayarContent" role="tab" aria-controls="bayarContent" aria-selected="true">Input Refund</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="refund-tab" data-toggle="tab" href="#refundContent" role="tab" aria-controls="refundContent" aria-selected="false">Bayar Tagihan</a>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="myTabContent">
+                    <!-- Bayar Tagihan Tab -->
+                    <div class="tab-pane fade show active" id="bayarContent" role="tabpanel" aria-labelledby="bayar-tab">
+                        <form id="bayarForm" action="{{ route('refundinden.store')}}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="nobay" class="form-label">No Bayar</label>
+                                <input type="text" class="form-control" id="returinden_id" name="returinden_id" value="{{ $dataretur->id }}" hidden>
+                                <input type="text" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $dataretur->mutasiinden_id }}" hidden>
+                                <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" value="{{ $no_bayar }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tgl" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="tgl" name="tanggal_bayar" value="{{ now()->format('Y-m-d') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="metode" class="form-label">Metode</label>
+                                <select class="form-control select2" id="metode" name="metode">
+                                    <option value="cash">cash</option>
+                                    @foreach ($rekenings as $item)
+                                        <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nominal" class="form-label">Nominal</label>
+                                <input type="text" class="form-control" id="nominal" name="nominal" value="{{ $dataretur->sisa_refund }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="bukti" class="form-label">Bukti</label>
+                                <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Input Refund Tab -->
+                    <div class="tab-pane fade" id="refundContent" role="tabpanel" aria-labelledby="refund-tab">
+                        <form id="refundForm" action="{{ route('pembayaranmutasi.store')}}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="nobay" class="form-label">No bayar</label>
+                                {{-- <input type="text" class="form-control" id="returinden_id" name="returinden_id" value="{{ $dataretur->id }}" hidden> --}}
+                                <input type="text" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $dataretur->mutasiinden_id }}" hidden>
+                                <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" value="{{ $no_bypo }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tgl" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="tgl" name="tanggal_bayar" value="{{ now()->format('Y-m-d') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="metode" class="form-label">Metode</label>
+                                <select class="form-control select2" id="metode" name="metode">
+                                    <option value="cash">cash</option>
+                                    @foreach ($rekenings as $item)
+                                        <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nominal" class="form-label">Nominal</label>
+                                <input type="text" class="form-control" id="nominal" name="nominal" value="{{ $dataretur->mutasiinden->sisa_bayar }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="bukti" class="form-label">Bukti</label>
+                                <input type="file" class="form-control" id="bukti" name="buktitf" accept="image/*">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-            <form id="supplierForm" action="{{ route('refundinden.store')}}" method="POST" enctype="multipart/form-data">
-                @csrf
-            <div class="mb-3">
-              <label for="nobay" class="form-label">No Bayar</label>
-              <input type="text" class="form-control" id="returinden_id" name="returinden_id" value="{{ $dataretur->id }}" hidden>
-              <input type="text" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $dataretur->mutasiinden_id }}" hidden>
-              <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" value="{{ $no_bayar }}" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="tgl" class="form-label">Tanggal</label>
-              <input type="date" class="form-control" id="tgl" name="tanggal_bayar" value="{{ now()->format('Y-m-d') }}">
-            </div>
-            <div class="mb-3">
-              <label for="metode" class="form-label">Metode</label>
-              <select class="form-control select2" id="metode" name="metode">
-                <option value="cash">cash</option>
-                @foreach ($rekenings as $item)
-                <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
-                @endforeach
-            </select>
-            </div>
-            <div class="mb-3">
-              <label for="nominal" class="form-label">Nominal</label>
-              <input type="text" class="form-control" id="nominal" name="nominal" value="{{ $dataretur->sisa_refund }}">
-            </div>
-            <div class="mb-3">
-              <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
-            </div>
-            
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Simpan</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
+</div>
 </div>
 @endsection
 

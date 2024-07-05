@@ -65,7 +65,7 @@
                                 {{-- <th>Status Admin</th>
                                 <th>Status Finance</th> --}}
                                 <th>Status Pembayaran</th>
-                                <th>Retur</th>
+                                <th>Barang Retur</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -76,7 +76,7 @@
                                 <td>{{ $datapo->no_po }}</td>
                                 <td>{{ $datapo->supplier->nama }}</td>
                                 <td>{{ tanggalindo($datapo->tgl_kirim) }}</td>
-                                <td>{{ tanggalindo($datapo->tgl_diterima)}}</td>
+                                <td>{{ $datapo->tgl_diterima ? tanggalindo($datapo->tgl_diterima) : ''}}</td>
                                 <td>{{ $datapo->no_do_suplier}}</td>
                                 <td>{{ $datapo->lokasi->nama}}</td>
                                 <td>{{ $datapo->status_dibuat}}</td>
@@ -132,6 +132,9 @@
                                             <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>
                                         @endif
+                                        <li>
+                                            <a href="{{ route('pembelian.editpurchase', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit PO</a>
+                                        </li>
                                         <li>
                                             {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
                                         </li>

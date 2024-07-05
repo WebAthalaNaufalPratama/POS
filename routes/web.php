@@ -276,12 +276,19 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
 
         Route::group(['prefix' => 'purchase'], function() {
+            //akses purchase
             Route::get('/pembelian', 'PembelianController@index')->name('pembelian.index');
             Route::get('/pembelian/create', 'PembelianController@create')->name('pembelian.create');
             Route::post('/store_po', 'PembelianController@store_po')->name('pembelianpo.store');
+            Route::get('/pembelian/{datapo}/editpurchase_po', 'PembelianController@po_editpurchase')->name('pembelian.editpurchase');
+            Route::post('/{datapo}/update_po_purchase', 'PembelianController@po_update_purchase')->name('pembelian.updatepurchase');
             Route::get('/pembelian/{datapo}/show', 'PembelianController@show')->name('pembelian.show');
+
+            //akses admin
             Route::get('/pembelian/{datapo}/edit_po', 'PembelianController@po_edit')->name('pembelian.edit');
             Route::post('/{datapo}/update_po', 'PembelianController@po_update')->name('pembelian.update');
+
+
             
             Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
             Route::get('/invoice/{type}/{datapo}/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
@@ -290,6 +297,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
             Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
             Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
+            
             
             Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
             Route::post('/storeinden', 'PembelianController@store_inden')->name('inden.store');
@@ -558,6 +566,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{inven_inden}/edit', 'InventoryIndenController@edit')->name('inven_inden.edit');
             Route::patch('/{inven_inden}/update', 'InventoryIndenController@update')->name('inven_inden.update');
             Route::get('/{inven_inden}/delete', 'InventoryIndenController@destroy')->name('inven_inden.destroy');
+        });
+
+        Route::group(['prefix' => 'inven_gudang'], function() {
+            Route::get('/', 'InventoryGudangController@index')->name('inven_gudang.index');
+            Route::get('/create', 'InventoryGudangController@create')->name('inven_gudang.create');
+            Route::post('/store', 'InventoryGudangController@store')->name('inven_gudang.store');
+            Route::get('/{inven_gudang}/show', 'InventoryGudangController@show')->name('inven_gudang.show');
+            Route::get('/{inven_gudang}/edit', 'InventoryGudangController@edit')->name('inven_gudang.edit');
+            Route::patch('/{inven_gudang}/update', 'InventoryGudangController@update')->name('inven_gudang.update');
+            Route::get('/{inven_gudang}/delete', 'InventoryGudangController@destroy')->name('inven_gudang.destroy');
         });
 
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\InventoryGreenHouse;
+use App\Models\InventoryGudang;
 use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\Kondisi;
@@ -10,20 +10,20 @@ use App\Models\Lokasi;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
-class InventoryGreenhouseController extends Controller
+class InventoryGudangController extends Controller
 {
     public function index()
     {
-        $data = InventoryGreenHouse::all();
-        return view('inven_greenhouse.index', compact('data'));
+        $data = InventoryGudang::all();
+        return view('inven_gudang.index', compact('data'));
     }
 
     public function create()
     {
         $produks = Produk::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 3)->get();
-        return view('inven_greenhouse.create', compact('produks', 'kondisi', 'gallery'));
+        $gallery = Lokasi::where('tipe_lokasi', 4)->get();
+        return view('inven_gudang.create', compact('produks', 'kondisi', 'gallery'));
     }
 
     public function store(Request $req)
@@ -41,23 +41,23 @@ class InventoryGreenhouseController extends Controller
         $data = $req->except(['_token', '_method']);
         // dd($data);
         // check duplikasi
-        $duplicate = InventoryGreenHouse::where('kode_produk', $data['kode_produk'])->where('kondisi_id', $data['kondisi_id'])->where('lokasi_id', $data['lokasi_id'])->first();
+        $duplicate = InventoryGudang::where('kode_produk', $data['kode_produk'])->where('kondisi_id', $data['kondisi_id'])->where('lokasi_id', $data['lokasi_id'])->first();
         if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
 
          // save data inven galeri
-         $check = InventoryGreenHouse::create($data);
+         $check = InventoryGudang::create($data);
          if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
-         return redirect(route('inven_greenhouse.index'))->with('success', 'Data tersimpan');
+         return redirect(route('inven_gudang.index'))->with('success', 'Data tersimpan');
     }
     
-    public function edit($inventoryGreenhouse)
+    public function edit($inventoryGudang)
     {
-        $data = InventoryGreenHouse::find($inventoryGreenhouse);
+        $data = InventoryGudang::find($inventoryGudang);
         $produks = Produk::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 3)->get();
-        return view('inven_greenhouse.edit', compact('data', 'produks', 'kondisi', 'gallery'));
+        $gallery = Lokasi::where('tipe_lokasi', 4)->get();
+        return view('inven_gudang.edit', compact('data', 'produks', 'kondisi', 'gallery'));
     }
     public function update(Request $req, $inventoryGallery)
     {
@@ -74,31 +74,31 @@ class InventoryGreenhouseController extends Controller
         $data = $req->except(['_token', '_method']);
 
         // check duplikasi
-        $duplicate = InventoryGreenHouse::where('kode_produk', $data['kode_produk'])->where('kondisi_id', $data['kondisi_id'])->where('lokasi_id', $data['lokasi_id'])->where('id', '!=', $inventoryGallery)->first();
+        $duplicate = InventoryGudang::where('kode_produk', $data['kode_produk'])->where('kondisi_id', $data['kondisi_id'])->where('lokasi_id', $data['lokasi_id'])->where('id', '!=', $inventoryGallery)->first();
         if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
 
          // save data inven galeri
-         $check = InventoryGreenHouse::find($inventoryGallery)->update($data);
+         $check = InventoryGudang::find($inventoryGallery)->update($data);
          if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
-         return redirect(route('inven_greenhouse.index'))->with('success', 'Data tersimpan');
+         return redirect(route('inven_gudang.index'))->with('success', 'Data tersimpan');
     }
 
     public function destroy($inventoryGallery)
     {
-        $data = InventoryGreenHouse::find($inventoryGallery);
+        $data = InventoryGudang::find($inventoryGallery);
         if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
     }
 
-    public function show($inventoryGreenhouse)
+    public function show($inventoryGudang)
     {
-        $data = InventoryGreenHouse::find($inventoryGreenhouse);
+        $data = InventoryGudang::find($inventoryGudang);
         $produks = Produk::all();
         $kondisi = Kondisi::all();
         $gallery = Lokasi::where('tipe_lokasi', 3)->get();
-        return view('inven_greenhouse.show', compact('data', 'produks', 'kondisi', 'gallery'));
+        return view('inven_gudang.show', compact('data', 'produks', 'kondisi', 'gallery'));
     }
 }

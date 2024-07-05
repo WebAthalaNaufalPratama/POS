@@ -442,7 +442,7 @@
         </div>
         <div class="modal-body">
             <form id="supplierForm" action="{{ route('pembayaranmutasi.store')}}" method="POST" enctype="multipart/form-data">
-                @csrf
+                @csrf 
             <div class="mb-3">
               <label for="nobay" class="form-label">No Bayar</label>
               <input type="hidden" class="form-control" id="mutasiinden_id" name="mutasiinden_id" value="{{ $data->id }}">

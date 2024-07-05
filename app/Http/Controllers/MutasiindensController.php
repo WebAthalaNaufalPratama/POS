@@ -186,7 +186,7 @@ class MutasiindensController extends Controller
             }
 
             if ($request->qtykrm[$key] > $inventoryInden->jumlah) {
-                return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data inven inden/stok di inden kurang');
+                return redirect()->back()->withInput()->with('fail', 'stok di inden kurang');
             }
         }
 
@@ -638,7 +638,8 @@ class MutasiindensController extends Controller
 
         $validated = $validator->validated();
 
-        $lokasi_id = Mutasiindens::where('id', $request->mutasiinden_id)->first()->lokasi_id;
+        $mutasi = Mutasiindens::where('id', $request->mutasiinden_id)->first();
+        $lokasi_id = $mutasi->lokasi_id;
         $lokasi = Lokasi::find($lokasi_id);
         // return $lokasi;
 
@@ -654,7 +655,11 @@ class MutasiindensController extends Controller
             'status_dibuat' => $request->status_dibuat,
             'tgl_dibuat' => $request->tgl_dibuat,
         ]);
-        
+
+        if ($mutasi->sisa_bayar == $mutasi->total_biaya) {
+            $mutasi->sisa_bayar = $returinden->total_akhir;
+            $mutasi->update();  // Memanggil update() pada objek model Mutasiindens
+        }
         
         // Loop melalui data produk dan masukkan ke tabel Produkreturinden
         $allInserted = true;
@@ -703,9 +708,9 @@ class MutasiindensController extends Controller
                 break;
             }
         }
-
+        
         if ($returinden && $allInserted) {
-            return redirect()->route('mutasiindengh.index')->with('success', 'Data retur berhasil disimpan.');
+            return redirect()->route('show.returinden',['mutasiIG' =>  $returinden->mutasiinden_id ])->with('success', 'Data retur berhasil disimpan.');
         } else {
             return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data');
         }

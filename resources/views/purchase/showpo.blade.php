@@ -31,11 +31,11 @@ Carbon::setLocale('id');
                 Transaksi Pembelian
             </h4>
         </hr>
+        @if($beli->no_retur !== null)
         <label>
             <input type="checkbox" id="returCheckbox" @if($beli->no_retur !== null)  checked @endif disabled> Pembelian Retur
         </label>
     </br>
-        @if($beli->no_retur !== null)
         <div>
             <label for="nomerRetur">Nomor Retur:</label>
             <input type="text" class="form-control" id="nomerRetur" name="no_retur" value="{{ $beli->no_retur}}" style="width: 20%;" disabled>
@@ -87,7 +87,8 @@ Carbon::setLocale('id');
                                        </div>
                                        <div class="form-group">
                                         <label for="harga_jual">Status</label>
-                                        <input type="text" class="form-control" id="status" name="status" value="@php
+                                        <input type="text" class="form-control" id="status" name="status" value="{{$beli->status_dibuat}}" readonly>
+                                        {{-- <input type="text" class="form-control" id="status" name="status" value="@php
                                             $latestDate = max($beli->tgl_dibuat, $beli->tgl_diterima, $beli->tgl_diperiksa);
                                             if ($latestDate == $beli->tgl_dibuat) {
                                                 echo $beli->status_dibuat. ' oleh ' . $pembuat;
@@ -96,7 +97,7 @@ Carbon::setLocale('id');
                                             } else {
                                                 echo $beli->status_diperiksa. ' oleh ' . $pemeriksa;
                                             }
-                                        @endphp" readonly>
+                                        @endphp" readonly> --}}
                                     </div>
                                     
                                         </div>
@@ -107,7 +108,7 @@ Carbon::setLocale('id');
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="text" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ $beli->tgl_diterima ? tanggalindo($beli->tgl_diterima) : '' }}" readonly>
+                                                    <input type="text" class="form-control" id="tgl_terima" name="tgl_terima" value="{{ $beli->tgl_diterima ? tanggalindo($beli->tgl_diterima) : '-' }}" readonly>
                                                 </div>
                                         </div>
                                         <div class="col-md-3">
@@ -206,34 +207,47 @@ Carbon::setLocale('id');
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
                                             <td id="penerima">
+                                                @if (!$penerima )
+                                                <input type="text" class="form-control" value="Nama (Admin Galery)" disabled>
+                                                @else
                                                 <input type="text" class="form-control" value="{{ $penerima }} ({{ $penerimajbt }})" disabled>
+                                                @endif
                                             </td>
                                             <td id="pemeriksa">
+                                                @if (!$pemeriksa )
+                                                <input type="text" class="form-control" value="Nama (Auditor)"  disabled>
+                                                @else
                                                 <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})"  disabled>
+                                                @endif
                                             </td>
                                         </tr>
                                         
                                         <tr>
                                             <td id="status_dibuat">
-                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
+                                                <input type="text" class="form-control" id="status_buat" value="{{ $beli->status_dibuat }}" readonly>
+                                                {{-- <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
                                                     <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
-                                                </select>
+                                                </select> --}}
                                             </td>
                                             <td id="status_diterima">
-                                                <select id="status_diterima" name="status_diterima" class="form-control" required disabled>
+                                                <input type="text" class="form-control" id="status_diterima" value="{{ $beli->status_diterima ?? '-' }}" readonly>
+
+                                                {{-- <select id="status_diterima" name="status_diterima" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="pending" {{ $beli->status_diterima == 'pending' ? 'selected' : '' }}>Pending</option>
                                                     <option value="acc" {{ $beli->status_diterima == 'acc' ? 'selected' : '' }}>Accept</option>
-                                                </select>
+                                                </select> --}}
                                             </td>
                                             <td id="status_diperiksa">
-                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required disabled>
+                                                <input type="text" class="form-control" id="status_diperiksa" value="{{ $beli->status_diperiksa ?? '-' }}" readonly>
+
+                                                {{-- <select id="status_diperiksa" name="status_diperiksa" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="pending" {{ $beli->status_diperiksa == 'pending' ? 'selected' : '' }}>Pending</option>
                                                     <option value="acc" {{ $beli->status_diperiksa == 'acc' ? 'selected' : '' }}>Accept</option>
-                                                </select>
+                                                </select> --}}
                                             </td>
                                         </tr>
                                         <tr>
@@ -241,10 +255,10 @@ Carbon::setLocale('id');
                                                 <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat }}" disabled>
                                             </td>
                                             <td id="tgl_diterima">
-                                                <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima_ttd ?? ''}}" disabled>
+                                                <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima_ttd ?? '-'}}" disabled>
                                             </td>
                                             <td id="tgl_pemeriksa">
-                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '' }}" disabled>
+                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '-' }}" disabled>
                                             </td>
                                         </tr>
                                     </tbody>

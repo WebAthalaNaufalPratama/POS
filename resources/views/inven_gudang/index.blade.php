@@ -7,10 +7,10 @@
         <div class="card-header">
             <div class="page-header">
                 <div class="page-title">
-                    <h4>Inventory Greenhouse</h4>
+                    <h4>Inventory Gudang</h4>
                 </div>
                 <div class="page-btn">
-                    <a href="{{ route('inven_greenhouse.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
+                    <a href="{{ route('inven_gudang.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
                 </div>
             </div>
         </div>
@@ -23,7 +23,7 @@
                     <th>Kode Produk</th>
                     <th>Nama Produk</th>
                     <th>Kondisi</th>
-                    <th>Greenhouse</th>
+                    <th>Gudang</th>
                     <th>Jumlah</th>
                     <th>Minimal Stok</th>
                     <th class="text-center">Aksi</th>
@@ -45,10 +45,10 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="{{ route('inven_greenhouse.show', ['inven_greenhouse' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        <a href="{{ route('inven_gudang.show', ['inven_gudang' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('inven_greenhouse.edit', ['inven_greenhouse' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        <a href="{{ route('inven_gudang.edit', ['inven_gudang' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
                                     <li>
                                         <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>

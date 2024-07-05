@@ -148,6 +148,9 @@
                         @if(in_array('inven_greenhouse.index', $rolePermissions))
                         <li><a href="{{ route('inven_greenhouse.index')}}" class="{{ request()->is('inven_greenhouse*') ? 'active' : '' }}">GreenHouse</a></li>
                         @endif
+                        @if(in_array('inven_gudang.index', $rolePermissions))
+                        <li><a href="{{ route('inven_gudang.index')}}" class="{{ request()->is('inven_gudang*') ? 'active' : '' }}">Gudang</a></li>
+                        @endif
                         @if(in_array('inven_inden.index', $rolePermissions))
                         <li><a href="{{ route('inven_inden.index')}}" class="{{ request()->is('inven_inden*') ? 'active' : '' }}">Inden</a></li>
                         @endif

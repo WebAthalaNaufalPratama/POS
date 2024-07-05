@@ -78,124 +78,125 @@ class InventoryGalleryController extends Controller
         //     }
         // })->get();
 
-        $komponenDoSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.do_sewa', 'produk_terjual.do_sewa.data_pembuat', 'produk_terjual.do_sewa.kontrak')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('do_sewa', function($p) use($isSuperAdmin){
-                return $p->whereHas('kontrak', function($z) use($isSuperAdmin){
-                    if (!$isSuperAdmin) {
-                        $z->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-                    }
-                });
-            });
-        })->get();
-        $dataKomponen = $komponenDoSewa->map(function($komponen){
-            return [
-                'Id' => $komponen->produk_terjual->id,
-                'Pengubah' => optional($komponen->produk_terjual->do_sewa->data_pembuat)->name,
-                'No Referensi' => $komponen->produk_terjual->do_sewa->no_do ?? null,
-                'Kode Produk Jual' => $komponen->produk_terjual->produk->kode ?? null,
-                'Nama Produk Jual' => $komponen->produk_terjual->produk->nama ?? null,
-                'Kode Komponen' => $komponen->kode_produk ?? null,
-                'Nama Komponen' => $komponen->nama_produk ?? null,
-                'Kondisi' => $komponen->data_kondisi->nama ?? null,
-                'Masuk' => '-',
-                'Keluar' => $komponen->jumlah * $komponen->produk_terjual->jumlah,
-                'Waktu' => $komponen->updated_at
-            ];
-        });
+        // $komponenDoSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.do_sewa', 'produk_terjual.do_sewa.data_pembuat', 'produk_terjual.do_sewa.kontrak')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
+        //     return $q->whereHas('do_sewa', function($p) use($isSuperAdmin){
+        //         return $p->whereHas('kontrak', function($z) use($isSuperAdmin){
+        //             if (!$isSuperAdmin) {
+        //                 $z->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        //             }
+        //         });
+        //     });
+        // })->get();
+        // $dataKomponen = $komponenDoSewa->map(function($komponen){
+        //     return [
+        //         'Id' => $komponen->produk_terjual->id,
+        //         'Pengubah' => optional($komponen->produk_terjual->do_sewa->data_pembuat)->name,
+        //         'No Referensi' => $komponen->produk_terjual->do_sewa->no_do ?? null,
+        //         'Kode Produk Jual' => $komponen->produk_terjual->produk->kode ?? null,
+        //         'Nama Produk Jual' => $komponen->produk_terjual->produk->nama ?? null,
+        //         'Kode Komponen' => $komponen->kode_produk ?? null,
+        //         'Nama Komponen' => $komponen->nama_produk ?? null,
+        //         'Kondisi' => $komponen->data_kondisi->nama ?? null,
+        //         'Masuk' => '-',
+        //         'Keluar' => $komponen->jumlah * $komponen->produk_terjual->jumlah,
+        //         'Waktu' => $komponen->updated_at
+        //     ];
+        // });
 
-        $komponenKblSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.kembali_sewa', 'produk_terjual.kembali_sewa.data_pembuat', 'produk_terjual.kembali_sewa.sewa')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('kembali_sewa', function($p) use($isSuperAdmin){
-                return $p->whereHas('sewa', function($z) use($isSuperAdmin){
-                    if (!$isSuperAdmin) {
-                        $z->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-                    }
-                });
-            });
-        })->get();
-        $dataKembaliSewa = $komponenKblSewa->map(function($komponen){
-            return [
-                'Id' => $komponen->produk_terjual->id,
-                'Pengubah' => optional($komponen->produk_terjual->kembali_sewa->data_pembuat)->name,
-                'No Referensi' => $komponen->produk_terjual->kembali_sewa->no_kembali ?? null,
-                'Kode Produk Jual' => $komponen->produk_terjual->produk->kode ?? null,
-                'Nama Produk Jual' => $komponen->produk_terjual->produk->nama ?? null,
-                'Kode Komponen' => $komponen->kode_produk ?? null,
-                'Nama Komponen' => $komponen->nama_produk ?? null,
-                'Kondisi' => $komponen->data_kondisi->nama ?? null,
-                'Masuk' => $komponen->jumlah * $komponen->produk_terjual->jumlah,
-                'Keluar' => '-',
-                'Waktu' => $komponen->updated_at
-            ];
-        });
-        $mergedCollection = $dataKomponen->merge($dataKembaliSewa)->sortBy('Id');
+        // $komponenKblSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.kembali_sewa', 'produk_terjual.kembali_sewa.data_pembuat', 'produk_terjual.kembali_sewa.sewa')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
+        //     return $q->whereHas('kembali_sewa', function($p) use($isSuperAdmin){
+        //         return $p->whereHas('sewa', function($z) use($isSuperAdmin){
+        //             if (!$isSuperAdmin) {
+        //                 $z->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        //             }
+        //         });
+        //     });
+        // })->get();
+        // $dataKembaliSewa = $komponenKblSewa->map(function($komponen){
+        //     return [
+        //         'Id' => $komponen->produk_terjual->id,
+        //         'Pengubah' => optional($komponen->produk_terjual->kembali_sewa->data_pembuat)->name,
+        //         'No Referensi' => $komponen->produk_terjual->kembali_sewa->no_kembali ?? null,
+        //         'Kode Produk Jual' => $komponen->produk_terjual->produk->kode ?? null,
+        //         'Nama Produk Jual' => $komponen->produk_terjual->produk->nama ?? null,
+        //         'Kode Komponen' => $komponen->kode_produk ?? null,
+        //         'Nama Komponen' => $komponen->nama_produk ?? null,
+        //         'Kondisi' => $komponen->data_kondisi->nama ?? null,
+        //         'Masuk' => $komponen->jumlah * $komponen->produk_terjual->jumlah,
+        //         'Keluar' => '-',
+        //         'Waktu' => $komponen->updated_at
+        //     ];
+        // });
+        // $mergedCollection = $dataKomponen->merge($dataKembaliSewa)->sortBy('Id');
 
-        $dataPO = Produkbeli::whereHas('pembelian', function($q) use($isSuperAdmin){
-            if (!$isSuperAdmin) {
-                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-            }
-        })->get();
-        $produkPO = $dataPO->map(function($produk){
-            return [
-                'Id' => $produk->id,
-                'Pengubah' => optional($produk->pembelian->pembuat)->name,
-                'No Referensi' => $produk->pembelian->no_po ?? null,
-                'Kode Produk Jual' => '-',
-                'Nama Produk Jual' => '-',
-                'Kode Komponen' => $produk->produk->kode ?? null,
-                'Nama Komponen' => $produk->produk->nama ?? null,
-                'Kondisi' => $produk->kondisi->nama ?? null,
-                'Masuk' => $produk->jml_diterima,
-                'Keluar' => '-',
-                'Waktu' => $produk->updated_at
-            ];
-        });
-        $mergedCollection = $mergedCollection->merge($produkPO)->sortByDesc('Waktu');
+        // $dataPO = Produkbeli::whereHas('pembelian', function($q) use($isSuperAdmin){
+        //     if (!$isSuperAdmin) {
+        //         $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        //     }
+        // })->get();
+        // $produkPO = $dataPO->map(function($produk){
+        //     return [
+        //         'Id' => $produk->id,
+        //         'Pengubah' => optional($produk->pembelian->pembuat)->name,
+        //         'No Referensi' => $produk->pembelian->no_po ?? null,
+        //         'Kode Produk Jual' => '-',
+        //         'Nama Produk Jual' => '-',
+        //         'Kode Komponen' => $produk->produk->kode ?? null,
+        //         'Nama Komponen' => $produk->produk->nama ?? null,
+        //         'Kondisi' => $produk->kondisi->nama ?? null,
+        //         'Masuk' => $produk->jml_diterima,
+        //         'Keluar' => '-',
+        //         'Waktu' => $produk->updated_at
+        //     ];
+        // });
+        // $mergedCollection = $mergedCollection->merge($produkPO)->sortByDesc('Waktu');
 
-        $dataMutasiMasuk = Produk_Terjual::whereHas('mutasi', function($q) use($isSuperAdmin){
-            if (!$isSuperAdmin) {
-                $q->where('penerima', Auth::user()->karyawans->lokasi_id);
-            }
-        })->get();
-        $produkMutasiMasuk = $dataMutasiMasuk->map(function($produk){
-            return [
-                'Id' => $produk->id,
-                'Pengubah' => optional($produk->mutasi->dibuat)->name,
-                'No Referensi' => $produk->mutasi->no_mutasi ?? null,
-                'Kode Produk Jual' => '-',
-                'Nama Produk Jual' => '-',
-                'Kode Komponen' => $produk->produk->kode ?? null,
-                'Nama Komponen' => $produk->produk->nama ?? null,
-                'Kondisi' => $produk->kondisi->nama ?? null,
-                'Masuk' => $produk->jml_diterima,
-                'Keluar' => '-',
-                'Waktu' => $produk->updated_at
-            ];
-        });
+        // $dataMutasiMasuk = Produk_Terjual::whereHas('mutasi', function($q) use($isSuperAdmin){
+        //     if (!$isSuperAdmin) {
+        //         $q->where('penerima', Auth::user()->karyawans->lokasi_id);
+        //     }
+        // })->get();
+        // $produkMutasiMasuk = $dataMutasiMasuk->map(function($produk){
+        //     return [
+        //         'Id' => $produk->id,
+        //         'Pengubah' => optional($produk->mutasi->dibuat)->name,
+        //         'No Referensi' => $produk->mutasi->no_mutasi ?? null,
+        //         'Kode Produk Jual' => '-',
+        //         'Nama Produk Jual' => '-',
+        //         'Kode Komponen' => $produk->produk->kode ?? null,
+        //         'Nama Komponen' => $produk->produk->nama ?? null,
+        //         'Kondisi' => $produk->kondisi->nama ?? null,
+        //         'Masuk' => $produk->jml_diterima,
+        //         'Keluar' => '-',
+        //         'Waktu' => $produk->updated_at
+        //     ];
+        // });
 
-        $mergedCollection = $mergedCollection->merge($produkMutasiMasuk)->sortByDesc('Waktu');
+        // $mergedCollection = $mergedCollection->merge($produkMutasiMasuk)->sortByDesc('Waktu');
 
-        $dataMutasiKeluar = Produk_Terjual::whereHas('mutasi', function($q) use($isSuperAdmin){
-            if (!$isSuperAdmin) {
-                $q->where('pengirim', Auth::user()->karyawans->lokasi_id);
-            }
-        })->get();
-        $produkMutasiKeluar = $dataMutasiKeluar->map(function($produk){
-            return [
-                'Id' => $produk->id,
-                'Pengubah' => optional($produk->mutasi->dibuat)->name,
-                'No Referensi' => $produk->mutasi->no_mutasi ?? null,
-                'Kode Produk Jual' => '-',
-                'Nama Produk Jual' => '-',
-                'Kode Komponen' => $produk->produk->kode ?? null,
-                'Nama Komponen' => $produk->produk->nama ?? null,
-                'Kondisi' => $produk->kondisi->nama ?? null,
-                'Masuk' => '-',
-                'Keluar' => $produk->jml_diterima,
-                'Waktu' => $produk->updated_at
-            ];
-        });
+        // $dataMutasiKeluar = Produk_Terjual::whereHas('mutasi', function($q) use($isSuperAdmin){
+        //     if (!$isSuperAdmin) {
+        //         $q->where('pengirim', Auth::user()->karyawans->lokasi_id);
+        //     }
+        // })->get();
+        // $produkMutasiKeluar = $dataMutasiKeluar->map(function($produk){
+        //     return [
+        //         'Id' => $produk->id,
+        //         'Pengubah' => optional($produk->mutasi->dibuat)->name,
+        //         'No Referensi' => $produk->mutasi->no_mutasi ?? null,
+        //         'Kode Produk Jual' => '-',
+        //         'Nama Produk Jual' => '-',
+        //         'Kode Komponen' => $produk->produk->kode ?? null,
+        //         'Nama Komponen' => $produk->produk->nama ?? null,
+        //         'Kondisi' => $produk->kondisi->nama ?? null,
+        //         'Masuk' => '-',
+        //         'Keluar' => $produk->jml_diterima,
+        //         'Waktu' => $produk->updated_at
+        //     ];
+        // });
 
-        $mergedCollection = $mergedCollection->merge($produkMutasiKeluar)->sortByDesc('Waktu');
+        // $mergedCollection = $mergedCollection->merge($produkMutasiKeluar)->sortByDesc('Waktu');
+        $mergedCollection = collect();
         // dd($mergedCollection);
         return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis', 'pemakaian_sendiri', 'mergedCollection'));
     }
