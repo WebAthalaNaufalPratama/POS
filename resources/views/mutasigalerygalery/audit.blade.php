@@ -91,7 +91,7 @@
                                         <div class="form-group">
                                             <div id="alasan" style="display: none;">
                                                 <label for="alasan">Alasan</label>
-                                                <textarea name="alasan_batal" id="alasan"></textarea>
+                                                <textarea name="alasan" id="alasan"></textarea>
                                             </div>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">

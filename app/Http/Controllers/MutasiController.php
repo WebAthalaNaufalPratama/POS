@@ -1842,10 +1842,12 @@ class MutasiController extends Controller
         }
         return redirect(route('mutasigalery.index'))->with('success', 'Data Berhasil Disimpan');
 
-        if($update){
-            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('mutasigalery.show', ['mutasiGO' => $mutasis]))->with('success', 'Berhasil Mengupdate Data');
+        }elseif($req->status == 'TUNDA'){
+            return redirect(route('mutasigalery.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
-            return redirect()->back()->with('fail', 'Gagal Mengupdate Data');
+            return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
 
     }
@@ -1973,7 +1975,7 @@ class MutasiController extends Controller
     {
         // dd($req);
         $mutasis = $req->input('mutasiGAG');
-        $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG']);
+        $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG', 'alasan', 'kode_produk', 'nama_produk', ]);
         // dd($data);
 
         if ($req->hasFile('bukti')) {
@@ -2026,18 +2028,18 @@ class MutasiController extends Controller
             $produk_terjual = Produk_Terjual::where('id', $req->nama_produk[$i])->update([
                 'produk_jual_id' => $getProduk->id,
                 'no_mutasigag' => $req->no_mutasi,
-                'jumlah' => $data['jumlah_dikirim'][$i],
+                'jumlah' => $req->jumlah_dikirim[$i],
             ]);
 
             if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                'produk_terjual_id' => $getProduk->id,
+                'produk_terjual_id' => $req->nama_produk[$i],
                 'kode_produk' => $getProduk->kode,
                 'nama_produk' => $getProduk->nama,
                 'tipe_produk' => $getProduk->tipe_produk,
                 'kondisi' => $getProdukJual->kondisi_id,
                 'deskripsi' => $getProduk->deskripsi,
-                'jumlah' => $data['jumlah_dikirim'][$i],
+                'jumlah' => $req->jumlah_dikirim[$i],
                 'harga_satuan' => 0,
                 'harga_total' => 0
             ]);
@@ -2051,18 +2053,21 @@ class MutasiController extends Controller
                 // dd($stok);
     
                 if ($stok) {
-                    $stok->jumlah -= intval($data['jumlah_dikirim'][$i]);
+                    $stok->jumlah -= intval($req->jumlah_dikirim[$i]);
                     $stok->update();
                 }
             }
             
         }
 
-        if($update){
-            return redirect()->back()->with('success', 'Berhasil Menyimpan Data');
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('mutasigalerygalery.show', ['mutasiGAG' => $mutasis]))->with('success', 'Berhasil Mengupdate Data');
+        }elseif($req->status == 'TUNDA'){
+            return redirect(route('mutasigalerygalery.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
-            return redirect()->back()->with('fail', 'Gagal Menyimpan Data');
+            return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
+
     }
 
     public function audit_GG($mutasi)
