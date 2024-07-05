@@ -83,8 +83,8 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT">DRAFT</option>
-                                                <option value="PUBLISH">PUBLISH</option>
+                                                <option value="TUNDA">TUNDA</option>
+                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -439,6 +439,8 @@
         function parseRupiahToNumber(rupiah) {
             return parseInt(rupiah.replace(/[^\d]/g, ''));
         }
+
+        
 
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();

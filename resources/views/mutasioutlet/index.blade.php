@@ -65,6 +65,8 @@
                                         @endphp
                                         @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                             <a class="dropdown-item" href="{{ route('auditmutasioutlet.edit', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
+                                        @elseif($user->hasRole(['AdminGllery', 'KasirGallery', 'KasirOutlet']) && $mutasi->status != 'DIKONFIRMASI')
+                                            <a class="dropdown-item" href="{{ route('auditmutasioutlet.edit', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                         @endif
                                         @if($lokasi->lokasi->tipe_lokasi != 1)
                                             <a class="dropdown-item" href="{{ route('mutasioutlet.payment', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>

@@ -65,8 +65,11 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
+                                            @if($mutasi->status != 'DIBATALKAN')
                                             @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                                 <a class="dropdown-item" href="{{ route('auditmutasigalery.edit', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
+                                            @elseif($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery']) && $mutasi->status != 'DIKONFIRMASI')
+                                                <a class="dropdown-item" href="{{ route('auditmutasigalery.edit', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                             @endif
                                             @if($lokasi->lokasi->tipe_lokasi != 2)
                                                 <a class="dropdown-item" href="{{ route('mutasigalery.payment', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
@@ -75,6 +78,9 @@
                                                 <a class="dropdown-item" href="{{ route('mutasigalery.acc', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('mutasigalery.view', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
+                                            @else
+                                                <a class="dropdown-item" href="{{ route('mutasigalery.view', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

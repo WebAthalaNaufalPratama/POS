@@ -83,9 +83,16 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required >
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $mutasis->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan" id="alasan"></textarea>
+                                            </div>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
                                             <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
@@ -114,7 +121,7 @@
                                                     <tr>
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
+                                                        <!-- <th>Jumlah Diterima</th> -->
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -126,22 +133,29 @@
                                                     @foreach ($produks as $produk)
                                                     <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
+                                                             <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" >
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
+                                                                <option value="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
                                                                     {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
                                                                 </option>
                                                                 @endforeach
                                                             </select>
-                                                            <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
                                                         </td> 
                                                         <td>
                                                             <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" >
                                                         </td>
-                                                        <td>
+                                                        <!-- <td>
                                                             <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
-                                                        </td>
+                                                        </td> -->
+                                                        <td>
+                                                        @if ($i == 0)
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        @else
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        @endif
+                                                    </td>
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -557,6 +571,15 @@
         $('#pic_0').on('click', function() {
             addModal();
         });
+        $('#status').change(function(){
+            var status = $(this).val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan').hide();
+            }
+        });
 
         $('[id^=btnGift]').click(function(e) {
             console.log('coba');
@@ -826,6 +849,7 @@
                 $(this).val(jumlahkirim);
             }
         });
+        
 
         $('#promo_id').change(function() {
             var promo_id = $(this).select2().find(":selected").val()

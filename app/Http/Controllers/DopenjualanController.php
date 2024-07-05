@@ -774,10 +774,12 @@ class DopenjualanController extends Controller
             }
         }
 
-        if($update){
-            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('dopenjualan.show', ['penjualan' => $dopenjualanIds]))->with('success', 'Berhasil Mengupdate Data');
+        }elseif($req->status == 'TUNDA'){
+            return redirect(route('penjualan.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
-            return redirect()->back()->with('fail', 'Gagal Menyimpan Data');
+            return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
 
     }

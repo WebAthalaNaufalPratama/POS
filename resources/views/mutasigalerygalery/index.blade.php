@@ -65,11 +65,14 @@
                                         <div class="dropdown-menu">
                                         @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                             <a class="dropdown-item" href="{{ route('auditmutasigalerygalery.edit', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
-                                        @endif
-                                        @if($lokasi->lokasi_id == $mutasi->lokasi_id)
+                                        @elseif($user->hasRole(['KasirOutlet', 'AdminGallery', 'KasirGallery']) && $mutasi->status != 'DIKONFIRMASI')
+                                        @if($lokasi->lokasi_id == $mutasi->pengirim)
+                                            <a class="dropdown-item" href="{{ route('auditmutasigalerygalery.edit', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                             <a class="dropdown-item" href="{{ route('mutasigalerygalery.payment', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                         @endif
-                                        @if($lokasi->lokasi_id != $mutasi->lokasi_id)
+                                        @endif
+                                            
+                                        @if($lokasi->lokasi_id == $mutasi->penerima)
                                             <a class="dropdown-item" href="{{ route('mutasigalerygalery.show', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
                                         @endif
                                             <a class="dropdown-item" href="{{ route('mutasigalerygalery.view', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>

@@ -113,7 +113,6 @@ class MutasiController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
-        dd($data);
 
         if ($req->hasFile('bukti')) {
             $file = $req->file('bukti');
@@ -1278,16 +1277,19 @@ class MutasiController extends Controller
                 ]);
                 if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
-                $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+                if($req->status == 'DIKONFIRMASI'){
+                    $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
                                     ->where('kode_produk', $getProdukJual->kode_produk)
                                     ->where('kondisi_id', $getProdukJual->kondisi_id)
                                     ->first();
-                // dd($stok);
-    
-                if ($stok) {
-                    $stok->jumlah -= intval($data['jumlah_dikirim'][$i]);
-                    $stok->update();
+                    // dd($stok);
+        
+                    if ($stok) {
+                        $stok->jumlah -= intval($data['jumlah_dikirim'][$i]);
+                        $stok->update();
+                    }
                 }
+                
             }
             return redirect(route('mutasigalerygalery.index'))->with('success', 'Data Berhasil Disimpan');
         } else {
@@ -1765,17 +1767,87 @@ class MutasiController extends Controller
         // dd($req);
 
         $mutasis = $req->input('mutasiGO');
-        $data = $req->except(['_method', '_token', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO']);
+        $data = $req->except(['_method', '_token', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO', 'nama_produk', 'kode_produk']);
         // dd($data);
 
-        $data['dibukukan_id'] = Auth::user()->id;
-        $data['tanggal_dibukukan'] = now();
+        if ($req->hasFile('bukti')) {
+            $file = $req->file('bukti');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
+            // dd($filePath);
+            $data['bukti'] = $filePath;
+        }
+
+        //update data ttd
+        $user = Auth::user();
+        $jabatan = Karyawan::where('user_id', $user->id)->first();
+        $jabatanpegawai = $jabatan->jabatan;
+        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
+
+        if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+            $data['diperiksa_id'] = Auth::user()->id;
+            $data['tanggal_diperiksa'] = now();
+        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+            $data['dibukukan_id'] = Auth::user()->id;
+            $data['tanggal_dibukukan'] = now();
+        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
+            $data['pembuat_id'] = Auth::user()->id;
+            $data['tanggal_pembuat'] = now();
+        }
 
         $update = Mutasi::where('id', $mutasis)->update($data);
-        if($update){
-            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+
+        if($req->status == 'DIBATALKAN'){
+            return redirect(route('mutasigalery.index'))->with('success', 'Berhasil Mengupdate Data');
+        }
+
+        //hapus komponen agar bisa di create ulang
+        $produkterjualmutasi = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
+        $arrayCombined =  $produkterjualmutasi->pluck('id')->toArray();
+        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_mutasigo', $req->no_mutasi)->get();
+        $ceken = $cek->pluck('id')->toArray();
+
+        if (!empty($ceken)) {
+            Produk_Terjual::whereIn('id', $ceken)->forceDelete();
+            Komponen_Produk_Terjual::whereIn('produk_terjual_id', $ceken)->forceDelete();
+        }
+        Komponen_Produk_Terjual::whereIn('produk_terjual_id', $arrayCombined)->forceDelete();
+
+        for ($i = 0; $i < count($req->nama_produk); $i++) {
+            $getProdukJual = Produk_Terjual::with('komponen')->where('id', $req->nama_produk[$i])->first();
+            // dd($getProdukJual);
+            $getProduk = Produk_Jual::with('komponen')->where('id', $req->kode_produk[$i])->first();
+            // dd($getProdukJual);
+            $produk_terjual = Produk_Terjual::where('id', $req->nama_produk[$i])->update([
+                'produk_jual_id' => $req->kode_produk[$i],
+                'no_mutasigo' => $req->no_mutasi,
+                'jumlah' => $req->jumlah_dikirim[$i],
+            ]);
+
+            if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            foreach ($getProduk->komponen as $komponen) {
+                $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                    'produk_terjual_id' => $req->nama_produk[$i],
+                    'kode_produk' => $komponen->kode_produk,
+                    'nama_produk' => $komponen->nama_produk,
+                    'tipe_produk' => $komponen->tipe_produk,
+                    'kondisi' => $komponen->kondisi,
+                    'deskripsi' => $komponen->deskripsi,
+                    'jumlah' => $komponen->jumlah,
+                    'harga_satuan' => $komponen->harga_satuan,
+                    'harga_total' => $komponen->harga_total
+                ]);
+                if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+        }
+        return redirect(route('mutasigalery.index'))->with('success', 'Data Berhasil Disimpan');
+
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('mutasigalery.show', ['mutasiGO' => $mutasis]))->with('success', 'Berhasil Mengupdate Data');
+        }elseif($req->status == 'TUNDA'){
+            return redirect(route('mutasigalery.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
-            return redirect()->back()->with('fail', 'Gagal Mengupdate Data');
+            return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
 
     }
@@ -1903,18 +1975,99 @@ class MutasiController extends Controller
     {
         // dd($req);
         $mutasis = $req->input('mutasiGAG');
-        $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG']);
+        $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG', 'alasan', 'kode_produk', 'nama_produk', ]);
         // dd($data);
 
-        $data['dibukukan_id'] = Auth::user()->id;
-        $data['tanggal_dibukukan'] = now();
+        if ($req->hasFile('bukti')) {
+            $file = $req->file('bukti');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
+            // dd($filePath);
+            $data['bukti'] = $filePath;
+        }
+
+        //update data ttd
+        $user = Auth::user();
+        $jabatan = Karyawan::where('user_id', $user->id)->first();
+        $jabatanpegawai = $jabatan->jabatan;
+        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
+
+        if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+            $data['diperiksa_id'] = Auth::user()->id;
+            $data['tanggal_diperiksa'] = now();
+        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+            $data['dibukukan_id'] = Auth::user()->id;
+            $data['tanggal_dibukukan'] = now();
+        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
+            $data['pembuat_id'] = Auth::user()->id;
+            $data['tanggal_pembuat'] = now();
+        }
 
         $update = Mutasi::where('id', $mutasis)->update($data);
-        if($update){
-            return redirect()->back()->with('success', 'Berhasil Menyimpan Data');
-        }else{
-            return redirect()->back()->with('fail', 'Gagal Menyimpan Data');
+
+        if($req->status == 'DIBATALKAN'){
+            return redirect(route('mutasigalerygalery.index'))->with('success', 'Berhasil Mengupdate Data');
         }
+
+        //hapus komponen agar bisa di create ulang
+        $produkterjualmutasi = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
+        $arrayCombined =  $produkterjualmutasi->pluck('id')->toArray();
+        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_mutasigag', $req->no_mutasi)->get();
+        $ceken = $cek->pluck('id')->toArray();
+
+        if (!empty($ceken)) {
+            Produk_Terjual::whereIn('id', $ceken)->forceDelete();
+            Komponen_Produk_Terjual::whereIn('produk_terjual_id', $ceken)->forceDelete();
+        }
+        Komponen_Produk_Terjual::whereIn('produk_terjual_id', $arrayCombined)->forceDelete();
+
+        for ($i = 0; $i < count($req->kode_produk); $i++) {
+            $getProdukJual = InventoryGallery::where('id', $req->kode_produk[$i])->first();
+            $getProduk = Produk::where('kode', $getProdukJual->kode_produk)->first();
+            // dd($getProduk);
+            $produk_terjual = Produk_Terjual::where('id', $req->nama_produk[$i])->update([
+                'produk_jual_id' => $getProduk->id,
+                'no_mutasigag' => $req->no_mutasi,
+                'jumlah' => $req->jumlah_dikirim[$i],
+            ]);
+
+            if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                'produk_terjual_id' => $req->nama_produk[$i],
+                'kode_produk' => $getProduk->kode,
+                'nama_produk' => $getProduk->nama,
+                'tipe_produk' => $getProduk->tipe_produk,
+                'kondisi' => $getProdukJual->kondisi_id,
+                'deskripsi' => $getProduk->deskripsi,
+                'jumlah' => $req->jumlah_dikirim[$i],
+                'harga_satuan' => 0,
+                'harga_total' => 0
+            ]);
+            if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            if($req->status == 'DIKONFIRMASI'){
+                $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+                                ->where('kode_produk', $getProdukJual->kode_produk)
+                                ->where('kondisi_id', $getProdukJual->kondisi_id)
+                                ->first();
+                // dd($stok);
+    
+                if ($stok) {
+                    $stok->jumlah -= intval($req->jumlah_dikirim[$i]);
+                    $stok->update();
+                }
+            }
+            
+        }
+
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('mutasigalerygalery.show', ['mutasiGAG' => $mutasis]))->with('success', 'Berhasil Mengupdate Data');
+        }elseif($req->status == 'TUNDA'){
+            return redirect(route('mutasigalerygalery.index'))->with('success', 'Berhasil Mengupdate data');
+        }else{
+            return redirect()->back()->with('fail', 'Gagal Mengupdate data');
+        }
+
     }
 
     public function audit_GG($mutasi)

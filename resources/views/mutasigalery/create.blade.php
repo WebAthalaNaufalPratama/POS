@@ -83,8 +83,7 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT">DRAFT</option>
-                                                <option value="PUBLISH">PUBLISH</option>
+                                                <option value="TUNDA">TUNDA</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -115,7 +114,7 @@
                                                 <tr>
                                                     <th>Nama</th>
                                                     <th>Jumlah Dikirim</th>
-                                                    <th>Jumlah Diterima</th>
+                                                    <!-- <th>Jumlah Diterima</th> -->
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -152,7 +151,7 @@
 
                                                     </td>
                                                     <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                                                    <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                                                    <!-- <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td> -->
                                                     <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                 </tr>
                                             </tbody>
@@ -441,7 +440,6 @@
                                 </select>
                             </td>
                             <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                            <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
                             <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
                         </tr>`;
 
