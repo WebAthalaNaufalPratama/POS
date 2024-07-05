@@ -38,7 +38,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="pengirim">Nama Pengirim</label>
-                                            <select id="pengirim" name="pengirim" class="form-control" required disabled>
+                                            <select id="pengirim" name="pengirim" class="form-control" required>
                                                 <option value="">Pilih Nama Pengirim</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->pengirim ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -49,7 +49,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="penerima">Nama Penerima</label>
-                                            <select id="penerima" name="penerima" class="form-control" required disabled>
+                                            <select id="penerima" name="penerima" class="form-control" required>
                                                 <option value="">Pilih Nama Penerima</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -60,7 +60,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="no_mutasi">No Mutasi</label>
-                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" >
+                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -73,19 +73,26 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="nama">Tanggal Pengiriman</label>
-                                            <input type="date" class="form-control" id="tanggal_kirim" name="tanggal_kirim" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_kirim}}" required disabled>
+                                            <input type="date" class="form-control" id="tanggal_kirim" name="tanggal_kirim" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_kirim}}" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="nama">Tanggal Diterima</label>
-                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_diterima}}" required disabled>
+                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_diterima}}" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="status">Status</label>
-                                            <select id="status" name="status" class="form-control" required disabled>
+                                            <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $mutasis->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan" id="alasan"></textarea>
+                                            </div>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
                                             <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
@@ -114,7 +121,7 @@
                                                     <tr>
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
+                                                        <!-- <th>Jumlah Diterima</th> -->
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -126,21 +133,22 @@
                                                     @foreach ($produks as $produk)
                                                     <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control"  disabled>
+                                                            <input type="hidden" id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" value="{{ $produk->id}}">
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" >
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                <option value="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
-                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" ></td>
-                                                        <td>
+                                                        <!-- <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" ></td> -->
+                                                        <!-- <td>
                                                             <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                 Set Gift
                                                             </button>
                                                         </td>
-                                                        <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td> -->
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -171,12 +179,12 @@
                                                         <tr>
                                                             <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
                                                             <td id="penyetuju">{{ $mutasis->diterima ? $mutasis->diterima->name : '-'}}</td>
-                                                            <td id="pemeriksa">{{ Auth::user()->name}}</td>
+                                                            <td id="pemeriksa">-</td>
                                                         </tr>
                                                         <tr>
                                                             <td id="tgl_pembuat" style="width: 25%;">{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}</td>
                                                             <td id="tgl_penyetuju" style="width: 25%;">{{$mutasis->tanggal_penerima ? $mutasis->tanggal_penerima : '-'}}</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ date('Y-m-d')}}</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -810,6 +818,16 @@
             updateHargaSatuan(this);
         });
 
+        $('#status').change(function(){
+            var status = $(this).val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan').hide();
+            }
+        });
+
         // $('#delivery_order_section').show();
 
         // $('#distribusi').change(function() {
@@ -963,6 +981,8 @@
                 pointInput.val(0);
             }
         });
+
+        
 
 
         function checkPromo(total_transaksi, tipe_produk, produk) {

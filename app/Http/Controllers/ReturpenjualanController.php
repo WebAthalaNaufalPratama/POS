@@ -929,6 +929,21 @@ class ReturpenjualanController extends Controller
         // dd($data);
         $handphone = Customer::where('id', $req->customer_id)->value('handphone');
 
+        //update data ttd
+        $user = Auth::user();
+        $jabatan = Karyawan::where('user_id', $user->id)->first();
+        $jabatanpegawai = $jabatan->jabatan;
+        $returId = ReturPenjualan::where('id', $retur)->first();
+        $returpenjualan = DeliveryOrder::where('no_retur', $returId->no_retur)->first();
+
+        if($returpenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+            $data['auditor_id'] = Auth::user()->id;
+            $data['tanggal_audit'] = now();
+        }elseif($returpenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+            $data['dibukukan_id'] = Auth::user()->id;
+            $data['tanggal_dibukukan'] = now();
+        }
+
         $update = ReturPenjualan::where('id', $retur)->update($data);
 
         $datado = [
