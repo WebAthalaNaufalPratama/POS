@@ -107,7 +107,7 @@
                                             <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkSewa as $produk)
-                                                    <option value="{{ $produk->produk->kode }}" data-id="{{ $pj->id }}">{{ $produk->produk->nama }}</option>
+                                                    <option value="{{ $produk->produk->kode }}" data-id="{{ $pj->id }}" data-tooltip="test">{{ $produk->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -126,7 +126,26 @@
                                             <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkSewa as $pj)
-                                                    <option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}" {{ $pj->id == $produk->id ? 'selected' : '' }}>({{ $pj->id }}) {{ $pj->produk->nama }}</option>
+                                                    @php
+                                                    if($pj->produk->tipe_produk == 6){
+
+                                                        $descArray = [];
+                                                        foreach ($pj->komponen as $komponen) {
+                                                            if (in_array($komponen->tipe_produk, [1, 2])) {
+                                                                $descArray[] = $komponen->produk->nama;
+                                                            }
+                                                        }
+                                                        $desc = implode(', ', $descArray);
+                                                    } else {
+                                                        $desc = '';
+                                                    }
+                                                    @endphp
+                                                     <option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}"
+                                                        @if ($pj->produk->tipe_produk == 6)
+                                                            data-tooltip="{{ $desc }}"
+                                                        @endif
+                                                        {{ $pj->id == $produk->id ? 'selected' : '' }}>{{ $pj->produk->nama }}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -243,6 +262,7 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip({ html: true });
             $('form').on('submit', function(event) { // add request id
                 $('select[name="nama_produk[]"]').each(function() {
                     var selectedOption = $(this).find('option:selected');
@@ -264,24 +284,52 @@
                 });
             });
 
-            $('[id^=produk], #driver_id').select2();
+            $('[id^=produk], #driver_id').select2({
+                templateResult: formatState,
+                templateSelection: formatState,
+            });
             $('#driver_id').trigger('change');
             var i = '{{ count($kontrak->produk) }}';
             $('#add').click(function(){
-                var newRow = '<tr id="row'+i+'"><td>' + 
-                                '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
-                                    '<option value="">Pilih Produk</option>'+
-                                    '@foreach ($produkSewa as $pj)'+
-                                        '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}">({{ $pj->id }}) {{ $pj->produk->nama }}</option>'+
-                                    '@endforeach'+
-                                '</select>'+
-                            '</td>'+
-                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" class="form-control"></td>'+
-                            '<td><input type="text" name="satuan[]" id="satuan_'+i+'" class="form-control"></td>'+
-                            '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_'+i+'" class="form-control"></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
+                var newRow = '<tr id="row' + i + '">' +
+                '<td>' +
+                    '<select id="produk_' + i + '" name="nama_produk[]" class="form-control">' +
+                        '<option value="">Pilih Produk</option>';
+                            @foreach ($produkSewa as $pj)
+                                @php
+                                if ($pj->produk->tipe_produk == 6) {
+                                    $descArray = [];
+                                    foreach ($pj->komponen as $komponen) {
+                                        if (in_array($komponen->tipe_produk, [1, 2])) {
+                                            $descArray[] = $komponen->produk->nama;
+                                        }
+                                    }
+                                    $desc = implode(', ', $descArray);
+                                } else {
+                                    $desc = '';
+                                }
+                                @endphp
+
+                                newRow += '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}"';
+                                @if ($pj->produk->tipe_produk == 6)
+                                    newRow += ' data-tooltip="{{ $desc }}"';
+                                @endif
+                                newRow += '{{ $pj->id == $produk->id ? " selected" : "" }}>';
+                                newRow += '{{ $pj->produk->nama }}</option>';
+                            @endforeach
+
+                            newRow += '</select>' +
+                                            '</td>' +
+                                            '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
+                                            '<td><input type="text" name="satuan[]" id="satuan_' + i + '" class="form-control"></td>' +
+                                            '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_' + i + '" class="form-control"></td>' +
+                                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                                        '</tr>';
                 $('#dynamic_field').append(newRow);
-                $('#produk_' + i).select2();
+                $('#produk_' + i).select2({
+                    templateResult: formatState,
+                    templateSelection: formatState
+                });
                 i++;
             })
             $('#add2').click(function(){
@@ -329,5 +377,14 @@
 
             input.val(value);
         });
+        function formatState(state) {
+            if (!$(state.element).attr('data-tooltip')) {
+                return state.text;
+            }
+            var $state = $(
+                '<span>' + state.text + ' <i class="fas fa-info-circle ml-1" data-toggle="tooltip" title="' + $(state.element).attr('data-tooltip') + '"></i></span>'
+            );
+            return $state;
+        }
     </script>
 @endsection

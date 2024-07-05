@@ -173,7 +173,7 @@
                                                 <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
                                                     <option value="">Pilih Produk</option>
                                                     @foreach ($produkjuals as $produk)
-                                                        <option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}" {{ $komponen->produk->kode == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
+                                                        <option value="{{ $produk->kode }}" data-tipe_produk="{{ $produk->tipe_produk }}" data-harga_jual="{{ $produk->harga_jual }}" {{ $komponen->produk->kode == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
@@ -298,7 +298,7 @@
                                             </div>
                                         </div> --}}
                                         <div class="input-group">
-                                            <input type="text" id="promo_persen" name="promo_persen" value="{{ $kontraks->promo_persen ?? 0 }}" class="form-control" required aria-describedby="basic-addon3" oninput="validatePersen(this)">
+                                            <input type="text" id="promo_persen" name="promo_persen" value="{{ $kontraks->promo_persen ?? 0 }}" class="form-control" aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
                                         <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ $kontraks->total_promo ?? 0 }}" required>

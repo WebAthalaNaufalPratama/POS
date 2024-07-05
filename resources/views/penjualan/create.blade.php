@@ -125,8 +125,7 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT">DRAFT</option>
-                                                <option value="PUBLISH">PUBLISH</option>
+                                                <option value="TUNDA">TUNDA</option>
                                             </select>
                                         </div>
                                     </div>
@@ -149,7 +148,7 @@
                                             $user = Auth::user();
                                             $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                         @endphp
-                                        @if($lokasi->tipe_lokasi == 1)
+                                        @if($lokasi->lokasi->tipe_lokasi == 1)
                                             <div class="form-group">
                                                 <label for="lokasi_pengirim">Lokasi Pengiriman</label>
                                                 <select id="lokasi_pengirim" name="lokasi_pengirim" class="form-control">
@@ -677,11 +676,21 @@
 
         if (!isNaN(hargaTotal)) {
             if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue * jumlah; 
+                hargaTotal -= diskonValue;
+                if(hargaTotal <= 0){
+                    hargaTotal = 0;
+                    alert('nominal tidak boleh melebihi harga total');
+                    diskonValue = 0;
+                }
                 $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
             } else if (diskonType === "persen" && !isNaN(diskonValue)) {
-                var diskonPersen = (hargaTotal * diskonValue / 100); // Menghitung diskon berdasarkan persentase
-                hargaTotal -= diskonPersen * jumlah; // Mengurangkan diskon persentase dari hargaTotal
+                var diskonPersen = (hargaTotal * diskonValue / 100); 
+                hargaTotal -= diskonPersen; 
+                if(hargaTotal <= 0){
+                    hargaTotal = 0;
+                    alert('diskon tidak boleh melebihi harga total');
+                    diskonPersen = 0;
+                }
             }
         }
 
@@ -1023,7 +1032,7 @@
                 $('#inputPembayaran').show();
                 $('#inputRekening').show();
                 $('#inputTanggalBayar').show();
-                $('#inputBuktiBayar').show();
+                $('#inputBuktiBayar').hide();
                 $('#nominal').val(formatRupiah(dpValue, 'Rp '));
             } else {
                 $('#inputPembayaran').hide();

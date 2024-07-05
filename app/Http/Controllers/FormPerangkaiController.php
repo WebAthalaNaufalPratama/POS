@@ -234,6 +234,7 @@ class FormPerangkaiController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
+        // dd($data);
         // dd($req->prdTerjual_i);
         // delete data
         $getPerangkai = FormPerangkai::where('no_form', $data['no_form'])->get();
@@ -242,64 +243,7 @@ class FormPerangkaiController extends Controller
         }
         
         $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
-        // dd($updateProdukTerjual);
-        $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
-        // dd($lokasi);
-        if($lokasi->tipe_lokasi == 1 && $req->distribusi == 'Diambil')
-        {
-            $allStockAvailable = true;
-
-            foreach ($updateProdukTerjual->komponen as $komponen ) {
-                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
-                                        ->where('kode_produk', $komponen->kode_produk)
-                                        ->where('kondisi_id', $komponen->kondisi)
-                                        ->first();
-                if (!$stok) {
-                    $allStockAvailable = false;
-                    break;
-                }
-            }
-
-            if (!$allStockAvailable) {
-                return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
-            }
-
-            foreach ($updateProdukTerjual->komponen as $komponen ) {
-                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
-                                         ->where('kode_produk', $komponen->kode_produk)
-                                         ->where('kondisi_id', $komponen->kondisi)
-                                         ->first();
-                $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($req->jml_produk));
-                $stok->update();
-            }
-        }elseif($lokasi->tipe_lokasi == 2 && $req->distribusi == 'Diambil')
-        {
-            $allStockAvailable = true;
-
-            foreach ($updateProdukTerjual->komponen as $komponen ) {
-                $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
-                                        ->where('kode_produk', $komponen->kode_produk)
-                                        ->where('kondisi_id', $komponen->kondisi)
-                                        ->first();
-                if (!$stok) {
-                    $allStockAvailable = false;
-                    break;
-                }
-            }
-
-            if (!$allStockAvailable) {
-                return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
-            }
-
-            foreach ($updateProdukTerjual->komponen as $komponen ) {
-                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
-                                         ->where('kode_produk', $komponen->kode_produk)
-                                         ->where('kondisi_id', $komponen->kondisi)
-                                         ->first();
-                $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($req->jml_produk));
-                $stok->update();
-            }
-        }
+        // // dd($updateProdukTerjual);
         // save data
         foreach ($req->perangkai_id as $item) {
             $data['perangkai_id'] = $item;

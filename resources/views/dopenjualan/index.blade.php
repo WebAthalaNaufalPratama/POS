@@ -73,12 +73,17 @@
                                             $user = Auth::user();
                                         @endphp
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('dopenjualan.show', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show</a>
-                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
-                                                <a class="dropdown-item" href="{{ route('auditdopenjualan.edit', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
+                                            @if($dopenjualan->status != 'DIBATALKAN')
+                                                @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                                    <a class="dropdown-item" href="{{ route('auditdopenjualan.edit', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
+                                                @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $dopenjualan->status != 'DIKONFIRMASI')
+                                                    <a class="dropdown-item" href="{{ route('auditdopenjualan.edit', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
+                                                @endif
+                                                <a class="dropdown-item" href="{{ route('dopenjualan.show', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show</a>
+                                                <a class="dropdown-item" href="{{ route('pdfdopenjualan.generate', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak DO</a>
+                                            @elseif($dopenjualan->status == 'DIBATALKAN')
+                                                <a class="dropdown-item" href="{{ route('dopenjualan.show', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show</a>
                                             @endif
-                                            <a class="dropdown-item" href="{{ route('pdfdopenjualan.generate', ['dopenjualan' => $dopenjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak DO</a>
-                                            
 
                                             <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $dopenjualan->id }})">Delete</a> -->
                                         </div>

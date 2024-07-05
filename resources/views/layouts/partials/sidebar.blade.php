@@ -115,7 +115,7 @@
                         @if(in_array('mutasigalery.index', $rolePermissions))
                             <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
                         @endif
-                        @if(in_array('formpenjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                        @if(in_array('formpenjualan.index', $rolePermissions) && isset($lokasi->lokasi->tipe_lokasi) && $lokasi->lokasi->tipe_lokasi != 2)
                             <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'MUTASIGO']) }}" class="{{ request()->is('formpenjualan?jenis_rangkaian=MUTASIGO') ? 'active' : '' }}">Perangkai Mutasi GO</a></li>
                         @endif
                         @if(in_array('mutasioutlet.index', $rolePermissions))

@@ -26,10 +26,10 @@
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('penjualan.update', ['penjualan' => $penjualans->id]) }}" method="POST" enctype="multipart/form-data">
+            <!-- <form action="{{ route('penjualan.update', ['penjualan' => $penjualans->id]) }}" method="POST" enctype="multipart/form-data"> -->
                 <div class="row">
                     <div class="col-sm">
-                        @csrf
+                        <!-- @csrf -->
 
                         <div class="row ">
                             <div class="col-md-6 border rounded pt-3 ">
@@ -127,8 +127,8 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required disabled>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{$penjualans->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{$penjualans->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                <option value="TUNDA" {{$penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{$penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI </option>
                                             </select>
                                         </div>
                                     </div>
@@ -144,6 +144,14 @@
                                                 <!-- <option value="">Pilih Nama Sales</option> -->
                                                 @foreach ($karyawans as $karyawan)
                                                 <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lokasi_pengirim">Lokasi Pengiriman</label>
+                                            <select id="lokasi_pengirim" name="lokasi_pengirim" class="form-control" disabled>
+                                                @foreach ($lokasigalery as $galery)
+                                                <option value="{{ $galery->id }}">{{ $galery->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -247,8 +255,10 @@
                                                         </div> -->
                                                         </td>
                                                         <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.')}}" readonly></td>
+                                                        @if($komponen->no_form == null)
                                                         <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
                                                         <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @endif
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
                                                         @php
@@ -280,27 +290,23 @@
                                                 </div>
                                                 <div id="inputTransfer" style="display: none;">
                                                     <label>Rekening Von</label>
-                                                    <select id="rekening_id" name="rekening_id" class="form-control">
+                                                    <select id="rekening_id" name="rekening_id" class="form-control" disabled>
                                                         <option value="">Pilih Bank</option>
                                                         @foreach($bankpens as $bankpen)
-                                                        <option value="{{ $bankpen->id }}">{{ $bankpen->bank }}</option>
+                                                        <option value="{{ $bankpen->id }}" {{ $penjualans->rekening_id ==$bankpen->id ? 'selected':''}}>{{ $bankpen->bank }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
-                                                <div class="form-group" style="display:none;">
-                                                    <label for="no_invoice">Nomor Invoice</label>
-                                                    <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" onchange="generateInvoiceBayar(this)" readonly>
-                                                </div>
                                                 <div class="form-group mt-3">
-                                                    <div id="inputPembayaran" style="display: none;">
+                                                    <div id="inputPembayaran">
                                                         <label for="nominal">Nominal</label>
-                                                        <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" readonly>
+                                                        <input type="text" class="form-control" id="nominal" name="nominal" value="{{ 'Rp '. number_format($pembayaran->nominal, 0, ',', '.')}}" placeholder="Nominal Bayar" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <div id="inputBuktiBayar" style="display: none;">
+                                                    <div id="inputBuktiBayar">
                                                         <label for="buktibayar">Unggah Bukti</label>
-                                                        <input type="file" class="form-control" id="bukti" name="bukti">
+                                                        {{ $pembayaran->bukti}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -378,7 +384,10 @@
                                                     <h5 class="col-lg-5">
                                                         <div class="row align-items-center">
                                                             <div class="col-9 pe-0">
-                                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
+                                                                <select id="promo_id" name="promo_id" class="form-control" value="{{ $penjualans->promo_id}}" required disabled>
+                                                                    @foreach ($promos as $promo)
+                                                                    <option value="{{ $promo->id }}">{{ $promo->nama }}</option>
+                                                                    @endforeach
                                                                 </select>
                                                             </div>
                                                             <div class="col-3 ps-0 mb-0">
@@ -533,7 +542,7 @@
                             <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
                             <a href="{{ route('penjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
-            </form>
+            <!-- </form> -->
         </div>
 
     </div>
@@ -558,6 +567,7 @@
                                 <label for="prdTerjual" class="col-form-label">Produk</label>
                                 <input type="text" class="form-control" name="produk_id" id="prdTerjual" readonly required>
                             </div>
+                            <input type="hidden" name="status" id="status" value="{{$penjualans->status}}">
                             <input type="hidden" name="lokasi_id" id="lokasi_id" value="{{ $penjualans->lokasi_id }}">
                             <input type="hidden" name="distribusi" id="distribusi" value="{{ $penjualans->distribusi }}">
                             <input type="hidden" name="prdTerjual_id" id="prdTerjual_id" value="">
@@ -621,6 +631,9 @@
                                 <label for="prdTerjualGift" class="col-form-label">Produk</label>
                                 <input type="text" class="form-control" name="produk_id" id="prdTerjualGift" readonly required>
                             </div>
+                            <input type="hidden" name="status" id="status" value="{{$penjualans->status}}">
+                            <input type="hidden" name="lokasi_id" id="lokasi_id" value="{{ $penjualans->lokasi_id }}">
+                            <input type="hidden" name="distribusi" id="distribusi" value="{{ $penjualans->distribusi }}">
                             <input type="hidden" name="prdTerjual_id" id="prdTerjualGift_id" value="">
                             <div class="col-sm-4">
                                 <label for="jmlGift_produk" class="col-form-label">Jumlah</label>
@@ -834,8 +847,60 @@
             }
         }
 
-        
+        function dpchange(){
+            var inputNominal = $('#dp').val();
+            var dpValue = parseRupiahToNumber(inputNominal);
 
+            if (dpValue > 0) {
+                $('#inputPembayaran').show();
+                $('#inputRekening').show();
+                $('#inputTanggalBayar').show();
+                $('#inputBuktiBayar').show();
+                $('#nominal').val(formatRupiah(dpValue, 'Rp '));
+            } else {
+                $('#inputPembayaran').hide();
+                $('#inputRekening').hide();
+                $('#inputTanggalBayar').hide();
+                $('#inputBuktiBayar').hide();
+            }
+
+            // Update input value to formatted Rupiah
+            $(this).val(formatRupiah(dpValue, 'Rp '));
+        };
+
+        $("[id^='jenis_diskon_']").each(function() {
+            var index = this.id.split("_")[2];
+            showInputType(index);
+        });
+
+        $('#dp').on('change', dpchange);
+
+        function togglePaymentFields() {
+            var pembayaran = $('#cara_bayar').val();
+
+            $('#inputCash').hide();
+            $('#inputTransfer').hide();
+
+            if (pembayaran === "cash") {
+                $('#inputCash').show();
+            } else if (pembayaran === "transfer") {
+                $('#inputTransfer').show();
+            }
+        }
+
+        // Add change event listener
+        $('#cara_bayar').change(function() {
+            togglePaymentFields();
+        });
+        // Initial value from backend
+        var initialPembayaran = "{{ $penjualans->cara_bayar }}";
+
+        // Set the initial value in the dropdown and trigger the change event
+        if (initialPembayaran) {
+            $('#cara_bayar').val(initialPembayaran).trigger('change');
+        }
+
+        
 
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");

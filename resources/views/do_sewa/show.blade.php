@@ -125,8 +125,26 @@
                                         <td>
                                             <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
                                                 <option value="">Pilih Produk</option>
-                                                @foreach ($produkJuals as $pj)
-                                                    <option value="{{ $pj->kode }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                @foreach ($produkSewa as $pj)
+                                                @php
+                                                if($pj->produk->tipe_produk == 6){
+
+                                                    $descArray = [];
+                                                    foreach ($pj->komponen as $komponen) {
+                                                        if (in_array($komponen->tipe_produk, [1, 2])) {
+                                                            $descArray[] = $komponen->produk->nama;
+                                                        }
+                                                    }
+                                                    $desc = implode(', ', $descArray);
+                                                } else {
+                                                    $desc = '';
+                                                }
+                                                @endphp
+                                                    <option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}"
+                                                    @if ($pj->produk->tipe_produk == 6)
+                                                        data-tooltip="{{ $desc }}"
+                                                    @endif    
+                                                    {{ $pj->produk->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
@@ -314,10 +332,14 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip({ html: true });
             if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
             }
-            $('[id^=produk], #driver_id').select2();
+            $('[id^=produk], #driver_id').select2({
+                templateResult: formatState,
+                templateSelection: formatState,
+            });
             var i = '{{ count($data->produk) }}';
             $('#add').click(function(){
                 var newRow = '<tr id="row'+i+'"><td>' + 
@@ -423,5 +445,14 @@
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
         };
+        function formatState(state) {
+            if (!$(state.element).attr('data-tooltip')) {
+                return state.text;
+            }
+            var $state = $(
+                '<span>' + state.text + ' <i class="fas fa-info-circle ml-1" data-toggle="tooltip" title="' + $(state.element).attr('data-tooltip') + '"></i></span>'
+            );
+            return $state;
+        }
     </script>
 @endsection

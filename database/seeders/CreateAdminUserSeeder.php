@@ -312,7 +312,7 @@ class CreateAdminUserSeeder extends Seeder
         ]);
 
         Lokasi::create([
-            'id' => 1,
+            'id' => 2,
             'nama' => 'outlet semarang',
             'tipe_lokasi' => 2,
             'operasional_id' => 2,

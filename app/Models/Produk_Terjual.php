@@ -72,4 +72,12 @@ class Produk_Terjual extends Model
     public function mutasi(){
         return $this->belongsTo(Mutasi::class, 'no_mutasigo', 'no_mutasi');
     }
+
+    public function do_penjualan(){
+        return $this->belongsTo(DeliveryOrder::class, 'no_do', 'no_do');
+    }
+
+    public function retur_penjualan(){
+        return $this->belongsTo(ReturPenjualan::class, 'no_retur', 'no_retur');
+    }
 }
