@@ -69,12 +69,25 @@
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                 </a>
                                 <ul class="dropdown-menu">
+                                    @if(in_array($item->status, ['DIKONFIRMASI', 'BATAL']))
                                     <li>
                                         <a href="{{ route('kembali_sewa.show', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                     </li>
+                                    @else
+                                    <li>
+                                        <a href="{{ route('kembali_sewa.show', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
+                                    </li>
+                                    @endif
+                                    @if( ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($item->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
+                                    @if(!$item->hasKembali)
                                     <li>
                                         <a href="{{ route('kembali_sewa.edit', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
+                                    @endif
+                                    <li>
+                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
+                                    </li>
+                                    @endif
                                 </ul>
                             </td>
                         </tr>
@@ -161,30 +174,42 @@
         return 0;
     });
     function deleteData(id){
-        $.ajax({
-            type: "GET",
-            url: "/kemblai_sewa/"+id+"/delete",
-            headers: {
-                'X-CSRF-TOKEN': csrfToken
-            },
-            success: function(response) {
-                toastr.success(response.msg, 'Success', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-
-                setTimeout(() => {
-                    location.reload()
-                }, 2000);
-            },
-            error: function(error) {
-                toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
+        Swal.fire({
+            title: 'Batalkan kembali sewa?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, batalkan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/kembali_sewa/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
                 });
             }
         });
