@@ -13,6 +13,7 @@ use App\Models\PemakaianSendiri;
 use App\Models\Produk;
 use App\Models\Produk_Terjual;
 use App\Models\Produkbeli;
+use App\Models\ProdukMutasiInden;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -68,6 +69,7 @@ class InventoryGalleryController extends Controller
         
         $mergedCollection = collect();
 
+        // sewa start
         $komponenDoSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.do_sewa', 'produk_terjual.do_sewa.data_pembuat', 'produk_terjual.do_sewa.kontrak')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
             return $q->where('jenis', null)->whereHas('do_sewa', function($p) use($isSuperAdmin){
                 return $p->where('status', 'DIKONFIRMASI')->whereHas('kontrak', function($z) use($isSuperAdmin){
@@ -95,7 +97,6 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataKomponen);
         }
-
         $komponenKblSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.kembali_sewa', 'produk_terjual.kembali_sewa.data_pembuat', 'produk_terjual.kembali_sewa.sewa')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
             return $q->whereHas('kembali_sewa', function($p) use($isSuperAdmin){
                 return $p->where('status', 'DIKONFIRMASI')->whereHas('sewa', function($z) use($isSuperAdmin){
@@ -123,7 +124,9 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataKembaliSewa);
         }
+        // sewa end
 
+        // penjualan start (kurang retur)
         $komponenPenjualanDiambil = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
             return $q->whereHas('penjualan', function($p) use($isSuperAdmin){
                 $p->where('distribusi', 'Diambil')->where('status', 'DIKONFIRMASI');
@@ -150,7 +153,6 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataPenjualanDiambil);
         }
-
         $komponenPenjualanDikirim = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.do_penjualan.penjualan', 'produk_terjual.do_penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
             return $q->whereHas('do_penjualan', function($p) use($isSuperAdmin){
                 $p->where('status', 'DIKONFIRMASI')->whereHas('penjualan', function($z) use($isSuperAdmin){
@@ -179,13 +181,14 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataPenjualanDikirim);
         }
+        // penjualan end
 
-
-
+        // pembelian start (kurang retur po dan inden)
         $komponenPembelian = Produkbeli::whereHas('pembelian', function($q) use($isSuperAdmin){
             if (!$isSuperAdmin) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             }
+            $q->whereNotNull('jml_diterima')->where('status_diterima', 'DIKONFIRMASI');
         })->get();
         if($komponenPembelian->isNotEmpty()){
             $dataPO = $komponenPembelian->map(function($produk){
@@ -198,86 +201,42 @@ class InventoryGalleryController extends Controller
                     'Kode Komponen' => $produk->produk->kode ?? null,
                     'Nama Komponen' => $produk->produk->nama ?? null,
                     'Kondisi' => $produk->kondisi->nama ?? null,
-                    'Masuk' => $produk->jml_diterima,
+                    'Masuk' => $produk->jml_diterima ?? '-',
                     'Keluar' => '-',
                     'Waktu' => $produk->updated_at
                 ];
             });
             $mergedCollection = $mergedCollection->merge($dataPO);
         }
+        $komponenPembelianInden = ProdukMutasiInden::with('mutasiinden', 'produk.produk', 'kondisi')->whereNotNull('jml_diterima')->whereHas('mutasiinden', function($q) use($isSuperAdmin){
+            if (!$isSuperAdmin) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            }
+            $q->where('status_diterima', 'DIKONFIRMASI');
+        })->get();
+        if($komponenPembelianInden->isNotEmpty()){
+            $dataPOInden = $komponenPembelianInden->map(function($produk){
+                return [
+                    'Id' => $produk->id,
+                    'Pengubah' => optional($produk->mutasiinden->pembuat)->name,
+                    'No Referensi' => $produk->mutasiinden->no_mutasi ?? null,
+                    'Kode Produk Jual' => '-',
+                    'Nama Produk Jual' => '-',
+                    'Kode Komponen' => $produk->produk->produk->kode ?? null,
+                    'Nama Komponen' => $produk->produk->produk->nama ?? null,
+                    'Kondisi' => $produk->kondisi->nama ?? null,
+                    'Masuk' => $produk->jml_diterima ?? '-',
+                    'Keluar' => '-',
+                    'Waktu' => $produk->updated_at
+                ];
+            });
+            $mergedCollection = $mergedCollection->merge($dataPOInden);
+        }
+        // pembelian end
 
-        // $dataMutasiMasuk = Produk_Terjual::whereHas('mutasi', function($q) use($isSuperAdmin){
-        //     if (!$isSuperAdmin) {
-        //         $q->where('penerima', Auth::user()->karyawans->lokasi_id);
-        //     }
-        // })->get();
-        // $produkMutasiMasuk = $dataMutasiMasuk->map(function($produk){
-        //     return [
-        //         'Id' => $produk->id,
-        //         'Pengubah' => optional($produk->mutasi->dibuat)->name,
-        //         'No Referensi' => $produk->mutasi->no_mutasi ?? null,
-        //         'Kode Produk Jual' => '-',
-        //         'Nama Produk Jual' => '-',
-        //         'Kode Komponen' => $produk->produk->kode ?? null,
-        //         'Nama Komponen' => $produk->produk->nama ?? null,
-        //         'Kondisi' => $produk->kondisi->nama ?? null,
-        //         'Masuk' => $produk->jml_diterima,
-        //         'Keluar' => '-',
-        //         'Waktu' => $produk->updated_at
-        //     ];
-        // });
-
-        // $mergedCollection = $mergedCollection->merge($produkMutasiMasuk)->sortByDesc('Waktu');
-
-        // $dataMutasiKeluar = Produk_Terjual::whereHas('mutasi', function($q) use($isSuperAdmin){
-        //     if (!$isSuperAdmin) {
-        //         $q->where('pengirim', Auth::user()->karyawans->lokasi_id);
-        //     }
-        // })->get();
-        // $produkMutasiKeluar = $dataMutasiKeluar->map(function($produk){
-        //     return [
-        //         'Id' => $produk->id,
-        //         'Pengubah' => optional($produk->mutasi->dibuat)->name,
-        //         'No Referensi' => $produk->mutasi->no_mutasi ?? null,
-        //         'Kode Produk Jual' => '-',
-        //         'Nama Produk Jual' => '-',
-        //         'Kode Komponen' => $produk->produk->kode ?? null,
-        //         'Nama Komponen' => $produk->produk->nama ?? null,
-        //         'Kondisi' => $produk->kondisi->nama ?? null,
-        //         'Masuk' => '-',
-        //         'Keluar' => $produk->jml_diterima,
-        //         'Waktu' => $produk->updated_at
-        //     ];
-        // });
-
-        // $mergedCollection = $mergedCollection->merge($produkMutasiKeluar)->sortByDesc('Waktu');
-
-        // $dataPenjualanDiambil = Produk_Terjual::whereHas('penjualan', function($q) use($isSuperAdmin){
-        //     if (!$isSuperAdmin) {
-        //         $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        //     }
-        //     $q->where('distribusi', 'Diambil');
-        // })->get();
-
-        // $mergedCollection = $mergedCollection->merge($dataPenjualanDiambil)->sortByDesc('Waktu');
-
-        // $dataPenjualanDikirim = Produk_Terjual::whereHas('do_penjualan', function($q) use($isSuperAdmin){
-        //     if (!$isSuperAdmin) {
-        //         $q->where('lokasi_pengirim', Auth::user()->karyawans->lokasi_id);
-        //     }
-        //     $q->where('jenis_do', 'PENJUALAN');
-        // })->get();
-
-        // $mergedCollection = $mergedCollection->merge($dataPenjualanDikirim)->sortByDesc('Waktu');
+        // mutasi start
+        // mutasi end
         
-        // $dataReturPenjualan = Produk_Terjual::whereHas('retur_penjualan', function($q) use($isSuperAdmin){
-        //     if (!$isSuperAdmin) {
-        //         $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        //     }
-        // })->get();
-
-        // $mergedCollection = $mergedCollection->merge($dataReturPenjualan)->sortByDesc('Waktu');
-        // dd($mergedCollection);
         return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis', 'pemakaian_sendiri', 'mergedCollection'));
     }
 

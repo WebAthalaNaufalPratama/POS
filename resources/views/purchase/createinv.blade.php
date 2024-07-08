@@ -159,10 +159,9 @@ Carbon::setLocale('id');
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
+                                    <div class="col-lg-7 col-md-6 col-sm-12 mt-4">
                                         <div class="page-btn">
                                             Riwayat Pembayaran
-                                            {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table datanew">
@@ -174,38 +173,24 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        {{-- <th>Aksi</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {{-- @foreach ($datapos as $datapo)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $datapo->no_po }}</td>
-                                                        <td>{{ $datapo->supplier->nama }}</td>
-                                                        <td>{{ $datapo->tgl_kirim }}</td>
-                                                        <td>{{ $datapo->tgl_diterima}}</td>
-                                                        <td>{{ $datapo->no_do_suplier}}</td>
-                                                        <td>{{ $datapo->lokasi->nama}}</td>
-                                                        <td>{{ $datapo->status_dibuat}}</td>
-                                                       
-                                                    </tr>
-                                                    @endforeach --}}
+                                                    {{-- Data pembayaran --}}
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="col-lg-5 float-md-right">
+                                    <div class="col-lg-5 col-md-6 col-sm-12 mt-4">
                                         <div class="total-order">
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            
-                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ old('sub_total_dis') }}"readonly required>
-                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ old('sub_total') }}"readonly required>
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ old('sub_total_dis') }}" readonly required>
+                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ old('sub_total') }}" readonly required>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -213,8 +198,8 @@ Carbon::setLocale('id');
                                                     <h4>Total Diskon</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" class="form-control" required name="total_diskon_display" id="total_diskon_display" oninput="calculateTotal(0)"  value="{{ old('total_diskon_display') }}" readonly>
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" class="form-control" required name="total_diskon_display" id="total_diskon_display" oninput="calculateTotal(0)" value="{{ old('total_diskon_display') }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -226,7 +211,7 @@ Carbon::setLocale('id');
                                                             <option value="include" selected>INCLUDE</option>
                                                         </select>
                                                     </h4>
-                                                    <h5 class="col-lg-5">
+                                                    <h5>
                                                         <div class="input-group">
                                                             <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" readonly>
                                                             <span class="input-group-text">%</span>
@@ -237,8 +222,8 @@ Carbon::setLocale('id');
                                                     <h4>Biaya Pengiriman</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)" value="{{ old('biaya_ongkir_dis') }}" required>
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis" class="form-control" oninput="calculateTotal(0)" value="{{ old('biaya_ongkir_dis') }}" required>
                                                             <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ old('biaya_ongkir') }}" required>
                                                         </div>
                                                     </h5>
@@ -247,7 +232,7 @@ Carbon::setLocale('id');
                                                     <h4>Total Tagihan</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
+                                                            <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly value="{{ old('total_tagihan_dis') }}" required>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly value="{{ old('total_tagihan') }}" required>
                                                         </div>
@@ -257,7 +242,7 @@ Carbon::setLocale('id');
                                                     <h4>DP</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
+                                                            <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="dp" name="dp" class="form-control" required readonly>
                                                         </div>
                                                     </h5>
@@ -266,7 +251,7 @@ Carbon::setLocale('id');
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
+                                                            <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly required>
                                                         </div>
                                                     </h5>
@@ -277,6 +262,7 @@ Carbon::setLocale('id');
                                 </div>
                             </div>
                         </div>
+                        
                          <div class="row justify-content-start">
                             <div class="col-md-6 border rounded pt-3 me-1 mt-2">
                              

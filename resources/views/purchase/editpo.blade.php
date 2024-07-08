@@ -149,15 +149,18 @@
                                             </thead>
                                             
                                             <tbody id="dynamic_field_1">
+                                                @php
+                                                    $i = 0;
+                                                @endphp
                                                 @foreach ($produkbelis as $index  => $item)
                                                 <tr>
-                                                    <td hidden><input type="text" name="id[]" id="id_0" class="form-control" value="{{ $item->id }}" readonly hidden></td>
-                                                    <td><input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
-                                                    <td><input type="text" name="nama[]" id="nama_0" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" value="{{ $item->jml_diterima ?? '' }}" ></td>
+                                                    <td hidden><input type="text" name="id[]" id="id_{{ $i }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
+                                                    <td><input type="text" name="kode[]" id="kode_{{ $i }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
+                                                    <td><input type="text" name="nama[]" id="nama_{{ $i }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $item->jml_dikirim }}" readonly></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $item->jml_diterima ?? '' }}" ></td>
                                                     <td>
-                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)">
+                                                        <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" onchange="showInputType({{ $i }})">
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->id }}" {{ $kondisi->id == $item->kondisi_id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
@@ -167,6 +170,9 @@
                                                     </td>
                                                  
                                                 </tr>
+                                                @php
+                                                    $i++;
+                                                @endphp
                                                 @endforeach
                                             </tbody>
                                         </table>
@@ -323,6 +329,10 @@ function clearFile(){
 
         
 $(document).ready(function() {
+    $(document).on('input change', 'input[name="qtytrm[]"]', function () {
+        let index = $(this).attr('id').split('_')[1];
+        validateQty(index);
+    });
     
     if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
@@ -416,12 +426,16 @@ $(document).ready(function() {
     });
 });
 
+    function validateQty(index) {
+        let qtyKrm = parseFloat($(`#qtykrm_${index}`).val());
+        let qtyTrm = parseFloat($(`#qtytrm_${index}`).val());
+
+        if (qtyTrm < 0) {
+            $(`#qtytrm_${index}`).val(0);
+        } else if (qtyTrm > qtyKrm) {
+            $(`#qtytrm_${index}`).val(qtyKrm);
+        }
+    }
 
 </script>
-{{-- <script>
-    $(document).ready(function() {
-        
-    });
-</script> --}}
-
 @endsection

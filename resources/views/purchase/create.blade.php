@@ -183,24 +183,53 @@
                             </div>
                         </div>
                         <br>
+
                         <div class="row justify-content-end">
+                            <div class="col-md-3 col-12 border rounded pt-3 me-1 mt-2">
+                                <div class="table-responsive">
+                                    <table class="table border rounded">
+                                        <thead>
+                                            <tr>
+                                                <th>Dibuat Oleh :</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td id="pembuat">
+                                                    <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
+                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td id="tgl_pembuat">
+                                                    <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br>
+                            </div>
+                        </div>
+                        
+                        {{-- <div class="row justify-content-end">
                             <div class="col-md-3 border rounded pt-3 me-1 mt-2">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
                                             <th>Dibuat Oleh :</th>
-                                            {{-- <th>Diterima</th> --}}
-                                            {{-- <th>Diperiksa</th> --}}
+                                            <th>Diterima</th>
+                                            <th>Diperiksa</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td id="pembuat">
                                                 <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                {{-- <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled> --}}
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                                 <input type="text" class="form-control" value="Nama (Purchasing)" disabled>
                                             </td>
-                                            {{-- <td id="penerima">
+                                            <td id="penerima">
                                                 <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                                 <input type="text" class="form-control" value="Nama (Admin Galery)" disabled>
@@ -209,10 +238,10 @@
                                                 <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                                 <input type="text" class="form-control" value="Nama (Auditor)" disabled>
-                                            </td> --}}
+                                            </td>
                                         </tr>
                                         
-                                        {{-- <tr>
+                                        <tr>
                                             <td id="status_dibuat">
                                                 <input type="text" class="form-control" id="status_buat" value="{{ old('status')}}" readonly>
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required>
@@ -240,23 +269,23 @@
                                                     <option value="acc" disabled>Accept</option>
                                                 </select>
                                             </td>
-                                        </tr> --}}
+                                        </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" >
                                             </td>
-                                            {{-- <td id="tgl_diterima">
+                                            <td id="tgl_diterima">
                                                 <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="" readonly>
                                             </td>
                                             <td id="tgl_pemeriksa">
                                                 <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
-                                            </td> --}}
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 <br>
                             </div>
-                        </div>
+                        </div> --}}
                         
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
