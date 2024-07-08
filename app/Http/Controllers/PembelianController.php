@@ -1457,7 +1457,7 @@ class PembelianController extends Controller
     }
 
 
-    public function po_update(Request $request, $datapo)
+    public function po_update(Request $request, $datapo) //admin
     {
         // dd($request->all());
         // Validasi input
@@ -1503,11 +1503,13 @@ class PembelianController extends Controller
         // $pembelian->tgl_kirim = $request->tgl_kirim;
         // $pembelian->no_do_suplier = $request->no_do ?? '';
         
+        
+        $pembelian->penerima = $request->penerima;
         $pembelian->tgl_diterima = $request->tgl_diterima;
         $pembelian->status_diterima = $request->status;
         $pembelian->tgl_diterima_ttd = $request->tgl_diterima_ttd;
-        $pembelian->status_diperiksa = $request->status_diperiksa ?? null;
-        $pembelian->tgl_diperiksa= $request->tgl_diperiksa ?? null; // Update tgl_diterima_ttd juga jika diperlukan
+        // $pembelian->status_diperiksa = $request->status_diperiksa ?? null;
+        // $pembelian->tgl_diperiksa= $request->tgl_diperiksa ?? null; // Update tgl_diterima_ttd juga jika diperlukan
     
 
         // if ($request->hasFile('bukti')) {

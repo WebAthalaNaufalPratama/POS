@@ -140,9 +140,11 @@
                                         <li>
                                             <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
                                         </li>
+                                        @if ($datapo->status_dibuat == "TUNDA")
                                         <li>
                                             <a href="{{ route('pembelian.editpurchase', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit PO</a>
                                         </li>
+                                        @endif
                                     </ul>
                                 </td>
                                 @endrole
@@ -155,9 +157,11 @@
                                         <li>
                                             <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
                                         </li>
+                                        @if ($datapo->status_diterima == "TUNDA" || $datapo->status_diterima == null )
                                         <li>
                                             <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>
+                                        @endif
                                     </ul>
                                 </td>
                                 @endrole
