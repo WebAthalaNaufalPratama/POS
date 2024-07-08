@@ -9,11 +9,14 @@
                     <div class="page-title">
                         <h4>Purchase Order</h4>
                     </div>
-                    @role('Purchasing')
+                    @php
+                        $user = Auth::user();
+                    @endphp
+                    @if($user->hasRole(['Purchasing']))
                     <div class="page-btn">
                         <a href="{{ route('pembelian.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembelian</a>
                     </div>
-                    @endrole
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -40,6 +43,7 @@
                             @endforeach
                         </select>
                     </div>
+                    @if(Auth::user()->hasRole('Purchasing') || Auth::user()->hasRole('Finance'))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
                             <option value="">Pilih Status</option>
@@ -47,11 +51,13 @@
                             <option value="Belum Lunas" {{ request()->input('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                         </select>
                     </div>
+                    @endif
                     <div class="col-sm-2">
                         <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('pembelian.index') }}" class="btn btn-info">Filter</a>
                         <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('pembelian.index') }}" class="btn btn-warning">Clear</a>
                     </div>
                 </div>
+                
                 <div class="table-responsive">
                     <table class="table datanew">
                         <thead>
@@ -63,20 +69,17 @@
                                 <th>Tanggal Terima</th>
                                 <th>No DO Supplier</th>
                                 <th>Lokasi</th>
-                                @role('Purchasing')
+                                @if($user->hasRole(['Purchasing']))
                                 <th>Status Purchase</th>
-                                <th>Status Pembayaran</th>
-                                @endrole
-                                @role('AdminGallery')
+                                @endif
+                                @if($user->hasRole(['AdminGallery']))
                                 <th>Status Admin</th>
-                                @endrole
-                                @role('Auditor')
+                                @endif
+                                @if($user->hasRole(['Auditor']))
                                 <th>Status Auditor</th>
-                                @endrole
-                                @role('Finance')
-                                <th>Status Finance</th>
+                                @endif
                                 <th>Status Pembayaran</th>
-                                @endrole
+                               
                                 <th>Barang Retur</th>
                                 <th>Aksi</th>
                             </tr>
@@ -91,24 +94,15 @@
                                 <td>{{ $datapo->tgl_diterima ? tanggalindo($datapo->tgl_diterima) : ''}}</td>
                                 <td>{{ $datapo->no_do_suplier}}</td>
                                 <td>{{ $datapo->lokasi->nama}}</td>
-                                @role('Purchasing')
+                                @if($user->hasRole(['Purchasing']))
                                 <td>{{ $datapo->status_dibuat}}</td>
-                                <td>
-                                    @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
-                                        LUNAS
-                                    @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
-                                        BELUM LUNAS
-                                    @endif
-                                </td>
-                                @endrole
-                                @role('AdminGallery')
+                                @endif
+                                @if($user->hasRole(['AdminGallery']))
                                 <td>{{ $datapo->status_diterima}}</td>
-                                @endrole
-                                @role('Auditor')
-                                <td>{{ $datapo->status_diterima}}</td>
-                                @endrole
-                                @role('Finance')
+                                @endif
+                                @if($user->hasRole(['Auditor']))
                                 <td>{{ $datapo->status_diperiksa}}</td>
+                                @endif
                                 <td>
                                     @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
                                         LUNAS
@@ -116,8 +110,7 @@
                                         BELUM LUNAS
                                     @endif
                                 </td>
-                                @endrole
-                                
+                               
                                 <td>
                                 @if($datapo->no_retur !== null) 
                                 {{ $datapo->no_retur }}
@@ -126,65 +119,69 @@
                                 @endif
                                 </td>
                                 
-                                @role('Purchasing')
-                                <td class="text-center">
-                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        @if ($datapo->tgl_diterima_ttd !== null)
-                                        <li>
-                                            @php
-                                                $invoiceExists = $datainv->contains('pembelian_id', $datapo->id);
-                                            @endphp
-                                
-                                            @if ($invoiceExists && $datapo->invoice->sisa != 0)
-                                                <a href="{{ route('invoice.edit',['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
-                                                </a>
-                                            @elseif($invoiceExists && $datapo->invoice->sisa == 0)
-                                                <a href="{{ route('invoice.show',['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
-                                                </a>
-                                            @else
-                                            <a href="{{ route('invoicebiasa.create', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
-                                                </a>
+                                @if($user->hasRole(['Purchasing', 'Auditor']))
+                                    <td class="text-center">
+                                        <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            @if ($datapo->tgl_diterima_ttd !== null)
+                                                <li>
+                                                    @php
+                                                        $invoiceExists = $datainv->contains('pembelian_id', $datapo->id);
+                                                    @endphp
+
+                                                    @if ($invoiceExists && $datapo->invoice->sisa != 0)
+                                                        <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
+                                                        </a>
+                                                    @elseif($invoiceExists && $datapo->invoice->sisa == 0)
+                                                        <a href="{{ route('invoice.show', ['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('invoicebiasa.create', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
+                                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
+                                                        </a>
+                                                    @endif
+                                                </li>
                                             @endif
-                                        </li>
-                                        @endif
-                                        <li>
-                                            <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
-                                        </li>
-                                        @if ($datapo->status_dibuat == "TUNDA")
-                                        <li>
-                                            <a href="{{ route('pembelian.editpurchase', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit PO</a>
-                                        </li>
-                                        @endif
-                                    </ul>
-                                </td>
-                                @endrole
-                                @role('AdminGallery')
-                                <td class="text-center">
-                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
-                                        </li>
-                                        @if ($datapo->status_diterima == null)
-                                        <li>
-                                            <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
-                                        </li>
-                                        @endif
-                                        {{-- @if ($datapo->status_diterima == "TUNDA")
-                                        <li>
-                                            <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Data Terima</a>
-                                        </li>
-                                        @endif --}}
-                                    </ul>
-                                </td>
-                                @endrole
+                                            <li>
+                                                <a href="{{ route('pembelian.show', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail PO
+                                                </a>
+                                            </li>
+                                            @if ($datapo->status_dibuat == "TUNDA")
+                                                <li>
+                                                    <a href="{{ route('pembelian.editpurchase', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
+                                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit PO
+                                                    </a>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </td>
+                                @elseif($user->hasRole(['AdminGallery', 'Auditor']))
+                                    <td class="text-center">
+                                        <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="{{ route('pembelian.show', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail PO
+                                                </a>
+                                            </li>
+                                            @if ($datapo->status_diterima == "TUNDA" || $datapo->status_diterima == null)
+                                                <li>
+                                                    <a href="{{ route('pembelian.edit', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
+                                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Acc Terima
+                                                    </a>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </td>
+                                @endif
+
 
                             </tr>
                             @endforeach
@@ -195,7 +192,7 @@
         </div>
     </div>
 </div>
-@unless(Auth::user()->hasRole('AdminGallery'))
+{{-- @unless(Auth::user()->hasRole('AdminGallery')) --}}
    
 @if(Auth::user()->hasRole('Purchasing') || Auth::user()->hasRole('Auditor'))
 <div class="row">
@@ -321,7 +318,7 @@
 </div>
 @endif
 
-@endunless
+{{-- @endunless --}}
 @endsection
 
 @section('scripts')

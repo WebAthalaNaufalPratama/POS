@@ -13,9 +13,11 @@
                         $user = Auth::user();
                         $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                     @endphp
+                    @if($user->hasRole(['Purchasing', 'SuperAdmin', 'Finance']))
                     <div class="page-btn">
                         <a href="{{ route('mutasigalerygalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
                     </div>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -65,11 +67,11 @@
                                         <div class="dropdown-menu">
                                         @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                             <a class="dropdown-item" href="{{ route('auditmutasigalerygalery.edit', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
-                                        @elseif($user->hasRole(['KasirOutlet', 'AdminGallery', 'KasirGallery']) && $mutasi->status != 'DIKONFIRMASI')
-                                        @if($lokasi->lokasi_id == $mutasi->pengirim)
+                                        @elseif($user->hasRole(['Purchasing']))
+                                        @if($mutasi->status != 'DIKONFIRMASI')
                                             <a class="dropdown-item" href="{{ route('auditmutasigalerygalery.edit', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
-                                            <a class="dropdown-item" href="{{ route('mutasigalerygalery.payment', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                         @endif
+                                            <a class="dropdown-item" href="{{ route('mutasigalerygalery.payment', ['mutasiGAG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                         @endif
                                             
                                         @if($lokasi->lokasi_id == $mutasi->penerima)

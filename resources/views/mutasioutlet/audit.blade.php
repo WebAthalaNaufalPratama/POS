@@ -83,9 +83,16 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required >
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $mutasis->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan" id="alasan"></textarea>
+                                            </div>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
                                             <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
@@ -129,8 +136,8 @@
                                                         @php
                                                             $isTRDSelected = false;
                                                         @endphp
-                                                            
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
+                                                            <input type="hidden" name="nama_produk[]" class="form-control" value="{{ $produk->id}}">
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" >
                                                                 @php
                                                                     $isTRDSelected = false; // Reset the variable each time the loop starts
                                                                     $selectedTRDKode = ''; // Initialize the selected TRD product code
@@ -158,7 +165,7 @@
                                                                         }
                                                                     }
                                                                     @endphp
-                                                                    <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                                    <option value="{{ $pj->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
                                                                         @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                             {{ $pj->produk->nama }}
                                                                         @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
@@ -758,6 +765,15 @@
             }
         });
 
+        $('#status').change(function(){
+            var status = $(this).val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan').hide();
+            }
+        });
 
         $(document).on('change', '[id^=nama_produk]', function() {
             var id = $(this).attr('id').split('_')[2];

@@ -523,6 +523,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGG}/view', 'MutasiController@view_ghgalery')->name('mutasighgalery.view');
             Route::get('/{mutasiGG}/auditGG', 'MutasiController@audit_GG')->name('auditmutasighgalery.edit');
             Route::patch('/auditmutasiGG', 'MutasiController@audit_GGUpdate')->name('auditmutasighgalery.update');
+            Route::get('/get-products-by-lokasi',  'MutasiController@getProductsByLokasi')->name('getProductsByLokasi');
         });
 
         Route::group(['prefix' => 'inven_greenhouse'], function() {

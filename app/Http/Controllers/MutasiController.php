@@ -25,6 +25,7 @@ use App\Models\Pembayaran;
 use App\Models\InventoryGallery;
 use App\Models\InventoryOutlet;
 use App\Models\InventoryGreenHouse;
+use App\Models\InventoryGudang;
 use App\Models\Mutasi;
 use App\Models\ProdukMutasi;
 use App\Models\ReturPenjualan;
@@ -1424,15 +1425,14 @@ class MutasiController extends Controller
         $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
         // dd($karyawans);
         // $customers = Customer::where('lokasi_id', $lokasi)->get();
-        $lokasipengirim = Lokasi::where('tipe_lokasi', 3)->get();
-        $lokasipenerima = Lokasi::where('tipe_lokasi', 1)->get();
+        $lokasipengirim = Lokasi::where('tipe_lokasi', 3)->orwhere('tipe_lokasi', 4)->get();
+        $lokasipenerima = Lokasi::where('tipe_lokasi', 1)->orwhere('tipe_lokasi', 3)->orwhere('tipe_lokasi', 4)->get();
         $ongkirs = Ongkir::get();
         $karyawans = Karyawan::where('lokasi_id', $lokasi)->get();
         // $promos = Promo::where(function ($query) use ($lokasi) {
         //     $query->where('lokasi_id', $lokasi)
         //         ->orWhere('lokasi_id', 'Semua');
         // })->get();
-        $produks = InventoryGreenhouse::all();
         // dd($produks);
         $bankpens = Rekening::get();
         $Invoice = Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->latest()->first();
@@ -1460,7 +1460,22 @@ class MutasiController extends Controller
         // $invoices = Penjualan::get();
 
         // return view('mutasighgalery.create', compact('customers', 'lokasipengirim','lokasipenerima',  'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
-        return view('mutasighgalery.create', compact('lokasipenerima', 'lokasipengirim', 'produks', 'Invoice', 'cekInvoice', 'bankpens', 'ongkirs', 'karyawans'));
+        return view('mutasighgalery.create', compact('lokasipenerima', 'lokasipengirim', 'Invoice', 'cekInvoice', 'bankpens', 'ongkirs', 'karyawans'));
+    }
+
+    public function getProductsByLokasi(Request $request)
+    {
+        $tipe_lokasi = $request->tipe_lokasi;
+
+        if ($tipe_lokasi == 4) {
+            $produks = InventoryGudang::with(['produk', 'kondisi'])->get();
+        } elseif ($tipe_lokasi == 3) {
+            $produks = InventoryGreenhouse::with(['produk', 'kondisi'])->get();
+        } else {
+            $produks = [];
+        }
+    
+        return response()->json($produks);
     }
 
     public function view_galerygalery($mutasi){
@@ -1519,36 +1534,63 @@ class MutasiController extends Controller
             $data['bukti'] = $filePath;
         }
 
-        $allStockAvailable = true;
-        
-        for ($i = 0; $i < count($data['nama_produk']); $i++) {
-            $getProdukJual = InventoryGreenHouse::where('id', $data['nama_produk'][$i])->first();
-            $stok = null;
-            // dd($getProdukJual);
-            $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
-                                    ->where('kode_produk', $getProdukJual->kode_produk)
-                                    ->where('kondisi_id', $getProdukJual->kondisi_id)
-                                    ->first();
-            // dd($stok);
+        $lokasi = Lokasi::where('id', $req->pengirim)->first();
 
-            if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
-                $allStockAvailable = false;
-                break;
+        
+        if($lokasi->tipe_lokasi == 3 && $req->status == 'DIKONFIRMASI'){
+            $allStockAvailable = true;
+        
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                $getProdukJual = InventoryGreenHouse::where('id', $data['nama_produk'][$i])->first();
+                $stok = null;
+                // dd($getProdukJual);
+                $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
+                                        ->where('kode_produk', $getProdukJual->kode_produk)
+                                        ->where('kondisi_id', $getProdukJual->kondisi_id)
+                                        ->first();
+                // dd($stok);
+
+                if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
+                    $allStockAvailable = false;
+                    break;
+                }
+            }
+
+            if (!$allStockAvailable) {
+                return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
+            }
+        }elseif($lokasi->tipe_lokasi == 4 && $req->status == 'DIKONFIRMASI'){
+            $allStockAvailable = true;
+        
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                $getProdukJual = InventoryGudang::where('id', $data['nama_produk'][$i])->first();
+                $stok = null;
+                // dd($getProdukJual);
+                $stok = InventoryGudang::where('lokasi_id', $req->pengirim)
+                                        ->where('kode_produk', $getProdukJual->kode_produk)
+                                        ->where('kondisi_id', $getProdukJual->kondisi_id)
+                                        ->first();
+                // dd($stok);
+
+                if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
+                    $allStockAvailable = false;
+                    break;
+                }
+            }
+
+            if (!$allStockAvailable) {
+                return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
             }
         }
 
         // dd($stok);
-
-        if (!$allStockAvailable) {
-            return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
-        }
 
         $data['pembuat_id'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
         
         $mutasi = Mutasi::create($data);
 
-        $lokasi = Lokasi::where('id', $req->pengirim)->first();
+        
 
         if ($mutasi) {
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
@@ -1574,16 +1616,29 @@ class MutasiController extends Controller
                     'harga_total' => 0
                 ]);
                 if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-                $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
-                                    ->where('kode_produk', $getProdukJual->kode_produk)
-                                    ->where('kondisi_id', $getProdukJual->kondisi_id)
-                                    ->first();
-                // dd($stok);
-    
-                if ($stok) {
-                    $stok->jumlah -= intval($data['jumlah_dikirim'][$i]);
-                    $stok->update();
+                
+                if($req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 3){
+                    $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
+                                        ->where('kode_produk', $getProdukJual->kode_produk)
+                                        ->where('kondisi_id', $getProdukJual->kondisi_id)
+                                        ->first();
+                    // dd($stok);
+        
+                    if ($stok) {
+                        $stok->jumlah -= intval($data['jumlah_dikirim'][$i]);
+                        $stok->update();
+                    }
+                }elseif($req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 4){
+                    $stok = InventoryGudang::where('lokasi_id', $req->pengirim)
+                                        ->where('kode_produk', $getProdukJual->kode_produk)
+                                        ->where('kondisi_id', $getProdukJual->kondisi_id)
+                                        ->first();
+                    // dd($stok);
+        
+                    if ($stok) {
+                        $stok->jumlah -= intval($data['jumlah_dikirim'][$i]);
+                        $stok->update();
+                    }
                 }
             }
             return redirect(route('mutasighgalery.index'))->with('success', 'Data Berhasil Disimpan');
@@ -1919,7 +1974,7 @@ class MutasiController extends Controller
 
         $allkeys = array_keys($req->all());
 
-        $komponens = ['_token', '_method','nama_produk', 'kodegiftproduk', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk', 'kondisitradproduk', 'jumlahtradproduk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiOG'];
+        $komponens = ['_token', '_method','nama_produk', 'kodegiftproduk', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk', 'kondisitradproduk', 'jumlahtradproduk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiOG', 'kode_produk'];
 
         $filter = array_filter($allkeys, function($key) use ($komponens){
             foreach($komponens as $komponen){
@@ -1931,15 +1986,180 @@ class MutasiController extends Controller
         $data = $req->except($filter);
         // dd($data);
 
-        $data['dibukukan_id'] = Auth::user()->id;
-        $data['tanggal_dibukukan'] = now();
+        //update data ttd
+        $user = Auth::user();
+        $jabatan = Karyawan::where('user_id', $user->id)->first();
+        $jabatanpegawai = $jabatan->jabatan;
+        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
+
+        if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+            $data['diperiksa_id'] = Auth::user()->id;
+            $data['tanggal_diperiksa'] = now();
+        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+            $data['dibukukan_id'] = Auth::user()->id;
+            $data['tanggal_dibukukan'] = now();
+        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
+            $data['pembuat_id'] = Auth::user()->id;
+            $data['tanggal_pembuat'] = now();
+        }
         // dd($data);
 
         $update = Mutasi::where('id', $mutasis)->update($data);
-        if($update){
-            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+
+        if($req->status == 'DIBATALKAN'){
+            return redirect(route('mutasigalery.index'))->with('success', 'Berhasil Mengupdate Data');
+        }
+
+        //hapus komponen agar bisa di create ulang
+        $produkterjualmutasi = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
+        $arrayCombined =  $produkterjualmutasi->pluck('id')->toArray();
+        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_mutasigo', $req->no_mutasi)->get();
+        $ceken = $cek->pluck('id')->toArray();
+
+        if (!empty($ceken)) {
+            Produk_Terjual::whereIn('id', $ceken)->forceDelete();
+            Komponen_Produk_Terjual::whereIn('produk_terjual_id', $ceken)->forceDelete();
+        }
+        Komponen_Produk_Terjual::whereIn('produk_terjual_id', $arrayCombined)->forceDelete();
+
+        for ($i = 0; $i < count($req->nama_produk); $i++) {
+            $getProdukJual = Produk_Terjual::with('komponen')->where('id', $req->nama_produk[$i])->first();
+            
+            $produk_terjual = Produk_Terjual::where('id', $req->nama_produk[$i])->update([
+                'produk_jual_id' => $getProdukJual->produk_jual_id,
+                'no_mutasiog' => $req->no_mutasi,
+                'jumlah' => $req->jumlah_dikirim[$i]
+            ]);
+
+            if($getProdukJual){
+                $getProdukJual->jumlah_dikirim = intval($getProdukJual->jumlah_dikirim) - intval($req->jumlah_dikirim[$i]);
+                $getProdukJual->update();
+            }
+            
+            if (!$produk_terjual) {
+                return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data');
+            }
+
+            $cekgfttrd = substr($getProdukJual->produk->kode, 0, 3);
+
+            if ($cekgfttrd == 'GFT') {
+                $kode_key = 'kodegiftproduk_' . $i;
+                $komponen_key = 'komponengiftproduk_' . $i;
+                $kondisi_key = 'kondisigiftproduk_' . $i;
+                $jumlah_key = 'jumlahgiftproduk_' . $i;
+
+                if (isset($req->$komponen_key) && is_array($req->$komponen_key)) {
+                    $cekcount = count($req->$komponen_key);
+                    $produkCollection = collect();
+                    
+                    // Membuat koleksi produk dari kode produk yang diberikan
+                    foreach ($req->$kode_key as $index => $kodeProduk) {
+                        $produk = Produk::where('kode', $kodeProduk)->first();
+                        if ($produk) {
+                            $produkCollection->push([
+                                'produk' => $produk,
+                                'kondisi' => isset($req->$kondisi_key[$index]) ? Kondisi::where('nama', $req->$kondisi_key[$index])->value('id') : null,
+                                'jumlah' => isset($req->$jumlah_key[$index]) ? $req->$jumlah_key[$index] : 0,
+                            ]);
+                        }
+                    }
+
+
+                    // Iterasi melalui setiap produk dan setiap komponen
+                    foreach ($produkCollection as $getProduk) {
+                            // Buat objek Komponen_Produk_Terjual
+                            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                                'produk_terjual_id' => $req->nama_produk[$i],
+                                'kode_produk' => $getProduk['produk']->kode, 
+                                'nama_produk' => $getProduk['produk']->nama, 
+                                'tipe_produk' => $getProduk['produk']->tipe_produk, 
+                                'kondisi' => $getProduk['kondisi'], 
+                                'deskripsi' => $getProduk['produk']->deskripsi, 
+                                'jumlah' => $getProduk['jumlah'], 
+                                'harga_satuan' => 0,
+                                'harga_total' => 0
+                            ]);
+
+                            if (!$komponen_produk_terjual) {
+                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                            }
+
+                            // if ($lokasi->tipe_lokasi == 1) {
+                            //     $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+                            //         ->where('kode_produk', $komponen_produk_terjual->kode_produk)
+                            //         ->where('kondisi_id', $komponen_produk_terjual->kondisi)
+                            //         ->first();
+
+                            //     if ($stok) {
+                            //         $stok->jumlah += intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah);
+                            //         $stok->update();
+                            //     }
+                            // }
+                        // }
+                    }
+
+                    // Pengurangan inven outlet
+                    // $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                    //     ->where('kode_produk', $produk_terjual->produk->kode)
+                    //     ->first();
+
+                    // if (!$stok) {
+                    //     return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                    // }
+
+                    // $stok->jumlah -= intval($produk_terjual->jumlah);
+                    // $stok->save();
+                }
+            } elseif ($cekgfttrd == 'TRD') {
+                $kondisi_key = 'kondisitradproduk_' . $i;
+                $jumlah_key = 'jumlahtradproduk_' . $i;
+
+                if (isset($req->$kondisi_key) && is_array($req->$kondisi_key)) {
+                    for ($index = 0; $index < count($req->$kondisi_key); $index++) {
+                        $kondisi = Kondisi::where('nama', $req->$kondisi_key[$index])->value('id');
+                        $jumlah = $req->$jumlah_key[$index];
+
+                        foreach ($getProdukJual->komponen as $komponen) {
+                            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                                'produk_terjual_id' => $req->nama_produk[$i],
+                                'kode_produk' => $komponen->kode_produk,
+                                'nama_produk' => $komponen->nama_produk,
+                                'tipe_produk' => $komponen->tipe_produk,
+                                'kondisi' => $kondisi,
+                                'deskripsi' => $komponen->deskripsi,
+                                'jumlah' => $jumlah,
+                                'harga_satuan' => $komponen->harga_satuan,
+                                'harga_total' => $komponen->harga_total
+                            ]);
+
+                            if (!$komponen_produk_terjual) {
+                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                            }
+                        }
+                    }
+                }
+
+                //pengurangan inven outlet
+                // $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                //                     ->where('kode_produk', $produk_terjual->produk->kode)
+                //                     ->first();
+                //         // dd($stok);
+                    
+                // if (!$stok) {
+                //     return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                // }
+
+                // $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                // $stok->save();
+            }
+        }
+
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('mutasioutlet.show', ['mutasiOG' => $mutasis]))->with('success', 'Berhasil Mengupdate Data');
+        }elseif($req->status == 'TUNDA'){
+            return redirect()->back()->with('success', 'Berhasil Mengupdate data');
         }else{
-            return redirect()->back()->with('fail', 'Gagal Mengupdate Data');
+            return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
     }
 
@@ -2072,9 +2292,10 @@ class MutasiController extends Controller
 
     public function audit_GG($mutasi)
     {
-        $lokasis = Lokasi::all();
+        $lokasis = Lokasi::where('tipe_lokasi', 3)->orwhere('tipe_lokasi', 4)->get();
         $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigg', $mutasis->no_mutasi)->get();
+        // dd($produks)
         // dd($produks);
         foreach($produks as $produk)
         {
@@ -2105,7 +2326,7 @@ class MutasiController extends Controller
         $mutasis = $req->input('mutasiGG');
 
         $allkeys = array_keys($req->all());
-        $keys = ['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGG'];
+        $keys = ['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGG', 'kode_produk'];
         $filter = array_filter($allkeys, function($key) use ($keys){
             foreach($keys as $ke){
                 if(strpos($ke, $key) === 0){
@@ -2116,15 +2337,85 @@ class MutasiController extends Controller
 
         $data = $req->except($filter);
 
-        // dd($data);
-        $data['dibukukan_id'] = Auth::user()->id;
-        $data['tanggal_dibukukan'] = now();
+         //update data ttd
+         $user = Auth::user();
+         $jabatan = Karyawan::where('user_id', $user->id)->first();
+         $jabatanpegawai = $jabatan->jabatan;
+         $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
+ 
+         if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+             $data['diperiksa_id'] = Auth::user()->id;
+             $data['tanggal_diperiksa'] = now();
+         }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+             $data['dibukukan_id'] = Auth::user()->id;
+             $data['tanggal_dibukukan'] = now();
+         }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
+             $data['pembuat_id'] = Auth::user()->id;
+             $data['tanggal_pembuat'] = now();
+         }
 
         $update = Mutasi::where('id', $mutasis)->update($data);
-        if($update){
-            return redirect()->back()->with('success', 'Berhasil Mengupdate Data');
+
+        if($req->status == 'DIBATALKAN'){
+            return redirect(route('mutasighgalery.index'))->with('success', 'Berhasil Mengupdate Data');
+        }
+
+        //hapus komponen agar bisa di create ulang
+        $produkterjualmutasi = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
+        $arrayCombined =  $produkterjualmutasi->pluck('id')->toArray();
+        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_mutasigag', $req->no_mutasi)->get();
+        $ceken = $cek->pluck('id')->toArray();
+
+        if (!empty($ceken)) {
+            Produk_Terjual::whereIn('id', $ceken)->forceDelete();
+            Komponen_Produk_Terjual::whereIn('produk_terjual_id', $ceken)->forceDelete();
+        }
+        Komponen_Produk_Terjual::whereIn('produk_terjual_id', $arrayCombined)->forceDelete();
+
+        for ($i = 0; $i < count($req->kode_produk); $i++) {
+            $getProdukJual = InventoryGreenHouse::where('id', $req->kode_produk[$i])->first();
+            $getProduk = Produk::where('kode', $getProdukJual->kode_produk)->first();
+            // dd($getProduk);
+            $produk_terjual = Produk_Terjual::where('id', $req->nama_produk[$i])->update([
+                'produk_jual_id' => $req->kode_produk[$i],
+                'no_mutasigg' => $req->no_mutasi,
+                'jumlah' => $req->jumlah_dikirim[$i],
+            ]);
+
+            if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                'produk_terjual_id' => $req->nama_produk[$i],
+                'kode_produk' => $getProduk->kode,
+                'nama_produk' => $getProduk->nama,
+                'tipe_produk' => $getProduk->tipe_produk,
+                'kondisi' => $getProdukJual->kondisi_id,
+                'deskripsi' => $getProduk->deskripsi,
+                'jumlah' => $req->jumlah_dikirim[$i],
+                'harga_satuan' => 0,
+                'harga_total' => 0
+            ]);
+            if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+            if($req->status == 'DIKONFIRMASI'){
+                $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
+                                    ->where('kode_produk', $getProdukJual->kode_produk)
+                                    ->where('kondisi_id', $getProdukJual->kondisi_id)
+                                    ->first();
+                // dd($stok);
+
+                if ($stok) {
+                    $stok->jumlah -= intval($req->jumlah_dikirim[$i]);
+                    $stok->update();
+                }
+            }
+        }
+
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('mutasighgalery.show', ['mutasiGG' => $mutasis]))->with('success', 'Berhasil Mengupdate Data');
+        }elseif($req->status == 'TUNDA'){
+            return redirect(route('mutasighgalery.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
-            return redirect()->back()->with('fail', 'Gagal Menyimpan Data');
+            return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
 
     }
