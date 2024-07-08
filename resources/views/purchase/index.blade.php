@@ -132,9 +132,11 @@
                                             <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>
                                         @endif
+                                        @if ($datapo->status_dibuat == 'TUNDA' || $datapo->status_dibuat == 'BATAL' )
                                         <li>
                                             <a href="{{ route('pembelian.editpurchase', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit PO</a>
                                         </li>
+                                        @endif
                                         <li>
                                             {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
                                         </li>

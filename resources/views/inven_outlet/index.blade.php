@@ -57,9 +57,9 @@
                                     <li>
                                         <a href="{{ route('inven_outlet.edit', ['inven_outlet' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
-                                    <li>
+                                    {{-- <li>
                                         <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
-                                    </li>
+                                    </li> --}}
                                 </ul>
                             </td>
                         </tr>
