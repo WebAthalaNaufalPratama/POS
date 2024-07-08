@@ -65,14 +65,18 @@
                                 <th>Lokasi</th>
                                 @role('Purchasing')
                                 <th>Status Purchase</th>
+                                <th>Status Pembayaran</th>
                                 @endrole
                                 @role('AdminGallery')
                                 <th>Status Admin</th>
                                 @endrole
+                                @role('Auditor')
+                                <th>Status Auditor</th>
+                                @endrole
                                 @role('Finance')
                                 <th>Status Finance</th>
-                                @endrole
                                 <th>Status Pembayaran</th>
+                                @endrole
                                 <th>Barang Retur</th>
                                 <th>Aksi</th>
                             </tr>
@@ -89,20 +93,31 @@
                                 <td>{{ $datapo->lokasi->nama}}</td>
                                 @role('Purchasing')
                                 <td>{{ $datapo->status_dibuat}}</td>
+                                <td>
+                                    @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
+                                        LUNAS
+                                    @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
+                                        BELUM LUNAS
+                                    @endif
+                                </td>
                                 @endrole
                                 @role('AdminGallery')
                                 <td>{{ $datapo->status_diterima}}</td>
                                 @endrole
+                                @role('Auditor')
+                                <td>{{ $datapo->status_diterima}}</td>
+                                @endrole
                                 @role('Finance')
                                 <td>{{ $datapo->status_diperiksa}}</td>
-                                @endrole
                                 <td>
-                                @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
-                                    LUNAS
-                                @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
-                                    BELUM LUNAS
-                                @endif
+                                    @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
+                                        LUNAS
+                                    @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
+                                        BELUM LUNAS
+                                    @endif
                                 </td>
+                                @endrole
+                                
                                 <td>
                                 @if($datapo->no_retur !== null) 
                                 {{ $datapo->no_retur }}
@@ -157,11 +172,16 @@
                                         <li>
                                             <a href="{{ route('pembelian.show', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
                                         </li>
-                                        @if ($datapo->status_diterima == "TUNDA" || $datapo->status_diterima == null )
+                                        @if ($datapo->status_diterima == null)
                                         <li>
                                             <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>
                                         @endif
+                                        {{-- @if ($datapo->status_diterima == "TUNDA")
+                                        <li>
+                                            <a href="{{ route('pembelian.edit', ['type' => 'pembelian','datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Data Terima</a>
+                                        </li>
+                                        @endif --}}
                                     </ul>
                                 </td>
                                 @endrole
@@ -175,6 +195,9 @@
         </div>
     </div>
 </div>
+@unless(Auth::user()->hasRole('AdminGallery'))
+   
+@if(Auth::user()->hasRole('Purchasing') || Auth::user()->hasRole('Auditor'))
 <div class="row">
     <div class="col-sm-12">
         <div class="card">
@@ -296,6 +319,9 @@
         </div>
     </div>
 </div>
+@endif
+
+@endunless
 @endsection
 
 @section('scripts')

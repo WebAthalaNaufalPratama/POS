@@ -86,12 +86,28 @@
                                        </div>
                                        <div class="form-group">
                                         <label for="status">Status</label>
+                                        @role('Purchasing')
                                         <select id="status" name="status" class="form-control select2" required>
                                             <option value="">Pilih Status</option>
                                             <option value="TUNDA" {{ old('status') == 'TUNDA' || old('status') == '' ? 'selected' : '' }}>TUNDA</option>
                                             <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                             <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                         </select>
+                                        @endrole
+                                        @role('AdminGallery')
+                                        <select id="status" name="status" class="form-control select2" required>
+                                            <option value="">Pilih Status</option>
+                                            <option value="DIKONFIRMASI" selected>DIKONFIRMASI</option>
+                                        </select>
+                                        @endrole
+                                        @role('Auditor')
+                                        <select id="status" name="status" class="form-control select2" required>
+                                            <option value="">Pilih Status</option>
+                                            <option value="TUNDA" {{ old('status') == 'TUNDA' || old('status') == '' ? 'selected' : '' }}>TUNDA</option>
+                                            <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                            <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                        </select>
+                                        @endrole
                                        </div>   
                                     </div>
                                         <div class="col-md-3">
