@@ -41,7 +41,7 @@
                                             <select id="pengirim" name="pengirim" class="form-control" required >
                                                 <option value="">Pilih Nama Pengirim</option>
                                                 @foreach ($lokasis as $lokasi)
-                                                <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->pengirim ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
+                                                <option value="{{ $lokasi->id }}" data-tipe-lokasi="{{ $lokasi->tipe_lokasi }}" {{ $lokasi->id == $mutasis->pengirim ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -60,7 +60,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="no_mutasi">No Mutasi</label>
-                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" >
+                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -83,9 +83,16 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required >
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $mutasis->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="alasan" style="display: none;">
+                                                <label for="alasan">Alasan</label>
+                                                <textarea name="alasan" id="alasan"></textarea>
+                                            </div>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
                                             <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
@@ -114,7 +121,7 @@
                                                     <tr>
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
+                                                        <!-- <th>Jumlah Diterima</th> -->
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -126,22 +133,17 @@
                                                     @foreach ($produks as $produk)
                                                     <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
+                                                            <input type="hidden" id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" value="{{ $produk->id }}">
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control select2">
                                                                 <option value="">Pilih Produk</option>
-                                                                @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
-                                                                    {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
-                                                                </option>
-                                                                @endforeach
                                                             </select>
-                                                            <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
                                                         </td> 
                                                         <td>
                                                             <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" >
                                                         </td>
-                                                        <td>
+                                                        <!-- <td>
                                                             <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
-                                                        </td>
+                                                        </td> -->
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -444,127 +446,105 @@
     });
 </script>
 
+@foreach ($produks as $index => $produk)
+    @foreach ($produk->komponen as $komponen)
+        <script>
+            $(document).ready(function() {
+                var tipeLokasi = $('#pengirim').find(':selected').data('tipe-lokasi');
+                var selectedProdukId = "{{ $komponen->kode_produk }}"; 
+                var selectedKondisiId = "{{ $komponen->kondisi }}"; 
+                console.log('Initializing fetch for row:', {{ $index }});
+                console.log('Selected Produk ID:', selectedProdukId);
+                console.log('Selected Kondisi ID:', selectedKondisiId);
+                fetchProducts(tipeLokasi, {{ $index }}, selectedProdukId, selectedKondisiId);
+            });
+        </script>
+    @endforeach
+@endforeach
+
+
+
 <script>
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     $(document).ready(function() {
+        function fetchProducts(tipeLokasi, rowId, selectedProdukId = null, selectedKondisiId = null) {
+    console.log('Fetching products for tipe lokasi:', tipeLokasi, 'rowId:', rowId);
+    console.log('Selected Produk ID before fetch:', selectedProdukId);
+    console.log('Selected Kondisi ID before fetch:', selectedKondisiId);
+
+    $.ajax({
+        url: '{{ route("getProductsByLokasi") }}',
+        type: 'GET',
+        data: { tipe_lokasi: tipeLokasi },
+        success: function(data) {
+            console.log('Fetched products:', data);
+            console.log('Selected Produk ID after fetch:', selectedProdukId);
+            console.log('Selected Kondisi ID after fetch:', selectedKondisiId);
+            updateProductOptions(data, rowId, selectedProdukId, selectedKondisiId);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching products:', error);
+        }
+    });
+}
+
+function updateProductOptions(produks, rowId, selectedProdukId = null, selectedKondisiId = null) {
+    var $produkSelect = $('#kode_produk_' + rowId);
+    $produkSelect.empty();
+    $produkSelect.append('<option value="">Pilih Produk</option>');
+
+    $.each(produks, function(index, produk) {
+        console.log('Selected Produk ID:', selectedProdukId);
+        console.log('Selected Kondisi ID:', selectedKondisiId);
+
+        var selected = (selectedProdukId == produk.kode_produk && selectedKondisiId == produk.kondisi_id) ? 'selected' : '';
+
+        $produkSelect.append(
+            '<option value="' + produk.id + '" data-harga="' + produk.harga_jual + '" data-tipe_produk="' + produk.tipe_produk + '" ' + selected + '>' +
+            produk.produk.nama + ' - ' + produk.kondisi.nama +
+            '</option>'
+        );
+    });
+}
+
+
+        $('#pengirim').change(function() {
+            var tipeLokasi = $(this).find(':selected').data('tipe-lokasi');
+            fetchProducts(tipeLokasi, 0);
+        });
+
         var i = 1;
         $('#add').click(function() {
-            var newRow = `<tr class="tr_clone" id="row${i}">
+            var newRow = `<tr id="row${i}">
                             <td>
-                                <select id="nama_produk_${i}" name="nama_produk[]" class="form-control select2">
+                                <select id="kode_produk_${i}" name="kode_produk[]" class="form-control select2">
                                     <option value="">Pilih Produk</option>
-                                    @foreach ($produks as $index => $produk)
-                                        <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                            @if (substr($produk->kode, 0, 3) === 'TRD') 
-                                                {{ $produk->nama }}
-                                                @foreach ($produk->komponen as $komponen)
-                                                    @if ($komponen->kondisi)
-                                                        @foreach($kondisis as $kondisi)
-                                                            @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                    $found = true;
-                                                                    break;
-                                                                @endphp
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                    @if ($found) @break @endif
-                                                @endforeach
-                                            @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                {{ $produk->nama }}
-                                            @endif
-                                        </option>
-                                    @endforeach
                                 </select>
                             </td>
-                            <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                            <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                            <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" class="form-control"></td>
                             <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
-
-            // var picModal = `<div class="modal fade" id="picModal_${i}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            //                     <div class="modal-dialog" role="document">
-            //                         <div class="modal-content">
-            //                             <div class="modal-header">
-            //                                 <h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ${i}</h5>
-            //                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            //                                     <span aria-hidden="true">&times;</span>
-            //                                 </button>
-            //                             </div>
-            //                             <div class="modal-body">
-            //                                 <div class="form-group">
-            //                                     <label for="tglrangkai_${i}">Tanggal Rangkaian</label>
-            //                                     <input type="date" class="form-control" id="tglrangkai_${i}" name="tglrangkai_${i}">
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jnsrangkai_${i}">Jenis Rangkaian</label>
-            //                                     <input type="text" class="form-control" id="jnsrangkai_${i}" name="jnsrangkai_${i}" value="penjualan" readonly>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="no_invoice_rangkai_${i}">Nomor Invoice</label>
-            //                                     <input type="text" class="form-control" id="no_invoice_rangkai_${i}" name="no_invoice_rangkai_${i}" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jumlahStaff_${i}">Jumlah Staff Perangkai</label>
-            //                                     <input type="text" class="form-control" id="jumlahStaff_${i}" name="jumlahStaff_${i}" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="staffPerangkaiContainer_${i}">Pilih PIC Perangkai</label>
-            //                                     <div id="staffPerangkaiContainer_${i}"></div>
-            //                                 </div>
-            //                                 <div class="table-responsive">
-            //                                     <table class="table">
-            //                                         <thead>
-            //                                             <tr>
-            //                                                 <th>Nama</th>
-            //                                                 <th>Jumlah</th>
-            //                                                 <th></th>
-            //                                             </tr>
-            //                                         </thead>
-            //                                         <tbody id="dynamic_field">
-            //                                             <tr>
-            //                                                 <td>
-            //                                                     <select id="nama_produk" name="nama_produk[]" class="form-control">
-            //                                                         <option value="">Pilih Produk</option>`;
-
-            // @foreach($produks as $produk)
-            // picModal += `<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>`;
-            // @endforeach
-
-            // picModal += `                    </select>
-            //                                                     <input type="hidden" name="kode_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="tipe_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
-            //                                                 </td>
-            //                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
-            //                                             </tr>
-            //                                         </tbody>
-            //                                     </table>
-            //                                 </div>
-            //                             </div>
-            //                             <div class="modal-footer justify-content-center">
-            //                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            //                             </div>
-            //                         </div>
-            //                     </div>
-            //                 </div>`;
-
-
-            // $('body').append(picModal);
-
-
-            $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
-            i++
+            $('.select2').select2();
+            updateProductOptionsForAllRows(i);
+            i++;
         });
+
+        function updateProductOptionsForAllRows(rowId) {
+            var tipeLokasi = $('#pengirim').find(':selected').data('tipe-lokasi');
+            fetchProducts(tipeLokasi, rowId);
+        }
 
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
             $('#row' + button_id + '').remove();
             calculateTotal(0);
         });
+
+        // Trigger change event to initialize the first row
+        $('#pengirim').trigger('change');
+
 
         function addModal() {
             let i = $('.modal').length;
@@ -574,10 +554,10 @@
         });
 
         $('[id^=btnGift]').click(function(e) {
-            console.log('coba');
+            // console.log('coba');
             e.preventDefault();
             var produk_id = $(this).data('produk_gift');
-            console.log(produk_id);
+            // console.log(produk_id);
             getDataGift(produk_id);
         });
 
@@ -721,6 +701,16 @@
 
             // Panggil fungsi updateHargaSatuan
             updateHargaSatuan(this);
+        });
+
+        $('#status').change(function(){
+            var status = $(this).val();
+            if(status == 'DIBATALKAN')
+            {
+                $('#alasan').show();
+            }else{
+                $('#alasan').hide();
+            }
         });
 
         // $('#delivery_order_section').show();

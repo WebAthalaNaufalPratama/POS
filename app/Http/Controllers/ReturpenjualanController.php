@@ -103,6 +103,7 @@ class ReturpenjualanController extends Controller
         $kondisis = Kondisi::all();
         $produkjuals = Produk_Terjual::all();
         $perPendapatan = [];
+        $statusbayar = Pembayaran::where('invoice_penjualan_id', $penjualan)->latest()->first();
 
         foreach ($penjualans->deliveryorder as $deliveryOrder) {
             $selectedGFTKomponen = [];
@@ -178,7 +179,7 @@ class ReturpenjualanController extends Controller
         
         $drivers = Karyawan::where('jabatan', 'driver')->get();
 
-        return view('returpenjualan.create', compact('tipe', 'ongkirs','perPendapatan','juals','penjualans','suppliers','cekretur','drivers','dopenjualans', 'kondisis', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals', 'cekInvoice'));
+        return view('returpenjualan.create', compact('statusbayar','tipe', 'ongkirs','perPendapatan','juals','penjualans','suppliers','cekretur','drivers','dopenjualans', 'kondisis', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals', 'cekInvoice'));
     }
 
     public function store(Request $req)
@@ -514,7 +515,7 @@ class ReturpenjualanController extends Controller
                                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
                             }
 
-                            if($lokasi->tipe_lokasi == 1 && $req->status == 'DIKONFIRMASI'){
+                            if($lokasi->tipe_lokasi == 1 && $req->status == 'DIKONFIRMASI' && $req->komplain != 'diskon'){
                                 $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
                                 if ($stok) {
                                     $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));

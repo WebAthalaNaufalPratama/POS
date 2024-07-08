@@ -67,11 +67,13 @@
                                         <div class="dropdown-menu">
                                             @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                                 <a class="dropdown-item" href="{{ route('auditmutasighgalery.edit', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
-                                            @endif
-                                            @if($lokasi->lokasi->tipe_lokasi != 1)
+                                            @elseif($user->hasRole(['Purchasing']))
+                                                @if($mutasi->status != 'DIKONFIRMASI')
+                                                    <a class="dropdown-item" href="{{ route('auditmutasighgalery.edit', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
+                                                @endif
                                                 <a class="dropdown-item" href="{{ route('mutasighgalery.payment', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                             @endif
-                                            @if($lokasi->lokasi->tipe_lokasi != 3)
+                                            @if($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['AdminGallery', 'KasirGallery']))
                                                 <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('mutasighgalery.view', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
