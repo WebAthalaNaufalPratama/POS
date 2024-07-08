@@ -37,7 +37,9 @@ class PembelianController extends Controller
      */
     public function index(Request $req)
     {
-        $query = Pembelian::orderBy('created_at', 'desc');
+        $query = Pembelian::when(Auth::user()->hasRole('AdminGallery'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI')->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        })->orderBy('created_at', 'desc');
         if ($req->supplier) {
             $query->where('supplier_id', $req->input('supplier'));
         }
