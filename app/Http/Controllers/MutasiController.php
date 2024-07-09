@@ -1118,7 +1118,7 @@ class MutasiController extends Controller
 
     public function index_ghgalery(Request $req)
     {
-        $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->orderBy('created_at', 'desc');
+        $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->orwhere('no_mutasi', 'like', 'MPG%')->orderBy('created_at', 'desc');
 
         if ($req->dateStart) {
             $query->where('created_at', '>=', $req->input('dateStart'));
@@ -1444,6 +1444,16 @@ class MutasiController extends Controller
         } else {
             $cekInvoice = 0;
         }
+
+        $Invoicep = Mutasi::where('no_mutasi', 'LIKE', 'MPG%')->latest()->first();
+        // dd($bankpens);
+        if ($Invoicep != null) {
+            $substring = substr($Invoicep->no_mutasi, 11);
+            $cekInvoicep = substr($substring, 0, 3);
+            // dd($cekInvoice);
+        } else {
+            $cekInvoicep = 0;
+        }
         // dd($cekInvoice);
         // $InvoiceBayar = Pembayaran::latest()->first();
         // // dd($Invoice);
@@ -1460,7 +1470,7 @@ class MutasiController extends Controller
         // $invoices = Penjualan::get();
 
         // return view('mutasighgalery.create', compact('customers', 'lokasipengirim','lokasipenerima',  'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
-        return view('mutasighgalery.create', compact('lokasipenerima', 'lokasipengirim', 'Invoice', 'cekInvoice', 'bankpens', 'ongkirs', 'karyawans'));
+        return view('mutasighgalery.create', compact('cekInvoicep','lokasipenerima', 'lokasipengirim', 'Invoice', 'cekInvoice', 'bankpens', 'ongkirs', 'karyawans'));
     }
 
     public function getProductsByLokasi(Request $request)
@@ -2350,7 +2360,7 @@ class MutasiController extends Controller
          }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
              $data['dibukukan_id'] = Auth::user()->id;
              $data['tanggal_dibukukan'] = now();
-         }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
+         }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'purchasing' || $jabatanpegawai == 'admin'){
              $data['pembuat_id'] = Auth::user()->id;
              $data['tanggal_pembuat'] = now();
          }

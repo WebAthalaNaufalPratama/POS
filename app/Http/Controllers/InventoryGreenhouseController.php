@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\Kondisi;
 use App\Models\Lokasi;
+use App\Models\Mutasi;
+use Illuminate\Support\Collection;
+use App\Models\Produk_Terjual;
+use App\Models\Komponen_Produk_Terjual;
+use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,7 +21,35 @@ class InventoryGreenhouseController extends Controller
     public function index()
     {
         $data = InventoryGreenHouse::all();
-        return view('inven_greenhouse.index', compact('data'));
+        $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'DIKONFIRMASI')->get();
+
+        $riwayat = collect();
+
+        if ($mutasigg) {
+            $arraymutasi = $mutasigg->pluck('no_mutasi')->toArray();
+    
+            $produkTerjual = Produk_Terjual::whereIn('no_mutasigg', $arraymutasi)
+                ->with('komponen')
+                ->get();
+    
+            foreach ($produkTerjual as $produk) {
+                $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
+                    ->where('subject_id', $produk->id)
+                    ->where('description', 'created')
+                    ->orderBy('id', 'desc')
+                    ->first();
+    
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Terjual';
+                    $produkActivity->komponen = $produk->komponen;
+                    $riwayat->push($produkActivity);
+                }
+            }
+        }
+    
+        $riwayat = $riwayat->sortByDesc('id')->values();
+        // dd($riwayat);
+        return view('inven_greenhouse.index', compact('data', 'riwayat'));
     }
 
     public function create()

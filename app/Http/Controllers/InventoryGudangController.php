@@ -6,7 +6,10 @@ use App\Models\InventoryGudang;
 use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\Kondisi;
+use App\Models\Mutasi;
 use App\Models\Lokasi;
+use App\Models\Produk_Terjual;
+use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,7 +18,34 @@ class InventoryGudangController extends Controller
     public function index()
     {
         $data = InventoryGudang::all();
-        return view('inven_gudang.index', compact('data'));
+        $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MPG%')->where('status', 'DIKONFIRMASI')->get();
+
+        $riwayat = collect();
+
+        if ($mutasigg) {
+            $arraymutasi = $mutasigg->pluck('no_mutasi')->toArray();
+    
+            $produkTerjual = Produk_Terjual::whereIn('no_mutasigg', $arraymutasi)
+                ->with('komponen')
+                ->get();
+    
+            foreach ($produkTerjual as $produk) {
+                $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
+                    ->where('subject_id', $produk->id)
+                    ->where('description', 'created')
+                    ->orderBy('id', 'desc')
+                    ->first();
+    
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Terjual';
+                    $produkActivity->komponen = $produk->komponen;
+                    $riwayat->push($produkActivity);
+                }
+            }
+        }
+    
+        $riwayat = $riwayat->sortByDesc('id')->values();
+        return view('inven_gudang.index', compact('data', 'riwayat'));
     }
 
     public function create()
