@@ -9,8 +9,15 @@
                 <div class="page-title">
                     <h4>Inventory Gudang</h4>
                 </div>
-                <div class="page-btn">
-                    <a href="{{ route('inven_gudang.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
+                <div class="d-flex align-items-center">
+                    <div class="page-btn">
+                        <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#loginven" class="btn btn-secondary me-2 same-size-btn">
+                        <img width="100" height="100" src="https://img.icons8.com/ios-filled/100/000000/edit-property.png" alt="edit-property" class="me-2" alt="img">Log Inventory
+                        </a>
+                    </div>
+                    <div class="page-btn">
+                        <a href="{{ route('inven_gudang.create') }}" class="btn btn-added same-size-btn"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -62,6 +69,75 @@
             </div>
         </div>
         </div>
+    </div>
+</div>
+<div class="modal fade" id="loginven" tabindex="-1" aria-labelledby="loginvenlabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editcustomerlabel">LOG INVENTORY</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+        </div>
+        <div class="modal-body">
+            <div class="card-body">
+                <div class="table-responsive">
+                <table class="table datanew">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>no referensi</th>
+                        <th>Produk</th>
+                        <th>Subjek</th>
+                        <th>Masuk</th>
+                        <th>Keluar</th>
+                        <th>Pengubah</th>
+                        <th>Tanggal</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($riwayat as $item)
+                            @php
+                                $properties = json_decode($item->properties, true);
+                            @endphp
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    @if ($item->jenis === 'Produk Terjual')
+                                        {{ $properties['attributes']['no_mutasigg'] ?? '-' }}
+                                    @else
+                                        {{ $item->produk_terjual->no_mutasigg ?? '-' }}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($item->jenis === 'Produk Terjual')
+                                        @php
+                                            $komponen = $item->komponen->first();
+                                            $produkNama = $komponen ? \App\Models\Produk::where('kode', $komponen->kode_produk)->value('nama') : null;
+                                            $kondisiNama = $komponen ? \App\Models\Kondisi::where('id', $komponen->kondisi)->value('nama') : null;
+                                        @endphp
+                                        {{ $produkNama ?? '-' }} - {{ $kondisiNama ?? '-' }}
+                                    @else
+                                        @php
+                                            $produkNama = \App\Models\Produk::where('id', $properties['attributes']['kode_produk'] ?? null)->value('nama');
+                                            $kondisiNama = \App\Models\Kondisi::where('id', $properties['attributes']['kondisi'] ?? null)->value('nama');
+                                        @endphp
+                                        {{ $produkNama ?? '-' }} - {{ $kondisiNama ?? '-' }}
+                                    @endif
+                                </td>
+                                <td>{{ $item->jenis === 'Produk Terjual' ? 'Mutasi GH /Pusat' : 'Komponen' }}</td>
+                                <td>{{ $item->jenis === 'Produk Terjual' ? ($properties['attributes']['jumlah_diterima'] ?? '0') : '0' }}</td>
+                                <td>{{ $item->jenis === 'Produk Terjual' ? ($properties['attributes']['jumlah'] ?? '0') : '0' }}</td>
+                                <td>{{ $item->causer->name ?? '-' }}</td>
+                                <td>{{ $item->updated_at ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </form>
+      </div>
     </div>
 </div>
 @endsection
