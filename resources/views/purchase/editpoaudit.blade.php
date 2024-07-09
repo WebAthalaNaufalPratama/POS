@@ -6,7 +6,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Edit Purchase Order</h3>
+            <h3 class="page-title">Edit Purchase Order (Auditor)</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{ route('pembelian.index') }}">Purchase Order</a>
@@ -38,7 +38,7 @@
             @endif
         </div>
         <div class="card-body">
-            <form action="{{ route('pembelian.update',['datapo' => $beli->id ]) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('pembelian.updateaudit',['datapo' => $beli->id ]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 {{-- @method('PUT') --}}
                 <div class="row">
@@ -117,7 +117,12 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
-                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}">
+                                                @if($beli->tgl_diterima !==null)
+                                                <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima }}" disabled>
+                      
+                                                @else
+                                                <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}">
+                                                @endif
                                                 </div>
                                         </div>
                                         <div class="col-md-3">
@@ -202,7 +207,9 @@
                                     <thead>
                                         <tr>
                                             <th>Dibuat :</th>
+                                            @if($beli->lokasi->tipe_lokasi == 1)
                                             <th>Diterima :</th>
+                                            @endif
                                             <th>Diperiksa :</th>
                                         </tr>
                                     </thead>
@@ -213,20 +220,27 @@
                                                 {{-- <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled> --}}
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
+                                            @if($beli->lokasi->tipe_lokasi == 1)
                                             <td id="penerima">
-                                                <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                <input type="text" class="form-control" value="{{ $penerima  }} ({{ $penerimajbt  }})"  disabled>
+
+                                                {{-- <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled> --}}
                                             </td>
+                                            @endif
                                             {{-- <td id="pemeriksa">
                                                 <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                             </td> --}}
                                             <td id="pemeriksa">
+                                                <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+{{-- 
                                                 @if (!$pemeriksa )
                                                 <input type="text" class="form-control" value="Nama (Auditor)"  disabled>
                                                 @else
                                                 <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})"  disabled>
-                                                @endif
+                                                @endif --}}
                                             </td>
                                         </tr>
                                         
@@ -240,8 +254,9 @@
                                                     <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : ''}}>Publish</option>
                                                 </select> --}}
                                             </td>
+                                            @if($beli->lokasi->tipe_lokasi == 1)
                                             <td id="status_diterima">
-                                                <input type="text" class="form-control" id="status_diterima" value="{{ $beli->status_diterima ?? 'TUNDA' }}" readonly>
+                                                <input type="text" class="form-control" id="status_diterima" value="{{ $beli->status_diterima }}" readonly>
 
                                                 {{-- <select id="status_diterima" name="status_diterima" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
@@ -249,8 +264,9 @@
                                                     <option value="acc" {{ $beli->status_diterima == 'acc' ? 'selected' : '' }}>Accept</option>
                                                 </select> --}}
                                             </td>
+                                            @endif
                                             <td id="status_diperiksa">
-                                                <input type="text" class="form-control" id="status_diperiksa" value="{{ $beli->status_diperiksa ?? '-' }}" readonly>
+                                                <input type="text" class="form-control" id="status_diperiksa" value="TUNDA" readonly>
 
                                                 {{-- <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
@@ -263,10 +279,13 @@
                                             <td id="tgl_pembuat">
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? '-'}}" readonly >
                                             </td>
+                                            @if($beli->lokasi->tipe_lokasi == 1)
                                             <td id="tgl_diterima">
-                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ now() }}" >
+                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ $beli->tgl_diterima_ttd ?? '-'}}" readonly>
+                                            </td>
+                                            @endif
                                             <td id="tgl_pemeriksa">
-                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '-' }}" disabled>
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ now() }}">
                                             </td>
                                         </tr>
                                     </tbody>

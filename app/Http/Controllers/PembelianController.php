@@ -37,9 +37,36 @@ class PembelianController extends Controller
      */
     public function index(Request $req)
     {
-        $query = Pembelian::when(Auth::user()->hasRole('AdminGallery'), function($q){
-            $q->where('status_dibuat', 'DIKONFIRMASI')->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        })->orderBy('created_at', 'desc');
+        $query = Pembelian::query();
+
+        $query->when(Auth::user()->hasRole('AdminGallery'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI')
+              ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+        
+        $query->when(Auth::user()->hasRole('Auditor'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI')
+              ->where(function($query) {
+                  $query->where('status_diterima', 'DIKONFIRMASI')
+                        ->orWhere(function($subQuery) {
+                            $subQuery->whereNull('status_diterima')
+                                     ->whereHas('lokasi.tipe', function($lokasiQuery) {
+                                         $lokasiQuery->whereIn('tipe_lokasi', [3, 4]);
+                                     });
+                        });
+              });
+        });
+        
+        // $query->when(Auth::user()->hasRole('Finance'), function($q){
+        //     $q->where('status_dibuat', 'DIKONFIRMASI');
+        // });
+        
+        $query->orderBy('created_at', 'desc');
+        
+        // Execute the query
+        $pembelian = $query->get();
+        
+
         if ($req->supplier) {
             $query->where('supplier_id', $req->input('supplier'));
         }
@@ -1376,6 +1403,36 @@ class PembelianController extends Controller
 
     }
 
+    public function po_edit_audit ($datapo, Request $request)
+    {
+
+        $type = $request->query('type');
+        
+        if ($type === 'pembelian') {
+            
+            $produks = Produk::get();
+            $suppliers = Supplier::where('tipe_supplier','tradisional')->get();
+            $lokasis = Lokasi::get();
+            $kondisis = Kondisi::get();
+            $beli = Pembelian::find($datapo);
+
+            // return $beli;
+            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
+            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
+            $penerima = Karyawan::where('user_id', $beli->penerima)->first()->nama ?? null;;
+            $penerimajbt = Karyawan::where('user_id', $beli->penerima)->first()->jabatan ?? null;;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama ?? null;;
+            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan ?? null;
+            $produkbelis = Produkbeli::where('pembelian_id', $datapo)->get();
+            
+            return view('purchase.editpoaudit',compact('produks','suppliers','lokasis','kondisis','beli','produkbelis','pembuat','penerima','pemeriksa','pembuatjbt','penerimajbt','pemeriksajbt'));
+        
+        } 
+
+
+    }
+
+
     public function po_update_purchase(Request $request, $datapo)
     {
         $type = $request->type;
@@ -1453,7 +1510,21 @@ class PembelianController extends Controller
 
 
         return redirect()->route('pembelian.index')->with('success', 'Data PO berhasil diupdate');
+     }
     }
+
+    public function po_update_audit(Request $request, $datapo)
+    {
+        $type = $request->type;
+
+        if ($type === 'pembelian') {
+
+        
+            
+        }
+        
+        return redirect()->route('pembelian.index')->with('success', 'Data PO berhasil diupdate');
+     
     }
 
 

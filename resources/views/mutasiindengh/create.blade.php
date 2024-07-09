@@ -189,9 +189,9 @@
                             </div>
                         </div>
                         <div class="row justify-content-around">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                            <div class="col-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
+                                    <div class="col-lg-7 col-md-6 col-12 mt-4">
                                         <div class="page-btn">
                                             Riwayat Pembayaran
                                             {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
@@ -210,32 +210,19 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {{-- @foreach ($datapos as $datapo)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $datapo->no_po }}</td>
-                                                        <td>{{ $datapo->supplier->nama }}</td>
-                                                        <td>{{ $datapo->tgl_kirim }}</td>
-                                                        <td>{{ $datapo->tgl_diterima}}</td>
-                                                        <td>{{ $datapo->no_do_suplier}}</td>
-                                                        <td>{{ $datapo->lokasi->nama}}</td>
-                                                        <td>{{ $datapo->status_dibuat}}</td>
-                                                       
-                                                    </tr>
-                                                    @endforeach --}}
+                                                    {{-- Data pembayaran --}}
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="col-lg-5 float-md-right">
+                                    <div class="col-lg-5 col-md-6 col-12 mt-4">
                                         <div class="total-order">
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            
+                                                            <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" readonly>
                                                             <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" readonly>
                                                         </div>
@@ -245,20 +232,18 @@
                                                     <h4>Biaya Perawatan</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis"  class="form-control" oninput="calculateTotal(0)" readonly>
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis" class="form-control" oninput="calculateTotal(0)" readonly>
                                                             <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
-
                                                 </li>
-                                                
                                                 <li>
                                                     <h4>Biaya Pengiriman</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)" readonly>
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis" class="form-control" oninput="calculateTotal(0)" readonly>
                                                             <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
@@ -267,7 +252,7 @@
                                                     <h4>Total Tagihan</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
+                                                            <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly>
                                                         </div>
@@ -277,7 +262,7 @@
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
+                                                            <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly>
                                                         </div>
                                                     </h5>
@@ -288,86 +273,89 @@
                                 </div>
                             </div>
                         </div>
-                         <div class="row justify-content-start">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-2"> 
-                             
-                                        <table class="table table-responsive border rounded">
-                                            <thead>
-                                                <tr>
-                                                    <th>Dibuat</th>                                              
-                                                    <th>Diterima</th>                                              
-                                                    <th>Dibukukan</th>
-                                                    <th>Diperiksa</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td id="pembuat">
-                                                        <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
-                                                    <td id=penerima">
-                                                        <input type="hidden" name=penerima" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
-                                                    <td id="pembuku">
-                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
-                                                    <td id="pemeriksa">
-                                                        <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control">
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="draft">Draft</option>
-                                                            <option value="publish" selected>Publish</option>
-                                                        </select>
-                                                    </td>
-                                                    <td id="status_diterima">
-                                                        <select id="status_diterima" name="status_diterima" class="form-control" readonly>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_diterima') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{ old('status_diterima') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
-                                                        </select>
-                                                    </td>
-                                                    <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
-                                                        </select>
-                                                    </td>
-                                                    <td id="status_dibuku">
-                                                        <select id="status_diperiksa" name="status_dibuku" class="form-control" readonly>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_diperiksa') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{ old('status_diperiksa') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
-                                                        </select>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td id="tgl_dibuat">
-                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
-                                                    </td>
-                                                    <td id="tgl_diterima">
-                                                        <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" readonly>
-                                                    </td>
-                                                    <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" readonly>
-                                                    </td>
-                                                    <td id="tgl_diperiksa">
-                                                        <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', now()->format('Y-m-d')) }}" readonly >
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>  
-                                        <br>                                 
-                               </div>
-                         </div>
+                        
+                        <div class="row justify-content-start">
+                            <div class="col-12 border rounded pt-3 me-1 mt-2"> 
+                                <div class="table-responsive">
+                                    <table class="table border rounded">
+                                        <thead>
+                                            <tr>
+                                                <th>Dibuat</th>                                              
+                                                <th>Diterima</th>                                              
+                                                <th>Dibukukan</th>
+                                                <th>Diperiksa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td id="pembuat">
+                                                    <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
+                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                </td>
+                                                <td id="penerima">
+                                                    <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                </td>
+                                                <td id="pembuku">
+                                                    <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                </td>
+                                                <td id="pemeriksa">
+                                                    <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
+                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td id="status_dibuat">
+                                                    <select id="status_dibuat" name="status_dibuat" class="form-control">
+                                                        <option disabled selected>Pilih Status</option>
+                                                        <option value="draft">Draft</option>
+                                                        <option value="publish" selected>Publish</option>
+                                                    </select>
+                                                </td>
+                                                <td id="status_diterima">
+                                                    <select id="status_diterima" name="status_diterima" class="form-control" readonly>
+                                                        <option disabled selected>Pilih Status</option>
+                                                        <option value="pending" {{ old('status_diterima') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
+                                                        <option value="acc" {{ old('status_diterima') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                    </select>
+                                                </td>
+                                                <td id="status_dibuku">
+                                                    <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
+                                                        <option disabled selected>Pilih Status</option>
+                                                        <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
+                                                        <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                    </select>
+                                                </td>
+                                                <td id="status_dibuku">
+                                                    <select id="status_diperiksa" name="status_dibuku" class="form-control" readonly>
+                                                        <option disabled selected>Pilih Status</option>
+                                                        <option value="pending" {{ old('status_diperiksa') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
+                                                        <option value="acc" {{ old('status_diperiksa') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td id="tgl_dibuat">
+                                                    <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
+                                                </td>
+                                                <td id="tgl_diterima">
+                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" readonly>
+                                                </td>
+                                                <td id="tgl_dibuku">
+                                                    <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" readonly>
+                                                </td>
+                                                <td id="tgl_diperiksa">
+                                                    <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', now()->format('Y-m-d')) }}" readonly >
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>  
+                                <br>                                 
+                            </div>
+                        </div>
+                        
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>

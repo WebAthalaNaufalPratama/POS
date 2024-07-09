@@ -289,6 +289,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pembelian/{datapo}/edit_po', 'PembelianController@po_edit')->name('pembelian.edit');
             Route::post('/{datapo}/update_po', 'PembelianController@po_update')->name('pembelian.update');
 
+            //audit
+            Route::get('/pembelian/{datapo}/edit_po_audit', 'PembelianController@po_edit_audit')->name('pembelian.editaudit');
+            Route::post('/{datapo}/update_po_audit', 'PembelianController@po_update_audit')->name('pembelian.updateaudit');
+
 
             
             Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');

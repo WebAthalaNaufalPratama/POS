@@ -205,7 +205,9 @@ Carbon::setLocale('id');
                                     <thead>
                                         <tr>
                                             <th>Dibuat</th>
+                                            @if(in_array($beli->lokasi->tipe->id, [1, 2]))
                                             <th>Diterima</th>
+                                            @endif
                                             <th>Diperiksa</th>
                                         </tr>
                                     </thead>
@@ -214,6 +216,7 @@ Carbon::setLocale('id');
                                             <td id="pembuat">
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
+                                            @if(in_array($beli->lokasi->tipe->id, [1, 2]))
                                             <td id="penerima">
                                                 @if (!$penerima )
                                                 <input type="text" class="form-control" value="Nama (Admin Galery)" disabled>
@@ -221,6 +224,7 @@ Carbon::setLocale('id');
                                                 <input type="text" class="form-control" value="{{ $penerima }} ({{ $penerimajbt }})" disabled>
                                                 @endif
                                             </td>
+                                            @endif
                                             <td id="pemeriksa">
                                                 @if (!$pemeriksa )
                                                 <input type="text" class="form-control" value="Nama (Auditor)"  disabled>
@@ -239,6 +243,8 @@ Carbon::setLocale('id');
                                                     <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
                                                 </select> --}}
                                             </td>
+                                            @if(in_array($beli->lokasi->tipe->id, [1, 2]))
+
                                             <td id="status_diterima">
                                                 <input type="text" class="form-control" id="status_diterima" value="{{ $beli->status_diterima ?? '-' }}" readonly>
 
@@ -248,6 +254,7 @@ Carbon::setLocale('id');
                                                     <option value="acc" {{ $beli->status_diterima == 'acc' ? 'selected' : '' }}>Accept</option>
                                                 </select> --}}
                                             </td>
+                                            @endif
                                             <td id="status_diperiksa">
                                                 <input type="text" class="form-control" id="status_diperiksa" value="{{ $beli->status_diperiksa ?? '-' }}" readonly>
 
@@ -262,9 +269,11 @@ Carbon::setLocale('id');
                                             <td id="tgl_pembuat">
                                                 <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat }}" disabled>
                                             </td>
+                                            @if(in_array($beli->lokasi->tipe->id, [1, 2]))
                                             <td id="tgl_diterima">
                                                 <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima_ttd ?? '-'}}" disabled>
                                             </td>
+                                            @endif
                                             <td id="tgl_pemeriksa">
                                                 <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '-' }}" disabled>
                                             </td>
