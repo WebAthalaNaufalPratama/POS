@@ -51,7 +51,7 @@
                                             <label for="penerima">Nama Penerima</label>
                                             <select id="penerima" name="penerima" class="form-control" required >
                                                 <option value="">Pilih Nama Penerima</option>
-                                                @foreach ($lokasis as $lokasi)
+                                                @foreach ($lokasispenerima as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
@@ -446,66 +446,40 @@
     });
 </script>
 
-@foreach ($produks as $index => $produk)
-    @foreach ($produk->komponen as $komponen)
-        <script>
-            $(document).ready(function() {
-                var tipeLokasi = $('#pengirim').find(':selected').data('tipe-lokasi');
-                var selectedProdukId = "{{ $komponen->kode_produk }}"; 
-                var selectedKondisiId = "{{ $komponen->kondisi }}"; 
-                console.log('Initializing fetch for row:', {{ $index }});
-                console.log('Selected Produk ID:', selectedProdukId);
-                console.log('Selected Kondisi ID:', selectedKondisiId);
-                fetchProducts(tipeLokasi, {{ $index }}, selectedProdukId, selectedKondisiId);
-            });
-        </script>
-    @endforeach
-@endforeach
-
-
-
 <script>
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
-    $(document).ready(function() {
-        function fetchProducts(tipeLokasi, rowId, selectedProdukId = null, selectedKondisiId = null) {
-    console.log('Fetching products for tipe lokasi:', tipeLokasi, 'rowId:', rowId);
-    console.log('Selected Produk ID before fetch:', selectedProdukId);
-    console.log('Selected Kondisi ID before fetch:', selectedKondisiId);
+        $(document).ready(function() {
+            function fetchProducts(tipeLokasi, rowId, selectedProdukId = null, selectedKondisiId = null) {
 
-    $.ajax({
-        url: '{{ route("getProductsByLokasi") }}',
-        type: 'GET',
-        data: { tipe_lokasi: tipeLokasi },
-        success: function(data) {
-            console.log('Fetched products:', data);
-            console.log('Selected Produk ID after fetch:', selectedProdukId);
-            console.log('Selected Kondisi ID after fetch:', selectedKondisiId);
-            updateProductOptions(data, rowId, selectedProdukId, selectedKondisiId);
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching products:', error);
+            $.ajax({
+                url: '{{ route("getProductsByLokasi") }}',
+                type: 'GET',
+                data: { tipe_lokasi: tipeLokasi },
+                success: function(data) {
+                    updateProductOptions(data, rowId, selectedProdukId, selectedKondisiId);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching products:', error);
+                }
+            });
         }
-    });
-}
 
-function updateProductOptions(produks, rowId, selectedProdukId = null, selectedKondisiId = null) {
-    var $produkSelect = $('#kode_produk_' + rowId);
-    $produkSelect.empty();
-    $produkSelect.append('<option value="">Pilih Produk</option>');
+        function updateProductOptions(produks, rowId, selectedProdukId = null, selectedKondisiId = null) {
+            var $produkSelect = $('#kode_produk_' + rowId);
+            $produkSelect.empty();
+            $produkSelect.append('<option value="">Pilih Produk</option>');
 
-    $.each(produks, function(index, produk) {
-        console.log('Selected Produk ID:', selectedProdukId);
-        console.log('Selected Kondisi ID:', selectedKondisiId);
+            $.each(produks, function(index, produk) {
 
-        var selected = (selectedProdukId == produk.kode_produk && selectedKondisiId == produk.kondisi_id) ? 'selected' : '';
+                var selected = (selectedProdukId == produk.kode_produk && selectedKondisiId == produk.kondisi_id) ? 'selected' : '';
 
-        $produkSelect.append(
-            '<option value="' + produk.id + '" data-harga="' + produk.harga_jual + '" data-tipe_produk="' + produk.tipe_produk + '" ' + selected + '>' +
-            produk.produk.nama + ' - ' + produk.kondisi.nama +
-            '</option>'
-        );
-    });
-}
+                $produkSelect.append(
+                    '<option value="' + produk.id + '" data-harga="' + produk.harga_jual + '" data-tipe_produk="' + produk.tipe_produk + '" ' + selected + '>' +
+                    produk.produk.nama + ' - ' + produk.kondisi.nama +
+                    '</option>'
+                );
+            });
+        }
 
 
         $('#pengirim').change(function() {
@@ -541,6 +515,17 @@ function updateProductOptions(produks, rowId, selectedProdukId = null, selectedK
             $('#row' + button_id + '').remove();
             calculateTotal(0);
         });
+
+        @foreach ($produks as $index => $produk)
+            @foreach ($produk->komponen as $komponen)
+                    $(document).ready(function() {
+                        var tipeLokasi = $('#pengirim').find(':selected').data('tipe-lokasi');
+                        var selectedProdukId = "{{ $komponen->kode_produk }}"; 
+                        var selectedKondisiId = "{{ $komponen->kondisi }}"; 
+                        fetchProducts(tipeLokasi, {{ $index }}, selectedProdukId, selectedKondisiId);
+                    });
+            @endforeach
+        @endforeach
 
         // Trigger change event to initialize the first row
         $('#pengirim').trigger('change');
