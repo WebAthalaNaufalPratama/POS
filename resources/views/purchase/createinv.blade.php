@@ -213,8 +213,12 @@ Carbon::setLocale('id');
                                                     </h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
                                                             <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ old('nominal_ppn') }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -477,6 +481,7 @@ function calculateTotal(index) {
 
 
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
+    calculatePPN();
 }
 
 // Fungsi untuk menghitung total tagihan
@@ -547,6 +552,15 @@ document.querySelectorAll('input[name^="jumlah"], #diskon_total, #biaya_ongkir, 
         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
     });
 });
+
+function calculatePPN()
+{
+    let ppn_persen = $('#persen_ppn').val();
+    let subtotal = $('#sub_total_int').val();
+    if(isNaN(ppn_persen) || isNaN(subtotal) || ppn_persen > 100) return;
+    let nominal_ppn = ppn_persen * subtotal / 100;
+    $('#nominal_ppn').val(formatNumber(nominal_ppn));
+}
     
 
 
