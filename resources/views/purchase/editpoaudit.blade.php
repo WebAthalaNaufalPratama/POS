@@ -101,11 +101,9 @@
                                         </select>
                                         @endrole
                                         @role('Auditor')
-                                        <select id="status" name="status" class="form-control select2" required>
-                                            <option value="">Pilih Status</option>
-                                            <option value="TUNDA" {{ old('status') == 'TUNDA' || old('status') == '' ? 'selected' : '' }}>TUNDA</option>
-                                            <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                            <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                        <select id="status" name="status" class="form-control" required>
+                                            {{-- <option value="">Pilih Status</option> --}}
+                                            <option value="DIKONFIRMASI" selected>DIKONFIRMASI</option>
                                         </select>
                                         @endrole
                                        </div>   
@@ -113,13 +111,12 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ $beli->tgl_kirim ?? '' }}" disabled>
+                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($beli->tgl_kirim ?? '') }}" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
                                                 @if($beli->tgl_diterima !==null)
-                                                <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima }}" disabled>
-                      
+                                                <input type="text" class="form-control" id="tgl_diterima" value="{{ tanggalindo($beli->tgl_diterima) }}" disabled>
                                                 @else
                                                 <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}">
                                                 @endif
@@ -233,7 +230,7 @@
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                             </td> --}}
                                             <td id="pemeriksa">
-                                                <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
 {{-- 
                                                 @if (!$pemeriksa )

@@ -110,8 +110,10 @@
                                 <td>
                                     @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
                                         LUNAS
-                                    @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
+                                    @elseif($datapo->invoice !== null )
                                         BELUM LUNAS
+                                    @elseif($datapo->invoice == null )
+                                        Belum Ada Tagihan
                                     @endif
                                 </td>                              
                                 @endif
@@ -130,7 +132,7 @@
                                         </a>
                                         <ul class="dropdown-menu">
                                             @if($user->hasRole(['Purchasing']))
-                                            @if ($datapo->tgl_diterima_ttd !== null)
+                                            @if ($datapo->status_diperiksa == 'DIKONFIRMASI')
                                                 <li>
                                                     @php
                                                         $invoiceExists = $datainv->contains('pembelian_id', $datapo->id);
