@@ -21,7 +21,6 @@ class InventoryGreenhouseController extends Controller
     public function index()
     {
         $data = InventoryGreenHouse::all();
-        $mergedriwayat =[];
         $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'DIKONFIRMASI')->get();
 
         $riwayat = collect();
