@@ -28,9 +28,6 @@
         <div class="card-body">
                 <div class="row">
                     <div class="col-sm">
-                    <form action="{{ route('mutasigalerygalery.update', ['mutasiGAG' => $mutasis->id]) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        @method('patch')
                         <div class="row justify-content-around">
                             <div class="col-md-6 border rounded pt-3 me-1">
                                 <!-- <h5>Informasi Mutasi</h5> -->
@@ -140,7 +137,7 @@
                                                             <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly>
                                                         </td>
                                                         <td>
-                                                            <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
+                                                            <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}" readonly>
                                                         </td>
                                                     </tr>
                                                     @php
@@ -242,7 +239,6 @@
                             </div>
                         </div>
                         <div class="text-end mt-3">
-                            <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="{{ route('mutasigalery.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
