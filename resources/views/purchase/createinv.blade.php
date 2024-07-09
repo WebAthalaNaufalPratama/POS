@@ -128,7 +128,7 @@ Carbon::setLocale('id');
                                                        
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon_display.'.$index) }}">
+                                                                <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="limitDiskon({{ $index }}), calculateTotal({{ $index }})" value="{{ old('diskon_display.'.$index) }}">
                                                                 <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon.'.$index) }}">
                                                             </div>
                                                     </td>
@@ -213,8 +213,12 @@ Carbon::setLocale('id');
                                                     </h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
                                                             <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ old('nominal_ppn') }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -467,7 +471,13 @@ function calculateTotal(index) {
     var jumlah = (qtytrm * harga) - distot;
 
     if (diskon > harga) {
-        alert('Harga diskon tidak boleh melebihi harga');
+        // alert('Harga diskon tidak boleh melebihi harga');
+        toastr.warning('Harga diskon tidak boleh melebihi harga', 'Warning', {
+            closeButton: true,
+            tapToDismiss: false,
+            rtl: false,
+            progressBar: true
+        });
     }
 
     document.getElementById('jumlahint_' + index).value = jumlah;
@@ -477,6 +487,7 @@ function calculateTotal(index) {
 
 
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
+    calculatePPN();
 }
 
 // Fungsi untuk menghitung total tagihan
@@ -547,6 +558,28 @@ document.querySelectorAll('input[name^="jumlah"], #diskon_total, #biaya_ongkir, 
         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
     });
 });
+
+function calculatePPN()
+{
+    let ppn_persen = $('#persen_ppn').val();
+    let subtotal = $('#sub_total_int').val();
+    if(isNaN(ppn_persen) || isNaN(subtotal) || ppn_persen > 100) return;
+    let nominal_ppn = ppn_persen * subtotal / 100;
+    $('#nominal_ppn').val(formatNumber(nominal_ppn));
+}
+
+function limitDiskon(index) 
+{
+    let diskon = unformatRupiah($('#diskon2_' + index).val());
+    let harga_satuan = unformatRupiah($('#harga2_' + index).val());
+
+    if (diskon > harga_satuan) {
+        $('#diskon2_' + index).val(formatRupiah(harga_satuan));
+        return;
+    }
+
+    $('#diskon2_' + index).val(formatRupiah(diskon));
+}
     
 
 

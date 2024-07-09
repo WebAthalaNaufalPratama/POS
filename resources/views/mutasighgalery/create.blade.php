@@ -225,25 +225,6 @@
 
 @section('scripts')
 <script>
-    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-    // console.log(cekInvoiceNumbers);
-    var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
-
-    function generateInvoice() {
-        var invoicePrefix = "MGG";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_mutasi').val(generatedInvoice);
-    }
-
-    $(document).ready(function() {
-        generateInvoice();
-    });
 
     function updateDate(element) {
         var today = new Date().toISOString().split('T')[0];
@@ -321,6 +302,42 @@
                 }
             });
         }
+
+        var cekInvoiceNumbers = "<?php echo $cekInvoice; ?>";
+        var cekInvoiceNumberspusat = "<?php echo $cekInvoicep; ?>";
+
+        function generateInvoice() {
+            var tipeLokasi = $('#pengirim').find(':selected').data('tipe-lokasi');
+
+            var invoicePrefix = '';
+            var nextInvoiceNumber = 0;
+
+            if (tipeLokasi == 3) {
+                invoicePrefix = "MGG";
+                nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+            } else if (tipeLokasi == 4) {
+                invoicePrefix = "MPG";
+                nextInvoiceNumber = parseInt(cekInvoiceNumberspusat) + 1;
+            }
+
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+
+            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+            $('#no_mutasi').val(generatedInvoice);
+        }
+
+
+        $(document).ready(function() {
+            generateInvoice();
+
+            $('#pengirim').change(function() {
+                generateInvoice();
+            });
+        });
 
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");

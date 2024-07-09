@@ -114,7 +114,7 @@
                                                     <tr>
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
+                                                        <!-- <th>Jumlah Diterima</th> -->
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -139,9 +139,9 @@
                                                         <td>
                                                             <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly>
                                                         </td>
-                                                        <td>
+                                                        <!-- <td>
                                                             <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
-                                                        </td>
+                                                        </td> -->
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -462,7 +462,7 @@
 
         $('#bayar').on('change', function() {
             var caraBayar = $(this).val();
-            console.log(caraBayar);
+            // console.log(caraBayar);
             if (caraBayar == 'cash') {
                 $('#rekening').hide();
             } else if (caraBayar == 'transfer') {
