@@ -35,6 +35,7 @@
                             @endforeach
                         </select>
                     </div>
+                    @if(Auth::user()->hasRole('Purchasing') || Auth::user()->hasRole('Auditor'))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterGallery" name="filterGallery" class="form-control" title="Gallery">
                             <option value="">Pilih Gallery</option>
@@ -43,7 +44,8 @@
                             @endforeach
                         </select>
                     </div>
-                    @if(Auth::user()->hasRole('Purchasing') || Auth::user()->hasRole('Finance'))
+                    @endif
+                    @if(Auth::user()->hasRole('Purchasing'))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
                             <option value="">Pilih Status</option>
@@ -65,10 +67,10 @@
                                 <th>No</th>
                                 <th>No Purchase Order</th>
                                 <th>Supplier</th>
+                                <th>Lokasi</th>
                                 <th>Tanggal Kirim</th>
                                 <th>Tanggal Terima</th>
                                 <th>No DO Supplier</th>
-                                <th>Lokasi</th>
                                 @if($user->hasRole(['Purchasing']))
                                 <th>Status Purchase</th>
                                 @endif
@@ -78,8 +80,9 @@
                                 @if($user->hasRole(['Auditor']))
                                 <th>Status Auditor</th>
                                 @endif
+                                @if($user->hasRole(['Purchasing']))
                                 <th>Status Pembayaran</th>
-                               
+                                @endif
                                 <th>Barang Retur</th>
                                 <th>Aksi</th>
                             </tr>
@@ -90,27 +93,28 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $datapo->no_po }}</td>
                                 <td>{{ $datapo->supplier->nama }}</td>
+                                <td>{{ $datapo->lokasi->nama}}</td>
                                 <td>{{ tanggalindo($datapo->tgl_kirim) }}</td>
                                 <td>{{ $datapo->tgl_diterima ? tanggalindo($datapo->tgl_diterima) : ''}}</td>
                                 <td>{{ $datapo->no_do_suplier}}</td>
-                                <td>{{ $datapo->lokasi->nama}}</td>
                                 @if($user->hasRole(['Purchasing']))
-                                <td>{{ $datapo->status_dibuat}}</td>
+                                <td>{{ $datapo->status_dibuat ?? 'TUNDA'}}</td>
                                 @endif
                                 @if($user->hasRole(['AdminGallery']))
-                                <td>{{ $datapo->status_diterima}}</td>
+                                <td>{{ $datapo->status_diterima ?? 'TUNDA'}}</td>
                                 @endif
                                 @if($user->hasRole(['Auditor']))
-                                <td>{{ $datapo->status_diperiksa}}</td>
+                                <td>{{ $datapo->status_diperiksa ?? 'TUNDA'}}</td>
                                 @endif
+                                @if($user->hasRole(['Purchasing']))
                                 <td>
                                     @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
                                         LUNAS
                                     @elseif($datapo->invoice == null || $datapo->invoice->sisa !== 0  )
                                         BELUM LUNAS
                                     @endif
-                                </td>
-                               
+                                </td>                              
+                                @endif
                                 <td>
                                 @if($datapo->no_retur !== null) 
                                 {{ $datapo->no_retur }}
@@ -125,6 +129,7 @@
                                             <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                         </a>
                                         <ul class="dropdown-menu">
+                                            @if($user->hasRole(['Purchasing']))
                                             @if ($datapo->tgl_diterima_ttd !== null)
                                                 <li>
                                                     @php
@@ -146,6 +151,7 @@
                                                     @endif
                                                 </li>
                                             @endif
+                                            @endif
                                             <li>
                                                 <a href="{{ route('pembelian.show', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail PO
@@ -157,6 +163,15 @@
                                                         <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit PO
                                                     </a>
                                                 </li>
+                                            @endif
+                                            @if($user->hasRole(['Auditor']))
+                                            @if ($datapo->status_diperiksa == "TUNDA" || $datapo->status_diperiksa == null)
+                                            <li>
+                                                <a href="{{ route('pembelian.editaudit', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Periksa
+                                                </a>
+                                            </li>
+                                            @endif
                                             @endif
                                         </ul>
                                     </td>
@@ -171,12 +186,15 @@
                                                     <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail PO
                                                 </a>
                                             </li>
+                                            @if($user->hasRole(['AdminGallery']))
+
                                             @if ($datapo->status_diterima == "TUNDA" || $datapo->status_diterima == null)
                                                 <li>
                                                     <a href="{{ route('pembelian.edit', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
                                                         <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Acc Terima
                                                     </a>
                                                 </li>
+                                            @endif
                                             @endif
                                         </ul>
                                     </td>
