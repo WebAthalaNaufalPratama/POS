@@ -22,6 +22,15 @@ class InventoryGreenhouseController extends Controller
     {
         $data = InventoryGreenHouse::all();
         $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'DIKONFIRMASI')->get();
+        $lokasi = Lokasi::where('tipe_lokasi', 3)->get();
+        $arraylokasi = $lokasi->pluck('id')->toArray();
+        $mutasimasukgg = Mutasi::where(function ($query) {
+            $query->where('no_mutasi', 'LIKE', 'MPG%')
+                  ->orWhere('no_mutasi', 'LIKE', 'MGG%');
+        })
+        ->whereIn('penerima', $arraylokasi)
+        ->where('status', 'DIKONFIRMASI')
+        ->get();        
 
         $riwayat = collect();
 
@@ -35,7 +44,26 @@ class InventoryGreenhouseController extends Controller
             foreach ($produkTerjual as $produk) {
                 $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
                     ->where('subject_id', $produk->id)
-                    ->where('description', 'created')
+                    ->orderBy('id', 'desc')
+                    ->first();
+    
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Terjual';
+                    $produkActivity->komponen = $produk->komponen;
+                    $riwayat->push($produkActivity);
+                }
+            }
+        }
+        if ($mutasimasukgg) {
+            $arraymutasi = $mutasimasukgg->pluck('no_mutasi')->toArray();
+    
+            $produkTerjual = Produk_Terjual::whereIn('no_mutasigg', $arraymutasi)->whereNotNull('jumlah_diterima')
+                ->with('komponen')
+                ->get();
+    
+            foreach ($produkTerjual as $produk) {
+                $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
+                    ->where('subject_id', $produk->id)
                     ->orderBy('id', 'desc')
                     ->first();
     

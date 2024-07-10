@@ -73,7 +73,7 @@
                                                 @endif
                                                 <a class="dropdown-item" href="{{ route('mutasighgalery.payment', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                             @endif
-                                            @if($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['AdminGallery', 'KasirGallery']))
+                                            @if($lokasi->lokasi_id == $mutasi->penerima && $mutasi->status == 'DIKONFIRMASI' && !$user->hasRole(['Purchasing']) || $user->hasRole(['Auditor']))
                                                 <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('mutasighgalery.view', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
