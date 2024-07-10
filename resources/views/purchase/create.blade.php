@@ -29,13 +29,13 @@
             <label>
                 <input type="checkbox" id="returCheckbox"> Pembelian Retur
             </label>
+            <div id="returDropdown" style="display:none; margin-top: 10px;">
+                <label for="nomerRetur">Nomor Retur:</label>
+                <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur') }}">
+            </div>
+            
         </div>
-        <div id="returDropdown" style="display:none; margin-top: 10px;">
-            <label for="nomerRetur">Nomor Retur:</label>
-            <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur') }}">
-        </div>
-        
-        <div class="card-body">
+         <div class="card-body">
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-start">
@@ -121,7 +121,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">

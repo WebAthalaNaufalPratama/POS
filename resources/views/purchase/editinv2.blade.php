@@ -43,23 +43,6 @@ Carbon::setLocale('id');
                                             min="{{ now()->format('Y-m-d') }}" 
                                             max="{{ now()->addYear()->format('Y-m-d') }}">
                                          </div>
-                                        
-                                        {{-- <div class="form-group">
-                                            <label for="supplier">Supplier</label>
-                                            <div class="input-group">
-                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
-                                                    <option value="">Pilih Nama Supplier</option>
-                                                    @foreach ($suppliers as $supplier)
-                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                                <div class="input-group-append">
-                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-                                                        <img src="/assets/img/icons/plus1.svg" alt="img" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div> --}}
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -331,9 +314,6 @@ Carbon::setLocale('id');
     </div>
 </div>
 </div>
-
-
-
 </div>
 <div class="modal fade" id="myModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
