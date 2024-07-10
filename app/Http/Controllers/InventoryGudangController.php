@@ -18,7 +18,15 @@ class InventoryGudangController extends Controller
     public function index()
     {
         $data = InventoryGudang::all();
+        $lokasi = Lokasi::where('tipe_lokasi', 4)->get();
+        $arraylokasi = $lokasi->pluck('id')->toArray();
         $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MPG%')->where('status', 'DIKONFIRMASI')->get();
+        $mutasimasukgg = Mutasi::where(function ($query) {
+            $query->Where('no_mutasi', 'LIKE', 'MGG%');
+        })
+        ->whereIn('penerima', $arraylokasi)
+        ->where('status', 'DIKONFIRMASI')
+        ->get();
 
         $riwayat = collect();
 
@@ -33,6 +41,26 @@ class InventoryGudangController extends Controller
                 $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
                     ->where('subject_id', $produk->id)
                     ->where('description', 'created')
+                    ->orderBy('id', 'desc')
+                    ->first();
+    
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Terjual';
+                    $produkActivity->komponen = $produk->komponen;
+                    $riwayat->push($produkActivity);
+                }
+            }
+        }
+        if ($mutasimasukgg) {
+            $arraymutasi = $mutasimasukgg->pluck('no_mutasi')->toArray();
+    
+            $produkTerjual = Produk_Terjual::whereIn('no_mutasigg', $arraymutasi)->whereNotNull('jumlah_diterima')
+                ->with('komponen')
+                ->get();
+    
+            foreach ($produkTerjual as $produk) {
+                $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
+                    ->where('subject_id', $produk->id)
                     ->orderBy('id', 'desc')
                     ->first();
     

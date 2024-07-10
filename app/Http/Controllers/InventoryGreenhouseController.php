@@ -8,8 +8,10 @@ use App\Models\Produk;
 use App\Models\Kondisi;
 use App\Models\Lokasi;
 use App\Models\Mutasi;
+use App\Models\Pembelian;
 use Illuminate\Support\Collection;
 use App\Models\Produk_Terjual;
+use App\Models\Produkbeli;
 use App\Models\Komponen_Produk_Terjual;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +24,19 @@ class InventoryGreenhouseController extends Controller
     {
         $data = InventoryGreenHouse::all();
         $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'DIKONFIRMASI')->get();
+        $lokasi = Lokasi::where('tipe_lokasi', 3)->get();
+        $arraylokasi = $lokasi->pluck('id')->toArray();
+        $mutasimasukgg = Mutasi::where(function ($query) {
+            $query->where('no_mutasi', 'LIKE', 'MPG%');
+        })
+        ->whereIn('penerima', $arraylokasi)
+        ->where('status', 'DIKONFIRMASI')
+        ->get();
+        $pomasukgg = Pembelian::whereIn('lokasi_id', $arraylokasi)
+                ->whereNotNull('status_diterima')
+                ->whereNotNull('tgl_diterima')
+                ->where('status_diterima', 'DIKONFIRMASI')
+                ->with('produkbeli')->get();        
 
         $riwayat = collect();
 
@@ -35,7 +50,6 @@ class InventoryGreenhouseController extends Controller
             foreach ($produkTerjual as $produk) {
                 $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
                     ->where('subject_id', $produk->id)
-                    ->where('description', 'created')
                     ->orderBy('id', 'desc')
                     ->first();
     
@@ -45,6 +59,41 @@ class InventoryGreenhouseController extends Controller
                     $riwayat->push($produkActivity);
                 }
             }
+        }
+        if ($mutasimasukgg) {
+            $arraymutasi = $mutasimasukgg->pluck('no_mutasi')->toArray();
+    
+            $produkTerjual = Produk_Terjual::whereIn('no_mutasigg', $arraymutasi)->whereNotNull('jumlah_diterima')
+                ->with('komponen')
+                ->get();
+    
+            foreach ($produkTerjual as $produk) {
+                $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
+                    ->where('subject_id', $produk->id)
+                    ->orderBy('id', 'desc')
+                    ->first();
+    
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Terjual';
+                    $produkActivity->komponen = $produk->komponen;
+                    $riwayat->push($produkActivity);
+                }
+            }
+        }
+        if($pomasukgg) {
+            foreach ($pomasukgg as $produk) {
+                $produkActivity = Activity::where('subject_type', Produkbeli::class)
+                    ->where('subject_id', $produk->id)
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Beli';
+                    $produkActivity->komponen = $produk->produkbeli;
+                    $riwayat->push($produkActivity);
+                }
+            }
+
         }
     
         $riwayat = $riwayat->sortByDesc('id')->values();

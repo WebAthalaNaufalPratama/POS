@@ -126,8 +126,8 @@
                                     @endif
                                 </td>
                                 <td>{{ $item->jenis === 'Produk Terjual' ? 'Mutasi GH /Pusat' : 'Komponen' }}</td>
-                                <td>{{ $item->jenis === 'Produk Terjual' ? ($properties['attributes']['jumlah_diterima'] ?? '0') : '0' }}</td>
-                                <td>{{ $item->jenis === 'Produk Terjual' ? ($properties['attributes']['jumlah'] ?? '0') : '0' }}</td>
+                                <td>{{ $item->jenis === 'Produk Terjual' && isset($properties['attributes']['no_mutasigg']) && Str::startsWith($properties['attributes']['no_mutasigg'], 'MPG') ? ($properties['attributes']['jumlah_diterima'] ?? '0') : '0' }}</td>
+                                <td>{{ $item->jenis === 'Produk Terjual' && isset($properties['attributes']['no_mutasigg']) && Str::startsWith($properties['attributes']['no_mutasigg'], 'MGG') ? ($properties['attributes']['jumlah'] ?? '0') : '0' }}</td>
                                 <td>{{ $item->causer->name ?? '-' }}</td>
                                 <td>{{ $item->updated_at ?? '-' }}</td>
                             </tr>

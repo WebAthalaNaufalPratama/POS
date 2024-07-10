@@ -1332,43 +1332,56 @@ class MutasiController extends Controller
             'jumlah_diterima' => 'required',
         ]);
 
-        // dd($validator);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method']);
-        // dd($data);
         $lokasi = Lokasi::where('id', $req->penerima)->first();
-        // dd($lokasi);
         for ($i = 0; $i < count($data['nama_produk']); $i++) {
-            // $getProdukJual = InventoryGreenHouse::where('id', $data['nama_produk'][$i])->first();
-            // dd($getProdukJual);
-            // $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-            
             $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigag', $req->no_mutasi)
                                         ->where('id', $data['nama_produk'][$i])
                                         ->first();
-            // dd($produkmutasi);
-            foreach($produkmutasi->komponen as $komponen)
+            if($produkmutasi->jumlah_diterima == null)
             {
-                // dd($lokasi->tipe_lokasi);
-                $stok = InventoryGallery::where('lokasi_id', $req->penerima)
-                                        ->where('kode_produk', $komponen->kode_produk)
-                                        ->where('kondisi_id', $komponen->kondisi)
-                                        ->first();
-                // dd($stok);
-                if ($stok) {
-                    $stok->jumlah += intval($data['jumlah_diterima'][$i]);
-                    $stok->update();
+                foreach($produkmutasi->komponen as $komponen)
+                {
+                    $stok = InventoryGallery::where('lokasi_id', $req->penerima)
+                                            ->where('kode_produk', $komponen->kode_produk)
+                                            ->where('kondisi_id', $komponen->kondisi)
+                                            ->first();
+                    if ($stok) {
+                        $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        $stok->update();
+                    }
                 }
-            }
-
-            if ($produkmutasi) {
-                $produkmutasi->update([
-                    'jumlah_diterima' => $data['jumlah_diterima'][$i],
-                ]);
-            } else {
-                return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                if ($produkmutasi) {
+                    $produkmutasi->update([
+                        'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                    ]);
+                } else {
+                    return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                }
+            }else{
+                foreach($produkmutasi->komponen as $komponen)
+                {
+                    $stok = InventoryGallery::where('lokasi_id', $req->penerima)
+                                            ->where('kode_produk', $komponen->kode_produk)
+                                            ->where('kondisi_id', $komponen->kondisi)
+                                            ->first();
+                    if ($stok) {
+                        $stok->jumlah -= intval($produkmutasi->jumlah_diterima);
+                        $stok->update();
+                        $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        $stok->update();
+                    }
+                }
+                if ($produkmutasi) {
+                    $produkmutasi->update([
+                        'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                    ]);
+                } else {
+                    return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                }
             }
         }
         
@@ -1691,45 +1704,202 @@ class MutasiController extends Controller
             'jumlah_diterima' => 'required',
         ]);
 
-        // dd($validator);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
         $data = $req->except(['_token', '_method']);
-        // dd($data);
         $lokasi = Lokasi::where('id', $req->penerima)->first();
-        // dd($lokasi);
-        for ($i = 0; $i < count($data['nama_produk']); $i++) {
-            // $getProdukJual = InventoryGreenHouse::where('id', $data['nama_produk'][$i])->first();
-            // dd($getProdukJual);
-            // $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-            
-            $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigg', $req->no_mutasi)
-                                        ->where('id', $data['nama_produk'][$i])
-                                        ->first();
-            // dd($produkmutasi->komponen);
-            foreach($produkmutasi->komponen as $komponen)
-            {
-                // dd($lokasi->tipe_lokasi);
-                $stok = InventoryGallery::where('lokasi_id', $req->penerima)
-                                        ->where('kode_produk', $komponen->kode_produk)
-                                        ->where('kondisi_id', $komponen->kondisi)
-                                        ->first();
-                // dd($stok);
-                if ($stok) {
-                    $stok->jumlah += intval($data['jumlah_diterima'][$i]);
-                    $stok->update();
+        if($lokasi->tipe_lokasi == 1){
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {            
+                $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigg', $req->no_mutasi)
+                                            ->where('id', $data['nama_produk'][$i])
+                                            ->first();
+                if($produkmutasi->jumlah_diterima == null)
+                {
+                    foreach($produkmutasi->komponen as $komponen)
+                    {
+                        $stok = InventoryGallery::where('lokasi_id', $req->penerima)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if ($stok) {
+                            $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        }else {
+                            InventoryGallery::create([
+                                'lokasi_id' => $req->penerima,
+                                'kode_produk' => $komponen->kode_produk,
+                                'kondisi_id' => $komponen->kondisi,
+                                'jumlah' => intval($data['jumlah_diterima'][$i])
+                            ]);
+                        }
+                        $stok->update();
+                    }
+                    if ($produkmutasi) {
+                        $produkmutasi->update([
+                            'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        ]);
+                    } else {
+                        return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                    }
+                }else{
+                    foreach($produkmutasi->komponen as $komponen)
+                    {
+                        $stok = InventoryGallery::where('lokasi_id', $req->penerima)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if ($stok) {
+                            $stok->jumlah -= intval($produkmutasi->jumlah_diterima);
+                            $stok->update();
+                            $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        }else {
+                            InventoryGallery::create([
+                                'lokasi_id' => $req->penerima,
+                                'kode_produk' => $komponen->kode_produk,
+                                'kondisi_id' => $komponen->kondisi,
+                                'jumlah' => intval($data['jumlah_diterima'][$i])
+                            ]);
+                        }
+                        $stok->update();
+                    }
+                    if ($produkmutasi) {
+                        $produkmutasi->update([
+                            'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        ]);
+                    } else {
+                        return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                    }
                 }
+                
             }
-
-            if ($produkmutasi) {
-                $produkmutasi->update([
-                    'jumlah_diterima' => $data['jumlah_diterima'][$i],
-                ]);
-            } else {
-                return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+        }elseif($lokasi->tipe_lokasi == 3){
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {            
+                $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigg', $req->no_mutasi)
+                                            ->where('id', $data['nama_produk'][$i])
+                                            ->first();
+                if($produkmutasi->jumlah_diterima == null)
+                {
+                    foreach($produkmutasi->komponen as $komponen)
+                    {
+                        $stok = InventoryGreenhouse::where('lokasi_id', $req->penerima)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if ($stok) {
+                            $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        } else {
+                            InventoryGreenhouse::create([
+                                'lokasi_id' => $req->penerima,
+                                'kode_produk' => $komponen->kode_produk,
+                                'kondisi_id' => $komponen->kondisi,
+                                'jumlah' => intval($data['jumlah_diterima'][$i])
+                            ]);
+                        }
+                        $stok->update();
+                    }
+                    if ($produkmutasi) {
+                        $produkmutasi->update([
+                            'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        ]);
+                    } else {
+                        return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                    }
+                }else{
+                    foreach($produkmutasi->komponen as $komponen)
+                    {
+                        $stok = InventoryGreenhouse::where('lokasi_id', $req->penerima)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if ($stok) {
+                            $stok->jumlah -= intval($produkmutasi->jumlah_diterima);
+                            $stok->update();
+                            $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        } else {
+                            InventoryGreenhouse::create([
+                                'lokasi_id' => $req->penerima,
+                                'kode_produk' => $komponen->kode_produk,
+                                'kondisi_id' => $komponen->kondisi,
+                                'jumlah' => intval($data['jumlah_diterima'][$i])
+                            ]);
+                        }
+                        $stok->update();
+                    }
+                    if ($produkmutasi) {
+                        $produkmutasi->update([
+                            'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        ]);
+                    } else {
+                        return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                    }
+                }
+                
+            }
+        }elseif($lokasi->tipe_lokasi == 4){
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {            
+                $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigg', $req->no_mutasi)
+                                            ->where('id', $data['nama_produk'][$i])
+                                            ->first();
+                if($produkmutasi->jumlah_diterima == null)
+                {
+                    foreach($produkmutasi->komponen as $komponen)
+                    {
+                        $stok = InventoryGudang::where('lokasi_id', $req->penerima)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if ($stok) {
+                            $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        }else {
+                            InventoryGudang::create([
+                                'lokasi_id' => $req->penerima,
+                                'kode_produk' => $komponen->kode_produk,
+                                'kondisi_id' => $komponen->kondisi,
+                                'jumlah' => intval($data['jumlah_diterima'][$i])
+                            ]);
+                        }
+                        $stok->update();
+                    }
+                    if ($produkmutasi) {
+                        $produkmutasi->update([
+                            'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        ]);
+                    } else {
+                        return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                    }
+                }else{
+                    foreach($produkmutasi->komponen as $komponen)
+                    {
+                        $stok = InventoryGudang::where('lokasi_id', $req->penerima)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if ($stok) {
+                            $stok->jumlah -= intval($produkmutasi->jumlah_diterima);
+                            $stok->update();
+                            $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                        }else {
+                            InventoryGudang::create([
+                                'lokasi_id' => $req->penerima,
+                                'kode_produk' => $komponen->kode_produk,
+                                'kondisi_id' => $komponen->kondisi,
+                                'jumlah' => intval($data['jumlah_diterima'][$i])
+                            ]);
+                        }
+                        $stok->update();
+                    }
+                    if ($produkmutasi) {
+                        $produkmutasi->update([
+                            'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        ]);
+                    } else {
+                        return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
+                    }
+                }
+                
             }
         }
+        
         
         return redirect(route('mutasighgalery.index'))->with('success', 'Data Berhasil Disimpan');
     }
@@ -2428,7 +2598,7 @@ class MutasiController extends Controller
                 // dd($stok);
     
                 if ($stok) {
-                    $stok->jumlah -= intval($data['jumlah_dikirim'][$i]);
+                    $stok->jumlah -= intval($req->jumlah_dikirim[$i]);
                     $stok->update();
                 }
             }
