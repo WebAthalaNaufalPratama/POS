@@ -12,7 +12,7 @@ Carbon::setLocale('id');
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Pembayaran Invoice (Finance)</h3>
+            <h3 class="page-title">Pembayaran Invoice</h3>
         </div>
     </div>
 </div>
@@ -42,6 +42,23 @@ Carbon::setLocale('id');
                                             <label for="tg_inv">Tanggal Invoice</label>
                                             <input type="text" class="form-control" id="tgl_inv" name="tgl_inv" value="{{ \Carbon\Carbon::parse($inv_po->tgl_inv)->translatedFormat('d F Y') }}" readonly>
                                         </div>
+                                        
+                                        {{-- <div class="form-group">
+                                            <label for="supplier">Supplier</label>
+                                            <div class="input-group">
+                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
+                                                    <option value="">Pilih Nama Supplier</option>
+                                                    @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                                                        <img src="/assets/img/icons/plus1.svg" alt="img" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div> --}}
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
