@@ -32,14 +32,18 @@
     <!-- Custom styles for this template -->
     <link href="signin.css" rel="stylesheet">
 </head>
-<body class="text-center">
-    
-    <main class="form-signin">
+<body>
+    <div class="wrapper">
+      <div class="inner">
+        <img src="/assets/img/image-1.png" class="image-1">
+        <!-- <main class="form"> -->
 
         @yield('content')
-        
-    </main>
-    
+
+        <!-- </main> -->
+        <img src="/assets/img/image-2.png" class="image-2">
+      </div>
+    </div>
 
 </body>
 </html>
