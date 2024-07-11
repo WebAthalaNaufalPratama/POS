@@ -140,7 +140,7 @@
                                         <div class="form-group">
                                             <div id="alasan" style="display: none;">
                                                 <label for="alasan">Alasan</label>
-                                                <textarea name="alasan_batal" id="alasan"></textarea>
+                                                <textarea name="alasan_batal" id="alasan_batal"></textarea>
                                             </div>
                                         </div>
                                         <div class="form-group" style="display:none;" id="driver">
@@ -163,9 +163,9 @@
                                             <label for="no_invoice">No Invoice</label>
                                             <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required readonly>
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group" style="display:none;" id="do">
                                             <label for="no_do">No Delivery Order</label>
-                                            <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Invoice" value="{{ $penjualans->no_do}}" required readonly>
+                                            <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Invoice" required readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="catatan_komplain">Catatan</label>
@@ -498,55 +498,6 @@
 @endsection
 
 @section('scripts')
-<script>
-    $(document).ready(function() {
-        // These variables simulate server-side PHP data injection
-        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
-        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
-        var cekInvoiceRetur = "<?php echo $cekretur ?>";
-        var nextInvoiceRetur = parseInt(cekInvoiceRetur) + 1;
-        var lokasi = "<?php echo $tipe?>";
-
-        // Function to generate Delivery Order Number (DO)
-        function generateDOP() {
-            var invoicePrefix = "DOP";
-            var currentDate = new Date();
-            var year = currentDate.getFullYear();
-            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            var day = currentDate.getDate().toString().padStart(2, '0');
-            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-            $('#no_do').val(generatedInvoice);
-        }
-
-        // Function to generate Return Invoice Number (RTP/RTO)
-        function generateRTP(kode) {
-            var currentDate = new Date();
-            var year = currentDate.getFullYear();
-            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            var day = currentDate.getDate().toString().padStart(2, '0');
-            var formattedNextInvoiceNumber = nextInvoiceRetur.toString().padStart(3, '0');
-
-            var generatedInvoice = kode + year + month + day + formattedNextInvoiceNumber;
-            $('#no_retur').val(generatedInvoice);
-        }
-
-        // Generate DO on page load
-        generateDOP();
-
-        var kode;
-        if (lokasi == 1) {
-            kode = "RTP";
-        } else if (lokasi == 2) { 
-            kode = "RTO";
-        } else {
-            kode = ""; 
-        }
-
-        generateRTP(kode);
-    });
-</script>
 <script>
     // Function to update date to today's date
     function updateDate(element) {
@@ -886,6 +837,34 @@
             $('#total').val(formatRupiah(totalTagihan, 'Rp '));
         }
 
+        var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
+        var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
+        var cekInvoiceRetur = "<?php echo $cekretur ?>";
+        var nextInvoiceRetur = parseInt(cekInvoiceRetur) + 1;
+        var lokasi = "<?php echo $tipe?>";
+
+        function generateRTP(kode) {
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceRetur.toString().padStart(3, '0');
+
+            var generatedInvoice = kode + year + month + day + formattedNextInvoiceNumber;
+            $('#no_retur').val(generatedInvoice);
+        }
+
+        var kode;
+        if (lokasi == 1) {
+            kode = "RTP";
+        } else if (lokasi == 2) { 
+            kode = "RTO";
+        } else {
+            kode = ""; 
+        }
+
+        generateRTP(kode);
+
         $('#komplain').on('change', function(){
             var komplain = $(this).val();
 
@@ -898,12 +877,13 @@
                 var biayakirim = $('#biaya_pengiriman');
 
                 if(komplain == 'retur') {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').show();
+                    generateDOR();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur, #do').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
                     hargaSatuanInput.prop('readonly', true);
                 } else {
-                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur').hide();
+                    $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur, #do').hide();
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
@@ -950,10 +930,10 @@
                 var jumlahInput = $(this);
                 var index = jumlahInput.attr('id').split('_')[1];
 
-                if(komplain == 'refund' || komplain == 'diskon') { // Jika refund atau diskon, aktifkan input jumlah
+                if(komplain == 'refund' || komplain == 'diskon') { 
                     jumlahInput.prop('readonly', false);
                 } else {
-                    jumlahInput.prop('readonly', true); // Jika selain refund atau diskon, nonaktifkan input jumlah
+                    jumlahInput.prop('readonly', true); 
                 }
             });
 
@@ -982,6 +962,8 @@
                 }
             });
 
+            // generateDOR();
+
             $('[id^=totalharga_]').each(function() {
                 var totalhargaInput = $(this);
                 var index = totalhargaInput.attr('id').split('_')[1];
@@ -1002,9 +984,9 @@
                 var status = $(this).val();
                 if(status == 'DIBATALKAN')
                 {
-                    $('#alasan').show();
+                    $('#alasan_batal').show();
                 }else{
-                    $('#alasan').hide();
+                    $('#alasan_batal').hide();
                 }
             });
             
@@ -1029,16 +1011,29 @@
                 var jumlahInput = $(this);
                 var index = jumlahInput.attr('id').split('_')[1];
 
-                if(komplain == 'refund' || komplain == 'diskon') { // Jika refund atau diskon, aktifkan input jumlah
+                if(komplain == 'refund' || komplain == 'diskon') {
                     jumlahInput.prop('readonly', false);
                 } else {
-                    jumlahInput.prop('readonly', true); // Jika selain refund atau diskon, nonaktifkan input jumlah
+                    jumlahInput.prop('readonly', true);
                 }
             });
 
             updateSubTotal();
             }
         });
+
+        function generateDOR() {
+            var invoicePrefix = "DOR";
+            var currentDate = new Date();
+            var year = currentDate.getFullYear();
+            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            var day = currentDate.getDate().toString().padStart(2, '0');
+            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
+
+            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
+            // console.log(generatedInvoice)
+            $('#no_do').val(generatedInvoice);
+        }
 
         var jumlahDO = [];
 

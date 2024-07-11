@@ -33,9 +33,9 @@ class InventoryGreenhouseController extends Controller
         ->where('status', 'DIKONFIRMASI')
         ->get();
         $pomasukgg = Pembelian::whereIn('lokasi_id', $arraylokasi)
-                ->whereNotNull('status_diterima')
-                ->whereNotNull('tgl_diterima')
-                ->where('status_diterima', 'DIKONFIRMASI')
+                ->whereNotNull('status_diperiksa')
+                ->whereNotNull('tgl_diperiksa')
+                ->where('status_diperiksa', 'DIKONFIRMASI')
                 ->with('produkbeli')->get();        
 
         $riwayat = collect();
