@@ -105,6 +105,8 @@
                                 <td>
                                     @if ($item->jenis === 'Produk Terjual')
                                         {{ $item->produk_terjual->no_mutasigg ?? '-' }}
+                                    @elseif ($item->jenis === 'Produk Beli')
+                                        {{ $properties['attributes']['no_po'] ?? '-' }}
                                     @else
                                         {{ $properties['attributes']['no_mutasigg'] ?? '-' }}
                                     @endif
@@ -139,7 +141,10 @@
                                     @if ($item->jenis === 'Produk Terjual' && isset($properties['attributes']['no_mutasigg']) && Str::startsWith($properties['attributes']['no_mutasigg'], 'MPG'))
                                         {{ $properties['attributes']['jumlah_diterima'] ?? '0' }}
                                     @elseif ($item->jenis === 'Produk Beli')
-                                        {{ $properties['attributes']['jml_diterima'] ?? '0' }}
+                                        @php
+                                            $komponen = $item->produkbeli->first();
+                                        @endphp
+                                        {{ $komponen->jml_diterima ?? '0' }}
                                     @else
                                         0
                                     @endif
