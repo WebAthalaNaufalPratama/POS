@@ -577,7 +577,7 @@
     var ceklokasi = "<?php echo $ceklokasi ?>";
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
 
-    function generateInvoice(kode) {
+    function generateInvoiceBayar(kode) {
         var currentDate = new Date();
         var year = currentDate.getFullYear();
         var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
@@ -597,7 +597,7 @@
         kode = "";
     }
 
-    generateInvoice();
+    generateInvoiceBayar(kode);
 </script>
 <script>
     // Function to update date to today's date
@@ -719,12 +719,6 @@
         $('#nama_produk_modal_' + index).val(namaProdukValue);
         $('#jumlah_produk_modal_' + index).val(jumlahValue);
     }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        if ('{{ session('success') }}' || '{{ session('fail') }}') {
-            window.location.reload();
-        }
-    });
 </script>
 
 <script>

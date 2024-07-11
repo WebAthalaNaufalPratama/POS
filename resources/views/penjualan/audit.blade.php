@@ -479,7 +479,7 @@
                                                     <h5 class="col-lg-5">
                                                         <div class="row align-items-center">
                                                             <div class="col-9 pe-0">
-                                                                <select id="promo_id" name="promo_id" class="form-control" value="{{ $penjualans->promo_id}}" required>
+                                                                <select id="promo_id" name="promo_id" class="form-control" value="{{ $penjualans->promo_id}}">
                                                                     @foreach ($promos as $promo)
                                                                     <option value="{{ $promo->id }}">{{ $promo->nama }}</option>
                                                                     @endforeach
