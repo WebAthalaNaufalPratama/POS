@@ -63,6 +63,8 @@
                                 <th>Nominal</th>
                                 <th>Status</th>
                                 <th>Sisa Tagihan</th>
+                                <th>Status Purchase</th>
+                                <th>Status Finance</th>
                                 <th>Komplain</th>
                                 <th>Aksi</th>
                             </tr>
@@ -88,6 +90,8 @@
                                 <td>
                                 {{ formatRupiah($inv->sisa) }}
                                 </td>
+                                <td> {{ $inv->status_dibuat }}</td>
+                                <td> {{ $inv->status_dibuku }}</td>
                                 <td>
                                 @php
                                     // Mengambil data retur pertama yang memiliki 'invoicepo_id' sama dengan $inv->id
@@ -98,6 +102,7 @@
                                 @endif
  
                                 </td>
+                               
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
