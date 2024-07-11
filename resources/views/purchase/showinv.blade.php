@@ -438,21 +438,28 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
                                                     </td>
                                                     <td id="pembuku">
+                                                        @if (!$pembuku )
+                                                        <input type="text" class="form-control" value="Nama (Finance)" disabled>
+                                                        @else
                                                         <input type="text" class="form-control" value="{{ $pembuku }} ({{ $pembukujbt }})"  disabled>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" required readonly>
+                                                        <input type="text" class="form-control" id="status_dibuat" value="{{ $inv_po->status_dibuat ?? '-' }}" readonly>
+
+                                                        {{-- <select id="status_dibuat" name="status_dibuat" class="form-control" required readonly>
                                                            <option value="draft" {{ $inv_po->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
                                                            <option value="publish" {{ $inv_po->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
-                                                       </select>
+                                                       </select> --}}
                                                        </td>
-                                                       <td id="status_diterima">
-                                                           <select id="status_dibukukan" name="status_dibukukan" class="form-control" required readonly>
+                                                       <td id="status_dibuku">
+                                                        <input type="text" class="form-control" id="status_dibuku" value="{{ $inv_po->status_dibuku ?? '-' }}" readonly>
+                                                           {{-- <select id="status_dibukukan" name="status_dibukukan" class="form-control" required readonly>
                                                                <option value="pending" {{ $inv_po->status_dibuku == 'pending' ? 'selected' : '' }}>Pending</option>
                                                                <option value="acc" {{ $inv_po->status_dibuku == 'acc' ? 'selected' : '' }}>Accept</option>
-                                                           </select>
+                                                           </select> --}}
                                                        </td>
                                                 </tr>
                                                 <tr>
@@ -460,7 +467,7 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ tanggalindo($inv_po->tgl_dibukukan) }}" disabled>
+                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ isset($inv_po->tgl_dibukukan) ? tanggalindo($inv_po->tgl_dibukukan) : '-' }}" disabled>
                                                     </td>
                                                 </tr>
                                             </tbody>

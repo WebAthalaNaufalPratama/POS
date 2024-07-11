@@ -83,7 +83,7 @@
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA" {{ old('status') == 'TUNDA' || old('status') == '' ? 'selected' : '' }}>TUNDA</option>
                                                 <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                {{-- <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                             </select>
                                                 {{-- <input type="text" class="form-control" id="status" name="status" value="Draft" readonly> --}}
                                         </div>
