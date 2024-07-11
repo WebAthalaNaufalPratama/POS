@@ -139,6 +139,7 @@
                                     $i = 0;
                                     @endphp
                                     @foreach ($data->produk as $produk) 
+                                    @if($produk->jenis != 'TAMBAHAN')
                                         <tr id="row{{ $i }}">
                                             <td>
                                                 <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
@@ -155,7 +156,82 @@
                                                 $i++;
                                             @endphp
                                         </tr>
+                                    @endif
                                     @endforeach
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="form-row row">
+                        <label>Tambahan Produk</label>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nama</th>
+                                        <th>Harga Satuan</th>
+                                        <th>Jumlah</th>
+                                        <th>Harga Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dynamic_field2">
+                                    @if(count($data->produk) < 1)
+                                    <tr>
+                                        <td>
+                                            <select id="produk2_0" name="nama_produk2[]" class="form-control">
+                                                <option value="">Pilih Produk</option>
+                                                @foreach ($produkjuals as $produk)
+                                                    <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}" data-harga_jual="{{ $produk->harga }}">{{ $produk->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control"  required></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"  required></td>
+                                        <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control"  required readonly></td>
+                                    </tr>
+                                    @else
+                                    @php
+                                        $j = 0;
+                                    @endphp
+                                    @foreach ($data->produk as $produk)
+                                        @if ($produk->jenis == 'TAMBAHAN')
+                                        <tr id="row2{{ $j }}">
+                                            <td>
+                                                <select id="produk2_{{ $j }}" name="nama_produk2[]" class="form-control" disabled>
+                                                    <option value="">Pilih Produk</option>
+                                                    @foreach ($produkjuals as $pj)
+                                                        <option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-harga_jual="{{ $pj->harga }}" {{ $produk->produk->kode == $pj->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->harga }}" disabled></td>
+                                            <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->jumlah }}" disabled></td>
+                                            <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="{{ $produk->harga_jual }}" readonly disabled></td>
+                                        </tr>
+                                        @php
+                                            $j++;
+                                        @endphp
+                                        @endif
+                                    @endforeach
+                                    @endif
+                                    @if($j == 0)
+                                    <tr>
+                                        <td>
+                                            <select id="produk2_{{ $j }}" name="nama_produk2[]" class="form-control">
+                                                <option value="">Pilih Produk</option>
+                                                @foreach ($produkjuals as $pj)
+                                                    <option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-harga_jual="{{ $pj->harga }}">{{ $pj->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value=""></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value=""></td>
+                                        <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="" readonly></td>
+                                        <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                    </tr>
                                     @endif
                                 </tbody>
                             </table>
@@ -512,6 +588,7 @@
         var cekInvoiceNumbers = "{{ $invoice_bayar }}";
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){
+            multiply($('#jumlah_0'))
             $('[id^=produk], #sales_id, #ongkir_id, #rekening, #rekening_id, #bayar').select2();
             var i = '{{ count($data->kontrak->produk) }}';
             $('#add').click(function(){
@@ -529,6 +606,23 @@
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
+                i++;
+            })
+            $('#add2').click(function(){
+                var newRow = '<tr id="row2'+i+'"><td>' + 
+                                '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
+                                    '<option value="">Pilih Produk</option>'+
+                                    '@foreach ($produkjuals as $pj)'+
+                                        '<option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" data-harga_jual="{{ $produk->harga }}">{{ $pj->nama }}</option>'+
+                                    '@endforeach'+
+                                '</select>'+
+                            '</td>'+
+                            '<td><input type="text" name="harga_satuan2[]" id="harga_satuan2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
+                            '<td><input type="number" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
+                            '<td><input type="text" name="harga_total2[]" id="harga_total2_' + i + '" class="form-control"  required readonly></td>' +
+                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
+                $('#dynamic_field2').append(newRow);
+                $('#produk2_' + i).select2();
                 i++;
             })
             $(document).on('input', '[id^=nominal]', function() {
@@ -559,6 +653,11 @@
             $('#row'+button_id+'').remove();
             multiply($('#harga_satuan_0'))
             multiply($('#jumlah_0'))
+        });
+        $(document).on('click', '.btn_remove2', function() {
+            var button_id = $(this).attr("id");
+            $('#row2'+button_id+'').remove();
+            multiply($('#harga_satuan_0'))
         });
         // diskon start
         $('#total_promo').on('input', function(){
@@ -802,11 +901,70 @@
                 }
             }
 
-            var inputs = $('input[name="harga_total[]"]');
-            var total = 0;
-            inputs.each(function() {
-                total += parseInt(cleanNumber($(this).val())) || 0;
+            var inputs1 = $('input[name="harga_total[]"]');
+            var total1 = 0;
+            var inputs2 = $('input[name="harga_total2[]"]');
+            var total2 = 0;
+            inputs1.each(function() {
+                total1 += parseInt(cleanNumber($(this).val())) || 0;
             });
+            inputs2.each(function() {
+                total2 += parseInt(cleanNumber($(this).val())) || 0;
+            });
+            var total = total1 + total2;
+            var promo = cleanNumber($('#total_promo').val() ?? 0);
+            $('#subtotal').val(formatNumber((total - promo)))
+
+            var ppn_persen = $('#ppn_persen').val();
+            var ppn_nominal = ppn_persen * (total - promo) / 100
+            $('#ppn_nominal').val(formatNumber(ppn_nominal))
+
+            var pph_persen = $('#pph_persen').val();
+            var pph_nominal = pph_persen * (total - promo) / 100
+            $('#pph_nominal').val(formatNumber(pph_nominal))
+
+            total_harga();
+        }
+        function multiply2(element) {
+            let input = $(element);
+            let value = input.val();
+            
+            if (!isNumeric(cleanNumber(value))) {
+            return false;
+            }
+            var id = 0
+            var jumlah = 0
+            var harga_satuan = 0
+            var jenis = $(element).attr('id')
+            if(jenis.split('_').length == 2){
+                id = $(element).attr('id').split('_')[1];
+                jumlah = $(element).val();
+                harga_satuan = cleanNumber($('#harga_satuan2_' + id).val());
+                if (harga_satuan) {
+                    var harga_total = harga_satuan * jumlah
+                    $('#harga_total2_'+id).val(formatNumber(harga_total))
+                }
+            } else if(jenis.split('_').length == 3){
+                id = $(element).attr('id').split('_')[2];
+                harga_satuan = cleanNumber($(element).val());
+                jumlah = $('#jumlah2_' + id).val();
+                if (jumlah) {
+                    var harga_total = harga_satuan * jumlah
+                    $('#harga_total2_'+id).val(formatNumber(harga_total))
+                }
+            }
+
+            var inputs1 = $('input[name="harga_total[]"]');
+            var total1 = 0;
+            var inputs2 = $('input[name="harga_total2[]"]');
+            var total2 = 0;
+            inputs1.each(function() {
+                total1 += parseInt(cleanNumber($(this).val())) || 0;
+            });
+            inputs2.each(function() {
+                total2 += parseInt(cleanNumber($(this).val())) || 0;
+            });
+            var total = total1 + total2;
             var promo = cleanNumber($('#total_promo').val() ?? 0);
             $('#subtotal').val(formatNumber((total - promo)))
 
@@ -827,6 +985,8 @@
             var ongkir_nominal = cleanNumber($('#ongkir_nominal').val()) || 0;
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(formatNumber(harga_total));
+            var dp = parseInt(cleanNumber($('#dp').val()));
+            $('#sisa_bayar').val(formatNumber(harga_total - dp));
         }
         function update_pajak(subtotal){
             var ppn_persen = $('#ppn_persen').val() || 0;

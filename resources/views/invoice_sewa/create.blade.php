@@ -118,7 +118,7 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"  required></td>
+                                        <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"  required></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"  required></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"  required readonly></td>
                                         <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
@@ -174,6 +174,40 @@
                         </div>
                     </div>
                 </div>
+                <div class="row mt-3">
+                    <div class="form-row row">
+                        <label>Tambahan Produk</label>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nama</th>
+                                        <th>Harga Satuan</th>
+                                        <th>Jumlah</th>
+                                        <th>Harga Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dynamic_field2">
+                                    <tr>
+                                        <td>
+                                            <select id="produk2_0" name="nama_produk2[]" class="form-control">
+                                                <option value="">Pilih Produk</option>
+                                                @foreach ($produkjuals as $produk)
+                                                    <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}" data-harga_jual="{{ $produk->harga }}">{{ $produk->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control"  required></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"  required></td>
+                                        <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control"  required readonly></td>
+                                        <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-around">
@@ -215,16 +249,6 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="row align-items-center"> --}}
-                                            {{-- <div class="col-12">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontrak->promo_id }}"> --}}
-                                            {{-- <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
-                                            </div> --}}
-                                        {{-- </div> --}}
                                         <div class="input-group">
                                             <input type="text" id="promo_persen" name="promo_persen" value="{{ $data->promo_persen ?? 0 }}" class="form-control" readonly aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
@@ -256,15 +280,7 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="input-group">
-                                            <select id="ongkir_id" name="ongkir_id" class="form-control">
-                                                <option value="">Pilih Ongkir</option>
-                                                @foreach ($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" {{ $ongkir->id == $kontrak->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div> --}}
-                                        <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $hasInvoice ? 0 :  $kontrak->ongkir_nominal }}" readonly>
+                                        <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontrak->ongkir_nominal }}" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -287,8 +303,7 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Sisa Bayar</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="sisa_bayar" name="sisa_bayar" value="{{ $sisaBayar }}" class="form-control" required readonly>
-                                        <input type="hidden" id="sisa_bayar_awal" value="{{ $sisaBayar }}">
+                                        <input type="text" id="sisa_bayar" name="sisa_bayar" value="" class="form-control" required readonly>
                                     </div>
                                 </div>
                             </div>
@@ -307,13 +322,9 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit" {{ $sisaBayar == 0 ? 'disabled' : '' }} id="btnSubmit">Submit</button>
+                    <button class="btn btn-primary" type="submit" id="btnSubmit">Submit</button>
                     <a href="{{ route('invoice_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
-                @if ($sisaBayar == 0)
-                <p class="text-end text-danger">Invoice sudah lunas</p>
-                @endif
-                <p class="text-end text-danger d-none" id="isKelebihan">Total Harga lebih besar dari nilai kontrak</p>
                 </form>
             </div>
         </div>
@@ -352,7 +363,7 @@
                                 }
                                 @endphp
 
-                                newRow += '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}"';
+                                newRow += '<option value="{{ $pj->produk->kode }}" data-id="{{ $pj->id }}" data-harga_jual="{{ $pj->harga }}" data-tipe_produk="{{ $pj->produk->tipe_produk }}"';
                                 @if ($pj->produk->tipe_produk == 6)
                                     newRow += ' data-tooltip="{{ $desc }}"';
                                 @endif
@@ -362,9 +373,9 @@
 
                             newRow += '</select>' +
                                             '</td>' +
-                                            '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
-                                            '<td><input type="text" name="satuan[]" id="satuan_' + i + '" class="form-control"></td>' +
-                                            '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_' + i + '" class="form-control"></td>' +
+                                            '<td><input type="text" name="harga_satuan[]" id="harga_satuan_' + i + '" oninput="multiply(this)" class="form-control"  required></td>' +
+                                            '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control"  required></td>' +
+                                            '<td><input type="text" name="harga_total[]" id="harga_total_' + i + '" class="form-control"  required readonly></td>' +
                                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
                                         '</tr>';
                 $('#dynamic_field').append(newRow);
@@ -372,6 +383,23 @@
                     templateResult: formatState,
                     templateSelection: formatState
                 });
+                i++;
+            })
+            $('#add2').click(function(){
+                var newRow = '<tr id="row2'+i+'"><td>' + 
+                                '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
+                                    '<option value="">Pilih Produk</option>'+
+                                    '@foreach ($produkjuals as $pj)'+
+                                        '<option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" data-harga_jual="{{ $produk->harga }}">{{ $pj->nama }}</option>'+
+                                    '@endforeach'+
+                                '</select>'+
+                            '</td>'+
+                            '<td><input type="text" name="harga_satuan[]" id="harga_satuan2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
+                            '<td><input type="number" name="jumlah[]" id="jumlah2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
+                            '<td><input type="text" name="harga_total[]" id="harga_total2_' + i + '" class="form-control"  required readonly></td>' +
+                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
+                $('#dynamic_field2').append(newRow);
+                $('#produk2_' + i).select2();
                 i++;
             })
             $(document).on('input', '[id^=harga_satuan], #dp, #ongkir_nominal, #pph_nominal, #ppn_nominal, #total_promo', function() {
@@ -412,11 +440,15 @@
             });
         })
         $(document).on('click', '.btn_remove', function() {
-                var button_id = $(this).attr("id");
-                $('#row'+button_id+'').remove();
-                multiply($('#harga_satuan_0'))
-                multiply($('#jumlah_0'))
-            });
+            var button_id = $(this).attr("id");
+            $('#row'+button_id+'').remove();
+            multiply($('#harga_satuan_0'))
+            multiply($('#jumlah_0'))
+        });
+        $(document).on('click', '.btn_remove2', function() {
+            var button_id = $(this).attr("id");
+            $('#row2'+button_id+'').remove();
+        });
         // diskon start
         $('#total_promo').on('input', function(){
             $('#promo_persen').val(0);
@@ -556,10 +588,10 @@
 
         // dp start
         $('#dp').on('input', function(){
-            var dp = $(this).val();
+            var dp = cleanNumber($(this).val());
             $(this).val(formatNumber(dp))
             var total_harga = cleanNumber($('#total_harga').val());
-            sisa_bayar = sisa_bayar - dp;
+            sisa_bayar = total_harga - dp;
             $('#sisa_bayar').val(formatNumber(sisa_bayar));
         });
         $('#dp_persen').on('input', function(){
@@ -567,7 +599,9 @@
 
             var dp_persen = $(this).val()
             var dp_nominal = dp_persen * total_harga / 100
+            sisa_bayar = total_harga - dp_nominal;
             $('#dp').val(formatNumber(dp_nominal))
+            $('#sisa_bayar').val(formatNumber(sisa_bayar));
         });
         // dp end
 
@@ -587,8 +621,15 @@
             var nomor = parts[parts.length - 1];
             var harga_jual = $(this).find(":selected").data("harga_jual") ?? 0;
             $('#harga_satuan_' + nomor).val(formatNumber(harga_jual));
-            $('#btnCheckPromo').trigger('click')
             multiply('#harga_satuan_' + nomor);
+        });
+        $(document).on('change', '[id^=produk2_]', function(){
+            var id = $(this).attr('id');
+            var parts = id.split('_');
+            var nomor = parts[parts.length - 1];
+            var harga_jual = $(this).find(":selected").data("harga_jual") ?? 0;
+            $('#harga_satuan2_' + nomor).val(formatNumber(harga_jual));
+            multiply2('#harga_satuan2_' + nomor);
         });
         function multiply(element) {
             let input = $(element);
@@ -619,11 +660,70 @@
                 }
             }
 
-            var inputs = $('input[name="harga_total[]"]');
-            var total = 0;
-            inputs.each(function() {
-                total += parseInt(cleanNumber($(this).val())) || 0;
+            var inputs1 = $('input[name="harga_total[]"]');
+            var total1 = 0;
+            var inputs2 = $('input[name="harga_total2[]"]');
+            var total2 = 0;
+            inputs1.each(function() {
+                total1 += parseInt(cleanNumber($(this).val())) || 0;
             });
+            inputs2.each(function() {
+                total2 += parseInt(cleanNumber($(this).val())) || 0;
+            });
+            var total = total1 + total2;
+            var promo = cleanNumber($('#total_promo').val() ?? 0);
+            $('#subtotal').val(formatNumber((total - promo)))
+
+            var ppn_persen = $('#ppn_persen').val();
+            var ppn_nominal = ppn_persen * (total - promo) / 100
+            $('#ppn_nominal').val(formatNumber(ppn_nominal))
+
+            var pph_persen = $('#pph_persen').val();
+            var pph_nominal = pph_persen * (total - promo) / 100
+            $('#pph_nominal').val(formatNumber(pph_nominal))
+
+            total_harga();
+        }
+        function multiply2(element) {
+            let input = $(element);
+            let value = input.val();
+            
+            if (!isNumeric(cleanNumber(value))) {
+            return false;
+            }
+            var id = 0
+            var jumlah = 0
+            var harga_satuan = 0
+            var jenis = $(element).attr('id')
+            if(jenis.split('_').length == 2){
+                id = $(element).attr('id').split('_')[1];
+                jumlah = $(element).val();
+                harga_satuan = cleanNumber($('#harga_satuan2_' + id).val());
+                if (harga_satuan) {
+                    var harga_total = harga_satuan * jumlah
+                    $('#harga_total2_'+id).val(formatNumber(harga_total))
+                }
+            } else if(jenis.split('_').length == 3){
+                id = $(element).attr('id').split('_')[2];
+                harga_satuan = cleanNumber($(element).val());
+                jumlah = $('#jumlah2_' + id).val();
+                if (jumlah) {
+                    var harga_total = harga_satuan * jumlah
+                    $('#harga_total2_'+id).val(formatNumber(harga_total))
+                }
+            }
+
+            var inputs1 = $('input[name="harga_total[]"]');
+            var total1 = 0;
+            var inputs2 = $('input[name="harga_total2[]"]');
+            var total2 = 0;
+            inputs1.each(function() {
+                total1 += parseInt(cleanNumber($(this).val())) || 0;
+            });
+            inputs2.each(function() {
+                total2 += parseInt(cleanNumber($(this).val())) || 0;
+            });
+            var total = total1 + total2;
             var promo = cleanNumber($('#total_promo').val() ?? 0);
             $('#subtotal').val(formatNumber((total - promo)))
 
@@ -644,6 +744,8 @@
             var ongkir_nominal = cleanNumber($('#ongkir_nominal').val()) || 0;
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(formatNumber(harga_total));
+            var dp = parseInt(cleanNumber($('#dp').val()));
+            $('#sisa_bayar').val(formatNumber(harga_total - dp));
         }
         function update_pajak(subtotal){
             var ppn_persen = $('#ppn_persen').val() || 0;
@@ -657,17 +759,17 @@
                 $('#pph_nominal').val(formatNumber(parseInt(pph_nominal)));
             }
         }
-        function isKelebihan(){
-            var total_harga = $('#total_harga').val();
-            var sisa_bayar = $('#sisa_bayar').val();
-            if (total_harga > sisa_bayar){
-                $('#btnSubmit').attr('disabled', true);
-                $('#isKelebihan').removeClass('d-none');
-            } else {
-                $('#btnSubmit').attr('disabled', false);
-                $('#isKelebihan').addClass('d-none');
-            }
-        }
+        // function isKelebihan(){
+        //     var total_harga = $('#total_harga').val();
+        //     var sisa_bayar = $('#sisa_bayar').val();
+        //     if (total_harga > sisa_bayar){
+        //         $('#btnSubmit').attr('disabled', true);
+        //         $('#isKelebihan').removeClass('d-none');
+        //     } else {
+        //         $('#btnSubmit').attr('disabled', false);
+        //         $('#isKelebihan').addClass('d-none');
+        //     }
+        // }
         function formatState(state) {
             if (!$(state.element).attr('data-tooltip')) {
                 return state.text;
