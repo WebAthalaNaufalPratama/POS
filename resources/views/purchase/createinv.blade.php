@@ -573,8 +573,8 @@ function calculatePPN()
 
 function limitDiskon(index) 
 {
-    let diskon = unformatRupiah($('#diskon2_' + index).val());
-    let harga_satuan = unformatRupiah($('#harga2_' + index).val());
+    let diskon = parseInt(unformatRupiah($('#diskon2_' + index).val()));
+    let harga_satuan = parseInt(unformatRupiah($('#harga2_' + index).val()));
 
     if (diskon > harga_satuan) {
         $('#diskon2_' + index).val(formatRupiah(harga_satuan));

@@ -8,8 +8,10 @@ use App\Models\Produk;
 use App\Models\Kondisi;
 use App\Models\Lokasi;
 use App\Models\Mutasi;
+use App\Models\Pembelian;
 use Illuminate\Support\Collection;
 use App\Models\Produk_Terjual;
+use App\Models\Produkbeli;
 use App\Models\Komponen_Produk_Terjual;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Auth;
@@ -25,12 +27,16 @@ class InventoryGreenhouseController extends Controller
         $lokasi = Lokasi::where('tipe_lokasi', 3)->get();
         $arraylokasi = $lokasi->pluck('id')->toArray();
         $mutasimasukgg = Mutasi::where(function ($query) {
-            $query->where('no_mutasi', 'LIKE', 'MPG%')
-                  ->orWhere('no_mutasi', 'LIKE', 'MGG%');
+            $query->where('no_mutasi', 'LIKE', 'MPG%');
         })
         ->whereIn('penerima', $arraylokasi)
         ->where('status', 'DIKONFIRMASI')
-        ->get();        
+        ->get();
+        $pomasukgg = Pembelian::whereIn('lokasi_id', $arraylokasi)
+                ->whereNotNull('status_diterima')
+                ->whereNotNull('tgl_diterima')
+                ->where('status_diterima', 'DIKONFIRMASI')
+                ->with('produkbeli')->get();        
 
         $riwayat = collect();
 
@@ -73,6 +79,21 @@ class InventoryGreenhouseController extends Controller
                     $riwayat->push($produkActivity);
                 }
             }
+        }
+        if($pomasukgg) {
+            foreach ($pomasukgg as $produk) {
+                $produkActivity = Activity::where('subject_type', Produkbeli::class)
+                    ->where('subject_id', $produk->id)
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Beli';
+                    $produkActivity->komponen = $produk->produkbeli;
+                    $riwayat->push($produkActivity);
+                }
+            }
+
         }
     
         $riwayat = $riwayat->sortByDesc('id')->values();
