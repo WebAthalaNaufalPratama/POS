@@ -834,6 +834,94 @@ class PembelianController extends Controller
         return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe]))->with('success', 'Berhasil update pembuku');
     }
 
+    public function update_purchase_invoice(Request $request, Pembelian $pembelian, $idinv)
+    {
+        $validator = Validator::make($request->all(), [
+            'id_po' => 'required',
+            'no_inv' => 'required',
+            'tgl_inv' => 'required',
+
+            'sub_total' => 'required',
+            'total_tagihan' => 'required',
+
+            'status_dibuat' => 'required',
+            // 'tgl_dibuat' => 'required|date',
+        ]);
+    
+        // Periksa apakah validasi gagal
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return redirect()->back()->withInput()->with('fail', $errors);
+        }
+
+        $inv = Invoicepo::find($idinv);
+
+        // $idpo = $inv->pembelian_id = $request->id_po;
+        // $inv->poinden_id = $request->nopo;
+
+        $inv->tgl_inv = $request->tgl_inv;
+        $no_inv = $inv->no_inv = $request->no_inv;
+        $inv->status_dibuat = $request->status_dibuat;
+        $subtot = $inv->subtotal = $request->sub_total;
+
+        // $inv->pembuat = $request->pembuat;
+        // $inv->pembuku = $request->pembuku ?? null;
+        // $inv->status_dibuku = $request->status_dibuku ?? null;
+        // $inv->tgl_dibuat = $request->tgl_dibuat;
+        // $inv->tgl_dibukukan = $request->tgl_dibukukan ?? null;
+
+        // $disk = $inv->diskon = $request->diskon_total;
+
+        if ($request->persen_ppn == null ) {
+           $inv->ppn = 0;
+        } else { 
+            $persen_ppn =  $request->persen_ppn;
+            $inv->ppn = $persen_ppn/100 * $subtot;
+        }
+        
+
+        $inv->biaya_kirim = $request->biaya_ongkir;
+        $inv->total_tagihan = $request->total_tagihan;
+        $inv->sisa = $request->total_tagihan;
+        // $inv->dp = 0;
+
+        $check1 = $inv->update();
+        
+        $produkIds = $request->input('id');
+        $hargas = $request->input('harga');
+        $diskons = $request->input('diskon');
+        $jumlahs = $request->input('jumlah');
+        
+        // Loop melalui setiap produk untuk update
+        foreach ($produkIds as $index => $produkId) {
+            // Temukan Produkbeli berdasarkan id
+            $produkbeli = Produkbeli::findOrFail($produkId);
+    
+            // Update harga, diskon, dan jumlah
+            $produkbeli->harga = $hargas[$index];
+            $produkbeli->diskon = $diskons[$index];
+            $produkbeli->totalharga = $jumlahs[$index];
+    
+            // Simpan perubahan
+            $check2 = $produkbeli->update();
+        }
+
+
+        if($inv->pembelian()->exists()){
+            $tipe = 'pembelian';
+            $datapo = $inv->pembelian_id;
+        } else if($inv->poinden()->exists()){
+            $tipe = 'poinden';
+            $datapo = $inv->poinden_id;
+        }
+
+        if (!$check1 || !$check2) {
+            return redirect()->back()->withInput()->with('fail', 'Gagal update data');
+        } else {
+            return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe]))->with('success', 'Berhasil update data');
+        }
+    }
+
     public function gambarpo_update(Request $req, Pembelian $datapo)
     {
         if ($req->hasFile('file')) {
@@ -977,7 +1065,8 @@ class PembelianController extends Controller
             if (!$check1 || !$check2) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             } else {
-                return redirect()->route('invoice.edit',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);        }
+                return redirect()->route('invoice.edit',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
+             }
 
        
         }
@@ -1211,6 +1300,8 @@ class PembelianController extends Controller
             $retur = Returpembelian::where('invoicepo_id', $inv_po->id)->first();
             // return $diskonTot;
 
+            $ppn = $inv_po->ppn / $inv_po->subtotal * 100;
+
             $totalDiskon = 0;
 
             foreach ($diskonTot as $item) {
@@ -1265,7 +1356,7 @@ class PembelianController extends Controller
                 $q->where('pembelian_id', $datapo);
             })->get();
 
-            return view('purchase.editinv_purchase', compact('riwayat','retur','produkkomplains','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
+            return view('purchase.editinv_purchase', compact('ppn','riwayat','retur','produkkomplains','totalDis','inv_po', 'produkbelis', 'beli', 'rekenings', 'no_bypo', 'nomor_inv', 'databayars', 'pembuat', 'pembuku', 'pembuatjbt', 'pembukujbt'));
 
         } elseif ($type === 'poinden') {
             $inv_po = Invoicepo::where('poinden_id', $datapo)->first();
