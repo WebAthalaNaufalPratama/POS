@@ -12,7 +12,7 @@ Carbon::setLocale('id');
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Pembayaran Invoice</h3>
+            <h3 class="page-title">Edit Invoice (Purchasing)</h3>
         </div>
     </div>
 </div>
@@ -25,7 +25,7 @@ Carbon::setLocale('id');
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('invoice.update', $inv_po->id )}} " method="POST" enctype="multipart/form-data">
+            {{-- <form action="{{ route('invoice.update', $inv_po->id )}} " method="POST" enctype="multipart/form-data"> --}}
                 @csrf
                 @method('PUT')
                 <div class="row">
@@ -36,34 +36,18 @@ Carbon::setLocale('id');
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_inv">No. Invoice</label>
-                                            <input type="text" class="form-control" id="no_inv" name="no_inv"  value="{{ $inv_po->no_inv }}" readonly>
+                                            <input type="text" class="form-control" id="no_inv" name="no_inv"  value="{{ $inv_po->no_inv }}">
                                         </div>
                                         <div class="form-group">
                                             <label for="tg_inv">Tanggal Invoice</label>
-                                            <input type="text" class="form-control" id="tgl_inv" name="tgl_inv" value="{{ \Carbon\Carbon::parse($inv_po->tgl_inv)->translatedFormat('d F Y') }}" readonly>
+                                            <input type="date" class="form-control" id="tgl_inv" name="tgl_inv" value="{{ $inv_po->tgl_inv }}">
                                         </div>
-                                        
-                                        {{-- <div class="form-group">
-                                            <label for="supplier">Supplier</label>
-                                            <div class="input-group">
-                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
-                                                    <option value="">Pilih Nama Supplier</option>
-                                                    @foreach ($suppliers as $supplier)
-                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                                <div class="input-group-append">
-                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-                                                        <img src="/assets/img/icons/plus1.svg" alt="img" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div> --}}
                                     </div>
+                                   {{-- info po --}}
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_po">No. Purchase Order</label>
-                                            <input type="text" class="form-control" id="no_po" name="id_po" value="{{ $inv_po->pembelian_id }}" readonly hidden>
+                                            <input type="hidden" class="form-control" id="no_po" name="id_po" value="{{ $inv_po->pembelian_id }}" readonly>
                                             <input type="text" class="form-control" id="no_po" name="no_po" value="{{ $inv_po->pembelian->no_po }}" readonly>
                                         </div>
                                         <div class="form-group">
@@ -116,13 +100,13 @@ Carbon::setLocale('id');
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{formatRupiah2($item->harga) }}" readonly>
+                                                            <input type="text" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{formatRupiah2($item->harga) }}">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}" readonly>
+                                                            <input type="text" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}">
                                                         </div>
                                                     </td>
                                                     <td>
@@ -320,12 +304,31 @@ Carbon::setLocale('id');
                                                     </h5>
                                                 </li>
                                              
-                                                <li>
+                                                {{-- <li>
                                                     <h4>PPN</h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{formatRupiah2($inv_po->ppn) }}" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li> --}}
+                                                <li>
+                                                    <h4>PPN
+                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
+                                                            <option value=""> Pilih Jenis PPN</option>
+                                                            <option value="exclude">EXCLUDE</option>
+                                                            <option value="include" selected>INCLUDE</option>
+                                                        </select>
+                                                    </h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ $inv_po->ppn }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -334,7 +337,7 @@ Carbon::setLocale('id');
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($inv_po->biaya_kirim) }}" readonly required>
+                                                            <input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($inv_po->biaya_kirim) }}" required>
                                                         </div>    
                                                     </h5>
                                                 </li>

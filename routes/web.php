@@ -302,6 +302,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
             Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
             Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
+
+            //purchase
+            Route::get('/invoice/{datapo}/edit_inv_purchase', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
+
             
             
             Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
