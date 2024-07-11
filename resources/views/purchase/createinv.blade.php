@@ -43,23 +43,7 @@ Carbon::setLocale('id');
                                             min="{{ now()->format('Y-m-d') }}" 
                                             max="{{ now()->addYear()->format('Y-m-d') }}">
                                          </div>
-                                        
-                                        {{-- <div class="form-group">
-                                            <label for="supplier">Supplier</label>
-                                            <div class="input-group">
-                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
-                                                    <option value="">Pilih Nama Supplier</option>
-                                                    @foreach ($suppliers as $supplier)
-                                                    <option value="{{ $supplier->id }}">{{ $supplier->nama }}</option>
-                                                    @endforeach
-                                                </select>
-                                                <div class="input-group-append">
-                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-                                                        <img src="/assets/img/icons/plus1.svg" alt="img" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div> --}}
+                                     
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -194,15 +178,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
-                                                    <h4>Total Diskon</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span>
-                                                            <input type="text" class="form-control" required name="total_diskon_display" id="total_diskon_display" oninput="calculateTotal(0)" value="{{ old('total_diskon_display') }}" readonly>
-                                                        </div>
-                                                    </h5>
-                                                </li>
+                                                
                                                 <li>
                                                     <h4>PPN
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
@@ -239,6 +215,15 @@ Carbon::setLocale('id');
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly value="{{ old('total_tagihan_dis') }}" required>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly value="{{ old('total_tagihan') }}" required>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Total Diskon</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" class="form-control" required name="total_diskon_display" id="total_diskon_display" oninput="calculateTotal(0)" value="{{ old('total_diskon_display') }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -400,21 +385,6 @@ function unformatRupiah(formattedValue) {
     return formattedValue.replace(/\./g, '');
 }
 
-    // Event listener untuk diskon_total2
-
-    // document.getElementById('diskon_total2').addEventListener('input', function(e) {
-    //         var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
-    //         if (rupiah === "") {
-    //             this.value = "";
-    //             document.getElementById('diskon_total').value = "";
-    //         } else {
-    //             this.value = formatRupiah(rupiah);
-    //             // Set nilai ke input hidden
-    //             document.getElementById('diskon_total').value = unformatRupiah(this.value);
-    //         }
-    //         calculateTotalAll(); // Recalculate total on change
-    //     });
-
         // Event listener untuk biaya_ongkir2
         document.getElementById('biaya_ongkir2').addEventListener('input', function(e) {
             var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
@@ -473,15 +443,15 @@ function calculateTotal(index) {
     var distot = (qtytrm * diskon); 
     var jumlah = (qtytrm * harga) - distot;
 
-    if (diskon > harga) {
-        // alert('Harga diskon tidak boleh melebihi harga');
-        toastr.warning('Harga diskon tidak boleh melebihi harga', 'Warning', {
-            closeButton: true,
-            tapToDismiss: false,
-            rtl: false,
-            progressBar: true
-        });
-    }
+    // if (diskon > harga) {
+    //     // alert('Harga diskon tidak boleh melebihi harga');
+    //     toastr.warning('Harga diskon tidak boleh melebihi harga', 'Warning', {
+    //         closeButton: true,
+    //         tapToDismiss: false,
+    //         rtl: false,
+    //         progressBar: true
+    //     });
+    // }
 
     document.getElementById('jumlahint_' + index).value = jumlah;
     document.getElementById('jumlah_' + index).value = formatRupiah(jumlah.toString());
@@ -521,11 +491,6 @@ function calculateTotalAll() {
     // Menghitung total tagihan
     var totalTagihan = subTotal + ppn + biayaOngkir;
 
-    // Menampilkan hasil yang benar jika diskon lebih besar dari subtotal
-    // if (diskonTotal > subTotal) {
-    //     totalTagihan = -Math.abs(totalTagihan);
-    // }
-
     document.getElementById('sub_total').value = formatRupiah(subTotal.toString());
     document.getElementById('total_diskon_display').value = formatRupiah(Totaldis.toString());
     document.getElementById('sub_total_int').value = subTotal;
@@ -538,11 +503,16 @@ function calculateTotalAll() {
 document.getElementById('jenis_ppn').addEventListener('change', function() {
     var selectedOption = this.value;
     var persenPpnInput = document.getElementById('persen_ppn');
+    var nominalppn = document.getElementById('nominal_ppn');
+
     if (selectedOption === 'exclude') {
         persenPpnInput.readOnly = false;
     } else {
         persenPpnInput.readOnly = true;
-        persenPpnInput.value = ''; // Set nilai input menjadi string kosong
+        persenPpnInput.value = '';
+        nominalppn.value = '';
+
+         // Set nilai input menjadi string kosong
     }
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
 });
@@ -583,86 +553,6 @@ function limitDiskon(index)
 
     $('#diskon2_' + index).val(formatRupiah(diskon));
 }
-    
-
-
-// function unformatRupiah(rupiah) {
-//     // Menghapus titik sebagai pemisah ribuan
-//     var unformatted = rupiah.replace(/\./g, '');
-//     // Menghapus 'Rp.' jika ada
-//     unformatted = unformatted.replace('Rp. ', '');
-//     // Mengonversi ke integer
-//     return parseInt(unformatted);
-// }
-
-// $(document).ready(function() {
-//         $("#metode").select2({
-//         dropdownParent: $("#myModalbayar")
-//         });
-    
-//          $('#jenis_ppn').change(function() {
-//             var selectedOption = $(this).val();
-//             if (selectedOption === 'exclude') {
-//                 $('#persen_ppn').prop('readonly', false);
-//             } else {
-//                 $('#persen_ppn').prop('readonly', true);
-//                 $('#persen_ppn').val(''); // Set nilai input menjadi string kosong
-//             }
-//             calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-//         });
-    
-//         // Fungsi untuk menghitung total tagihan
-//         function calculateTotalAll() {
-//             var subTotal = 0;
-//             var diskonTotal = parseFloat($('#diskon_total').val()) || 0;
-//             var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
-//             var persenPpn = parseFloat($('#persen_ppn').val()) || 0;
-    
-//             // Menghitung sub total
-//             $('input[name^="jumlah"]').each(function() {
-//                 subTotal += parseFloat($(this).val()) || 0;
-//             });
-    
-//             // Menghitung PPN berdasarkan jenis_ppn
-//             var ppn = 0;
-//             var jenisPpn = $('#jenis_ppn').val();
-//             if (jenisPpn === 'exclude') {
-//                 ppn = (subTotal - diskonTotal) * persenPpn / 100;
-//             }
-    
-//             // Menghitung total tagihan
-//             var totalTagihan = subTotal - diskonTotal + ppn + biayaOngkir;
-    
-//             // Memperbarui nilai total tagihan
-//             $('#sub_total').val(subTotal);
-            
-//             $('#total_tagihan').val(formatRupiah(totalTagihan));
-//             $('#total_tagihan_int').val(totalTagihan);
-//         }
-    
-//         // Panggil fungsi calculateTotal ketika ada perubahan pada input jumlah atau diskon
-//         $('input[name^="jumlah"], #diskon_total, #biaya_ongkir, #persen_ppn').on('input', function() {
-//             calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-//         });
-    
-//         // Fungsi untuk menghitung total harga per baris
-//         function calculateTotal(index) {
-//             var qtytrm = parseFloat($('#qtytrm_' + index).val()) || 0;
-//             var harga = parseFloat($('#harga_' + index).val()) || 0;
-//             var diskon = parseFloat($('#diskon_' + index).val()) || 0;
-//             var jumlah = qtytrm * harga - diskon;
-    
-//             $('#jumlah_' + index).val(jumlah);
-//             calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-//         }
-    
-//         // Panggil fungsi calculateTotal ketika ada perubahan pada input harga atau diskon per baris
-//         $('input[name^="harga"], input[name^="diskon"]').on('input', function() {
-//             var index = $(this).attr('id').split('_')[1];
-//             calculateTotal(index);
-//         });
-//      });
-
 
 
 </script>
