@@ -238,77 +238,77 @@ class ReturpenjualanController extends Controller
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
 
         // cek produk inventory
-        $allStockAvailable = true;
+        // $allStockAvailable = true;
 
-        if ($lokasi->tipe_lokasi == 1) {
-            // Function to accumulate required quantities for given product names and model
-            $accumulateRequiredQuantities = function($productNames, $req, $model, $field) {
-                $requiredQuantities = [];
+        // if ($lokasi->tipe_lokasi == 1) {
+        //     // Function to accumulate required quantities for given product names and model
+        //     $accumulateRequiredQuantities = function($productNames, $req, $model, $field) {
+        //         $requiredQuantities = [];
 
-                for ($i = 0; $i < count($productNames); $i++) {
-                    $getProdukJual = $model::with('komponen')->where($field, $productNames[$i])->first();
+        //         for ($i = 0; $i < count($productNames); $i++) {
+        //             $getProdukJual = $model::with('komponen')->where($field, $productNames[$i])->first();
 
-                    foreach ($getProdukJual->komponen as $komponen) {
-                        $komponenKey = $komponen->kode_produk . '_' . $komponen->kondisi;
+        //             foreach ($getProdukJual->komponen as $komponen) {
+        //                 $komponenKey = $komponen->kode_produk . '_' . $komponen->kondisi;
 
-                        if (!isset($requiredQuantities[$komponenKey])) {
-                            $requiredQuantities[$komponenKey] = 0;
-                        }
+        //                 if (!isset($requiredQuantities[$komponenKey])) {
+        //                     $requiredQuantities[$komponenKey] = 0;
+        //                 }
 
-                        $requiredQuantities[$komponenKey] += intval($req->jumlah[$i]) * intval($komponen->jumlah);
-                    }
-                }
+        //                 $requiredQuantities[$komponenKey] += intval($req->jumlah[$i]) * intval($komponen->jumlah);
+        //             }
+        //         }
 
-                return $requiredQuantities;
-            };
+        //         return $requiredQuantities;
+        //     };
 
-            // Helper function to merge required quantities
-            $mergeRequiredQuantities = function($quantities1, $quantities2) {
-                foreach ($quantities2 as $key => $quantity) {
-                    if (!isset($quantities1[$key])) {
-                        $quantities1[$key] = 0;
-                    }
-                    $quantities1[$key] += $quantity;
-                }
-                return $quantities1;
-            };
+        //     // Helper function to merge required quantities
+        //     $mergeRequiredQuantities = function($quantities1, $quantities2) {
+        //         foreach ($quantities2 as $key => $quantity) {
+        //             if (!isset($quantities1[$key])) {
+        //                 $quantities1[$key] = 0;
+        //             }
+        //             $quantities1[$key] += $quantity;
+        //         }
+        //         return $quantities1;
+        //     };
 
-            // Helper function to check stock availability for given required quantities
-            $checkStockAvailability = function($requiredQuantities, $lokasi_id) {
-                foreach ($requiredQuantities as $key => $requiredQuantity) {
-                    list($kode_produk, $kondisi) = explode('_', $key);
+        //     // Helper function to check stock availability for given required quantities
+        //     $checkStockAvailability = function($requiredQuantities, $lokasi_id) {
+        //         foreach ($requiredQuantities as $key => $requiredQuantity) {
+        //             list($kode_produk, $kondisi) = explode('_', $key);
 
-                    $stok = InventoryGallery::where('lokasi_id', $lokasi_id)
-                                            ->where('kode_produk', $kode_produk)
-                                            ->where('kondisi_id', $kondisi)
-                                            ->first();
+        //             $stok = InventoryGallery::where('lokasi_id', $lokasi_id)
+        //                                     ->where('kode_produk', $kode_produk)
+        //                                     ->where('kondisi_id', $kondisi)
+        //                                     ->first();
 
-                    if (!$stok || $stok->jumlah < $requiredQuantity) {
-                        return false;
-                    }
-                }
+        //             if (!$stok || $stok->jumlah < $requiredQuantity) {
+        //                 return false;
+        //             }
+        //         }
 
-                return true;
-            };
+        //         return true;
+        //     };
 
-            // Accumulate required quantities for the first set of products (Produk_Terjual)
-            $requiredQuantities1 = $accumulateRequiredQuantities($req->nama_produk, $req, Produk_Terjual::class, 'id');
+        //     // Accumulate required quantities for the first set of products (Produk_Terjual)
+        //     $requiredQuantities1 = $accumulateRequiredQuantities($req->nama_produk, $req, Produk_Terjual::class, 'id');
 
-            // Accumulate required quantities for the second set of products (Produk_Jual)
-            $requiredQuantities2 = $accumulateRequiredQuantities($req->nama_produk2, $req, Produk_Jual::class, 'kode');
+        //     // Accumulate required quantities for the second set of products (Produk_Jual)
+        //     $requiredQuantities2 = $accumulateRequiredQuantities($req->nama_produk2, $req, Produk_Jual::class, 'kode');
 
-            // Merge the required quantities
-            $requiredQuantities = $mergeRequiredQuantities($requiredQuantities1, $requiredQuantities2);
-            // dd($requiredQuantities);
-            // Check stock availability
-            $allStockAvailable = $checkStockAvailability($requiredQuantities, $req->lokasi_id);
-            // dd($allStockAvailable);
+        //     // Merge the required quantities
+        //     $requiredQuantities = $mergeRequiredQuantities($requiredQuantities1, $requiredQuantities2);
+        //     // dd($requiredQuantities);
+        //     // Check stock availability
+        //     $allStockAvailable = $checkStockAvailability($requiredQuantities, $req->lokasi_id);
+        //     // dd($allStockAvailable);
 
-            // Redirect if any component is out of stock
-            if (!$allStockAvailable) {
-                return redirect()->route('inven_galeri.create')->with('fail', 'Data Produk Belum Ada Di Inventory Atau Stok Kurang');
-            }
-        }
+        //     // Redirect if any component is out of stock
+        //     if (!$allStockAvailable) {
+        //         return redirect()->route('inven_galeri.create')->with('fail', 'Data Produk Belum Ada Di Inventory Atau Stok Kurang');
+        //     }
+        // }
 
         // dd($deliveryOrder);
 
@@ -318,13 +318,14 @@ class ReturpenjualanController extends Controller
         $data['status'] = $req->status;
         $data['catatan'] = $req->catatan_komplain;
         $returPenjualan = ReturPenjualan::create($data);
-        $deliveryorder = DeliveryOrder::create($data);
+        
 
         if (!$returPenjualan) {
             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
         }
         // PRODUK GANTI
         if($req->komplain == 'retur'){
+            $deliveryorder = DeliveryOrder::create($data);
             for ($i = 0; $i < count($data['nama_produk2']); $i++) {
                 $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk2'][$i])->first();
                 $produk_terjual = Produk_Terjual::create([
