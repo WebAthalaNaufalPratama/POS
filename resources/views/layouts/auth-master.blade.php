@@ -11,7 +11,7 @@
     <!-- Bootstrap core CSS -->
     <link href="{!! url('assets/bootstrap/css/bootstrap.min.css') !!}" rel="stylesheet">
     <link href="{!! url('assets/css/signin.css') !!}" rel="stylesheet">
-    
+    <link rel="stylesheet" href="{!! url('assets/plugins/font-awesome/css/font-awesome.min.css') !!}">
     <style>
       .bd-placeholder-img {
         font-size: 1.125rem;
@@ -30,7 +30,7 @@
 
     
     <!-- Custom styles for this template -->
-    <link href="signin.css" rel="stylesheet">
+    <!-- <link href="signin.css" rel="stylesheet"> -->
 </head>
 <body>
     <div class="wrapper">
