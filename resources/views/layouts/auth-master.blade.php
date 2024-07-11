@@ -11,7 +11,7 @@
     <!-- Bootstrap core CSS -->
     <link href="{!! url('assets/bootstrap/css/bootstrap.min.css') !!}" rel="stylesheet">
     <link href="{!! url('assets/css/signin.css') !!}" rel="stylesheet">
-    
+    <link rel="stylesheet" href="{!! url('assets/plugins/font-awesome/css/font-awesome.min.css') !!}">
     <style>
       .bd-placeholder-img {
         font-size: 1.125rem;
@@ -30,16 +30,20 @@
 
     
     <!-- Custom styles for this template -->
-    <link href="signin.css" rel="stylesheet">
+    <!-- <link href="signin.css" rel="stylesheet"> -->
 </head>
-<body class="text-center">
-    
-    <main class="form-signin">
+<body>
+    <div class="wrapper">
+      <div class="inner">
+        <img src="/assets/img/image-1.png" class="image-1">
+        <!-- <main class="form"> -->
 
         @yield('content')
-        
-    </main>
-    
+
+        <!-- </main> -->
+        <img src="/assets/img/image-2.png" class="image-2">
+      </div>
+    </div>
 
 </body>
 </html>

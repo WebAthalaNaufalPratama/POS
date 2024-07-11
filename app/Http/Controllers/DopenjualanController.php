@@ -487,7 +487,7 @@ class DopenjualanController extends Controller
         // dd($req);
         $dopenjualanIds = $req->input('dopenjualan');
 
-        $data = $req->except(['_token', '_method','dopenjualan', 'nama_produk', 'jumlah', 'satuan', 'keterangan', 'nama_produk2', 'jumlah2', 'satuan2', 'keterangan2']);
+        $data = $req->except(['_token', '_method','dopenjualan', 'nama_produk', 'jumlah', 'satuan', 'keterangan', 'nama_produk2', 'jumlah2', 'satuan2', 'keterangan2', 'alasan']);
         //update bukti do
         if ($req->hasFile('file')) {
             $file = $req->file('file');
@@ -775,7 +775,7 @@ class DopenjualanController extends Controller
         }
 
         if($req->status == 'DIKONFIRMASI'){
-            return redirect(route('dopenjualan.show', ['penjualan' => $dopenjualanIds]))->with('success', 'Berhasil Mengupdate Data');
+            return redirect(route('dopenjualan.show', ['dopenjualan' => $dopenjualanIds]))->with('success', 'Berhasil Mengupdate Data');
         }elseif($req->status == 'TUNDA'){
             return redirect(route('penjualan.index'))->with('success', 'Berhasil Mengupdate data');
         }else{

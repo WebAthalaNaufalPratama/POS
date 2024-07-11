@@ -292,7 +292,7 @@
                                                 <div class="form-group mt-3">
                                                     <div id="inputPembayaran" >
                                                         <label for="nominal">Nominal</label>
-                                                        <input type="number" class="form-control" id="nominal" name="nominal" value="{{$pembayaran->nominal}}" placeholder="Nominal Bayar" readonly>
+                                                        <input type="number" class="form-control" id="nominal" name="nominal" value="{{$pembayaran && $pembayaran->nominal ? 'Rp '. number_format($pembayaran->nominal, 0, ',', '.') : ''}}}}" placeholder="Nominal Bayar" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">

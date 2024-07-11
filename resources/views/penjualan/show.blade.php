@@ -300,13 +300,13 @@
                                                 <div class="form-group mt-3">
                                                     <div id="inputPembayaran">
                                                         <label for="nominal">Nominal</label>
-                                                        <input type="text" class="form-control" id="nominal" name="nominal" value="{{ 'Rp '. number_format($pembayaran->nominal, 0, ',', '.')}}" placeholder="Nominal Bayar" readonly>
+                                                        <input type="text" class="form-control" id="nominal" name="nominal" value="{{ $pembayaran && $pembayaran->nominal ? 'Rp '. number_format($pembayaran->nominal, 0, ',', '.') : ''}}" placeholder="Nominal Bayar" readonly>
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <div id="inputBuktiBayar">
                                                         <label for="buktibayar">Unggah Bukti</label>
-                                                        {{ $pembayaran->bukti}}
+                                                        {{ $pembayaran->bukti ?? ''}}
                                                     </div>
                                                 </div>
                                             </div>

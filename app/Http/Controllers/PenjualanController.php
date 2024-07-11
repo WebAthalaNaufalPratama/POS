@@ -103,7 +103,7 @@ class PenjualanController extends Controller
         // $ceklokasi = Karyawan::where('user_id', $user)->first();
         $lokasi = Karyawan::where('user_id', $user->id)->get();
         // dd($lokasi->lokasi_id->tipe_lokasi);
-        $customers = Customer::where('lokasi_id', $lokasi[0]->lokasi_id)->get();
+        $customers = Customer::where('tipe', 'tradisional')->where('lokasi_id', $lokasi[0]->lokasi_id)->get();
         // dd($customers);
         $lokasis = Lokasi::where('id', $lokasi[0]->lokasi_id)->get();
         $lokasigalery = Lokasi::where('tipe_lokasi', 1)->get();
@@ -170,7 +170,7 @@ class PenjualanController extends Controller
             'jatuh_tempo' => 'required',
             'employee_id' => 'required',
             'status' => 'required',
-            'bukti_file' => 'required|image|mimes:jpeg,png|max:2048',
+            // 'bukti_file' => 'required|image|mimes:jpeg,png|max:2048',
             'notes' => 'required',
             'cara_bayar' => 'required',
             'pilih_pengiriman' => 'required',
@@ -300,7 +300,7 @@ class PenjualanController extends Controller
                 // }
                 return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
             } else {
-                return redirect()->back()->with('error', 'Gagal menyimpan data');
+                return redirect()->back()->with('fail', 'Gagal menyimpan data');
             }
         }elseif($lokasi->tipe_lokasi == 2){
             //buat produk penjualan dan komponen
@@ -386,7 +386,7 @@ class PenjualanController extends Controller
                 // }
                 return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
             } else {
-                return redirect()->back()->with('error', 'Gagal menyimpan data');
+                return redirect()->back()->with('fail', 'Gagal menyimpan data');
             }
         }
         
