@@ -49,6 +49,8 @@
                                 <th>Jumlah</th>
                                 <th>Komplain</th>
                                 <th>Total Harga</th>
+                                <th>Status Purchase</th>
+                                <th>Status Finance</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -91,6 +93,8 @@
                                     @endif
                                 </td>
                                 <td>{{ formatRupiah($data->subtotal)}}</td>
+                                <td>{{ $data->status_dibuat }}</td>
+                                <td>{{ $data->status_dibuku }}</td>
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

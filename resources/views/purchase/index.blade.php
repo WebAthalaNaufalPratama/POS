@@ -110,8 +110,10 @@
                                 <td>
                                     @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
                                         LUNAS
-                                    @elseif($datapo->invoice !== null )
+                                    @elseif($datapo->invoice !== null && $datapo->invoice->sisa !== 0 && $datapo->invoice->status_dibuat !== "BATAL")
                                         BELUM LUNAS
+                                    @elseif ($datapo->invoice !== null && $datapo->invoice->status_dibuat == "BATAL" )
+                                            Invoice Batal
                                     @elseif($datapo->invoice == null )
                                         Belum Ada Tagihan
                                     @endif
@@ -152,7 +154,7 @@
                                  @if($user->hasRole(['Purchasing', 'Finance']))
                                     @if ($datapo->status_diperiksa == 'DIKONFIRMASI')
 
-                                        @if ($invoiceExists)
+                                        @if ($invoiceExists && $datapo->invoice->status_dibuat !== 'BATAL')
                                         <li>
                                             <a href="{{ route('invoice.show', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
@@ -183,7 +185,7 @@
                                                 <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
                                             </a>
                                             @endif
-                                        @elseif(!$invoiceExists)
+                                        @elseif(!$invoiceExists || ($invoiceExists && $datapo->invoice->status_dibuat == 'BATAL'))
                                             @if($user->hasRole(['Purchasing']))
                                             <a href="{{ route('invoicebiasa.create', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
