@@ -298,13 +298,13 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
             Route::get('/invoice/{type}/{datapo}/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
             Route::post('/store_inv', 'PembelianController@storeinvoice')->name('invoicepo.store');
-            Route::get('/invoice/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit');
-            Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
+            Route::get('/invoice/{datapo}/edit/{id}', 'PembelianController@edit_invoice')->name('invoice.edit');
+            Route::get('/invoice/{datapo}/show/{id}', 'PembelianController@show_invoice')->name('invoice.show');
             Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
             Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
 
             //purchase
-            Route::get('/invoice/{datapo}/edit_inv_purchase', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
+            Route::get('/invoice/{datapo}/edit_inv_purchase/{id}', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
             Route::put('/update/{idinv}/purchasing', 'PembelianController@update_purchase_invoice')->name('invoice_purchase.update');        
             
             Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');

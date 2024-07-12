@@ -156,7 +156,7 @@
 
                                         @if ($invoiceExists && $datapo->invoice->status_dibuat !== 'BATAL')
                                         <li>
-                                            <a href="{{ route('invoice.show', ['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                            <a href="{{ route('invoice.show', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
                                             </a>
                                         </li>
@@ -165,7 +165,7 @@
                                         @if($invoiceExists && $datapo->invoice->sisa == 0 && ($datapo->invoice->status_dibuku == null || $datapo->invoice->status_dibuku == 'TUNDA'))
                                             @if($user->hasRole(['Finance']))
                                             <li>
-                                                <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
                                                 </a>
                                             </li>
@@ -175,7 +175,7 @@
                                         <li>
                                         @if ($invoiceExists && $datapo->invoice->sisa != 0 && $datapo->invoice->status_dibuat == 'DIKONFIRMASI' && ($datapo->invoice->status_dibuku == 'TUNDA' || $datapo->invoice->status_dibuku === null) )
                                             @if($user->hasRole(['Finance']))
-                                                <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                 </a>
                                             @endif
@@ -333,11 +333,11 @@
                                             @endphp
                                 
                                             @if ($invoiceExists && $inden->invoice->sisa != 0)
-                                                <a href="{{ route('invoice.edit',['datapo' => $inden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                                <a href="{{ route('invoice.edit',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                 </a>
                                             @elseif($invoiceExists && $inden->invoice->sisa == 0)
-                                                <a href="{{ route('invoice.show',['datapo' => $inden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                                <a href="{{ route('invoice.show',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
                                                 </a>
                                             @else
