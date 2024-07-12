@@ -162,29 +162,29 @@ class InventoryGalleryController extends Controller
             $mergedCollection = $mergedCollection->merge($dataPenjualanDikirim);
         }
 
-        // $komponenRetur = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.retur_penjualan', 'produk_terjual.retur_penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-        //     return $q->whereHas('retur_penjualan', function($p) use($isSuperAdmin){
-        //         $p->where('status', 'DIKONFIRMASI');
-        //     });
-        // })->get();
-        // if($komponenRetur->isNotEmpty()){
-        //     $dataPenjualanDikirim = $komponenPenjualanDikirim->map(function($komponen){
-        //         return [
-        //             'Id' => $komponen->produk_terjual->id,
-        //             'Pengubah' => optional($komponen->produk_terjual->retur_penjualan->dibuat[0])->name,
-        //             'No Referensi' => $komponen->produk_terjual->retur_penjualan->no_do ?? null,
-        //             'Kode Produk Jual' => $komponen->produk_terjual->produk->kode ?? null,
-        //             'Nama Produk Jual' => $komponen->produk_terjual->produk->nama ?? null,
-        //             'Kode Komponen' => $komponen->kode_produk ?? null,
-        //             'Nama Komponen' => $komponen->nama_produk ?? null,
-        //             'Kondisi' => $komponen->data_kondisi->nama ?? null,
-        //             'Masuk' => '-',
-        //             'Keluar' => $komponen->jumlah * $komponen->produk_terjual->jumlah,
-        //             'Waktu' => $komponen->updated_at
-        //         ];
-        //     });
-        //     $mergedCollection = $mergedCollection->merge($dataPenjualanDikirim);
-        // }
+        $komponenRetur = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.retur_penjualan', 'produk_terjual.retur_penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
+            return $q->whereHas('retur_penjualan', function($p) use($isSuperAdmin){
+                $p->where('status', 'DIKONFIRMASI');
+            });
+        })->get();
+        if($komponenRetur->isNotEmpty()){
+            $dataPenjualanretur = $komponenRetur->map(function($komponen){
+                return [
+                    'Id' => $komponen->produk_terjual->id,
+                    'Pengubah' => optional($komponen->produk_terjual->retur_penjualan->dibuat)->name,
+                    'No Referensi' => $komponen->produk_terjual->retur_penjualan->no_retur ?? null,
+                    'Kode Produk Jual' => $komponen->produk_terjual->produk->kode ?? null,
+                    'Nama Produk Jual' => $komponen->produk_terjual->produk->nama ?? null,
+                    'Kode Komponen' => $komponen->kode_produk ?? null,
+                    'Nama Komponen' => $komponen->nama_produk ?? null,
+                    'Kondisi' => $komponen->data_kondisi->nama ?? null,
+                    'Masuk' => '-',
+                    'Keluar' => $komponen->jumlah * $komponen->produk_terjual->jumlah,
+                    'Waktu' => $komponen->updated_at
+                ];
+            });
+            $mergedCollection = $mergedCollection->merge($dataPenjualanretur);
+        }
         // penjualan end
 
         // pembelian start (kurang retur inden)

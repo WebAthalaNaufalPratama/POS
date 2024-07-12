@@ -193,7 +193,7 @@ class ReturpenjualanController extends Controller
             'tanggal_retur' => 'required',
             'customer_id' => 'required',
             'supplier_id' => 'required',
-            'no_do' => 'required',
+            // 'no_do' => 'required',
             'komplain' => 'required',
             'catatan_komplain' => 'required',
             'sub_total' => 'required',

@@ -64,7 +64,7 @@ class ReturPenjualan extends Model
 
     public function dibuat()
     {
-        return $this->hasMany(User::class, 'id', 'pembuat');
+        return $this->belongsTo(User::class, 'pembuat', 'id');
     }
 
 }
