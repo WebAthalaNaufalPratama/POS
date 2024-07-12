@@ -97,6 +97,8 @@ class PembelianController extends Controller
         if ($req->supplierInd) {
             $query2->where('supplier_id', $req->input('supplierInd'));
         }
+
+
         if ($req->statusInd) {
             if ($req->statusInd == 'Lunas') {
                 $query2->whereHas('invoice', function($q) {
@@ -176,8 +178,15 @@ class PembelianController extends Controller
 
     public function invoice(Request $req)
     {
-       
-        $query= Invoicepo::with('pembelian')->whereNull('poinden_id')->orderBy('tgl_inv', 'desc');
+                // Query untuk invoices tanpa poinden_id
+        $query = Invoicepo::with('pembelian')->whereNull('poinden_id')->orderBy('created_at', 'desc');
+
+        // Filter untuk user dengan role Finance
+        $query->when(Auth::user()->hasRole('Finance'), function ($q) {
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+            //   ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+
         if ($req->supplier) {
             $query->whereHas('pembelian', function($q) use($req){
                 $q->where('supplier_id', $req->input('supplier'));
@@ -1008,7 +1017,9 @@ class PembelianController extends Controller
                 return redirect()->back()->withInput()->with('fail', $errors);
             }
     
-            $duplicate = Invoicepo::where('pembelian_id', $umum->id)->first();
+            $duplicate = Invoicepo::where('pembelian_id', $umum->id)
+            ->where('status_dibuat', '!=', 'BATAL')
+            ->first();
 
             if($duplicate){
                 return redirect()->back()->withInput()->with('fail', 'data sudah ada');

@@ -205,14 +205,14 @@
 
                             </div>
                         </div>
-                        <div class="row justify-content-start">
-                            <div class="col-md-6 border rounded pt-3 me-1 mt-2">
-                             
-                                        <table class="table table-responsive border rounded">
+                        <div class="row justify-content-end">
+                            <div class="col-md-3 col-12 border rounded pt-3 me-1 mt-2">
+                                <div class="table-responsive">
+                                    <table class="table border rounded">
                                             <thead>
                                                 <tr>
                                                     <th>Dibuat</th>                                              
-                                                    <th>Dibukukan</th>
+                                                    {{-- <th>Dibukukan</th> --}}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -221,38 +221,39 @@
                                                         <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
                                                     </td>
-                                                    <td id="pembuku">
+                                                    {{-- <td id="pembuku">
                                                         <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" required>
+                                                        <select id="status" name="status_dibuat" class="form-control select2" required>
                                                             <option value="">Pilih Status</option>
-                                                            <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                            <option value="publish" {{ (old('status_dibuat') == 'publish') || (old('status_dibuat') == null )  ? 'selected' : '' }}>Publish</option>
+                                                            <option value="TUNDA" {{ old('status') == 'TUNDA' || old('status') == '' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
-                                                    <td id="status_dibuku">
+                                                    {{-- <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibuku" class="form-control">
                                                             <option value="">Pilih Status</option>
                                                             <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
                                                             <option value="acc" {{ (old('status_dibukukan') == 'acc') || (old('status_dibukukan') == null) ? 'selected' : '' }}>Accept</option>
                                                         </select>
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ old('tgl_dibuat', now()->format('Y-m-d')) }}" >
                                                     </td>
-                                                    <td id="tgl_dibuku">
+                                                    {{-- <td id="tgl_dibuku">
                                                         <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{ old('tgl_dibuku', now()->format('Y-m-d')) }}" >
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                             </tbody>
                                         </table>  
-                                        <br>                                 
+                                        <br>
+                                </div>                                 
                                </div>
                          </div>
                     </div>
