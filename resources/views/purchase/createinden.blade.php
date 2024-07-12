@@ -114,12 +114,12 @@
                         </div>
 
                         <div class="row justify-content-start">
-                            <div class="col-md-6 border rounded pt-3 me-1 mt-2">
+                            <div class="col-md-3 border rounded pt-3 me-1 mt-2">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
                                             <th>Dibuat</th>
-                                            <th>Diperiksa</th>
+                                            <!-- <th>Diperiksa</th> -->
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -128,35 +128,35 @@
                                                 <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                             </td>
-                                            <td id="pemeriksa">
+                                            <!-- <td id="pemeriksa">
                                                 <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
-                                            </td>
+                                            </td> -->
                                         </tr>
                                         
                                         <tr>
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="draft">Draft</option>
-                                                    <option value="publish" selected>Publish</option>
+                                                    <option value="TUNDA">TUNDA</option>
+                                                    <option value="DIKONFIRMASI" selected>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
-                                            <td id="status_diperiksa">
+                                            <!-- <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" required readonly>
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="pending" disabled>Pending</option>
                                                     <option value="acc" disabled>Accept</option>
                                                 </select>
-                                            </td>
+                                            </td> -->
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" >
                                             </td>
-                                            <td id="tgl_pemeriksa">
+                                            <!-- <td id="tgl_pemeriksa">
                                                 <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
-                                            </td>
+                                            </td> -->
                                         </tr>
                                     </tbody>
                                 </table>

@@ -70,14 +70,6 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="distribusi">Distribusi Produk</label>
-                                            <select id="distribusi" name="distribusi" class="form-control" required>
-                                                <option value="">Pilih Distribusi Produk</option>
-                                                <option value="Dikirim">Dikirim</option>
-                                                <option value="Diambil">Langsung Diambil</option>
-                                            </select>
-                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -90,19 +82,12 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="harga_jual">Input File</label>
-                                            <div class="input-group">
-                                            <div class="custom-file-container" data-upload-id="myFirstImage">
-                                                <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                                </label>
-                                                <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti_file" accept="image/*">
-                                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                                </label>
-                                                <span class="text-danger">max 2mb</span>
-                                                <img id="preview" />
-                                            </div>
-                                            </div>
+                                            <label for="distribusi">Distribusi Produk</label>
+                                            <select id="distribusi" name="distribusi" class="form-control" required>
+                                                <option value="">Pilih Distribusi Produk</option>
+                                                <option value="Dikirim">Dikirim</option>
+                                                <option value="Diambil">Langsung Diambil</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -238,8 +223,6 @@
                             </div>
                         </div>
                         <div class="row ">
-                            <!-- <div class="col-md-12 border rounded pt-3 me-1 mt-2"> -->
-                                <!-- <div class="row"> -->
                                     <!-- Payment and Shipping Section -->
                                     <div class="col-lg-8 col-sm-12 border rounded mt-2">
                                         <div class="row mt-4">
@@ -282,9 +265,9 @@
 
                                             <!-- Shipping Section -->
                                             <div class="col-lg-6">
-                                                <div class="form-group">
+                                                <div class="form-group" style="display:none;" id="kirimpilih">
                                                     <label>Pengiriman</label>
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control">
                                                         <option value="">Pilih Jenis Pengiriman</option>
                                                         <option value="exspedisi">Ekspedisi</option>
                                                         <option value="sameday">SameDay</option>
@@ -311,11 +294,31 @@
                                                 </div>
                                             </div>
                                         </div>
-
+                                    </div>
+                                    <div class="col-lg-4 col-sm-12 border rounded mt-2">
+                                    <div class="row mt-4">
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                            <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                <label>Masukan Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                </label>
+                                                <label class="custom-file-container__custom-file">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti_file" accept="image/*">
+                                                    <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
+                                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                </label>
+                                                <span class="text-danger">max 2mb</span>
+                                                <div class="custom-file-container__image-preview"></div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                    <div class="col-lg-8 col-sm-12 border rounded mt-2">
                                         <!-- Table Section -->
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
-                                                <table class="table table-responsive border rounded">
+                                                <table class="table table-responsive border rounded text-center">
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
@@ -866,18 +869,6 @@
         });
         @endforeach
 
-
-
-        // $('#delivery_order_section').show();
-
-        // $('#distribusi').change(function() {
-        //     if ($(this).val() === 'Diambil') {
-        //         $('#delivery_order_section').hide();
-        //     } else {
-        //         $('#delivery_order_section').show();
-        //     }
-        // });
-
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
             var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); // Mengonversi format Rupiah menjadi numerik
@@ -974,6 +965,17 @@
         function parseRupiahToNumber(rupiah) {
             return parseInt(rupiah.replace(/[^\d]/g, ''));
         }
+
+        $('#distribusi').change(function() {
+            var kirim = $(this).val();
+
+            if (kirim === 'Diambil') {
+                $('#kirimpilih').hide();
+                $('#biaya_ongkir').val(0);
+            }else if(kirim === 'Dikirim'){
+                $('#kirimpilih').show();
+            }
+        });
 
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
