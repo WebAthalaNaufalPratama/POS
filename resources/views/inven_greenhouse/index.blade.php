@@ -104,9 +104,11 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
                                     @if ($item->jenis === 'Produk Terjual')
-                                        {{ $properties['attributes']['no_mutasigg'] ?? '-' }}
-                                    @else
                                         {{ $item->produk_terjual->no_mutasigg ?? '-' }}
+                                    @elseif ($item->jenis === 'Produk Beli')
+                                        {{ $properties['attributes']['no_po'] ?? '-' }}
+                                    @else
+                                        {{ $properties['attributes']['no_mutasigg'] ?? '-' }}
                                     @endif
                                 </td>
                                 <td>
@@ -117,17 +119,43 @@
                                             $kondisiNama = $komponen ? \App\Models\Kondisi::where('id', $komponen->kondisi)->value('nama') : null;
                                         @endphp
                                         {{ $produkNama ?? '-' }} - {{ $kondisiNama ?? '-' }}
+                                    @elseif ($item->jenis === 'Produk Beli')
+                                        @php
+                                            $komponen = $item->produkbeli->first();
+                                            $produkNama = $komponen ? \App\Models\Produk::where('id', $komponen->produk_id)->value('nama') : null;
+                                            $kondisiNama = $komponen ? \App\Models\Kondisi::where('id', $komponen->kondisi_id)->value('nama') : null;
+                                        @endphp
+                                        {{ $produkNama ?? '-' }} - {{ $kondisiNama ?? '-' }}
                                     @else
                                         @php
-                                            $produkNama = \App\Models\Produk::where('id', $properties['attributes']['kode_produk'] ?? null)->value('nama');
-                                            $kondisiNama = \App\Models\Kondisi::where('id', $properties['attributes']['kondisi'] ?? null)->value('nama');
+                                            $produkNama = \App\Models\Produk::where('id', $properties['attributes']['kode_produk'] ?? $properties['attributes']['produk_id'] ?? null)->value('nama');
+                                            $kondisiNama = \App\Models\Kondisi::where('id', $properties['attributes']['kondisi'] ?? $properties['attributes']['kondisi_id'] ?? null)->value('nama');
                                         @endphp
                                         {{ $produkNama ?? '-' }} - {{ $kondisiNama ?? '-' }}
                                     @endif
                                 </td>
-                                <td>{{ $item->jenis === 'Produk Terjual' ? 'Mutasi GH /Pusat' : 'Komponen' }}</td>
-                                <td>{{ $item->jenis === 'Produk Terjual' && isset($properties['attributes']['no_mutasigg']) && Str::startsWith($properties['attributes']['no_mutasigg'], 'MPG') ? ($properties['attributes']['jumlah_diterima'] ?? '0') : '0' }}</td>
-                                <td>{{ $item->jenis === 'Produk Terjual' && isset($properties['attributes']['no_mutasigg']) && Str::startsWith($properties['attributes']['no_mutasigg'], 'MGG') ? ($properties['attributes']['jumlah'] ?? '0') : '0' }}</td>
+                                <td>
+                                    {{ $item->jenis === 'Produk Terjual' ? 'Mutasi GH / Pusat' : ($item->jenis === 'Produk Beli' ? 'Purchase Order' : '-') }}
+                                </td>
+                                <td>
+                                    @if ($item->jenis === 'Produk Terjual' && isset($properties['attributes']['no_mutasigg']) && Str::startsWith($properties['attributes']['no_mutasigg'], 'MPG'))
+                                        {{ $properties['attributes']['jumlah_diterima'] ?? '0' }}
+                                    @elseif ($item->jenis === 'Produk Beli')
+                                        @php
+                                            $komponen = $item->produkbeli->first();
+                                        @endphp
+                                        {{ $komponen->jml_diterima ?? '0' }}
+                                    @else
+                                        0
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($item->jenis === 'Produk Terjual' && isset($properties['attributes']['no_mutasigg']) && Str::startsWith($properties['attributes']['no_mutasigg'], 'MGG'))
+                                        {{ $properties['attributes']['jumlah'] ?? '0' }}
+                                    @else
+                                        0
+                                    @endif
+                                </td>
                                 <td>{{ $item->causer->name ?? '-' }}</td>
                                 <td>{{ $item->updated_at ?? '-' }}</td>
                             </tr>

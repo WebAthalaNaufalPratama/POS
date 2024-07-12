@@ -101,23 +101,22 @@ Carbon::setLocale('id');
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" name="harga_display[]" id="harga2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{formatRupiah2($item->harga) }}" required>
-                                                            <input type="hidden" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{formatRupiah2($item->harga) }}" readonly>
+                                                            <input type="hidden" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{$item->harga}}" readonly>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="limitDiskon({{ $index }}), calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}">
-                                                            <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}" readonly>
+                                                            <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->diskon }}" readonly>
+                                                            <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ $item->jml_diterima * $item->diskon }}" readonly></td>
                                                         </div>
                                                     </td>
-                                                    <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
-
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control" value="{{ formatRupiah2($item->totalharga) }}" readonly></td>
-                                                            <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control" value="{{ formatRupiah2($item->totalharga) }}" readonly>
+                                                            <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control" value="{{ $item->totalharga}}" readonly>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -249,7 +248,7 @@ Carbon::setLocale('id');
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ formatRupiah2($inv_po->subtotal) }}" readonly required>
-                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ formatRupiah2($inv_po->subtotal) }}" readonly>
+                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{$inv_po->subtotal}}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -289,7 +288,7 @@ Carbon::setLocale('id');
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($inv_po->biaya_kirim) }}" required>
-                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ formatRupiah2($inv_po->biaya_kirim) }}" required>
+                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)" value="{{ $inv_po->biaya_kirim }}" required>
                                                         </div>    
                                                     </h5>
                                                 </li>
@@ -300,7 +299,7 @@ Carbon::setLocale('id');
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly value="{{ formatRupiah2($inv_po->total_tagihan) }}" required>
-                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" value="{{ formatRupiah2($inv_po->total_tagihan) }}" readonly required>
+                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" value="{{ $inv_po->total_tagihan }}" readonly required>
                                                         </div>    
                                                     </h5>
                                                 </li>
@@ -576,11 +575,13 @@ function calculateTotalAll() {
     // Menghitung sub total
     document.querySelectorAll('input[id^="jumlahint_"]').forEach(function(input) {
         subTotal += parseFloat(input.value) || 0;
+        console.log(input.value)
     });
 
      // Menghitung tot_disk
      document.querySelectorAll('input[id^="distot_int_"]').forEach(function(input) {
         Totaldis += parseFloat(input.value) || 0;
+        console.log(input.value)
     });
 
     // Menghitung PPN berdasarkan jenis_ppn
@@ -614,7 +615,7 @@ document.getElementById('jenis_ppn').addEventListener('change', function() {
         persenPpnInput.value = '';
         nominalppn.value = '';
 
-         // Set nilai input menjadi string kosong
+        // Set nilai input menjadi string kosong
     }
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
 });

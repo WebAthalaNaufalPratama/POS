@@ -33,10 +33,11 @@ class InventoryGreenhouseController extends Controller
         ->where('status', 'DIKONFIRMASI')
         ->get();
         $pomasukgg = Pembelian::whereIn('lokasi_id', $arraylokasi)
-                ->whereNotNull('status_diterima')
-                ->whereNotNull('tgl_diterima')
-                ->where('status_diterima', 'DIKONFIRMASI')
-                ->with('produkbeli')->get();        
+                ->whereNotNull('status_diperiksa')
+                ->whereNotNull('tgl_diperiksa')
+                ->where('status_diperiksa', 'DIKONFIRMASI')
+                ->with('produkbeli')->get(); 
+        // dd($pomasukgg);       
 
         $riwayat = collect();
 
@@ -66,6 +67,7 @@ class InventoryGreenhouseController extends Controller
             $produkTerjual = Produk_Terjual::whereIn('no_mutasigg', $arraymutasi)->whereNotNull('jumlah_diterima')
                 ->with('komponen')
                 ->get();
+            // dd($produkTerjual);
     
             foreach ($produkTerjual as $produk) {
                 $produkActivity = Activity::where('subject_type', Produk_Terjual::class)
@@ -81,15 +83,19 @@ class InventoryGreenhouseController extends Controller
             }
         }
         if($pomasukgg) {
+            // dd($pomasukgg);
             foreach ($pomasukgg as $produk) {
-                $produkActivity = Activity::where('subject_type', Produkbeli::class)
+                // dd($produk->id);
+
+                $produkActivity = Activity::where('subject_type', Pembelian::class)
                     ->where('subject_id', $produk->id)
                     ->orderBy('id', 'desc')
                     ->first();
+                // dd($produkActivity);
 
                 if ($produkActivity) {
                     $produkActivity->jenis = 'Produk Beli';
-                    $produkActivity->komponen = $produk->produkbeli;
+                    $produkActivity->produkbeli = $produk->produkbeli;
                     $riwayat->push($produkActivity);
                 }
             }

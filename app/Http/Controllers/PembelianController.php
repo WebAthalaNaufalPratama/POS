@@ -1008,6 +1008,12 @@ class PembelianController extends Controller
                 return redirect()->back()->withInput()->with('fail', $errors);
             }
     
+            $duplicate = Invoicepo::where('pembelian_id', $umum->id)->first();
+
+            if($duplicate){
+                return redirect()->back()->withInput()->with('fail', 'data sudah ada');
+            }
+
             $inv = new Invoicepo();
             $idpo = $inv->pembelian_id = $request->id_po;
             // $inv->poinden_id = $request->nopo;
@@ -1065,7 +1071,7 @@ class PembelianController extends Controller
             if (!$check1 || !$check2) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             } else {
-                return redirect()->route('invoice.edit',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
+                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
              }
 
        
@@ -1146,7 +1152,7 @@ class PembelianController extends Controller
             if (!$check1 || !$check2) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             } else {
-                return redirect()->route('invoice.edit',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
+                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
              }
 
         }

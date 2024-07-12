@@ -71,15 +71,15 @@
                                 <th>Tanggal Kirim</th>
                                 <th>Tanggal Terima</th>
                                 <th>No DO Supplier</th>
-                                @if($user->hasRole(['Purchasing','Finance']))
+                                {{-- @if($user->hasRole(['Purchasing','Finance'])) --}}
                                 <th>Status Purchase</th>
-                                @endif
-                                @if($user->hasRole(['AdminGallery','Finance']))
+                                {{-- @endif --}}
+                                {{-- @if($user->hasRole(['AdminGallery','Finance'])) --}}
                                 <th>Status Admin</th>
-                                @endif
-                                @if($user->hasRole(['Auditor','Finance']))
+                                {{-- @endif --}}
+                                {{-- @if($user->hasRole(['Auditor','Finance'])) --}}
                                 <th>Status Auditor</th>
-                                @endif
+                                {{-- @endif --}}
                                 @if($user->hasRole(['Purchasing','Finance']))
                                 <th>Status Pembayaran</th>
                                 @endif
@@ -97,15 +97,15 @@
                                 <td>{{ tanggalindo($datapo->tgl_kirim) }}</td>
                                 <td>{{ $datapo->tgl_diterima ? tanggalindo($datapo->tgl_diterima) : ''}}</td>
                                 <td>{{ $datapo->no_do_suplier}}</td>
-                                @if($user->hasRole(['Purchasing','Finance']))
+                                {{-- @if($user->hasRole(['Purchasing','Finance'])) --}}
                                 <td>{{ $datapo->status_dibuat ?? 'TUNDA'}}</td>
-                                @endif
-                                @if($user->hasRole(['AdminGallery','Finance']))
+                                {{-- @endif --}}
+                                {{-- @if($user->hasRole(['AdminGallery','Finance'])) --}}
                                 <td>{{ $datapo->status_diterima ?? 'TUNDA'}}</td>
-                                @endif
-                                @if($user->hasRole(['Auditor','Finance']))
+                                {{-- @endif --}}
+                                {{-- @if($user->hasRole(['Auditor','Finance'])) --}}
                                 <td>{{ $datapo->status_diperiksa ?? 'TUNDA'}}</td>
-                                @endif
+                                {{-- @endif --}}
                                 @if($user->hasRole(['Purchasing','Finance']))
                                 <td>
                                     @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0 )
@@ -160,6 +160,16 @@
                                         </li>
                                         @endif
 
+                                        @if($invoiceExists && $datapo->invoice->sisa == 0 && ($datapo->invoice->status_dibuku == null || $datapo->invoice->status_dibuku == 'TUNDA'))
+                                            @if($user->hasRole(['Finance']))
+                                            <li>
+                                                <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
+                                                </a>
+                                            </li>
+                                            @endif
+                                        @endif
+
                                         <li>
                                         @if ($invoiceExists && $datapo->invoice->sisa != 0 && $datapo->invoice->status_dibuat == 'DIKONFIRMASI' && ($datapo->invoice->status_dibuku == 'TUNDA' || $datapo->invoice->status_dibuku === null) )
                                             @if($user->hasRole(['Finance']))
@@ -173,7 +183,7 @@
                                                 <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
                                             </a>
                                             @endif
-                                        @else
+                                        @elseif(!$invoiceExists)
                                             @if($user->hasRole(['Purchasing']))
                                             <a href="{{ route('invoicebiasa.create', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
