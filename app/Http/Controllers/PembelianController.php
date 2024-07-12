@@ -831,7 +831,7 @@ class PembelianController extends Controller
         }
 
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal update pembukuan');
-        return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe]))->with('success', 'Berhasil update pembuku');
+        return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe, 'id' => $idinv]))->with('success', 'Berhasil update pembuku');
     }
 
     public function update_purchase_invoice(Request $request, Pembelian $pembelian, $idinv)
@@ -918,7 +918,7 @@ class PembelianController extends Controller
         if (!$check1 || !$check2) {
             return redirect()->back()->withInput()->with('fail', 'Gagal update data');
         } else {
-            return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe]))->with('success', 'Berhasil update data');
+            return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe, 'id' => $idinv]))->with('success', 'Berhasil update data');
         }
     }
 
@@ -1071,7 +1071,7 @@ class PembelianController extends Controller
             if (!$check1 || !$check2) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             } else {
-                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
+                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type, 'id' => $inv->id])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
              }
 
        
@@ -1152,7 +1152,7 @@ class PembelianController extends Controller
             if (!$check1 || !$check2) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             } else {
-                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
+                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type, 'id' => $inv->id])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
              }
 
         }
@@ -1163,13 +1163,13 @@ class PembelianController extends Controller
 
     }
 
-    public function edit_invoice ($datapo, Request $request) //purchasing
+    public function edit_invoice ($datapo, $id, Request $request) //purchasing
     {
 
         $type = $request->query('type');
 
         if ($type === 'pembelian') {
-            $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
+            $inv_po = Invoicepo::find($id);
             $diskonTot = Produkbeli::where('pembelian_id', $datapo)->get();
             $retur = Returpembelian::where('invoicepo_id', $inv_po->id)->first();
             // return $diskonTot;
@@ -1295,13 +1295,13 @@ class PembelianController extends Controller
 
     }
 
-    public function edit_invoice_purchase ($datapo, Request $request) //purchasing
+    public function edit_invoice_purchase ($datapo, $id, Request $request) //purchasing
     {
 
         $type = $request->query('type');
 
         if ($type === 'pembelian') {
-            $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
+            $inv_po = Invoicepo::find($id);
             $diskonTot = Produkbeli::where('pembelian_id', $datapo)->get();
             $retur = Returpembelian::where('invoicepo_id', $inv_po->id)->first();
             // return $diskonTot;
@@ -1430,13 +1430,13 @@ class PembelianController extends Controller
     }
 
 
-    public function show_invoice ($datapo, Request $request)
+    public function show_invoice ($datapo, $id, Request $request)
     {
 
         $type = $request->query('type');
 
         if ($type === 'pembelian') {
-            $inv_po = Invoicepo::where('pembelian_id', $datapo)->first();
+            $inv_po = Invoicepo::find($id);
             $diskonTot = Produkbeli::where('pembelian_id', $datapo)->get();
             $idinv = $inv_po->id;
             $retur = Returpembelian::where('invoicepo_id', $idinv)->first();

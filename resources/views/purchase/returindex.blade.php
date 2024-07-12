@@ -102,7 +102,7 @@
                                             @endphp
                                 
                                             @if ($invoiceExists)
-                                                <a href="{{ route('invoice.edit',['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                <a href="{{ route('invoice.edit',['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                 </a>
                                             @else
@@ -115,7 +115,7 @@
                                             <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> @if($data->komplain == "Refund") Input Refund @else Detail Retur @endif</a>
                                         </li>
                                         <li>
-                                            <a href="{{ route('invoice.show', ['datapo' => $data->invoice->pembelian_id, 'type'=>"pembelian"]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>
+                                            <a href="{{ route('invoice.show', ['datapo' => $data->invoice->pembelian_id, 'type'=>"pembelian", 'id' => $data->invoice->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>
                                         </li>
                                         {{-- <li>
                                             <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>

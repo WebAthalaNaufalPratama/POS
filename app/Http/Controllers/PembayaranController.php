@@ -363,7 +363,7 @@ class PembayaranController extends Controller
 
             if ($pembayaran) {
                 // Mengembalikan respon sukses jika data pembayaran berhasil disimpan
-                return redirect(route('invoice.edit', ['datapo' => $req->id_po, 'type' => $type]))->with('success', 'Data Berhasil Disimpan');
+                return redirect(route('invoice.edit', ['datapo' => $req->id_po, 'type' => $type, 'id' => $datainv->id]))->with('success', 'Data Berhasil Disimpan');
             } else {
                 // Mengembalikan respon gagal jika penyimpanan data pembayaran gagal
                 return redirect()->back()->with('fail', 'Gagal menyimpan data');
@@ -371,7 +371,7 @@ class PembayaranController extends Controller
         }elseif ($type === 'poinden') {
             if ($pembayaran) {
                 // Mengembalikan respon sukses jika data pembayaran berhasil disimpan
-                return redirect(route('invoice.edit', ['datapo' => $req->id_po, 'type' => $type]))->with('success', 'Data Berhasil Disimpan');
+                return redirect(route('invoice.edit', ['datapo' => $req->id_po, 'type' => $type, 'id' => $datainv->id]))->with('success', 'Data Berhasil Disimpan');
             } else {
                 // Mengembalikan respon gagal jika penyimpanan data pembayaran gagal
                 return redirect()->back()->with('fail', 'Gagal menyimpan data');
