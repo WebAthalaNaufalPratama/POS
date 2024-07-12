@@ -129,36 +129,57 @@
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
 
+                                            @if($pemeriksa)
                                             <td id="pemeriksa">
-                                                <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})"  disabled>
+                                                <input type="hidden" name="pemeriksa" value="{{ $beli->pemeriksa ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ $pemeriksa ?? '' }} ({{ $pemeriksajbt ?? '' }})" disabled>
                                             </td>
+                                            @else
+                                            <td id="pemeriksa">
+                                                <input type="text" class="form-control" value="Nama (Auditor)"  disabled>
+                                            </td>
+                                            @endif
                                         </tr>
                                         
                                         <tr>
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                    <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                    <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
                                           
+                                            @if($pemeriksa)
                                             <td id="status_diperiksa">
-                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required disabled>
+                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" disabled>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" {{ $beli->status_diperiksa == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                    <option value="acc" {{ $beli->status_diperiksa == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                    <option value="TUNDA" {{ $beli->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $beli->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
+                                            @else
+                                            <td id="status_diperiksa">
+                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" disabled>
+                                                    <option selected>-</option>
+                                                </select>
+                                            </td>
+                                            @endif
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
                                                 <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat }}" disabled>
                                             </td>
                                            
+                                            @if($pemeriksa)
                                             <td id="tgl_pemeriksa">
-                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '' }}" disabled>
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '' }}" disabled>
                                             </td>
+                                            @else
+                                            <td id="tgl_pemeriksa">
+                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="-" disabled>
+                                            </td>
+                                            @endif
                                         </tr>
                                     </tbody>
                                 </table>

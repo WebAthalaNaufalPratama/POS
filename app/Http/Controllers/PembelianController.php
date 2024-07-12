@@ -764,10 +764,10 @@ class PembelianController extends Controller
         }elseif ($type === 'poinden') {
             $beli = ModelsPoinden::find($datapo);
             // return $beli;
-            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
-            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
-            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama;
-            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan;
+            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama ?? null;
+            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan ?? null;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama ?? null;
+            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan ?? null;
             $produkbelis = Produkbeli::where('poinden_id', $datapo)->get();
             
             return view('purchase.showpoinden',compact('beli','produkbelis','pembuat','pemeriksa','pembuatjbt','pemeriksajbt'));
@@ -1609,8 +1609,8 @@ class PembelianController extends Controller
             $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
             // $penerima = Karyawan::where('user_id', $beli->penerima)->first()->nama;
             // $penerimajbt = Karyawan::where('user_id', $beli->penerima)->first()->jabatan;
-            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama;
-            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama ?? null;
+            $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan ?? null;
             $produkbelis = Produkbeli::where('poinden_id', $datapo)->get();
             
             return view('purchase.editpoinden',compact('produks','suppliers','lokasis','kondisis','beli','produkbelis','pembuat','pemeriksa','pembuatjbt','pemeriksajbt'));
@@ -1953,7 +1953,7 @@ class PembelianController extends Controller
 
     public function po_update(Request $request, $datapo) //admin
     {
-        // dd($request->all());
+        // dd($request);
         // Validasi input
 
         $type = $request->type;
@@ -2106,6 +2106,8 @@ class PembelianController extends Controller
         
             // $pembelian->supplier_id = $request->id_supplier;
             $pembelian->bulan_inden = $request->bulan_inden;
+            $pembelian->pemeriksa = $request->pemeriksa;
+            $pembelian->status_dibuat = $request->status_dibuat;
             $pembelian->status_diperiksa = $request->status_diperiksa;
             $pembelian->tgl_diperiksa = $request->tgl_diperiksa;
             $pembelian->save();

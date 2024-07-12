@@ -309,17 +309,17 @@ Carbon::setLocale('id');
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="draft" {{ old('status_dibuat') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                            <option value="publish" {{ (old('status_dibuat') == 'publish') || (old('status_dibuat') == null) ? 'selected' : '' }}>Publish</option>
+                                                            <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' ? 'selected' : '' }}>Draft</option>
+                                                            <option value="DIKONFIRMASI" {{ (old('status_dibuat') == 'DIKONFIRMASI') || (old('status_dibuat') == null) ? 'selected' : '' }}>Publish</option>
                                                         </select>
                                                     </td>
-                                                    <td id="status_dibuku">
+                                                    <!-- <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
                                                             <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
                                                         </select>
-                                                    </td>
+                                                    </td> -->
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">

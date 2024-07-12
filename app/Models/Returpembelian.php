@@ -41,6 +41,8 @@ class Returpembelian extends Model
     public function produkretur (){
         return $this->hasMany(Produkretur::class, 'returpembelian_id', 'id');
     }
-    
+    public function dibuat(){
+        return $this->belongsTo(User::class, 'pembuat', 'id');
+    }
    
 }

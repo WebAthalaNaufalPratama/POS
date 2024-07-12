@@ -8,6 +8,7 @@ use App\Models\Produk;
 use App\Models\Kondisi;
 use App\Models\Mutasi;
 use App\Models\Lokasi;
+use App\Models\Pembelian;
 use App\Models\Produk_Terjual;
 use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Http;
@@ -27,6 +28,12 @@ class InventoryGudangController extends Controller
         ->whereIn('penerima', $arraylokasi)
         ->where('status', 'DIKONFIRMASI')
         ->get();
+
+        $pomasukgg = Pembelian::whereIn('lokasi_id', $arraylokasi)
+                ->whereNotNull('status_diperiksa')
+                ->whereNotNull('tgl_diperiksa')
+                ->where('status_diperiksa', 'DIKONFIRMASI')
+                ->with('produkbeli')->get(); 
 
         $riwayat = collect();
 
@@ -70,6 +77,21 @@ class InventoryGudangController extends Controller
                     $riwayat->push($produkActivity);
                 }
             }
+        }
+        if($pomasukgg) {
+            foreach ($pomasukgg as $produk) {
+                $produkActivity = Activity::where('subject_type', Pembelian::class)
+                    ->where('subject_id', $produk->id)
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                if ($produkActivity) {
+                    $produkActivity->jenis = 'Produk Beli';
+                    $produkActivity->produkbeli = $produk->produkbeli;
+                    $riwayat->push($produkActivity);
+                }
+            }
+
         }
     
         $riwayat = $riwayat->sortByDesc('id')->values();
