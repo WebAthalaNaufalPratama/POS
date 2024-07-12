@@ -755,9 +755,9 @@ class PembelianController extends Controller
         }elseif ($type === 'poinden') {
             $beli = ModelsPoinden::find($datapo);
             // return $beli;
-            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama;
-            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan;
-            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama ;
+            $pembuat = Karyawan::where('user_id', $beli->pembuat)->first()->nama ?? null;
+            $pembuatjbt = Karyawan::where('user_id', $beli->pembuat)->first()->jabatan ?? null;
+            $pemeriksa = Karyawan::where('user_id', $beli->pemeriksa)->first()->nama ?? null;
             $pemeriksajbt = Karyawan::where('user_id', $beli->pemeriksa)->first()->jabatan ?? null;
             $produkbelis = Produkbeli::where('poinden_id', $datapo)->get();
             
@@ -2096,6 +2096,7 @@ class PembelianController extends Controller
             // $pembelian->supplier_id = $request->id_supplier;
             $pembelian->bulan_inden = $request->bulan_inden;
             $pembelian->pemeriksa = $request->pemeriksa;
+            $pembelian->status_dibuat = $request->status_dibuat;
             $pembelian->status_diperiksa = $request->status_diperiksa;
             $pembelian->tgl_diperiksa = $request->tgl_diperiksa;
             $pembelian->save();
