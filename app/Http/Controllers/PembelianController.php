@@ -1942,7 +1942,7 @@ class PembelianController extends Controller
 
     public function po_update(Request $request, $datapo) //admin
     {
-        // dd($request->all());
+        // dd($request);
         // Validasi input
 
         $type = $request->type;

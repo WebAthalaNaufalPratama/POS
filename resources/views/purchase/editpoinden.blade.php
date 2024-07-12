@@ -41,31 +41,31 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
-                                            {{-- <div class="input-group"> --}}
-                                                <select id="id_supplier" name="id_supplier" class="form-control" readonly>
-                                                    <option value="" disabled>Pilih Nama Supplier</option>
+                                            <div class="input-group">
+                                                <select id="id_supplier" name="id_supplier" class="form-control" required>
+                                                    <option value="">Pilih Nama Supplier</option>
                                                     @foreach ($suppliers as $supplier)
-                                                        <option value="{{ $supplier->id }}" {{ $supplier->id == $beli->supplier->id ? 'selected' : '' }} disabled>
+                                                        <option value="{{ $supplier->id }}" {{ $supplier->id == $beli->supplier->id ? 'selected' : '' }}>
                                                             {{ $supplier->nama }}
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                                {{-- <div class="input-group-append">
+                                                <div class="input-group-append">
                                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                                                         <img src="/assets/img/icons/plus1.svg" alt="img" />
                                                     </button>
-                                                </div> --}}
-                                            {{-- </div> --}}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="bulan_inden">Bulan Inden</label>
-                                            <input type="text" class="form-control" id="bulan" name="bulan_inden" value="{{ $beli->bulan_inden}}" readonly>
+                                            {{-- <input type="text" class="form-control" id="bulan" name="bulan_inden" value="{{ $beli->bulan_inden}}" readonly> --}}
 
-                                            {{-- <select class="form-control" id="bulanTahun" name="bulan_inden">
+                                            <select class="form-control" id="bulanTahun" name="bulan_inden">
                                                 <!-- Opsi akan diisi oleh JavaScript -->
-                                            </select> --}}
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label for="harga_jual">Status</label>
@@ -115,7 +115,11 @@
                                                 <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
                                                 <td><input type="number" name="qty[]" id="qty_{{ $index }}" class="form-control" value="{{ $item->jumlahInden }}"></td>
                                                 <td><input type="text" name="ket[]" id="ket_{{ $index }}" class="form-control" value="{{ $item->keterangan }}"></td>
-                                                {{-- <td><button type="button" name="remove" id="{{ $index }}" class="btn btn-danger btn_remove">x</button></td> --}}
+                                                @if($index == 0)
+                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                @else
+                                                <td><button type="button" name="remove" id="{{ $index }}" class="btn btn-danger btn_remove">x</button></td>
+                                                @endif
                                             </tr>
                                         @endforeach
                                     </tbody>
