@@ -138,16 +138,16 @@
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                    <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                    <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
                                           
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" required disabled>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" {{ $beli->status_diperiksa == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                    <option value="acc" {{ $beli->status_diperiksa == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                    <option value="TUNDA" {{ $beli->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $beli->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
                                         </tr>

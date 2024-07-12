@@ -173,7 +173,7 @@ class PenjualanController extends Controller
             // 'bukti_file' => 'required|image|mimes:jpeg,png|max:2048',
             'notes' => 'required',
             'cara_bayar' => 'required',
-            'pilih_pengiriman' => 'required',
+            // 'pilih_pengiriman' => 'required',
             'biaya_ongkir' => 'required',
             'sub_total' => 'required',
             'jenis_ppn' => 'required',

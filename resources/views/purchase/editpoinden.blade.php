@@ -151,15 +151,15 @@
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="draft" {{ $beli->status_dibuat == 'draft' ? 'selected' : ''}} disabled>Draft</option>
-                                                    <option value="publish" {{ $beli->status_dibuat == 'publish' ? 'selected' : ''}} disabled>Publish</option>
+                                                    <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : ''}} disabled>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : ''}} disabled>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
                                                     <option disabled selected>Pilih Status</option>
-                                                    <option value="pending">Pending</option>
-                                                    <option value="acc" selected>Accept</option>
+                                                    <option value="TUNDA">TUNDA</option>
+                                                    <option value="DIKONFIRMASI" selected>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
                                         </tr>
