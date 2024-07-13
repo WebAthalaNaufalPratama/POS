@@ -62,11 +62,6 @@
                                                 <!-- Opsi akan diisi oleh JavaScript -->
                                             </select>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="harga_jual">Status</label>
-                                                <input type="text" class="form-control" id="status" name="status" value="Draft" readonly>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>

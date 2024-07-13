@@ -50,16 +50,6 @@
                                             <label for="bulan_inden">Bulan Inden</label>
                                             <input type="text" class="form-control" id="bulan_inden" name="bulan_inden"  value="{{ $beli->bulan_inden }}" readonly>
                                        </div>
-                                       <div class="form-group">
-                                        <label for="harga_jual">Status</label>
-                                        <input type="text" class="form-control" id="status" name="status" value="@php
-                                            $latestDate = max($beli->tgl_dibuat, $beli->tgl_diperiksa);
-                                            if ($latestDate == $beli->tgl_dibuat) {
-                                                echo $beli->status_dibuat. ' oleh ' . $pembuat;
-                                            } elseif ($latestDate == $beli->tgl_diperiksa) {
-                                                $beli->status_diperiksa. ' oleh ' . $pemeriksa; 
-                                            }
-                                        @endphp" readonly>
                                     </div>
                                 </div>
 
