@@ -93,7 +93,7 @@
                                                 <label>Bukti Retur <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*">
+                                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*" required>
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
@@ -1031,7 +1031,7 @@
             var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
 
             var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-            // console.log(generatedInvoice)
+            console.log(generatedInvoice)
             $('#no_do').val(generatedInvoice);
         }
 

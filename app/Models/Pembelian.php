@@ -51,6 +51,8 @@ class Pembelian extends Model
     public function penerima(){
         return $this->belongsTo(User::class, 'penerima', 'id');
     }
-
+    public function dibuat(){
+        return $this->belongsTo(User::class, 'pembuat', 'id');
+    }
 
 }

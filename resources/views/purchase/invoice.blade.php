@@ -1,6 +1,9 @@
 @extends('layouts.app-von')
 
 @section('content')
+@php
+$user = Auth::user();
+@endphp
 <div class="row">
     <div class="col-sm-12">
         <div class="card">
@@ -126,29 +129,39 @@
                                             @endif
                                         </li>
                                         @if(Auth::user()->hasRole('Purchasing'))
-                                            @if($inv->status_dibuat == "TUNDA")
-                                            <li>
-                                                <a href="{{ route('invoice.edit',['datapo' => $inv->pembelian->id, 'type' => 'pembelian']) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Ubah Invoice
-                                                </a>
-                                            </li>
-                                        @endif
+                                            @if ($inv->status_dibuat == "TUNDA")
+                                                <li>
+                                                    <a href="{{ route('invoicepurchase.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
+                                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
+                                                    </a>
+                                                </li>
+                                            @endif
                                         @endif
                                         @if(Auth::user()->hasRole('Finance'))
-                                            @if($inv->status_dibuku == "TUNDA")
+                                        @if($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null)
+                                        @if($inv->sisa == 0)
                                             <li>
-                                                <a href="{{ route('invoice.edit',['datapo' => $inv->pembelian->id, 'type' => 'pembelian']) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Ubah Invoice
+                                                <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
+                                                </a>
+                                            </li>
+                                        @else
+                                            <li>
+                                                <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
+                                                <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item">
+                                                    <img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar
+                                                </a>
                                             </li>
-                                            @endif
+                                        @endif
+                                        @endif                                 
                                         @endif
                                         
                                         <li>
-                                            <a href="{{ route('invoice.show',['datapo' => $inv->pembelian->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                            <a href="{{ route('invoice.show',['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
                                             </a>
                                         </li>
@@ -255,20 +268,20 @@
                                     <ul class="dropdown-menu">
                                         {{-- @if($inv->sisa !== 0)
                                         <li>
-                                            <a href="{{ route('invoice.edit',['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                            <a href="{{ route('invoice.edit',['datapo' => $inv->poinden->id, 'type' => 'poinden', 'id' => $inv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                             </a>
                                         </li>
                                         @endif --}}
                                         @if($inv->status_dibuat == "TUNDA")
                                         <li>
-                                            <a href="{{ route('invoice.edit',['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                            <a href="{{ route('invoice.edit',['datapo' => $inv->poinden->id, 'type' => 'poinden', 'id' => $inv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Ubah Invoice
                                             </a>
                                         </li>
                                         @endif
                                         <li>
-                                            <a href="{{ route('invoice.show',['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item">
+                                            <a href="{{ route('invoice.show',['datapo' => $inv->poinden->id, 'type' => 'poinden', 'id' => $inv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
                                             </a>
                                             <a href="{{ route('editinvoice.edit', ['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Edit Invoice</a>
