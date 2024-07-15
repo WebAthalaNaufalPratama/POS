@@ -99,14 +99,22 @@
                         @foreach ($riwayat as $item)
                             @php
                                 $properties = json_decode($item->properties, true);
+                                
+                                foreach($item->produkbeli as $produk){
+                                    dump($produk);
+                                }
+                               
                             @endphp
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                
                                 <td>
                                     @if ($item->jenis === 'Produk Terjual')
                                         {{ $item->produk_terjual->no_mutasigg ?? '-' }}
                                     @elseif ($item->jenis === 'Produk Beli')
+                                    @for($i=0;$i<(count($produk));$i++)
                                         {{ $properties['attributes']['no_po'] ?? '-' }}
+                                    @endfor
                                     @else
                                         {{ $properties['attributes']['no_mutasigg'] ?? '-' }}
                                     @endif
@@ -144,7 +152,7 @@
                                         @php
                                             $komponen = $item->produkbeli->first();
                                         @endphp
-                                        {{ $komponen->jml_diterima ?? '0' }}
+                                        {{ $produk->jml_diterima ?? '0' }}
                                     @else
                                         0
                                     @endif

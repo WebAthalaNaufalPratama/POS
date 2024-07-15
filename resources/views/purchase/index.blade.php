@@ -51,6 +51,8 @@
                             <option value="">Pilih Status</option>
                             <option value="Lunas" {{ request()->input('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                            <option value="Belum Ada Tagihan" {{ request()->input('status') == 'Belum Ada Tagihan' ? 'selected' : '' }}>Belum Ada Tagihan</option>
+                            <option value="Invoice Batal" {{ request()->input('status') == 'Invoice Batal' ? 'selected' : '' }}>Invoice Batal</option>
                         </select>
                     </div>
                     @endif

@@ -48,6 +48,7 @@ class PembelianController extends Controller
             $q->where('status_dibuat', 'DIKONFIRMASI')
               ->where(function($query) {
                   $query->where('status_diterima', 'DIKONFIRMASI')
+                  ->orWhere('status_diterima', '-')
                         ->orWhere(function($subQuery) {
                             $subQuery->whereNull('status_diterima')
                                      ->whereHas('lokasi.tipe', function($lokasiQuery) {
@@ -78,13 +79,20 @@ class PembelianController extends Controller
                 $query->whereHas('invoice', function($q) {
                     $q->where('sisa', 0);
                 });
-            } else {
-                $query->whereDoesntHave('invoice')
-                      ->orWhereHas('invoice', function($q) {
-                          $q->where('sisa', '!=', 0);
-                      });
+            } elseif($req->status == 'Belum Lunas') {
+                $query->whereHas('invoice', function($q) {
+                    $q->where('sisa', '!=', 0)
+                      ->where('status_dibuat', '!=', 'BATAL');
+                });
+            } elseif($req->status == 'Belum Ada Tagihan') {
+                $query->whereDoesntHave('invoice');
+            } elseif($req->status == 'Invoice Batal') {
+                $query->whereHas('invoice', function($q) {
+                    $q->where('status_dibuat', 'BATAL');
+                });
             }
-        }        
+        }
+               
         if ($req->dateStart) {
             $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
         }
