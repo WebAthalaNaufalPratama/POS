@@ -24,8 +24,9 @@ Carbon::setLocale('id');
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('invoicepo.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('editinvoice.update',['datapo' => $inv_po->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                @method('patch')
                 <div class="row">
                     <div class="col-sm">
                         <div class="row justify-content-start">
@@ -126,7 +127,7 @@ Carbon::setLocale('id');
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
                                                                 <input type="text" name="harga_display[]" id="harga2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{formatRupiah2($item->harga) }}" required>
-                                                                <input type="hidden" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('harga.'.$index) }}" required>
+                                                                <input type="hidden" name="harga[]" id="harga_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->harga }}" required>
                                                             </div>
                                                     </td>
                                                     <td>
@@ -134,7 +135,7 @@ Carbon::setLocale('id');
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
                                                                 <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}">
-                                                                <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ old('diskon.'.$index) }}">
+                                                                <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->diskon }}">
                                                             </div>
                                                     </td>
                                                     <input type="hidden" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
@@ -149,7 +150,7 @@ Carbon::setLocale('id');
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
                                                                 <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control" value="{{ formatRupiah2($item->totalharga) }}" readonly></td>
-                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control" value="{{ old('jumlah.'.$index) }}" readonly></td>
+                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control" value="{{ $item->totalharga }}" readonly></td>
                                                             </div>
                                                     </td> 
                                                 </tr>
@@ -227,13 +228,13 @@ Carbon::setLocale('id');
                                                     <h4>PPN
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
                                                             <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude" {{ }}>EXCLUDE</option>
-                                                            <option value="include" selected>INCLUDE</option>
+                                                            <option value="exclude" {{ $inv_po->ppn != null ? 'selected' : ''}}>EXCLUDE</option>
+                                                            <option value="include" {{ $inv_po->ppn == null ? 'selected' : ''}}>INCLUDE</option>
                                                         </select>
                                                     </h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="11" readonly>
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                     </h5>
@@ -253,7 +254,7 @@ Carbon::setLocale('id');
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly value="{{ old('total_tagihan_dis') }}" required>
+                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly value="{{ formatRupiah2($inv_po->total_tagihan) }}" required>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly value="{{ old('total_tagihan') }}" required>
                                                         </div>
                                                     </h5>
@@ -263,7 +264,7 @@ Carbon::setLocale('id');
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="dp" name="dp" class="form-control" required readonly>
+                                                            <input type="text" id="dp" name="dp" class="form-control" value="{{ formatRupiah2($inv_po->dp) }}" required readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -272,7 +273,7 @@ Carbon::setLocale('id');
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly required>
+                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ $inv_po->sisa }}" readonly required>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -438,6 +439,7 @@ function calculateTotal(index) {
     var qtytrm = parseFloat(document.getElementById('qtytrm_' + index).value) || 0;
     var harga = parseFloat(unformatRupiah(document.getElementById('harga_' + index).value)) || 0;
     var diskon = parseFloat(unformatRupiah(document.getElementById('diskon_' + index).value)) || 0;
+    console.log(harga);
    
     var distot = (qtytrm * diskon); 
     var jumlah = (qtytrm * harga) - distot;
@@ -458,6 +460,7 @@ function calculateTotal(index) {
 function calculateTotalAll() {
     var subTotal = 0;
     var Totaldis = 0;
+    
     // var diskonTotal = parseFloat(unformatRupiah(document.getElementById('diskon_total').value)) || 0;
     // var biayaOngkir = parseFloat(unformatRupiah(document.getElementById('biaya_ongkir').value)) || 0;
     var persenPpn = parseFloat(document.getElementById('persen_ppn').value) || 0;
@@ -469,6 +472,7 @@ function calculateTotalAll() {
     document.querySelectorAll('input[id^="distot_int_"]').forEach(function(input) {
         Totaldis += parseFloat(input.value) || 0;
     });
+    console.log(subTotal);
 
     // Menghitung PPN berdasarkan jenis_ppn
     var ppn = 0;
@@ -495,8 +499,8 @@ function calculateTotalAll() {
 }
 
 // Event listener untuk perubahan jenis PPN
-document.getElementById('jenis_ppn').addEventListener('change', function() {
-    var selectedOption = this.value;
+function jenisPPN() {
+    var selectedOption = $('#jenis_ppn').val();
     var persenPpnInput = document.getElementById('persen_ppn');
     if (selectedOption === 'exclude') {
         persenPpnInput.readOnly = false;
@@ -505,6 +509,10 @@ document.getElementById('jenis_ppn').addEventListener('change', function() {
         persenPpnInput.value = ''; // Set nilai input menjadi string kosong
     }
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
+};
+
+$(document).ready(function () {
+    $('#jenis_ppn').change(jenisPPN());
 });
 
 // Panggil fungsi calculateTotal ketika ada perubahan pada input harga atau diskon per baris

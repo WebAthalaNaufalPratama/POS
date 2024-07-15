@@ -1586,185 +1586,88 @@ class PembelianController extends Controller
 
     public function editinvoiceupdate($datapo, Request $request)
     {
-        dd($request);
+        // dd($request);
         $no_po = $request->input('no_po');
         $type = $request->input('type');
-
-        if ($type === 'pembelian') {
-        $umum = Pembelian::where('no_po', $no_po)->first();
-        if ($umum) {
-            
-            $validator = Validator::make($request->all(), [
-                'id_po' => 'required',
-                'no_inv' => 'required',
-                'tgl_inv' => 'required',
-                'sub_total' => 'required',
-                'total_tagihan' => 'required',
-            ]);
-        
-            // Periksa apakah validasi gagal
-            if ($validator->fails()) {
-                $errors = $validator->errors()->all();
-                return redirect()->back()->withInput()->with('fail', $errors);
-            }
+        $id_po = $request->input('id_po');
     
-            $duplicate = Invoicepo::where('pembelian_id', $umum->id)->first();
-
-            if($duplicate){
-                return redirect()->back()->withInput()->with('fail', 'data sudah ada');
-            }
-
-            // $inv = Invoicepo::where('')
-
-            $inv = new Invoicepo();
-            $idpo = $inv->pembelian_id = $request->id_po;
-            // $inv->poinden_id = $request->nopo;
-            $inv->tgl_inv = $request->tgl_inv;
-            $no_inv = $inv->no_inv = $request->no_inv;
+        if ($type === 'poinden') {
+            $inden = ModelsPoinden::where('no_po', $no_po)->first();
+            if ($inden) {
     
-            $inv->pembuat = $request->pembuat;
-            $inv->status_dibuat = $request->status_dibuat;
-            $inv->pembuku = $request->pembuku ?? null;
-            $inv->status_dibuku = $request->status_dibuku ?? null;
-            $inv->tgl_dibuat = $request->tgl_dibuat;
-            $inv->tgl_dibukukan = $request->tgl_dibukukan ?? null;
+                $validator = Validator::make($request->all(), [
+                    'id_po' => 'required',
+                    'no_inv' => 'required',
+                    'tgl_inv' => 'required|date',
+                    'sub_total' => 'required|numeric',
+                    'total_tagihan' => 'required|numeric',
+                    // Tambahkan validasi lainnya sesuai kebutuhan
+                ]);
     
-            $subtot = $inv->subtotal = $request->sub_total;
-            // $disk = $inv->diskon = $request->diskon_total;
-            if ($request->persen_ppn == null ) {
-               $inv->ppn = 0;
-            } else { 
-                $persen_ppn =  $request->persen_ppn;
-                $inv->ppn = $persen_ppn/100 * $subtot;
-            }
-            
+                // Periksa apakah validasi gagal
+                if ($validator->fails()) {
+                    $errors = $validator->errors()->all();
+                    return redirect()->back()->withInput()->with('fail', $errors);
+                }
     
-            $inv->biaya_kirim = $request->biaya_ongkir;
-            $inv->total_tagihan = $request->total_tagihan;
-            $inv->dp = 0;
-            $inv->sisa = $request->total_tagihan;
+                // Temukan Invoicepo berdasarkan id dan update
+                $invData = [
+                    'poinden_id' => $request->id_po,
+                    'tgl_inv' => $request->tgl_inv,
+                    'no_inv' => $request->no_inv,
+                    'pembuat' => $request->pembuat,
+                    'status_dibuat' => $request->status_dibuat,
+                    'pembuku' => $request->pembuku,
+                    'status_dibuku' => $request->status_dibuku,
+                    'tgl_dibuat' => $request->tgl_dibuat,
+                    'tgl_dibukukan' => $request->tgl_dibukukan,
+                    'subtotal' => $request->sub_total,
+                    'ppn' => $request->persen_ppn === null ? 0 : ($request->persen_ppn / 100 * $request->sub_total),
+                    'total_tagihan' => $request->total_tagihan,
+                    'dp' => 0,
+                    'sisa' => $request->total_tagihan,
+                ];
     
-            $check1 = $inv->save();
+                $check1 = Invoicepo::where('id', $datapo)->update($invData);
     
-            //kumpulan produkbeli dengan id tersebut
-            // $produks = Produkbeli::where('pembelian_id', $idpo)->get();
+                // Loop melalui setiap produk untuk update
+                $produkIds = $request->input('id');
+                $hargas = $request->input('harga');
+                $diskons = $request->input('diskon');
+                $jumlahs = $request->input('jumlah');
     
-            $produkIds = $request->input('id');
-            $hargas = $request->input('harga');
-            $diskons = $request->input('diskon');
-            $jumlahs = $request->input('jumlah');
-        
-            // Loop melalui setiap produk untuk update
-            foreach ($produkIds as $index => $produkId) {
-                // Temukan Produkbeli berdasarkan id
-                $produkbeli = Produkbeli::findOrFail($produkId);
-        
-                // Update harga, diskon, dan jumlah
-                $produkbeli->harga = $hargas[$index];
-                $produkbeli->diskon = $diskons[$index];
-                $produkbeli->totalharga = $jumlahs[$index];
-        
-                // Simpan perubahan
-                $check2 = $produkbeli->save();
-            }
-        
+                foreach ($produkIds as $index => $produkId) {
+                    $produkData = [
+                        'harga' => $hargas[$index],
+                        'diskon' => $diskons[$index],
+                        'totalharga' => $jumlahs[$index],
+                    ];
     
-            // Periksa keberhasilan penyimpanan data
-            if (!$check1 || !$check2) {
-                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    $check2 = Produkbeli::where('id', $produkId)->update($produkData);
+    
+                    if (!$check2) {
+                        return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate Data Produk');
+                    }
+                }
+    
+                // Periksa keberhasilan penyimpanan data
+                if (!$check1) {
+                    return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate Data Invoice');
+                } else {
+                    return redirect()->route('invoice.show',  ['datapo' => $id_po, 'type' => $type, 'id' => $datapo])->with('success', 'Data pembelian berhasil diupdate. Nomor Invoice: ' . $invData['no_inv']);
+                }
+    
             } else {
-                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
-             }
-
-       
-        }
-        } elseif ($type === 'poinden') {
-        $inden = ModelsPoinden::where('no_po', $no_po)->first();
-        if ($inden) {
-
-            $validator = Validator::make($request->all(), [
-                'id_po' => 'required',
-                'no_inv' => 'required',
-                'tgl_inv' => 'required',
-                'sub_total' => 'required',
-                'total_tagihan' => 'required',
-                // Tambahkan validasi lainnya sesuai kebutuhan
-            ]);
-        
-            // Periksa apakah validasi gagal
-            if ($validator->fails()) {
-                $errors = $validator->errors()->all();
-                return redirect()->back()->withInput()->with('fail', $errors);
+                return redirect()->back()->withErrors('PO Inden tidak ditemukan.');
             }
-    
-            $inv = new Invoicepo();
-            $idpo = $inv->poinden_id = $request->id_po;
-            // $inv->poinden_id = $request->nopo;
-            $inv->tgl_inv = $request->tgl_inv;
-            $no_inv = $inv->no_inv = $request->no_inv;
-    
-            $inv->pembuat = $request->pembuat;
-            $inv->status_dibuat = $request->status_dibuat;
-            $inv->pembuku = $request->pembuku;
-            $inv->status_dibuku = $request->status_dibuku;
-            $inv->tgl_dibuat = $request->tgl_dibuat;
-            $inv->tgl_dibukukan = $request->tgl_dibukukan;
-    
-            $subtot = $inv->subtotal = $request->sub_total;
-            // $disk = $inv->diskon = $request->diskon_total;
-            if ($request->persen_ppn == null ) {
-               $inv->ppn = 0;
-            } else { 
-                $persen_ppn =  $request->persen_ppn;
-                $inv->ppn = $persen_ppn/100 * $subtot;
-            }
-            
-    
-            // $inv->biaya_kirim = $request->biaya_ongkir;
-            $inv->total_tagihan = $request->total_tagihan;
-            $inv->dp = 0;
-            $inv->sisa = $request->total_tagihan;
-    
-            $check1 = $inv->save();
-    
-            //kumpulan produkbeli dengan id tersebut
-            // $produks = Produkbeli::where('pembelian_id', $idpo)->get();
-    
-            $produkIds = $request->input('id');
-            $hargas = $request->input('harga');
-            $diskons = $request->input('diskon');
-            $jumlahs = $request->input('jumlah');
-        
-            // Loop melalui setiap produk untuk update
-            foreach ($produkIds as $index => $produkId) {
-                // Temukan Produkbeli berdasarkan id
-                $produkbeli = Produkbeli::findOrFail($produkId);
-        
-                // Update harga, diskon, dan jumlah
-                $produkbeli->harga = $hargas[$index];
-                $produkbeli->diskon = $diskons[$index];
-                $produkbeli->totalharga = $jumlahs[$index];
-        
-                // Simpan perubahan
-                $check2 = $produkbeli->save();
-            }
-        
-    
-            // Periksa keberhasilan penyimpanan data
-            if (!$check1 || !$check2) {
-                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            } else {
-                return redirect()->route('invoice.show',  ['datapo' => $idpo, 'type' => $type])->with('success', 'Data pembelian berhasil disimpan. Nomor Invoice: ' . $no_inv);  
-             }
-
-        }
         } else {
             return redirect()->back()->withErrors('Tipe tidak valid.');
         }
-    } 
+    }
+    
 
 
-    public function show_invoice ($datapo, $id, Request $request)
+    public function show_invoice ($datapo, $id, $type, Request $request)
     {
 
         $type = $request->query('type');
