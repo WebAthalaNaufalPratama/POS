@@ -24,7 +24,7 @@ Carbon::setLocale('id');
             </h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('editinvoice.update', $inv_po->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('editinvoice.update',['datapo' => $inv_po->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('patch')
                 <div class="row">
@@ -234,7 +234,7 @@ Carbon::setLocale('id');
                                                     </h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{$inv_po->ppn }}" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="11" readonly>
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                     </h5>
@@ -273,7 +273,7 @@ Carbon::setLocale('id');
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ formatRupiah2($inv_po->sisa) }}" readonly required>
+                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ $inv_po->sisa }}" readonly required>
                                                         </div>
                                                     </h5>
                                                 </li>
