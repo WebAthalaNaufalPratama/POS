@@ -284,6 +284,7 @@ $user = Auth::user();
                                             <a href="{{ route('invoice.show',['datapo' => $inv->poinden->id, 'type' => 'poinden', 'id' => $inv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
                                             </a>
+                                            <a href="{{ route('editinvoice.edit', ['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Edit Invoice</a>
                                         </li>
                                     
                                         <li>

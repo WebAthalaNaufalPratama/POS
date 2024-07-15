@@ -352,8 +352,8 @@ Carbon::setLocale('id');
                                                 <tr>
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required readonly>
-                                                           <option value="draft" {{ $inv_po->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                           <option value="publish" {{ $inv_po->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
+                                                           <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                           <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                        </select>
                                                        </td>
                                                        <td id="status_diterima">
