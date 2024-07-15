@@ -285,48 +285,63 @@ Carbon::setLocale('id');
                         </div>
                          <div class="row justify-content-start">
                             <div class="col-md-3 border rounded pt-3 me-1 mt-2">
+                                @php
+                                    $user = Auth::user();
+                                @endphp
                              
                                         <table class="table table-responsive border rounded">
                                             <thead>
                                                 <tr>
-                                                    <th>Dibuat</th>                                              
-                                                    <!-- <th>Dibukukan</th> -->
+                                                    @if($user->hasRole(['Purchasing']))
+                                                    <th>Dibuat</th>
+                                                    @elseif($user->hasRole(['Auditor']))                                              
+                                                    <th>Dibukukan</th>
+                                                    @endif
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
+                                                @if($user->hasRole(['Purchasing']))
                                                     <td id="pembuat">
                                                         <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
                                                     </td>
-                                                    <!-- <td id="pembuku">
+                                                @elseif($user->hasRole(['Auditor']))
+                                                    <td id="pembuku">
                                                         <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td> -->
+                                                    </td>
+                                                @endif
                                                 </tr>
                                                 <tr>
+                                                @if($user->hasRole(['Purchasing']))
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ (old('status_dibuat') == 'DIKONFIRMASI') || (old('status_dibuat') == null) ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
-                                                    <!-- <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
+                                                @elseif($user->hasRole(['Auditor']))
+                                                    <td id="status_dibuku">
+                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control">
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                            <option value="TUNDA" {{ $inv_po->status_dibukukan == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibukukan == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
-                                                    </td> -->
+                                                    </td>
+                                                @endif
                                                 </tr>
                                                 <tr>
+                                                @if($user->hasRole(['Purchasing']))
                                                     <td id="tgl_dibuat">
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
                                                     </td>
-                                                    <!-- <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="" disabled>
-                                                    </td> -->
+                                                @elseif($user->hasRole(['Auditor']))
+                                                    <td id="tgl_dibuku">
+                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ now()->format('Y-m-d') }}">
+                                                    </td>
+                                                @endif
                                                 </tr>
                                             </tbody>
                                         </table>  
