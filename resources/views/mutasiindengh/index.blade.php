@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Mutasi Inden ke GreenHouse</h4>
+                        <h4>Mutasi Inden ke Gallery/GreenHouse</h4>
                     </div>
                     <div class="page-btn">
                         <a href="{{ route('mutasiindengh.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
@@ -37,7 +37,11 @@
                                 <th>Penerima</th>
                                 <th>Tanggal Kirim</th>
                                 <th>Tanggal Diterima</th>
+                                @if(Auth::user()->hasRole('Purchasing'))
                                 <th>Status Dibuat</th>
+                                @else
+                                <th>Status Diterima</th>
+                                @endif
                                 {{-- <th>Status Diterima</th>
                                 <th>Status Dibukukan</th>
                                 <th>Status Diperiksa</th> --}}
@@ -57,7 +61,11 @@
                                 <td>{{ $mutasi->lokasi->nama }}</td>
                                 <td>{{ tanggalindo($mutasi->tgl_dikirim) }}</td>
                                 <td>{{ $mutasi->tgl_diterima ? tanggalindo($mutasi->tgl_diterima) : ''}}</td>
+                                @if(Auth::user()->hasRole('Purchasing'))
                                 <td>{{ $mutasi->status_dibuat }}</td>
+                                @else
+                                <td>{{ $mutasi->status_diterima }}</td>
+                                @endif
                                 {{-- <td>{{ $mutasi->status_diterima }}</td>
                                 <td>{{ $mutasi->status_dibukukan }}</td>
                                 <td>{{ $mutasi->status_diperiksa }}</td> --}}
@@ -82,7 +90,17 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        @if ($mutasi->tgl_diterima == null)               
+                                        @role('Purchasing')
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('mutasiindengh.editpurchase', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                        @endrole
+                                        @role('Auditor')
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Periksa</a>
+                                        </li>
+                                        @endrole
+                                        @if ($mutasi->tgl_diterima == null && Auth::user()->hasRole('AdminGallery'))               
                                         <li>
                                             <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
                                         </li>

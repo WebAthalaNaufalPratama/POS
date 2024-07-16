@@ -183,9 +183,7 @@ class PenjualanController extends Controller
             'sisa_bayar' => 'required'
         ]);
 
-        // dd($validator);
         $error = $validator->errors()->all();
-        // dd($error);
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
 
@@ -196,35 +194,27 @@ class PenjualanController extends Controller
             }
         }
           
-        // dd($req->distribusi);
         $data['dibuat_id'] = Auth::user()->id;
-        $data['tanggal_dibuat'] = now();
-        // dd($data);
         if ($req->hasFile('bukti_file')) {
             $file = $req->file('bukti_file');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
-            // dd($filePath);
             $data['bukti_file'] = $filePath;
         }
-        // dd($req->cara_bayar);
         if($req->cara_bayar == 'cash')
         {
             $data['jumlahCash'] = $req->nominal;
         }
 
-        
-        //buat penjualan
         $penjualan = Penjualan::create($data);
-
+        $updatecust = Customer::where('id', $data['id_customer'])->update([
+            'status_buka' => 'TUTUP',
+        ]);
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
-
         if($lokasi->tipe_lokasi == 1){
-            //buat produk penjualan dan komponen
             if ($penjualan) {
                 for ($i = 0; $i < count($data['nama_produk']); $i++) {
                     $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-                    // dd($getProdukJual);
                     if($data['diskon'][$i] == 'NaN'){
                         $data['diskon'][$i] = 0;
                     }
@@ -239,8 +229,6 @@ class PenjualanController extends Controller
                         'harga_jual' => $data['harga_total'][$i]
                     ];
                     
-                    // dd($data);
-                    
                     if ($req->distribusi == 'Dikirim') {
                         $produkTerjualData['jumlah_dikirim'] = $data['jumlah'][$i];
                     }
@@ -248,7 +236,6 @@ class PenjualanController extends Controller
                     $produk_terjual = Produk_Terjual::create($produkTerjualData);
 
                     if($getProdukJual->tipe_produk == 6){
-                        // dd($produk_terjual);
                         $newProdukTerjual[] = $produk_terjual;
                     }
 
@@ -435,6 +422,7 @@ class PenjualanController extends Controller
         $pembayarans = Pembayaran::with('rekening')->where('invoice_penjualan_id', $penjualan)->orderBy('created_at', 'desc')->get();
         // dd($produks);
         $pembayaran = Pembayaran::where('invoice_penjualan_id', $penjualans->id)->first();
+        $lokasigalery = Lokasi::where('tipe_lokasi', 1)->get();
         // dd($promos);
         // $getProdukJual = Produk_Jual::find($penjualan);
         // $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
@@ -456,7 +444,7 @@ class PenjualanController extends Controller
         }
 
         // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
-        return view('penjualan.payment', compact('pembayaran','ceklokasi','pegawais','riwayat','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
+        return view('penjualan.payment', compact('lokasigalery','pembayaran','ceklokasi','pegawais','riwayat','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
     }
 
     public function show(Request $req, $penjualan)
@@ -964,8 +952,6 @@ class PenjualanController extends Controller
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
-        // dd($user);
-        // dd($diskon);
         $data = $req->except(['_token', '_method', 'bukti', 'status_bayar', 'nominal', 'no_invoice_bayar', 'harga_total', 'diskon','jenis_diskon',  'jumlah', 'harga_satuan', 'nama_produk', 'DataTables_Table_0_length', 'DataTables_Table_1_length' , 'penjualan', 'file' ]);
 
         $penjualan = Penjualan::where('id', $penjualanId)->first();
@@ -979,28 +965,28 @@ class PenjualanController extends Controller
                 $string = str_replace(',', '.', $string);
                 return floatval($string);
             }
-            $checkpromo = Promo::where('id', $data['promo_id'])->first();
-            if ($checkpromo->diskon === 'poin') {
-                $totalPromo = extractNumber($data['total_promo']);
-                $customer = Customer::find($data['id_customer']);
-            
-                if ($customer) {
-                    $currentPoints = floatval($customer->poin_loyalty);
-                    $updatedPoints = $totalPromo + $currentPoints;
-            
-                    $customer->update([
-                        'poin_loyalty' => $updatedPoints,
-                        'status_buka' => 'TUTUP'
-                    ]);
+            if(!empty($data['promo_id'])) {
+                $checkpromo = Promo::where('id', $data['promo_id'])->first();
+                if ($checkpromo->diskon === 'poin') {
+                    $totalPromo = extractNumber($data['total_promo']);
+                    $customer = Customer::find($data['id_customer']);
+                
+                    if ($customer) {
+                        $currentPoints = floatval($customer->poin_loyalty);
+                        $updatedPoints = $totalPromo + $currentPoints;
+                
+                        $customer->update([
+                            'poin_loyalty' => $updatedPoints,
+                            'status_buka' => 'TUTUP'
+                        ]);
+                    }
                 }
             }
         }
-        if($penjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+        if($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
             $data['auditor_id'] = Auth::user()->id;
-            $data['tanggal_audit'] = now();
-        }elseif($penjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+        }elseif($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
             $data['dibukukan_id'] = Auth::user()->id;
-            $data['tanggal_dibukukan'] = now();
         }
 
         $deletepj = Produk_Terjual::where('no_invoice', $penjualan->no_invoice)->get();

@@ -57,6 +57,25 @@
           pointer-events: none; 
           background-color: #e9ecef; 
       }
+
+      .image-preview {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 15px;
+    }
+    
+    .custom-file-container__image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        width: auto;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        object-fit: contain; /* Ensures the image is contained within the box and maintains aspect ratio */
+    }
+
   </style>
   
   @yield('css')

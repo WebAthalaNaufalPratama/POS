@@ -553,6 +553,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/', 'MutasiindensController@index_indengh')->name('mutasiindengh.index');
             Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create');
             Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');
+            Route::get('/{mutasiIG}/editpurchase', 'MutasiindensController@editpurchase_indengh')->name('mutasiindengh.editpurchase');
             Route::get('/{mutasiIG}/show', 'MutasiindensController@show_indengh')->name('mutasiindengh.show');
             Route::post('/store/retur', 'MutasiindensController@store_retur')->name('retur.store');
             Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store');

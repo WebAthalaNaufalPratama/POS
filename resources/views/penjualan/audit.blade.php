@@ -76,7 +76,7 @@
                                             <label for="point">Jumlah Point</label>
                                             <div class="input-group">
                                                 <span class="input-group-text" id="inputGroupPrepend2">
-                                                    <input type="checkbox" id="cek_point" name="cek_point" {{ $penjualans->point_dipakai != 0 ? 'checked' : '' }}>
+                                                    <input type="checkbox" id="cek_point" name="btndipakai" {{ $penjualans->btndipakai == 'on' ? 'checked' : '' }}>
                                                 </span>
                                                 <input type="number" class="form-control" id="point_dipakai" name="point_dipakai" placeholder="0" value="{{ $penjualans->point_dipakai }}" aria-describedby="inputGroupPrepend2" required>
                                             </div>
@@ -100,7 +100,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="no_invoice">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required>
+                                            <input type="text" class="form-control" id="no_invoice" name="no_invoice" placeholder="Nomor Invoice" value="{{ $penjualans->no_invoice}}" required readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="nama">Tanggal Invoice</label>
@@ -166,48 +166,31 @@
                                                     <th>Jumlah</th>
                                                     <th>Diskon</th>
                                                     <th>Harga Total</th>
-                                                    <!-- <th>PIC Perangkai</th> -->
                                                     <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
-                                                @if(count($produks) < 1) <tr>
+                                                <!-- Template row for when there are no products -->
+                                                @if(count($produks) < 1) 
+                                                <tr>
                                                     <td>
                                                         <select id="nama_produk_0" name="nama_produk[]" class="form-control" onchange="updateHargaSatuan(this)">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produkjuals as $produk)
                                                                 <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                                                    @if (substr($produk->kode, 0, 3) === 'TRD')
-                                                                        {{ $produk->nama }}
-                                                                        @foreach ($produk->komponen as $komponen)
-                                                                            @if ($komponen->kondisi)
-                                                                                @foreach($kondisis as $kondisi)
-                                                                                    @if($kondisi->id == $komponen->kondisi)
-                                                                                        - {{ $kondisi->nama }}
-                                                                                        @php
-                                                                                            $found = true;
-                                                                                            break;
-                                                                                        @endphp
-                                                                                    @endif
-                                                                                @endforeach
-                                                                            @endif
-                                                                            @if ($found) @break @endif
-                                                                        @endforeach
-                                                                    @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                                        {{ $produk->nama }}
-                                                                    @endif
+                                                                    {{ $produk->nama }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
                                                     </td>
                                                     <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)"></td>
                                                     <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" disabled></td>
-                                                    <td><select id="jenis_diskon_0" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)">
+                                                    <td>
+                                                        <select id="jenis_diskon_0" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)">
                                                             <option value="0">Pilih Diskon</option>
-                                                            <option value="Nominal" {{ $penjualans->jenis_diskon_0 == 'Nominal' ? 'selected' : ''}}>Nominal</option>
-                                                            <option value="persen" {{ $penjualans->jenis_diskon_0 == 'persen' ? 'selected' : ''}}>Persen</option>
+                                                            <option value="Nominal">Nominal</option>
+                                                            <option value="persen">Persen</option>
                                                         </select>
-
                                                         <div>
                                                             <div class="input-group">
                                                                 <input type="text" name="diskon[]" id="diskon_0" class="form-control" style="display: none;" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
@@ -215,26 +198,15 @@
                                                                 <span class="input-group-text" id="persenInput_0" style="display: none;">%</span>
                                                             </div>
                                                         </div>
-
-                                                        <!-- <div >
-                                                            <div class="input-group">
-                                                                <input type="number" name="diskon[]" id="diskon_0" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
-                                                                <span class="input-group-text" id="basic-addon3">%</span>
-                                                            </div>
-                                                        </div> -->
                                                     </td>
                                                     <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"></td>
-                                                    <!-- <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td> -->
-                                                    <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
-                                                    <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
-                                                    </tr>
-                                                    @endif
-                                                    @php
-                                                    $i = 0;
-                                                    @endphp
-                                                    @foreach ($produks as $komponen)
-                                                    <tr>
-                                                        <td>
+                                                </tr>
+                                                @endif
+                                                <!-- Loop through existing products -->
+                                                @php $i = 0; @endphp
+                                                @foreach ($produks as $komponen)
+                                                <tr id="row{{ $i }}">
+                                                    <td>
                                                         <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" onchange="updateHargaSatuan(this)">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produkjuals as $produk)
@@ -246,76 +218,39 @@
                                                                         selected 
                                                                     @endif
                                                                 >
-                                                                    @if (substr($produk->kode, 0, 3) === 'TRD')
-                                                                        {{ $produk->nama }}
-                                                                        @php $found = false; @endphp
-                                                                        @foreach ($produk->komponen as $komponenItem)
-                                                                            @if ($komponenItem->kondisi)
-                                                                                @foreach($kondisis as $kondisi)
-                                                                                    @if($kondisi->id == $komponenItem->kondisi)
-                                                                                        - {{ $kondisi->nama }}
-                                                                                        @php 
-                                                                                            $found = true; 
-                                                                                            break; 
-                                                                                        @endphp
-                                                                                    @endif
-                                                                                @endforeach
-                                                                            @endif
-                                                                            @if ($found) @break @endif
-                                                                        @endforeach
-                                                                    @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                                        {{ $produk->nama }}
-                                                                    @endif
+                                                                    {{ $produk->nama }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
-
-                                                        </td>
-                                                        <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga, 0, ',', '.',) }}" onchange="calculateTotal(0)"></td>
-                                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply($(this))" class="form-control" value="{{ $komponen->jumlah }}" onchange="calculateTotal(0)"></td>
-                                                        <td><select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" onchange="showInputType({{ $i }})">
-                                                                <option value="0">Pilih Diskon</option>
-                                                                <option value="Nominal" {{ $komponen->jenis_diskon == 'Nominal' ? 'selected' : ''}}>Nominal</option>
-                                                                <option value="persen" {{ $komponen->jenis_diskon == 'persen' ? 'selected' : ''}}>Persen</option>
-                                                            </select>
-
-                                                            <div>
-                                                                <div class="input-group">
-                                                                    <input type="text" name="diskon[]" id="diskon_{{ $i }}" value="{{ $komponen->diskon}}" style="display:none;" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
-                                                                    <span class="input-group-text" id="nominalInput_0" style="display: none;">.00</span>
-                                                                    <span class="input-group-text" id="persenInput_0" style="display: none;">%</span>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- <div >
+                                                    </td>
+                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga, 0, ',', '.',) }}" onchange="calculateTotal({{ $i }})"></td>
+                                                    <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply($(this))" class="form-control" value="{{ $komponen->jumlah }}" onchange="calculateTotal({{ $i }})"></td>
+                                                    <td>
+                                                        <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" onchange="showInputType({{ $i }})">
+                                                            <option value="0">Pilih Diskon</option>
+                                                            <option value="Nominal" {{ $komponen->jenis_diskon == 'Nominal' ? 'selected' : ''}}>Nominal</option>
+                                                            <option value="persen" {{ $komponen->jenis_diskon == 'persen' ? 'selected' : ''}}>Persen</option>
+                                                        </select>
+                                                        <div>
                                                             <div class="input-group">
-                                                                <input type="number" name="diskon[]" id="diskon_0" value="" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal(0)">
-                                                                <span class="input-group-text" id="basic-addon3">%</span>
+                                                                <input type="text" name="diskon[]" id="diskon_{{ $i }}" value="{{ $komponen->diskon}}" style="display:none;" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" onchange="calculateTotal({{ $i }})">
+                                                                <span class="input-group-text" id="nominalInput_{{ $i }}" style="display: none;">.00</span>
+                                                                <span class="input-group-text" id="persenInput_{{ $i }}" style="display: none;">%</span>
                                                             </div>
-                                                        </div> -->
-                                                        </td>
-                                                        <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.',)}}"></td>
-                                                        @php
-                                                            $user = Auth::user();
-                                                            $karyawan = \App\Models\Karyawan::where('user_id', $user->id)->first();
-                                                        @endphp
-                                                        @if($karyawan->lokasi->tipe_lokasi == 1)
-                                                            <!-- <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td> -->
-                                                            <!-- <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td> -->
-                                                        @endif
-                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                                        <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
-                                                        @php
-                                                        $i++;
-                                                        @endphp
-                                                    </tr>
-                                                    @endforeach
+                                                        </div>
+                                                    </td>
+                                                    <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.',)}}"></td>
+                                                    <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                    @php $i++; @endphp
+                                                </tr>
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <div class="row justify-content-around">
                             <div class="col-md-12 pt-3 me-1 mt-2">
                                 <div class="row">
@@ -361,9 +296,9 @@
 
                                             <!-- Shipping Section -->
                                             <div class="col-lg-6">
-                                                <div class="form-group">
+                                                <div class="form-group" style="display:none;" id="kirimpilih">
                                                     <label>Pengiriman</label>
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control">
                                                         <option value="">Pilih Jenis Pengiriman</option>
                                                         <option value="exspedisi" {{ $penjualans->pilih_pengiriman == 'exspedisi' ? 'selected' : ''}}>Ekspedisi</option>
                                                         <option value="sameday" {{ $penjualans->pilih_pengiriman == 'sameday' ? 'selected' : ''}}>SameDay</option>
@@ -404,7 +339,10 @@
                                                             <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                         </label>
                                                         <span class="text-danger">max 2mb</span>
-                                                        <img id="preview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" class="custom-file-container__image-preview"/>
+                                                        <div class="image-preview">
+                                                            <img id="imagePreview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" />
+                                                        </div>
+                                                        
                                                     </div>
                                                 </div>
                                             </div>
@@ -418,41 +356,93 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
-                                                            <th>Penyetuju</th>
                                                             <th>Pemeriksa</th>
+                                                            <th>Pembuku</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
+                                                            
                                                             @php
                                                                 $user = Auth::user();
-                                                                $jabatan = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                                             @endphp
-                                                            @if($penjualans->status == 'DIKONFIRMASI' && $jabatan == 'finance')
+                                                            @if($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                                <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
                                                                 <td id="penyetuju" >{{ Auth::user()->name}}</td>
-                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $jabatan == 'auditor')
+                                                                <td id="pemeriksa" >{{ $penjualans->dibuku->name ?? '-'}}</td>
+                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
+                                                                <td id="penyetuju" >{{ $penjualans->diperiksa->name ?? '-'}}</td>
                                                                 <td id="pemeriksa">{{ Auth::user()->name}}</td>
-                                                            @else
-                                                                <td id="penyetuju">-</td>
+                                                            @elseif($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                                <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
+                                                                <td id="penyetuju" >-</td>
                                                                 <td id="pemeriksa">-</td>
                                                             @endif
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $penjualans->tanggal_dibuat }}</td>
-                                                            @if($penjualans->status == 'DIKONFIRMASI' && $jabatan == 'finance')
-                                                                <td id="tgl_penyetuju" style="width: 25%;">{{ date('Y-m-d') }}</td>
-                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $jabatan == 'auditor')
-                                                                <td id="tgl_pemeriksa" style="width: 25%;">{{ date('Y-m-d') }}</td>
-                                                            @else
+                                                            @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                                <td><input type="date" class="form-control" name="tanggal_dibuat" style="width: 25%;" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
                                                                 <td id="tgl_penyetuju">-</td>
                                                                 <td id="tgl_pemeriksa">-</td>
+                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                                <td><input type="date" class="form-control" name="tanggal_dibuat"  value="{{ $penjualans->tanggal_dibuat }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_audit"  value="{{ $penjualans->tanggal_audit ?? '-' }}" readonly></td></td>
+                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td><input type="date" class="form-control" name="tanggal_dibuat"  value="{{ $penjualans->tanggal_dibuat }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ $penjualans->tanggal_dibukukan ?? '-'}}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_audit"  value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
                                                             @endif
                                                         </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
                                         </div>
+
+                                        <div class="card mt-2">
+                                            <div class="card-header">
+                                                <h4 class="card-title">Riwayat</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                <table class="table datanew">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Tanggal Perubahan</th>
+                                                        <th>Pengubah</th>
+                                                        <th>Log</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach ($riwayat as $item)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>{{ $item->created_at ?? '-' }}</td>
+                                                            <td>{{ $item->causer->name ?? '-' }}</td>
+                                                            <td>
+                                                                @php
+                                                                    $properties = json_decode($item->properties, true);
+                                                                    $changes = $item->changes();
+                                                                    
+                                                                    if (isset($changes['old'])) {
+                                                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                                                                        foreach ($diff as $key => $value) {
+                                                                            echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
+                                                                        }
+                                                                    } else {
+                                                                        echo 'Data Invoice Penjualan Terbuat';
+                                                                    }
+                                                                @endphp
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                                </div>
+                                            </div>
+                                        </div> 
                                     </div>
 
                                     <!-- Summary Section -->
@@ -514,50 +504,7 @@
                                             </ul>
                                         </div>
                                     </div>
-                                </div>  
-                                <div class="card mt-2">
-                                            <div class="card-header">
-                                                <h4 class="card-title">Riwayat</h4>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive">
-                                                <table class="table datanew">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>No</th>
-                                                        <th>Tanggal Perubahan</th>
-                                                        <th>Pengubah</th>
-                                                        <th>Log</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach ($riwayat as $item)
-                                                        <tr>
-                                                            <td>{{ $loop->iteration }}</td>
-                                                            <td>{{ $item->created_at ?? '-' }}</td>
-                                                            <td>{{ $item->causer->name ?? '-' }}</td>
-                                                            <td>
-                                                                @php
-                                                                    $properties = json_decode($item->properties, true);
-                                                                    $changes = $item->changes();
-                                                                    
-                                                                    if (isset($changes['old'])) {
-                                                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
-                                                                        foreach ($diff as $key => $value) {
-                                                                            echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
-                                                                        }
-                                                                    } else {
-                                                                        echo 'Data Invoice Penjualan Terbuat';
-                                                                    }
-                                                                @endphp
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                                </div>
-                                            </div>
-                                        </div>  
+                                </div> 
                             </div>
                         </div>
 
@@ -570,7 +517,7 @@
                             </div>
                         </div> -->
 
-                        <div class="row justify-content-around">
+                        <!-- <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-1">
                                 <div class="form-row row">
                                     <div class="mb-4">
@@ -621,7 +568,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div class="text-end mt-3">
                                 <button class="btn btn-primary" type="submit">Submit</button>
@@ -1124,12 +1071,6 @@
             i++
         });
 
-        $(document).on('click', '.btn_remove', function() {
-            var button_id = $(this).attr("id");
-            $('#row' + button_id + '').remove();
-            calculateTotal(0);
-        });
-
         function togglePaymentFields() {
             var pembayaran = $('#cara_bayar').val();
 
@@ -1217,11 +1158,6 @@
                 }
             });
         }
-
-        // $('#modalPerangkai').on('show.bs.modal', function (event) {
-        //     var selectedStatus = $('#status').val();
-        //     $('#selectedstatus').text(selectedStatus);
-        // });
 
         function getDataGift(produk_id) {
             var data = {
@@ -1360,24 +1296,6 @@
             }
         });
 
-        // $(document).on('change', '[id^=nama_produk]', function() {
-        //     var id = $(this).attr('id').split('_')[2];
-        //     var selectedOption = $(this).find(':selected');
-
-        //     var kodeProduk = selectedOption.data('kode');
-        //     var tipeProduk = selectedOption.data('tipe');
-        //     var deskripsiProduk = selectedOption.data('deskripsi');
-        //     // console.log(kodeProduk);
-        //     console.log(kodeProduk);
-        //     $('#kode_produk_' + id).val(kodeProduk);
-        //     $('#tipe_produk_' + id).val(tipeProduk);
-        //     $('#deskripsi_komponen_' + id).val(deskripsiProduk);
-
-        //     // Panggil fungsi updateHargaSatuan
-        //     updateHargaSatuan(this);
-        // });
-
-
         $('#delivery_order_section').show();
 
         $('#distribusi').change(function() {
@@ -1476,7 +1394,27 @@
             var button_id = $(this).attr("id");
             $('#row' + button_id + '').remove();
             calculateTotal(0);
+            updateIndicesProduk();
         });
+
+        function updateIndicesProduk() {
+            var i = 0;
+            $('tr[id^="row"]').each(function() {
+                $(this).attr('id', 'row' + i);
+
+                $(this).find('[id^="nama_produk_"]').attr('id', 'nama_produk_' + i).attr('name', 'nama_produk[]').attr('data-index', i);
+                $(this).find('[id^="harga_satuan_"]').attr('id', 'harga_satuan_' + i).attr('name', 'harga_satuan[]').attr('data-index', i);
+                $(this).find('[id^="jumlah_"]').attr('id', 'jumlah_' + i).attr('name', 'jumlah[]').attr('data-index', i);
+                $(this).find('[id^="jenis_diskon_"]').attr('id', 'jenis_diskon_' + i).attr('name', 'jenis_diskon[]').attr('data-index', i);
+                $(this).find('[id^="diskon_"]').attr('id', 'diskon_' + i).attr('name', 'diskon[]').attr('data-index', i);
+                $(this).find('[id^="harga_total_"]').attr('id', 'harga_total_' + i).attr('name', 'harga_total[]').attr('data-index', i);
+                $(this).find('[id^="nominalInput_"]').attr('id', 'nominalInput_' + i);
+                $(this).find('[id^="persenInput_"]').attr('id', 'persenInput_' + i);
+                $(this).find('.btn_remove').attr('id', i);
+
+                i++;
+            });
+        }
 
         function addModal() {
             let i = $('.modal').length;
@@ -1522,9 +1460,6 @@
             updateHargaSatuan(this);
         });
 
-
-
-
         @foreach($produks as $index => $produk)
         $('#jumlahStaff_{{ $index }}').on('input', function() {
             var jumlahStaff = parseInt($(this).val());
@@ -1565,18 +1500,6 @@
         });
         @endforeach
 
-
-
-        // $('#delivery_order_section').show();
-
-        // $('#distribusi').change(function() {
-        //     if ($(this).val() === 'Diambil') {
-        //         $('#delivery_order_section').hide();
-        //     } else {
-        //         $('#delivery_order_section').show();
-        //     }
-        // });
-
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
             var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); 
@@ -1607,15 +1530,6 @@
             }
         });
 
-        // Menggunakan variabel rowCount untuk menghasilkan nomor unik untuk setiap baris produk
-        var rowCount = 1;
-
-        // Fungsi untuk menghapus baris produk atau komponen
-        $(document).on('click', '.btn_remove', function() {
-            $(this).closest('tr').remove();
-            calculateTotal(0); // Memanggil fungsi calculateTotal setelah menghapus baris
-        });
-
         function formatRupiah(angka, prefix) {
             var numberString = angka.toString().replace(/[^,\d]/g, ''),
                 split = numberString.split(','),
@@ -1635,6 +1549,19 @@
         function parseRupiahToNumber(rupiah) {
             return parseInt(rupiah.replace(/[^\d]/g, ''));
         }
+
+        $('#distribusi').change(function() {
+            var kirim = $(this).val();
+
+            if (kirim === 'Diambil') {
+                $('#kirimpilih').hide();
+                $('#biaya_ongkir').val(0);
+            }else if(kirim === 'Dikirim'){
+                $('#kirimpilih').show();
+            }
+        });
+
+        $('#distribusi').on('change');
 
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
@@ -1795,41 +1722,11 @@
             });
         }
 
-        // function updateHargaSatuan(select) {
-        //     var index = select.selectedIndex;
-        //     var hargaSatuanInput = $('#harga_satuan_0');
-        //     var selectedOption = $(select).find('option').eq(index);
-        //     var hargaProduk = selectedOption.data('harga');
-                
-        //     hargaSatuanInput.val(hargaProduk);
-            
-        // }
-        // $('#nama_produk').on('change', function() {
-        //     updateHargaSatuan(this);
-        // });
-
-        // function updateHargaSatuan(select) {
-        //     var index = select.selectedIndex;
-        //     var hargaSatuanInput = $('#harga_satuan_0');
-        //     var selectedOption = $(select).find('option').eq(index);
-        //     var hargaProduk = selectedOption.data('harga');
-            
-        //     var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
-            
-        //     hargaSatuanInput.val(formattedHarga);
-        // }
-
-        // $('#nama_produk').on('change', function() {
-        //     updateHargaSatuan(this);
-        // });
-
         function updateHargaSatuan(select) {
             var index = select.selectedIndex;
             var hargaSatuanInput = $('#harga_satuan_' + select.id.split('_')[2]);
             var selectedOption = $(select).find('option').eq(index);
             var hargaProduk = selectedOption.data('harga');
-            // console.log(hargaProduk );
-            // hargaSatuanInput.val(hargaProduk);
             var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
             hargaSatuanInput.val(formattedHarga);
             multiply(hargaSatuanInput);
@@ -1887,6 +1784,11 @@
 
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(event.target.files[0]);
             if (file.size > 2 * 1024 * 1024) {
                 toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
                     closeButton: true,
