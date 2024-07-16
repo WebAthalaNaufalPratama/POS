@@ -99,10 +99,6 @@
                         @foreach ($riwayat as $item)
                             @php
                                 $properties = json_decode($item->properties, true);
-                                
-                                foreach($item->produkbeli as $produk){
-                                    dump($produk);
-                                }
                                
                             @endphp
                             @if($item->jenis === 'Produk Terjual')

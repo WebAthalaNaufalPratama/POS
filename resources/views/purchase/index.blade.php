@@ -99,17 +99,50 @@
                                 <td>{{ tanggalindo($datapo->tgl_kirim) }}</td>
                                 <td>{{ $datapo->tgl_diterima ? tanggalindo($datapo->tgl_diterima) : '-' }}</td>
                                 <td>{{ $datapo->no_do_suplier }}</td>
-                                <td>{{ $datapo->status_dibuat ?? 'TUNDA' }}</td>
-                                <td>{{ $datapo->status_diterima ?? 'TUNDA' }}</td>
-                                <td>{{ $datapo->status_diperiksa ?? 'TUNDA' }}</td>
+
+                                <td>
+                                    @if($datapo->status_dibuat == 'BATAL')
+                                        <span class="badge bg-secondary">BATAL</span>
+                                    @elseif($datapo->status_dibuat == 'TUNDA' || $datapo->status_dibuat == null)
+                                        <span class="badge bg-danger">TUNDA</span>
+                                    @elseif($datapo->status_dibuat == 'DIKONFIRMASI')
+                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @endif
+                                </td>
+                                
+                                <td>
+                                    @if($datapo->status_diterima == 'BATAL')
+                                        <span class="badge bg-secondary">BATAL</span>
+                                    @elseif($datapo->status_diterima == 'TUNDA' || $datapo->status_diterima == null)
+                                        <span class="badge bg-danger">TUNDA</span>
+                                    @elseif($datapo->status_diterima == 'DIKONFIRMASI')
+                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @else
+                                    {{$datapo->status_diterima  }}
+                                    @endif
+                                </td>
+                                
+                                <td>
+                                    @if($datapo->status_diperiksa == 'BATAL')
+                                        <span class="badge bg-secondary">BATAL</span>
+                                    @elseif($datapo->status_diperiksa == 'TUNDA' || $datapo->status_diperiksa == null)
+                                        <span class="badge bg-danger">TUNDA</span>
+                                    @elseif($datapo->status_diperiksa == 'DIKONFIRMASI')
+                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @endif
+                                </td>
+                                
+
                                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                                     <td>
                                         @if ($datapo->invoice !== null && $datapo->invoice->sisa == 0)
-                                            LUNAS
+                                            Lunas
                                         @elseif($datapo->invoice !== null && $datapo->invoice->sisa !== 0 && $datapo->invoice->status_dibuat !== "BATAL")
-                                            BELUM LUNAS
+                                            Belum Lunas
                                         @elseif ($datapo->invoice !== null && $datapo->invoice->status_dibuat == "BATAL")
                                             Invoice Batal
+                                        @elseif($datapo->invoice == null && $datapo->status_dibuat == "BATAL")
+                                        -
                                         @elseif($datapo->invoice == null)
                                             Belum Ada Tagihan
                                         @endif
@@ -130,12 +163,13 @@
 
                                 @endphp
                         
-                                @if(Auth::user()->hasRole(['Purchasing', 'Auditor', 'Finance']))
+                                @if(Auth::user()->hasRole(['Purchasing', 'Auditor', 'Finance','AdminGallery']))
                                     <td class="text-center">
                                         <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                             <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                         </a>
                                         <ul class="dropdown-menu">
+                                            
                                             <li>
                                                 <a href="{{ route('pembelian.show', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail PO
@@ -180,7 +214,7 @@
                                                     @elseif($invoice->status_dibuat == 'TUNDA')
                                                         @if(Auth::user()->hasRole(['Purchasing']))
                                                             <li>
-                                                                <a href="{{ route('invoicepurchase.edit', ['datapo' => $datapo->id, 'type' => 'pembelian']) }}" class="dropdown-item">
+                                                                <a href="{{ route('invoicepurchase.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
                                                                     <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
                                                                 </a>
                                                             </li>
@@ -199,6 +233,16 @@
                                                     </li>
                                                  @endif
                                             @endif
+
+                                            @if(Auth::user()->hasRole(['AdminGallery']))
+                                            @if ($datapo->status_dibuat == "DIKONFIRMASI" && $datapo->status_diterima == null)
+                                                <li>
+                                                    <a href="{{ route('pembelian.edit', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item">
+                                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Acc Terima
+                                                    </a>
+                                                </li>
+                                             @endif
+                                             @endif
                                         </ul>
                                     </td>
                                 @endif
