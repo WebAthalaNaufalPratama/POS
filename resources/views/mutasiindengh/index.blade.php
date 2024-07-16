@@ -78,9 +78,11 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
+                                    @role('Purchasing')
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
+                                    @endrole
                                     <ul class="dropdown-menu">
                                         <li>
                                             <a class="dropdown-item" href="{{ route('mutasiindengh.editpurchase', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
