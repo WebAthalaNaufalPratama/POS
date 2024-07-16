@@ -47,9 +47,9 @@ class Mutasiindens extends Model
     public function lokasi (){
         return $this->belongsTo(Lokasi::class, 'lokasi_id', 'id');
     }
-    // public function produkmutasi (){
-    //     return $this->hasMany(Produkbeli::class);
-    // }
+    public function produkmutasi(){
+        return $this->hasMany(ProdukMutasiInden::class, 'mutasiinden_id', 'id');
+    }
     // public function invoice (){
     //     return $this->hasOne(Invoicepo::class);
     // }

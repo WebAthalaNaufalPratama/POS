@@ -85,6 +85,7 @@ Carbon::setLocale('id');
                                 </div>
                             </div>
                         </div>
+                        @if ($inv_po->status_dibuat !== "BATAL")
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
@@ -140,6 +141,7 @@ Carbon::setLocale('id');
                                 </div>
                             </div>
                         </div>
+                        @endif
                         @if ($retur)
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
@@ -157,7 +159,8 @@ Carbon::setLocale('id');
 
                                         
                                    </div>
-                                    <div class="table-responsive">
+                                   {{-- komplain --}}
+                                    <div class="table-responsive"> 
                                         <table class="table">
                                             <thead>
                                                 <tr>

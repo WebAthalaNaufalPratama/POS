@@ -301,12 +301,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/invoice/{datapo}/editinvoice', 'PembelianController@editinvoice')->name('editinvoice.edit');
             Route::patch('/{datapo}/editinvoiceupdate', 'PembelianController@editinvoiceupdate')->name('editinvoice.update');
             Route::get('/invoice/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit');
-            Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
             Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
+            Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
             Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
 
             //purchase
-            Route::get('/invoice/{datapo}/edit_inv_purchase/{id}', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
+            Route::get('/invoice/{datapo}/edit_inv_purchase', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
             Route::put('/update/{idinv}/purchasing', 'PembelianController@update_purchase_invoice')->name('invoice_purchase.update');        
             
             Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
@@ -553,6 +553,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/', 'MutasiindensController@index_indengh')->name('mutasiindengh.index');
             Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create');
             Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');
+            Route::get('/{mutasiIG}/editpurchase', 'MutasiindensController@editpurchase_indengh')->name('mutasiindengh.editpurchase');
             Route::get('/{mutasiIG}/show', 'MutasiindensController@show_indengh')->name('mutasiindengh.show');
             Route::post('/store/retur', 'MutasiindensController@store_retur')->name('retur.store');
             Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store');
