@@ -99,6 +99,7 @@
                         @foreach ($riwayat as $item)
                             @php
                                 $properties = json_decode($item->properties, true);
+                               
                             @endphp
                             @if($item->jenis === 'Produk Terjual')
                                 <tr>

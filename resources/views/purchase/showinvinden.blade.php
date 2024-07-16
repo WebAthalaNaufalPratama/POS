@@ -358,8 +358,8 @@ Carbon::setLocale('id');
                                                        </td>
                                                        <td id="status_diterima">
                                                            <select id="status_dibukukan" name="status_dibukukan" class="form-control" required disabled>
-                                                               <option value="pending" {{ $inv_po->status_dibuku == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                               <option value="acc" {{ $inv_po->status_dibuku == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                               <option value="TUNDA" {{ $inv_po->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                               <option value="DIKONFIRMASI" {{ $inv_po->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                            </select>
                                                        </td>
                                                 </tr>

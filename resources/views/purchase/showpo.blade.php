@@ -86,6 +86,7 @@ Carbon::setLocale('id');
                                                 </select> --}}
                                        </div>
                                        <div class="form-group">
+
                                         <label for="harga_jual">Status</label>
                                         @role('Purchasing')
                                         <input type="text" class="form-control" id="status" name="status" value="{{$beli->status_dibuat}}" readonly>
@@ -96,7 +97,8 @@ Carbon::setLocale('id');
                                         @role('Auditor')
                                         <input type="text" class="form-control" id="status" name="status" value="{{$beli->status_diperiksa}}" readonly>
                                         @endrole
-                                        {{-- <input type="text" class="form-control" id="status" name="status" value="@php
+                                        @role('Finance')
+                                        <input type="text" class="form-control" id="status" name="status" value="@php
                                             $latestDate = max($beli->tgl_dibuat, $beli->tgl_diterima, $beli->tgl_diperiksa);
                                             if ($latestDate == $beli->tgl_dibuat) {
                                                 echo $beli->status_dibuat. ' oleh ' . $pembuat;
@@ -105,7 +107,8 @@ Carbon::setLocale('id');
                                             } else {
                                                 echo $beli->status_diperiksa. ' oleh ' . $pemeriksa;
                                             }
-                                        @endphp" readonly> --}}
+                                        @endphp" readonly>
+                                        @endrole
                                     </div>
                                     
                                         </div>
