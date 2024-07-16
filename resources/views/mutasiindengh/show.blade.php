@@ -28,7 +28,7 @@
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    Inden Ke GreenHouse
+                    Inden Ke Gallery/GreenHouse
                 </li>
             </ul>
         </div>
@@ -135,7 +135,7 @@
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" onchange="calculateTotal({{ $index }})" value="{{ $item->jml_dikirim }}" readonly></td>
                                                     <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->jml_diterima }}" readonly></td>
                                                     <td>
-                                                        <input type="text" name="kondisi[]" id="kondisi_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->kondisi->nama }}" readonly>
+                                                        <input type="text" name="kondisi[]" id="kondisi_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->kondisi->nama ?? '' }}" readonly>
                                                         {{-- <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control">
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
@@ -356,8 +356,8 @@
                                                         <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatanbuat ?? '' }})" readonly>
                                                     </td>
-                                                    <td id=penerima">
-                                                        <input type="hidden" name=penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                    <td id="penerima">
+                                                        <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ $penerima ?? '' }} ({{ $jabatanterima ?? '' }})" readonly>
                                                     </td>
                                                     <td id="pembuku">
@@ -372,34 +372,34 @@
                                                 <tr>
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
-                                                            <option selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ $data->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ $data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            <option value="BATAL" {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                            <option selected disabled>Pilih Status</option>
+                                                            <option value="TUNDA" disabled {{ $data->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" disabled {{ $data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" disabled {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_diterima">
                                                         <select id="status_diterima" name="status_diterima" class="form-control" readonly>
-                                                            <option selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ $data->status_diterima == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ $data->status_diterima == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            <option value="BATAL" {{ $data->status_diterima == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                            <option selected disabled>Pilih Status</option>
+                                                            <option value="TUNDA" disabled {{ $data->status_diterima == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" disabled {{ $data->status_diterima == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" disabled {{ $data->status_diterima == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
-                                                            <option selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ $data->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ $data->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            <option value="BATAL" {{ $data->status_dibuku == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                            <option disabled selected>Pilih Status</option>
+                                                            <option value="TUNDA" disabled {{ $data->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" disabled {{ $data->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" disabled {{ $data->status_dibuku == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_diperiksa">
                                                         <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ $data->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ $data->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            <option value="BATAL" {{ $data->status_diperiksa == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                            <option value="TUNDA" disabled {{ $data->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" disabled {{ $data->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" disabled {{ $data->status_diperiksa == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                 </tr>
@@ -408,13 +408,13 @@
                                                         <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($data->tgl_dibuat) }}"readonly >
                                                     </td>
                                                     <td id="tgl_diterima">
-                                                        <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ tanggalindo($data->tgl_diterima_ttd) }}" readonly>
+                                                        <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $data->tgl_diterima_ttd ? tanggalindo($data->tgl_diterima_ttd) : '-' }}" readonly>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ tanggalindo($data->tgl_dibukukan) }}"  readonly>
+                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ $data->tgl_dibukukan ? tanggalindo($data->tgl_dibukukan) : '-' }}"  readonly>
                                                     </td>
                                                     <td id="tgl_diperiksa">
-                                                        <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ tanggalindo($data->tgl_diperiksa) }}"  readonly>
+                                                        <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ $data->tgl_diperiksa ? tanggalindo($data->tgl_diperiksa) : '-' }}"  readonly>
                                                     </td>
                                                 </tr>
                                             </tbody>

@@ -362,9 +362,9 @@
                                                 <td id="status_dibuat">
                                                     <select id="status_dibuat" name="status_dibuat" class="form-control" required>
                                                         <option>Pilih Status</option>
-                                                        <option value="TUNDA">TUNDA</option>
-                                                        <option value="DIKONFIRMASI">DIKONFIRMASI</option>
-                                                        <option value="BATAL">BATAL</option>
+                                                        <option value="TUNDA" {{ $data->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                        <option value="DIKONFIRMASI" {{ $data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                        <option value="BATAL" {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                     </select>
                                                 </td>
                                                 {{-- <td id="status_diterima">

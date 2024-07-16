@@ -78,10 +78,12 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
+                                                <input type="hidden" name="supplier_id" value="{{ $data->supplier_id }}">
                                                 <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $data->supplier->nama }}" readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="lokasi">Lokasi</label>
+                                            <input type="hidden" name="lokasi_id" value="{{ $data->lokasi_id }}">
                                             <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $data->lokasi->nama }}" readonly>
 
                                         </div>
@@ -148,12 +150,12 @@
                                                     <input type="hidden" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $item->produk->produk->nama}}" readonly>
                                                     </td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" onchange="calculateTotal({{ $index }})" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})"></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" value="{{ $item->jml_diterima ?? '' }}" oninput="calculateTotal({{ $index }})"></td>
                                                     <td>
                                                         <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control">
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
-                                                                <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                                                                <option value="{{ $kondisi->id }}" {{ $item->kondisi_id == $kondisi->id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
@@ -281,37 +283,49 @@
                             </div>
                         </div>
                          <div class="row justify-content-start">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-2"> 
+                            @if(Auth::user()->hasRole('Auditor'))
+                            <div class="col-md-8 border rounded pt-3 me-1 mt-2"> 
+                            @else
+                            <div class="col-md-6 border rounded pt-3 me-1 mt-2"> 
+                            @endif
                              
                                         <table class="table table-responsive border rounded">
                                             <thead>
                                                 <tr>
                                                     <th>Dibuat</th>                                              
-                                                    <th>Diterima</th>                                              
+                                                    <th>Diterima</th>    
+                                                    @if(Auth::user()->hasRole('Finance'))                                          
                                                     <th>Dibukukan</th>
+                                                    @endif
+                                                    @if(Auth::user()->hasRole('Auditor'))
                                                     <th>Diperiksa</th>
+                                                    @endif
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
                                                     <td id="pembuat">
                                                         <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatan ?? '' }})" disabled>
+                                                        <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatan ?? '' }})" readonly>
                                                     </td>
-                                                    <td id=penerima_id">
+                                                    <td id="penerima_id">
                                                         <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
 
                                                         {{-- <input type="hidden" name=penerima_id" value="{{ Auth::user()->id ?? '' }}"> --}}
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                        <input type="text" class="form-control" value="{{ $penerima ?? Auth::user()->karyawans->nama }} ({{ $jabatan_penerima ?? Auth::user()->karyawans->jabatan }})" readonly>
                                                     </td>
+                                                    @if(Auth::user()->hasRole('Finance'))
                                                     <td id="pembuku">
                                                         <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="Nama (Finance)" disabled>
+                                                        <input type="text" class="form-control" value="Nama (Finance)" readonly>
                                                     </td>
+                                                    @endif
+                                                    @if(Auth::user()->hasRole('Auditor'))
                                                     <td id="pemeriksa">
-                                                        <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="Nama (Auditor)" disabled>
+                                                        <input type="hidden" name="pemeriksa" value="{{ $pembuku ?? Auth::user()->id }}">
+                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }}" readonly>
                                                     </td>
+                                                    @endif
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
@@ -323,37 +337,48 @@
                                                         </select>
                                                     </td>
                                                     <td id="status_diterima">
-                                                        <select id="status_diterima" name="status_diterima" class="form-control" required>
+                                                        <select id="status_diterima" name="status_diterima" class="form-control" {{ Auth::user()->hasRole('AdminGallery') ? 'required' : 'readonly' }}>
                                                             <option selected>Pilih Status</option>
                                                             {{-- <option value="TUNDA" {{ $data->status_diterima == 'TUNDA' ? 'selected' : '' }}>TUNDA</option> --}}
                                                             <option value="DIKONFIRMASI" {{ $data->status_diterima == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             {{-- <option value="BATAL" {{ $data->status_diterima == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                                         </select>
                                                     </td>
+                                                    @if(Auth::user()->hasRole('Finance'))
                                                     <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibukukan" class="form-control" disabled>
-                                                            <option selected>-</option>
+                                                        <select id="status_dibukukan" name="status_dibukukan" class="form-control" required>
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="DIKONFIRMASI" {{ $data->status_dibukukan == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
+                                                    @endif
+                                                    @if(Auth::user()->hasRole('Auditor'))
                                                     <td id="status_dibuku">
-                                                        <select id="status_diperiksa" name="status_diperiksa" class="form-control" disabled>
-                                                            <option selected>-</option>
+                                                        <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
+                                                            <option selected>Pilih Status</option>
+                                                            <option value="DIKONFIRMASI" {{ $data->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
+                                                    @endif
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
-                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ formatTanggal($data->tgl_dibuat) }}" readonly>
+                                                        <input type="hidden" name="tgl_dibuat" value="{{ $data->tgl_dibuat }}">
+                                                        <input type="text" class="form-control" id="tgl_dibuat" value="{{ formatTanggal($data->tgl_dibuat) }}" readonly>
                                                     </td>
                                                     <td id="tgl_diterima">
-                                                        <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" required>
+                                                        <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ $data->tgl_diterima ?? date('Y-m-d') }}" {{ Auth::user()->hasRole('AdminGallery') ? 'required' : 'readonly' }}>
                                                     </td>
+                                                    @if(Auth::user()->hasRole('Finance'))
                                                     <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="-" disabled>
+                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ $data->tgl_dibukukan ?? date('Y-m-d') }}" readonly>
                                                     </td>
+                                                    @endif
+                                                    @if(Auth::user()->hasRole('Auditor'))
                                                     <td id="tgl_diperiksa">
-                                                        <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="-" disabled>
+                                                        <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ $data->tgl_diperiksa ?? date('Y-m-d') }}" required>
                                                     </td>
+                                                    @endif
                                                 </tr>
                                             </tbody>
                                         </table>  
@@ -503,7 +528,10 @@ function calculateTotalAll() {
 
 
     $(document).ready(function() {
-
+        $(document).on('input change', 'input[name="qtytrm[]"]', function () {
+            let index = $(this).attr('id').split('_')[1];
+            validateQty(index);
+        });
         
         $('.select2').select2();
 
@@ -562,7 +590,7 @@ function calculateTotalAll() {
                     <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
                         <option value="">Pilih Kondisi</option>
                         @foreach ($kondisis as $kondisi)
-                         <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
+                         <option value="{{ $kondisi->id }}" readonly>{{ $kondisi->nama }}</option>
                         @endforeach
                     </select>
                 </td>
@@ -597,9 +625,9 @@ function calculateTotalAll() {
         //         '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
         //         '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" class="form-control" onchange="calculateTotal('+i+')"></td>'+
         //         '<td><select id="kondisi_'+i+'" name="kondisi[]" class="form-control">'+
-        //             '<option value="" disabled>Pilih Kondisi</option>'+
+        //             '<option value="" readonly>Pilih Kondisi</option>'+
         //                         '@foreach ($kondisis as $kondisi)'+
-        //                             '<option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>'+
+        //                             '<option value="{{ $kondisi->id }}" readonly>{{ $kondisi->nama }}</option>'+
         //                         '@endforeach'+
         //             '</select>'+
         //         '</td>'+
@@ -744,11 +772,20 @@ function calculateTotalAll() {
 
 
 
-        function clearFile(){
-            $('#bukti').val('');
-            $('#preview').attr('src', defaultImg);
-        }
+    function clearFile(){
+        $('#bukti').val('');
+        $('#preview').attr('src', defaultImg);
+    }
+    function validateQty(index) {
+        let qtyKrm = parseFloat($(`#qtykrm_${index}`).val());
+        let qtyTrm = parseFloat($(`#qtytrm_${index}`).val());
 
+        if (qtyTrm < 0) {
+            $(`#qtytrm_${index}`).val(0);
+        } else if (qtyTrm > qtyKrm) {
+            $(`#qtytrm_${index}`).val(qtyKrm);
+        }
+    }
         
 </script>
 @endsection
@@ -809,7 +846,7 @@ function calculateTotalAll() {
                     <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(${i})"></td>
                     <td>
                         <select id="kondisi_${i}" name="kondisi[]" class="form-control" onchange="showInputType(${i})">
-                            <option value="" disabled>Pilih Kondisi</option>
+                            <option value="" readonly>Pilih Kondisi</option>
                         </select>
                     </td>
                     <td>
