@@ -278,20 +278,20 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
-                                                            <th>Penyetuju</th>
                                                             <th>Pemeriksa</th>
+                                                            <th>Pembukuan</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td id="pembuat">{{ $dopenjualan->dibuat[0]->name }}</td>
-                                                            <td id="penyetuju">-</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            <td id="pembuat">{{ $dopenjualan->dibuat[0]->name ?? '-' }}</td>
+                                                            <td id="penyetuju">{{ $dopenjualan->diperiksa->name ?? '-' }}</td>
+                                                            <td id="pemeriksa">{{ $dopenjualan->dibuku->name ?? '-' }}</td>
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $dopenjualan->tanggal_pembuat }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $dopenjualan->tanggal_pembuat ?? '-' }}</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">{{ $dopenjualan->tanggal_penyetuju ?? '-' }}</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ $dopenjualan->tanggal_pemeriksa ?? '-' }}</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>

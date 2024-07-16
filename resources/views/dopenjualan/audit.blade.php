@@ -33,277 +33,310 @@
                 <form action="{{ route('auditdopenjualan.update', ['dopenjualan' => $dopenjualan->id]) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('patch')
-                    <div class="col-sm">
-                        <div class="row">
-                            <div class="col-md-6 border rounded pt-3">
-                                <h5>Informasi Pelanggan</h5>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="no_do">No Delivery Order</label>
-                                            <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Delivery Order" value="{{ $dopenjualan->no_do}}"  required readonly>
+                        <div class="col-sm">
+                            <div class="row">
+                                <div class="col-md-6 border rounded pt-3">
+                                    <h5>Informasi Pelanggan</h5>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="no_do">No Delivery Order</label>
+                                                <input type="text" class="form-control" id="no_do" name="no_do" placeholder="Nomor Delivery Order" value="{{ $dopenjualan->no_do}}"  required readonly>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="penerima">Penerima</label>
-                                            <input type="text" class="form-control" id="penerima" name="penerima" placeholder="Masukan Nama Penerima" value="{{ $dopenjualan->penerima}}" required >
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="penerima">Penerima</label>
+                                                <input type="text" class="form-control" id="penerima" name="penerima" placeholder="Masukan Nama Penerima" value="{{ $dopenjualan->penerima}}" required >
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="handphone">No Hp/Wa</label>
-                                            <input type="text" class="form-control" id="handphone" name="handphone" placeholder="Nomor Handphone" value="{{$dopenjualan->handphone}}" required >
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="handphone">No Hp/Wa</label>
+                                                <input type="text" class="form-control" id="handphone" name="handphone" placeholder="Nomor Handphone" value="{{$dopenjualan->handphone}}" required >
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="driver">Driver</label>
+                                                <select id="driver" name="driver" class="form-control" >
+                                                    <option value=""> Pilih Nama Driver </option>
+                                                    @foreach ($karyawans as $karyawan)
+                                                    <option value="{{ $karyawan->id }}" {{ $karyawan->id == $dopenjualan->driver ? 'selected' : '' }}>{{ $karyawan->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="driver">Driver</label>
-                                            <select id="driver" name="driver" class="form-control" >
-                                                <option value=""> Pilih Nama Driver </option>
-                                                @foreach ($karyawans as $karyawan)
-                                                <option value="{{ $karyawan->id }}" {{ $karyawan->id == $dopenjualan->driver ? 'selected' : '' }}>{{ $karyawan->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="alamat">Alamat</label>
-                                            <textarea type="text" class="form-control" id="alamat" name="alamat" placeholder="Alamat" value="{{ $dopenjualan->alamat}}" required >{{ $dopenjualan->alamat}}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <div class="col-md-6 border rounded pt-3">
-                                <h5>Informasi Pesanan</h5>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="no_referensi">Nomor Invoice</label>
-                                            <input type="text" class="form-control" id="no_referensi" name="no_referensi" placeholder="Nomor Invoice" value="{{ $dopenjualan->no_referensi}}" required readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="tanggal_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" id="tanggal_kirim" name="tanggal_kirim" placeholder="Tanggal_kirim" value="{{ $dopenjualan->tanggal_kirim}}" required >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="catatan">Catatan</label>
-                                            <textarea class="form-control" id="catatan" name="catatan" value="{{ $dopenjualan->catatan}}" >{{ $dopenjualan->catatan}}</textarea>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="status">Status</label>
-                                            <select id="status" name="status" class="form-control" required>
-                                                <option value="">Pilih Status</option>
-                                                <option value="TUNDA">TUNDA</option>
-                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
-                                                <option value="DIBATALKAN">DIBATALKAN</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <div id="alasan" style="display: none;">
-                                                <label for="alasan">Alasan</label>
-                                                <textarea name="alasan" id="alasan"></textarea>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="alamat">Alamat</label>
+                                                <textarea type="text" class="form-control" id="alamat" name="alamat" placeholder="Alamat" value="{{ $dopenjualan->alamat}}" required >{{ $dopenjualan->alamat}}</textarea>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="nama">Tanggal Invoice</label>
-                                            <input type="date" class="form-control" id="tanggal_pembuat" name="tanggal_pembuat" placeholder="Tanggal Invoice" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat))}}" required >
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="customer_id">Pengirim</label>
-                                            <select id="customer_id" name="customer_id" class="form-control"  >
-                                                <option value="">Pilih Nama Pengirim</option>
-                                                @foreach ($customers as $customer)
-                                                <option value="{{ $customer->id }}" {{ $customer->id == $dopenjualan->customer_id ? 'selected' : '' }}>{{ $customer->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                        <!-- <form action="{{ route('dopenjualan.update', ['dopenjualan' => $dopenjualan->id]) }}" method="POST" enctype="multipart/form-data">
-                                                @csrf
-                                                @method('patch') -->
-                                                <div class="custom-file-container" data-upload-id="myFirstImage">
-                                                    <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                                    </label>
-                                                    <label class="custom-file-container__custom-file">
-                                                        <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
-                                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                                    </label>
-                                                    <span class="text-danger">max 2mb</span>
-                                                    <img id="preview" src="{{ $dopenjualan->file ? '/storage/' . $dopenjualan->file : '' }}" alt="your image" />
+
+                                <div class="col-md-6 border rounded pt-3">
+                                    <h5>Informasi Pesanan</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="no_referensi">Nomor Invoice</label>
+                                                <input type="text" class="form-control" id="no_referensi" name="no_referensi" placeholder="Nomor Invoice" value="{{ $dopenjualan->no_referensi}}" required readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="tanggal_kirim">Tanggal Kirim</label>
+                                                <input type="date" class="form-control" id="tanggal_kirim" name="tanggal_kirim" placeholder="Tanggal_kirim" value="{{ $dopenjualan->tanggal_kirim}}" required >
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="catatan">Catatan</label>
+                                                <textarea class="form-control" id="catatan" name="catatan" value="{{ $dopenjualan->catatan}}" >{{ $dopenjualan->catatan}}</textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="status">Status</label>
+                                                <select id="status" name="status" class="form-control" required>
+                                                @if($dopenjualan->status != 'DIKONFIRMASI')
+                                                    <option value="">Pilih Status</option>
+                                                    <option value="TUNDA" {{ $dopenjualan->status == 'TUNDA' ? 'selected': ''}}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $dopenjualan->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
+                                                    <option value="DIBATALKAN" {{ $dopenjualan->status == 'DIBATALKAN' ? 'selected': ''}}>DIBATALKAN</option>
+                                                @else
+                                                    <option value="DIKONFIRMASI" {{ $dopenjualan->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
+                                                @endif
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <div id="alasan" style="display: none;">
+                                                    <label for="alasan">Alasan</label>
+                                                    <textarea name="alasan" id="alasan"></textarea>
                                                 </div>
-                                                <!-- <div class="text-end mt-3"> -->
-                                                    <!-- <button class="btn btn-primary" type="submit">Upload File</button> -->
-                                                    <!-- <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a> -->
-                                                <!-- </div> -->
-                                            <!-- </form> -->
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="nama">Tanggal Invoice</label>
+                                                <input type="date" class="form-control" id="tanggal_pembuat" name="tanggal_pembuat" placeholder="Tanggal Invoice" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat))}}" required >
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="customer_id">Pengirim</label>
+                                                <select id="customer_id" name="customer_id" class="form-control"  >
+                                                    <option value="">Pilih Nama Pengirim</option>
+                                                    @foreach ($customers as $customer)
+                                                    <option value="{{ $customer->id }}" {{ $customer->id == $dopenjualan->customer_id ? 'selected' : '' }}>{{ $customer->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                            <!-- <form action="{{ route('dopenjualan.update', ['dopenjualan' => $dopenjualan->id]) }}" method="POST" enctype="multipart/form-data">
+                                                    @csrf
+                                                    @method('patch') -->
+                                                    <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                        <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                        </label>
+                                                        <label class="custom-file-container__custom-file">
+                                                            <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
+                                                            <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                        </label>
+                                                        <span class="text-danger">max 2mb</span>
+                                                        <img id="preview" src="{{ $dopenjualan->file ? '/storage/' . $dopenjualan->file : '' }}" alt="your image" />
+                                                    </div>
+                                                    <!-- <div class="text-end mt-3"> -->
+                                                        <!-- <button class="btn btn-primary" type="submit">Upload File</button> -->
+                                                        <!-- <a href="{{ route('do_sewa.index') }}" class="btn btn-secondary" type="button">Back</a> -->
+                                                    <!-- </div> -->
+                                                <!-- </form> -->
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- <div class="row justify-content-around"> -->
-                        <div class="col-md-12 border rounded pt-3 me-1 mt-2">
-                            <div class="form-row row">
-                                <div class="mb-4">
-                                    <h5>Rincian Produk</h5>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Nama</th>
-                                                <th>Jumlah</th>
-                                                <th>Unit Satuan</th>
-                                                <th>Keterangan</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="dynamic_field">
-                                            @if(count($dopenjualan->produk) < 1) <tr>
-                                                <td>
-                                                    <select id="nama_produk_0" name="nama_produk[]" class="form-control" >
-                                                        <option value="">Pilih Produk</option>
-                                                        @foreach ($produkjuals as $produk)
-                                                        <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control"></td>
-                                                <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
-                                                <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
-                                                </tr>
-                                                @else
-                                                @php
-                                                $i = 0;
-                                                @endphp
-                                                @foreach ($dopenjualan->produk as $produk)
-                                                @if ($produk->jenis == null)
-                                                <tr id="row{{ $i }}">
-                                                    <td>
-                                                        <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
-                                                            <option value="">Pilih Produk</option>
-                                                            @foreach ($produkjuals as $pj)
-                                                            <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}"></td>
-                                                    <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
-                                                    <td><input type="text" name="keterangan[]" id="ketarangan_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
-                                                    <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                                </tr>
-                                                @endif
-                                                @php
-                                                $i++;
-                                                @endphp
-                                                @endforeach
-                                                @endif
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    <!-- </div> -->
 
-                    <!-- <div class="row justify-content-around"> -->
-                        <div class="col-md-12 border rounded pt-3 me-1 mt-2">
-                            <div class="form-row row">
-                                <div class="mb-4">
-                                    <h5>Tambahan Produk</h5>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Nama</th>
-                                                <th>Jumlah</th>
-                                                <th>Unit Satuan</th>
-                                                <th>Keterangan</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="dynamic_field_tambah">
-                                            @if(count($dopenjualan->produk) < 1) <tr>
-                                                <td>
-                                                    <select id="nama_produk2_0" name="nama_produk2[]" class="form-control" >
-                                                        <option value="">Pilih Produk</option>
-                                                        @foreach ($produkjuals as $produk)
-                                                        <option value="{{ $produk->id }}">{{ $produk->nama }}</option>
+                        <div class="col-sm">
+                            <div class="row">
+
+                                <div class="col-md-12 border rounded pt-3 mt-2">
+                                    <div class="form-row row">
+                                        <div class="mb-4">
+                                            <h5>Rincian Produk</h5>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nama</th>
+                                                        <th>Jumlah</th>
+                                                        <th>Unit Satuan</th>
+                                                        <th>Keterangan</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="dynamic_field">
+                                                    @if(count($dopenjualan->produk) < 1) <tr>
+                                                        <td>
+                                                            <select id="nama_produk_0" name="nama_produk[]" class="form-control" >
+                                                                <option value="">Pilih Produk</option>
+                                                                @foreach ($produkjuals as $produk)
+                                                                <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control"></td>
+                                                        <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
+                                                        <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
+                                                        </tr>
+                                                        @else
+                                                        @php
+                                                        $i = 0;
+                                                        @endphp
+                                                        @foreach ($dopenjualan->produk as $produk)
+                                                        @if ($produk->jenis == null)
+                                                        <tr id="row{{ $i }}">
+                                                            <td>
+                                                                <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
+                                                                    <option value="">Pilih Produk</option>
+                                                                    @foreach ($produkjuals as $pj)
+                                                                    <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </td>
+                                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}"></td>
+                                                            <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
+                                                            <td><input type="text" name="keterangan[]" id="ketarangan_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
+                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                        </tr>
+                                                        @endif
+                                                        @php
+                                                        $i++;
+                                                        @endphp
                                                         @endforeach
-                                                    </select>
-                                                </td>
-                                                <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
-                                                <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
-                                                <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
-                                                </tr>
-                                                @else
-                                                @php
-                                                $i = 0;
-                                                @endphp
-                                                @foreach ($dopenjualan->produk as $produk)
-                                                @if ($produk->jenis == 'TAMBAHAN')
-                                                <tr id="row{{ $i }}">
-                                                    <td>
-                                                        <select id="nama_produk2_{{ $i }}" name="nama_produk2[]" class="form-control" >
-                                                            <option value="">Pilih Produk</option>
-                                                            @foreach ($produkjuals as $pj)
-                                                            <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
-                                                    <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
-                                                    <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
-                                                    <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                                </tr>
-                                                @endif
-                                                @php
-                                                $i++;
-                                                @endphp
-                                                @endforeach
-                                                @endif
-                                        </tbody>
-                                    </table>
+                                                        @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    <!-- </div> -->
+
+                        <div class="col-sm">
+                            <div class="row">
+                                <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                                    <div class="form-row row">
+                                        <div class="mb-4">
+                                            <h5>Tambahan Produk</h5>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nama</th>
+                                                        <th>Jumlah</th>
+                                                        <th>Unit Satuan</th>
+                                                        <th>Keterangan</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="dynamic_field_tambah">
+                                                    @if(count($dopenjualan->produk) < 1) <tr>
+                                                        <td>
+                                                            <select id="nama_produk2_0" name="nama_produk2[]" class="form-control" >
+                                                                <option value="">Pilih Produk</option>
+                                                                @foreach ($produkjuals as $produk)
+                                                                <option value="{{ $produk->id }}">{{ $produk->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
+                                                        <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
+                                                        <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
+                                                        </tr>
+                                                        @else
+                                                        @php
+                                                        $i = 0;
+                                                        @endphp
+                                                        @foreach ($dopenjualan->produk as $produk)
+                                                        @if ($produk->jenis == 'TAMBAHAN')
+                                                        <tr id="row{{ $i }}">
+                                                            <td>
+                                                                <select id="nama_produk2_{{ $i }}" name="nama_produk2[]" class="form-control" >
+                                                                    <option value="">Pilih Produk</option>
+                                                                    @foreach ($produkjuals as $pj)
+                                                                    <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </td>
+                                                            <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
+                                                            <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
+                                                            <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
+                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                        </tr>
+                                                        @endif
+                                                        @php
+                                                        $i++;
+                                                        @endphp
+                                                        @endforeach
+                                                        @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     <div class="row  justify-content-center pt-3  mt-2">
-                                <div class="col-lg-6 col-sm-12 border radius pt-2 pb-2">
-                                            <!-- <div class="col-lg-12"> -->
-                                                <table class="table table-responsive border rounded">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Pembuat</th>
-                                                            <th>Penyetuju</th>
-                                                            <th>Pemeriksa</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td id="pembuat">{{ $dopenjualan->dibuat[0]->name }}</td>
-                                                            <td id="penyetuju">{{ Auth::user()->name}}</td>
-                                                            <td id="pemeriksa">-</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $dopenjualan->tanggal_pembuat }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">{{ date('Y-m-d')}}</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                        <div class="col-lg-6 col-sm-12 border radius pt-2 pb-2">
+                                    <!-- <div class="col-lg-12"> -->
+                                        <table class="table table-responsive border rounded">
+                                            <thead>
+                                                <tr>
+                                                    <th>Pembuat</th>
+                                                    <th>Penyetuju</th>
+                                                    <th>Pemeriksa</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                <tr>
+                                                    @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                        <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                        <td id="penyetuju">-</td>
+                                                        <td id="pemeriksa">-</td>
+                                                    @elseif($user->hasRole(['Finance']))
+                                                        <td id="pembuat">{{ $dopenjualan->dibuat[0]->name }}</td>
+                                                        <td id="penyetuju">{{ Auth::user()->name }}</td>
+                                                        <td id="pemeriksa">{{ $dopenjualan->dibuku->name ?? '-' }}</td>
+                                                    @elseif($user->hasRole(['Auditor']))
+                                                        <td id="pembuat">{{ $dopenjualan->dibuat[0]->name }}</td>
+                                                        <td id="penyetuju">{{ $dopenjualan->diperiksa->name }}</td>
+                                                        <td id="pemeriksa">{{ Auth::user()->name }}</td>
+                                                    @endif
+                                                </tr>
+                                                <tr>
+                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                    <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                @elseif($user->hasRole(['Finance']))
+                                                    <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat)) }}" disabled ></td>
+                                                    <td><input type="date" class="form-control" name="tanggal_penyetuju" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                    <td><input type="date" class="form-control" name="tanggal_pemeriksa" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pemeriksa)) }}" disabled></td>
+                                                @elseif($user->hasRole(['Auditor']))
+                                                    <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat)) }}" disabled></td>
+                                                    <td><input type="date" class="form-control" name="tanggal_penyetuju" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_penyetuju)) }}" disabled></td>
+                                                    <td><input type="date" class="form-control" name="tanggal_pemeriksa" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                @endif
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
 
                     <div class="text-end mt-1 mb-4 me-2">
                         <button class="btn btn-primary" type="submit">Submit</button>
@@ -430,6 +463,7 @@
                 '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
                 '</tr>';
             $('#dynamic_field').append(newRow);
+            updateIndicesProduk();
 
             // Menambahkan modal untuk setiap pic
             var picModal = '<div class="modal fade" id="picModal_' + i + '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">' +
@@ -476,14 +510,50 @@
                 '</tr>';
             $('#dynamic_field_tambah').append(newrowtambah);
             $('#nama_produk_' + i + ', #jenisdiskon_' + i).select2();
+            updateIndicesProdukTambahan();
             i++;
         })
 
-        $(document).on('click', '.btn_remove', function() {
-            var button_id = $(this).attr("id");
-            $('#row' + button_id + '').remove();
-            calculateTotal(0);
+        function updateIndicesProduk() {
+            var i = 0;
+
+            $('#dynamic_field tr[id^="row"]').each(function() {
+                $(this).attr('id', 'row' + i);
+                $(this).find('[id^="nama_produk_"]').attr('id', 'nama_produk_' + i).attr('name', 'nama_produk[]').attr('data-index', i);
+                $(this).find('[id^="jumlah_"]').attr('id', 'jumlah_' + i).attr('name', 'jumlah[]').attr('data-index', i);
+                $(this).find('[id^="satuan_"]').attr('id', 'satuan_' + i).attr('name', 'satuan[]').attr('data-index', i);
+                $(this).find('[id^="keterangan_"]').attr('id', 'keterangan_' + i).attr('name', 'keterangan[]').attr('data-index', i);
+                $(this).find('.btn_remove').attr('id', i);
+                i++;
+            });
+        }
+
+        function updateIndicesProdukTambahan() {
+            var i = 0;
+
+            $('#dynamic_field_tambah tr[id^="row"]').each(function() {
+                $(this).attr('id', 'row' + i);
+                $(this).find('[id^="nama_produk2_"]').attr('id', 'nama_produk2_' + i).attr('name', 'nama_produk2[]').attr('data-index', i);
+                $(this).find('[id^="jumlah2_"]').attr('id', 'jumlah2_' + i).attr('name', 'jumlah2[]').attr('data-index', i);
+                $(this).find('[id^="satuan2_"]').attr('id', 'satuan2_' + i).attr('name', 'satuan2[]').attr('data-index', i);
+                $(this).find('[id^="keterangan2_"]').attr('id', 'keterangan2_' + i).attr('name', 'keterangan2[]').attr('data-index', i);
+                $(this).find('.btn_remove').attr('id', i);
+                i++;
+            });
+        }
+
+        $(document).on('click', '#dynamic_field .btn_remove', function() {
+            var button_id = $(this).attr('id');
+            $('#row' + button_id).remove();
+            updateIndicesProduk();
         });
+        
+        $(document).on('click', '#dynamic_field_tambah .btn_remove', function() {
+            var button_id = $(this).attr('id');
+            $('#row' + button_id).remove();
+            updateIndicesProdukTambahan();
+        });
+
         $(document).on('change', '[id^=nama_produk]', function() {
             var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
             var selectedOption = $(this).find(':selected');

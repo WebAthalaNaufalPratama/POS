@@ -63,6 +63,14 @@ class DeliveryOrder extends Model
     {
         return $this->hasMany(User::class, 'id', 'pembuat');
     }
+    public function diperiksa()
+    {
+        return $this->hasOne(User::class, 'id', 'penyetuju');
+    }
+    public function dibuku()
+    {
+        return $this->hasOne(User::class, 'id', 'pemeriksa');
+    }
 
     public function penjualan()
     {

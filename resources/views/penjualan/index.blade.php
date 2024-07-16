@@ -104,6 +104,7 @@
                                             @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $penjualan->status != 'DIKONFIRMASI')
                                                 <a class="dropdown-item" href="{{ route('auditpenjualan.edit', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                             @endif
+                                            @if($penjualan->status == 'DIKONFIRMASI')
                                             @if($lokasi->lokasi->tipe_lokasi != 2 && in_array('penjualan.show', $rolePermissions))
                                                 <a class="dropdown-item" href="{{ route('penjualan.show', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Perangkai</a>
                                             @endif
@@ -114,10 +115,11 @@
                                             <a class="dropdown-item" href="{{ route('dopenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order</a>
                                             @endif
                                             <!-- && $penjualan->dibukukan_id != null && $penjualan->auditor_id != null && $penjualan->status == 'DIKONFIRMASI' -->
-                                            @if(in_array('returpenjualan.create', $rolePermissions))
+                                            @if(in_array('returpenjualan.create', $rolePermissions) && $penjualan->status == 'DIKONFIRMASI')
                                                 <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('pdfinvoicepenjualan.generate', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak Invoice</a>
+                                            @endif
                                             <!-- <a class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $penjualan->id }})">Delete</a> -->
                                         </div>
                                     @else
