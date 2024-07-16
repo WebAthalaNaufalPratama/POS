@@ -373,29 +373,33 @@
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
                                                             <option selected>Pilih Status</option>
-                                                            <option value="draft" {{ $data->status_dibuat == 'draft' ? 'selected' : '' }} disabled>Draft</option>
-                                                            <option value="publish" {{ $data->status_dibuat == 'publish' ? 'selected' : '' }} disabled>Publish</option>
+                                                            <option value="TUNDA" {{ $data->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_diterima">
                                                         <select id="status_diterima" name="status_diterima" class="form-control" readonly>
                                                             <option selected>Pilih Status</option>
-                                                            <option value="pending" {{ $data->status_diterima  == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{  $data->status_diterima == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                            <option value="TUNDA" {{ $data->status_diterima == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $data->status_diterima == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" {{ $data->status_diterima == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
                                                             <option selected>Pilih Status</option>
-                                                            <option value="pending" {{  $data->status_dibukukan == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{  $data->status_dibukukan == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                            <option value="TUNDA" {{ $data->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $data->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" {{ $data->status_dibuku == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_diperiksa">
                                                         <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{  $data->status_diperiksa  == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{  $data->status_diperiksa  == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                            <option value="TUNDA" {{ $data->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $data->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" {{ $data->status_diperiksa == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                 </tr>

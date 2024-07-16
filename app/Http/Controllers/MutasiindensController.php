@@ -327,6 +327,26 @@ class MutasiindensController extends Controller
      * @param  \App\Models\Mutasiindens  $mutasiindens
      * @return \Illuminate\Http\Response
      */
+    public function editpurchase_indengh($mutasiIG)
+    {
+        $data = Mutasiindens::with('produkmutasi')->where('id', $mutasiIG)->first();
+        $pembuat = Karyawan::where('user_id',$data->pembuat_id)->value('nama');
+        // return $pembuat;
+        $jabatan = Karyawan::where('user_id',$data->pembuat_id)->value('jabatan');
+        $barangmutasi = ProdukMutasiInden::where('mutasiinden_id',$data->id)->get();
+        // return $barangmutasi;
+        $produks = InventoryInden::get();
+        // $no_mutasi = $this->generatemutasiNumber();
+        $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
+        $lokasi = Lokasi::all();
+        $kondisis = Kondisi::all();
+        $bulanInden = InventoryInden::where('supplier_id', $data->supplier_id)->pluck('bulan_inden')->unique()->values()->all();
+        
+        // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
+        // return view('mutasiindengh.create', compact('lokasipengirim','lokasipenerima','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
+        return view('mutasiindengh.editpurchase',compact('data','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','jabatan', 'bulanInden'));
+    }
+
     public function edit_indengh($mutasiIG)
     {
         $data = Mutasiindens::where('id', $mutasiIG)->first();
@@ -459,14 +479,18 @@ class MutasiindensController extends Controller
 
         $produkIds = $request->id;
         $qty = $request->qtytrm;
+        $qty2 = $request->qtykrm;
         $kondisi = $request->kondisi;
         $rawat = $request->rawat;
         $jml = $request->jumlah;
+        $bulan_inden = $request->bulan_inden;
+        $kode_inden = $request->kode_inden;
     
         $check2 = true;
     
         foreach ($produkIds as $index => $produkId) {
             $produkmutasi = ProdukMutasiInden::find($produkId);
+            $id_inveninden = InventoryInden::where('supplier_id', $mutasiinden->supplier_id)->where('bulan_inden', $bulan_inden)->where('kode_produk_inden', $kode_inden)->first();
             
             if (!$produkmutasi) {
                 $check2 = false;
@@ -483,9 +507,11 @@ class MutasiindensController extends Controller
             }
     
             $produkmutasi->jml_diterima = $qty[$index];
+            $produkmutasi->jml_dikirim = $qty2[$index];
             $produkmutasi->kondisi_id = $kondisi[$index];
             $produkmutasi->biaya_rawat = $rawat[$index];
             $produkmutasi->totalharga = $jml[$index];
+            $produkmutasi->inventoryinden_id = $id_inveninden->id;
             $check2 = $produkmutasi->save();
     
             $lokasi = Lokasi::find($mutasiinden->lokasi_id);

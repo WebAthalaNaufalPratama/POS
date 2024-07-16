@@ -90,7 +90,7 @@
                                         <div class="form-group">
                                             <label for="tgl_terima">Tanggal Diterima</label>
                                             <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" 
-                                            value="{{ now()->format('Y-m-d') }}"
+                                            value="{{ $data->tgl_diterima ?? now()->format('Y-m-d') }}"
                                             min="{{ now()->format('Y-m-d') }}" 
                                             max="{{ now()->addYear()->format('Y-m-d') }}">
                                          </div>
@@ -145,7 +145,7 @@
                                                     </td>
                                                     <td>
                                                     <input type="text" class="form-control" name="kategori[]" id="kategori_{{ $index }}" value="{{ $item->produk->produk->nama }}" readonly>
-                                                    <input type="hidden" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $item->produk->kode_produk}}" readonly>
+                                                    <input type="hidden" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $item->produk->produk->nama}}" readonly>
                                                     </td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" onchange="calculateTotal({{ $index }})" value="{{ $item->jml_dikirim }}" readonly></td>
                                                     <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})"></td>
@@ -160,15 +160,15 @@
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="rawat2[]" id="rawat2_{{ $index }}" class="form-control-banyak" oninput="calculateTotal({{ $index }})">
-                                                            <input type="hidden" name="rawat[]" id="rawat_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})">
+                                                            <input type="text" name="rawat2[]" id="rawat2_{{ $index }}" value="{{ $item->biaya_rawat }}" class="form-control-banyak" oninput="calculateTotal({{ $index }})" readonly>
+                                                            <input type="hidden" name="rawat[]" id="rawat_{{ $index }}" value="{{ $item->biaya_rawat }}" class="form-control" oninput="calculateTotal({{ $index }})" readonly>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" class="form-control-banyak" readonly>
-                                                            <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control">
+                                                            <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" value="{{ $item->totalharga }}" class="form-control-banyak" readonly>
+                                                            <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" value="{{ $item->totalharga }}" class="form-control">
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -228,7 +228,7 @@
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
                                                             
-                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" readonly>
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" readonly value="{{ $data->subtotal ?? 0 }}">
                                                             <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
@@ -238,8 +238,8 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis"  class="form-control" oninput="calculateTotal(0)">
-                                                            <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)">
+                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis"  class="form-control" oninput="calculateTotal(0)"  value="{{ $data->biaya_perawatan ?? 0 }}" readonly>
+                                                            <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" oninput="calculateTotal(0)"  value="{{ $data->biaya_perawatan ?? 0 }}" readonly>
                                                         </div>
                                                     </h5>
 
@@ -250,8 +250,8 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" oninput="calculateTotal(0)">
-                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" oninput="calculateTotal(0)">
+                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis"  class="form-control" value="{{ $data->biaya_pengiriman ?? 0 }}" oninput="calculateTotal(0)" readonly>
+                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ $data->biaya_pengiriman ?? 0 }}" oninput="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -260,8 +260,8 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly>
-                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly>
+                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" value="{{ $data->total_biaya ?? 0 }}" readonly>
+                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" value="{{ $data->total_biaya ?? 0 }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -270,7 +270,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly>
+                                                            <input type="text" value="{{ $data->sisa_bayar ?? 0 }}" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -306,55 +306,53 @@
                                                     </td>
                                                     <td id="pembuku">
                                                         <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                        <input type="text" class="form-control" value="Nama (Finance)" disabled>
                                                     </td>
                                                     <td id="pemeriksa">
                                                         <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                        <input type="text" class="form-control" value="Nama (Auditor)" disabled>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
                                                             <option selected>Pilih Status</option>
-                                                            <option value="draft" {{ $data->status_dibuat == 'draft' ? 'selected' : '' }} disabled>Draft</option>
-                                                            <option value="publish" {{ $data->status_dibuat == 'publish' ? 'selected' : '' }} disabled>Publish</option>
+                                                            <option value="TUNDA" {{ $data->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="BATAL" {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_diterima">
-                                                        <select id="status_diterima" name="status_diterima" class="form-control">
+                                                        <select id="status_diterima" name="status_diterima" class="form-control" required>
                                                             <option selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_diterima') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_diterima') == 'acc'|| old('status_diterima') == null ? 'selected' : '' }}>Accept</option>
+                                                            {{-- <option value="TUNDA" {{ $data->status_diterima == 'TUNDA' ? 'selected' : '' }}>TUNDA</option> --}}
+                                                            <option value="DIKONFIRMASI" {{ $data->status_diterima == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            {{-- <option value="BATAL" {{ $data->status_diterima == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibukukan" class="form-control">
-                                                            <option selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' || old('status_dibukukan') == null ? 'selected' : '' }}>Accept</option>
+                                                        <select id="status_dibukukan" name="status_dibukukan" class="form-control" disabled>
+                                                            <option selected>-</option>
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status_diperiksa" name="status_diperiksa" class="form-control">
-                                                            <option selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_diperiksa') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="acc" {{ old('status_diperiksa') == 'acc' || old('status_diperiksa') == null ? 'selected' : '' }}>Accept</option>
+                                                        <select id="status_diperiksa" name="status_diperiksa" class="form-control" disabled>
+                                                            <option selected>-</option>
                                                         </select>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
-                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ formatTanggal($data->tgl_dibuat) }}" readonly >
+                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ formatTanggal($data->tgl_dibuat) }}" readonly>
                                                     </td>
                                                     <td id="tgl_diterima">
-                                                        <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}">
+                                                        <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" required>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}">
+                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="-" disabled>
                                                     </td>
                                                     <td id="tgl_diperiksa">
-                                                        <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', now()->format('Y-m-d')) }}" >
+                                                        <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="-" disabled>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -467,7 +465,7 @@ document.querySelectorAll('input[id^="rawat2_"], input[id^="biaya_rwt2"], input[
 });
 
 function calculateTotal(index) {
-    var qtyTerimaElem = document.getElementById('qtytrm_' + index);
+    var qtyTerimaElem = document.getElementById('qtykrm_' + index);
     var rawatElem = document.getElementById('rawat2_' + index);
 
     if (qtyTerimaElem && rawatElem) {
