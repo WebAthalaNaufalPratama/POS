@@ -631,6 +631,12 @@ class PembelianController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
 
+        $existingRetur = ReturPembelian::where('invoicepo_id', $request->invoicepo_id)->first();
+        if ($existingRetur) {
+            return redirect()->back()->withInput()->with('fail', 'Retur Pembelian dengan Invoice PO ini sudah ada.');
+        }
+
+
         $data = $request->except(['_token', '_method', 'file']);
 
         if ($request->hasFile('file')) {
@@ -644,7 +650,9 @@ class PembelianController extends Controller
         $data['ongkir'] = $request->biaya_pengiriman ?? 0;
         // $data['total'] = $request->total_harga;
         $jenis = $data['komplain'];
+        
         $save = ReturPembelian::create($data);
+
         // $data['sisa'] = $request->subtotal;
         // $save = ReturPembelian::create($data);
        
@@ -674,6 +682,11 @@ class PembelianController extends Controller
                         $getInven = InventoryGreenHouse::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
                         $getInven->jumlah -=  $data['jumlah'][$i];
                         $getInven->update();
+                    
+                    }elseif($getProdukBeli->pembelian->lokasi->tipe_lokasi == 4 ){
+                        $getInven = InventoryGudang::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
+                        $getInven->jumlah -=  $data['jumlah'][$i];
+                        $getInven->update();
                     }
                 } 
 
@@ -697,18 +710,6 @@ class PembelianController extends Controller
             // $getProdukbeli = Produkbeli::where('pembelian_id',  $getInvoice->pembelian_id)->get();
             $getProdukretur = Produkretur::where('returpembelian_id',$save->id)->get();
 
-           
-            
-            // Menjumlahkan seluruh nilai totalharga dari getProdukbeli
-
-            // foreach ($getProdukbeli as $produkbeli) {
-            //     $sumProdukbeli -= $produkbeli->totalharga;
-            // }
-            
-            // Menghitung nilai newSubtotal
-            // $newSubtotal = $sumProdukretur + $sumProdukbeli;
-
-
             if($jenis == 'Retur'){
                 $subretur = $newSubtotal - $getretur->subtotal;
                 $getInvoice->subtotal = $subretur ;
@@ -717,17 +718,29 @@ class PembelianController extends Controller
                 $check = $getInvoice->update();
             }elseif($jenis == 'Refund'){
                 $subrefund = $newSubtotal - $getretur->subtotal;
+                // dd($subrefund);
                 $getInvoice->subtotal = $subrefund ;
                 // $getInvoice->total_tagihan = $subrefund  + $getInvoice->biaya_kirim + $getInvoice->ppn + $getretur->ongkir;
                 $getInvoice->total_tagihan = $getretur->ongkir;
                 $getInvoice->sisa = $getretur->ongkir;
-                $check = $getInvoice->update();
-                $getretur->sisa = $subrefund;
-                $check2=$getretur->update();
-                
-                if(!$check2) return redirect()->back()->withInput()->with('fail', 'Gagal Update');
 
-                
+                 //Debugging
+                try {
+                    $getretur->sisa = $subrefund;
+                    $check2 = $getretur->update();
+
+                    if (!$check2) {
+                        return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur');
+                    }
+                } catch (\Exception $e) {
+                    return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur: ' . $e->getMessage());
+                }
+
+                $check = $getInvoice->update();
+
+                // $getretur->sisa = $newSubtotal - $getretur->subtotal;
+                // $check2=$getretur->update();
+
             }else{
 
                 foreach ($getProdukretur as $produkretur) {
@@ -736,7 +749,7 @@ class PembelianController extends Controller
                 $getInvoice->subtotal = $newSubtotal;
                 $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + $getInvoice->ppn;
                 $getInvoice->sisa = $getInvoice->total_tagihan;
-                $check = $getInvoice->update(); 
+                $check = $getInvoice->update();
             }
 
            
@@ -795,9 +808,14 @@ class PembelianController extends Controller
         $rekenings = Rekening::all();
         $databayars = Pembayaran::where('retur_pembelian_id', $data->id)->get()->sortByDesc('created_at');
 
+        $pembuat = Karyawan::where('user_id', $data->pembuat)->first()->nama ?? null;
+        $pembuatjbt = Karyawan::where('user_id', $data->pembuat)->first()->jabatan ?? null;
+        $pembuku = Karyawan::where('user_id', $data->pembuku)->first()->nama ?? null;
+        $pembukujbt = Karyawan::where('user_id', $data->pembuku)->first()->jabatan ?? null;
+
         $no_byre = $this->generatebayarrefundNumber();
 
-        return view('purchase.showreturpo', compact('data','rekenings','databayars', 'lokasi','no_byre'));
+        return view('purchase.showreturpo', compact('data','pembuat','pembuatjbt','pembuku','pembukujbt','rekenings','databayars', 'lokasi','no_byre'));
      }
 
     /**
@@ -2286,39 +2304,7 @@ class PembelianController extends Controller
                             return redirect()->back()->withInput()->with('fail', 'Bukan Inventory Galery');
 
                         }
-                        // } elseif ($lokasi->tipe_lokasi == 3) {
-                        //     $checkInven = InventoryGreenHouse::where('kode_produk', $produk->kode)
-                        //         ->where('kondisi_id', $kondisiIds[$index])
-                        //         ->where('lokasi_id', $lokasi->id)
-                        //         ->first();
-                        //     if ($checkInven) {
-                        //         $checkInven->jumlah += $qtyTerima[$index];
-                        //         $checkInven->update();
-                        //     } else {
-                        //         $createProduk = new InventoryGreenHouse();
-                        //         $createProduk->kode_produk = $produk->kode;
-                        //         $createProduk->kondisi_id = $kondisiIds[$index];
-                        //         $createProduk->jumlah = $qtyTerima[$index];
-                        //         $createProduk->lokasi_id = $lokasi->id;
-                        //         $createProduk->save();
-                        //     }
-                        // }elseif ($lokasi->tipe_lokasi == 4) {
-                        //     $checkInven = InventoryGudang::where('kode_produk', $produk->kode)
-                        //         ->where('kondisi_id', $kondisiIds[$index])
-                        //         ->where('lokasi_id', $lokasi->id)
-                        //         ->first();
-                        //     if ($checkInven) {
-                        //         $checkInven->jumlah += $qtyTerima[$index];
-                        //         $checkInven->update();
-                        //     } else {
-                        //         $createProduk = new InventoryGudang();
-                        //         $createProduk->kode_produk = $produk->kode;
-                        //         $createProduk->kondisi_id = $kondisiIds[$index];
-                        //         $createProduk->jumlah = $qtyTerima[$index];
-                        //         $createProduk->lokasi_id = $lokasi->id;
-                        //         $createProduk->save();
-                        //     }
-                        // }
+                        
                     }
                 }
 
@@ -2426,9 +2412,35 @@ class PembelianController extends Controller
 
     }
 
-    public function show_retur ($retur_id, Request $request)
+    public function edit_returpo($id)
     {
+        $data = Returpembelian::with('invoice', 'produkretur')->find($id);
+        
+        if (!$data) {
+            return redirect()->route('returbeli.index')->with('error', 'Data retur pembelian tidak ditemukan.');
+        }
+    
+        $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+        $rekenings = Rekening::all();
+        $databayars = Pembayaran::where('retur_pembelian_id', $data->id)->get()->sortByDesc('created_at');
+    
+        // Mengambil data pembuat dan pembuku menggunakan satu query
+        $pembuat = Karyawan::where('user_id', $data->pembuat)->first()->nama ?? null;
+        $pembuatjbt = Karyawan::where('user_id', $data->pembuat)->first()->jabatan ?? null;
+        $pembuku = Karyawan::where('user_id', $data->pembuku)->first()->nama ?? null;
+        $pembukujbt = Karyawan::where('user_id', $data->pembuku)->first()->jabatan ?? null;
+
+        $nomor_retur = $this->generateReturNumber();
+
+        $invoice = Invoicepo::with('pembelian', 'pembelian.produkbeli', 'pembelian.produkbeli.produk')->find($data->invoicepo_id);
+        // return $nomor_retur;
+
+    
+        return view('purchase.editretur', compact('nomor_retur','invoice','data', 'pembuat','pembuatjbt', 'pembuku','pembukujbt', 'rekenings', 'databayars', 'lokasi'));
     }
+    
+
+    
 
     public function show_returinv ($retur_id, Request $request)
     {

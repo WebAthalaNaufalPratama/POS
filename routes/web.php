@@ -322,7 +322,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/refundinden/store', 'PembayaranController@refundInden')->name('refundinden.store');
 
              Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show'); 
-             Route::get('/returinv/{retur_id}/show', 'PembelianController@show_returinv')->name('returinvoice.show');
+             Route::get('/returbeli/{retur_id}/edit', 'PembelianController@edit_returpo')->name('returbeli.edit');
 
         });
 
