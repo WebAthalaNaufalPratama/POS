@@ -1591,11 +1591,13 @@ class PembelianController extends Controller
         $no_po = $request->input('no_po');
         $type = $request->input('type');
         $id_po = $request->input('id_po');
+
+        $user = Auth::user();
     
         if ($type === 'poinden') {
             $inden = ModelsPoinden::where('no_po', $no_po)->first();
             if ($inden) {
-    
+
                 $validator = Validator::make($request->all(), [
                     'id_po' => 'required',
                     'no_inv' => 'required',
@@ -1609,25 +1611,39 @@ class PembelianController extends Controller
                 if ($validator->fails()) {
                     $errors = $validator->errors()->all();
                     return redirect()->back()->withInput()->with('fail', $errors);
+                }                  
+
+                if($user->hasRole(['Purchasing'])){
+                    $invData = [
+                        'poinden_id' => $request->id_po,
+                        'tgl_inv' => $request->tgl_inv,
+                        'no_inv' => $request->no_inv,
+                        'pembuat' => $request->pembuat,
+                        'status_dibuat' => $request->status_dibuat,
+                        'tgl_dibuat' => $request->tgl_dibuat,
+                        'subtotal' => $request->sub_total,
+                        'ppn' => $request->persen_ppn === null ? 0 : ($request->persen_ppn / 100 * $request->sub_total),
+                        'total_tagihan' => $request->total_tagihan,
+                        'dp' => 0,
+                        'sisa' => $request->total_tagihan,
+                    ];
+                }elseif($user->hasRole(['Auditor'])){
+                    $invData = [
+                        'poinden_id' => $request->id_po,
+                        'tgl_inv' => $request->tgl_inv,
+                        'no_inv' => $request->no_inv,
+                        'pembuku' => $request->pembuku,
+                        'status_dibuku' => $request->status_dibuku,
+                        'tgl_dibukukan' => $request->tanggal_dibukukan,
+                        'subtotal' => $request->sub_total,
+                        'ppn' => $request->persen_ppn === null ? 0 : ($request->persen_ppn / 100 * $request->sub_total),
+                        'total_tagihan' => $request->total_tagihan,
+                        'dp' => 0,
+                        'sisa' => $request->total_tagihan,
+                    ];
                 }
-    
                 // Temukan Invoicepo berdasarkan id dan update
-                $invData = [
-                    'poinden_id' => $request->id_po,
-                    'tgl_inv' => $request->tgl_inv,
-                    'no_inv' => $request->no_inv,
-                    'pembuat' => $request->pembuat,
-                    'status_dibuat' => $request->status_dibuat,
-                    'pembuku' => $request->pembuku,
-                    'status_dibuku' => $request->status_dibuku,
-                    'tgl_dibuat' => $request->tgl_dibuat,
-                    'tgl_dibukukan' => $request->tgl_dibukukan,
-                    'subtotal' => $request->sub_total,
-                    'ppn' => $request->persen_ppn === null ? 0 : ($request->persen_ppn / 100 * $request->sub_total),
-                    'total_tagihan' => $request->total_tagihan,
-                    'dp' => 0,
-                    'sisa' => $request->total_tagihan,
-                ];
+                
     
                 $check1 = Invoicepo::where('id', $datapo)->update($invData);
     
