@@ -81,8 +81,8 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control select2" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="TUNDA" {{ old('status') == 'TUNDA' || old('status') == '' ? 'selected' : '' }}>TUNDA</option>
-                                                <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                <option value="TUNDA" {{ old('status') == 'TUNDA'  ? 'selected' : '' }}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' || old('status') == '' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 {{-- <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                             </select>
                                                 {{-- <input type="text" class="form-control" id="status" name="status" value="Draft" readonly> --}}
