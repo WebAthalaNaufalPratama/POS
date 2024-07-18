@@ -97,4 +97,14 @@ class Penjualan extends Model
         return $this->hasMany(User::class, 'id', 'dibuat_id');
     }
 
+    public function diperiksa()
+    {
+        return $this->hasOne(User::class, 'id', 'dibukukan_id');
+    }
+
+    public function dibuku()
+    {
+        return $this->hasOne(User::class, 'id', 'auditor_id');
+    }
+
 }

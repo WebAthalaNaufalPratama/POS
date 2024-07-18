@@ -142,10 +142,19 @@
                         @if ($data->komplain == 'Refund')
                         <div class="row justify-content-around">
                             <div class="col-lg-8 col-md-8 col-sm-6 col-6 border rounded mt-3 pt-3">
-                                <div class="page-btn">
+                               
                                     <center><h5>Riwayat uang masuk (Refund) </h5></center><br>
-                                    <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
-                                </div>
+                                    @if(Auth::user()->hasRole('Finance') && $data->status_dibuat == "DIKONFIRMASI")
+                                    {{-- <button type="submit" class="btn btn-primary">Simpan</button> --}}
+                                    
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
+                                         Tambah Pembayaran
+                                    </button>
+                                    
+                                    @endif
+                                    
+                                    {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
+                               
                                 <div class="table-responsive">
                                     <table class="table datanew">
                                         <thead>
@@ -232,49 +241,47 @@
                         </div>
                         <div class="row justify-content-start">
                             <div class="col-md-6 border rounded pt-3 me-1 mt-2">
-                                <table class="table table-responsive border rounded">
-                                    <thead>
-                                        <tr>
-                                            <th>Dibuat</th>                                              
-                                            <th>Dibukukan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td id="pembuat">
-                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                            </td>
-                                            <td id="pembuku">
-                                                <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td id="status_dibuat">
-                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
-                                                    <option value="">Pilih Status</option>
-                                                    <option value="draft" {{$data->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                    <option value="publish" {{ ($data->status_dibuat == 'publish') || ($data->status_dibuat == null)  ? 'selected' : '' }}>Publish</option>
-                                                </select>
-                                            </td>
-                                            <td id="status_dibuku">
-                                                <select id="status_dibukukan" name="status_dibuku" class="form-control" disabled>
-                                                    <option value="">Pilih Status</option>
-                                                    <option value="pending" {{$data->status_dibukukan == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                    <option value="acc" {{ ($data->status_dibukukan == 'acc') || ($data->status_dibukukan == null) ? 'selected' : '' }}>Accept</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td id="tgl_dibuat">
-                                                <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{$data->tgl_dibuat }}" readonly>
-                                            </td>
-                                            <td id="tgl_dibuku">
-                                                <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku }}" readonly>
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                            
+                                    <table class="table table-responsive border rounded">
+                                        <thead>
+                                            <tr>
+                                                <th>Dibuat</th>                                              
+                                                <th>Dibukukan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td id="pembuat">
+                                                    <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
+                                                </td>
+    
+                                                <td id="pembuku">
+                                                    @if (!$pembuku )
+                                                    <input type="text" class="form-control" value="Nama (Finance)"  disabled>
+                                                    @else
+                                                    <input type="text" class="form-control" value="{{ $pembuku }} ({{ $pembukujbt }})"  disabled>
+                                                    @endif
+                                                </td>
+                                                
+                                            </tr>
+                                            <tr>
+                                                <td id="status_dibuat">
+                                                    <input type="text" class="form-control" id="status_buat" value="{{ $data->status_dibuat }}" readonly>
+                                                </td>
+                                                <td id="status_dibuku">
+                                                    <input type="text" class="form-control" id="status_dibuku" value="{{ $data->status_dibuku ?? '-' }}" readonly>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td id="tgl_dibuat">
+                                                    <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{tanggalindo($data->tgl_dibuat) }}" readonly>
+                                                </td>
+                                                <td id="tgl_dibuku">
+                                                    <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? '-'}}" readonly>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </table>  
                                 <br>                                 
                             </div>
@@ -292,28 +299,25 @@
                                     <tbody>
                                         <tr>
                                             <td id="pembuat">
-                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
+
                                             <td id="pembuku">
-                                                <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                @if (!$pembuku )
+                                                <input type="text" class="form-control" value="Nama (Finance)"  disabled>
+                                                @else
+                                                <input type="text" class="form-control" value="{{ $pembuku }} ({{ $pembukujbt }})"  disabled>
+                                                @endif
                                             </td>
+                                            
                                         </tr>
                                         <tr>
                                             <td id="status_dibuat">
-                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
-                                                    <option value="">Pilih Status</option>
-                                                    <option value="draft" {{$data->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                    <option value="publish" {{ ($data->status_dibuat == 'publish') || ($data->status_dibuat == null)  ? 'selected' : '' }}>Publish</option>
-                                                </select>
+                                                <input type="text" class="form-control" id="status_buat" value="{{ tanggalindo($data->status_dibuat) }}" readonly>
                                             </td>
                                             <td id="status_dibuku">
-                                                <select id="status_dibukukan" name="status_dibuku" class="form-control" disabled>
-                                                    <option value="">Pilih Status</option>
-                                                    <option value="pending" {{$data->status_dibukukan == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                    <option value="acc" {{ ($data->status_dibukukan == 'acc') || ($data->status_dibukukan == null) ? 'selected' : '' }}>Accept</option>
-                                                </select>
+                                                <input type="text" class="form-control" id="status_dibuku" value="{{ $data->status_dibuku ?? '-' }}" readonly>
+
                                             </td>
                                         </tr>
                                         <tr>
@@ -321,7 +325,7 @@
                                                 <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{$data->tgl_dibuat }}" readonly>
                                             </td>
                                             <td id="tgl_dibuku">
-                                                <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku }}" readonly>
+                                                <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? '-'}}" readonly>
                                             </td>
                                         </tr>
                                     </tbody>

@@ -70,14 +70,6 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="distribusi">Distribusi Produk</label>
-                                            <select id="distribusi" name="distribusi" class="form-control" required disabled>
-                                                <!-- <option value="">Pilih Distribusi Produk</option> -->
-                                                <option value="Dikirim" {{ $penjualans->distribusi == 'Dikirim' ? 'selected' : '' }}>Dikirim</option>
-                                                <option value="Diambil" {{ $penjualans->distribusi == 'Diambil' ? 'selected' : '' }}>Langsung Diambil</option>
-                                            </select>
-                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -90,21 +82,12 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="harga_jual">Input File</label>
-                                            <div class="input-group mt-3">
-                                                <!-- <input type="file" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" aria-describedby="inputGroupPrepend2" required disabled> -->
-                                                <div class="custom-file-container" data-upload-id="myFirstImage">
-                                                    <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                                    </label>
-                                                    <label class="custom-file-container__custom-file">
-                                                        <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required disabled>
-                                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                                    </label>
-                                                    <span class="text-danger">max 2mb</span>
-                                                    <img id="preview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" alt="your image" />
-                                                </div>
-                                            </div>
-
+                                            <label for="distribusi">Distribusi Produk</label>
+                                            <select id="distribusi" name="distribusi" class="form-control" required disabled>
+                                                <!-- <option value="">Pilih Distribusi Produk</option> -->
+                                                <option value="Dikirim" {{ $penjualans->distribusi == 'Dikirim' ? 'selected' : '' }}>Dikirim</option>
+                                                <option value="Diambil" {{ $penjualans->distribusi == 'Diambil' ? 'selected' : '' }}>Langsung Diambil</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -144,6 +127,14 @@
                                                 <!-- <option value="">Pilih Nama Sales</option> -->
                                                 @foreach ($karyawans as $karyawan)
                                                 <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lokasi_pengirim">Lokasi Pengiriman</label>
+                                            <select id="lokasi_pengirim" name="lokasi_pengirim" class="form-control" disabled>
+                                                @foreach ($lokasigalery as $galery)
+                                                <option value="{{ $galery->id }}">{{ $galery->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -264,7 +255,7 @@
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
                                     <!-- Payment and Shipping Section -->
-                                    <div class="col-lg-6 col-sm-12">
+                                    <div class="col-lg-8 col-sm-12 border rounded" >
                                         <div class="row mt-4">
                                             <!-- Payment Section -->
                                             <div class="col-lg-6">
@@ -334,7 +325,30 @@
                                                 </div>
                                             </div>
                                         </div>
-
+                                        </div>
+                                        <div class="col-lg-4 col-sm-12 border rounded">
+                                            <div class="row mt-4">
+                                                <div class="form-group">
+                                                    <div class="form-group">
+                                                        <!-- <input type="file" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" aria-describedby="inputGroupPrepend2" required disabled> -->
+                                                        <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                            <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                            </label>
+                                                            <label class="custom-file-container__custom-file">
+                                                                <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
+                                                                <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                            </label>
+                                                            <span class="text-danger">max 2mb</span>
+                                                            <div class="image-preview">
+                                                                <img id="imagePreview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" />
+                                                            </div>
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <div class="col-lg-8 col-sm-12 border rounded mt-2">
                                         <!-- Table Section -->
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
@@ -361,10 +375,54 @@
                                                 </table>
                                             </div>
                                         </div>
+                                        <div class="card mt-2">
+                                            <div class="card-header">
+                                                <h4 class="card-title">Riwayat</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                <table class="table datanew">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>Tanggal Perubahan</th>
+                                                        <th>Pengubah</th>
+                                                        <th>Log</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach ($riwayat as $item)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>{{ $item->created_at ?? '-' }}</td>
+                                                            <td>{{ $item->causer->name ?? '-' }}</td>
+                                                            <td>
+                                                                @php
+                                                                    $properties = json_decode($item->properties, true);
+                                                                    $changes = $item->changes();
+                                                                    
+                                                                    if (isset($changes['old'])) {
+                                                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                                                                        foreach ($diff as $key => $value) {
+                                                                            echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
+                                                                        }
+                                                                    } else {
+                                                                        echo 'Data Invoice Penjualan Terbuat';
+                                                                    }
+                                                                @endphp
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                                </div>
+                                            </div>
+                                        </div> 
+
                                     </div>
 
                                     <!-- Summary Section -->
-                                    <div class="col-lg-6 col-sm-12">
+                                    <div class="col-lg-4 col-sm-12">
                                         <div class="total-order mt-4">
                                             <ul>
                                                 <li>
@@ -416,67 +474,27 @@
                                             </ul>
                                         </div>
                                     </div>
-                                </div>  
-                                <div class="card mt-2">
-                                            <div class="card-header">
-                                                <h4 class="card-title">Riwayat</h4>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive">
-                                                <table class="table datanew">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>No</th>
-                                                        <th>Tanggal Perubahan</th>
-                                                        <th>Pengubah</th>
-                                                        <th>Log</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach ($riwayat as $item)
-                                                        <tr>
-                                                            <td>{{ $loop->iteration }}</td>
-                                                            <td>{{ $item->created_at ?? '-' }}</td>
-                                                            <td>{{ $item->causer->name ?? '-' }}</td>
-                                                            <td>
-                                                                @php
-                                                                    $properties = json_decode($item->properties, true);
-                                                                    $changes = $item->changes();
-                                                                    
-                                                                    if (isset($changes['old'])) {
-                                                                        $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
-                                                                        foreach ($diff as $key => $value) {
-                                                                            echo "$value: <span class='text-danger'>{$changes['old'][$value]}</span> => <span class='text-success'>{$changes['attributes'][$value]}</span><br>";
-                                                                        }
-                                                                    } else {
-                                                                        echo 'Data Invoice Penjualan Terbuat';
-                                                                    }
-                                                                @endphp
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                                </div>
-                                            </div>
-                                        </div>  
-                            </div>
-                        </div>
-
-                        <div class="row justify-content-between">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="add-icon text-end">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBayar">add +</button>
                                 </div>
+                                 
                             </div>
                         </div>
 
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-1">
                                 <div class="form-row row">
+                                    <div class="row">
+                                    <h5>Riwayat Pembayaran</h5>
+                                    </div>
+                                    <div class="row justify-content-between">
+                                        <div class="col-md-12">
+                                            <label for=""></label>
+                                            <div class="add-icon text-end">
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBayar">add +</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="mb-4">
-                                        <h5>Riwayat Pembayaran</h5>
+                                        
                                         <div class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table datanew">
@@ -582,7 +600,7 @@
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <!-- <button type="submit" class="btn btn-primary">Simpan</button> -->
             </div>
             </form>
         </div>

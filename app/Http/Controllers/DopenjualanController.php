@@ -112,25 +112,19 @@ class DopenjualanController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        // dd($data);
         if ($req->hasFile('file')) {
             $file = $req->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('bukti_do_penjualan', $fileName, 'public');
-            // dd($filePath);
             $data['file'] = $filePath;
         }
         $lokasipengirim = Penjualan::where('no_invoice', $req->no_referensi)->value('lokasi_pengirim');
         $data['lokasi_pengirim'] = $lokasipengirim;
-        // dd($data['nama_produk']);
         $data['jenis_do'] = 'PENJUALAN'; 
-        $data['tanggal_pembuat'] = now();
         $data['pembuat'] = Auth::user()->id;
         $invoice = Penjualan::where('no_invoice', $req->no_referensi)->first();
         $data['alasan_batal'] = $req->alasan;
-        // dd($invoice);
         $lokasi = Lokasi::where('id', $invoice->lokasi_id)->first();
-        // dd($lokasi);
 
         // cek produk inventory
         $allStockAvailable = true;
@@ -503,12 +497,12 @@ class DopenjualanController extends Controller
         $jabatanpegawai = $jabatan->jabatan;
         $dopenjualan = DeliveryOrder::where('id', $dopenjualanIds)->first();
 
-        if($dopenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
-            $data['auditor_id'] = Auth::user()->id;
-            $data['tanggal_audit'] = now();
-        }elseif($dopenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
-            $data['dibukukan_id'] = Auth::user()->id;
-            $data['tanggal_dibukukan'] = now();
+        if($dopenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
+            $data['pemeriksa'] = Auth::user()->id;
+        }elseif($dopenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
+            $data['penyetuju'] = Auth::user()->id;
+        }elseif($user->hasRole(['KasirAdmin', 'AdminGallery', 'KasirOutlet'])) {
+            $data['pembuat'] = Auth::user()->id;
         }
         $data['alasan_batal'] = $req->alasan;
 

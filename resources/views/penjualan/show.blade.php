@@ -70,14 +70,6 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="distribusi">Distribusi Produk</label>
-                                            <select id="distribusi" name="distribusi" class="form-control" required disabled>
-                                                <!-- <option value="">Pilih Distribusi Produk</option> -->
-                                                <option value="Dikirim" {{ $penjualans->distribusi == 'Dikirim' ? 'selected' : '' }}>Dikirim</option>
-                                                <option value="Diambil" {{ $penjualans->distribusi == 'Diambil' ? 'selected' : '' }}>Langsung Diambil</option>
-                                            </select>
-                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -90,21 +82,12 @@
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="harga_jual">Input File</label>
-                                            <div class="input-group mt-3">
-                                                <!-- <input type="file" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" aria-describedby="inputGroupPrepend2" required disabled> -->
-                                                <div class="custom-file-container" data-upload-id="myFirstImage">
-                                                    <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                                    </label>
-                                                    <label class="custom-file-container__custom-file">
-                                                        <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required disabled>
-                                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                                    </label>
-                                                    <span class="text-danger">max 2mb</span>
-                                                    <img id="preview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" alt="your image" />
-                                                </div>
-                                            </div>
-
+                                            <label for="distribusi">Distribusi Produk</label>
+                                            <select id="distribusi" name="distribusi" class="form-control" required disabled>
+                                                <!-- <option value="">Pilih Distribusi Produk</option> -->
+                                                <option value="Dikirim" {{ $penjualans->distribusi == 'Dikirim' ? 'selected' : '' }}>Dikirim</option>
+                                                <option value="Diambil" {{ $penjualans->distribusi == 'Diambil' ? 'selected' : '' }}>Langsung Diambil</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -276,7 +259,7 @@
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                             <div class="row">
                                     <!-- Payment and Shipping Section -->
-                                    <div class="col-lg-6 col-sm-12">
+                                    <div class="col-lg-8 col-sm-12 border rounded" >
                                         <div class="row mt-4">
                                             <!-- Payment Section -->
                                             <div class="col-lg-6">
@@ -342,7 +325,30 @@
                                                 </div>
                                             </div>
                                         </div>
-
+                                    </div>
+                                    <div class="col-lg-4 col-sm-12 border rounded">
+                                        <div class="row mt-4">
+                                            <div class="form-group">
+                                                <div class="form-group">
+                                                    <!-- <input type="file" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" aria-describedby="inputGroupPrepend2" required disabled> -->
+                                                    <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                        <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                        </label>
+                                                        <label class="custom-file-container__custom-file">
+                                                            <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
+                                                            <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                        </label>
+                                                        <span class="text-danger">max 2mb</span>
+                                                        <div class="image-preview">
+                                                            <img id="imagePreview" src="{{ $penjualans->bukti_file ? '/storage/' . $penjualans->bukti_file : '' }}" />
+                                                        </div>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 col-sm-12 border rounded mt-2">
                                         <!-- Table Section -->
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
@@ -357,83 +363,19 @@
                                                     <tbody>
                                                         <tr>
                                                             <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
-                                                            <td id="penyetuju">-</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            <td id="penyetuju">{{ $penjualans->diperiksa->name ?? '-' }}</td>
+                                                            <td id="pemeriksa">{{ $penjualans->dibuku->name ?? '-'}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td id="tgl_pembuat" style="width: 25%;">{{ $penjualans->tanggal_dibuat }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            <td id="tgl_penyetuju" style="width: 25%;">{{ $penjualans->tanggal_dibukukan ?? '-' }}</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ $penjualans->tanggal_audit ?? '-' }}</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <!-- Summary Section -->
-                                    <div class="col-lg-6 col-sm-12">
-                                        <div class="total-order mt-4">
-                                            <ul>
-                                                <li>
-                                                    <h4>Sub Total</h4>
-                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.')}}" readonly required></h5>
-                                                </li>
-                                                <li>
-                                                    <h4>Promo</h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="row align-items-center">
-                                                            <div class="col-9 pe-0">
-                                                                <select id="promo_id" name="promo_id" class="form-control" value="{{ $penjualans->promo_id}}" required disabled>
-                                                                    @foreach ($promos as $promo)
-                                                                    <option value="{{ $promo->id }}">{{ $promo->nama }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-3 ps-0 mb-0">
-                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
-                                                            </div>
-                                                        </div>
-                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{'Rp '. number_format($penjualans->total_promo, 0, ',', '.')}}" readonly>
-                                                    </h5>
-                                                </li>
-                                                <li>
-                                                    <h4>PPN
-                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required readonly>
-                                                            <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude" {{ $penjualans->jenis_ppn == 'exclude' ? 'selected' : ''}}>EXCLUDE</option>
-                                                            <option value="include" {{ $penjualans->jenis_ppn == 'include' ? 'selected' : ''}}>INCLUDE</option>
-                                                        </select>
-                                                    </h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{$penjualans->persen_ppn}}" readonly required>
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.')}}"readonly required>
-                                                    </h5>
-                                                </li>
-                                                <li>
-                                                    <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.')}}" readonly required></h5>
-                                                </li>
-                                                <li>
-                                                    <h4>DP</h4>
-                                                    <h5><input type="text" id="dp" name="dp" class="form-control" value="{{ 'Rp '. number_format($penjualans->dp, 0, ',', '.')}}" required readonly></h5>
-                                                </li>
-                                                <li class="total">
-                                                    <h4>Total Tagihan</h4>
-                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.')}}" readonly required></h5>
-                                                </li>
-                                                <li>
-                                                    <h4>Sisa Bayar</h4>
-                                                    <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{'Rp '. number_format($penjualans->sisa_bayar, 0, ',', '.')}}" readonly required></h5>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
+                                        <div class="card">
                                             <div class="card-header">
                                                 <h4 class="card-title">Riwayat</h4>
                                             </div>
@@ -535,14 +477,75 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <!-- Summary Section -->
+                                    <div class="col-lg-4 col-sm-12">
+                                        <div class="total-order mt-4">
+                                            <ul>
+                                                <li>
+                                                    <h4>Sub Total</h4>
+                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.')}}" readonly required></h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Promo</h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-9 pe-0">
+                                                                <select id="promo_id" name="promo_id" class="form-control" value="{{ $penjualans->promo_id}}" required disabled>
+                                                                    @foreach ($promos as $promo)
+                                                                    <option value="{{ $promo->id }}">{{ $promo->nama }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-3 ps-0 mb-0">
+                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{'Rp '. number_format($penjualans->total_promo, 0, ',', '.')}}" readonly>
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>PPN
+                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required readonly>
+                                                            <option value=""> Pilih Jenis PPN</option>
+                                                            <option value="exclude" {{ $penjualans->jenis_ppn == 'exclude' ? 'selected' : ''}}>EXCLUDE</option>
+                                                            <option value="include" {{ $penjualans->jenis_ppn == 'include' ? 'selected' : ''}}>INCLUDE</option>
+                                                        </select>
+                                                    </h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{$penjualans->persen_ppn}}" readonly required>
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.')}}"readonly required>
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Biaya Ongkir</h4>
+                                                    <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.')}}" readonly required></h5>
+                                                </li>
+                                                <li>
+                                                    <h4>DP</h4>
+                                                    <h5><input type="text" id="dp" name="dp" class="form-control" value="{{ 'Rp '. number_format($penjualans->dp, 0, ',', '.')}}" required readonly></h5>
+                                                </li>
+                                                <li class="total">
+                                                    <h4>Total Tagihan</h4>
+                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.')}}" readonly required></h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Sisa Bayar</h4>
+                                                    <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{'Rp '. number_format($penjualans->sisa_bayar, 0, ',', '.')}}" readonly required></h5>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                
                             </div>
-                        </div>
-
-                        <div class="text-end mt-3">
-                            <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
-                            <a href="{{ route('penjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
-                        </div>
             <!-- </form> -->
+        </div>
+        <div class="text-end mt-3">
+            <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
+            <a href="{{ route('penjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
         </div>
 
     </div>

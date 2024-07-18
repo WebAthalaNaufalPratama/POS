@@ -121,9 +121,9 @@
                                         <label for="komplain">Komplain</label>
                                             <select id="komplain" name="komplain" class="form-control">
                                                 <option value=""> Pilih Komplain </option>
-                                                @if($statusbayar->status_bayar == 'LUNAS')
+                                                @if(!empty($statusbayar) && $statusbayar->status_bayar == 'LUNAS')
                                                     <option value="refund">Refund</option>
-                                                @elseif($statusbayar->status_bayar == 'BELUM LUNAS')
+                                                @else
                                                     <option value="diskon">Diskon</option>
                                                     <option value="retur">Retur</option>
                                                 @endif
@@ -213,7 +213,7 @@
                                                 @endphp
                                                 @foreach ($penjualans->deliveryorder as $deliveryOrder)
                                                 @foreach ($deliveryOrder->produk as $produk)
-                                                @if ($produk->jenis != 'TAMBAHAN')
+                                                @if ($produk->jenis != 'TAMBAHAN' && $deliveryOrder->pembuat != null && $deliveryOrder->penyetuju != null && $deliveryOrder->pemeriksa != null)
                                                 <tr id="row{{ $i }}">
                                                     <td><input type="text" name="no_do1[]" id="no_do_{{ $i }}" class="form-control" value="{{ $deliveryOrder->no_do }}" required></td>
                                                     <td>

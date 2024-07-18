@@ -261,9 +261,9 @@
                                                             <td id="pemeriksa">-</td>
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            <td>-</td>
+                                                            <td>-</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -497,7 +497,7 @@
         });
 
         $('#addtambah').click(function() {
-            var newrowtambah = '<tr class="tr_clone" id="row' + i + '">' +
+            var newrowtambah = '<tr class="tr_clone" id="row_tambah' + i + '">' +
                 '<td>' +
                 '<select id="nama_produk2_' + i + '" name="nama_produk2[]" class="form-control select2">' +
                 '<option value="">Pilih Produk</option>' +
@@ -519,13 +519,57 @@
             i++;
         })
 
-        $(document).on('click', '.btn_remove', function() {
-            var button_id = $(this).attr("id");
-            $('#row' + button_id + '').remove();
-            calculateTotal(0);
+        function updateIndicesProduk() {
+            $('#dynamic_field tr').each(function(index) {
+                var newId = 'row' + index;
+                $(this).attr('id', newId);
+                $(this).find('[id^="nama_produk_"]').attr('id', 'nama_produk_' + index).attr('name', 'nama_produk[]').attr('data-index', index);
+                $(this).find('[id^="jumlah_"]').attr('id', 'jumlah_' + index).attr('name', 'jumlah[]').attr('data-index', index);
+                $(this).find('[id^="satuan_"]').attr('id', 'satuan_' + index).attr('name', 'satuan[]').attr('data-index', index);
+                $(this).find('[id^="keterangan_"]').attr('id', 'keterangan_' + index).attr('name', 'keterangan[]').attr('data-index', index);
+                $(this).find('.btn_remove').attr('id', index);
+            });
+        }
+
+        function updateIndicesProdukTambahan() {
+            var i = 1;
+
+            $('#dynamic_field_tambah tr.tr_clone').each(function() {
+                $(this).attr('id', 'row_tambah' + i);
+                $(this).find('[id^="nama_produk2_"]').attr('id', 'nama_produk2_' + i).attr('name', 'nama_produk2[]').attr('data-index', i);
+                $(this).find('[id^="jumlah2_"]').attr('id', 'jumlah2_' + i).attr('name', 'jumlah2[]').attr('data-index', i);
+                $(this).find('[id^="satuan2_"]').attr('id', 'satuan2_' + i).attr('name', 'satuan2[]').attr('data-index', i);
+                $(this).find('[id^="keterangan2_"]').attr('id', 'keterangan2_' + i).attr('name', 'keterangan2[]').attr('data-index', i);
+                $(this).find('.btn_remove_tambah').attr('id', 'remove_tambah_' + i); // Pastikan ID tombol penghapusan diupdate dengan benar
+                i++;
+            });
+        }
+
+        $(document).on('click', '#dynamic_field .btn_remove', function() {
+            var button_id = $(this).attr('id');
+            $('#row' + button_id).remove();
+            console.log('coba');
+            updateIndicesProduk(); 
         });
+
+        $(document).on('click', '.btn_remove', function() {
+            var button_id = $(this).attr('id');
+            $('#row_tambah' + button_id).remove();
+            updateIndicesProdukTambahan(); 
+            i = 0;
+            $('#dynamic_field_tambah tr').each(function() {
+                $(this).attr('id', 'row_tambah' + i);
+                $(this).find('[id^="nama_produk2_"]').attr('id', 'nama_produk2_' + i).attr('name', 'nama_produk2[]').attr('data-index', i);
+                $(this).find('[id^="jumlah2_"]').attr('id', 'jumlah2_' + i).attr('name', 'jumlah2[]').attr('data-index', i);
+                $(this).find('[id^="satuan2_"]').attr('id', 'satuan2_' + i).attr('name', 'satuan2[]').attr('data-index', i);
+                $(this).find('[id^="keterangan2_"]').attr('id', 'keterangan2_' + i).attr('name', 'keterangan2[]').attr('data-index', i);
+                $(this).find('.btn_remove').attr('id', i);
+                i++;
+            });
+        });
+
         $(document).on('change', '[id^=nama_produk]', function() {
-            var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
+            var id = $(this).attr('id').split('_')[2]; 
             var selectedOption = $(this).find(':selected');
             $('#kode_produk_' + id).val(selectedOption.data('kode'));
             $('#tipe_produk_' + id).val(selectedOption.data('tipe'));

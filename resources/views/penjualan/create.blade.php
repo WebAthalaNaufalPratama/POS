@@ -76,7 +76,7 @@
                                             <label for="point">Jumlah Point</label>
                                             <div class="input-group">
                                                 <span class="input-group-text" id="inputGroupPrepend2">
-                                                    <input type="checkbox" id="cek_point" name="cek_point">
+                                                    <input type="checkbox" id="cek_point" name="btndipakai">
                                                 </span>
                                                 <input type="number" class="form-control" id="point_dipakai" name="point_dipakai" placeholder="0" value="" aria-describedby="inputGroupPrepend2" readonly required>
                                             </div>
@@ -318,24 +318,24 @@
                                         <!-- Table Section -->
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
-                                                <table class="table table-responsive border rounded text-center">
+                                                <table class="table table-responsive border rounded">
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
-                                                            <th>Penyetuju</th>
-                                                            <th>Pemeriksa</th>
+                                                            <!-- <th>Pemeriksa</th>
+                                                            <th>Pembuku</th> -->
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
                                                             <td id="pembuat">{{ Auth::user()->name }}</td>
-                                                            <td id="penyetuju">-</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            <!-- <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td> -->
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            <td><input type="date" class="form-control" name="tanggal_dibuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            <!-- <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td> -->
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -360,7 +360,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-3 ps-0 mb-0">
-                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
+                                                                <button id="btnCheckPromo" name="btndipakai" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                                             </div>
                                                         </div>
                                                         <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
