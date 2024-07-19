@@ -24,7 +24,7 @@ class DeliveryOrderController extends Controller
     public function index_sewa(Request $req)
     {
         $query = DeliveryOrder::where('jenis_do', 'SEWA');
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        if(Auth::user()->karyawans){
             $query->whereHas('kontrak', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -41,11 +41,14 @@ class DeliveryOrderController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
         }
+        if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
+            $query->where('status', 'DIKONFIRMASI');
+        }
         $data = $query->orderByDesc('id')->get();
         $customer = DeliveryOrder::select('customer_id')
         ->distinct()
         ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -53,7 +56,7 @@ class DeliveryOrderController extends Controller
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -343,6 +346,14 @@ class DeliveryOrderController extends Controller
                 $msg = 'Dibatalkan';
             } else {
                 return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');
+            }
+            if(Auth::user()->hasRole('Auditor')){
+                $do_sewa->penyetuju = Auth::user()->id;
+                $do_sewa->tanggal_penyetuju = $req->tanggal_penyetuju;
+            }
+            if(Auth::user()->hasRole('Finance')){
+                $do_sewa->pemeriksa = Auth::user()->id;
+                $do_sewa->tanggal_pemeriksa = $req->tanggal_pemeriksa;
             }
             $check = $do_sewa->update();
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');
