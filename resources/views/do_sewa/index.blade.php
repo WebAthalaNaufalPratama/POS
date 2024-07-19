@@ -88,7 +88,7 @@
                                         </li>
                                         @endif
                                     @endif
-                                    @if( ($item->status == 'DIKONFIRMASI' && Auth::user()->hasRole('Auditor')) && in_array('do_sewa.show', $thisUserPermissions) || ($item->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery') && in_array('do_sewa.edit', $thisUserPermissions)) )
+                                    @if( ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Auditor') || Auth::user()->hasRole('Finance'))) && in_array('do_sewa.show', $thisUserPermissions) || ($item->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery') && in_array('do_sewa.edit', $thisUserPermissions)) )
                                         @if(!$item->hasKembali)
                                             <li>
                                                 <a href="{{ route('do_sewa.edit', ['do_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>

@@ -122,7 +122,7 @@
                                             </li>
                                         @endif
                                     @endif
-                                    @if( ($kontrak->status == 'DIKONFIRMASI' && Auth::user()->hasRole('Auditor')) && in_array('kontrak.show', $thisUserPermissions) || ($kontrak->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery') && in_array('kontrak.edit', $thisUserPermissions)) )
+                                    @if( ($kontrak->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Auditor') || Auth::user()->hasRole('Finance'))) && in_array('kontrak.show', $thisUserPermissions) || ($kontrak->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery') && in_array('kontrak.edit', $thisUserPermissions)) )
                                         @if(!$kontrak->hasKembali)
                                             <li>
                                                 <a href="{{ route('kontrak.edit', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
