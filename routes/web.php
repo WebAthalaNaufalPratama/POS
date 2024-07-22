@@ -316,6 +316,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/retur', 'PembelianController@index_retur')->name('returbeli.index');
             Route::get('/retur/create', 'PembelianController@create_retur')->name('returbeli.create');
             Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
+            Route::put('/retur/{idretur}/update', 'PembelianController@update_retur_finance')->name('returfinance.update');
             Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
             Route::post('/refund/store', 'PembayaranController@bayar_refund')->name('bayarrefund.store');

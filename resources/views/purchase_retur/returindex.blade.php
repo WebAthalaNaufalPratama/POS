@@ -120,16 +120,25 @@
                                         
                                         @if(Auth::user()->hasRole('Finance'))
                                         <li>
-                                            <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> @if($data->komplain == "Refund") @endif Input Refund</a>
+                                            <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">
+                                                @if($data->komplain == "Refund" && ($data->status_dibuku == "TUNDA" || is_null($data->status_dibuku)))
+                                                    Input Refund
+                                                @else
+                                                    Detail Retur
+                                                @endif
+                                            </a>
                                         </li>
                                         @endif
                                         @if(Auth::user()->hasRole('Purchasing'))
                                         <li>
                                             <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur</a>
                                         </li>
+                                        @if($data->status_dibuat == "TUNDA")
                                         <li>
                                             <a href="{{ route('returbeli.edit', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur</a>
                                         </li>
+                                        @endif
                                         @endif
                                         <li>
                                             <a href="{{ route('invoice.show', ['datapo' => $data->invoice->pembelian_id, 'type'=>"pembelian", 'id' => $data->invoice->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>

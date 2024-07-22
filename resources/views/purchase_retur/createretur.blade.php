@@ -273,9 +273,11 @@
                                                         <select id="status" name="status_dibuat" class="form-control select2" required>
                                                             <option value="">Pilih Status</option>
                                                             <option value="TUNDA" {{ old('status') == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' || old('status') == ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="DIKONFIRMASI" {{ (old('status') ?? 'DIKONFIRMASI') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
+                                                    
+                                                    
                                                     {{-- <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibuku" class="form-control">
                                                             <option value="">Pilih Status</option>
