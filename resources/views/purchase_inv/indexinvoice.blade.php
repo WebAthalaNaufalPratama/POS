@@ -63,8 +63,8 @@ $user = Auth::user();
                                 <th>No PO</th>
                                 <th>Supplier</th>
                                 <th>lokasi</th>
-                                <th>Nominal</th>
                                 <th>Status</th>
+                                <th>Nominal</th>
                                 <th>Sisa Tagihan</th>
                                 <th>Status Purchase</th>
                                 <th>Status Finance</th>
@@ -81,7 +81,6 @@ $user = Auth::user();
                                 <td>{{ $inv->pembelian->no_po }}</td>
                                 <td>{{ $inv->pembelian->supplier->nama }}</td>
                                 <td>{{ $inv->pembelian->lokasi->nama}}</td>
-                                <td>{{ formatRupiah($inv->total_tagihan) }}</td>
                                 <td>
                                     @if ($inv->sisa == 0)
                                         <span class="badge bg-success">Lunas</span>
@@ -89,6 +88,7 @@ $user = Auth::user();
                                         <span class="badge bg-danger">Belum Lunas</span>
                                     @endif
                                 </td>
+                                <td>{{ formatRupiah($inv->total_tagihan) }}</td>
                                 
                                 <td>
                                 {{ formatRupiah($inv->sisa) }}
@@ -135,8 +135,8 @@ $user = Auth::user();
                                              @endphp
                                         
                                        
-                                        @if($invoiceRetur && $invoiceRetur->status_dibuat == "DIKONFIRMASI")
-                                        <li>
+                                        @if($invoiceRetur && $invoiceRetur->status_dibuat == "DIKONFIRMASI" && $inv->sisa !== 0 )
+                                        {{-- <li>
                                             <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                             </a>
@@ -145,15 +145,16 @@ $user = Auth::user();
                                             <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item">
                                                 <img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar
                                             </a>
-                                        </li>
+                                        </li> --}}
                                  
-                                        @elseif(($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan) && !$invoiceRetur)
+                                        @elseif(($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan) && !$invoiceRetur && ($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null) && $inv->status_dibuat == "DIKONFIRMASI")
                                             @if(Auth::user()->hasRole('Purchasing'))
                                                 <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain
                                                 </a>
                                             @endif
                                          @endif
+                                         
                                         </li>
                                         @if(Auth::user()->hasRole('Purchasing'))
                                             @if ($inv->status_dibuat == "TUNDA")
@@ -164,20 +165,19 @@ $user = Auth::user();
                                                 </li>
                                             @endif
                                         @endif
-                                        @if(Auth::user()->hasRole('Finance'))
+                                    @if(Auth::user()->hasRole('Finance'))
 
                                         @if($inv->sisa == 0)
-                                        @if($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null)
-                                        <li>
-                                            <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
-                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
-                                            </a>
-                                        </li>
-                                        @endif
-
+                                            @if($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null)
+                                            <li>
+                                                <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
+                                                </a>
+                                            </li>
+                                            @endif
                                         @else
-
-                                        @if(!$invoiceRetur)
+                                        
+                                        @if(!$invoiceRetur || ($invoiceRetur && $invoiceRetur->status_dibuku =="DIKONFIRMASI"))
                                             <li>
                                                 <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
@@ -191,7 +191,7 @@ $user = Auth::user();
                                         @endif
 
                                         @endif
-                                        @endif                                 
+                                    @endif                                 
                                        
                                         
                                         <li>

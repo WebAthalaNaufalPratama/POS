@@ -68,7 +68,7 @@
                             <td class="text-center">
                                 @if ($item->status_bayar == 'LUNAS')
                                     <span class="badge bg-success">{{ $item->status_bayar }}</span>
-                                @elseif ($item->status_bayar == 'BELUM LUNAS')
+                                @else
                                     <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
                                 @endif
                             </td>
@@ -150,7 +150,7 @@
                             <td class="text-center">
                                 @if ($item->status_bayar == 'LUNAS')
                                     <span class="badge bg-success">{{ $item->status_bayar }}</span>
-                                @elseif ($item->status_bayar == 'BELUM LUNAS')
+                                @else
                                     <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
                                 @endif
                             </td>

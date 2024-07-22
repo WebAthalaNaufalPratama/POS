@@ -76,6 +76,48 @@
         object-fit: contain; /* Ensures the image is contained within the box and maintains aspect ratio */
     }
 
+    .calculation-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .calculation-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .calculation-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .calculation-list li::before {
+            content: '✔'; /* You can replace this with any icon or emoji */
+            color: #4CAF50;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .calculation-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
   </style>
   
   @yield('css')

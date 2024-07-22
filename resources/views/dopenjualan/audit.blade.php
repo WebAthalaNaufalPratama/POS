@@ -99,7 +99,12 @@
                                                     <option value="">Pilih Status</option>
                                                     <option value="TUNDA" {{ $dopenjualan->status == 'TUNDA' ? 'selected': ''}}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $dopenjualan->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
-                                                    <option value="DIBATALKAN" {{ $dopenjualan->status == 'DIBATALKAN' ? 'selected': ''}}>DIBATALKAN</option>
+                                                    @php
+                                                        $user = Auth::user();
+                                                    @endphp
+                                                    @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $dopenjualan->status != 'DIKONFIRMASI')
+                                                        <option value="DIBATALKAN" {{ $dopenjualan->status == 'DIBATALKAN' ? 'selected': ''}}>DIBATALKAN</option>
+                                                    @endif
                                                 @else
                                                     <option value="DIKONFIRMASI" {{ $dopenjualan->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
                                                 @endif
@@ -178,7 +183,43 @@
                                                             <select id="nama_produk_0" name="nama_produk[]" class="form-control" >
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $produk)
-                                                                <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                                <option value="{{ $produk->kode }}">
+                                                                    @if (substr($produk->produk->kode, 0, 3) === 'TRD')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            @if ($found) @break @endif
+                                                                        @endforeach
+                                                                        - {{$komponen->jumlah}}
+                                                                    @elseif (substr($produk->produk->kode, 0, 3) === 'GFT')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            - ( {{$komponen->nama_produk}}
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            - {{$komponen->jumlah}} )
+                                                                        @endforeach
+                                                                    @endif
+                                                                </option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
@@ -197,7 +238,43 @@
                                                                 <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
                                                                     <option value="">Pilih Produk</option>
                                                                     @foreach ($produkjuals as $pj)
-                                                                    <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                    <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>
+                                                                        @if (substr($produk->produk->kode, 0, 3) === 'TRD')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            @if ($found) @break @endif
+                                                                        @endforeach
+                                                                        - {{$komponen->jumlah}}
+                                                                    @elseif (substr($produk->produk->kode, 0, 3) === 'GFT')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            - ( {{$komponen->nama_produk}}
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            - {{$komponen->jumlah}} )
+                                                                        @endforeach
+                                                                    @endif
+                                                                </option>
                                                                     @endforeach
                                                                 </select>
                                                             </td>
@@ -312,7 +389,7 @@
                                                         <td id="pemeriksa">{{ $dopenjualan->dibuku->name ?? '-' }}</td>
                                                     @elseif($user->hasRole(['Auditor']))
                                                         <td id="pembuat">{{ $dopenjualan->dibuat[0]->name }}</td>
-                                                        <td id="penyetuju">{{ $dopenjualan->diperiksa->name }}</td>
+                                                        <td id="penyetuju">{{ $dopenjualan->diperiksa->name ?? '-' }}</td>
                                                         <td id="pemeriksa">{{ Auth::user()->name }}</td>
                                                     @endif
                                                 </tr>

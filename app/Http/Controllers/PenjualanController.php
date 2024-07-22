@@ -26,6 +26,7 @@ use App\Models\InventoryOutlet;
 use App\Models\Pembayaran;
 use App\Models\User;
 use Carbon\Carbon;
+use App\Models\ReturPenjualan;
 use Illuminate\Support\Facades\Storage;
 use App\Models\FormPerangkai;
 use GrahamCampbell\ResultType\Success;
@@ -89,8 +90,6 @@ class PenjualanController extends Controller
             $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
         }
         $penjualans = $query->orderByDesc('id')->get();
-
-        // dd($latestPayments);
 
         return view('penjualan.index', compact('customers','sales','penjualans', 'latestPayments'));
     }
@@ -208,6 +207,7 @@ class PenjualanController extends Controller
 
         $penjualan = Penjualan::create($data);
         $updatecust = Customer::where('id', $data['id_customer'])->update([
+            'status_piutang' => 'BELUM LUNAS',
             'status_buka' => 'TUTUP',
         ]);
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
@@ -544,12 +544,16 @@ class PenjualanController extends Controller
         }
 
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
+     
+        $exsist = Komponen_Produk_Terjual::where('produk_terjual_id', $req->prdTerjual_id)->get();
+        if($exsist)
+        {
+            $exsist->each->forceDelete();
+        }
+        // dd($req->prdTerjual_id);
+        $jumlahItem = count($req->komponen_id);
         if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI')
         {
-            $exsist = Komponen_Produk_Terjual::where('produk_terjual_id', $req->prdTerjual_id)->get();
-            // dd($req->prdTerjual_id);
-            $jumlahItem = count($req->komponen_id);
-
             if ($exsist) {
                 foreach ($exsist as $komponen ) {
                     $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
@@ -560,32 +564,33 @@ class PenjualanController extends Controller
                     $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($req->jml_produk));
                     $stok->update();
                 }
-                $exsist->each->forceDelete();
             }
-            $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
-            // dd($updateProdukTerjual);
-            $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
-            // dd($lokasi);
-            
-            // Create new komponen produk terjual and decrement stock
-            for ($i = 0; $i < $jumlahItem; $i++) {
-                $data['produk_terjual_id'] = $req->prdTerjual_id;
-                $data['kondisi'] = $req->kondisi_id[$i];
-                $data['jumlah'] = $req->jumlahproduk[$i];
+        }
+        $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
+        // dd($updateProdukTerjual);
+        $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+        // dd($lokasi);
+        
+        // Create new komponen produk terjual and decrement stock
+        for ($i = 0; $i < $jumlahItem; $i++) {
+            $data['produk_terjual_id'] = $req->prdTerjual_id;
+            $data['kondisi'] = $req->kondisi_id[$i];
+            $data['jumlah'] = $req->jumlahproduk[$i];
 
-                $produk = Produk::findOrFail($req->komponen_id[$i]);
+            $produk = Produk::findOrFail($req->komponen_id[$i]);
 
-                $data['kode_produk'] = $produk->kode;
-                $data['nama_produk'] = $produk->nama;
-                $data['tipe_produk'] = $produk->tipe_produk;
-                $data['deskripsi'] = $produk->deskripsi;
-                $data['harga_satuan'] = 0;
-                $data['harga_total'] = 0;
+            $data['kode_produk'] = $produk->kode;
+            $data['nama_produk'] = $produk->nama;
+            $data['tipe_produk'] = $produk->tipe_produk;
+            $data['deskripsi'] = $produk->deskripsi;
+            $data['harga_satuan'] = 0;
+            $data['harga_total'] = 0;
 
-                $check = Komponen_Produk_Terjual::create($data);
-
+            $check = Komponen_Produk_Terjual::create($data);
+            if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI')
+            {
                 $allStockAvailable = true;
-
+            
                 $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
                                             ->where('kode_produk', $data['kode_produk'])
                                             ->where('kondisi_id', $data['kondisi'])
@@ -597,12 +602,13 @@ class PenjualanController extends Controller
 
                 $stok->jumlah = intval($stok->jumlah) - (intval($data['jumlah']) * intval($req->jml_produk));
                 $stok->update();
-
-                if (!$check) {
-                    return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                }
             }
 
+            if (!$check) {
+                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+        }
+        if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI'){
             if (!$allStockAvailable) {
                 return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
             }
@@ -893,7 +899,7 @@ class PenjualanController extends Controller
         $user = Auth::user()->value('id');
         $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
         // dd($lokasi);
-        $customers = Customer::where('lokasi_id', $lokasi)->get();
+        $customers = Customer::where('lokasi_id', $lokasi)->where('id', $penjualans->id_customer)->get();
         // dd($customers);
         $lokasis = Lokasi::where('id', $lokasi)->get();
         $rekenings = Rekening::get();
@@ -952,7 +958,7 @@ class PenjualanController extends Controller
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
-        $data = $req->except(['_token', '_method', 'bukti', 'status_bayar', 'nominal', 'no_invoice_bayar', 'harga_total', 'diskon','jenis_diskon',  'jumlah', 'harga_satuan', 'nama_produk', 'DataTables_Table_0_length', 'DataTables_Table_1_length' , 'penjualan', 'file' ]);
+        $data = $req->except(['_token', '_method', 'bukti', 'status_bayar', 'nominal', 'no_invoice_bayar', 'harga_total', 'diskon','jenis_diskon',  'jumlah', 'harga_satuan', 'nama_produk', 'DataTables_Table_0_length', 'DataTables_Table_1_length' , 'penjualan', 'file', 'ubahapa' ]);
 
         $penjualan = Penjualan::where('id', $penjualanId)->first();
         //update poin
@@ -988,12 +994,15 @@ class PenjualanController extends Controller
         }elseif($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
             $data['dibukukan_id'] = Auth::user()->id;
         }
-
-        $deletepj = Produk_Terjual::where('no_invoice', $penjualan->no_invoice)->get();
-        if ($deletepj->isNotEmpty()) {
-            $array = $deletepj->pluck('id')->toArray();
-            Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
-            Produk_Terjual::whereIn('id', $array)->forceDelete();
+        if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
+            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua') ||
+            (!$user->hasRole(['Auditor', 'Finance']))) {
+            $deletepj = Produk_Terjual::where('no_invoice', $penjualan->no_invoice)->get();
+            if ($deletepj->isNotEmpty()) {
+                $array = $deletepj->pluck('id')->toArray();
+                Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
+                Produk_Terjual::whereIn('id', $array)->forceDelete();
+            }
         }
 
         if ($penjualan) {
@@ -1011,60 +1020,64 @@ class PenjualanController extends Controller
 
         $update = Penjualan::where('id', $penjualanId)->update($data);
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
-        for ($i = 0; $i < count($nama_produk); $i++) {
-            $getProdukJual = Produk_Jual::with('komponen')->where('kode', $nama_produk[$i])->first();
-            // dd($getProdukJual);
-            if($diskon[$i] == 'NaN'){
-                $diskon[$i] = 0;
-            }
-            // dd($data);
-            $produkTerjualData = [
-                'produk_jual_id' => $getProdukJual->id,
-                'no_invoice' => $req->no_invoice,
-                'harga' => $harga[$i],
-                'jumlah' => $req->jumlah[$i],
-                'jenis_diskon' => $req->jenis_diskon[$i],
-                'diskon' => $req->diskon[$i],
-                'harga_jual' => $req->harga_total[$i]
-            ];
-            
-            if ($req->distribusi == 'Dikirim') {
-                $produkTerjualData['jumlah_dikirim'] = $req->jumlah[$i];
-            }
-
-            $produk_terjual = Produk_Terjual::create($produkTerjualData);
-            // dd($getProdukJual);
-            if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            foreach ($getProdukJual->komponen as $komponen) {
-                $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                    'produk_terjual_id' => $produk_terjual->id,
-                    'kode_produk' => $komponen->kode_produk,
-                    'nama_produk' => $komponen->nama_produk,
-                    'tipe_produk' => $komponen->tipe_produk,
-                    'kondisi' => $komponen->kondisi,
-                    'deskripsi' => $komponen->deskripsi,
-                    'jumlah' => $komponen->jumlah,
-                    'harga_satuan' => $komponen->harga_satuan,
-                    'harga_total' => $komponen->harga_total
-                ]);
-                if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');           
-            }  
-
-            //pengurangan jika lokasinya outlet
-
-            if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 2){
-                $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
-                            ->where('kode_produk', $produk_terjual->produk->kode)
-                            ->first();
-                // dd($stok);
-            
-                if (!$stok) {
-                    return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+        if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
+            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua') ||
+            (!$user->hasRole(['Auditor', 'Finance']))) {
+            for ($i = 0; $i < count($nama_produk); $i++) {
+                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $nama_produk[$i])->first();
+                // dd($getProdukJual);
+                if($diskon[$i] == 'NaN'){
+                    $diskon[$i] = 0;
+                }
+                // dd($data);
+                $produkTerjualData = [
+                    'produk_jual_id' => $getProdukJual->id,
+                    'no_invoice' => $req->no_invoice,
+                    'harga' => $harga[$i],
+                    'jumlah' => $req->jumlah[$i],
+                    'jenis_diskon' => $req->jenis_diskon[$i],
+                    'diskon' => $req->diskon[$i],
+                    'harga_jual' => $req->harga_total[$i]
+                ];
+                
+                if ($req->distribusi == 'Dikirim') {
+                    $produkTerjualData['jumlah_dikirim'] = $req->jumlah[$i];
                 }
 
-                $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
-                $stok->save();
+                $produk_terjual = Produk_Terjual::create($produkTerjualData);
+                // dd($getProdukJual);
+                if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                foreach ($getProdukJual->komponen as $komponen) {
+                    $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                        'produk_terjual_id' => $produk_terjual->id,
+                        'kode_produk' => $komponen->kode_produk,
+                        'nama_produk' => $komponen->nama_produk,
+                        'tipe_produk' => $komponen->tipe_produk,
+                        'kondisi' => $komponen->kondisi,
+                        'deskripsi' => $komponen->deskripsi,
+                        'jumlah' => $komponen->jumlah,
+                        'harga_satuan' => $komponen->harga_satuan,
+                        'harga_total' => $komponen->harga_total
+                    ]);
+                    if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');           
+                }  
 
+                //pengurangan jika lokasinya outlet
+
+                if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 2){
+                    $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
+                                ->where('kode_produk', $produk_terjual->produk->kode)
+                                ->first();
+                    // dd($stok);
+                
+                    if (!$stok) {
+                        return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                    }
+
+                    $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                    $stok->save();
+
+                }
             }
         }
 
@@ -1186,5 +1199,123 @@ class PenjualanController extends Controller
 
         // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
     return view('penjualan.showaudit', compact('lokasigalery','produkKomponens','ceklokasi','pegawais','riwayat','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
+    }
+
+    public function view_penjualan ($penjualan)
+    {
+        $produkjuals = Produk_Jual::all();
+        $penjualans = Penjualan::with('dibuat')->where('id', $penjualan )->find($penjualan);
+        $pembayaran = Pembayaran::where('invoice_penjualan_id', $penjualans->id)->first();
+        $customers = Customer::where('id', $penjualans->id_customer)->get();
+        $karyawans = Karyawan::where('id', $penjualans->employee_id)->get();
+        $pegawais = Karyawan::all(); 
+        $promos = Promo::where('id', $penjualans->promo_id)->get();
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
+        $lokasigalery = Lokasi::where('tipe_lokasi', 1)->get();
+        $roles = Auth::user()->roles()->value('name');
+        $user = Auth::user()->value('id');
+        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
+        $lokasis = Lokasi::where('id', $lokasi)->get();
+        $rekenings = Rekening::get();
+        $ongkirs = Ongkir::get();
+        $bankpens = Rekening::get();
+        $Invoice = Penjualan::latest()->first();
+        $kondisis = Kondisi::all();
+        $invoices = Penjualan::get();
+        $produkterjuals = Produk_Terjual::all();
+        //retur penjualan
+        $perPendapatan = [];
+        $retur = ReturPenjualan::with('produk_retur', 'deliveryorder')->where('no_invoice', $penjualans->no_invoice)->get(); 
+        foreach ($retur as $returpenjualans) {
+            foreach ($returpenjualans->produk_retur as $produk) {
+                $selectedGFTKomponen = [];
+                
+                    foreach ($produkjuals as $index => $pj) {
+                        if($pj->produk && $produk->produk->kode)
+                        {
+                            $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                        
+                        if ($isSelectedGFT) {
+                            foreach ($pj->komponen as $komponen) {
+                                if ($pj->id == $komponen->produk_terjual_id) {
+                                    foreach ($kondisis as $kondisi) {
+                                        if ($kondisi->id == $komponen->kondisi) {
+                                            $selectedGFTKomponen[$produk->no_retur][] = [
+                                                'kode' => $komponen->kode_produk,
+                                                'nama' => $komponen->nama_produk,
+                                                'kondisi' => $kondisi->nama,
+                                                'jumlah' => $komponen->jumlah,
+                                                'produk' => $komponen->produk_terjual_id
+                                            ];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        }
+                        if (!empty($selectedGFTKomponen)) {
+                            $perPendapatan += $selectedGFTKomponen;
+                        }
+                    }
+                
+            }
+        }
+        
+
+        $retur = ReturPenjualan::where('no_invoice', $penjualans->no_invoice)->first();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+        //log activity
+        $riwayatPenjualan = Activity::where('subject_type', Penjualan::class)->where('subject_id', $penjualan)->orderBy('id', 'desc')->get();
+        $riwayatProdukTerjual = Activity::where('subject_type', Produk_Terjual::class)->where('subject_id', $produks[0]->id)->orderBy('id', 'desc')->get();
+        $riwayatPerangkai = Activity::where('subject_type', FormPerangkai::class)->orderBy('id', 'desc')->get();
+        $komponenIds = $produks[0]->komponen->pluck('id')->toArray();
+        $riwayatKomponen = Activity::where('subject_type', Komponen_Produk_Terjual::class)->orderBy('id', 'desc')->get();
+        $produkIds = $produks->pluck('id')->toArray();
+        $filteredRiwayat = $riwayatKomponen->filter(function (Activity $activity) use ($produkIds) {
+            $properties = json_decode($activity->properties, true);
+            return isset($properties['attributes']['produk_terjual_id']) && in_array($properties['attributes']['produk_terjual_id'], $produkIds);
+        });
+        
+        $latestCreatedAt = $filteredRiwayat->max('created_at');
+        
+        $latestRiwayat = $filteredRiwayat->filter(function (Activity $activity) use ($latestCreatedAt) {
+            return $activity->created_at == $latestCreatedAt;
+        });
+
+        $formIds = $produks->pluck('no_form')->toArray();
+        $filteredFormRiwayat = $riwayatPerangkai->filter(function (Activity $activity) use ($formIds) {
+            $properties = json_decode($activity->properties, true);
+            return isset($properties['attributes']['no_form']) && in_array($properties['attributes']['no_form'], $formIds);
+        });
+        
+        $latestFormCreatedAt = $filteredFormRiwayat->max('created_at');
+        
+        $latestFormRiwayat = $filteredFormRiwayat->filter(function (Activity $activity) use ($latestFormCreatedAt) {
+            return $activity->created_at == $latestFormCreatedAt;
+        });
+        
+        // dd($latestFormRiwayat);
+        
+        $mergedriwayat = [
+            'penjualan' => $riwayatPenjualan,
+            'komponen_produk_terjual' => $latestRiwayat,
+            'form_perangkai' => $latestFormRiwayat
+        ];
+        
+        $riwayat = collect($mergedriwayat)
+            ->flatMap(function ($riwayatItem, $jenis) {
+                return $riwayatItem->map(function ($item) use ($jenis) {
+                    $item->jenis = $jenis;
+                    return $item;
+                });
+            })
+            ->sortByDesc('id')
+            ->values()
+            ->all();
+        
+        // dd($riwayat);
+        // return view('penjualan.create', compact('customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis','invoices'));
+        return view('penjualan.viewpenjualan', compact('produkterjuals','perPendapatan','retur','lokasigalery','pembayaran','pegawais','riwayat','produkKomponens','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai'));
     }
 }

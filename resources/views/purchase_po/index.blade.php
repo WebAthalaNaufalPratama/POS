@@ -74,13 +74,13 @@
                                 <th>Tanggal Terima</th>
                                 <th>No DO Supplier</th>
                                 {{-- @if($user->hasRole(['Purchasing','Finance'])) --}}
-                                <th>Status Purchase</th>
+                                <th>Status Dibuat</th>
                                 {{-- @endif --}}
                                 {{-- @if($user->hasRole(['AdminGallery','Finance'])) --}}
-                                <th>Status Admin</th>
+                                <th>Status Diterima</th>
                                 {{-- @endif --}}
                                 {{-- @if($user->hasRole(['Auditor','Finance'])) --}}
-                                <th>Status Auditor</th>
+                                <th>Status Diperiksa</th>
                                 {{-- @endif --}}
                                 @if($user->hasRole(['Purchasing','Finance']))
                                 <th>Status Pembayaran</th>
@@ -101,25 +101,34 @@
                                 <td>{{ $datapo->no_do_suplier }}</td>
 
                                 <td>
-                                    @if($datapo->status_dibuat == 'BATAL')
-                                        <span class="badge bg-secondary">BATAL</span>
-                                    @elseif($datapo->status_dibuat == 'TUNDA' || $datapo->status_dibuat == null)
-                                        <span class="badge bg-danger">TUNDA</span>
-                                    @elseif($datapo->status_dibuat == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
-                                    @endif
+                       
+                                        @if($datapo->status_dibuat == 'BATAL')
+                                            <span class="badge bg-secondary">BATAL</span>
+                                        @elseif($datapo->status_dibuat == 'TUNDA' || $datapo->status_dibuat == null)
+                                            <span class="badge bg-danger">TUNDA</span>
+                                        @elseif($datapo->status_dibuat == 'DIKONFIRMASI')
+                                            <span class="badge bg-success">DIKONFIRMASI</span>
+                                        @endif
+                                   
                                 </td>
                                 
                                 <td>
-                                    @if($datapo->status_diterima == 'BATAL')
-                                        <span class="badge bg-secondary">BATAL</span>
-                                    @elseif($datapo->status_diterima == 'TUNDA' || $datapo->status_diterima == null)
-                                        <span class="badge bg-danger">TUNDA</span>
-                                    @elseif($datapo->status_diterima == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @if($datapo->lokasi->tipe_lokasi == 1)
+
+                                        @if($datapo->status_diterima == 'BATAL')
+                                            <span class="badge bg-secondary">BATAL</span>
+                                        @elseif($datapo->status_diterima == 'TUNDA' || $datapo->status_diterima == null)
+                                            <span class="badge bg-danger">TUNDA</span>
+                                        @elseif($datapo->status_diterima == 'DIKONFIRMASI')
+                                            <span class="badge bg-success">DIKONFIRMASI</span>
+                                        @else
+                                        {{$datapo->status_diterima  }}
+                                        @endif
+
                                     @else
-                                    {{$datapo->status_diterima  }}
+                                        -
                                     @endif
+
                                 </td>
                                 
                                 <td>
@@ -203,7 +212,7 @@
                                                             </li>
                                                         @endif
                                                     @endif
-                                                    @if ($invoice->sisa != 0 && $invoice->status_dibuat == 'DIKONFIRMASI' && ($invoice->status_dibuku == 'TUNDA' || $invoice->status_dibuku === null))
+                                                    @if ($invoice->sisa != 0 && $invoice->status_dibuat == 'DIKONFIRMASI' && ($invoice->status_dibuku == 'TUNDA' || $invoice->status_dibuku === null) && ($invoice->retur && $invoice->retur->status_dibuku == "DIKONFIRMASI"))
                                                         @if(Auth::user()->hasRole(['Finance']))
                                                             <li>
                                                                 <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
@@ -288,13 +297,17 @@
                             @endforeach
                         </select>
                     </div>
+                    @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatusInd" name="filterStatusInd" class="form-control" title="Status">
-                            <option value="">Pilih Status</option>
-                            <option value="Lunas" {{ request()->input('statusInd') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
-                            <option value="Belum Lunas" {{ request()->input('statusInd') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                             <option value="">Pilih Status</option>
+                            <option value="Lunas" {{ request()->input('statusind') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
+                            <option value="Belum Lunas" {{ request()->input('statusind') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                            <option value="Belum Ada Tagihan" {{ request()->input('statusind') == 'Belum Ada Tagihan' ? 'selected' : '' }}>Belum Ada Tagihan</option>
+                            <option value="Invoice Batal" {{ request()->input('statusind') == 'Invoice Batal' ? 'selected' : '' }}>Invoice Batal</option>
                         </select>
                     </div>
+                    @endif
                     <div class="col-sm-2">
                         <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('pembelian.index') }}" class="btn btn-info">Filter</a>
                         <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('pembelian.index') }}" class="btn btn-warning">Clear</a>
@@ -306,11 +319,14 @@
                             <tr>
                                 <th>No</th>
                                 <th>No Purchase Order</th>
+                                <th>Tanggal PO</th>
                                 <th>Supplier</th>
                                 <th>Bulan Stok Inden</th>
                                 <th>Status Purchase</th>
-                                {{-- <th>Status Finance</th> --}}
+                                <th>Status Auditor</th>
+                                @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                                 <th>Status Pembayaran</th>
+                                @endif
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -319,44 +335,77 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $inden->no_po }}</td>
+                                <td>{{ $inden->tgl_dibuat }}</td>
                                 <td>{{ $inden->supplier->nama }}</td>
                                 <td>{{ $inden->bulan_inden}}</td>
-                                <td>{{ $inden->status_dibuat}}</td>
-                                {{-- <td>{{ $inden->status_diperiksa}}</td> --}}
                                 <td>
-                                @if ($inden->invoice !== null && $inden->invoice->sisa == 0 )
-                                    LUNAS
-                                @elseif($inden->invoice == null || $inden->invoice->sisa !== 0  )
-                                    BELUM LUNAS
-                                @endif
+                                    @if($inden->status_dibuat == 'BATAL')
+                                        <span class="badge bg-secondary">BATAL</span>
+                                    @elseif($inden->status_dibuat == 'TUNDA' || $inden->status_dibuat == null)
+                                        <span class="badge bg-danger">TUNDA</span>
+                                    @elseif($inden->status_dibuat == 'DIKONFIRMASI')
+                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @endif
+                               
                                 </td>
+                                <td>
+                                    @if($inden->status_diperiksa == 'BATAL')
+                                        <span class="badge bg-secondary">BATAL</span>
+                                    @elseif($inden->status_diperiksa == 'TUNDA' || $inden->status_diperiksa == null)
+                                        <span class="badge bg-danger">TUNDA</span>
+                                    @elseif($inden->status_diperiksa == 'DIKONFIRMASI')
+                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @endif
+                                </td>
+                                @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
+
+                                <td>
+                                    @if ($inden->invoice !== null && $inden->invoice->sisa == 0)
+                                    Lunas
+                                    @elseif($inden->invoice !== null && $inden->invoice->sisa !== 0 && $inden->invoice->status_dibuat !== "BATAL")
+                                        Belum Lunas
+                                    @elseif ($inden->invoice !== null && $inden->invoice->status_dibuat == "BATAL")
+                                        Invoice Batal
+                                    @elseif($inden->invoice == null && $inden->status_dibuat == "BATAL")
+                                    -
+                                    @elseif($inden->invoice == null)
+                                        Belum Ada Tagihan
+                                    @endif
+                                </td>
+                                @endif
                                 
                             
+                                            @php
+                                                $invoiceExists = $datainv->where('poinden_id', $inden->id)
+                                                                        ->where('status_dibuat', '!=', 'BATAL');
+                                                // Mengambil data retur pertama yang memiliki 'invoicepo_id' sama dengan $inv->id
+                                                // $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $inden->id);
+                                            @endphp
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        @if ($inden->tgl_diperiksa !== null)
-                                        <li>
-                                            @php
-                                                $invoiceExists = $datainv->contains('poinden_id', $inden->id);
-                                            @endphp
-                                
-                                            @if ($invoiceExists && $inden->invoice->sisa != 0)
+                                @if ($inden->tgl_diperiksa !== null)
+                                @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
+                                    <li>
+                                    @foreach ($invoiceExists as $invoice)
+                                            @if ($invoice->sisa != 0)
                                                 <a href="{{ route('invoice.edit',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                 </a>
-                                            @elseif($invoiceExists && $inden->invoice->sisa == 0)
+                                            @elseif($invoice->sisa == 0)
                                                 <a href="{{ route('invoice.show',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
                                                 </a>
                                             @else
-                                            <a href="{{ route('invoicebiasa.create', ['type' => 'poinden', 'datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
-                                            </a>
+                                                <a href="{{ route('invoicebiasa.create', ['type' => 'poinden', 'datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
+                                                </a>
                                             @endif
-                                        </li>
-                                        @endif
+                                    @endforeach
+                                    </li>
+                                @endif
+                                @endif
 
                                         <li>
                                             <a href="{{ route('pembelian.show', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>

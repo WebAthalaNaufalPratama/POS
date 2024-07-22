@@ -316,9 +316,12 @@
                                                             $user = Auth::user();
                                                             $karyawan = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                                         @endphp
-                                                        @if($karyawan->lokasi->tipe_lokasi == 1)
-                                                            <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
-                                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $produk->no_form == null && $karyawan->lokasi->tipe_lokasi == 1)
+                                                            <td><button id="btnGift_0" data-produk_gift="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
+                                                            <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                                            <td><button id="btnGift_0" data-produk_gift="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
+                                                            <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                         @endif
                                                         <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->

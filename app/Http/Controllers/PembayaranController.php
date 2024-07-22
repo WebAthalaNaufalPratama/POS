@@ -106,6 +106,7 @@ class PembayaranController extends Controller
             return redirect()->back()->with('fail', 'Gagal mengedit');
         }
     }
+
     public function store(Request $req)
     {
         $validator = Validator::make($req->all(), [
@@ -345,9 +346,20 @@ class PembayaranController extends Controller
         if ($datainv->dp === 0) {
             $datainv->update(['dp' => $req->nominal]);
         }
-    
+
+        $lastPayment = Pembayaran::where('invoice_purchase_id', $req->invoice_purchase_id)
+        ->orderBy('created_at', 'asc')
+        ->get(); // Menggunakan get() untuk mendapatkan semua hasil
+
+        // Menghitung jumlah cicilan sebelumnya
+        $cicilanSebelumnya = $lastPayment->count();
+
         // Menentukan status pembayaran berdasarkan sisa tagihan
-        $data['status_bayar'] = $cekTotalTagihan <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+        if ($cekTotalTagihan <= 0) {
+            $data['status_bayar'] = 'LUNAS';
+        } else {
+            $data['status_bayar'] = 'Cicilan ke-' . ($cicilanSebelumnya + 1);   
+        }
     
         // Menyimpan data pembayaran
         $pembayaran = Pembayaran::create($data);
@@ -442,12 +454,22 @@ class PembayaranController extends Controller
         $cekTotalTagihan = $datamutasi->sisa_bayar- $req->nominal;
         $datamutasi->update(['sisa_bayar' => $cekTotalTagihan]);
 
-        // if ($datamutasi->dp === 0) {
-        //     $datamutasi->update(['dp' => $req->nominal]);
-        // }
-    
+        $lastPayment = Pembayaran::where('mutasiinden_id', $req->mutasiinden_id)
+        ->orderBy('created_at', 'asc')
+        ->get(); // Menggunakan get() untuk mendapatkan semua hasil
+
+        // Menghitung jumlah cicilan sebelumnya
+        $cicilanSebelumnya = $lastPayment->count();
+
         // Menentukan status pembayaran berdasarkan sisa tagihan
-        $data['status_bayar'] = $cekTotalTagihan <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+        if ($cekTotalTagihan <= 0) {
+            $data['status_bayar'] = 'LUNAS';
+        } else {
+            $data['status_bayar'] = 'Cicilan ke-' . ($cicilanSebelumnya + 1);   
+        }
+
+        // Menentukan status pembayaran berdasarkan sisa tagihan
+        // $data['status_bayar'] = $cekTotalTagihan <= 0 ? 'LUNAS' : 'BELUM LUNAS';
     
         // Menyimpan data pembayaran
         $pembayaran = Pembayaran::create($data);
@@ -456,11 +478,6 @@ class PembayaranController extends Controller
             // Mengembalikan respon jika tagihan sudah lunas setelah pembayaran
             return redirect()->back()->with('success', 'Tagihan sudah Lunas');
         }
-
-
-        
-       
-
             if ($pembayaran) {
                 // Mengembalikan respon sukses jika data pembayaran berhasil disimpan
                 return redirect(route('mutasiindengh.show',['mutasiIG' => $req->mutasiinden_id]))->with('success', 'Data Berhasil Disimpan');
@@ -528,11 +545,26 @@ class PembayaranController extends Controller
             }
 
             $new_invoice_tagihan = Invoicepo::find($data['invoice_purchase_id']);
+
+            $lastPayment = Pembayaran::where('invoice_purchase_id', $req->invoice_purchase_id)
+            ->orderBy('created_at', 'asc')
+            ->get(); // Menggunakan get() untuk mendapatkan semua hasil
+
+            // Menghitung jumlah cicilan sebelumnya
+            $cicilanSebelumnya = $lastPayment->count();
+
+            // Menentukan status pembayaran berdasarkan sisa tagihan
             if($new_invoice_tagihan->sisa <= 0){
                 $data['status_bayar'] = 'LUNAS';
             } else {
-                $data['status_bayar'] = 'BELUM LUNAS';
+                $data['status_bayar'] = 'Cicilan ke-' . ($cicilanSebelumnya + 1);   
             }
+                
+            // if($new_invoice_tagihan->sisa <= 0){
+            //     $data['status_bayar'] = 'LUNAS';
+            // } else {
+            //     $data['status_bayar'] = 'BELUM LUNAS';
+            // }
 
             if ($invoice_tagihan->dp === 0) {
                 $invoice_tagihan->update(['dp' => $req->nominal]);
@@ -587,11 +619,26 @@ class PembayaranController extends Controller
             }
 
             $new_refund_tagihan = Returpembelian::find($data['retur_pembelian_id']);
+
+            $lastPayment = Pembayaran::where('retur_pembelian_id', $req->retur_pembelian_id)
+            ->orderBy('created_at', 'asc')
+            ->get(); // Menggunakan get() untuk mendapatkan semua hasil
+
+            // Menghitung jumlah cicilan sebelumnya
+            $cicilanSebelumnya = $lastPayment->count();
+
+            // Menentukan status pembayaran berdasarkan sisa tagihan
             if($new_refund_tagihan->sisa <= 0){
                 $data['status_bayar'] = 'LUNAS';
             } else {
-                $data['status_bayar'] = 'BELUM LUNAS';
+                $data['status_bayar'] = 'Cicilan ke-' . ($cicilanSebelumnya + 1);   
             }
+
+            // if($new_refund_tagihan->sisa <= 0){
+            //     $data['status_bayar'] = 'LUNAS';
+            // } else {
+            //     $data['status_bayar'] = 'BELUM LUNAS';
+            // }
 
             $data['cara_bayar'] = $cara_bayar;
             $data['rekening_id'] = $rekening_id;
@@ -647,10 +694,19 @@ class PembayaranController extends Controller
             }
 
             $new_refund_tagihan = Returinden::find($data['returinden_id']);
+
+            $lastPayment = Pembayaran::where('returinden_id', $req->returinden_id)
+            ->orderBy('created_at', 'asc')
+            ->get(); // Menggunakan get() untuk mendapatkan semua hasil
+
+            // Menghitung jumlah cicilan sebelumnya
+            $cicilanSebelumnya = $lastPayment->count();
+
+            // Menentukan status pembayaran berdasarkan sisa tagihan
             if($new_refund_tagihan->sisa_refund <= 0){
                 $data['status_bayar'] = 'LUNAS';
             } else {
-                $data['status_bayar'] = 'BELUM LUNAS';
+                $data['status_bayar'] = 'Cicilan ke-' . ($cicilanSebelumnya + 1);   
             }
 
             $data['cara_bayar'] = $cara_bayar;

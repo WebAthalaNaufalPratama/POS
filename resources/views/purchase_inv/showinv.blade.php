@@ -339,10 +339,14 @@ Carbon::setLocale('id');
                                                 <li>
                                                     <h4>PPN</h4>
                                                     <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{formatRupiah2($inv_po->ppn) }}" readonly>
-                                                        </div>
+                                                            <div class="input-group">
+                                                                <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span>
+                                                                <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ formatRupiah2($inv_po->ppn)  }}" readonly>
+                                                            </div>
                                                     </h5>
                                                 </li>
                                                 <li>
@@ -354,7 +358,7 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
-                                                @if ($retur && $retur->komplain == 'Refund')
+                                                {{-- @if ($retur && $retur->komplain == 'Refund')
                                                 <li>
                                                     <h4>Total Tagihan barang</h4>
                                                     <h5>
@@ -364,7 +368,7 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
-                                                @endif
+                                                @endif --}}
                                                 @if ($retur)
                                                 <li>
                                                     <h4>Biaya Pengiriman {{ $retur->komplain }}</h4>
