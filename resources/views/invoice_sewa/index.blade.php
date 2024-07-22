@@ -86,9 +86,11 @@
                                         @endif
                                     @endif
                                     @if( ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($item->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
-                                    <li>
-                                        <a href="{{ route('invoice_sewa.edit', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                    </li>
+                                        @if(!$item->hasKembali)
+                                        <li>
+                                            <a href="{{ route('invoice_sewa.edit', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                        @endif
                                     @endif
                                     @if($item->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery'))
                                     <li>

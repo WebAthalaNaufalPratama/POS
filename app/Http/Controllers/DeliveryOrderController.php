@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DeliveryOrder;
 use App\Models\InventoryGallery;
 use App\Models\Karyawan;
+use App\Models\KembaliSewa;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kontrak;
 use App\Models\Produk_Jual;
@@ -61,6 +62,9 @@ class DeliveryOrderController extends Controller
         })
         ->orderBy('karyawans.nama')
         ->get();
+        $data->map(function($kontrak){
+            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
+        });
         return view('do_sewa.index', compact('data', 'driver', 'customer'));
     }
 

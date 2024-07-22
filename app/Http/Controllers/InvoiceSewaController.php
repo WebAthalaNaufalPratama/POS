@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\InvoiceSewa;
 use App\Models\Karyawan;
+use App\Models\KembaliSewa;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kontrak;
 use App\Models\Ongkir;
@@ -63,6 +64,9 @@ class InvoiceSewaController extends Controller
         } else {
             $invoice_bayar = 0;
         }
+        $data->map(function($kontrak){
+            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
+        });
         $bankpens = Rekening::get();
         return view('invoice_sewa.index', compact('data', 'invoice_bayar', 'bankpens', 'customer'));
     }

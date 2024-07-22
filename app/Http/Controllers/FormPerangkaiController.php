@@ -28,14 +28,14 @@ class FormPerangkaiController extends Controller
         $perangkai = FormPerangkai::select('perangkai_id')
         ->distinct()
         ->join('karyawans', 'form_perangkais.perangkai_id', '=', 'karyawans.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
         ->get();
 
-        $query = FormPerangkai::whereHas('produk_terjual');
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        $query = FormPerangkai::where('jenis_rangkaian', 'Sewa')->whereHas('produk_terjual');
+        if(Auth::user()->karyawans){
             $query->whereHas('perangkai', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
