@@ -27,11 +27,17 @@ class KembaliSewa extends Model
     ];
 
     public function data_driver(){
-        return $this->belongsTo(Karyawan::class, 'driver', 'id');
+        return $this->belongsTo(User::class, 'driver', 'id');
     }
 
     public function data_pembuat(){
         return $this->belongsTo(User::class, 'pembuat', 'id');
+    }
+    public function data_penyetuju(){
+        return $this->belongsTo(User::class, 'penyetuju', 'id');
+    }
+    public function data_pemeriksa(){
+        return $this->belongsTo(User::class, 'pemeriksa', 'id');
     }
 
     public function produk(){
