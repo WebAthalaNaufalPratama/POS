@@ -93,37 +93,57 @@
                                     @endif
                                 </td>
                                 <td>{{ formatRupiah($data->subtotal)}}</td>
-                                <td>{{ $data->status_dibuat }}</td>
-                                <td>{{ $data->status_dibuku }}</td>
+                                <td>
+                                    @if ($data->status_dibuat == 'TUNDA' || $data->status_dibuat == null)
+                                        <span class="badge bg-danger">TUNDA</span>
+                                    @elseif ($data->status_dibuat == 'DIKONFIRMASI')
+                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @else
+                                        <span class="badge bg-primary">{{ $data->status_dibuat }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($data->status_dibuku == 'TUNDA' || $data->status_dibuku == null)
+                                        <span class="badge bg-danger">TUNDA</span>
+                                    @elseif ($data->status_dibuku == 'DIKONFIRMASI')
+                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    @else
+                                        <span class="badge bg-primary">{{ $data->status_dibuku }}</span>
+                                    @endif
+                                </td>
+                                
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        {{-- <li>
-                                            @php
-                                                $invoiceExists = $datainv->contains('pembelian_id', $datapo->id);
-                                            @endphp
-                                
-                                            @if ($invoiceExists)
-                                                <a href="{{ route('invoice.edit',['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $datainv->id]) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
-                                                </a>
-                                            @else
-                                            <a href="{{ route('invoicebiasa.create', ['type' => 'pembelian', 'datapo' => $datapo->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
-                                                </a>
-                                            @endif
-                                        </li> --}}
                                         
+                                        @if(Auth::user()->hasRole('Finance'))
                                         <li>
-                                            <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> @if($data->komplain == "Refund") Input Refund @else Detail Retur @endif</a>
+                                            <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">
+                                                @if($data->komplain == "Refund" && ($data->status_dibuku == "TUNDA" || is_null($data->status_dibuku)))
+                                                    Input Refund
+                                                @else
+                                                    Detail Retur
+                                                @endif
+                                            </a>
                                         </li>
+                                        @endif
+                                        @if(Auth::user()->hasRole('Purchasing'))
+                                        <li>
+                                            <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur</a>
+                                        </li>
+                                        @if($data->status_dibuat == "TUNDA")
+                                        <li>
+                                            <a href="{{ route('returbeli.edit', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur</a>
+                                        </li>
+                                        @endif
+                                        @endif
                                         <li>
                                             <a href="{{ route('invoice.show', ['datapo' => $data->invoice->pembelian_id, 'type'=>"pembelian", 'id' => $data->invoice->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>
                                         </li>
-                                        {{-- <li>
-                                            <a href="#" class="dropdown-item" onclick="deleteData({{ $datapo->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
-                                        </li> --}}
+                                        
                                     </ul>
                                 </td>
                             </tr>

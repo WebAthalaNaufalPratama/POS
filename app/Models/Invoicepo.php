@@ -25,6 +25,7 @@ class Invoicepo extends Model
         'tgl_dibukukan',
         'subtotal',
         'diskon',
+        'persen_ppn',
         'ppn',
         'biaya_kirim',
         'total_tagihan',

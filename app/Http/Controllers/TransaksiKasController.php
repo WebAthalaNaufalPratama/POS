@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Akun;
 use App\Models\Lokasi;
 use App\Models\Pembayaran;
+use App\Models\Rekening;
 use App\Models\TransaksiKas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,16 +18,29 @@ class TransaksiKasController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index_pusat()
+    public function index_pusat(Request $req)
     {
-        $data = TransaksiKas::all();
-        $lokasis = Lokasi::all();
-        $akuns = Akun::all();
-        $totalOperasional = $data->sum('harga_total');
-        $totalSewa = Pembayaran::whereHas('sewa')->get()->sum('nominal');
-        $totalPenjualan = Pembayaran::whereHas('penjualan')->get()->sum('nominal');
-        $saldo = $totalSewa + $totalPenjualan - $totalOperasional;
-        return view('kas_pusat.index', compact('data', 'lokasis', 'akuns', 'saldo', 'totalOperasional', 'totalSewa', 'totalPenjualan'));
+        $queryMasuk = TransaksiKas::query();
+        $queryKeluar = TransaksiKas::query();
+        $rekenings = Rekening::whereHas('lokasi', function($q){
+            $q->where('operasional_id', 1);
+        })->get();
+        $lokasis = Lokasi::where('operasional_id', 1)->orWhere('tipe_lokasi', 1)->get();
+        if($req->lokasi){
+            $queryMasuk->where('lokasi_penerima', $req->lokasi);
+            $queryKeluar->where('lokasi_pengirim', $req->lokasi);
+        }
+        if($req->rekening){
+            $queryMasuk->where('rekening_penerima', $req->rekening);
+            $queryKeluar->where('rekening_pengirim', $req->rekening);
+        } else {
+            $queryMasuk->whereIn('rekening_penerima', $rekenings->pluck('id'));
+            $queryKeluar->whereIn('rekening_pengirim', $rekenings->pluck('id'));
+        }
+        $dataMasuk = $queryMasuk->get();
+        $dataKeluar = $queryKeluar->get();
+        
+        return view('kas_pusat.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings'));
     }
 
     /**
@@ -49,14 +63,13 @@ class TransaksiKasController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'akun_id' => 'required|numeric',
+            'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
+            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
-            'kuantitas' => 'required|numeric',
-            'harga_satuan' => 'required|numeric',
-            'harga_total' => 'required|numeric',
-            'lokasi_id' => 'required',
-            'tanggal_transaksi' => 'required|date',
-            'bukti' => 'required|file',
+            'nominal' => 'required|numeric',
+            'tanggal' => 'required|date',
+            'file' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -156,23 +169,40 @@ class TransaksiKasController extends Controller
         return response()->json(['msg' => 'Data berhasil dihapus']);
     }
 
-    public function index_gallery()
+    public function index_gallery(Request $req)
     {
-        $data = TransaksiKas::whereHas('lokasi', function($z){
-            $z->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
+        $queryMasuk = TransaksiKas::query();
+        $queryKeluar = TransaksiKas::query();
+        $rekenings = Rekening::whereHas('lokasi', function($q){
+            $q->where('tipe_lokasi', 1);
         })->get();
-        $lokasis = Lokasi::all();
-        $akuns = Akun::all();
-        $totalOperasional = $data->sum('harga_total');
-        $totalSewa = Pembayaran::whereHas('sewa.sewa.lokasi', function($q) {
-            $q->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
-        })->get()->sum('nominal');
- 
-        $totalPenjualan = Pembayaran::whereHas('penjualan.lokasi', function($q) {
-            $q->where('operasional_id', Auth::user()->karyawans->lokasi->operasional_id);
-        })->get()->sum('nominal');
-        $saldo = $totalSewa + $totalPenjualan - $totalOperasional;
-        return view('kas_gallery.index', compact('data', 'lokasis', 'akuns', 'saldo', 'totalOperasional', 'totalSewa', 'totalPenjualan'));
+        $lokasis = Lokasi::where('tipe_lokasi', 1)->get();
+        if($req->lokasi){
+            $queryMasuk->where('lokasi_penerima', $req->lokasi);
+            $queryKeluar->where('lokasi_pengirim', $req->lokasi);
+            $lokasi_pengirim = $req->lokasi;
+            $rekeningKeluar = Rekening::where('lokasi_id', $req->lokasi)->get();
+        } else {
+            if(Auth::user()->hasRole('AdminGallery')){
+                $queryMasuk->where('lokasi_penerima', Auth::user()->karyawans->lokasi_id);
+                $queryKeluar->where('lokasi_pengirim', Auth::user()->karyawans->lokasi_id);
+                $lokasi_pengirim = Auth::user()->karyawans->lokasi_id;
+                $rekeningKeluar = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+            } else {
+                $lokasi_pengirim = $lokasis->first()->id;
+                $rekeningKeluar = Rekening::where('lokasi_id', $lokasi_pengirim)->get();
+            }
+        }
+        if($req->rekening){
+            $queryMasuk->where('rekening_penerima', $req->rekening);
+            $queryKeluar->where('rekening_pengirim', $req->rekening);
+        } else {
+            $queryMasuk->whereIn('rekening_penerima', $rekenings->pluck('id'));
+            $queryKeluar->whereIn('rekening_pengirim', $rekenings->pluck('id'));
+        }
+        $dataMasuk = $queryMasuk->get();
+        $dataKeluar = $queryKeluar->get();
+        return view('kas_gallery.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 'rekeningKeluar', 'lokasi_pengirim'));
     }
 
     /**
@@ -195,26 +225,28 @@ class TransaksiKasController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'akun_id' => 'required|numeric',
+            'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
+            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
-            'kuantitas' => 'required|numeric',
-            'harga_satuan' => 'required|numeric',
-            'harga_total' => 'required|numeric',
-            'lokasi_id' => 'required',
-            'tanggal_transaksi' => 'required|date',
-            'bukti' => 'required|file',
+            'nominal' => 'required|numeric',
+            'tanggal' => 'required|date',
+            'file' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        $data['status'] = 'AKTIF';
+        if($req->jenis == 'Pemindahan Saldo'){
+            if($data['rekening_penerima'] == $data['rekening_pengirim']) return redirect()->back()->withInput()->with('fail', 'Tidak bisa transfer ke rekening yang sama');
+        }
+        $data['status'] = 'DIKONFIRMASI';
 
         // save data
-        if ($req->hasFile('bukti')) {
-            $file = $req->file('bukti');
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
             $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
             $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $data['file'] = $filePath;
         }
         $check = TransaksiKas::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
@@ -300,5 +332,17 @@ class TransaksiKasController extends Controller
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
+    }
+
+    public function rekeningPerLokasi(Request $req)
+    {
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'lokasi_id' => 'required',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return response()->json($error, 400);
+        $rekenings = Rekening::where('lokasi_id', $req->lokasi_id)->get();
+        return response()->json($rekenings);
     }
 }

@@ -12,24 +12,34 @@ class TransaksiKas extends Model
     use HasFactory, SoftDeletes, LogsActivity;
     protected $guarded = ['id'];
     protected static $logAttributes = [
-        'akun_id',
-        'lokasi_id',
-        'keterangan',
-        'kuantitas',
-        'harga_satuan',
-        'harga_total',
-        'tanggal_transaksi',
+        'lokasi_penerima',
+        'lokasi_pengirim',
+        'rekening_penerima',
+        'rekening_pengirim',
+        'nominal',
+        'tanggal',
+        'file',
         'status',
-        'bukti',
+        'keterangan',
     ];
 
-    public function akun()
+    public function lok_penerima()
     {
-        return $this->belongsTo(Akun::class);
+        return $this->belongsTo(Lokasi::class, 'lokasi_penerima');
     }
 
-    public function lokasi()
+    public function lok_pengirim()
     {
-        return $this->belongsTo(Lokasi::class);
+        return $this->belongsTo(Lokasi::class, 'lokasi_pengirim');
+    }
+
+    public function rek_penerima()
+    {
+        return $this->belongsTo(Rekening::class, 'rekening_penerima');
+    }
+
+    public function rek_pengirim()
+    {
+        return $this->belongsTo(Rekening::class, 'rekening_pengirim');
     }
 }

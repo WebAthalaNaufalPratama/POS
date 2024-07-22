@@ -5,7 +5,7 @@
     <div class="col-sm-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">Data Retur Pembelian</h5>
+                <h5 class="card-title">Data Retur Pembelian id</h5>
             </div>
             <div class="card-body">
                 {{-- <form action="{{ route('returbeli.store') }}" method="POST" enctype="multipart/form-data" id="addForm"> --}}

@@ -273,7 +273,7 @@ Carbon::setLocale('id');
                                                     </h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $ppn ?? '-' }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn ?? '-' }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                         <div class="input-group">

@@ -176,7 +176,7 @@
                                                     <td><input type="text" name="kode[]" id="kode_{{ $i }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
                                                     <td><input type="text" name="nama[]" id="nama_{{ $i }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $item->jml_diterima ?? '' }}" ></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ old('qtytrm.' . $i, $item->jml_diterima ?? '') }}" ></td>
                                                     <td>
                                                         <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" onchange="showInputType({{ $i }})">
                                                             <option value="">Pilih Kondisi</option>
@@ -184,7 +184,6 @@
                                                                 <option value="{{ $kondisi->id }}" {{ $kondisi->id == $item->kondisi_id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
                                                             @endforeach
                                                         </select>
-                                                        
                                                     </td>
                                                  
                                                 </tr>

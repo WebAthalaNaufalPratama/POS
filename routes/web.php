@@ -58,6 +58,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('getProdukTerjual', 'ProdukTerjualController@getProdukTerjual')->name('getProdukTerjual');
         Route::post('addKomponen', 'KomponenProdukTerjualController@addKomponen')->name('addKomponen');
         Route::get('getProdukDo', 'DeliveryOrderController@getProdukDo')->name('getProdukDo');
+        Route::get('rekeningPerLokasi', 'TransaksiKasController@rekeningPerLokasi')->name('rekeningPerLokasi');
 
 
         Route::group(['prefix' => 'dashboard'], function() {
@@ -317,13 +318,14 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/retur', 'PembelianController@index_retur')->name('returbeli.index');
             Route::get('/retur/create', 'PembelianController@create_retur')->name('returbeli.create');
             Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
+            Route::put('/retur/{idretur}/update', 'PembelianController@update_retur_finance')->name('returfinance.update');
             Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
             Route::post('/refund/store', 'PembayaranController@bayar_refund')->name('bayarrefund.store');
             Route::post('/refundinden/store', 'PembayaranController@refundInden')->name('refundinden.store');
 
              Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show'); 
-             Route::get('/returinv/{retur_id}/show', 'PembelianController@show_returinv')->name('returinvoice.show');
+             Route::get('/returbeli/{retur_id}/edit', 'PembelianController@edit_returpo')->name('returbeli.edit');
 
         });
 
@@ -503,23 +505,23 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
 
         Route::group(['prefix' => 'kas_pusat'], function() {
-            Route::get('/', 'KasController@index_pusat')->name('kas_pusat.index');
-            Route::get('/create', 'KasController@create_pusat')->name('kas_pusat.create');
-            Route::post('/store', 'KasController@store_pusat')->name('kas_pusat.store');
-            Route::get('/{kas_pusat}/show', 'KasController@show_pusat')->name('kas_pusat.show');
-            Route::get('/{kas_pusat}/edit', 'KasController@edit_pusat')->name('kas_pusat.edit');
-            Route::patch('/{kas_pusat}/update', 'KasController@update_pusat')->name('kas_pusat.update');
-            Route::get('/{kas_pusat}/delete', 'KasController@destroy_pusat')->name('kas_pusat.destroy');
+            Route::get('/', 'TransaksiKasController@index_pusat')->name('kas_pusat.index');
+            Route::get('/create', 'TransaksiKasController@create_pusat')->name('kas_pusat.create');
+            Route::post('/store', 'TransaksiKasController@store_pusat')->name('kas_pusat.store');
+            Route::get('/{kas_pusat}/show', 'TransaksiKasController@show_pusat')->name('kas_pusat.show');
+            Route::get('/{kas_pusat}/edit', 'TransaksiKasController@edit_pusat')->name('kas_pusat.edit');
+            Route::patch('/{kas_pusat}/update', 'TransaksiKasController@update_pusat')->name('kas_pusat.update');
+            Route::get('/{kas_pusat}/delete', 'TransaksiKasController@destroy_pusat')->name('kas_pusat.destroy');
         });
 
         Route::group(['prefix' => 'kas_gallery'], function() {
-            Route::get('/', 'KasController@index_gallery')->name('kas_gallery.index');
-            Route::get('/create', 'KasController@create_gallery')->name('kas_gallery.create');
-            Route::post('/store', 'KasController@store_gallery')->name('kas_gallery.store');
-            Route::get('/{kas_gallery}/show', 'KasController@show_gallery')->name('kas_gallery.show');
-            Route::get('/{kas_gallery}/edit', 'KasController@edit_gallery')->name('kas_gallery.edit');
-            Route::patch('/{kas_gallery}/update', 'KasController@update_gallery')->name('kas_gallery.update');
-            Route::get('/{kas_gallery}/delete', 'KasController@destroy_gallery')->name('kas_gallery.destroy');
+            Route::get('/', 'TransaksiKasController@index_gallery')->name('kas_gallery.index');
+            Route::get('/create', 'TransaksiKasController@create_gallery')->name('kas_gallery.create');
+            Route::post('/store', 'TransaksiKasController@store_gallery')->name('kas_gallery.store');
+            Route::get('/{kas_gallery}/show', 'TransaksiKasController@show_gallery')->name('kas_gallery.show');
+            Route::get('/{kas_gallery}/edit', 'TransaksiKasController@edit_gallery')->name('kas_gallery.edit');
+            Route::patch('/{kas_gallery}/update', 'TransaksiKasController@update_gallery')->name('kas_gallery.update');
+            Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
         });
         
         Route::group(['prefix' => 'mutasiGG'], function() {
