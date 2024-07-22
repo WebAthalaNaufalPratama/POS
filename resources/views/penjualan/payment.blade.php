@@ -494,7 +494,6 @@
                                         </div>
                                     </div>
                                     <div class="mb-4">
-                                        
                                         <div class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table datanew">

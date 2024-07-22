@@ -173,7 +173,7 @@ class ReturpenjualanController extends Controller
         $suppliers = Supplier::all();
         $dopenjualans = DeliveryOrder::where('no_do', $penjualans->no_invoice)->get();
         // $produkjuals = Produk_Jual::all();
-        $customers = Customer::all();
+        $customers = Customer::where('id', $penjualans->id_customer)->get();
         $karyawans = Karyawan::all();
         $ongkirs = Ongkir::get();
         
@@ -226,7 +226,6 @@ class ReturpenjualanController extends Controller
         $data['jenis_do'] = 'RETUR';
         $data['pembuat'] = Auth::user()->id;
         $data['no_referensi'] = $req->no_retur;
-        $data['tanggal_pembuat'] = now();
         $data['handphone'] = Customer::where('id', $req->customer_id)->value('handphone');
 
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
@@ -324,6 +323,7 @@ class ReturpenjualanController extends Controller
             
             $produk_terjual = Produk_Terjual::create([
                 'produk_jual_id' => $getProdukJual->produk_jual_id,
+                'no_do' => $data['nama_produk'][$i],
                 'no_retur' => $returPenjualan->no_retur,
                 'jenis' => 'RETUR',
                 'alasan' => $data['alasan'][$i],
@@ -351,7 +351,6 @@ class ReturpenjualanController extends Controller
                     $cekcount = count($data[$komponen_key]);
                     $produkCollection = collect();
 
-                    // Membuat koleksi produk dari kode produk yang diberikan
                     foreach ($data[$kode_key] as $index => $kodeProduk) {
                         $produk = Produk::where('kode', $kodeProduk)->first();
                         if ($produk) {
@@ -363,10 +362,7 @@ class ReturpenjualanController extends Controller
                         }
                     }
 
-
-                    // Iterasi melalui setiap produk dan setiap komponen
                     foreach ($produkCollection as $getProduk) {
-                            // Buat objek Komponen_Produk_Terjual
                             $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                                 'produk_terjual_id' => $produk_terjual->id,
                                 'kode_produk' => $getProduk['produk']->kode, 
@@ -394,7 +390,6 @@ class ReturpenjualanController extends Controller
                                     $stok->update();
                                 }
                             }
-                        // }
                     }
 
                     // Pengurangan inven outlet
@@ -600,7 +595,7 @@ class ReturpenjualanController extends Controller
         $produkreturjuals = Produk_Jual::all();
         // dd($produkjuals);
         $suppliers = Supplier::all();
-        $dopenjualans = DeliveryOrder::where('no_do', $returpenjualans->no_invoice)->get();
+        $dopenjualans = DeliveryOrder::where('no_referensi', $returpenjualans->no_retur)->first();
         // $produkjuals = Produk_Jual::all();
         $customers = Customer::all();
         $karyawans = Karyawan::all();
@@ -833,7 +828,7 @@ class ReturpenjualanController extends Controller
         $prefixes = [
             'kodegiftproduk_', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk',
             'jumlah', 'alasan', 'diskon', 'jenis_diskon', 'harga', 'totalharga',
-            'namaproduk2', 'jumlah2', 'satuan2', 'keterangan2', 'nama_produk', 'file', 'status',
+            'namaproduk2', 'jumlah2', 'satuan2', 'keterangan2', 'nama_produk', 'file',
             'kondisitradproduk_', 'jumlahtradproduk_', 'kode_produk2', 'idgiftproduk_'
         ];
         
@@ -860,56 +855,81 @@ class ReturpenjualanController extends Controller
         $returId = ReturPenjualan::where('id', $retur)->first();
         $returpenjualan = DeliveryOrder::where('no_referensi', $returId->no_retur)->first();
 
-        if($returpenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
-            $data['auditor_id'] = Auth::user()->id;
-            $data['tanggal_audit'] = now();
-        }elseif($returpenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
-            $data['dibukukan_id'] = Auth::user()->id;
-            $data['tanggal_dibukukan'] = now();
+        if($returId->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
+            $data['pembuku'] = Auth::user()->id;
+        }elseif($returId->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
+            $data['pemeriksa'] = Auth::user()->id;
         }
 
         $update = ReturPenjualan::where('id', $retur)->update($data);
-
-        $datado = [
-            'no_do' => $req->no_do,
-            'no_referensi' => $req->no_retur,
-            'jenis_do' => 'RETUR',
-            'tanggal_kirim' => $req->tanggal_kirim,
-            'customer_id' => $req->customer_id,
-            'handphone' => $handphone,
-            'penerima' => $req->penerima,
-            'alamat' => $req->alamat,
-            'catatan' => $req->catatan,
-            'status' => $req->status,
-            'alasan_batal' => $req->alasan_batal, 
-            'driver' => $req->driver,
-        ];
-        
-        if ($req->hasFile('file')) {
-            $filePath = $this->uploadFileDO($req->file('file'));
-            $datado['file'] = $filePath; // Menggunakan $datado
+        if($req->komplain == 'retur'){
+            $datado = [
+                'no_do' => $req->no_do,
+                'no_referensi' => $req->no_retur,
+                'jenis_do' => 'RETUR',
+                'tanggal_kirim' => $req->tanggal_kirim,
+                'customer_id' => $req->customer_id,
+                'handphone' => $handphone,
+                'penerima' => $req->penerima,
+                'alamat' => $req->alamat,
+                'catatan' => $req->catatan,
+                'status' => $req->status,
+                'alasan_batal' => $req->alasan_batal, 
+                'driver' => $req->driver,
+            ];
+            
+            if ($req->hasFile('file')) {
+                $filePath = $this->uploadFileDO($req->file('file'));
+                $datado['file'] = $filePath;
+            }
+            
+            $updateDO = DeliveryOrder::where('no_do', $req->no_do)->update($datado);
         }
         
-        $updateDO = DeliveryOrder::where('no_do', $req->no_do)->update($datado); // Memasukkan data untuk update
         if($req->status == 'DIBATALKAN'){
             return redirect(route('returpenjualan.index'))->with('success', 'Berhasil Mengupdate Data');
         }
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
 
+        if($req->status == 'DIKONFIRMASI' && $req->komplain == 'retur' ) {
+            $invoicepnj = Penjualan::where('no_invoice', $req->no_invoice)->first();
+            $biayakirim = $req->total;
+            $totaltagihanretur = intval($invoicepnj->total_tagihan) + intval($req->total);
+            $bayar = Pembayaran::where('invoice_penjualan_id', $invoicepnj->id)->get();
+            $hasilsisa = 0;
+            foreach($bayar as $byr) {
+                $hasilsisa += $byr->nominal; 
+            }
+
+            $sisa = intval($totaltagihanretur) - intval($hasilsisa);
+            $updatepnj = Penjualan::where('no_invoice', $req->no_invoice)->update([
+                'biaya_kirim_retur' => $biayakirim,
+                'total_tagihan_retur' => $totaltagihanretur,
+                'sisa_bayar' => $sisa,
+            ]);
+            
+        }
+
         //hapus komponen agar bisa di create ulang
         $produkterjualretur = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
-        $produkterjualganti = Produk_Terjual::whereIn('id', $req->nama_produk2)->get();
-        $arrayCombined = array_merge($produkterjualganti->pluck('id')->toArray(), $produkterjualretur->pluck('id')->toArray());
-        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_retur', $req->no_retur)->get();
+        if($req->komplain == 'retur'){
+            $produkterjualganti = Produk_Terjual::whereIn('id', $req->nama_produk2)->get();
+            $arrayCombined = array_merge($produkterjualganti->pluck('id')->toArray(), $produkterjualretur->pluck('id')->toArray());
+            $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_retur', $req->no_retur)->get();
+        }else{
+            $arrayCombined = $produkterjualretur->pluck('id')->toArray();
+            $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_retur', $req->no_retur)->get();
+        }
+        
         $ceken = $cek->pluck('id')->toArray();
 
         if (!empty($ceken)) {
             Produk_Terjual::whereIn('id', $ceken)->forceDelete();
             Komponen_Produk_Terjual::whereIn('produk_terjual_id', $ceken)->forceDelete();
         }
-        Komponen_Produk_Terjual::whereIn('produk_terjual_id', $produkterjualganti->pluck('id')->toArray())->forceDelete();
-
+    
         if($req->komplain == 'retur'){
+            Komponen_Produk_Terjual::whereIn('produk_terjual_id', $produkterjualganti->pluck('id')->toArray())->forceDelete();
             for ($i = 0; $i < count($req->nama_produk2); $i++) {
                 $getProdukJual = Produk_Terjual::with('komponen')->where('id', $req->nama_produk2[$i])->first();
                 $getProduk = Produk_Jual::where('kode', $req->kode_produk2[$i])->first();
@@ -999,6 +1019,42 @@ class ReturpenjualanController extends Controller
 
             if (!$produk_terjual) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+
+            if($req->status == 'DIKONFIRMASI' && $req->komplain == 'diskon') {
+                $invoicepnj = Penjualan::where('no_invoice', $req->no_invoice)->first();
+                if($req->jenis_diskon[$i] == 'Nominal'){
+                    $diskon =  intval($req->diskon[$i]);
+                }elseif($req->jenis_diskon[$i] == 'persen'){
+                    $diskonbelum =  intval($req->totalharga[$i]) * intval($req->diskon[$i]) / 100;
+                    $diskon = intval($req->totalharga[$i]) - intval($diskonbelum);
+                }
+                //ppn sebelumnya
+                $jumlahsubtotal = intval($invoicepnj->total_tagihan) - (intval($invoicepnj->jumlah_ppn) + intval($diskon));
+                //ppn yang baru
+                $ppntotal = intval($jumlahsubtotal) * intval($invoicepnj->persen_ppn) / 100;
+                $totaltagihanretur = intval($jumlahsubtotal) + intval($ppntotal);
+                $bayar = Pembayaran::where('invoice_penjualan_id', $invoicepnj->id)->get();
+                $hasilsisa = 0;
+                foreach($bayar as $byr) {
+                    $hasilsisa += $byr->nominal; 
+                }
+
+                $sisa = intval($totaltagihanretur) - intval($hasilsisa);
+                $updatepnj = Penjualan::where('no_invoice', $req->no_invoice)->update([
+                    'sub_total_retur' => $jumlahsubtotal,
+                    'jumlahppnretur' => $ppntotal,
+                    'total_tagihan_retur' => $totaltagihanretur,
+                    'sisa_bayar' => $sisa,
+                ]);
+                $pjinvoicepenj = Produk_Terjual::where('no_do', $getProdukJual->no_do)->first();
+                $hasilrefund = Produk_Terjual::where('id', $pjinvoicepenj->no_do)->first();
+                $hasilinvoice = Produk_Terjual::where('id', $hasilrefund->no_invoice)->update([
+                    'jumlahretur' => $req->jumlah[$i],
+                    'diskonretur' => $diskon,
+                    'hargajualretur' => $req->totalharga[$i],
+                ]);
+                
             }
 
             $cekgfttrd = substr($getProdukJual->produk->kode, 0, 3);
@@ -1141,13 +1197,69 @@ class ReturpenjualanController extends Controller
             }
         }
         
-        if($req->status == 'DIKONFIRMASI'){
+        if($req->status == 'DIKONFIRMASI' && $req->komplain == 'RETUR'){
             return redirect(route('returpenjualan.show', ['returpenjualan' => $retur]))->with('success', 'Silakan set Komponen Ganti');
-        }elseif($req->status == 'TUNDA'){
+        }elseif($req->status == 'TUNDA' || $req->status == 'DIKONFIRMASI'){
             return redirect(route('returpenjualan.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
             return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
+    }
+
+    public function view_retur ($returpenjualan) 
+    {
+        $penjualans = ReturPenjualan::with('produk_retur', 'deliveryorder')->find($returpenjualan);
+        $returpenjualans = ReturPenjualan::with('deliveryorder')->find($returpenjualan);
+        $lokasis = Lokasi::all();
+        $karyawans = Karyawan::all();
+        $produks = Produk_Terjual::with('komponen', 'produk')->where('no_retur', $returpenjualans->no_retur)->get();
+        $produkjuals = Produk_Terjual::all();
+        $produkreturjuals = Produk_Jual::all();
+        $suppliers = Supplier::all();
+        $dopenjualans = DeliveryOrder::where('no_referensi', $returpenjualans->no_retur)->first();
+        $customers = Customer::all();
+        $karyawans = Karyawan::all();
+        $kondisis = Kondisi::all();
+        $drivers = Karyawan::where('jabatan', 'driver')->get();
+        $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
+        $juals = Produk_Jual::all();
+        $ongkirs = Ongkir::get();
+        $perPendapatan = [];
+
+        foreach ($penjualans->produk_retur as $produk) {
+            $selectedGFTKomponen = [];
+            
+                foreach ($produkjuals as $index => $pj) {
+                    if($pj->produk && $produk->produk->kode)
+                    {
+                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                    
+                    if ($isSelectedGFT) {
+                        foreach ($pj->komponen as $komponen) {
+                            if ($pj->id == $komponen->produk_terjual_id) {
+                                foreach ($kondisis as $kondisi) {
+                                    if ($kondisi->id == $komponen->kondisi) {
+                                        $selectedGFTKomponen[$produk->no_retur][] = [
+                                            'kode' => $komponen->kode_produk,
+                                            'nama' => $komponen->nama_produk,
+                                            'kondisi' => $kondisi->nama,
+                                            'jumlah' => $komponen->jumlah,
+                                            'produk' => $komponen->produk_terjual_id
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    }
+                    if (!empty($selectedGFTKomponen)) {
+                        $perPendapatan += $selectedGFTKomponen;
+                    }
+                }
+            
+        }
+
+        return view('returpenjualan.view', compact('perPendapatan','ongkirs','juals','produkKomponens','produkreturjuals','penjualans','returpenjualans','suppliers','drivers','dopenjualans', 'kondisis', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals'));
     }
 
 }

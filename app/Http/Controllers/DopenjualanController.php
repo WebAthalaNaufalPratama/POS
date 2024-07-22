@@ -37,10 +37,14 @@ class DopenjualanController extends Controller
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         $userroles = Auth::user()->roles()->value('name');
         // dd($user);
-        if($lokasi->lokasi->tipe_lokasi == 2){
+        if($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet'])){
             $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
-        }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
+        }elseif($lokasi->lokasi->tipe_lokasi == 1 && $user->hasRole([ 'KasirGallery', 'AdminGallery'])){
             $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
+        }elseif($user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1){
+            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->where('status', 'DIKONFIRMASI')->orWhere('status', 'DIBATALKAN')->orderBy('created_at', 'desc');
+        }elseif($user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2){
+            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->where('status', 'DIKONFIRMASI')->orWhere('status', 'DIBATALKAN')->orderBy('created_at', 'desc');
         }else{
             $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
         }
@@ -77,6 +81,7 @@ class DopenjualanController extends Controller
         $penjualans = Penjualan::with('produk')->find($penjualan);
         // dd($produk); 
         // dd($penjualans);
+        $kondisis = Kondisi::all();
         $user = Auth::user();
         $lokasis = Lokasi::find($user);
         $karyawans = Karyawan::where('jabatan', 'Driver')->get();
@@ -94,7 +99,7 @@ class DopenjualanController extends Controller
         }
         // dd($produks);
 
-        return view('dopenjualan.create', compact('penjualans', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals', 'cekInvoice'));
+        return view('dopenjualan.create', compact('kondisis','penjualans', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals', 'cekInvoice'));
     }
 
     public function store(Request $req)
@@ -466,6 +471,7 @@ class DopenjualanController extends Controller
         $produkjuals = Produk_Jual::all();
         $customers = Customer::all();
         $karyawans = Karyawan::all();
+        $kondisis = Kondisi::all();
         $Invoice = DeliveryOrder::latest()->first();
         if ($Invoice != null) {
             $substring = substr($Invoice->no_do, 11);
@@ -473,7 +479,7 @@ class DopenjualanController extends Controller
         } else {
             $cekInvoice = 0;
         }
-        return view('dopenjualan.audit', compact('dopenjualan', 'produkjuals', 'karyawans', 'customers', 'cekInvoice'));
+        return view('dopenjualan.audit', compact('kondisis','dopenjualan', 'produkjuals', 'karyawans', 'customers', 'cekInvoice'));
     }
 
     public function audit_update(Request $req)
@@ -539,11 +545,11 @@ class DopenjualanController extends Controller
         $lokasi = Lokasi::where('id', $invoice->lokasi_id)->first();
 
         // Mendapatkan data yang ada berdasarkan id untuk nama_produk
-        $exist = Produk_Terjual::where('id', $req->nama_produk)->get();
+        $exist = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
         $arrayExist = $exist->pluck('id')->toArray();
 
         // Mendapatkan data yang ada berdasarkan id untuk nama_produk2
-        $exist2 = Produk_Terjual::where('id', $req->nama_produk2)->get();
+        $exist2 = Produk_Terjual::whereIn('id', $req->nama_produk2)->get();
         $arrayExist2 = $exist2->pluck('id')->toArray();
 
         // Menggabungkan kedua array
@@ -581,14 +587,17 @@ class DopenjualanController extends Controller
                         'satuan' => $req->satuan[$i],
                         'keterangan' => $req->keterangan[$i]
                     ]);
-    
-                    if($getProdukJual->jumlah != $req->jumlah)
+
+                    if($getProdukJual->jumlah != $req->jumlah[$i])
                     {
-                        $updateexist = Produk_Terjual::where('id', $getProdukJual->no_invoice)->first();
-                        $jumlahDikirim = (int)$updateexist->jumlah - (int)$req->jumlah;
-                        Produk_terjual::where('id', $getProdukJual)->update([
+                        $intinvoice = $getProdukJual->no_invoice;
+                        $updateexist = Produk_Terjual::where('id', $intinvoice)->first();
+                        $jumlahDikirim = intval($updateexist->jumlah) - intval($req->jumlah[$i]);
+                        $updatecek = Produk_terjual::where('id', $updateexist->id)->update([
                             'jumlah_dikirim' => $jumlahDikirim
                         ]);
+
+                       
                     }
                 
                 
@@ -771,7 +780,7 @@ class DopenjualanController extends Controller
         if($req->status == 'DIKONFIRMASI'){
             return redirect(route('dopenjualan.show', ['dopenjualan' => $dopenjualanIds]))->with('success', 'Berhasil Mengupdate Data');
         }elseif($req->status == 'TUNDA'){
-            return redirect(route('penjualan.index'))->with('success', 'Berhasil Mengupdate data');
+            return redirect(route('dopenjualan.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
             return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }

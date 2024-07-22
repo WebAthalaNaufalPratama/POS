@@ -274,6 +274,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{penjualan}/audit', 'PenjualanController@audit')->name('auditpenjualan.edit');
             Route::patch('/storeaudit', 'PenjualanController@audit_update')->name('auditpenjualan.update');
             Route::get('/{penjualan}/showaudit', 'PenjualanController@audit_show')->name('auditpenjualan.show');
+            Route::get('/{penjualan}/view', 'PenjualanController@view_penjualan')->name('penjualan.view');
         });
 
         Route::group(['prefix' => 'purchase'], function() {
@@ -408,6 +409,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/paymentretur', 'ReturPenjualanController@paymentretur')->name('returpenjualan.paymentretur');
             Route::get('/{returpenjualan}/auditretur', 'ReturPenjualanController@audit')->name('auditretur.edit');
             Route::patch('/storeauditretur', 'ReturPenjualanController@auditretur_update')->name('auditretur.update');
+            Route::get('/{returpenjualan}/view', 'ReturPenjualanController@view_retur')->name('returpenjualan.view');
         });
 
         Route::group(['prefix' => 'inven_galeri'], function() {

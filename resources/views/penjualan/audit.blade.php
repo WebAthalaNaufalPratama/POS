@@ -112,7 +112,12 @@
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA" {{$penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
                                                 <option value="DIKONFIRMASI" {{$penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
-                                                <option value="DIBATALKAN" {{$penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALAKAN</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $dopenjualan->status != 'DIKONFIRMASI')
+                                                    <option value="DIBATALKAN" {{$penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALAKAN</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -240,7 +245,11 @@
                                                         </div>
                                                     </td>
                                                     <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.',)}}"></td>
-                                                    <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                    @if($i == 0)
+                                                        <td><button type="button" name="add" id="add" class="btn btn-success btnubah">+</button></td>
+                                                    @else
+                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove btnubah">x</button></td>
+                                                    @endif
                                                     @php $i++; @endphp
                                                 </tr>
                                                 @endforeach
@@ -382,7 +391,7 @@
                                                         </tr>
                                                         <tr>
                                                             @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
-                                                                <td><input type="date" class="form-control" name="tanggal_dibuat" style="width: 25%;" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
                                                                 <td id="tgl_penyetuju">-</td>
                                                                 <td id="tgl_pemeriksa">-</td>
                                                             @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
@@ -393,6 +402,23 @@
                                                                 <td><input type="date" class="form-control" name="tanggal_dibuat"  value="{{ $penjualans->tanggal_dibuat }}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ $penjualans->tanggal_dibukukan ?? '-'}}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_audit"  value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            @endif
+                                                        </tr>
+                                                        <tr>
+                                                            @if($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                                <td>-</td>
+                                                                <td><select name="ubahapa" id="ubahapa" class="form-control">
+                                                                    <option value="ubahsemua">Ubah Produk</option>
+                                                                    <option value="tidakubah">Tidak Ubah Produk</option>
+                                                                </td>
+                                                                <td></td></td>
+                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td>-</td>
+                                                                <td>-</td>
+                                                                <td><select name="ubahapa" id="ubahapa" class="form-control">
+                                                                    <option value="ubahsemua">Ubah Produk</option>
+                                                                    <option value="tidakubah">Tidak Ubah Produk</option>
+                                                                </td>
                                                             @endif
                                                         </tr>
                                                     </tbody>
@@ -923,16 +949,26 @@
         var hargaTotal = 0;
 
         if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
-            hargaTotal = jumlah * hargaSatuan; // Mengalikan jumlah dengan hargaSatuan
+            hargaTotal = jumlah * hargaSatuan;
         }
 
         if (!isNaN(hargaTotal)) {
             if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue * jumlah; 
+                hargaTotal -= diskonValue;
+                if(hargaTotal <= 0){
+                    hargaTotal = 0;
+                    alert('nominal tidak boleh melebihi harga total');
+                    diskonValue = 0;
+                }
                 $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
             } else if (diskonType === "persen" && !isNaN(diskonValue)) {
-                var diskonPersen = (hargaTotal * diskonValue / 100); // Menghitung diskon berdasarkan persentase
-                hargaTotal -= diskonPersen * jumlah; // Mengurangkan diskon persentase dari hargaTotal
+                var diskonPersen = (hargaTotal * diskonValue / 100); 
+                hargaTotal -= diskonPersen; 
+                if(hargaTotal <= 0){
+                    hargaTotal = 0;
+                    alert('diskon tidak boleh melebihi harga total');
+                    diskonPersen = 0;
+                }
             }
         }
 
@@ -949,6 +985,7 @@
 
         // Format subtotal kembali ke format Rupiah sebelum menetapkannya ke input
         $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
+        $('#jenis_ppn').trigger('change');
     }
 
     function copyDataToModal(index) {
@@ -964,37 +1001,54 @@
 <script>
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     $(document).ready(function() {
-        var i = 1;
+        var i = {{count($produks)}};
         $('#add').click(function() {
-            var newRow = '<tr class="tr_clone" id="row' + i + '">' +
-                '<td>' +
-                '<select id="nama_produk_' + i + '" name="nama_produk[]" class="form-control select2">' +
-                '<option value="">Pilih Produk</option>' +
-                '@foreach ($produks as $index => $produk)' +
-                '<option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}">{{ $produk->nama }}</option>' +
-                '@endforeach' +
-                '</select>' +
-                '</td>' +
-                '<td><input type="number" name="harga_satuan[]" id="harga_satuan_' + i + '" class="form-control" readonly></td>' +
-                '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control" oninput="multiply(this)"></td>' +
-                '<td>' +
-                '<select id="jenis_diskon_' + i + '" name="jenis_diskon[]" class="form-control" onchange="showInputType(' + i + ')">' +
-                '<option value="0">Pilih Diskon</option>' +
-                '<option value="Nominal">Nominal</option>' +
-                '<option value="persen">Persen</option>' +
-                '</select>' +
-                '<div class="input-group">' +
-                '<input type="number" name="diskon[]" id="diskon_' + i + '" value="" class="form-control" style="display: none;" aria-label="Recipients username" aria-describedby="basic-addon3" onchange="calculateTotal(' + i + ')">' +
-                '<span class="input-group-text" id="nominalInput_' + i + '" style="display: none;">.00</span>' +
-                '<span class="input-group-text" id="persenInput_' + i + '" style="display: none;">%</span>' +
-                '</div>' +
-                '</div>' +
-                '</td>' +
-                '<td><input type="number" name="harga_total[]" id="harga_total_' + i + '" class="form-control" readonly></td>' +
-                '<td><button type="button" name="pic[]" id="pic_' + i + '" class="btn btn-warning" data-toggle="modal" data-target="#picModal_' + i + '" onclick="copyDataToModal(' + i + ')">PIC Perangkai</button></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
-                '</tr>';
-
+            var newRow = `<tr class="tr_clone" id="row${i}">
+                <td>
+                    <select id="nama_produk_${i}" name="nama_produk[]" class="form-control select2">
+                        <option value="">Pilih Produk</option>
+                        @foreach ($produkjuals as $index => $produk)
+                            <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                @if (substr($produk->kode, 0, 3) === 'TRD') 
+                                    {{ $produk->nama }}
+                                    @foreach ($produk->komponen as $komponen)
+                                        @if ($komponen->kondisi)
+                                            @foreach($kondisis as $kondisi)
+                                                @if($kondisi->id == $komponen->kondisi)
+                                                    - {{ $kondisi->nama }}
+                                                    @php
+                                                        $found = true;
+                                                        break;
+                                                    @endphp
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                        @if ($found) @break @endif
+                                    @endforeach
+                                @elseif (substr($produk->kode, 0, 3) === 'GFT')
+                                    {{ $produk->nama }}
+                                @endif
+                            </option>
+                        @endforeach
+                    </select>
+                </td>
+                <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control" readonly></td>
+                <td><input type="number" name="jumlah[]" id="jumlah_${i}" class="form-control" oninput="multiply(this)"></td>
+                <td>
+                    <select id="jenis_diskon_${i}" name="jenis_diskon[]" class="form-control" onchange="showInputType(${i})">
+                        <option value="0">Pilih Diskon</option>
+                        <option value="Nominal">Nominal</option>
+                        <option value="persen">Persen</option>
+                    </select>
+                    <div class="input-group">
+                        <input type="text" name="diskon[]" id="diskon_${i}" value="" class="form-control" style="display: none;" aria-label="Recipients username" aria-describedby="basic-addon3" onchange="calculateTotal(${i})">
+                        <span class="input-group-text" id="nominalInput_${i}" style="display: none;">.00</span>
+                        <span class="input-group-text" id="persenInput_${i}" style="display: none;">%</span>
+                    </div>
+                </td>
+                <td><input type="text" name="harga_total[]" id="harga_total_${i}" class="form-control" readonly></td>
+                <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
+            </tr>`;
 
             $('#dynamic_field').append(newRow);
 
@@ -1514,6 +1568,28 @@
             
             $(this).html('<span class="spinner-border spinner-border-sm me-2"></span>');
             checkPromo(total_transaksi, tipe_produk, produk);
+        });
+
+        $('#ubahapa').change(function () {
+            var ubahapa = $(this).val();
+
+            if (ubahapa == 'ubahsemua') {
+                $('.btnubah').show();
+                $('[id^=nama_produk]').prop('disabled', false);
+                $('[id^=harga_satuan]').prop('readonly', false);
+                $('[id^=jumlah]').prop('readonly', false);
+                $('[id^=jenis_diskon]').prop('disabled', false);
+                $('[id^=diskon]').prop('readonly', false);
+                $('[id^=harga_total]').prop('readonly', false);
+            }else{
+                $('[id^=nama_produk]').prop('disabled', true);
+                $('[id^=harga_satuan]').prop('readonly', true);
+                $('[id^=jumlah]').prop('readonly', true);
+                $('[id^=jenis_diskon]').prop('disabled', true);
+                $('[id^=diskon]').prop('readonly', true);
+                $('[id^=harga_total]').prop('readonly', true);
+                $('.btnubah').hide();
+            }
         });
 
 

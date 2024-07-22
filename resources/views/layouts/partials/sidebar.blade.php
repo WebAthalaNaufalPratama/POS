@@ -58,7 +58,12 @@
                     <a href="javascript:void(0);"><i data-feather="file-text"></i><span> Sewa</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('kontrak.index') }}" class="{{ request()->is('kontrak*') ? 'active' : '' }}">Kontrak</a></li>
-                        <li><a href="{{ route('form.index', ['jenis_rangkaian' => 'Sewa']) }}" class="{{ request()->is('form*') ? 'active' : '' }}">Perangkai</a></li>
+                        <li>
+                            <a href="{{ route('form.index', ['jenis_rangkaian' => 'Sewa']) }}"
+                            class="{{ request()->is('form') && request()->query('jenis_rangkaian') == 'Sewa' ? 'active' : '' }}">
+                                Perangkai
+                            </a>
+                        </li>
                         <li><a href="{{ route('do_sewa.index') }}" class="{{ request()->is('do_sewa*') ? 'active' : '' }}">Delivery Order</a></li>
                         <li><a href="{{ route('kembali_sewa.index') }}" class="{{ request()->is('kembali_sewa*') ? 'active' : '' }}">Barang Kembali</a></li>
                         <li><a href="{{ route('invoice_sewa.index') }}" class="{{ request()->is('invoice_sewa*') ? 'active' : '' }}">Invoice</a></li>
@@ -71,7 +76,12 @@
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
-                        <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="{{ request()->is('formpenjualan*') ? 'active' : '' }}">Perangkai</a></li>
+                        <li>
+                            <a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}"
+                            class="{{ request()->is('formpenjualan') && request()->query('jenis_rangkaian') == 'Penjualan' ? 'active' : '' }}">
+                                Perangkai
+                            </a>
+                        </li>
                         <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
                         <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
                         <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
@@ -116,7 +126,12 @@
                             <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
                         @endif
                         @if(in_array('formpenjualan.index', $rolePermissions) && isset($lokasi->lokasi->tipe_lokasi) && $lokasi->lokasi->tipe_lokasi != 2)
-                            <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'MUTASIGO']) }}" class="{{ request()->is('formpenjualan?jenis_rangkaian=MUTASIGO') ? 'active' : '' }}">Perangkai Mutasi GO</a></li>
+                        <li>
+                            <a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'MUTASIGO']) }}"
+                            class="{{ request()->is('formpenjualan') && request()->query('jenis_rangkaian') == 'MUTASIGO' ? 'active' : '' }}">
+                                Perangkai Mutasi GO
+                            </a>
+                        </li>
                         @endif
                         @if(in_array('mutasioutlet.index', $rolePermissions))
                             <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>

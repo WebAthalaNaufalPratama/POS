@@ -234,8 +234,6 @@ class FormPerangkaiController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
-        // dd($data);
-        // dd($req->prdTerjual_i);
         // delete data
         $getPerangkai = FormPerangkai::where('no_form', $data['no_form'])->get();
         if($getPerangkai){

@@ -95,7 +95,7 @@
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <img id="preview" />
+                                                <div class="custom-file-container__image-preview"></div>
                                             </div>
                                         </div>
                                     </div>
