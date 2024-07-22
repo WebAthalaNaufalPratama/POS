@@ -157,15 +157,19 @@
                         {{-- <li><a href="#" class="">Inden</a></li> --}}
                     </ul>
                 </li>
-                @if(in_array('kas_galery.index', $rolePermissions))
+               @role(['AdminGallery', 'Finance'])
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/wallet1.svg" alt="img"><span> Kas</span> <span class="menu-arrow"></span></a>
                     <ul>
+                        @if(in_array('kas_pusat.index', $rolePermissions))
                         <li><a href="{{ route('kas_pusat.index') }}" class="{{ request()->is('kas_pusat*') ? 'active' : '' }}">Pusat</a></li>
+                        @endif
+                        @if(in_array('kas_gallery.index', $rolePermissions))
                         <li><a href="{{ route('kas_gallery.index')}}" class="{{ request()->is('kas_gallery*') ? 'active' : '' }}">Gallery</a></li>
+                        @endif
                     </ul>
                 </li>
-                @endif
+                @endrole
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>

@@ -239,30 +239,30 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataReturPO);
         }
-        // $komponenPembelianInden = ProdukMutasiInden::with('mutasiinden', 'produk.produk', 'kondisi')->whereNotNull('jml_diterima')->whereHas('mutasiinden', function($q) use($isSuperAdmin){
-        //     if (!$isSuperAdmin) {
-        //         $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        //     }
-        //     $q->where('status_diterima', 'DIKONFIRMASI');
-        // })->get();
-        // if($komponenPembelianInden->isNotEmpty()){
-        //     $dataPOInden = $komponenPembelianInden->map(function($produk){
-        //         return [
-        //             'Id' => $produk->id,
-        //             'Pengubah' => optional($produk->mutasiinden->pembuat)->name,
-        //             'No Referensi' => $produk->mutasiinden->no_mutasi ?? null,
-        //             'Kode Produk Jual' => '-',
-        //             'Nama Produk Jual' => '-',
-        //             'Kode Komponen' => $produk->produk->produk->kode ?? null,
-        //             'Nama Komponen' => $produk->produk->produk->nama ?? null,
-        //             'Kondisi' => $produk->kondisi->nama ?? null,
-        //             'Masuk' => $produk->jml_diterima ?? '-',
-        //             'Keluar' => '-',
-        //             'Waktu' => $produk->updated_at
-        //         ];
-        //     });
-        //     $mergedCollection = $mergedCollection->merge($dataPOInden);
-        // }
+        $komponenPembelianInden = ProdukMutasiInden::with('mutasiinden', 'produk.produk', 'kondisi')->whereNotNull('jml_diterima')->whereHas('mutasiinden', function($q) use($isSuperAdmin){
+            if (!$isSuperAdmin) {
+                $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            }
+            $q->where('status_diterima', 'DIKONFIRMASI');
+        })->get();
+        if($komponenPembelianInden->isNotEmpty()){
+            $dataPOInden = $komponenPembelianInden->map(function($produk){
+                return [
+                    'Id' => $produk->id,
+                    'Pengubah' => optional($produk->mutasiinden->pembuat)->name,
+                    'No Referensi' => $produk->mutasiinden->no_mutasi ?? null,
+                    'Kode Produk Jual' => '-',
+                    'Nama Produk Jual' => '-',
+                    'Kode Komponen' => $produk->produk->produk->kode ?? null,
+                    'Nama Komponen' => $produk->produk->produk->nama ?? null,
+                    'Kondisi' => $produk->kondisi->nama ?? null,
+                    'Masuk' => $produk->jml_diterima ?? '-',
+                    'Keluar' => '-',
+                    'Waktu' => $produk->updated_at
+                ];
+            });
+            $mergedCollection = $mergedCollection->merge($dataPOInden);
+        }
         // pembelian end
 
         // mutasi start
