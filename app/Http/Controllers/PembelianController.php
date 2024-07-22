@@ -1759,7 +1759,11 @@ class PembelianController extends Controller
 
     public function edit_returpo($id)
     {
-        $data = Returpembelian::with('invoice', 'produkretur')->find($id);
+        $data = Returpembelian::with('invoice', 'produkretur')->where('id', $id)->first();
+        foreach($data->produkretur as $produk) {
+            $beli = Produkbeli::where('id', $produk->produkbeli_id)->first();
+        }
+        // dd($beli);
         
         if (!$data) {
             return redirect()->route('returbeli.index')->with('error', 'Data retur pembelian tidak ditemukan.');
@@ -1781,7 +1785,7 @@ class PembelianController extends Controller
         // return $nomor_retur;
 
     
-        return view('purchase_retur.editretur', compact('nomor_retur','invoice','data', 'pembuat','pembuatjbt', 'pembuku','pembukujbt', 'rekenings', 'databayars', 'lokasi'));
+        return view('purchase_retur.editretur', compact('beli','nomor_retur','invoice','data', 'pembuat','pembuatjbt', 'pembuku','pembukujbt', 'rekenings', 'databayars', 'lokasi'));
     }
 
 
@@ -2545,6 +2549,180 @@ class PembelianController extends Controller
     public function destroy(Pembelian $pembelian)
     {
         //
+    }
+
+    function update_retur_purchase($retur, Request $request) {
+        $validator = Validator::make($request->all(), [
+            'invoicepo_id' => 'required',
+            'no_retur' => 'required',
+            'tgl_retur' => 'required',
+            'komplain' => 'required',
+            'subtotal' => 'required',
+            // 'total_harga' => 'required',
+        ]);
+
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+        $data = $request->except(['_token', '_method', 'file', 'supplier_id', 'lokasi_id', 'tanggal_po', 'tanggal_invoice', 'no_po', 'no_invoice', 'kode_produk', 'nama_produk', 'alasan', 'jumlah', 'diskon', 'harga_satuan', 'harga_total', 'DataTables_Table_0_length', 'biaya_pengiriman', 'total_harga']);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_retur_pembelian', $fileName, 'public');
+            $data['foto'] = $filePath;
+        }
+
+        if($request->komplain == "Refund"){
+            $data['sisa'] = $request->subtotal;
+        }else{
+            $data['sisa'] = 0;
+        }
+        
+        $data['ongkir'] = $request->biaya_pengiriman ?? 0;
+        $user = Auth::user();
+        if($user->hasRole(['Purchasing'])) {
+            $data['tgl_dibuku'] = null;
+        }elseif($user->hasRole(['Auditor'])) {
+            $data['tgl_dibuat'] = null;
+        }
+        // $data['total'] = $request->total_harga;
+        $jenis = $data['komplain'];
+        
+        $save = ReturPembelian::where('id', $retur)->update($data);
+
+        // $data['sisa'] = $request->subtotal;
+        // $save = ReturPembelian::create($data);
+       
+
+        if ($save) {        
+
+            for ($i = 0; $i < count($request->nama_produk); $i++) {
+                $returpem = ReturPembelian::where('id', $retur)->first();
+                $produkReturBeli = [
+                    'returpembelian_id' => $returpem->id,
+                    'produkbeli_id' => $request->nama_produk[$i],
+                    'alasan' => $request->alasan[$i],
+                    'jumlah' => $request->jumlah[$i],
+                    'harga' => $request->harga_satuan[$i],
+                    'diskon' => $request->diskon[$i] ?? 0,
+                    'totharga' => $request->harga_total[$i]
+                ];
+
+                $produkret = Produkretur::where('returpembelian_id', $returpem->id)->where('produkbeli_id', $request->nama_produk[$i])->first();
+                if(!empty($produkret)) {
+                    $produk_retur = Produkretur::where('returpembelian_id', $returpem->id)->where('produkbeli_id', $request->nama_produk[$i])->update($produkReturBeli);
+                }elseif(empty($produkret)){
+                    $produk_retur = Produkretur::create($produkReturBeli);
+                }
+                
+                if($request->status_dibuat == "DIKONFIRMASI"){
+
+                    $getProdukBeli = Produkbeli::where('id', $request->nama_produk[$i])->first();
+                    if($jenis == 'Retur' || 'Refund'){
+                        if ($getProdukBeli->pembelian->lokasi->tipe_lokasi == 1 ) {
+                            $getInven = InventoryGallery::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
+                            $getInven->jumlah += $produkret->jumlah;
+                            $getInven->update();
+                            $getInven->jumlah -=  $request->jumlah[$i];
+                            $getInven->update();
+                        }elseif($getProdukBeli->pembelian->lokasi->tipe_lokasi == 3 ){
+                            $getInven = InventoryGreenHouse::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
+                            $getInven->jumlah += $produkret->jumlah;
+                            $getInven->update();
+                            $getInven->jumlah -=  $request->jumlah[$i];
+                            $getInven->update();
+                        
+                        }elseif($getProdukBeli->pembelian->lokasi->tipe_lokasi == 4 ){
+                            $getInven = InventoryGudang::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
+                            $getInven->jumlah += $produkret->jumlah;
+                            $getInven->update();
+                            $getInven->jumlah -=  $request->jumlah[$i];
+                            $getInven->update();
+                        }
+                    } 
+
+                    $totalharga = ($getProdukBeli->jml_diterima - $request->jumlah[$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
+                    $updateproduk = [
+                        'type_komplain' => $jenis,
+                        'qty_komplain' => $request->jumlah[$i],
+                        'totalharga' =>  $totalharga
+                    ];
+
+                    $update = Produkbeli::where('id', $request->nama_produk[$i])->update($updateproduk);
+
+                    if (!$update) {
+                        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    }
+
+                }
+
+            }
+            
+            if($request->status_dibuat == "DIKONFIRMASI"){
+
+            $getInvoice = Invoicepo::find($request->invoicepo_id);
+            $getppn = $getInvoice->persen_pp ?? 0;
+            $newSubtotal = $getInvoice->subtotal;
+            $getretur = Returpembelian::where('id',$save->id)->first();
+            // $getProdukbeli = Produkbeli::where('pembelian_id',  $getInvoice->pembelian_id)->get();
+            $getProdukretur = Produkretur::where('returpembelian_id',$save->id)->get();
+            
+
+            if($jenis == 'Retur'){
+                $subretur = $newSubtotal - $getretur->subtotal;
+                $getInvoice->subtotal = $subretur ;
+                $getInvoice->ppn = $getppn/100 * $subretur ;
+                $getInvoice->total_tagihan = $subretur  + $getInvoice->biaya_kirim + ($getppn/100 * $subretur) + $getretur->ongkir;
+                $getInvoice->sisa = $getInvoice->total_tagihan;
+                $check = $getInvoice->update();
+            }elseif($jenis == 'Refund'){
+                $subrefund = $newSubtotal - $getretur->subtotal;
+                // dd($subrefund);
+                $getInvoice->subtotal = $subrefund ;
+                $getInvoice->ppn = $getppn/100 * $subrefund ;
+                $getInvoice->total_tagihan = $subrefund  + $getInvoice->biaya_kirim + ($getppn/100 * $subrefund) + $getretur->ongkir;
+                // $getInvoice->total_tagihan = $getretur->ongkir;
+                $getInvoice->sisa = $getretur->ongkir;
+
+                 //Debugging
+                try {
+                    $getretur->sisa = $subrefund;
+                    $check2 = $getretur->update();
+
+                    if (!$check2) {
+                        return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur');
+                    }
+                } catch (\Exception $e) {
+                    return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur: ' . $e->getMessage());
+                }
+
+                $check = $getInvoice->update();
+
+                // $getretur->sisa = $newSubtotal - $getretur->subtotal;
+                // $check2=$getretur->update();
+
+            }else{
+
+                foreach ($getProdukretur as $produkretur) {
+                    $newSubtotal -= ($produkretur->jumlah * $produkretur->diskon);
+                }
+                $getInvoice->subtotal = $newSubtotal;
+                $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + ($getppn/100 *$newSubtotal) ;
+                $getInvoice->ppn = $getppn/100 *$newSubtotal ;
+                $getInvoice->sisa = $getInvoice->total_tagihan;
+                $check = $getInvoice->update();
+            }
+
+           
+            
+            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal Update Invoice');
+        }
+
+            // return redirect('returbeli.show',)->withInput()->with('success', 'Berhasil Menyimpan Data');
+            return redirect(route('returbeli.edit', ['retur_id' => $returpem->id]))->with('success', 'Berhasil Menyimpan Data');
+
+        }
     }
 
    

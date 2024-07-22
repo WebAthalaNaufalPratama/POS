@@ -326,6 +326,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
              Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show'); 
              Route::get('/returbeli/{retur_id}/edit', 'PembelianController@edit_returpo')->name('returbeli.edit');
+             Route::patch('/returbeli/{retur_id}/update', 'PembelianController@update_retur_purchase')->name('retur_purchase.update');
 
         });
 
