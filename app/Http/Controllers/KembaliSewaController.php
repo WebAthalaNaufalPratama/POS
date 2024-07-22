@@ -27,7 +27,7 @@ class KembaliSewaController extends Controller
     public function index(Request $req)
     {
         $query = KembaliSewa::query();
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        if(Auth::user()->karyawans){
             $query->whereHas('sewa', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -46,11 +46,14 @@ class KembaliSewaController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_kembali', '<=', $req->input('dateEnd'));
         }
+        if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
+            $query->where('status', 'DIKONFIRMASI');
+        }
         $data = $query->orderByDesc('id')->get();
         $customer = Kontrak::whereHas('kembali_sewa')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -58,7 +61,7 @@ class KembaliSewaController extends Controller
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -389,6 +392,14 @@ class KembaliSewaController extends Controller
                 $msg = 'Dibatalkan';
             } else {
                 return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');
+            }
+            if(Auth::user()->hasRole('Auditor')){
+                $kembaliSewa->penyetuju = Auth::user()->id;
+                $kembaliSewa->tanggal_penyetuju = $req->tanggal_penyetuju;
+            }
+            if(Auth::user()->hasRole('Finance')){
+                $kembaliSewa->pemeriksa = Auth::user()->id;
+                $kembaliSewa->tanggal_pemeriksa = $req->tanggal_pemeriksa;
             }
             $check = $kembaliSewa->update();
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');

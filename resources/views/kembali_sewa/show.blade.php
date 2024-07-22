@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h5 class="card-title">Buat Kembali Sewa</h5>
+                        <h5 class="card-title">Detail Kembali Sewa</h5>
                     </div>
                 </div>
             </div>
@@ -187,16 +187,28 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td id="driver">-</td>
-                                        <td id="pembuat">{{ Auth::user()->name ?? '-' }}</td>
-                                        <td id="penyetuju">-</td>
-                                        <td id="pemeriksa">-</td>
+                                        <td id="driver">{{ $data->data_driver->nama ?? '-' }}</td>
+                                        <td id="pembuat">{{ $data->data_pembuat->name ?? '-' }}</td>
+                                        <td id="penyetuju">{{ $data->data_penyetuju->name ?? (Auth::user()->hasRole('Auditor') ? Auth::user()->name : '') }}</td>
+                                        <td id="pemeriksa">{{ $data->data_pemeriksa->name ?? (Auth::user()->hasRole('Finance') ? Auth::user()->name : '') }}</td>
                                     </tr>
                                     <tr>
                                         <td style="width: 25%;">{{ isset($data->tanggal_driver) ? formatTanggal($data->tanggal_driver) : '-' }}</td>
                                         <td id="tgl_pembuat" style="width: 25%;">{{ isset($data->tanggal_pembuat) ? formatTanggal($data->tanggal_pembuat) : '-' }}</td>
-                                        <td id="tgl_penyetuju" style="width: 25%;">{{ isset($data->tanggal_penyetuju) ? formatTanggal($data->tanggal_penyetuju) : '-' }}</td>
-                                        <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($data->tanggal_pemeriksa) ? formatTanggal($data->tanggal_pemeriksa) : '-' }}</td>
+                                        <td id="tgl_penyetuju"  style="width: 25%;">
+                                            @if(Auth::user()->hasRole('Auditor') && !$data->tanggal_penyetuju)
+                                            <input type="date" class="form-control" name="tanggal_penyetuju" id="tanggal_penyetuju" required value="{{ $data->tanggal_penyetuju ? \Carbon\Carbon::parse($data->tanggal_penyetuju)->format('Y-m-d') : date('Y-m-d') }}">
+                                            @else
+                                            <label id="tanggal_penyetuju" name="tanggal_penyetuju">{{ isset($data->tanggal_penyetuju) ? \Carbon\Carbon::parse($data->tanggal_penyetuju)->format('Y-m-d') : '-' }}</label>
+                                            @endif
+                                        </td>
+                                        <td id="tgl_pemeriksa"  style="width: 25%;">
+                                             @if(Auth::user()->hasRole('Finance') && !$data->tanggal_pemeriksa)
+                                             <input type="date" class="form-control" name="tanggal_pemeriksa" id="tanggal_pemeriksa" value="{{ date('Y-m-d') }}">
+                                             @else
+                                             <label id="tanggal_pemeriksa" name="tanggal_pemeriksa">{{ isset($data->tanggal_pemeriksa) ? \Carbon\Carbon::parse($data->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</label>
+                                            @endif
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -263,8 +275,10 @@
             </div>
             <div class="text-end mt-3">
                 <input type="hidden" name="konfirmasi" id="hiddenActionInput" value="">
-                @if($data->status == 'TUNDA')
+                @if((Auth::user()->hasRole('AdminGallery') && $data->status == 'TUNDA') || (Auth::user()->hasRole('Auditor') && $data->status == 'DIKONFIRMASI' && !$data->tanggal_penyetuju) || (Auth::user()->hasRole('Finance') && $data->status == 'DIKONFIRMASI' && !$data->tanggal_pemeriksa))
                 <button class="btn btn-success confirm-btn" data-action="confirm" type="button">Konfirmasi</button>
+                @endif
+                @if(Auth::user()->hasRole('AdminGallery') && $data->status == 'TUNDA')
                 <button class="btn btn-danger confirm-btn" data-action="cancel" type="button">Batal</button>
                 @endif
                 <a href="{{ route('kembali_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>

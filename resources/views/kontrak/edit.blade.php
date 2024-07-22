@@ -210,10 +210,10 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td id="pengaju">{{ $kontraks->pengaju->nama ?? '-' }}</td>
-                                            <td id="pembuat">{{ $kontraks->data_pembuat->karyawans->nama ?? '-' }}</td>
-                                            <td id="penyetuju">{{ $kontraks->penyetuju->nama ?? '-' }}</td>
-                                            <td id="pemeriksa">{{ $kontraks->pemeriksa->nama ?? '-' }}</td>
+                                            <td id="pengaju">{{ $kontraks->data_sales->name }}</td>
+                                            <td id="pembuat">{{ $kontraks->data_pembuat->name ?? '-' }}</td>
+                                            <td id="penyetuju">{{ $kontraks->data_penyetuju->name ?? '-' }}</td>
+                                            <td id="pemeriksa">{{ $kontraks->data_pemeriksa->name ?? '-' }}</td>
                                         </tr>
                                         <tr>
                                             <td id="tgl_sales" class="col-md-3">

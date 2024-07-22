@@ -65,7 +65,7 @@ class Kontrak extends Model
     }
     
     public function data_sales(){
-        return $this->belongsTo(Karyawan::class, 'sales', 'id');
+        return $this->belongsTo(User::class, 'sales', 'id');
     }
         
     public function data_pembuat(){
@@ -73,11 +73,11 @@ class Kontrak extends Model
     }
         
     public function data_penyetuju(){
-        return $this->belongsTo(Karyawan::class, 'penyetuju', 'id');
+        return $this->belongsTo(User::class, 'penyetuju', 'id');
     }
         
     public function data_pemeriksa(){
-        return $this->belongsTo(Karyawan::class, 'pemeriksa', 'id');
+        return $this->belongsTo(User::class, 'pemeriksa', 'id');
     }
     public function produk(){
         return $this->hasMany(Produk_Terjual::class, 'no_sewa', 'no_kontrak');

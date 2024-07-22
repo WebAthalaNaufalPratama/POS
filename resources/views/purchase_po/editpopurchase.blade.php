@@ -109,8 +109,7 @@
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
                                     <div class="mb-4">
-                                        <h5>List Produk <button type="button" name="add" id="add" class="btn btn-success">+</button>
-                                        </h5>
+                                        {{-- <h5>List Produk</h5> <button type="button" name="add" id="add" class="btn btn-success">+</button> --}}
                                         <div class="table-responsive">
                                             <table class="table">
                                                 <thead>
@@ -125,7 +124,7 @@
                                                 </thead>
                                                 <tbody id="dynamic_field">
                                                     @foreach ($produkbelis as $index => $item)
-                                                        <tr>
+                                                        <tr id="row{{ $index }}">
                                                             <td hidden>
                                                                 <input type="text" name="id[{{ $index }}]" id="id_{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden>
                                                             </td>
@@ -155,6 +154,11 @@
                                                                     @endforeach
                                                                 </select>
                                                             </td>
+                                                            @if($index == 0)
+                                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                            @else
+                                                            <td><button type="button" name="remove" id="{{ $index }}" class="btn btn-danger btn_remove">x</button></td>
+                                                            @endif
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
@@ -351,7 +355,7 @@
     @endforeach
     
         
-    var i = {{ $initialIndex }};
+    var i = {{ count($produkbelis) }};
         
         $('#add').off('click').on('click', function() {
             var newRow = '<tr id="row'+i+'">'+
@@ -396,6 +400,7 @@
         });
 
     $(document).on('click', '.btn_remove', function(){
+        console.log('fsa')
         var button_id = $(this).attr("id");
         $('#row'+button_id+'').remove();
     });

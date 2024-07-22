@@ -2236,28 +2236,33 @@ class PembelianController extends Controller
         // Simpan perubahan ke database
         $pembelian->save();
 
-        // Loop through each existing ProdukBeli entry and update it
-        if ($request->has('id')) {
-            foreach ($request->id as $index => $id) {
-                $produkBeli = ProdukBeli::find($id);
-                if ($produkBeli) {
-                    $produkBeli->produk_id = $request->produk[$index];
-                    $produkBeli->jml_dikirim = $request->qtykrm[$index];
-                    $produkBeli->save();
-                }
-            }
+        $dataprodukbeli = ProdukBeli::where('pembelian_id', $pembelian->id)->get();
+
+        foreach ($dataprodukbeli as $produk) {
+            $produk->delete();
         }
+        // Loop through each existing ProdukBeli entry and update it
+        // if ($request->has('id')) {
+        //     foreach ($request->id as $index => $id) {
+        //         $produkBeli = ProdukBeli::find($id);
+        //         if ($produkBeli) {
+        //             $produkBeli->produk_id = $request->produk[$index];
+        //             $produkBeli->jml_dikirim = $request->qtykrm[$index];
+        //             $produkBeli->save();
+        //         }
+        //     }
+        // }
 
         // Handle new entries
         if ($request->has('produk')) {
             foreach ($request->produk as $index => $produkId) {
-                if (!isset($request->id[$index])) {
+                // if (!isset($request->id[$index])) {
                     $produkBeli = new ProdukBeli();
                     $produkBeli->pembelian_id = $datapo;
                     $produkBeli->produk_id = $produkId;
                     $produkBeli->jml_dikirim = $request->qtykrm[$index];
                     $produkBeli->save();
-                }
+                // }
             }
         }
 

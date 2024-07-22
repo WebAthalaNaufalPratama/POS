@@ -50,6 +50,9 @@
                     <th>Customer</th>
                     <th>Driver</th>
                     <th>Tanggal Kembali</th>
+                    <th>Tanggal Dibuat</th>
+                    <th>Tanggal Pemeriksa</th>
+                    <th>Tanggal Pembuku</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -63,30 +66,37 @@
                             <td>{{ $item->sewa->customer->nama }}</td>
                             <td>{{ $item->data_driver->nama }}</td>
                             <td>{{ formatTanggal($item->tanggal_kembali) }}</td>
+                            <td>{{ $item->tanggal_pembuat ? formatTanggal($item->tanggal_pembuat) : '' }}</td>
+                            <td>{{ $item->tanggal_penyetuju ? formatTanggal($item->tanggal_penyetuju) : '' }}</td>
+                            <td>{{ $item->tanggal_pemeriksa ? formatTanggal($item->tanggal_pemeriksa) : '' }}</td>
                             <td>{{ $item->status }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    @if(in_array($item->status, ['DIKONFIRMASI', 'BATAL']))
-                                    <li>
-                                        <a href="{{ route('kembali_sewa.show', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
-                                    </li>
-                                    @else
-                                    <li>
-                                        <a href="{{ route('kembali_sewa.show', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
-                                    </li>
+                                    @if(in_array('kembali_sewa.show', $thisUserPermissions))
+                                        @if((in_array($item->status, ['DIKONFIRMASI', 'BATAL']) && Auth::user()->hasRole('AdminGallery')) || ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Auditor') && $item->tanggal_penyetuju || Auth::user()->hasRole('Finance') && $item->tanggal_pemeriksa)))
+                                        <li>
+                                            <a href="{{ route('kembali_sewa.show', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        </li>
+                                        @else
+                                        <li>
+                                            <a href="{{ route('kembali_sewa.show', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
+                                        </li>
+                                        @endif
                                     @endif
-                                    @if( ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($item->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
-                                    @if(!$item->hasKembali)
-                                    <li>
-                                        <a href="{{ route('kembali_sewa.edit', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                    </li>
+                                    @if( ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Auditor') || Auth::user()->hasRole('Finance'))) && in_array('kembali_sewa.show', $thisUserPermissions) || ($item->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery') && in_array('kembali_sewa.edit', $thisUserPermissions)) )
+                                        @if(!$item->hasKembali)
+                                            <li>
+                                                <a href="{{ route('kembali_sewa.edit', ['kembali_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                            </li>
+                                        @endif
                                     @endif
-                                    <li>
-                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
-                                    </li>
+                                    @if($item->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery'))
+                                        <li>
+                                            <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
+                                        </li>
                                     @endif
                                 </ul>
                             </td>

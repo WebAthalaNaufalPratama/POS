@@ -180,17 +180,14 @@
                                             <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->harga }}" disabled></td>
                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->jumlah }}" disabled></td>
                                             <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual }}" readonly></td>
+                                            @if( in_array('getProdukTerjual', $thisUserPermissions))
                                             <td>
                                                 @if ($komponen->produk->tipe_produk == 6)
                                                 <button id="btnGift_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-info w-100">Set Gift</button>
                                                 @endif
                                             </td>
                                             <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary">Perangkai</button></td>
-                                            {{-- @if ($i == 0)
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                            @else
-                                                <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                            @endif --}}
+                                            @endif
                                             @php
                                                 $i++;
                                             @endphp
@@ -216,10 +213,10 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td id="pengaju">{{ $kontraks->pengaju->nama ?? '-' }}</td>
-                                            <td id="pembuat">{{ $kontraks->data_pembuat->karyawans->nama ?? '-' }}</td>
-                                            <td id="penyetuju">{{ $kontraks->penyetuju->nama ?? '-' }}</td>
-                                            <td id="pemeriksa">{{ $kontraks->pemeriksa->nama ?? '-' }}</td>
+                                            <td id="pengaju">{{ $kontraks->data_sales->name }}</td>
+                                            <td id="pembuat">{{ $kontraks->data_pembuat->name ?? '-' }}</td>
+                                            <td id="penyetuju">{{ $kontraks->data_penyetuju->name ?? (Auth::user()->hasRole('Auditor') ? Auth::user()->name : '') }}</td>
+                                            <td id="pemeriksa">{{ $kontraks->data_pemeriksa->name ?? (Auth::user()->hasRole('Finance') ? Auth::user()->name : '') }}</td>
                                         </tr>
                                         <tr>
                                             <td id="tgl_sales" class="col-md-3">
@@ -229,10 +226,18 @@
                                                 <label id="tanggal_pembuat" name="tanggal_pembuat">{{ isset($kontraks->tanggal_pembuat) ? \Carbon\Carbon::parse($kontraks->tanggal_pembuat)->format('Y-m-d') : '-' }}</label>
                                             </td>
                                             <td id="tgl_penyetuju" class="col-md-3">
+                                                @if(Auth::user()->hasRole('Auditor') && !$kontraks->tanggal_penyetuju)
+                                                <input type="date" class="form-control" name="tanggal_penyetuju" id="tanggal_penyetuju" required value="{{ $kontraks->tanggal_penyetuju ? \Carbon\Carbon::parse($kontraks->tanggal_penyetuju)->format('Y-m-d') : date('Y-m-d') }}">
+                                                @else
                                                 <label id="tanggal_penyetuju" name="tanggal_penyetuju">{{ isset($kontraks->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontraks->tanggal_penyetuju)->format('Y-m-d') : '-' }}</label>
+                                                @endif
                                             </td>
                                             <td id="tgl_pemeriksa" class="col-md-3">
-                                                <label id="tanggal_pemeriksa" name="tanggal_pemeriksa">{{ isset($kontraks->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontraks->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</label>
+                                                 @if(Auth::user()->hasRole('Finance') && !$kontraks->tanggal_pemeriksa)
+                                                 <input type="date" class="form-control" name="tanggal_pemeriksa" id="tanggal_pemeriksa" value="{{ date('Y-m-d') }}">
+                                                 @else
+                                                 <label id="tanggal_pemeriksa" name="tanggal_pemeriksa">{{ isset($kontraks->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontraks->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</label>
+                                                @endif
                                             </td>
                                         </tr>                                        
                                     </tbody>
@@ -353,8 +358,10 @@
                 </div>
                 <div class="text-end mt-3">
                     <input type="hidden" name="konfirmasi" id="hiddenActionInput" value="">
-                    @if($kontraks->status == 'TUNDA')
+                    @if((Auth::user()->hasRole('AdminGallery') && $kontraks->status == 'TUNDA') || (Auth::user()->hasRole('Auditor') && $kontraks->status == 'DIKONFIRMASI' && !$kontraks->tanggal_penyetuju) || (Auth::user()->hasRole('Finance') && $kontraks->status == 'DIKONFIRMASI' && !$kontraks->tanggal_pemeriksa))
                     <button class="btn btn-success confirm-btn" data-action="confirm" type="button">Konfirmasi</button>
+                    @endif
+                    @if(Auth::user()->hasRole('AdminGallery') && $kontraks->status == 'TUNDA')
                     <button class="btn btn-danger confirm-btn" data-action="cancel" type="button">Batal</button>
                     @endif
                     <a href="{{ route('kontrak.index') }}" class="btn btn-secondary" type="button">Back</a>
