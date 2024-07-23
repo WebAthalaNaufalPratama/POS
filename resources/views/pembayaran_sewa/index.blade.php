@@ -58,12 +58,11 @@
                             <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
                             <td>{{ $item->cara_bayar }}</td>
                             <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
-                            <td class="text-center">
-                                @if ($item->status_bayar == 'LUNAS')
-                                    <span class="badge bg-success">{{ $item->status_bayar }}</span>
-                                @elseif ($item->status_bayar == 'BELUM LUNAS')
-                                    <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
-                                @endif
+                            <td>
+                                <span class="badges
+                                {{ $item->status_bayar == 'LUNAS' ? 'bg-lightgreen' : 'bg-lightred' }}">
+                                {{ $item->status_bayar }}
+                                </span>
                             </td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">

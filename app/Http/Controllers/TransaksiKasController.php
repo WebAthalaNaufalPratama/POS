@@ -39,8 +39,10 @@ class TransaksiKasController extends Controller
         }
         $dataMasuk = $queryMasuk->get();
         $dataKeluar = $queryKeluar->get();
+        $saldoMasuk = $queryMasuk->where('status', 'DIKONFIRMASI')->get()->sum('nominal');
+        $saldoKeluar = $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('nominal') + $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('biaya_lain');
         
-        return view('kas_pusat.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings'));
+        return view('kas_pusat.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 'saldoMasuk', 'saldoKeluar'));
     }
 
     /**
@@ -202,7 +204,9 @@ class TransaksiKasController extends Controller
         }
         $dataMasuk = $queryMasuk->get();
         $dataKeluar = $queryKeluar->get();
-        return view('kas_gallery.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 'rekeningKeluar', 'lokasi_pengirim'));
+        $saldoMasuk = $queryMasuk->where('status', 'DIKONFIRMASI')->get()->sum('nominal');
+        $saldoKeluar = $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('nominal') + $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('biaya_lain');
+        return view('kas_gallery.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 'rekeningKeluar', 'lokasi_pengirim', 'saldoMasuk', 'saldoKeluar'));
     }
 
     /**

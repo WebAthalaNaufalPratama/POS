@@ -80,7 +80,12 @@
                             <td>{{ formatTanggal($kontrak->tanggal_pembuat) ?? '-'  }}</td>
                             <td>{{ $kontrak->tanggal_penyetuju ? formatTanggal($kontrak->tanggal_penyetuju) : '-'  }}</td>
                             <td>{{ $kontrak->tanggal_pemeriksa ? formatTanggal($kontrak->tanggal_pemeriksa) : '-'  }}</td>
-                            <td>{{ $kontrak->status ?? '-'  }}</td>
+                            <td>
+                                <span class="badges
+                                {{ $kontrak->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : ($kontrak->status == 'TUNDA' ? 'bg-lightred' : 'bg-lightgrey') }}">
+                                {{ $kontrak->status ?? '-' }}
+                                </span>
+                            </td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

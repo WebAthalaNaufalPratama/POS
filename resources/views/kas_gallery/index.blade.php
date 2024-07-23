@@ -64,7 +64,7 @@
             <span><img src="assets/img/icons/dash2.svg" alt="img" /></span>
           </div>
           <div class="dash-widgetcontent">
-            <h3>Rp. <span class="counters-rupiah" data-count="{{ $dataMasuk->sum('nominal') }}"></span></h3>
+            <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h3>
             <h6>Saldo Masuk</h6>
           </div>
         </div>
@@ -75,7 +75,7 @@
             <span><img src="assets/img/money-send-svgrepo-com.svg" alt="img" style="width: 50%" /></span>
           </div>
           <div class="dash-widgetcontent">
-            <h3>Rp. <span class="counters-rupiah" data-count="{{ ($dataKeluar->sum('nominal') + $dataKeluar->sum('biaya_lain')) }}"></span></h3>
+            <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h3>
             <h6>Saldo Keluar</h6>
           </div>
         </div>
@@ -86,7 +86,7 @@
             <span><img src="assets/img/balance-sheet.png" style="width: 50%" alt="img" /></span>
           </div>
           <div class="dash-widgetcontent">
-            <h3>Rp. <span class="counters-rupiah" data-count="{{ ($dataMasuk->sum('nominal') - ($dataKeluar->sum('nominal') + $dataKeluar->sum('biaya_lain'))) }}"></span></h3>
+            <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk - $saldoKeluar }}"></span></h3>
             <h6>Saldo</h6>
           </div>
         </div>
@@ -134,7 +134,9 @@
                           <td>{{ $item->nominal ? formatRupiah($item->nominal) : '-' }}</td>
                           <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : '-' }}</td>
                           <td>{{ $item->keterangan ?? '-' }}</td>
-                          <td>{{ $item->status ?? '-' }}</td>
+                          <td>
+                            <span class="badges {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : 'bg-lightgrey' }}">{{ $item->status ?? '-' }}</span>
+                          </td>
                           {{-- <td class="text-center">
                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -161,7 +163,9 @@
                   <h4>Kas Keluar</h4>
               </div>
               <div class="page-btn">
+                @if(in_array('kas_gallery.create', $thisUserPermissions) && in_array('kas_gallery.store', $thisUserPermissions))
                   <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addkaskeluar" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kas Keluar</a>
+                @endif
               </div>
           </div>
       </div>
@@ -191,7 +195,9 @@
                           <td>{{ $item->nominal ? formatRupiah($item->nominal) : '-' }}</td>
                           <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : '-' }}</td>
                           <td>{{ $item->keterangan ?? '-' }}</td>
-                          <td>{{ $item->status ?? '-' }}</td>
+                          <td>
+                            <span class="badges {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : 'bg-lightgrey' }}">{{ $item->status ?? '-' }}</span>
+                          </td>
                           <td class="text-center">
                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

@@ -62,7 +62,12 @@
                             <td>{{ formatRupiah($item->total_tagihan) }}</td>
                             <td>{{ formatRupiah($item->dp) }}</td>
                             <td>{{ formatRupiah($item->sisa_bayar) }}</td>
-                            <td>{{ $item->status }}</td>
+                            <td>
+                                <span class="badges
+                                {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : ($item->status == 'TUNDA' ? 'bg-lightred' : 'bg-lightgrey') }}">
+                                {{ $item->status ?? '-' }}
+                                </span>
+                            </td>
                             <td>{{ $item->tanggal_pembuat ? formatTanggal($item->tanggal_pembuat) : '' }}</td>
                             <td>{{ $item->tanggal_penyetuju ? formatTanggal($item->tanggal_penyetuju) : '' }}</td>
                             <td>{{ $item->tanggal_pemeriksa ? formatTanggal($item->tanggal_pemeriksa) : '' }}</td>
