@@ -126,7 +126,7 @@
                                         <td>1</td>
                                         <input type="hidden" name="kode_produk[]" id="kode_produk_{{ $i }}" class="form-control" required readonly>
                                         <td style="width: 250px;">
-                                            <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control" required>
+                                            <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control produk-dropdown" required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($invoice->pembelian->produkbeli as $produk)
                                                     <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}" {{ $produk->id == $komponen->produkbeli->id ? 'selected' : '' }}>
@@ -418,6 +418,34 @@
                 $('[id^=biaya_pengiriman]').attr('required', false);
             }
         }
+
+        //disabled option dari select
+        function updateOptions() {
+            let selectedValues = [];
+            $('.produk-dropdown').each(function() {
+                if ($(this).val()) {
+                    selectedValues.push($(this).val());
+                }
+            });
+
+            $('.produk-dropdown option').prop('disabled', false);
+
+            $('.produk-dropdown').each(function() {
+                let $dropdown = $(this);
+                selectedValues.forEach(function(value) {
+                    if ($dropdown.val() !== value) {
+                        $dropdown.find('option[value="' + value + '"]').prop('disabled', true);
+                    }
+                });
+            });
+        }
+
+        updateOptions();
+
+        $('.produk-dropdown').on('change', function() {
+            updateOptions();
+        });
+
         function multiply(element) {
             var id = 0
             var jenis = $(element).attr('id')
