@@ -352,7 +352,6 @@ class PembelianController extends Controller
         return view('purchase_retur.returindex',compact('dataretur','datainv', 'gallery'));
     }
 
-    
 
     /**
      * Show the form for creating a new resource.
@@ -540,7 +539,6 @@ class PembelianController extends Controller
 
     }
 
-    
 
     /**
      * Store a newly created resource in storage.
@@ -635,107 +633,107 @@ class PembelianController extends Controller
     
     public function store_inden(Request $request)
     {
-    // Validasi input
-    $validator = Validator::make($request->all(), [
+        // Validasi input
+         $validator = Validator::make($request->all(), [
         'nopo' => 'required',
         'id_supplier' => 'required',
         'bulan_inden' => 'required',
         // 'status_dibuat' => 'required',
         // Tambahkan validasi lainnya sesuai kebutuhan
-    ]);
+        ]);
 
-    // Periksa apakah validasi gagal
-    if ($validator->fails()) {
-        $errors = $validator->errors()->all();
-        return redirect()->back()->withInput()->with('fail', $errors);
-    }
+        // Periksa apakah validasi gagal
+        if ($validator->fails()) {
+            $errors = $validator->errors()->all();
+            return redirect()->back()->withInput()->with('fail', $errors);
+        }
 
-    // Cek apakah data sudah ada
-    $existingProduct = ModelsPoinden::where('supplier_id', $request->id_supplier)
-        ->where('bulan_inden', $request->bulan_inden)
-        ->where('status_dibuat', '!=', 'BATAL')
-        ->first();
+        // Cek apakah data sudah ada
+        $existingProduct = ModelsPoinden::where('supplier_id', $request->id_supplier)
+            ->where('bulan_inden', $request->bulan_inden)
+            ->where('status_dibuat', '!=', 'BATAL')
+            ->first();
 
-    if ($existingProduct) {
-        return redirect()->back()->withInput()->with('fail', 'Data sudah ada.');
-    }
+        if ($existingProduct) {
+            return redirect()->back()->withInput()->with('fail', 'Data sudah ada.');
+        }
 
-    // Simpan data pembelian
-    $pembelian = new ModelsPoinden();
-    $pembelian->no_po = $request->nopo;
-    $pembelian->supplier_id = $request->id_supplier;
-    $pembelian->bulan_inden = $request->bulan_inden;
-    $pembelian->pembuat = $request->pembuat; // ID pengguna yang membuat pembelian
-    $pembelian->pemeriksa = $request->pemeriksa; // ID pengguna yang membuat pembelian
-    $pembelian->tgl_dibuat = $request->tgl_dibuat; // Tanggal pembuatan saat ini
-    $pembelian->tgl_diperiksa = $request->tgl_diperiksa ?? null; // Tanggal pembuatan saat ini
-    $pembelian->status_dibuat = $request->status_dibuat ?? null; // Status pembuatan
-    $pembelian->status_diperiksa = $request->status_diperiksa ?? null; // Status pembuatan
+        // Simpan data pembelian
+        $pembelian = new ModelsPoinden();
+        $pembelian->no_po = $request->nopo;
+        $pembelian->supplier_id = $request->id_supplier;
+        $pembelian->bulan_inden = $request->bulan_inden;
+        $pembelian->pembuat = $request->pembuat; // ID pengguna yang membuat pembelian
+        $pembelian->pemeriksa = $request->pemeriksa; // ID pengguna yang membuat pembelian
+        $pembelian->tgl_dibuat = $request->tgl_dibuat; // Tanggal pembuatan saat ini
+        $pembelian->tgl_diperiksa = $request->tgl_diperiksa ?? null; // Tanggal pembuatan saat ini
+        $pembelian->status_dibuat = $request->status_dibuat ?? null; // Status pembuatan
+        $pembelian->status_diperiksa = $request->status_diperiksa ?? null; // Status pembuatan
 
-    // Pengecekan duplikasi kode indens
-    $kode_indens = $request->kode_inden;
-    if (count($kode_indens) !== count(array_unique($kode_indens))) {
-        return redirect()->back()->withInput()->with('fail', 'kode inden tidak boleh sama');
-    }
+        // Pengecekan duplikasi kode indens
+        $kode_indens = $request->kode_inden;
+        if (count($kode_indens) !== count(array_unique($kode_indens))) {
+            return redirect()->back()->withInput()->with('fail', 'kode inden tidak boleh sama');
+        }
 
-    // Simpan data pembelian
-    $check1 = $pembelian->save();
-    if (!$check1) {
-        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data pembelian');
-    }
+        // Simpan data pembelian
+        $check1 = $pembelian->save();
+        if (!$check1) {
+            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data pembelian');
+        }
 
-    // Simpan data produk beli
-    $kategori = $request->kategori;
-    $jumlah = $request->qty;
-    $ket = $request->ket;
-    $check2 = true;
+        // Simpan data produk beli
+        $kategori = $request->kategori;
+        $jumlah = $request->qty;
+        $ket = $request->ket;
+        $check2 = true;
 
-    foreach ($kode_indens as $index => $kode_inden) {
-        $produkBeli = new Produkbeli();
-        $produkBeli->poinden_id = $pembelian->id;
-        $produkBeli->kode_produk_inden = $kode_inden;
-        $produkBeli->produk_id = $kategori[$index];
-        $produkBeli->jumlahInden = $jumlah[$index];
-        $produkBeli->keterangan = $ket[$index];
-        $check2 = $check2 && $produkBeli->save();
-    }
+        foreach ($kode_indens as $index => $kode_inden) {
+            $produkBeli = new Produkbeli();
+            $produkBeli->poinden_id = $pembelian->id;
+            $produkBeli->kode_produk_inden = $kode_inden;
+            $produkBeli->produk_id = $kategori[$index];
+            $produkBeli->jumlahInden = $jumlah[$index];
+            $produkBeli->keterangan = $ket[$index];
+            $check2 = $check2 && $produkBeli->save();
+        }
 
-    if ($request->status_dibuat == "DIKONFIRMASI") {
-        $produkbelis = Produkbeli::where('poinden_id', $pembelian->id)->get();
-        foreach ($produkbelis as $produkbeli) {
-            $kode = $produkbeli->produk->kode;
-            $kode_inden = $produkbeli->kode_produk_inden;
-            $jumlah = $produkbeli->jumlahInden;
+        if ($request->status_dibuat == "DIKONFIRMASI") {
+            $produkbelis = Produkbeli::where('poinden_id', $pembelian->id)->get();
+            foreach ($produkbelis as $produkbeli) {
+                $kode = $produkbeli->produk->kode;
+                $kode_inden = $produkbeli->kode_produk_inden;
+                $jumlah = $produkbeli->jumlahInden;
 
-            $inventoryInden = InventoryInden::where('kode_produk', $kode)
-                ->where('supplier_id', $pembelian->supplier_id)
-                ->where('bulan_inden', $pembelian->bulan_inden)
-                ->where('kode_produk_inden', $kode_inden)
-                ->first();
+                $inventoryInden = InventoryInden::where('kode_produk', $kode)
+                    ->where('supplier_id', $pembelian->supplier_id)
+                    ->where('bulan_inden', $pembelian->bulan_inden)
+                    ->where('kode_produk_inden', $kode_inden)
+                    ->first();
 
-            if ($inventoryInden) {
-                // Update existing InventoryInden
-                $inventoryInden->jumlah += $jumlah;
-                $inventoryInden->save();
-            } else {
-                // Create new InventoryInden
-                InventoryInden::create([
-                    'supplier_id' => $pembelian->supplier_id,
-                    'kode_produk_inden' => $kode_inden,
-                    'bulan_inden' => $pembelian->bulan_inden,
-                    'kode_produk' => $kode,
-                    'jumlah' => $jumlah,
-                ]);
+                if ($inventoryInden) {
+                    // Update existing InventoryInden
+                    $inventoryInden->jumlah += $jumlah;
+                    $inventoryInden->save();
+                } else {
+                    // Create new InventoryInden
+                    InventoryInden::create([
+                        'supplier_id' => $pembelian->supplier_id,
+                        'kode_produk_inden' => $kode_inden,
+                        'bulan_inden' => $pembelian->bulan_inden,
+                        'kode_produk' => $kode,
+                        'jumlah' => $jumlah,
+                    ]);
+                }
             }
         }
-    }
 
-    // Periksa keberhasilan penyimpanan data
-    if (!$check2) {
-        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data produk');
-    } else {
-        return redirect(route('pembelian.index'))->with('success', 'Data pembelian berhasil disimpan. Nomor PO: ' . $pembelian->no_po);
-    }
+        // Periksa keberhasilan penyimpanan data
+        if (!$check2) {
+            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data produk');
+        } else {
+            return redirect(route('pembelian.index'))->with('success', 'Data pembelian berhasil disimpan. Nomor PO: ' . $pembelian->no_po);
+        }
     }
 
     public function storeinvoice(Request $request)
@@ -2427,7 +2425,7 @@ class PembelianController extends Controller
 
 
         return redirect()->route('pembelian.index')->with('success', 'Data PO berhasil diupdate');
-    }
+     }
     }
 
 
@@ -2744,12 +2742,6 @@ class PembelianController extends Controller
         }
         
         $data['ongkir'] = $request->biaya_pengiriman ?? 0;
-        $user = Auth::user();
-        if($user->hasRole(['Purchasing'])) {
-            $data['tgl_dibuku'] = null;
-        }elseif($user->hasRole(['Auditor'])) {
-            $data['tgl_dibuat'] = null;
-        }
         // $data['total'] = $request->total_harga;
         $jenis = $data['komplain'];
         
@@ -2828,11 +2820,10 @@ class PembelianController extends Controller
             $getInvoice = Invoicepo::find($request->invoicepo_id);
             $getppn = $getInvoice->persen_pp ?? 0;
             $newSubtotal = $getInvoice->subtotal;
-            $getretur = Returpembelian::where('id',$save->id)->first();
+            $getretur = Returpembelian::where('id',$retur)->first();
             // $getProdukbeli = Produkbeli::where('pembelian_id',  $getInvoice->pembelian_id)->get();
-            $getProdukretur = Produkretur::where('returpembelian_id',$save->id)->get();
+            $getProdukretur = Produkretur::where('returpembelian_id',$getretur->id)->get();
             
-
             if($jenis == 'Retur'){
                 $subretur = $newSubtotal - $getretur->subtotal;
                 $getInvoice->subtotal = $subretur ;
@@ -2889,6 +2880,5 @@ class PembelianController extends Controller
         }
     }
 
-   
 
 }
