@@ -112,9 +112,14 @@
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
                             <ul class="dropdown-menu">
+                              @if(in_array('kas_pusat.edit', $thisUserPermissions) && in_array('kas_pusat.update', $thisUserPermissions))
                                 <li>
-                                    <a href="javascript:void(0);" onclick="getData({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    <a href="javascript:void(0);" onclick="edit_masuk({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                 </li>
+                              @endif
+                              <li>
+                                <a href="javascript:void(0);" onclick="bukti('{{ $item->file }}')" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
+                              </li>
                             </ul>
                           </td>
                       </tr>
@@ -176,8 +181,11 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="javascript:void(0);" onclick="getData({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    <a href="javascript:void(0);" onclick="edit_keluar({{ $item->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                 </li>
+                                <li>
+                                  <a href="javascript:void(0);" onclick="bukti('{{ $item->file }}')" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
+                              </li>
                             </ul>
                           </td>
                       </tr>
@@ -192,7 +200,7 @@
 
 {{-- modal start --}}
 <div class="modal fade" id="addkasmasuk" tabindex="-1" aria-labelledby="addkasmasuklabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addkasmasuklabel">Tambah Transaksi Masuk</h5>
@@ -202,74 +210,79 @@
           <form id="addFormMasuk" action="{{ route('kas_pusat.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="jenis" value="Pemindahan Saldo">
-            <div class="row mb-3">
+            <div class="row">
               <div class="col-6">
-                <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
-                <div class="form-group">
-                  <select class="select2" name="lokasi_pengirim" id="masuk_lokasi_pengirim" onchange="getRekening(this, 'masuk_rekening_pengirim')" required>
-                    <option value="">Lokasi Pengirim</option>
-                    @foreach($lokasis as $lokasi)
-                      <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                    @endforeach
-                  </select>
+                <div class="row">
+                  <div class="col-6">
+                    <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
+                    <div class="form-group">
+                      <select class="select2" name="lokasi_pengirim" id="masuk_lokasi_pengirim" onchange="getRekening(this, 'masuk_rekening_pengirim')" required>
+                        <option value="">Lokasi Pengirim</option>
+                        @foreach($lokasis as $lokasi)
+                          <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="lokasi_penerima" class="col-form-label">Lokasi Penerima</label>
+                    <div class="form-group">
+                      <select class="select2" name="lokasi_penerima" id="masuk_lokasi_penerima" required>
+                        <option value="">Lokasi Penerima</option>
+                        @foreach($lokasis as $lokasi)
+                          @if($lokasi->operasional_id == 1)
+                            <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                          @endif
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
+                    <div class="form-group">
+                      <select class="select2" name="rekening_pengirim" id="masuk_rekening_pengirim" disabled>
+                        <option value="">Rekening Pengirim</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
+                    <div class="form-group">
+                      <select class="select2" name="rekening_penerima" id="masuk_rekening_penerima" required>
+                        <option value="">Rekening Penerima</option>
+                        @foreach($rekenings as $rekening)
+                          @if($rekening->lokasi->operasional_id == 1)
+                            <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
+                          @endif
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <label for="tanggal" class="col-form-label">Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal" id="masuk_tanggal" value="{{ date('Y-m-d') }}" required>
+                  </div>
+                  <div class="col-12">
+                    <label for="nominal" class="col-form-label">Nominal</label>
+                    <input type="text" class="form-control" name="nominal" id="masuk_nominal" required>
+                  </div>
+                  <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                    <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
+                    <input type="text" class="form-control" name="biaya_lain" id="masuk_biaya_lain">
+                  </div>
+                  <div class="col-12">
+                    <label for="keterangan" class="col-form-label">Keterangan</label>
+                    <input type="text" class="form-control" name="keterangan" id="masuk_keterangan" required>
+                  </div>
                 </div>
               </div>
               <div class="col-6">
-                <label for="lokasi_penerima" class="col-form-label">Lokasi Penerima</label>
-                <div class="form-group">
-                  <select class="select2" name="lokasi_penerima" id="masuk_lokasi_penerima" required>
-                    <option value="">Lokasi Penerima</option>
-                    @foreach($lokasis as $lokasi)
-                      @if($lokasi->operasional_id == 1)
-                        <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                      @endif
-                    @endforeach
-                  </select>
+                <div class="mb-3">
+                  <label for="file" class="col-form-label">File</label>
+                  <input type="file" class="form-control" name="file" id="masuk_file" accept="image/*" required onchange="previewImage(this, 'masuk_preview')">
+                  <img class="mt-2" src="" alt="" id="masuk_preview" style="width: 100%;height:auto;">
                 </div>
               </div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-6">
-                <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
-                <div class="form-group">
-                  <select class="select2" name="rekening_pengirim" id="masuk_rekening_pengirim" disabled>
-                    <option value="">Rekening Pengirim</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-6">
-                <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
-                <div class="form-group">
-                  <select class="select2" name="rekening_penerima" id="masuk_rekening_penerima" required>
-                    <option value="">Rekening Penerima</option>
-                    @foreach($rekenings as $rekening)
-                      @if($rekening->lokasi->operasional_id == 1)
-                        <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
-                      @endif
-                    @endforeach
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label for="tanggal" class="col-form-label">Tanggal</label>
-              <input type="date" class="form-control" name="tanggal" id="masuk_tanggal" value="{{ date('Y-m-d') }}" required>
-            </div>
-            <div class="mb-3">
-              <label for="nominal" class="col-form-label">Nominal</label>
-              <input type="text" class="form-control" name="nominal" id="masuk_nominal" required>
-            </div>
-            <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
-              <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
-              <input type="text" class="form-control" name="biaya_lain" id="masuk_biaya_lain">
-            </div>
-            <div class="mb-3">
-              <label for="keterangan" class="col-form-label">Keterangan</label>
-              <input type="text" class="form-control" name="keterangan" id="masuk_keterangan" required>
-            </div>
-            <div class="mb-3">
-              <label for="file" class="col-form-label">File</label>
-              <input type="file" class="form-control" name="file" id="masuk_file" accept="image/*" required>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -281,7 +294,7 @@
     </div>
 </div>
 <div class="modal fade" id="addkaskeluar" tabindex="-1" aria-labelledby="addkaskeluarlabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addkaskeluarlabel">Tambah Transaksi Keluar</h5>
@@ -291,103 +304,104 @@
           <form id="addFormKeluar" action="{{ route('kas_pusat.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row">
-              <div class="col-12">
-                <label for="jenis" class="col-form-label">Jenis</label>
-                <div class="form-group">
-                  <select class="select2" name="jenis" id="keluar_jenis" required>
-                    <option value="Pemindahan Saldo">Pemindahan Saldo</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="row pemindahan_saldo">
               <div class="col-6">
-                <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
-                <div class="form-group">
-                  <select class="select2" name="lokasi_pengirim" id="keluar_lokasi_pengirim" onchange="getRekening(this, 'keluar_rekening_pengirim')" required>
-                    <option value="">Lokasi Pengirim</option>
-                    @foreach($lokasis as $lokasi)
-                      @if($lokasi->operasional_id == 1)
+                <div class="row">
+                  <div class="col-12">
+                    <label for="jenis" class="col-form-label">Jenis</label>
+                    <select class="select2" name="jenis" id="keluar_jenis" required>
+                      <option value="Pemindahan Saldo">Pemindahan Saldo</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row pemindahan_saldo">
+                  <div class="col-6">
+                    <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
+                    <select class="select2" name="lokasi_pengirim" id="keluar_lokasi_pengirim" onchange="getRekening(this, 'keluar_rekening_pengirim')" required>
+                      <option value="">Lokasi Pengirim</option>
+                      @foreach($lokasis as $lokasi)
+                        @if($lokasi->operasional_id == 1)
+                          <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                        @endif
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label for="lokasi_penerima" class="col-form-label">Lokasi Penerima</label>
+                    <select class="select2" name="lokasi_penerima" id="keluar_lokasi_penerima" onchange="getRekening(this, 'keluar_rekening_penerima')" required>
+                      <option value="">Lokasi Penerima</option>
+                      @foreach($lokasis as $lokasi)
                         <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                      @endif
-                    @endforeach
-                  </select>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="row pemindahan_saldo">
+                  <div class="col-6">
+                    <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
+                    <select class="select2" name="rekening_pengirim" id="keluar_rekening_pengirim" disabled>
+                      <option value="">Rekening Pengirim</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
+                    <select class="select2" name="rekening_penerima" id="keluar_rekening_penerima" disabled>
+                      <option value="">Rekening Penerima</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row lainnya d-none">
+                  <div class="col-6">
+                    <label for="lokasi_pengirim" class="col-form-label">lokasi</label>
+                    <select class="select2" name="lokasi_pengirim" id="keluar_lokasi" disabled>
+                      <option value="">lokasi</option>
+                      @foreach($lokasis as $lokasi)
+                          @if($lokasi->operasional_id == 1)
+                            <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                          @endif
+                        @endforeach
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label for="rekening_pengirim" class="col-form-label">Rekening</label>
+                    <select class="select2" name="rekening_pengirim" id="keluar_rekening" disabled>
+                      <option value="">Rekening</option>
+                      @foreach($rekenings as $rekening)
+                          @if($rekening->lokasi->operasional_id == 1)
+                            <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
+                          @endif
+                        @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <label for="tanggal" class="col-form-label">Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal" id="keluar_tanggal" value="{{ date('Y-m-d') }}" required>
+                  </div>
+                  <div class="col-12">
+                    <label for="nominal" class="col-form-label">Nominal</label>
+                    <input type="text" class="form-control" name="nominal" id="keluar_nominal" required>
+                  </div>
+                  <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                    <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
+                    <input type="text" class="form-control" name="biaya_lain" id="keluar_biaya_lain">
+                  </div>
+                  <div class="col-12">
+                    <label for="keterangan" class="col-form-label">Keterangan</label>
+                    <input type="text" class="form-control" name="keterangan" id="keluar_keterangan" required>
+                  </div>
                 </div>
               </div>
               <div class="col-6">
-                <label for="lokasi_penerima" class="col-form-label">Lokasi Penerima</label>
-                <div class="form-group">
-                  <select class="select2" name="lokasi_penerima" id="keluar_lokasi_penerima" onchange="getRekening(this, 'keluar_rekening_penerima')" required>
-                    <option value="">Lokasi Penerima</option>
-                    @foreach($lokasis as $lokasi)
-                      <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                    @endforeach
-                  </select>
+                <div class="row">
+                  <div class="col-12">
+                    <label for="file" class="col-form-label">File</label>
+                    <input type="file" class="form-control" name="file" id="keluar_file" accept="image/*" required onchange="previewImage(this, 'keluar_preview')">
+                    <img class="mt-2" src="" alt="" id="keluar_preview" style="width: 100%;height:auto;">
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="row pemindahan_saldo">
-              <div class="col-6">
-                <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
-                <div class="form-group">
-                  <select class="select2" name="rekening_pengirim" id="keluar_rekening_pengirim" disabled>
-                    <option value="">Rekening Pengirim</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-6">
-                <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
-                <div class="form-group">
-                  <select class="select2" name="rekening_penerima" id="keluar_rekening_penerima" disabled>
-                    <option value="">Rekening Penerima</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="row lainnya d-none">
-              <div class="col-6 mb-3">
-                <label for="lokasi_pengirim" class="col-form-label">lokasi</label>
-                <select class="select2" name="lokasi_pengirim" id="keluar_lokasi" disabled>
-                  <option value="">lokasi</option>
-                  @foreach($lokasis as $lokasi)
-                      @if($lokasi->operasional_id == 1)
-                        <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                      @endif
-                    @endforeach
-                </select>
-              </div>
-              <div class="col-6 mb-3">
-                <label for="rekening_pengirim" class="col-form-label">Rekening</label>
-                <select class="select2" name="rekening_pengirim" id="keluar_rekening" disabled>
-                  <option value="">Rekening</option>
-                  @foreach($rekenings as $rekening)
-                      @if($rekening->lokasi->operasional_id == 1)
-                        <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
-                      @endif
-                    @endforeach
-                </select>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label for="tanggal" class="col-form-label">Tanggal</label>
-              <input type="date" class="form-control" name="tanggal" id="keluar_tanggal" value="{{ date('Y-m-d') }}" required>
-            </div>
-            <div class="mb-3">
-              <label for="nominal" class="col-form-label">Nominal</label>
-              <input type="text" class="form-control" name="nominal" id="keluar_nominal" required>
-            </div>
-            <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
-              <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
-              <input type="text" class="form-control" name="biaya_lain" id="keluar_biaya_lain">
-            </div>
-            <div class="mb-3">
-              <label for="keterangan" class="col-form-label">Keterangan</label>
-              <input type="text" class="form-control" name="keterangan" id="keluar_keterangan" required>
-            </div>
-            <div class="mb-3">
-              <label for="file" class="col-form-label">File</label>
-              <input type="file" class="form-control" name="file" id="keluar_file" accept="image/*" required>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -398,70 +412,103 @@
       </div>
     </div>
 </div>
-{{-- <div class="modal fade" id="editkas" tabindex="-1" aria-labelledby="editkaslabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="editkasmasuk" tabindex="-1" aria-labelledby="editkasmasuklabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editkaslabel">Edit Transaksi Kas</h5>
+          <h5 class="modal-title" id="editkasmasuklabel">Edit Transaksi Masuk</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form id="editForm" action="kas_pusat/0/update" method="POST">
+          <form id="editFormMasuk" action="" method="POST" enctype="multipart/form-data">
             @csrf
-            @method('PATCH')
-            <div class="mb-3">
-              <label for="nama" class="col-form-label">Akun</label>
-              <div class="form-group">
-                <select class="select2" name="akun_id" id="edit_akun_id" required>
-                  <option value="">Pilih Akun</option>
-                  @foreach($akuns as $akun)
-                    <option value="{{ $akun->id }}">{{ $akun->no_akun }} - {{ $akun->nama_akun }}</option>
-                  @endforeach
-                </select>
+            @method('patch')
+            <input type="hidden" name="jenis" value="Pemindahan Saldo">
+            <div class="row">
+              <div class="col-6">
+                <div class="row">
+                  <div class="col-12">
+                    <label for="status" class="col-form-label">Status</label>
+                    <select class="select2" name="status" id="edit_masuk_status" required>
+                      <option value="BATAL">BATAL</option>
+                      <option value="DIKONFIRMASI">DIKONFIRMASI</option>
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
+                    <div class="form-group">
+                      <select class="select2" name="lokasi_pengirim" id="edit_masuk_lokasi_pengirim" onchange="getRekening(this, 'edit_masuk_rekening_pengirim')" required>
+                        <option value="">Lokasi Pengirim</option>
+                        @foreach($lokasis as $lokasi)
+                          <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="lokasi_penerima" class="col-form-label">Lokasi Penerima</label>
+                    <div class="form-group">
+                      <select class="select2" name="lokasi_penerima" id="edit_masuk_lokasi_penerima" required>
+                        <option value="">Lokasi Penerima</option>
+                        @foreach($lokasis as $lokasi)
+                          @if($lokasi->operasional_id == 1)
+                            <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                          @endif
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
+                    <div class="form-group">
+                      <select class="select2" name="rekening_pengirim" id="edit_masuk_rekening_pengirim" disabled>
+                        <option value="">Rekening Pengirim</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
+                    <div class="form-group">
+                      <select class="select2" name="rekening_penerima" id="edit_masuk_rekening_penerima" required>
+                        <option value="">Rekening Penerima</option>
+                        @foreach($rekenings as $rekening)
+                          @if($rekening->lokasi->operasional_id == 1)
+                            <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
+                          @endif
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <label for="tanggal" class="col-form-label">Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal" id="edit_masuk_tanggal" value="{{ date('Y-m-d') }}" required>
+                  </div>
+                  <div class="col-12">
+                    <label for="nominal" class="col-form-label">Nominal</label>
+                    <input type="text" class="form-control" name="nominal" id="edit_masuk_nominal" required>
+                  </div>
+                  <div class="col-12">
+                    <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
+                    <input type="text" class="form-control" name="biaya_lain" id="edit_masuk_biaya_lain">
+                  </div>
+                  <div class="col-12">
+                    <label for="keterangan" class="col-form-label">Keterangan</label>
+                    <input type="text" class="form-control" name="keterangan" id="edit_masuk_keterangan" required>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="mb-3">
-              <label for="keterangan" class="col-form-label">Keterangan</label>
-              <input type="text" class="form-control" name="keterangan" id="edit_keterangan" required>
-            </div>
-            <div class="mb-3">
-              <label for="kuantitas" class="col-form-label">Kuantitas</label>
-              <input type="number" class="form-control" name="kuantitas" id="edit_kuantitas" required>
-            </div>
-            <div class="mb-3">
-              <label for="harga_satuan" class="col-form-label">Harga Satuan</label>
-              <input type="number" class="form-control" name="harga_satuan" id="edit_harga_satuan" required>
-            </div>
-            <div class="mb-3">
-              <label for="harga_total" class="col-form-label">Harga Total</label>
-              <input type="number" class="form-control" name="harga_total" id="edit_harga_total" readonly required>
-            </div>
-            <div class="mb-3">
-              <label for="lokasi_id" class="col-form-label">Lokasi</label>
-              <div class="form-group">
-                <select class="select2" name="lokasi_id" id="edit_lokasi_id" required>
-                  <option value="">Pilih Lokasi</option>
-                  @foreach($lokasis as $lokasi)
-                    <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                  @endforeach
-                </select>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label for="tanggal_transaksi" class="col-form-label">Tanggal Transaksi</label>
-              <input type="date" class="form-control" name="tanggal_transaksi" id="edit_tanggal_transaksi" value="{{ date('Y-m-d') }}" required>
-            </div>
-            <div class="mb-3">
-              <label for="bukti" class="col-form-label">Bukti</label>
-              <input type="file" class="form-control" name="bukti" id="edit_bukti">
-            </div>
-            <div class="mb-3">
-              <label for="status" class="col-form-label">Status</label>
-              <div class="form-group">
-                <select class="select2" name="status" id="edit_status" required>
-                  <option value="AKTIF">Aktif</option>
-                  <option value="TIDAK AKTIF">Tidak Aktif</option>
-                </select>
+              <div class="col-6">
+                <div class="row">
+                  <div class="col-12">
+                    <label for="file" class="col-form-label">File</label>
+                    <input type="file" class="form-control" name="file" id="edit_masuk_file" accept="image/*" onchange="previewImage(this, 'edit_masuk_preview')">
+                    <img class="mt-2" src="" alt="" id="edit_masuk_preview" style="width: 100%;height:auto;">
+                  </div>
+                </div>
               </div>
             </div>
         </div>
@@ -472,8 +519,151 @@
     </form>
       </div>
     </div>
-</div> --}}
-<div class="modal fade" id="modalBukti" tabindex="-1" aria-labelledby="addAkunlabel" aria-hidden="true">
+</div>
+<div class="modal fade" id="editkaskeluar" tabindex="-1" aria-labelledby="editkaskeluarlabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editkaskeluarlabel">Edit Transaksi Keluar</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+        </div>
+        <div class="modal-body">
+          <form id="editFormKeluar" action="{{ route('kas_pusat.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('patch')
+            <div class="row">
+              <div class="col-6">
+                <div class="row">
+                  <div class="col-12">
+                    <label for="status" class="col-form-label">Status</label>
+                    <select class="select2" name="status" id="edit_keluar_status" required>
+                      <option value="BATAL">BATAL</option>
+                      <option value="DIKONFIRMASI">DIKONFIRMASI</option>
+                    </select>
+                  </div>
+                  <div class="col-12">
+                    <label for="jenis" class="col-form-label">Jenis</label>
+                    <div class="form-group">
+                      <select class="select2" name="jenis" id="edit_keluar_jenis" required>
+                        <option value="Pemindahan Saldo">Pemindahan Saldo</option>
+                        <option value="Lainnya">Lainnya</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row pemindahan_saldo">
+                  <div class="col-6">
+                    <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
+                    <div class="form-group">
+                      <select class="select2" name="lokasi_pengirim" id="edit_keluar_lokasi_pengirim" onchange="getRekening(this, 'keluar_rekening_pengirim')" required>
+                        <option value="">Lokasi Pengirim</option>
+                        @foreach($lokasis as $lokasi)
+                          @if($lokasi->operasional_id == 1)
+                            <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                          @endif
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="lokasi_penerima" class="col-form-label">Lokasi Penerima</label>
+                    <div class="form-group">
+                      <select class="select2" name="lokasi_penerima" id="edit_keluar_lokasi_penerima" onchange="getRekening(this, 'keluar_rekening_penerima')" required>
+                        <option value="">Lokasi Penerima</option>
+                        @foreach($lokasis as $lokasi)
+                          <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row pemindahan_saldo">
+                  <div class="col-6">
+                    <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
+                    <div class="form-group">
+                      <select class="select2" name="rekening_pengirim" id="edit_keluar_rekening_pengirim" disabled>
+                        <option value="">Rekening Pengirim</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
+                    <div class="form-group">
+                      <select class="select2" name="rekening_penerima" id="edit_keluar_rekening_penerima" disabled>
+                        <option value="">Rekening Penerima</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row lainnya d-none">
+                  <div class="col-6">
+                    <label for="lokasi_pengirim" class="col-form-label">lokasi</label>
+                    <select class="select2" name="lokasi_pengirim" id="edit_keluar_lokasi" disabled>
+                      <option value="">lokasi</option>
+                      @foreach($lokasis as $lokasi)
+                          @if($lokasi->operasional_id == 1)
+                            <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+                          @endif
+                        @endforeach
+                    </select>
+                  </div>
+                  <div class="col-6">
+                    <label for="rekening_pengirim" class="col-form-label">Rekening</label>
+                    <select class="select2" name="rekening_pengirim" id="edit_keluar_rekening" disabled>
+                      <option value="">Rekening</option>
+                      @foreach($rekenings as $rekening)
+                          @if($rekening->lokasi->operasional_id == 1)
+                            <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
+                          @endif
+                        @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <label for="tanggal" class="col-form-label">Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal" id="edit_keluar_tanggal" value="{{ date('Y-m-d') }}" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <label for="nominal" class="col-form-label">Nominal</label>
+                    <input type="text" class="form-control" name="nominal" id="edit_keluar_nominal" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
+                    <input type="text" class="form-control" name="biaya_lain" id="edit_keluar_biaya_lain">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <label for="keterangan" class="col-form-label">Keterangan</label>
+                    <input type="text" class="form-control" name="keterangan" id="edit_keluar_keterangan" required>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="row">
+                  <div class="col-12">
+                    <label for="file" class="col-form-label">File</label>
+                    <input type="file" class="form-control" name="file" id="edit_keluar_file" accept="image/*" onchange="previewImage(this, 'edit_keluar_preview')">
+                    <img class="mt-2" src="" alt="" id="edit_keluar_preview" style="width: 100%;height:auto;">
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+    </form>
+      </div>
+    </div>
+</div>
+<div class="modal fade" id="modalBukti" tabindex="-1" aria-labelledby="editAkunlabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -485,7 +675,6 @@
       </div>
       <div class="modal-footer justify-content-center">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-          <button type="submit" class="btn btn-primary">Simpan</button>
       </div>
     </div>
   </div>
@@ -495,9 +684,10 @@
 
 @section('scripts')
     <script>
+      var rekening_pengirim;
     $(document).ready(function() {
         // getRekening($('#filterLokasi'), 'filterRekening')
-        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #keluar_jenis, #keluar_rekening, #keluar_lokasi').select2()
+        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #keluar_jenis, #keluar_rekening, #keluar_lokasi, [id^=edit_masuk_rekening_], [id^=edit_keluar_rekening_], [id^=edit_masuk_lokasi_], [id^=edit_keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_jenis, #edit_keluar_rekening, #edit_keluar_lokasi, #edit_keluar_status, #edit_masuk_status').select2()
     });
     function bukti(src){
         var baseUrl = window.location.origin;
@@ -505,7 +695,7 @@
         $('#imgBukti').attr('src', fullUrl);
         $('#modalBukti').modal('show');
     }
-    $(document).on('input', '#keluar_nominal, #keluar_biaya_lain, #masuk_nominal, #masuk_biaya_lain', function() {
+    $(document).on('input', '#keluar_nominal, #keluar_biaya_lain, #masuk_nominal, #masuk_biaya_lain, #edit_keluar_nominal, #edit_keluar_biaya_lain, #edit_masuk_nominal, #edit_masuk_biaya_lain', function() {
         let input = $(this);
         let value = input.val();
         if (!isNumeric(cleanNumber(value))) {
@@ -516,8 +706,8 @@
         
         input.val(formattedValue);
     });
-    $('#addFormMasuk, #addFormKeluar').on('submit', function(e) {
-        let inputs = $('#addFormMasuk, #addFormKeluar').find('#keluar_nominal, #keluar_biaya_lain, #masuk_nominal, #masuk_biaya_lain');
+    $('#addFormMasuk, #addFormKeluar, #editFormMasuk, #editFormKeluar').on('submit', function(e) {
+        let inputs = $('#addFormMasuk, #addFormKeluar, #editFormMasuk, #editFormKeluar').find('#keluar_nominal, #keluar_biaya_lain, #masuk_nominal, #masuk_biaya_lain, #edit_keluar_nominal, #edit_keluar_biaya_lain, #edit_masuk_nominal, #edit_masuk_biaya_lain');
         inputs.each(function() {
             let input = $(this);
             let value = input.val();
@@ -528,7 +718,7 @@
 
         return true;
     });
-    $(document).on('change', '#keluar_jenis', function(){
+    $(document).on('change', '#edit_keluar_jenis, #keluar_jenis', function(){
         var jenis = $(this).val();
         if(jenis != 'Pemindahan Saldo') {
             $('div.pemindahan_saldo').addClass('d-none');
@@ -553,7 +743,7 @@
         }
     });
 
-    function getData(id){
+    function edit_keluar(id){
         $.ajax({
             type: "GET",
             url: "/kas_pusat/"+id+"/edit",
@@ -561,16 +751,65 @@
                 'X-CSRF-TOKEN': csrfToken
             },
             success: function(response) {
-                // console.log(response)
-                $('#editForm').attr('action', 'kas_pusat/'+id+'/update');
-                $('#edit_akun_id').val(response.akun_id).trigger('change')
-                $('#edit_keterangan').val(response.keterangan)
-                $('#edit_kuantitas').val(response.kuantitas)
-                $('#edit_harga_satuan').val(response.harga_satuan)
-                $('#edit_harga_total').val(response.harga_total)
-                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
-                $('#edit_tanggal_transaksi').val(response.tanggal_transaksi)
-                $('#edit_status').val(response.status).trigger('change')
+                $('#editFormKeluar').attr('action', 'kas_gallery/'+id+'/update');
+
+                $('#edit_keluar_jenis').val(response.jenis).trigger('change')
+                
+                $('#edit_keluar_rekening').val(response.rekening_pengirim).trigger('change')
+                $('#edit_keluar_lokasi').val(response.lokasi_pengirim).trigger('change')
+
+                $('#edit_keluar_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change')
+                $('#edit_keluar_lokasi_penerima').val(response.lokasi_penerima).trigger('change')
+                $('#edit_keluar_rekening_pengirim').val(response.rekening_pengirim).trigger('change')
+                $('#edit_keluar_rekening_penerima').val(response.rekening_penerima).trigger('change')
+
+                $('#edit_keluar_tanggal').val(response.tanggal)
+                $('#edit_keluar_nominal').val(response.nominal)
+                $('#edit_keluar_biaya_lain').val(response.biaya_lain)
+                $('#edit_keluar_keterangan').val(response.keterangan)
+                $('#edit_keluar_status').val(response.status).trigger('change')
+                $('#edit_preview').val(response.file)
+                $('#editkaskeluar').modal('show');
+            },
+            error: function(error) {
+                toastr.error('Ambil data error', 'Error', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+            }
+        });
+    }
+
+    function edit_masuk(id){
+        $.ajax({
+            type: "GET",
+            url: "/kas_pusat/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(response) {
+                $('#editFormMasuk').attr('action', 'kas_gallery/'+id+'/update');
+                rekening_pengirim = response.rekening_pengirim;
+
+                $('#edit_masuk_jenis').val(response.jenis).trigger('change')
+                
+                $('#edit_masuk_rekening').val(response.rekening_pengirim).trigger('change')
+                $('#edit_masuk_lokasi').val(response.lokasi_pengirim).trigger('change')
+
+                $('#edit_masuk_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change')
+                $('#edit_masuk_lokasi_penerima').val(response.lokasi_penerima).trigger('change')
+                $('#edit_masuk_rekening_pengirim').val(response.rekening_pengirim).trigger('change')
+                $('#edit_masuk_rekening_penerima').val(response.rekening_penerima).trigger('change')
+
+                $('#edit_masuk_tanggal').val(response.tanggal)
+                $('#edit_masuk_nominal').val(response.nominal)
+                $('#edit_masuk_biaya_lain').val(response.biaya_lain)
+                $('#edit_masuk_keterangan').val(response.keterangan)
+                $('#edit_masuk_status').val(response.status).trigger('change')
+                $('#edit_preview').val(response.file)
+                $('#editkasmasuk').modal('show');
             },
             error: function(error) {
                 toastr.error('Ambil data error', 'Error', {
@@ -669,7 +908,11 @@
       rekeningElement.empty();
       rekeningElement.append('<option value="">Rekening</option>');
       data.forEach(function(item){
-        rekeningElement.append('<option value="'+item['id']+'">'+item['nama_akun']+'</option>')
+        var isSelected = '';
+        if(id == 'edit_masuk_rekening_pengirim'){
+          isSelected = rekening_pengirim == item['id'] ? 'selected' : '';
+        }
+        rekeningElement.append('<option value="'+item['id']+'" '+isSelected+'>'+item['nama_akun']+'</option>')
       })
     }
     $('#filterBtn').click(function(){
@@ -700,5 +943,25 @@
         }
         return 0;
     });
+    function previewImage(element, preview_id) {
+        const file = $(element)[0].files[0];
+        if (file.size > 2 * 1024 * 1024) { 
+            toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                closeButton: true,
+                tapToDismiss: false,
+                rtl: false,
+                progressBar: true
+            });
+            $(this).val(''); 
+            return;
+        }
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#' + preview_id).attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
+        }
+    };
     </script>
 @endsection

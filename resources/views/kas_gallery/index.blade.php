@@ -118,7 +118,7 @@
                   <th>Biaya Lainnya</th>
                   <th>Keterangan</th>
                   <th>Status</th>
-                  <th>Aksi</th>
+                  {{-- <th>Aksi</th> --}}
               </tr>
               </thead>
               <tbody>
@@ -135,16 +135,16 @@
                           <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : '-' }}</td>
                           <td>{{ $item->keterangan ?? '-' }}</td>
                           <td>{{ $item->status ?? '-' }}</td>
-                          <td class="text-center">
+                          {{-- <td class="text-center">
                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="javascript:void(0);" onclick="getData({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    <a href="javascript:void(0);" onclick="edit({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                 </li>
                             </ul>
-                          </td>
+                          </td> --}}
                       </tr>
                   @endforeach
               </tbody>
@@ -197,9 +197,14 @@
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
                             <ul class="dropdown-menu">
+                              @if(in_array('kas_gallery.edit', $thisUserPermissions) && in_array('kas_gallery.update', $thisUserPermissions))
                                 <li>
-                                    <a href="javascript:void(0);" onclick="getData({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  <a href="javascript:void(0);" onclick="edit({{ $item->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                 </li>
+                              @endif
+                              <li>
+                                  <a href="javascript:void(0);" onclick="bukti('{{ $item->file }}')" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
+                              </li>
                             </ul>
                           </td>
                       </tr>
@@ -214,7 +219,7 @@
 
 {{-- modal start --}}
 <div class="modal fade" id="addkaskeluar" tabindex="-1" aria-labelledby="addkaskeluarlabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="addkaskeluarlabel">Tambah Transaksi Masuk</h5>
@@ -226,34 +231,39 @@
             <input type="hidden" name="lokasi_pengirim" value="{{ $lokasi_pengirim ?? '' }}">
             <input type="hidden" name="jenis" value="Lainnya">
             <div class="row">
-              <div class="col-sm-12 col-md-6 col-lg-6 mb-2">
-                <label for="rekening_pengirim" class="col-form-label">Rekening</label>
-                <select class="select2" name="rekening_pengirim" id="keluar_rekening_pengirim" required>
-                  <option value="">Rekening</option>
-                  @foreach($rekeningKeluar as $rekening)
-                      <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
-                  @endforeach
-                </select>
+              <div class="col-6">
+                <div class="col-12 mb-2">
+                  <label for="rekening_pengirim" class="col-form-label">Rekening</label>
+                  <select class="select2" name="rekening_pengirim" id="keluar_rekening_pengirim" required>
+                    <option value="">Rekening</option>
+                    @foreach($rekeningKeluar as $rekening)
+                        <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-12 mb-2">
+                  <label for="tanggal" class="col-form-label">Tanggal</label>
+                  <input type="date" class="form-control" name="tanggal" id="keluar_tanggal" value="{{ date('Y-m-d') }}" required>
+                </div>
+                <div class="col-12 mb-2">
+                  <label for="nominal" class="col-form-label">Nominal</label>
+                  <input type="text" class="form-control" name="nominal" id="keluar_nominal" required>
+                </div>
+                <div class="col-12 mb-2">
+                  <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
+                  <input type="text" class="form-control" name="biaya_lain" id="keluar_biaya_lain">
+                </div>
+                <div class="col-12 mb-2">
+                  <label for="keterangan" class="col-form-label">Keterangan</label>
+                  <input type="text" class="form-control" name="keterangan" id="keluar_keterangan" required>
+                </div>
               </div>
-              <div class="col-sm-12 col-md-6 col-lg-6 mb-2">
-                <label for="tanggal" class="col-form-label">Tanggal</label>
-                <input type="date" class="form-control" name="tanggal" id="keluar_tanggal" value="{{ date('Y-m-d') }}" required>
-              </div>
-              <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
-                <label for="nominal" class="col-form-label">Nominal</label>
-                <input type="text" class="form-control" name="nominal" id="keluar_nominal" required>
-              </div>
-              <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
-                <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
-                <input type="text" class="form-control" name="biaya_lain" id="keluar_biaya_lain">
-              </div>
-              <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
-                <label for="keterangan" class="col-form-label">Keterangan</label>
-                <input type="text" class="form-control" name="keterangan" id="keluar_keterangan" required>
-              </div>
-              <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
-                <label for="file" class="col-form-label">File</label>
-                <input type="file" class="form-control" name="file" id="keluar_file" accept="image/*" required>
+              <div class="col-6">
+                <div class="col-12 mb-2">
+                  <label for="file" class="col-form-label">File</label>
+                  <input type="file" class="form-control" name="file" id="keluar_file" accept="image/*" required onchange="previewImage(this, 'preview')">
+                  <img class="mt-2" src="" alt="" id="preview" style="width: 100%;height:auto;">
+                </div>
               </div>
             </div>
         </div>
@@ -265,81 +275,75 @@
       </div>
     </div>
 </div>
-{{-- <div class="modal fade" id="editkas" tabindex="-1" aria-labelledby="editkaslabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editkaslabel">Edit Transaksi Kas</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
-        </div>
-        <div class="modal-body">
-          <form id="editForm" action="kas_gallery/0/update" method="POST">
-            @csrf
-            @method('PATCH')
-            <div class="mb-3">
-              <label for="nama" class="col-form-label">Akun</label>
-              <div class="form-group">
-                <select class="select2" name="akun_id" id="edit_akun_id" required>
-                  <option value="">Pilih Akun</option>
-                  @foreach($akuns as $akun)
-                    <option value="{{ $akun->id }}">{{ $akun->no_akun }} - {{ $akun->nama_akun }}</option>
-                  @endforeach
-                </select>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label for="keterangan" class="col-form-label">Keterangan</label>
-              <input type="text" class="form-control" name="keterangan" id="edit_keterangan" required>
-            </div>
-            <div class="mb-3">
-              <label for="kuantitas" class="col-form-label">Kuantitas</label>
-              <input type="number" class="form-control" name="kuantitas" id="edit_kuantitas" required>
-            </div>
-            <div class="mb-3">
-              <label for="harga_satuan" class="col-form-label">Harga Satuan</label>
-              <input type="number" class="form-control" name="harga_satuan" id="edit_harga_satuan" required>
-            </div>
-            <div class="mb-3">
-              <label for="harga_total" class="col-form-label">Harga Total</label>
-              <input type="number" class="form-control" name="harga_total" id="edit_harga_total" readonly required>
-            </div>
-            <div class="mb-3">
-              <label for="lokasi_id" class="col-form-label">Lokasi</label>
-              <div class="form-group">
-                <select class="select2" name="lokasi_id" id="edit_lokasi_id" required>
-                  <option value="">Pilih Lokasi</option>
-                  @foreach($lokasis as $lokasi)
-                    <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                  @endforeach
-                </select>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label for="tanggal_transaksi" class="col-form-label">Tanggal Transaksi</label>
-              <input type="date" class="form-control" name="tanggal_transaksi" id="edit_tanggal_transaksi" value="{{ date('Y-m-d') }}" required>
-            </div>
-            <div class="mb-3">
-              <label for="bukti" class="col-form-label">Bukti</label>
-              <input type="file" class="form-control" name="bukti" id="edit_bukti">
-            </div>
-            <div class="mb-3">
-              <label for="status" class="col-form-label">Status</label>
-              <div class="form-group">
-                <select class="select2" name="status" id="edit_status" required>
-                  <option value="AKTIF">Aktif</option>
-                  <option value="TIDAK AKTIF">Tidak Aktif</option>
-                </select>
-              </div>
-            </div>
-        </div>
-        <div class="modal-footer justify-content-center">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            <button type="submit" class="btn btn-primary">Simpan</button>
-        </div>
-    </form>
+<div class="modal fade" id="editkaskeluar" tabindex="-1" aria-labelledby="editkaskeluarlabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editkaskeluarlabel">Edit Transaksi Masuk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
       </div>
+      <div class="modal-body">
+        <form id="editForm" action="" method="POST" enctype="multipart/form-data">
+          @csrf
+          @method('patch')
+          <input type="hidden" name="lokasi_pengirim" value="{{ $lokasi_pengirim ?? '' }}">
+          <input type="hidden" name="jenis" value="Lainnya">
+          <div class="row">
+            <div class="col-6">
+              <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                  <label for="status" class="col-form-label">Status</label>
+                  <select class="select2" name="status" id="edit_keluar_status" required>
+                    <option value="BATAL">BATAL</option>
+                    <option value="DIKONFIRMASI">DIKONFIRMASI</option>
+                  </select>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-6 mb-2">
+                  <label for="rekening_pengirim" class="col-form-label">Rekening</label>
+                  <select class="select2" name="rekening_pengirim" id="edit_keluar_rekening_pengirim" required>
+                    <option value="">Rekening</option>
+                    @foreach($rekeningKeluar as $rekening)
+                        <option value="{{ $rekening->id }}">{{ $rekening->nama_akun }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-6 mb-2">
+                  <label for="tanggal" class="col-form-label">Tanggal</label>
+                  <input type="date" class="form-control" name="tanggal" id="edit_keluar_tanggal" value="{{ date('Y-m-d') }}" required>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                  <label for="nominal" class="col-form-label">Nominal</label>
+                  <input type="text" class="form-control" name="nominal" id="edit_keluar_nominal" required>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                  <label for="biaya_lain" class="col-form-label">Biaya Lain</label>
+                  <input type="text" class="form-control" name="biaya_lain" id="edit_keluar_biaya_lain">
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                  <label for="keterangan" class="col-form-label">Keterangan</label>
+                  <input type="text" class="form-control" name="keterangan" id="edit_keluar_keterangan" required>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="row">
+                <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                  <label for="file" class="col-form-label">File</label>
+                  <input type="file" class="form-control" name="file" id="edit_keluar_file" accept="image/*" onchange="previewImage(this, 'edit_preview')">
+                  <img class="mt-2" src="" alt="" id="edit_preview" style="width: 100%;height:auto;">
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+  </form>
     </div>
-</div> --}}
+  </div>
+</div>
 <div class="modal fade" id="modalBukti" tabindex="-1" aria-labelledby="addAkunlabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -352,7 +356,6 @@
       </div>
       <div class="modal-footer justify-content-center">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-          <button type="submit" class="btn btn-primary">Simpan</button>
       </div>
     </div>
   </div>
@@ -363,7 +366,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi]').select2()
+        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_status, #edit_keluar_rekening_pengirim').select2()
     });
     function bukti(src){
         var baseUrl = window.location.origin;
@@ -371,7 +374,7 @@
         $('#imgBukti').attr('src', fullUrl);
         $('#modalBukti').modal('show');
     }
-    $(document).on('input', '#keluar_nominal, #keluar_biaya_lain', function() {
+    $(document).on('input', '#keluar_nominal, #keluar_biaya_lain, #edit_keluar_nominal, #edit_keluar_biaya_lain', function() {
         let input = $(this);
         let value = input.val();
         if (!isNumeric(cleanNumber(value))) {
@@ -383,7 +386,19 @@
         input.val(formattedValue);
     });
     $('#addForm').on('submit', function(e) {
-        let inputs = $('#addForm').find('#keluar_nominal, #keluar_biaya_lain');
+        let inputs = $('#addForm').find('#keluar_nominal, #keluar_biaya_lain, #edit_keluar_nominal, #edit_keluar_biaya_lain');
+        inputs.each(function() {
+            let input = $(this);
+            let value = input.val();
+            let cleanedValue = cleanNumber(value);
+
+            input.val(cleanedValue);
+        });
+
+        return true;
+    });
+    $('#editForm').on('submit', function(e) {
+        let inputs = $('#editForm').find('#keluar_nominal, #keluar_biaya_lain, #edit_keluar_nominal, #edit_keluar_biaya_lain');
         inputs.each(function() {
             let input = $(this);
             let value = input.val();
@@ -395,7 +410,7 @@
         return true;
     });
 
-    function getData(id){
+    function edit(id){
         $.ajax({
             type: "GET",
             url: "/kas_gallery/"+id+"/edit",
@@ -405,14 +420,14 @@
             success: function(response) {
                 // console.log(response)
                 $('#editForm').attr('action', 'kas_gallery/'+id+'/update');
-                $('#edit_akun_id').val(response.akun_id).trigger('change')
-                $('#edit_keterangan').val(response.keterangan)
-                $('#edit_kuantitas').val(response.kuantitas)
-                $('#edit_harga_satuan').val(response.harga_satuan)
-                $('#edit_harga_total').val(response.harga_total)
-                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
-                $('#edit_tanggal_transaksi').val(response.tanggal_transaksi)
-                $('#edit_status').val(response.status).trigger('change')
+                $('#edit_keluar_rekening_pengirim').val(response.rekening_pengirim).trigger('change')
+                $('#edit_keluar_tanggal').val(response.tanggal)
+                $('#edit_keluar_nominal').val(response.nominal)
+                $('#edit_keluar_biaya_lain').val(response.biaya_lain)
+                $('#edit_keluar_keterangan').val(response.keterangan)
+                $('#edit_keluar_status').val(response.status).trigger('change')
+                $('#edit_preview').attr('src', 'storage/'+response.file)
+                $('#editkaskeluar').modal('show');
             },
             error: function(error) {
                 toastr.error('Ambil data error', 'Error', {
@@ -555,5 +570,25 @@
         }
         return 0;
     });
+    function previewImage(element, preview_id) {
+        const file = $(element)[0].files[0];
+        if (file.size > 2 * 1024 * 1024) { 
+            toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                closeButton: true,
+                tapToDismiss: false,
+                rtl: false,
+                progressBar: true
+            });
+            $(this).val(''); 
+            return;
+        }
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#' + preview_id).attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
+        }
+    };
     </script>
 @endsection
