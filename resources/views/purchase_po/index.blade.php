@@ -102,42 +102,48 @@
 
                                 <td>
                        
-                                        @if($datapo->status_dibuat == 'BATAL')
-                                            <span class="badge bg-secondary">BATAL</span>
-                                        @elseif($datapo->status_dibuat == 'TUNDA' || $datapo->status_dibuat == null)
-                                            <span class="badge bg-danger">TUNDA</span>
-                                        @elseif($datapo->status_dibuat == 'DIKONFIRMASI')
-                                            <span class="badge bg-success">DIKONFIRMASI</span>
-                                        @endif
-                                   
+                                    @if($datapo->status_dibuat == 'BATAL')
+                                    <span class="badges bg-lightgrey">BATAL</span>
+                                    @elseif($datapo->status_dibuat == 'TUNDA' || $datapo->status_dibuat == null)
+                                    <span class="badges bg-lightred">TUNDA</span>
+                                    @elseif($datapo->status_dibuat == 'DIKONFIRMASI')
+                                    <span class="badges bg-lightgreen">DIKONFIRMASI</span>
+                                    @endif
                                 </td>
                                 
                                 <td>
                                     @if($datapo->lokasi->tipe_lokasi == 1)
 
                                         @if($datapo->status_diterima == 'BATAL')
-                                            <span class="badge bg-secondary">BATAL</span>
+                                            <span class="badges bg-lightgrey">BATAL</span>
                                         @elseif($datapo->status_diterima == 'TUNDA' || $datapo->status_diterima == null)
-                                            <span class="badge bg-danger">TUNDA</span>
+                                            <span class="badges bg-lightred">TUNDA</span>
                                         @elseif($datapo->status_diterima == 'DIKONFIRMASI')
-                                            <span class="badge bg-success">DIKONFIRMASI</span>
+                                            <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                         @else
                                         {{$datapo->status_diterima  }}
                                         @endif
 
-                                    @else
-                                        -
+                                    @else 
+                                    {{-- mengikuti auditor --}}
+                                        @if($datapo->status_diperiksa == 'BATAL')
+                                            <span class="badges bg-lightgrey">BATAL</span>
+                                        @elseif($datapo->status_diperiksa == 'TUNDA' || $datapo->status_diperiksa == null)
+                                            <span class="badges bg-lightred">TUNDA</span>
+                                        @elseif($datapo->status_diperiksa == 'DIKONFIRMASI')
+                                            <span class="badges bg-lightgreen">DIKONFIRMASI</span>
+                                        @endif
                                     @endif
 
                                 </td>
                                 
                                 <td>
                                     @if($datapo->status_diperiksa == 'BATAL')
-                                        <span class="badge bg-secondary">BATAL</span>
+                                        <span class="badges bg-lightgrey">BATAL</span>
                                     @elseif($datapo->status_diperiksa == 'TUNDA' || $datapo->status_diperiksa == null)
-                                        <span class="badge bg-danger">TUNDA</span>
+                                        <span class="badges bg-lightred">TUNDA</span>
                                     @elseif($datapo->status_diperiksa == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                        <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @endif
                                 </td>
                                 
@@ -276,9 +282,11 @@
                     <div class="page-title">
                         <h4>Purchase Order Inden</h4>
                     </div>
+                    @if($user->hasRole(['Purchasing']))
                     <div class="page-btn">
                         <a href="{{ route('pembelianinden.create') }}" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembelian</a>
                     </div>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -322,8 +330,8 @@
                                 <th>Tanggal PO</th>
                                 <th>Supplier</th>
                                 <th>Bulan Stok Inden</th>
-                                <th>Status Purchase</th>
-                                <th>Status Auditor</th>
+                                <th>Status Dibuat</th>
+                                <th>Status Diperiksa</th>
                                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                                 <th>Status Pembayaran</th>
                                 @endif
@@ -340,21 +348,21 @@
                                 <td>{{ $inden->bulan_inden}}</td>
                                 <td>
                                     @if($inden->status_dibuat == 'BATAL')
-                                        <span class="badge bg-secondary">BATAL</span>
+                                    <span class="badges bg-lightgrey">BATAL</span>
                                     @elseif($inden->status_dibuat == 'TUNDA' || $inden->status_dibuat == null)
-                                        <span class="badge bg-danger">TUNDA</span>
+                                    <span class="badges bg-lightred">TUNDA</span>
                                     @elseif($inden->status_dibuat == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                    <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @endif
                                
                                 </td>
                                 <td>
                                     @if($inden->status_diperiksa == 'BATAL')
-                                        <span class="badge bg-secondary">BATAL</span>
+                                        <span class="badges bg-lightgrey">BATAL</span>
                                     @elseif($inden->status_diperiksa == 'TUNDA' || $inden->status_diperiksa == null)
-                                        <span class="badge bg-danger">TUNDA</span>
+                                        <span class="badges bg-lightred">TUNDA</span>
                                     @elseif($inden->status_diperiksa == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                        <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @endif
                                 </td>
                                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
@@ -410,14 +418,21 @@
                                         <li>
                                             <a href="{{ route('pembelian.show', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
                                         </li>
+                                        @if(Auth::user()->hasRole('Purchasing'))
+                                        @if ($inden->tgl_diperiksa === null && ($inden->status_dibuat == "TUNDA" || $inden->status_dibuat == null ))
                                         <li>
-                                            <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                            <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit PO</a>
                                         </li>
-                                        @if ($inden->tgl_diperiksa === null)
-                                        <li>
-                                            <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
-                                        </li>
+                                        @endif
+                                        @endif
+                                        @if(Auth::user()->hasRole('Auditor'))
+                                            @if ($inden->tgl_diperiksa === null && $inden->status_dibuat == "DIKONFIRMASI")
+                                            <li>
+                                                <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Periksa</a>
+                                            </li>
+                                            @endif
                                          @endif
+
                                         <li>
                                             {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $inden->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
                                         </li>

@@ -41,6 +41,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
+                                            @if(Auth::user()->hasRole('Purchasing'))
                                             <div class="input-group">
                                                 <select id="id_supplier" name="id_supplier" class="form-control" required>
                                                     <option value="">Pilih Nama Supplier</option>
@@ -50,24 +51,30 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
+                                                
                                                 <div class="input-group-append">
                                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
                                                         <img src="/assets/img/icons/plus1.svg" alt="img" />
                                                     </button>
                                                 </div>
                                             </div>
+                                            @endif
+                                            @if(Auth::user()->hasRole('Auditor'))
+                                                <input type="text" class="form-control" id="supplier" name="supllier" value="{{ $beli->supplier->nama}}" readonly>
+
+                                            @endif
+
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="bulan_inden">Bulan Inden</label>
-                                            {{-- <input type="text" class="form-control" id="bulan" name="bulan_inden" value="{{ $beli->bulan_inden}}" readonly> --}}
+                                            <input type="text" class="form-control" id="bulan" name="bulan_inden" value="{{ $beli->bulan_inden}}" readonly>
 
-                                            <select class="form-control" id="bulanTahun" name="bulan_inden">
+                                            {{-- <select class="form-control" id="bulanTahun" name="bulan_inden" readonly>
                                                 <!-- Opsi akan diisi oleh JavaScript -->
-                                            </select>
+                                            </select> --}}
                                         </div>
-                                       
                                     </div>
                                 </div>
                             </div>
@@ -96,6 +103,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="dynamic_field">
+                                        @if(Auth::user()->hasRole('Purchasing'))
                                         @foreach ($produkbelis as $index => $item)
                                             <tr id="row{{ $index }}">
                                                 <td hidden><input type="text" name="id[]" id="id_{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
@@ -118,6 +126,31 @@
                                                 @endif
                                             </tr>
                                         @endforeach
+                                        @endif
+                                        
+                                        @if(Auth::user()->hasRole('Auditor'))
+                                        @foreach ($produkbelis as $index => $item)
+                                            <tr id="row{{ $index }}">
+                                                <td hidden><input type="text" name="id[]" id="id_{{ $index }}" class="form-control" value="{{ $item->id }}" readonly hidden></td>
+                                                <td><input type="text" name="kode_inden[]" id="kode_inden_{{ $index }}" class="form-control" value="{{ $item->kode_produk_inden }}" readonly></td>
+                                                <td>
+                                                    <select id="kategori_{{ $index }}" class="form-control kategori-select" style="width: 100%;" disabled>
+                                                        <option value="">----- Pilih Kategori ----</option>
+                                                        @foreach ($produks as $produk)
+                                                            <option value="{{ $produk->id }}" data-kode="{{ $produk->kode }}" {{ $item->produk_id == $produk->id ? 'selected' : '' }}>{{ $produk->nama }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <input type="hidden" name="kategori[]" value="{{ $item->produk_id }}">
+                                                </td>
+                                                
+                                                {{-- <td><input type="text" name="kategori[]" id="kategori_{{ $index }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td> --}}
+                                                <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
+                                                <td><input type="number" name="qty[]" id="qty_{{ $index }}" class="form-control" value="{{ $item->jumlahInden }}"></td>
+                                                <td><input type="text" name="ket[]" id="ket_{{ $index }}" class="form-control" value="{{ $item->keterangan }}"></td>
+                                                <td></td>
+                                            </tr>
+                                        @endforeach
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
@@ -134,6 +167,7 @@
                                             <th>Diperiksa</th>
                                         </tr>
                                     </thead>
+                                    @if(Auth::user()->hasRole('Purchasing'))
                                     <tbody>
                                         <tr>
                                             <td id="pembuat">
@@ -162,6 +196,7 @@
                                                     <option>Pilih Status</option>
                                                     <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                    <option value="BATAL" {{ $beli->status_dibuat == 'BATAL' ? 'selected' : ''}}>BATAL</option>
                                                 </select>
                                             </td>
                                             @if($pemeriksa)
@@ -197,6 +232,55 @@
                                             @endif
                                         </tr>
                                     </tbody>
+                                    @endif
+                                    @if(Auth::user()->hasRole('Auditor'))
+                                    <tbody>
+                                        <tr>
+                                            <td id="pembuat">
+                                                {{-- <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}"> --}}
+                                                {{-- <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled> --}}
+                                                <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
+                                            </td>
+                                          
+                                            <td id="pemeriksa">
+                                                 <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                {{-- <input type="text" class="form-control" value="{{ $pemeriksa  }} ({{ $pemeriksajbt  }})"  disabled> --}}
+                                            </td>
+                                         
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td id="status_dibuat">
+                                                <select id="status_dibuat" name="status_dibuat" class="form-control" disabled>
+                                                    {{-- <option>Pilih Status</option> --}}
+                                                    <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                    <option value="BATAL" {{ $beli->status_dibuat == 'BATAL' ? 'selected' : ''}}>BATAL</option>
+                                                </select>
+                                            </td>
+                                          
+                                            <td id="status_diperiksa">
+                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control">
+                                                    <option disabled selected>Pilih Status</option>
+                                                    {{-- <option value="TUNDA" {{ $beli->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option> --}}
+                                                    <option value="DIKONFIRMASI" {{ $beli->status_diperiksa == 'DIKONFIRMASI' || $beli->status_diperiksa == null ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                </select>
+                                            </td>
+                                           
+                                        </tr>
+                                        <tr>
+                                            <td id="tgl_pembuat">
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" disabled>
+                                            </td>
+                                         
+                                            <td id="tgl_pemeriksa">
+                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? now() }}">
+                                            </td>
+                                          
+                                        </tr>
+                                    </tbody>
+                                    @endif
                                 </table>
                                 <br>
                             </div>
