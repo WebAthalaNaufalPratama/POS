@@ -275,11 +275,11 @@
                                                     </td>
                                                     <td id="status_dibuku">
                                                         <!-- <input type="text" class="form-control" id="status_dibuku" value="{{ $data->status_dibuku ?? '-' }}" readonly> -->
-                                                        <select id="status" name="status_dibuku" class="form-control select2" required>
+                                                        <select id="status_dibuku" name="status_dibuku" class="form-control select2" required>
                                                             <option value="">Pilih Status</option>
-                                                            <option value="TUNDA" {{$data->status_dibuat == 'TUNDA' ||$data->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="TUNGGUBAYAR" {{$data->status_dibuat == 'TUNGGUBAYAR' ||$data->status_dibuat == '' ? 'selected' : '' }}>TUNGGU BAYAR</option>
-                                                            <option value="DIKONFIRMASI" {{$data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="TUNDA" {{$data->status_dibuku == 'TUNDA' ||$data->status_dibuku == '' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="TUNGGUBAYAR" {{$data->status_dibuku == 'TUNGGUBAYAR' ||$data->status_dibuku == '' ? 'selected' : '' }}>TUNGGU BAYAR</option>
+                                                            <option value="DIKONFIRMASI" {{$data->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                         
                                                     </td>
@@ -400,6 +400,29 @@
                 return true;
             });
         });
+
+        var status_dibuku = "{{ $data->status_dibuku }}";
+        $('#status_dibuku').val(status_dibuku).trigger('change');
+        statusdibuku();
+
+
+        function statusdibuku() {
+            var status = $('#status_dibuku').val();
+            if(status == "TUNGGUBAYAR") {
+                $('#catatan, #tgl_retur, #biaya_pengiriman').prop('readonly', true);
+                $('#komplain , #file').prop('disabled', true);
+                $('[id^=produk]').prop('disabled', true);
+                $('[id^=alasan]').prop('disabled', true);
+                $('[id^=jumlah]').prop('disabled', true);
+            }else if(status == "TUNDA") {
+                $('#catatan, #tgl_retur, #biaya_pengiriman').prop('readonly', false);
+                $('#komplain, #file').prop('disabled', false);
+                $('[id^=produk]').prop('disabled', false);
+                $('[id^=alasan]').prop('disabled', false);
+                $('[id^=jumlah]').prop('disabled', false);
+            }
+        }
+
         $(document).on('change', '[id^=produk_]', function(){
             var id = $(this).attr('id');
             var parts = id.split('_');
