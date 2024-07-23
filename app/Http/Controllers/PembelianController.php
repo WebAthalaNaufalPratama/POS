@@ -2585,12 +2585,6 @@ class PembelianController extends Controller
         }
         
         $data['ongkir'] = $request->biaya_pengiriman ?? 0;
-        $user = Auth::user();
-        if($user->hasRole(['Purchasing'])) {
-            $data['tgl_dibuku'] = null;
-        }elseif($user->hasRole(['Auditor'])) {
-            $data['tgl_dibuat'] = null;
-        }
         // $data['total'] = $request->total_harga;
         $jenis = $data['komplain'];
         
@@ -2669,9 +2663,9 @@ class PembelianController extends Controller
             $getInvoice = Invoicepo::find($request->invoicepo_id);
             $getppn = $getInvoice->persen_pp ?? 0;
             $newSubtotal = $getInvoice->subtotal;
-            $getretur = Returpembelian::where('id',$save->id)->first();
+            $getretur = Returpembelian::where('id',$retur)->first();
             // $getProdukbeli = Produkbeli::where('pembelian_id',  $getInvoice->pembelian_id)->get();
-            $getProdukretur = Produkretur::where('returpembelian_id',$save->id)->get();
+            $getProdukretur = Produkretur::where('returpembelian_id',$getretur->id)->get();
             
 
             if($jenis == 'Retur'){
