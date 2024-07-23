@@ -137,6 +137,7 @@
                                                     <option disabled selected>Pilih Status</option>
                                                     <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                    <option value="BATAL" {{ $beli->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                 </select>
                                             </td>
                                           
