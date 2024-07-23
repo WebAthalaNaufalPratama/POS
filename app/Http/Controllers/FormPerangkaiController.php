@@ -28,14 +28,14 @@ class FormPerangkaiController extends Controller
         $perangkai = FormPerangkai::select('perangkai_id')
         ->distinct()
         ->join('karyawans', 'form_perangkais.perangkai_id', '=', 'karyawans.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
         ->get();
 
-        $query = FormPerangkai::whereHas('produk_terjual');
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        $query = FormPerangkai::where('jenis_rangkaian', 'Sewa')->whereHas('produk_terjual');
+        if(Auth::user()->karyawans){
             $query->whereHas('perangkai', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -234,8 +234,6 @@ class FormPerangkaiController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
-        // dd($data);
-        // dd($req->prdTerjual_i);
         // delete data
         $getPerangkai = FormPerangkai::where('no_form', $data['no_form'])->get();
         if($getPerangkai){

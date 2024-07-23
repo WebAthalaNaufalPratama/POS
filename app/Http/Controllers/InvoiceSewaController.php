@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\InvoiceSewa;
 use App\Models\Karyawan;
+use App\Models\KembaliSewa;
 use App\Models\Komponen_Produk_Terjual;
 use App\Models\Kontrak;
 use App\Models\Ongkir;
@@ -28,7 +29,7 @@ class InvoiceSewaController extends Controller
     public function index(Request $req)
     {
         $query = InvoiceSewa::query();
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        if(Auth::user()->karyawans){
             $query->whereHas('kontrak', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -44,11 +45,14 @@ class InvoiceSewaController extends Controller
         if ($req->dateEnd) {
             $query->where('jatuh_tempo', '<=', $req->input('dateEnd'));
         }
+        if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
+            $query->where('status', 'DIKONFIRMASI');
+        }
         $data = $query->orderByDesc('id')->get();
         $customer = Kontrak::whereHas('invoice')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -60,6 +64,9 @@ class InvoiceSewaController extends Controller
         } else {
             $invoice_bayar = 0;
         }
+        $data->map(function($kontrak){
+            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
+        });
         $bankpens = Rekening::get();
         return view('invoice_sewa.index', compact('data', 'invoice_bayar', 'bankpens', 'customer'));
     }
@@ -80,8 +87,8 @@ class InvoiceSewaController extends Controller
 
         $kontrak = Kontrak::with('produk')->find($req->kontrak);
         $sales = Karyawan::where('jabatan', 'sales')->get();
-        $ongkirs = Ongkir::all();
-        $rekening = Rekening::all();
+        $ongkirs = Ongkir::where('lokasi_id', $kontrak->lokasi_id)->get();
+        $rekening = Rekening::where('lokasi_id', $kontrak->lokasi_id)->get();
         $produkjuals = Produk_Jual::all();
         $produkSewa = $kontrak->produk()->whereHas('produk')->get();
 
@@ -327,6 +334,14 @@ class InvoiceSewaController extends Controller
                 $msg = 'Dibatalkan';
             } else {
                 return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');
+            }
+            if(Auth::user()->hasRole('Auditor')){
+                $invoice->penyetuju = Auth::user()->id;
+                $invoice->tanggal_penyetuju = $req->tanggal_penyetuju;
+            }
+            if(Auth::user()->hasRole('Finance')){
+                $invoice->pemeriksa = Auth::user()->id;
+                $invoice->tanggal_pemeriksa = $req->tanggal_pemeriksa;
             }
             $check = $invoice->update();
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');

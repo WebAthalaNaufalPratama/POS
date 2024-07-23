@@ -195,17 +195,8 @@
                                                         </div> -->
                                                     </td>
                                                     <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
-                                                    @php
-                                                        $user = Auth::user();
-                                                    @endphp
-                                                    @endphp
-                                                    @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $produk->no_form == null && $karyawan->lokasi->tipe_lokasi == 1)
-                                                        <td><button id="btnGift_0" data-produk_gift="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
-                                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
-                                                    @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
-                                                        <td><button id="btnGift_0" data-produk_gift="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
-                                                        <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
-                                                    @endif
+                                                    <td><button id="btnGift_0" data-produk_gift="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
+                                                    <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                     <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                     <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
                                                     </tr>
@@ -247,15 +238,9 @@
                                                         </div> -->
                                                         </td>
                                                         <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.')}}" readonly></td>
-                                                        @php
-                                                            $user = Auth::user();
-                                                        @endphp
-                                                        @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $komponen->no_form == null && $karyawan->lokasi->tipe_lokasi == 1)
-                                                            <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
-                                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
-                                                        @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
-                                                            <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
-                                                            <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @if($komponen->no_form == null)
+                                                        <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
+                                                        <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                         @endif
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
@@ -270,6 +255,159 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row justify-content-around">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                                <div class="form-row row">
+                                    <div class="mb-4">
+                                        <h5>Produk Komplain ({{ $retur->komplain == 'retur' ? 'RETUR' : ($retur->komplain == 'diskon' ? 'DISKON' : ($retur->komplain == 'refund' ? 'REFUND' : '')) }})</h5>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama</th>
+                                                    <th>Jumlah</th>
+                                                    <th>Alasan</th>
+                                                    <th>Diskon</th>
+                                                    <th>Harga</th>
+                                                    <th>Total Harga</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dynamic_field">
+                                            @if(count($retur->produk_retur) > 0)
+                                            @php
+                                            $i = 0;
+                                            
+                                            @endphp
+                                            @foreach ($retur->produk_retur as $produk)
+                                            @if($produk->jenis == 'RETUR')
+                                            <tr id="row{{ $i }}">
+                                            <td>
+                                            @php
+                                                $isTRDSelected = false;
+                                            @endphp
+                                                <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control pilih-produk" data-index="{{ $i }}" required readonly>
+                                                <option value="">Pilih Produk</option>
+                                                @php
+                                                    $isTRDSelected = false; 
+                                                    $selectedTRDKode = ''; 
+                                                    $selectedGFTKode = ''; 
+                                                    $do = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
+                                                    $harga = \App\Models\Produk_Terjual::where('id', $do->no_invoice)->first();
+                                                @endphp
+                                                @foreach ($produkterjuals as $index => $pj)
+                                                    @php
+                                                    if($pj->produk && $produk->produk->kode){
+                                                        $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                                                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                                                        if($isSelectedTRD) {
+                                                            $isTRDSelected = true;
+                                                            // Reset selected TRD code
+                                                            $selectedTRDKode = '';
+                                                            foreach ($pj->komponen as $komponen) {
+                                                                if ($komponen->kondisi) {
+                                                                    foreach($kondisis as $kondisi) {
+                                                                        if($kondisi->id == $komponen->kondisi) {
+                                                                            // Set selected TRD code based on condition
+                                                                            $selectedTRDKode = $kondisi->nama;
+                                                                            $selectedTRDJumlah = $komponen->jumlah;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    @endphp
+                                                    <!-- @if($pj->produk) -->
+                                                    <option value="{{ $produk->id }}" data-harga="{{ $harga->harga_jual }}" data-jumlahproduk="{{ $harga->jumlah}}" data-diskon="{{ $harga->diskon}}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                        @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                            {{ $pj->produk->nama }}
+                                                        @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                            {{ $pj->produk->nama }}
+                                                        @endif
+                                                    </option>
+                                                    <!-- @endif -->
+                                                @endforeach
+                                            </select>
+                                            @if($isTRDSelected)
+                                                <div class="row mt-2">
+                                                    <div class="col">
+                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                            <option value=""> Pilih Kondisi </option>
+                                                            @foreach ($kondisis as $kondisi)
+                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col">
+                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                    </div>
+                                                </div>
+                                            @elseif($perPendapatan)
+                                                @foreach ($perPendapatan as $noRETUR => $items)
+                                                    @if($noRETUR == $produk->no_retur)
+                                                        @foreach ($items as $komponen)
+                                                            <div class="row mt-2">
+                                                                <div class="col">
+                                                                    <input type="hidden" name="idgiftproduk_{{ $i }}[]" id="idgiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['id'] }}">
+                                                                    <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
+                                                                    <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" readonly>
+                                                                        <option value=""> Pilih Kondisi </option>
+                                                                        @foreach ($kondisis as $kondisi)
+                                                                        <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : ''}} readonly>{{ $kondisi->nama }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required>
+                                                                    <!-- <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>    -->
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    @endif
+                                                @endforeach
+                                            @endif
+
+                                            </td>
+                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" data-index="{{ $i }}" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required readonly></td>
+                                            <td><input type="text" name="alasan[]" id="alasan_{{ $i }}" class="form-control" value="{{ old('alasan' . $i) ?? $produk->alasan}}" required readonly></td>
+                                            <td>
+                                                <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" readonly>
+                                                    <option value="0">Pilih Diskon</option>
+                                                    <option value="Nominal" {{ $produk->jenis_diskon == 'Nominal' ? 'selected' : ''}}>Nominal</option>
+                                                    <option value="persen" {{ $produk->jenis_diskon == 'persen' ? 'selected' : ''}}>Persen</option>
+                                                </select>
+                                                <div>
+                                                    <div class="input-group">
+                                                        <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="{{ 'Rp '. number_format($produk->diskon, 0, ',', '.') }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
+                                                        <span class="input-group-text" id="nominalInput_{{ $i }}" style="display:none;">.00</span>
+                                                        <span class="input-group-text" id="persenInput_{{ $i }}" style="display:none;">%</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($produk->harga, 0, ',', '.')}}" required readonly></td>
+                                            <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($produk->harga_jual, 0, ',', '.')}}" readonly></td>
+
+
+                                            </tr>
+                                            @php
+                                            $i++;
+                                            @endphp
+                                            @endif
+                                            @endforeach
+                                            @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                             <div class="row">
@@ -363,7 +501,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-8 col-sm-12 border rounded mt-2">
+                                    @if($retur->komplain == 'diskon')
+                                        <div class="col-lg-4 col-sm-12 border rounded mt-2">
+                                    @else
+                                        <div class="col-lg-8 col-sm-12 border rounded mt-2">
+                                    @endif
+                                    
                                         <!-- Table Section -->
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
@@ -493,13 +636,75 @@
                                             </div>
                                         </div>
                                     </div>
+                                    
                                     <!-- Summary Section -->
                                     <div class="col-lg-4 col-sm-12">
-                                        <div class="total-order mt-4">
+                                        <div class="total-order mt-4 calculation-container">
+                                        
+                                            <h4 class="calculation-header">Kalkulasi Sebelum Terkena Retur</h4>
+                                                <ul>
+                                                    <li>
+                                                        <h4>Sub Total</h4>
+                                                        <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.')}}" readonly required></h5>
+                                                    </li>
+                                                    <li>
+                                                        <h4>Promo</h4>
+                                                        <h5 class="col-lg-5">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-9 pe-0">
+                                                                    <select id="promo_id" name="promo_id" class="form-control" value="{{ $penjualans->promo_id}}" required disabled>
+                                                                        @foreach ($promos as $promo)
+                                                                        <option value="{{ $promo->id }}">{{ $promo->nama }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-3 ps-0 mb-0">
+                                                                    <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
+                                                                </div>
+                                                            </div>
+                                                            <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{'Rp '. number_format($penjualans->total_promo, 0, ',', '.')}}" readonly>
+                                                        </h5>
+                                                    </li>
+                                                    <li>
+                                                        <h4>PPN
+                                                            <select id="jenis_ppn" name="jenis_ppn" class="form-control" required readonly>
+                                                                <option value=""> Pilih Jenis PPN</option>
+                                                                <option value="exclude" {{ $penjualans->jenis_ppn == 'exclude' ? 'selected' : ''}}>EXCLUDE</option>
+                                                                <option value="include" {{ $penjualans->jenis_ppn == 'include' ? 'selected' : ''}}>INCLUDE</option>
+                                                            </select>
+                                                        </h4>
+                                                        <h5 class="col-lg-3">
+                                                            <div class="input-group">
+                                                                <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{$penjualans->persen_ppn}}" readonly required>
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                            <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.')}}"readonly required>
+                                                        </h5>
+                                                    </li>
+                                                    <li>
+                                                        <h4>Biaya Ongkir</h4>
+                                                        <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.')}}" readonly required></h5>
+                                                    </li>
+                                                    <li>
+                                                        <h4>DP</h4>
+                                                        <h5><input type="text" id="dp" name="dp" class="form-control" value="{{ 'Rp '. number_format($penjualans->dp, 0, ',', '.')}}" required readonly></h5>
+                                                    </li>
+                                                    <li class="total">
+                                                        <h4>Total Tagihan</h4>
+                                                        <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.')}}" readonly required></h5>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                    </div>
+
+                                    @if($retur->komplain == 'diskon')
+                                    <div class="col-lg-4 col-sm-12">
+                                        <div class="total-order mt-4 calculation-container">
+                                        <h4 class="calculation-header">Kalkulasi Setelah Terkena Retur</h4>
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
-                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.')}}" readonly required></h5>
+                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total_retur, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Promo</h4>
@@ -520,24 +725,15 @@
                                                     </h5>
                                                 </li>
                                                 <li>
-                                                    <h4>PPN
-                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required readonly>
-                                                            <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude" {{ $penjualans->jenis_ppn == 'exclude' ? 'selected' : ''}}>EXCLUDE</option>
-                                                            <option value="include" {{ $penjualans->jenis_ppn == 'include' ? 'selected' : ''}}>INCLUDE</option>
-                                                        </select>
-                                                    </h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{$penjualans->persen_ppn}}" readonly required>
-                                                            <span class="input-group-text">%</span>
-                                                        </div>
-                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.')}}"readonly required>
+                                                    <h4>PPN</h4>
+                                                    <h5 class="col-lg-3">
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{'Rp '. number_format($penjualans->jumlahppnretur , 0, ',', '.')}}"readonly required>
                                                     </h5>
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
                                                     <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.')}}" readonly required></h5>
+                                                    <h5><input type="text" id="biaya_kirim_retur" name="biaya_kirim_retur" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_kirim_retur, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>DP</h4>
@@ -545,7 +741,7 @@
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
-                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.')}}" readonly required></h5>
+                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan_retur, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Sisa Bayar</h4>
@@ -554,6 +750,7 @@
                                             </ul>
                                         </div>
                                     </div>
+                                    @endif
                                 
                             </div>
             <!-- </form> -->

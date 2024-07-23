@@ -198,9 +198,9 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control"  required></td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"  required></td>
-                                        <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control"  required readonly></td>
+                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control"></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"></td>
+                                        <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control" readonly></td>
                                         <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
                                     </tr>
                                 </tbody>

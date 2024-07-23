@@ -67,14 +67,16 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        @if(!empty($penjualans->deliveryOrder->first()))
                                         <div class="form-group" style="display:none;" id="penerima" disabled>
                                             <label for="penerima">Nama Penerima</label>
-                                            <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima" value="{{ $penjualans->deliveryOrder->first()->penerima ?? '-'}}" readonly>
+                                            <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima" value="{{ $penjualans->deliveryOrder->first()->penerima}}" readonly>
                                         </div>
                                         <div class="form-group" style="display:none;" id="tanggalkirim" disabled>
                                             <label for="tanggal_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" placeholder="Tanggal Kirim" id="tanggal_kirim" name="tanggal_kirim" value="{{$penjualans->deliveryOrder->first()->tanggal_kirim ?? '-'}}" readonly>
+                                            <input type="date" class="form-control" placeholder="Tanggal Kirim" id="tanggal_kirim" name="tanggal_kirim" value="{{$penjualans->deliveryOrder->first()->tanggal_kirim }}" readonly>
                                         </div>
+                                        @endif
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -139,21 +141,21 @@
                                                 <textarea name="alasan_batal" id="alasan" disabled>{{ $penjualans->alasan_batal}}</textarea>
                                             </div>
                                         </div>
-                                        @if(!empty($dopenjualans))
+                                        @if(!empty($penjualans->deliveryOrder->first()))
                                         <div class="form-group" style="display:none;" id="driver">
                                             <label for="driver">Driver</label>
                                             <select id="driver" name="driver" class="form-control" disabled>
                                                 <option value=""> Pilih Driver </option>
                                                 @foreach ($drivers as $driver)
-                                                <option value="{{ $driver->id }}" {{$driver->id == $dopenjualans->driver  ? 'selected' : ''}}>{{ $driver->nama }}</option>
+                                                <option value="{{ $driver->id }}" {{$driver->id == $dopenjualans->driver ? 'selected' : ''}}>{{ $driver->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        @endif
                                         <div class="form-group" style="display:none;" id="alamat">
                                             <label for="alamat">Alamat Pengiriman</label>
-                                            <textarea id="alamat" name="alamat" value="" disabled>{{ $dopenjualans->alamat ?? '-'}}</textarea>
+                                            <textarea id="alamat" name="alamat" value="" disabled>{{ $dopenjualans->alamat}}</textarea>
                                         </div>
+                                        @endif
                                     </div>
 
                                     <div class="col-md-6">
@@ -169,7 +171,7 @@
                                             <label for="catatan_komplain">Catatan</label>
                                             <textarea id="catatan_komplain" name="catatan_komplain" value="{{ $penjualans->catatan_komplain}}" disabled>{{ $penjualans->catatan_komplain}}</textarea>
                                         </div>
-                                        @if(!empty($dopenjualans))
+                                        @if(!empty($penjualans->deliveryOrder->first()))
                                         <div class="form-group" style="display:none;" id="bukti_kirim">
                                             <div class="custom-file-container" data-upload-id="mySecondImage">
                                                 <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
@@ -306,20 +308,21 @@
                                                     <td>
                                                         <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" readonly>
                                                             <option value="0">Pilih Diskon</option>
-                                                            <option value="Nominal" {{ $penjualans->{'jenis_diskon_' . $i} == 'Nominal' ? 'selected' : '' }}>Nominal</option>
-                                                            <option value="persen" {{ $penjualans->{'jenis_diskon_' . $i} == 'persen' ? 'selected' : '' }}>Persen</option>
+                                                            <option value="Nominal" {{ $produk->jenis_diskon == 'Nominal' ? 'selected' : '' }}>Nominal</option>
+                                                            <option value="persen" {{ $produk->jenis_diskon == 'persen' ? 'selected' : '' }}>Persen</option>
                                                         </select>
-                                                    <div>
                                                         <div class="input-group">
-                                                            <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="" class="form-control" style="display:none;" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
-                                                            <span class="input-group-text" id="nominalInput_{{ $i }}" style="display:none;">.00</span>
-                                                            <span class="input-group-text" id="persenInput_{{ $i }}" style="display:none;">%</span>
+                                                            <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="{{ number_format($produk->diskon, 0, ',', '.',)}}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
+                                                            @if( $produk->jenis_diskon == 'Nominal')
+                                                                <span class="input-group-text" id="nominalInput_{{ $i }}">.00</span>
+                                                            @elseif($produk->jenis_diskon == 'persen')
+                                                                <span class="input-group-text" id="persenInput_{{ $i }}">%</span>
+                                                            @endif
                                                         </div>
-                                                    </div>
-                                                </td>
+                                                    </td>
 
-                                                    <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" value="{{$penjualans->harga ?? 0}}" required readonly></td>
-                                                    <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" value="{{$penjualans->totalharga ?? 0}}" required readonly></td>
+                                                    <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($produk->harga, 0, ',', '.',)  ?? 0}}" required readonly></td>
+                                                    <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($produk->harga_jual, 0, ',', '.',)  ?? 0}}" required readonly></td>
                                                     <!-- <td>
                                                         @if ($i == 0)
                                                         <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
@@ -407,13 +410,6 @@
                                                         <td><input type="number" name="jumlah2[]" id="jumlah2_{{$i}}" class="form-control" value="{{$produk->jumlah}}" readonly></td>
                                                         <td><input type="text" name="satuan2[]" id="satuan2_{{$i}}" class="form-control" value="{{$produk->satuan}}" readonly></td>
                                                         <td><input type="text" name="keterangan2[]" id="keterangan2_{{$i}}" class="form-control" value="{{$produk->keterangan}}" readonly></td>
-                                                        <td>
-                                                            @if($dopenjualans->status != 'DIBATALKAN')
-                                                            <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
-                                                                Set Gift
-                                                            </button>
-                                                            @endif
-                                                        </td>
                                                     </tr>
                                                     @endif
                                                     @php
@@ -486,9 +482,9 @@
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
-                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ $penjualans->sub_total}}" readonly required></h5>
+                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.',)}}" readonly required></h5>
                                                 </li>
-                                                <li>
+                                                <li id="cekretur" style="display:none;">
                                                     <h4>Pengiriman
                                                     <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required readonly>
                                                         <option value="">Pilih Jenis Pengiriman</option>
@@ -512,13 +508,13 @@
                                                     </div> 
                                                     </h5>
                                                 </li>
-                                                <li>
+                                                <li id="cekretur" style="display:none;">
                                                     <h4>Biaya Ongkir</h4>
                                                     <h5><input type="number" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $penjualans->biaya_pengiriman}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Total</h4>
-                                                    <h5><input type="text" id="total" name="total" class="form-control" value="{{ $penjualans->total}}" readonly required></h5>
+                                                    <h5><input type="text" id="total" name="total" class="form-control" value="{{ 'Rp '. number_format($penjualans->total, 0, ',', '.',)}}" readonly required></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -890,7 +886,7 @@
             {
                 $('#alasan').show();
             }else{
-                $('#alasan'),hide();
+                $('#alasan').hide();
             }
         });
 
@@ -1097,18 +1093,15 @@
             }
         });
 
-        function pilihjenis(){
-            var jenisInput = $('[id^=jenis_diskon_]');
+        $('[id^=jenis_diskon_]').on('change', function(){
+            var jenisInput = $(this).val();
             var index = jenisInput.attr('id').split('_')[2]; 
             var selectedValue = jenisInput.val();
             var diskonValue = parseFloat($('#diskon_' + index).val()) || 0; 
             var hargaTotal = parseFloat($('#harga_' + index).val()) || 0; 
 
             $('[id^=diskon_' + index + ']').trigger('input');
-        };
-
-        $('[id^=jenis_diskon_]').on('change', pilihjenis());
-        pilihjenis();
+        });
 
         $('[id^=diskon_]').on('input', function(){
             var hasilInput = $(this);

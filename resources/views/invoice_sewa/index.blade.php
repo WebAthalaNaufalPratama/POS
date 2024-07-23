@@ -45,6 +45,9 @@
                     <th>DP</th>
                     <th>Sisa Bayar</th>
                     <th>Status</th>
+                    <th>Tanggal Dibuat</th>
+                    <th>Tanggal Diperiksa</th>
+                    <th>Tanggal Dibukukan</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -60,6 +63,9 @@
                             <td>{{ formatRupiah($item->dp) }}</td>
                             <td>{{ formatRupiah($item->sisa_bayar) }}</td>
                             <td>{{ $item->status }}</td>
+                            <td>{{ $item->tanggal_pembuat ? formatTanggal($item->tanggal_pembuat) : '' }}</td>
+                            <td>{{ $item->tanggal_penyetuju ? formatTanggal($item->tanggal_penyetuju) : '' }}</td>
+                            <td>{{ $item->tanggal_pemeriksa ? formatTanggal($item->tanggal_pemeriksa) : '' }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -68,24 +74,30 @@
                                     <li>
                                         <a href="{{ route('invoice_sewa.cetak', ['invoice_sewa' => $item->id]) }}" class="dropdown-item" target="blank"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
                                     </li>
-                                    @if($item->status == 'DIKONFIRMASI' || $item->status == 'BATAL')
-                                    <li>
-                                        <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
-                                    </li>
-                                    @else
-                                    <li>
-                                        <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Konfirmasi</a>
-                                    </li>
+                                    @if(in_array('do_sewa.show', $thisUserPermissions))
+                                        @if((in_array($item->status, ['DIKONFIRMASI', 'BATAL']) && Auth::user()->hasRole('AdminGallery')) || ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Auditor') && $item->tanggal_penyetuju || Auth::user()->hasRole('Finance') && $item->tanggal_pemeriksa)))
+                                            <li>
+                                                <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                            </li>
+                                        @else
+                                            <li>
+                                                <a href="{{ route('invoice_sewa.show', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
+                                            </li>
+                                        @endif
                                     @endif
                                     @if( ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) || ($item->status == 'TUNDA' && (Auth::user()->hasRole('AdminGallery') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor'))) )
-                                    <li>
-                                        <a href="{{ route('invoice_sewa.edit', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                    </li>
+                                        @if(!$item->hasKembali)
+                                        <li>
+                                            <a href="{{ route('invoice_sewa.edit', ['invoice_sewa' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                        @endif
+                                    @endif
+                                    @if($item->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery'))
                                     <li>
                                         <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
                                     </li>
                                     @endif
-                                    @if ($item->sisa_bayar != 0 && $item->status == 'DIKONFIRMASI')
+                                    @if ($item->sisa_bayar != 0 && $item->status == 'DIKONFIRMASI' && in_array('pembayaran_sewa.store', $thisUserPermissions))
                                     <li>
                                         <a href="javascript:void(0);" onclick="bayar({{ $item }})" class="dropdown-item"><img src="assets/img/icons/cash.svg" class="me-2" alt="img">Bayar</a>
                                     </li>

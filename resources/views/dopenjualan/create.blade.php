@@ -176,7 +176,43 @@
                                                             <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required readonly>
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>
+                                                                    @if (substr($produk->produk->kode, 0, 3) === 'TRD')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            @if ($found) @break @endif
+                                                                        @endforeach
+                                                                        - {{$komponen->jumlah}}
+                                                                    @elseif (substr($produk->produk->kode, 0, 3) === 'GFT')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            - ( {{$komponen->nama_produk}}
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            - {{$komponen->jumlah}} )
+                                                                        @endforeach
+                                                                    @endif
+                                                                </option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
@@ -226,7 +262,27 @@
                                                         <select id="nama_produk2_0" name="nama_produk2[]" class="form-control">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produkjuals as $produk)
-                                                            <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
+                                                            <option value="{{ $produk->kode }}">
+                                                                @if (substr($produk->kode, 0, 3) === 'TRD')
+                                                                        {{ $produk->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            @if ($found) @break @endif
+                                                                        @endforeach
+                                                                    @elseif (substr($produk->kode, 0, 3) === 'GFT')
+                                                                        {{ $produk->nama }}
+                                                                    @endif
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </td>
@@ -493,7 +549,7 @@
             $('body').append(picModal);
 
             $('#nama_produk_' + i + ', #jenisdiskon_' + i).select2();
-            i++
+            i++;
         });
 
         $('#addtambah').click(function() {
@@ -512,12 +568,12 @@
                 '<td><input type="number" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
                 '<td><input type="text" name="satuan2[]" id="satuan2_' + i + '" class="form-control"></td>' +
                 '<td><input type="text" name="keterangan2[]" id="keterangan2_' + i + '" class="form-control"></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove_tambah">x</button></td>' +
                 '</tr>';
             $('#dynamic_field_tambah').append(newrowtambah);
             $('#nama_produk_' + i + ', #jenisdiskon_' + i).select2();
             i++;
-        })
+        });
 
         function updateIndicesProduk() {
             $('#dynamic_field tr').each(function(index) {
@@ -548,14 +604,13 @@
         $(document).on('click', '#dynamic_field .btn_remove', function() {
             var button_id = $(this).attr('id');
             $('#row' + button_id).remove();
-            console.log('coba');
-            updateIndicesProduk(); 
+            updateIndicesProduk();
         });
 
-        $(document).on('click', '.btn_remove', function() {
-            var button_id = $(this).attr('id');
+        $(document).on('click', '#dynamic_field_tambah .btn_remove_tambah', function() {
+            var button_id = $(this).attr('id').split('_').pop(); // Ambil indeks dari ID tombol penghapusan
             $('#row_tambah' + button_id).remove();
-            updateIndicesProdukTambahan(); 
+            updateIndicesProdukTambahan();
             i = 0;
             $('#dynamic_field_tambah tr').each(function() {
                 $(this).attr('id', 'row_tambah' + i);
@@ -563,10 +618,11 @@
                 $(this).find('[id^="jumlah2_"]').attr('id', 'jumlah2_' + i).attr('name', 'jumlah2[]').attr('data-index', i);
                 $(this).find('[id^="satuan2_"]').attr('id', 'satuan2_' + i).attr('name', 'satuan2[]').attr('data-index', i);
                 $(this).find('[id^="keterangan2_"]').attr('id', 'keterangan2_' + i).attr('name', 'keterangan2[]').attr('data-index', i);
-                $(this).find('.btn_remove').attr('id', i);
+                $(this).find('.btn_remove_tambah').attr('id', 'remove_tambah_' + i); // Update ID tombol penghapusan dengan benar
                 i++;
             });
         });
+
 
         $(document).on('change', '[id^=nama_produk]', function() {
             var id = $(this).attr('id').split('_')[2]; 

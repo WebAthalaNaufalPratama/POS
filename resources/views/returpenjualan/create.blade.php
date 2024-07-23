@@ -134,7 +134,6 @@
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA">TUNDA</option>
-                                                <option value="DIKONFIRMASI">DIKONFRIMASI</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -215,7 +214,7 @@
                                                 @foreach ($deliveryOrder->produk as $produk)
                                                 @if ($produk->jenis != 'TAMBAHAN' && $deliveryOrder->pembuat != null && $deliveryOrder->penyetuju != null && $deliveryOrder->pemeriksa != null)
                                                 <tr id="row{{ $i }}">
-                                                    <td><input type="text" name="no_do1[]" id="no_do_{{ $i }}" class="form-control" value="{{ $deliveryOrder->no_do }}" required></td>
+                                                    <td><input type="text" name="no_do1[]" id="no_do_{{ $i }}" class="form-control" value="{{ $deliveryOrder->no_do }}" required readonly></td>
                                                     <td>
                                                     @php
                                                         $isTRDSelected = false;
@@ -223,9 +222,10 @@
                                                         <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control pilih-produk" data-index="{{ $i }}" required readonly>
                                                         <option value="">Pilih Produk</option>
                                                         @php
-                                                            $isTRDSelected = false; // Reset the variable each time the loop starts
-                                                            $selectedTRDKode = ''; // Initialize the selected TRD product code
-                                                            $selectedGFTKode = ''; // Initialize the selected GFT product code
+                                                            $isTRDSelected = false; 
+                                                            $selectedTRDKode = ''; 
+                                                            $selectedGFTKode = ''; 
+                                                            $harga = \App\Models\Produk_Terjual::where('id', $produk->no_invoice)->first();
                                                         @endphp
                                                         @foreach ($produkjuals as $index => $pj)
                                                             @php
@@ -251,7 +251,7 @@
                                                             }
                                                             @endphp
                                                             <!-- @if($pj->produk) -->
-                                                            <option value="{{ $produk->id }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                            <option value="{{ $produk->id }}" data-harga="{{ $harga->harga_jual }}" data-jumlahproduk="{{ $harga->jumlah}}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
                                                                 @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                     {{ $pj->produk->nama }}
                                                                 @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
@@ -425,9 +425,9 @@
                                                             <td id="pemeriksa">-</td>
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            <td id="penyetuju">-</td>
+                                                            <td id="pemeriksa">-</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -610,6 +610,7 @@
             $('#row' + button_id + '').remove();
             updateIndices();
             calculateTotal(0);
+            updateSubTotal();
         });
 
         function updateIndices() {
@@ -678,6 +679,7 @@
 
                 // Update the remove button id
                 $(this).find('.btn_remove').attr('id', i);
+                updateSubTotal();
 
                 // Increment the counter
                 i++;
@@ -887,8 +889,9 @@
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
+                    var jumlahProduk = $('#nama_produk_' + index + ' option:selected').data('jumlahproduk');
                     var jumlah = $('#jumlah_' + index).val();
-                    var harga = hargaProduk * jumlah;
+                    var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(harga);
                     hargaSatuanInput.prop('readonly', true);
                 }
@@ -955,8 +958,9 @@
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
+                    var jumlahProduk = $('#nama_produk_' + index + ' option:selected').data('jumlahproduk');
                     var jumlah = $('#jumlah_' + index).val();
-                    var harga = hargaProduk * jumlah;
+                    var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp'));
                     hargaSatuanInput.prop('readonly', true);
                 }
@@ -1110,16 +1114,24 @@
             var jenisInput = $('#jenis_diskon_' + index); 
             var selectedValue = jenisInput.val(); 
             var jumlah = $('#jumlah_' + index).val();
+            var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0;
+            var hargaTotal = 0;
 
-            var hargaTotal = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0; 
-            if (selectedValue === "Nominal") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; 
-                hargaTotal -= diskonValue * jumlah; 
-                $(this).val(formatRupiah(diskonValue));
-            } else if (selectedValue === "persen") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; 
-                var diskonAmount = (hargaTotal * diskonValue) / 100; 
-                hargaTotal -= diskonAmount * jumlah; 
+            if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
+                hargaTotal = jumlah * hargaSatuan;
+            }
+
+            if (!isNaN(hargaTotal)) {
+                // var hargaTotal = parseFloat(parseRupiahToNumber($('#totalharga_' + index).val())) || 0; 
+                if (selectedValue === "Nominal") {
+                    var diskonValue = parseFloat(hasilInput.val()) || 0; 
+                    hargaTotal -= diskonValue; 
+                    $(this).val(formatRupiah(diskonValue));
+                } else if (selectedValue === "persen") {
+                    var diskonValue = parseFloat(hasilInput.val()) || 0; 
+                    var diskonAmount = (hargaTotal * diskonValue) / 100; 
+                    hargaTotal -= diskonAmount; 
+                }
             }
 
             $('#totalharga_' + index).val(formatRupiah(hargaTotal, 'Rp '));

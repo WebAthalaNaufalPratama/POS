@@ -181,16 +181,16 @@
                                     @if(count($data->produk) < 1)
                                     <tr>
                                         <td>
-                                            <select id="produk2_0" name="nama_produk2[]" class="form-control">
+                                            <select id="produk2_0" name="nama_produk2[]" class="form-control" disabled>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkjuals as $produk)
                                                     <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}" data-harga_jual="{{ $produk->harga }}">{{ $produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control"  required></td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"  required></td>
-                                        <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control"  required readonly></td>
+                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control" disabled></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control" disabled></td>
+                                        <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control" disabled readonly></td>
                                     </tr>
                                     @else
                                     @php
@@ -220,17 +220,17 @@
                                     @if($j == 0)
                                     <tr>
                                         <td>
-                                            <select id="produk2_{{ $j }}" name="nama_produk2[]" class="form-control">
+                                            <select id="produk2_{{ $j }}" name="nama_produk2[]" class="form-control" disabled>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkjuals as $pj)
                                                     <option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-harga_jual="{{ $pj->harga }}">{{ $pj->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value=""></td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value=""></td>
-                                        <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="" readonly></td>
-                                        <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                        <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="" disabled></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="" disabled></td>
+                                        <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="" disabled></td>
+                                        {{-- <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td> --}}
                                     </tr>
                                     @endif
                                 </tbody>
@@ -255,14 +255,26 @@
                                         <tr>
                                             <td id="sales">{{ $data->data_sales->nama }}</td>
                                             <td id="pembuat">{{ $data->data_pembuat->nama ?? '-' }}</td>
-                                            <td id="penyetuju">{{ $data->data_penyetuju->nama ?? '-' }}</td>
-                                            <td id="pemeriksa">{{ $data->data_pemeriksa->nama ?? '-' }}</td>
+                                            <td id="penyetuju">{{ $kontraks->data_penyetuju->name ?? (Auth::user()->hasRole('Auditor') ? Auth::user()->name : '') }}</td>
+                                            <td id="pemeriksa">{{ $kontraks->data_pemeriksa->name ?? (Auth::user()->hasRole('Finance') ? Auth::user()->name : '') }}</td>
                                         </tr>
                                         <tr>
                                             <td style="width: 25%;">{{ isset($data->tanggal_sales) ? formatTanggal($data->tanggal_sales) : '-' }}</td>
                                             <td id="tgl_pembuat" style="width: 25%;">{{ isset($data->tanggal_pembuat) ? formatTanggal($data->tanggal_pembuat) : '-' }}</td>
-                                            <td id="tgl_penyetuju" style="width: 25%;">{{ isset($data->tanggal_penyetuju) ? formatTanggal($data->tanggal_penyetuju) : '-' }}</td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($data->tanggal_pemeriksa) ? formatTanggal($data->tanggal_pemeriksa) : '-' }}</td>
+                                            <td id="tgl_penyetuju"  style="width: 25%;">
+                                                @if(Auth::user()->hasRole('Auditor') && !$data->tanggal_penyetuju)
+                                                <input type="date" class="form-control" name="tanggal_penyetuju" id="tanggal_penyetuju" required value="{{ $data->tanggal_penyetuju ? \Carbon\Carbon::parse($data->tanggal_penyetuju)->format('Y-m-d') : date('Y-m-d') }}">
+                                                @else
+                                                <label id="tanggal_penyetuju" name="tanggal_penyetuju">{{ isset($data->tanggal_penyetuju) ? formatTanggal($data->tanggal_penyetuju) : '-' }}</label>
+                                                @endif
+                                            </td>
+                                            <td id="tgl_pemeriksa"  style="width: 25%;">
+                                                 @if(Auth::user()->hasRole('Finance') && !$data->tanggal_pemeriksa)
+                                                 <input type="date" class="form-control" name="tanggal_pemeriksa" id="tanggal_pemeriksa" value="{{ date('Y-m-d') }}">
+                                                 @else
+                                                 <label id="tanggal_pemeriksa" name="tanggal_pemeriksa">{{ isset($data->tanggal_pemeriksa) ? formatTanggal($data->tanggal_pemeriksa) : '-' }}</label>
+                                                @endif
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -413,8 +425,10 @@
                 </div>
                 <div class="text-end mt-3">
                     <input type="hidden" name="konfirmasi" id="hiddenActionInput" value="">
-                    @if($data->status == 'TUNDA')
+                    @if((Auth::user()->hasRole('AdminGallery') && $data->status == 'TUNDA') || (Auth::user()->hasRole('Auditor') && $data->status == 'DIKONFIRMASI' && !$data->tanggal_penyetuju) || (Auth::user()->hasRole('Finance') && $data->status == 'DIKONFIRMASI' && !$data->tanggal_pemeriksa))
                     <button class="btn btn-success confirm-btn" data-action="confirm" type="button">Konfirmasi</button>
+                    @endif
+                    @if(Auth::user()->hasRole('AdminGallery') && $data->status == 'TUNDA')
                     <button class="btn btn-danger confirm-btn" data-action="cancel" type="button">Batal</button>
                     @endif
                     <a href="{{ route('invoice_sewa.index') }}" class="btn btn-secondary" type="button">Back</a>
@@ -430,9 +444,11 @@
                         <div class="page-title">
                             <h4 class="card-title">Pembayaran</h4>
                         </div>
+                        @if(in_array('pembayaran_sewa.store', $thisUserPermissions))
                         <div class="page-btn">
                             <a href="javascript:void(0);" onclick="bayar({{ $data }})" class="btn btn-added">Tambah Pembayaran</a>
                         </div>
+                        @endif
                     </div>
                     @else
                     <h4 class="card-title text-center">Pembayaran</h4>

@@ -8,10 +8,11 @@
                 <h5 class="card-title">Edit Retur Pembelian (Purchasing)</h5>
             </div>
             <div class="card-body">
-                {{-- <form action="{{ route('returbeli.store') }}" method="POST" enctype="multipart/form-data" id="addForm"> --}}
+               <form action="{{ route('retur_purchase.update', ['retur_id' => $data->id]) }}" method="POST" enctype="multipart/form-data" id="addForm">
                 <div class="row">
                     <div class="col-sm">
                             @csrf
+                            @method('PATCH')
                             <div class="row justify-content-around">
                                 <div class="col-md-6 border rounded pt-3">
                                     <h5 class="card-title">Informasi Supplier</h5>
@@ -86,7 +87,7 @@
                                                     <label>File <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
                                                     </label>
                                                     <label class="custom-file-container__custom-file">
-                                                        <input type="file" id="file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required>
+                                                        <input type="file" id="file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*">
                                                         <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                     </label>
                                                     <span class="text-danger">max 2mb</span>
@@ -118,24 +119,32 @@
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field">
+                                @php $i = 0; @endphp
+                                @foreach($data->produkretur as $komponen)
                                     <tr>
+                                        
                                         <td>1</td>
-                                        <input type="hidden" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly>
+                                        <input type="hidden" name="kode_produk[]" id="kode_produk_{{ $i }}" class="form-control" required readonly>
                                         <td style="width: 250px;">
-                                            <select id="produk_0" name="nama_produk[]" class="form-control" required>
+                                            <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control produk-dropdown" required>
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($invoice->pembelian->produkbeli as $produk)
-                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}">{{ $produk->produk->nama }} ({{$produk->kondisi->nama}})</option>
+                                                    <option value="{{ $produk->id }}" data-jumlah="{{ $produk->jml_diterima }}" data-harga="{{ $produk->harga }}" data-diskon="{{ $produk->diskon }}" data-harga_total="{{ $produk->totalharga }}" {{ $produk->id == $komponen->produkbeli->id ? 'selected' : '' }}>
+                                                    {{ $produk->produk->nama }} ({{$produk->kondisi->nama}})</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><textarea name="alasan[]" id="alasan_0" class="form-control" cols="30"></textarea></td>
-                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control jumlah_diterima"  data-produk-id="{{ $produk->id }}" required></td>
-                                        <td id="tdDiskon_0"><input type="text" name="diskon[]" id="diskon_0" oninput="multiply(this)" class="form-control" required></td>
-                                        <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" required readonly></td>
-                                        <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" required readonly></td>
+                                        <td><textarea name="alasan[]" id="alasan_{{ $i }}" class="form-control" cols="30" value="{{ $komponen->alasan}}">{{ $komponen->alasan}}</textarea></td>
+                                        <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control jumlah_diterima"   value="{{ $komponen->jumlah}}" data-produk-id="{{ $produk->id }}" required></td>
+                                        <td id="tdDiskon_{{ $i }}"><input type="text" name="diskon[]" id="diskon_{{ $i }}" oninput="multiply(this)" class="form-control" required></td>
+                                        <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->harga}}" required readonly></td>
+                                        <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->totharga}}" required readonly></td>
                                         <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                       
                                     </tr>
+                                    @php $i++; @endphp
+                                    @endforeach
+                                    
                                 </tbody>
 
                             </table>
@@ -191,7 +200,7 @@
                                 <div class="form-group row mt-1" id="divOngkir">
                                     <label class="col-lg-3 col-form-label">Biaya Pengiriman</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ $data->ongkir }}" class="form-control"  required>
+                                        <input type="text" id="biaya_pengiriman" name="biaya_pengiriman" value="{{ number_format($data->ongkir, 0, ',', '.',) }}" class="form-control"  required>
                                     </div>
                                 </div>
 
@@ -409,6 +418,34 @@
                 $('[id^=biaya_pengiriman]').attr('required', false);
             }
         }
+
+        //disabled option dari select
+        function updateOptions() {
+            let selectedValues = [];
+            $('.produk-dropdown').each(function() {
+                if ($(this).val()) {
+                    selectedValues.push($(this).val());
+                }
+            });
+
+            $('.produk-dropdown option').prop('disabled', false);
+
+            $('.produk-dropdown').each(function() {
+                let $dropdown = $(this);
+                selectedValues.forEach(function(value) {
+                    if ($dropdown.val() !== value) {
+                        $dropdown.find('option[value="' + value + '"]').prop('disabled', true);
+                    }
+                });
+            });
+        }
+
+        updateOptions();
+
+        $('.produk-dropdown').on('change', function() {
+            updateOptions();
+        });
+
         function multiply(element) {
             var id = 0
             var jenis = $(element).attr('id')

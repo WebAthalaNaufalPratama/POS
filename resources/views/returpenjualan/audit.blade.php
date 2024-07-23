@@ -69,11 +69,11 @@
                                         </div>
                                         <div class="form-group" style="display:none;" id="penerima">
                                             <label for="penerima">Nama Penerima</label>
-                                            <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima" value="{{ $dopenjualans->penerima}}">
+                                            <input type="text" class="form-control" placeholder="Nama Penerima" name="penerima" id="penerima" value="{{ !empty($dopenjualans) ? $dopenjualans->penerima : '-'}}">
                                         </div>
                                         <div class="form-group" style="display:none;" id="tanggalkirim">
                                             <label for="tanggal_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" placeholder="Tanggal Kirim" id="tanggal_kirim" name="tanggal_kirim" value="{{$dopenjualans->tanggal_kirim}}">
+                                            <input type="date" class="form-control" placeholder="Tanggal Kirim" id="tanggal_kirim" name="tanggal_kirim" value="{{ !empty($dopenjualans) ? $dopenjualans->tanggal_kirim : '-'}}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -119,23 +119,26 @@
                                         <label for="komplain">Komplain</label>
                                             <select id="komplain" name="komplain" class="form-control">
                                                 <option value=""> Pilih Komplain </option>
-                                                <option value="refund" {{ $penjualans->komplain == 'refund' ? 'selected' : ''}}>Refund</option>
-                                                <option value="diskon" {{ $penjualans->komplain == 'diskon' ? 'selected' : ''}}>Diskon</option>
-                                                <option value="retur" {{ $penjualans->komplain == 'retur' ? 'selected' : ''}}>Retur</option>
+                                                @if(!empty($statusbayar) && $statusbayar->status_bayar == 'LUNAS')
+                                                    <option value="refund" {{ $penjualans->komplain == 'refund' ? 'selected' : ''}}>Refund</option>
+                                                @else
+                                                    <option value="diskon" {{ $penjualans->komplain == 'diskon' ? 'selected' : ''}}>Diskon</option>
+                                                    <option value="retur" {{ $penjualans->komplain == 'retur' ? 'selected' : ''}}>Retur</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="TUNDA">TUNDA</option>
-                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
-                                                <option value="DIBATALKAN">DIBATALKAN</option>
+                                                <option value="TUNDA" {{ $penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{ $penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <div id="alasan" style="display: none;">
-                                                <label for="alasan">Alasan</label>
+                                                <label for="alasan ">Alasan</label>
                                                 <textarea name="alasan_batal" id="alasan"></textarea>
                                             </div>
                                         </div>
@@ -144,13 +147,13 @@
                                             <select id="driver" name="driver" class="form-control">
                                                 <option value=""> Pilih Driver </option>
                                                 @foreach ($drivers as $driver)
-                                                <option value="{{ $driver->id }}" {{$driver->id == $dopenjualans->driver ? 'selected' : ''}}>{{ $driver->nama }}</option>
+                                                <option value="{{ $driver->id }}" {{!empty($dopenjualans)  && $driver->id == $dopenjualans->driver ? 'selected' : ''}}>{{ $driver->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="form-group" style="display:none;" id="alamat">
                                             <label for="alamat">Alamat Pengiriman</label>
-                                            <textarea id="alamat" name="alamat" value="{{ $dopenjualans->alamat}}">{{ $dopenjualans->alamat}}</textarea>
+                                            <textarea id="alamat" name="alamat" value="{{ !empty($dopenjualans) ? $dopenjualans->alamat : '-'}}">{{ !empty($dopenjualans) ? $dopenjualans->alamat : '-'}}</textarea>
                                         </div>
                                     </div>
 
@@ -176,7 +179,7 @@
                                                     <span class="custom-file-container__custom-file__custom-file-control_2"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <img id="preview_kirim" src="{{ $dopenjualans->file ? '/storage/' . $dopenjualans->file : ''}}" />
+                                                <img id="preview_kirim" src="{{ !empty($dopenjualans) && $dopenjualans->file ? '/storage/' . $dopenjualans->file : ''}}" />
                                             </div>
                                         </div>
                                     </div>
@@ -217,9 +220,11 @@
                                                         <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control pilih-produk" data-index="{{ $i }}" required readonly>
                                                         <option value="">Pilih Produk</option>
                                                         @php
-                                                            $isTRDSelected = false; // Reset the variable each time the loop starts
-                                                            $selectedTRDKode = ''; // Initialize the selected TRD product code
-                                                            $selectedGFTKode = ''; // Initialize the selected GFT product code
+                                                            $isTRDSelected = false; 
+                                                            $selectedTRDKode = ''; 
+                                                            $selectedGFTKode = ''; 
+                                                            $do = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
+                                                            $harga = \App\Models\Produk_Terjual::where('id', $do->no_invoice)->first();
                                                         @endphp
                                                         @foreach ($produkjuals as $index => $pj)
                                                             @php
@@ -245,7 +250,7 @@
                                                             }
                                                             @endphp
                                                             <!-- @if($pj->produk) -->
-                                                            <option value="{{ $produk->id }}" data-harga="{{ $pj->produk->harga_jual }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                            <option value="{{ $produk->id }}" data-harga="{{ $harga->harga_jual }}" data-jumlahproduk="{{ $harga->jumlah}}" data-diskon="{{ $harga->diskon}}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
                                                                 @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
                                                                     {{ $pj->produk->nama }}
                                                                 @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
@@ -302,21 +307,21 @@
                                                     <td><input type="text" name="alasan[]" id="alasan_{{ $i }}" class="form-control" value="{{ old('alasan' . $i) ?? $produk->alasan}}" required></td>
                                                     <td>
                                                         <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control">
-                                                        <option value="0">Pilih Diskon</option>
-                                                        <option value="Nominal" {{ $produk->Nominal == 'Nominal' ? 'selected' : ''}}>Nominal</option>
-                                                        <option value="persen" {{ $produk->persen == 'persen' ? 'selected' : ''}}>Persen</option>
-                                                    </select>
-                                                    <div>
-                                                        <div class="input-group">
-                                                            <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="{{ $produk->diskon }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
-                                                            <span class="input-group-text" id="nominalInput_{{ $i }}" style="display:none;">.00</span>
-                                                            <span class="input-group-text" id="persenInput_{{ $i }}" style="display:none;">%</span>
+                                                            <option value="0">Pilih Diskon</option>
+                                                            <option value="Nominal" {{ $produk->jenis_diskon == 'Nominal' ? 'selected' : ''}}>Nominal</option>
+                                                            <option value="persen" {{ $produk->jenis_diskon == 'persen' ? 'selected' : ''}}>Persen</option>
+                                                        </select>
+                                                        <div>
+                                                            <div class="input-group">
+                                                                <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="{{ $produk->diskon }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3">
+                                                                <span class="input-group-text" id="nominalInput_{{ $i }}" style="display:none;">.00</span>
+                                                                <span class="input-group-text" id="persenInput_{{ $i }}" style="display:none;">%</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
+                                                    </td>
 
                                                     <td><input type="text" name="harga[]" id="harga_{{ $i }}" class="form-control" value="{{ $produk->harga}}" required></td>
-                                                    <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" value="{{ $produk->totalharga}}"></td>
+                                                    <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" value="{{ $produk->harga_jual}}"></td>
                                                     <td>
                                                         @if ($i == 0)
                                                         <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
@@ -439,14 +444,37 @@
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
-                                                            <td id="penyetuju">{{ Auth::user()->name }}</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            @php
+                                                                $user = Auth::user();
+                                                            @endphp
+                                                            @if($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                                <td id="pembuat">{{ $penjualans->dibuat->name }}</td>
+                                                                <td id="penyetuju" >{{ Auth::user()->name}}</td>
+                                                                <td id="pemeriksa" >{{ $penjualans->dibuku->name ?? '-'}}</td>
+                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td id="pembuat">{{ $penjualans->dibuat->name }}</td>
+                                                                <td id="penyetuju" >{{ $penjualans->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{ Auth::user()->name}}</td>
+                                                            @elseif($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                                <td id="pembuat">{{ $penjualans->dibuat->name }}</td>
+                                                                <td id="penyetuju" >-</td>
+                                                                <td id="pemeriksa">-</td>
+                                                            @endif
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $penjualans->tanggal_pembuat }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">{{ date('Y-m-d') }}</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat" style="width: 25%;" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                                <td id="tgl_penyetuju">-</td>
+                                                                <td id="tgl_pemeriksa">-</td>
+                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $penjualans->tanggal_pembuat }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $penjualans->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $penjualans->tanggal_pembuat }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $penjualans->tanggal_diperiksa ?? '-'}}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            @endif
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -463,7 +491,7 @@
                                                 </li>
                                                 <li id="cekretur" style="display:none;">
                                                     <h4>Pengiriman
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" required>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control">
                                                         <option value="">Pilih Jenis Pengiriman</option>
                                                         <option value="exspedisi" {{ $penjualans->pilih_pengiriman == 'exspedisi' ? 'selected' : ''}}>Ekspedisi</option>
                                                         <option value="sameday" {{ $penjualans->pilih_pengiriman == 'sameday' ? 'selected' : ''}}>SameDay</option>
@@ -487,7 +515,7 @@
                                                 </li>
                                                 <li id="cekretur" style="display:none;">
                                                     <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="number" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $penjualans->biaya_pengiriman }}" readonly required></h5>
+                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $penjualans->biaya_pengiriman }}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Total</h4>
@@ -499,7 +527,7 @@
                                 </div>
                             <!-- </div>
                         </div> -->
-                        <div class="row justify-content-around">
+                        <!-- <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-1">
                                 <div class="form-row row">
                                     <div class="mb-4">
@@ -549,7 +577,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
@@ -816,6 +844,10 @@
             });
         }
 
+        $('[id^=nama_produk_]').on('mousedown click focus', function(e) {
+            e.preventDefault();
+        });
+
 
         $('[id^=btnGift]').click(function(e) {
                 e.preventDefault();
@@ -1025,8 +1057,9 @@
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
+                    var jumlahProduk = $('#nama_produk_' + index + ' option:selected').data('jumlahproduk');
                     var jumlah = $('#jumlah_' + index).val();
-                    var harga = hargaProduk * jumlah;
+                    var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(harga);
                     hargaSatuanInput.prop('readonly', true);
                 }
@@ -1070,14 +1103,14 @@
                 var jumlahInput = $(this);
                 var index = jumlahInput.attr('id').split('_')[1];
 
-                if(komplain == 'refund' || komplain == 'diskon') { // Jika refund atau diskon, aktifkan input jumlah
+                if(komplain == 'refund' || komplain == 'diskon') {
                     jumlahInput.prop('readonly', false);
                 } else {
-                    jumlahInput.prop('readonly', true); // Jika selain refund atau diskon, nonaktifkan input jumlah
+                    jumlahInput.prop('readonly', true); 
                 }
             });
 
-            updateSubTotal();
+            // updateSubTotal();
             } else{
                 $('#gantiproduk').hide();
                 $('[id^=harga_]').each(function() {
@@ -1095,10 +1128,14 @@
                     biayakirim.val(0);
                     biayakirim.prop('readonly', true);
                     var hargaProduk = $('#nama_produk_' + index + ' option:selected').data('harga');
+                    var jumlahProduk = $('#nama_produk_' + index + ' option:selected').data('jumlahproduk');
                     var jumlah = $('#jumlah_' + index).val();
-                    var harga = hargaProduk * jumlah;
+                    var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp '));
                     hargaSatuanInput.prop('readonly', true);
+                    $('[id^=diskon_]').each(function() {
+                        $(this).trigger('change');
+                    });
                 }
             });
 
@@ -1149,9 +1186,7 @@
             }
         });
 
-        $(document).ready(function() {
-            $('#komplain').trigger('change');
-        });
+        $('#komplain').trigger('change');
 
         $('[id^=jenis_diskon_]').on('change', function() {
             var jenisInput = $(this);
@@ -1163,22 +1198,30 @@
             $('[id^=diskon_' + index + ']').trigger('input');
         });
 
-        $('[id^=diskon_]').change('input', function(){
+        $('[id^=diskon_]').on('change', function(){
             var hasilInput = $(this);
             var index = hasilInput.attr('id').split('_')[1]; 
             var jenisInput = $('#jenis_diskon_' + index); 
             var selectedValue = jenisInput.val(); 
             var jumlah = $('#jumlah_' + index).val();
+            var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0;  
+            var hargaTotal = 0;
 
-            var hargaTotal = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0; 
-            if (selectedValue === "Nominal") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; 
-                hargaTotal -= diskonValue * jumlah; 
-                $(this).val(formatRupiah(diskonValue));
-            } else if (selectedValue === "persen") {
-                var diskonValue = parseFloat(hasilInput.val()) || 0; 
-                var diskonAmount = (hargaTotal * diskonValue) / 100; 
-                hargaTotal -= diskonAmount * jumlah; 
+            if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
+                hargaTotal = jumlah * hargaSatuan;
+            }
+
+            if (!isNaN(hargaTotal)) {
+                // var hargaTotal = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0; 
+                if (selectedValue === "Nominal") {
+                    var diskonValue = parseFloat(hasilInput.val()) || 0;
+                    hargaTotal -= diskonValue; 
+                    $(this).val(formatRupiah(diskonValue));
+                } else if (selectedValue === "persen") {
+                    var diskonValue = parseFloat(hasilInput.val()) || 0; 
+                    var diskonAmount = (hargaTotal * diskonValue) / 100; 
+                    hargaTotal -= diskonAmount; 
+                }
             }
 
             $('#totalharga_' + index).val(formatRupiah(hargaTotal, 'Rp '));
@@ -1191,42 +1234,40 @@
             $('#total').val(formatRupiah(subtotal, 'Rp '));
         });
 
+        $('[id^=diskon_]').each(function() {
+            $(this).trigger('change');
+        });
+
 
         $('#pilih_pengiriman').change(function() {
-                var pengiriman = $(this).val();
-                var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+            var pengiriman = $(this).val();
+            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
 
-                $('#inputOngkir').hide();
-                $('#inputExspedisi').hide();
+            $('#inputOngkir').hide();
+            $('#inputExspedisi').hide();
 
-                if (pengiriman === "sameday") {
-                    $('#inputOngkir').show();
-                    $('#biaya_pengiriman').prop('readonly', false);
-                } else if (pengiriman === "exspedisi") {
-                    $('#inputExspedisi').show();
-                    $('#biaya_pengiriman').prop('readonly', true);
-                    ongkirId();
-                }
-            });
+            if (pengiriman === "sameday") {
+                $('#inputOngkir').show();
+                $('#biaya_pengiriman').prop('readonly', false);
+                $('#biaya_pengiriman').change('input', Totaltagihan);
+            } else if (pengiriman === "exspedisi") {
+                $('#inputExspedisi').show();
+                $('#biaya_pengiriman').prop('readonly', true);
+                $('#ongkir_id').on('change');
+            }
+        });
         
         $('#pilih_pengiriman').trigger('change');
-
-        function OngkirId(){
-            var Ongkir = $(this).val();
-            $(this).val(formatRupiah(Ongkir, 'Rp '));
-            $('#total_biaya').val(formatRupiah(Ongkir, 'Rp '));
-        }
         
-
         $('#ongkir_id').change(function() {
             var selectedOption = $(this).find('option:selected');
-            var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
-            $('#biaya_pengiriman').val(formatRupiah(ongkirValue, 'Rp '));
+            var ongkirValue = parseFloat((selectedOption.data('biaya_pengiriman'))) || 0;
+            $('#biaya_pengiriman').val(ongkirValue);
             Totaltagihan();
         });
 
         function Totaltagihan() {
-            var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
+            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
             var totalTagihan = biayaOngkir;
             $('#biaya_pengiriman').val(formatRupiah(totalTagihan, 'Rp '));
             $('#total').val(formatRupiah(totalTagihan, 'Rp '));
@@ -1304,6 +1345,23 @@
 
                     // Panggil updateSubTotal setiap kali input jumlah diubah
                     updateSubTotal();
+                }else if(komplain == 'diskon'){
+                    var hargaProduk = parseFloat(parseRupiahToNumber($('#harga_' + index).val()));
+                    var jumlah = parseInt(jumlahInput.val());
+                    console.log(hargaProduk);
+
+                    // Jika jumlah tidak valid, berikan harga dan total harga nilai 0
+                    if (isNaN(jumlah) || jumlah <= 0) {
+                        // $('#harga_' + index).val(0);
+                        $('#totalharga_' + index).val(0);
+                    } else {
+                        var harga = hargaProduk * jumlah;
+                        // $('#harga_' + index).val(formatRupiah(harga, 'Rp '));
+                        $('#totalharga_' + index).val(formatRupiah(harga, 'Rp '));
+                    }
+
+                    // Panggil updateSubTotal setiap kali input jumlah diubah
+                    updateSubTotal();
                 }
             }
         });
@@ -1327,12 +1385,6 @@
                 $('.kondisi').hide();
             }
         });
-        
-        
-
-        $('#biaya_pengiriman').change('input', Totaltagihan);
-
-        
 
     });
 </script>

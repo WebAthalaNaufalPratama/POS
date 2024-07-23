@@ -33,7 +33,7 @@ class KontrakController extends Controller
     public function index(Request $req)
     {
         $query = Kontrak::with('customer', 'invoice');
-        if(!Auth::user()->hasRole('SuperAdmin')){
+        if(Auth::user()->karyawans){
             $query->where('lokasi_id',Auth::user()->karyawans->lokasi_id);
         }
         if ($req->customer) {
@@ -48,6 +48,9 @@ class KontrakController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_kontrak', '<=', $req->input('dateEnd'));
         }
+        if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
+            $query->where('status', 'DIKONFIRMASI');
+        }
         $kontraks = $query->orderByDesc('id')->get();
         $kontraks->map(function($kontrak){
             $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
@@ -56,7 +59,7 @@ class KontrakController extends Controller
         $customer = Kontrak::select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(!Auth::user()->hasRole('SuperAdmin'), function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -64,7 +67,7 @@ class KontrakController extends Controller
         $sales = Kontrak::select('sales')
         ->distinct()
         ->join('karyawans', 'kontraks.sales', '=', 'karyawans.id')
-        ->when(!Auth::user()->hasRole('SuperAdmin'), function ($query) {
+        ->when(Auth::user()->karyawans, function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -79,7 +82,7 @@ class KontrakController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->hasRole('SuperAdmin')) {
+        if (Auth::user()->karyawans) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -212,30 +215,20 @@ class KontrakController extends Controller
      */
     public function show($kontrak)
     {
-        if (!Auth::user()->hasRole('SuperAdmin')) {
-            $produkjuals = Produk_Jual::all();
-            $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
-            $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $rekenings = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $promos = Promo::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $sales = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'sales')->get();
-            $ongkirs = Ongkir::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $perangkai = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'Perangkai')->get();
-        } else {
-            $produkjuals = Produk_Jual::all();
-            $lokasis = Lokasi::all();
-            $customers = Customer::where('tipe', 'sewa')->get();
-            $rekenings = Rekening::all();
-            $promos = Promo::all();
-            $sales = Karyawan::where('jabatan', 'sales')->get();
-            $ongkirs = Ongkir::all();
-            $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
-        }
         $kontraks = Kontrak::find($kontrak);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
         $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
         $bungapot = Produk::where('tipe_produk',1)->orWhere('tipe_produk',2)->get();
         $kondisi = Kondisi::all();
+        $produkjuals = Produk_Jual::all();
+        $lokasis = Lokasi::find($kontraks->lokasi_id);
+        $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', $kontraks->lokasi_id)->get();
+        $rekenings = Rekening::where('lokasi_id', $kontraks->lokasi_id)->get();
+        $promos = Promo::where('lokasi_id', $kontraks->lokasi_id)->get();
+        $sales = Karyawan::where('lokasi_id', $kontraks->lokasi_id)->where('jabatan', 'sales')->get();
+        $ongkirs = Ongkir::where('lokasi_id', $kontraks->lokasi_id)->get();
+        $perangkai = Karyawan::where('lokasi_id', $kontraks->lokasi_id)->where('jabatan', 'Perangkai')->get();
+        
         return view('kontrak.show', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat', 'perangkai', 'bungapot', 'kondisi'));
     }
 
@@ -247,29 +240,17 @@ class KontrakController extends Controller
      */
     public function edit($kontrak)
     {
-        if (!Auth::user()->hasRole('SuperAdmin')) {
-            $produkjuals = Produk_Jual::all();
-            $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
-            $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $rekenings = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $promos = Promo::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $sales = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'sales')->get();
-            $ongkirs = Ongkir::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-            $perangkai = Karyawan::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->where('jabatan', 'Perangkai')->get();
-        } else {
-            $produkjuals = Produk_Jual::all();
-            $lokasis = Lokasi::all();
-            $customers = Customer::where('tipe', 'sewa')->get();
-            $rekenings = Rekening::all();
-            $promos = Promo::all();
-            $sales = Karyawan::where('jabatan', 'sales')->get();
-            $ongkirs = Ongkir::all();
-            $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
-        }
-
         $kontraks = Kontrak::find($kontrak);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
-        $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();        
+        $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
+        $produkjuals = Produk_Jual::all();
+        $lokasis = Lokasi::find($kontraks->lokasi_id);
+        $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', $kontraks->lokasi_id)->get();
+        $rekenings = Rekening::where('lokasi_id', $kontraks->lokasi_id)->get();
+        $promos = Promo::where('lokasi_id', $kontraks->lokasi_id)->get();
+        $sales = Karyawan::where('lokasi_id', $kontraks->lokasi_id)->where('jabatan', 'sales')->get();
+        $ongkirs = Ongkir::where('lokasi_id', $kontraks->lokasi_id)->get();
+        $perangkai = Karyawan::where('lokasi_id', $kontraks->lokasi_id)->where('jabatan', 'Perangkai')->get();
         return view('kontrak.edit', compact('kontraks', 'produks', 'produkjuals', 'lokasis', 'customers', 'rekenings', 'promos', 'sales', 'ongkirs', 'riwayat'));
     }
 
@@ -292,6 +273,14 @@ class KontrakController extends Controller
                 $msg = 'Dibatalkan';
             } else {
                 return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');
+            }
+            if(Auth::user()->hasRole('Auditor')){
+                $kontrak->penyetuju = Auth::user()->id;
+                $kontrak->tanggal_penyetuju = $req->tanggal_penyetuju;
+            }
+            if(Auth::user()->hasRole('Finance')){
+                $kontrak->pemeriksa = Auth::user()->id;
+                $kontrak->tanggal_pemeriksa = $req->tanggal_pemeriksa;
             }
             $check = $kontrak->update();
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');

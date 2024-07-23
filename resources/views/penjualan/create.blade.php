@@ -670,11 +670,11 @@
         var diskonType = $('#jenis_diskon_' + index).val();
         var diskonValue = parseFloat($('#diskon_' + index).val());
         var jumlah = parseFloat($('#jumlah_' + index).val());
-        var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_satuan_' + index).val())); // Mengonversi hargaSatuan ke angka
+        var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_satuan_' + index).val()));
         var hargaTotal = 0;
 
         if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
-            hargaTotal = jumlah * hargaSatuan; // Mengalikan jumlah dengan hargaSatuan
+            hargaTotal = jumlah * hargaSatuan;
         }
 
         if (!isNaN(hargaTotal)) {

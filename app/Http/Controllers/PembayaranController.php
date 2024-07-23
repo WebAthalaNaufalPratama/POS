@@ -165,7 +165,7 @@ class PembayaranController extends Controller
 
     public function index_sewa(Request $req){
         $query = Pembayaran::whereNotNull('invoice_sewa_id');
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        if(Auth::user()->karyawans){
             $query->whereHas('sewa', function($q) {
                 $q->whereHas('kontrak', function($p) {
                     $p->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
