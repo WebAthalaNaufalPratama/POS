@@ -14,9 +14,28 @@ class InventoryIndenController extends Controller
 {
     public function index()
     {
-        $data = InventoryInden::all();
-        return view('inven_inden.index', compact('data'));
+    $caseStatement = "CASE 
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Januari' THEN '01'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Februari' THEN '02'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Maret' THEN '03'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'April' THEN '04'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Mei' THEN '05'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Juni' THEN '06'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Juli' THEN '07'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Agustus' THEN '08'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'September' THEN '09'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Oktober' THEN '10'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'November' THEN '11'
+        WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Desember' THEN '12'
+        END";
+    
+    $rawOrderBy = "CONCAT(RIGHT(bulan_inden, 4), '-', $caseStatement)";
+
+    $data = InventoryInden::orderByRaw($rawOrderBy . ' DESC')->get();
+    
+    return view('inven_inden.index', compact('data'));
     }
+
 
     public function create()
     {
