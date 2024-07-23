@@ -297,7 +297,7 @@
                                                     <td id="tgl_dibuat">
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $data->tgl_dibuat ?? now()->format('Y-m-d') }}" disabled>
                                                     </td>
-                                                    <td id="tgl_dibuku"></td>
+                                                    <td id="tgl_dibuku">
                                                         <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? now()->format('Y-m-d')}}">
                                                     </td>
                                                     @endif

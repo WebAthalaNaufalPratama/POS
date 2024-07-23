@@ -140,6 +140,11 @@
                                         </li>
                                         @endif
                                         @endif
+                                        @if(Auth::user()->hasRole(['Finance']))
+                                        <li>
+                                        <a href="{{ route('returbeli.edit', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur</a>
+                                        </li>
+                                        @endif
                                         <li>
                                             <a href="{{ route('invoice.show', ['datapo' => $data->invoice->pembelian_id, 'type'=>"pembelian", 'id' => $data->invoice->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>
                                         </li>
