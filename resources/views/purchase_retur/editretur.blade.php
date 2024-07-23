@@ -218,16 +218,24 @@
                             <div class="col-md-6 border rounded pt-3 me-1 mt-2">
                                 <div class="table-responsive">
                                     <table class="table table-responsive border rounded">
+                                            @php
+                                                $user = Auth::user();
+                                            @endphp
                                             <thead>
                                                 <tr>
-                                                    <th>Dibuat</th>                                              
-                                                    <th>Dibukukan</th>
+                                                    @if($user->hasRole(['Purchasing']))
+                                                        <th>Dibuat</th>  
+                                                    @elseif($user->hasRole(['Finance']))                                     
+                                                        <th>Dibukukan</th>
+                                                    @endif
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
+                                                    
+                                                    @if($user->hasRole(['Purchasing']))
                                                     <td id="pembuat">
-                                                        <input type="text" class="form-control" value="{{ $pembuat }} ({{$pembuatjbt}})"  disabled>
+                                                        <input type="text" class="form-control" value="{{ $pembuat }} ({{$pembuatjbt}})" >
                                                     </td>
                                                     <td id="pembuku">
                                                         @if (!$pembuku )
@@ -236,8 +244,17 @@
                                                         <input type="text" class="form-control" value="{{ $pembuku }} ({{ $pembukujbt }})"  disabled>
                                                         @endif
                                                     </td>
+                                                    @elseif($user->hasRole(['Finance']))
+                                                    <td id="pembuat">
+                                                        <input type="text" class="form-control" value="{{ $pembuat }} ({{$pembuatjbt}})"  disabled>
+                                                    </td>
+                                                    <td id="pembuku">
+                                                        <input type="text" class="form-control" value="{{ Auth::user()->name}}"  >
+                                                    </td>
+                                                    @endif
                                                 </tr>
                                                 <tr>
+                                                    @if($user->hasRole(['Purchasing']))
                                                     <td id="status_dibuat">
                                                         <select id="status" name="status_dibuat" class="form-control select2" required>
                                                             <option value="">Pilih Status</option>
@@ -246,16 +263,44 @@
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <input type="text" class="form-control" id="status_dibuku" value="{{ $data->status_dibuku ?? '-' }}" readonly>
+                                                        <input type="text" class="form-control" id="status_dibuku" value="{{ $data->status_dibuku ?? '-' }}" disabled>
                                                     </td>
+                                                    @elseif($user->hasRole(['Finance']))
+                                                    <td id="status_dibuat">
+                                                        <select id="status" name="status_dibuat" class="form-control select2" required disabled>
+                                                            <option value="">Pilih Status</option>
+                                                            <option value="TUNDA" {{$data->status_dibuat == 'TUNDA' ||$data->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{$data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_dibuku">
+                                                        <!-- <input type="text" class="form-control" id="status_dibuku" value="{{ $data->status_dibuku ?? '-' }}" readonly> -->
+                                                        <select id="status_dibuku" name="status_dibuku" class="form-control select2" required>
+                                                            <option value="">Pilih Status</option>
+                                                            <option value="TUNDA" {{$data->status_dibuku == 'TUNDA' ||$data->status_dibuku == '' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="TUNGGUBAYAR" {{$data->status_dibuku == 'TUNGGUBAYAR' ||$data->status_dibuku == '' ? 'selected' : '' }}>TUNGGU BAYAR</option>
+                                                            <option value="DIKONFIRMASI" {{$data->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                        </select>
+                                                        
+                                                    </td>
+                                                    @endif
                                                 </tr>
                                                 <tr>
+                                                    @if($user->hasRole(['Purchasing']))
                                                     <td id="tgl_dibuat">
-                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $data->tgl_dibuat , now()->format('Y-m-d') }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $data->tgl_dibuat ?? now()->format('Y-m-d') }}" >
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? '-'}}" readonly>
+                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? '-'}}" disabled>
                                                     </td>
+                                                    @elseif($user->hasRole(['Finance']))
+                                                    <td id="tgl_dibuat">
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $data->tgl_dibuat ?? now()->format('Y-m-d') }}" disabled>
+                                                    </td>
+                                                    <td id="tgl_dibuku">
+                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? now()->format('Y-m-d')}}">
+                                                    </td>
+                                                    @endif
                                                 </tr>
                                             </tbody>
                                         </table>  
@@ -355,6 +400,29 @@
                 return true;
             });
         });
+
+        var status_dibuku = "{{ $data->status_dibuku }}";
+        $('#status_dibuku').val(status_dibuku).trigger('change');
+        statusdibuku();
+
+
+        function statusdibuku() {
+            var status = $('#status_dibuku').val();
+            if(status == "TUNGGUBAYAR") {
+                $('#catatan, #tgl_retur, #biaya_pengiriman').prop('readonly', true);
+                $('#komplain , #file').prop('disabled', true);
+                $('[id^=produk]').prop('disabled', true);
+                $('[id^=alasan]').prop('disabled', true);
+                $('[id^=jumlah]').prop('disabled', true);
+            }else if(status == "TUNDA") {
+                $('#catatan, #tgl_retur, #biaya_pengiriman').prop('readonly', false);
+                $('#komplain, #file').prop('disabled', false);
+                $('[id^=produk]').prop('disabled', false);
+                $('[id^=alasan]').prop('disabled', false);
+                $('[id^=jumlah]').prop('disabled', false);
+            }
+        }
+
         $(document).on('change', '[id^=produk_]', function(){
             var id = $(this).attr('id');
             var parts = id.split('_');
