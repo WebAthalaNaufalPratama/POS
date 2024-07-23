@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             Tipe_LokasiSeeder::class,
             Tipe_ProdukSeeder::class,
             OperasionalSeeder::class,
-            CreateAdminUserSeeder::class,
+            // CreateAdminUserSeeder::class,
+            InitialSeeder::class,
         ]);
     }
 }
