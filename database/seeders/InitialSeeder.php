@@ -18,73 +18,110 @@ class InitialSeeder extends Seeder
     public function run()
     {
         // create role
-        $role = Role::create(['name' => 'SuperAdmin']);
-        $roleadmingallery = Role::create(['name' => 'AdminGallery']);
-        $rolepurchasing = Role::create(['name' => 'Purchasing']);
-        $rolesales = Role::create(['name' => 'Sales']);
-        $rolekasirgallery = Role::create(['name' => 'KasirGallery']);
-        $rolekasiroutlet = Role::create(['name' => 'KasirOutlet']);
-        $rolefinance = Role::create(['name' => 'Finance']);
-        $roleauditor = Role::create(['name' => 'Auditor']);
-        $rolesalmen = Role::create(['name' => 'SalesManager']);
+        $role = Role::firstOrCreate(['name' => 'SuperAdmin']);
+        $roleadmingallery = Role::firstOrCreate(['name' => 'AdminGallery']);
+        $rolepurchasing = Role::firstOrCreate(['name' => 'Purchasing']);
+        $rolesales = Role::firstOrCreate(['name' => 'Sales']);
+        $rolekasirgallery = Role::firstOrCreate(['name' => 'KasirGallery']);
+        $rolekasiroutlet = Role::firstOrCreate(['name' => 'KasirOutlet']);
+        $rolefinance = Role::firstOrCreate(['name' => 'Finance']);
+        $roleauditor = Role::firstOrCreate(['name' => 'Auditor']);
+        $rolesalmen = Role::firstOrCreate(['name' => 'SalesManager']);
         
         // create user default
-        $user = User::create([
-            'name' => 'SuperAdmin', 
-            'email' => 'superadmin@gmail.com',
-            'username' => 'superadmin',
-            'password' => '123'
-        ]);
-        $useradmingallery = User::create([
-            'name' => 'AdminGallery', 
-            'email' => 'admingallery@gmail.com',
-            'username' => 'admingallery',
-            'password' => '123'
-        ]);
-        $userpurchasing = User::create([
-            'name' => 'Purchasing', 
-            'email' => 'purchasing@gmail.com',
-            'username' => 'purchasing',
-            'password' => '123'
-        ]);
-        $usersales = User::create([
-            'name' => 'Sales', 
-            'email' => 'sales@gmail.com',
-            'username' => 'sales',
-            'password' => '123'
-        ]);
-        $userkasirgallery = User::create([
-            'name' => 'KasirGallery', 
-            'email' => 'kasirgallery@gmail.com',
-            'username' => 'kasirgallery',
-            'password' => '123'
-        ]);
-        $userkasiroutlet = User::create([
-            'name' => 'KasirOutlet', 
-            'email' => 'kasiroutlet@gmail.com',
-            'username' => 'kasiroutlet',
-            'password' => '123'
-        ]);
-        $userfinance = User::create([
-            'name' => 'Finance', 
-            'email' => 'finance@gmail.com',
-            'username' => 'finance',
-            'password' => '123'
-        ]);
-        $userauditor = User::create([
-            'name' => 'Auditor', 
-            'email' => 'auditor@gmail.com',
-            'username' => 'auditor',
-            'password' => '123'
-        ]);
-        $usersalesmanger = User::create([
-            'name' => 'Salesmanager', 
-            'email' => 'salesmanager@gmail.com',
-            'username' => 'salmen',
-            'password' => '123'
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'superadmin@gmail.com'],
+            [
+                'name' => 'SuperAdmin', 
+                'username' => 'superadmin',
+                'password' => '123'
+            ]
+        );
+        $useradmingallery = User::firstOrCreate(
+            ['email' => 'admingallery@gmail.com'],
+            [
+                'name' => 'AdminGallery', 
+                'username' => 'admingallery',
+                'password' => '123'
+            ]
+        );
+        $userpurchasing = User::firstOrCreate(
+            ['email' => 'purchasing@gmail.com'],
+            [
+                'name' => 'Purchasing', 
+                'username' => 'purchasing',
+                'password' => '123'
+            ]
+        );
+        $usersales = User::firstOrCreate(
+            ['email' => 'sales@gmail.com'],
+            [
+                'name' => 'Sales', 
+                'username' => 'sales',
+                'password' => '123'
+            ]
+        );
+        $userkasirgallery = User::firstOrCreate(
+            ['email' => 'kasirgallery@gmail.com'],
+            [
+                'name' => 'KasirGallery', 
+                'username' => 'kasirgallery',
+                'password' => '123'
+            ]
+        );
+        $userkasiroutlet = User::firstOrCreate(
+            ['email' => 'kasiroutlet@gmail.com'],
+            [
+                'name' => 'KasirOutlet', 
+                'username' => 'kasiroutlet',
+                'password' => '123'
+            ]
+        );
+        $userfinance = User::firstOrCreate(
+            ['email' => 'finance@gmail.com'],
+            [
+                'name' => 'Finance', 
+                'username' => 'finance',
+                'password' => '123'
+            ]
+        );
+        $userauditor = User::firstOrCreate(
+            ['email' => 'auditor@gmail.com'],
+            [
+                'name' => 'Auditor', 
+                'username' => 'auditor',
+                'password' => '123'
+            ]
+        );
+        $usersalesmanger = User::firstOrCreate(
+            ['email' => 'salesmanager@gmail.com'],
+            [
+                'name' => 'Salesmanager', 
+                'username' => 'salmen',
+                'password' => '123'
+            ]
+);
 
         // permission
+        // basic permission
+            $basiPermissionList = [
+                'home.index',
+                'login',
+                'login.perform',
+                'getBulan',
+                'getKode',
+                'getKategori',
+                'logout',
+                'checkPromo',
+                'getPromo',
+                'getProdukTerjual',
+                'addKomponen',
+                'getProdukDo',
+                'rekeningPerLokasi',
+                'dashboard.index'
+            ];
+
+        // super admin
             $permissionssuperadmin = Permission::pluck('id');
 
         // admingallery
@@ -118,6 +155,7 @@ class InitialSeeder extends Seeder
                 'formmutasigalery.cetak',
                 'mutasioutlet'
             ];
+            $admingalleryPermissionList = array_merge($basiPermissionList, $admingalleryPermissionList);
             $query = Permission::query();
             foreach ($admingalleryPermissionList as $prefix) {
                 $query->orWhere('name', 'like', $prefix . '%');
@@ -152,6 +190,7 @@ class InitialSeeder extends Seeder
                 'inven_gudang',
                 'mutasigalerygalery'
             ];
+            $purchasingPermissionList = array_merge($basiPermissionList, $purchasingPermissionList);
             $query = Permission::query();
             foreach ($purchasingPermissionList as $prefix) {
                 $query->orWhere('name', 'like', $prefix . '%');
@@ -179,6 +218,7 @@ class InitialSeeder extends Seeder
                 'formpenjualan.cetak',
                 'formmutasigalery.cetak'
             ];
+            $kasrigalleryPermissionList = array_merge($basiPermissionList, $kasrigalleryPermissionList);
             $query = Permission::query();
             foreach ($kasrigalleryPermissionList as $prefix) {
                 $query->orWhere('name', 'like', $prefix . '%');
@@ -206,6 +246,7 @@ class InitialSeeder extends Seeder
                 'formpenjualan.cetak',
                 'formmutasigalery.cetak'
             ];
+            $kasiroutletPermissionList = array_merge($basiPermissionList, $kasiroutletPermissionList);
             $query = Permission::query();
             foreach ($kasiroutletPermissionList as $prefix) {
                 $query->orWhere('name', 'like', $prefix . '%');
@@ -340,6 +381,7 @@ class InitialSeeder extends Seeder
                 'pemakaian_sendiri.edit',
                 'pemakaian_sendiri.update'
             ];
+            $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
             $query = Permission::query();
             foreach ($financePermissionList as $prefix) {
                 $query->orWhere('name', 'like', $prefix . '%');
@@ -463,6 +505,7 @@ class InitialSeeder extends Seeder
                 'kas_pusat.index',
                 'pemakaian_sendiri.index'
             ];
+            $auditorPermissionList = array_merge($basiPermissionList, $auditorPermissionList);
             $query = Permission::query();
             foreach ($auditorPermissionList as $prefix) {
                 $query->orWhere('name', 'like', $prefix . '%');
@@ -493,33 +536,41 @@ class InitialSeeder extends Seeder
         $userauditor->assignRole([$roleauditor->id]);
 
         // create lokasi
-        Lokasi::create([
-            'nama' => 'Galery Semarang',
-            'tipe_lokasi' => 1,
-            'operasional_id' => 2,
-            'alamat' => 'semarang',
-            'pic' => 'yvon'
-        ]);
-        Lokasi::create([
-            'nama' => 'Galery Surabaya',
-            'tipe_lokasi' => 1,
-            'operasional_id' => 2,
-            'alamat' => 'Surabaya',
-            'pic' => 'sby'
-        ]);
-        Lokasi::create([
-            'nama' => 'Galery Yogyakarta',
-            'tipe_lokasi' => 1,
-            'operasional_id' => 2,
-            'alamat' => 'Yogyakarta',
-            'pic' => 'ygy'
-        ]);
-        Lokasi::create([
-            'nama' => 'Outlet Semarang',
-            'tipe_lokasi' => 2,
-            'operasional_id' => 2,
-            'alamat' => 'semarang',
-            'pic' => 'dian'
-        ]);
+        Lokasi::firstOrCreate(
+            ['nama' => 'Galery Semarang'],
+            [
+                'tipe_lokasi' => 1,
+                'operasional_id' => 2,
+                'alamat' => 'semarang',
+                'pic' => 'yvon'
+            ]
+        );
+        Lokasi::firstOrCreate(
+            ['nama' => 'Galery Surabaya'],
+            [
+                'tipe_lokasi' => 1,
+                'operasional_id' => 2,
+                'alamat' => 'Surabaya',
+                'pic' => 'sby'
+            ]
+        );
+        Lokasi::firstOrCreate(
+            ['nama' => 'Galery Yogyakarta'],
+            [
+                'tipe_lokasi' => 1,
+                'operasional_id' => 2,
+                'alamat' => 'Yogyakarta',
+                'pic' => 'ygy'
+            ]
+        );
+        Lokasi::firstOrCreate(
+            ['nama' => 'Outlet Semarang'],
+            [
+                'tipe_lokasi' => 2,
+                'operasional_id' => 2,
+                'alamat' => 'semarang',
+                'pic' => 'dian'
+            ]
+        );
     }
 }
