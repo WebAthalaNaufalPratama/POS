@@ -26,26 +26,47 @@ class InventoryGalleryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        $produks = InventoryGallery::with('produk')->when(Auth::user()->karyawans, function ($query) {
+        $produks = InventoryGallery::with('kondisi', 'produk', 'gallery')->when(Auth::user()->karyawans, function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->orderBy('kode_produk')->orderBy('kondisi_id')->get();
+        $namaproduks = InventoryGallery::with('produk')->get()->unique('kode_produk');
+        $kondisis = Kondisi::all();
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
         $karyawans = Karyawan::when(Auth::user()->karyawans, function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->get();
         $lokasis = Lokasi::where('tipe_lokasi', 1)->when(Auth::user()->karyawans, function ($query) {
             return $query->where('id', Auth::user()->karyawans->lokasi_id);
         })->get();
-        $data = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->karyawans, function ($query) {
-            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        })->get();
+        $query = InventoryGallery::orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->karyawans, function ($q) {
+            return $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+        if ($req->produk) {
+            $query->where('kode_produk', $req->input('produk'));
+        }
+        if ($req->kondisi) {
+            $query->where('kondisi_id', $req->input('kondisi'));
+        }
+        if ($req->gallery) {
+            $query->where('lokasi_id', $req->input('gallery'));
+        }
+        $data = $query->get();
 
-        $pemakaian_sendiri = PemakaianSendiri::when(Auth::user()->karyawans, function ($query) {
-            return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        })->orderBy('tanggal', 'desc')->orderByDesc('id')->get();
+        $query2 = PemakaianSendiri::orderBy('tanggal', 'desc')->orderByDesc('id');
+        if ($req->produk2) {
+            $query2->where('produk_id', $req->input('produk2'));
+        }
+        if ($req->kondisi2) {
+            $query2->where('kondisi_id', $req->input('kondisi2'));
+        }
+        if ($req->gallery2) {
+            $query2->where('lokasi_id', $req->input('gallery2'));
+        }
+        $pemakaian_sendiri = $query2->get();
 
-        $isSuperAdmin = Auth::user()->hasRole('SuperAdmin');
+        $isSuperAdmin = Auth::user()->hasRole('SuperAdmin', 'kondisis');
         
         $mergedCollection = collect();
 
@@ -320,7 +341,7 @@ class InventoryGalleryController extends Controller
         }
         // mutasi end
         
-        return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis', 'pemakaian_sendiri', 'mergedCollection'));
+        return view('inven_galeri.index', compact('data', 'produks', 'karyawans', 'lokasis', 'pemakaian_sendiri', 'mergedCollection', 'galleries', 'kondisis', 'namaproduks'));
     }
 
     /**

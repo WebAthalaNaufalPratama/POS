@@ -16,9 +16,22 @@ use Illuminate\Support\Facades\Validator;
 
 class InventoryGudangController extends Controller
 {
-    public function index()
+    public function index(Request $req)
     {
-        $data = InventoryGudang::all();
+        $namaproduks = InventoryGudang::with('produk')->get()->unique('kode_produk');
+        $kondisis = Kondisi::all();
+        $gudangs = Lokasi::where('tipe_lokasi', 4)->get();
+        $query = InventoryGudang::query();
+        if ($req->produk) {
+            $query->where('kode_produk', $req->input('produk'));
+        }
+        if ($req->kondisi) {
+            $query->where('kondisi_id', $req->input('kondisi'));
+        }
+        if ($req->gallery) {
+            $query->where('lokasi_id', $req->input('gallery'));
+        }
+        $data = $query->get();
         $lokasi = Lokasi::where('tipe_lokasi', 4)->get();
         $arraylokasi = $lokasi->pluck('id')->toArray();
         $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MPG%')->where('status', 'DIKONFIRMASI')->get();
@@ -95,7 +108,7 @@ class InventoryGudangController extends Controller
         }
     
         $riwayat = $riwayat->sortByDesc('id')->values();
-        return view('inven_gudang.index', compact('data', 'riwayat'));
+        return view('inven_gudang.index', compact('data', 'riwayat', 'namaproduks', 'kondisis', 'gudangs'));
     }
 
     public function create()

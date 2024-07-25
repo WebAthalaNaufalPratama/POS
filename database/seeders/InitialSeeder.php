@@ -153,7 +153,8 @@ class InitialSeeder extends Seeder
                 'returpenjualan',
                 'mutasigalery',
                 'formmutasigalery.cetak',
-                'mutasioutlet'
+                'mutasioutlet',
+                'pemakaian_sendiri'
             ];
             $admingalleryPermissionList = array_merge($basiPermissionList, $admingalleryPermissionList);
             $query = Permission::query();
