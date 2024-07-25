@@ -52,7 +52,7 @@
                             <option value="Lunas" {{ request()->input('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                             <option value="Belum Ada Tagihan" {{ request()->input('status') == 'Belum Ada Tagihan' ? 'selected' : '' }}>Belum Ada Tagihan</option>
-                            <option value="Invoice Batal" {{ request()->input('status') == 'Invoice Batal' ? 'selected' : '' }}>Invoice Batal</option>
+                            {{-- <option value="Invoice Batal" {{ request()->input('status') == 'Invoice Batal' ? 'selected' : '' }}>Invoice Batal</option> --}}
                         </select>
                     </div>
                     @endif
@@ -210,30 +210,30 @@
                                             @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                                                 @foreach ($invoiceItems as $invoice)
                                                     @if($invoice->sisa == 0 && ($invoice->status_dibuku == null || $invoice->status_dibuku == 'TUNDA'))
-                                                        @if(Auth::user()->hasRole(['Finance']))
+                                                        {{-- @if(Auth::user()->hasRole(['Finance']))
                                                             <li>
                                                                 <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
                                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
                                                                 </a>
                                                             </li>
-                                                        @endif
+                                                        @endif --}}
                                                     @endif
                                                     @if ($invoice->sisa != 0 && $invoice->status_dibuat == 'DIKONFIRMASI' && ($invoice->status_dibuku == 'TUNDA' || $invoice->status_dibuku === null) && ($invoice->retur && $invoice->retur->status_dibuku == "DIKONFIRMASI"))
-                                                        @if(Auth::user()->hasRole(['Finance']))
+                                                        {{-- @if(Auth::user()->hasRole(['Finance']))
                                                             <li>
                                                                 <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
                                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                                 </a>
                                                             </li>
-                                                        @endif
+                                                        @endif --}}
                                                     @elseif($invoice->status_dibuat == 'TUNDA')
-                                                        @if(Auth::user()->hasRole(['Purchasing']))
+                                                        {{-- @if(Auth::user()->hasRole(['Purchasing']))
                                                             <li>
                                                                 <a href="{{ route('invoicepurchase.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
                                                                     <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
                                                                 </a>
                                                             </li>
-                                                        @endif
+                                                        @endif --}}
                                                     @endif
                                                                                                  
                                                 @endforeach

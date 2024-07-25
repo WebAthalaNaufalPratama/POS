@@ -529,6 +529,9 @@ class PembayaranController extends Controller
         $data = $req->except(['_token', '_method', 'bukti']);
         $invoice_tagihan = Invoicepo::find($data['invoice_purchase_id']);
         
+        if ($invoice_tagihan->dp === 0) {
+            $invoice_tagihan->update(['dp' => $req->nominal]);
+        }
 
         // cek sisa bayar
         if($invoice_tagihan->sisa > 0){
@@ -565,10 +568,6 @@ class PembayaranController extends Controller
             // } else {
             //     $data['status_bayar'] = 'BELUM LUNAS';
             // }
-
-            if ($invoice_tagihan->dp === 0) {
-                $invoice_tagihan->update(['dp' => $req->nominal]);
-            }
 
             $pembayaran = Pembayaran::create($data);
 

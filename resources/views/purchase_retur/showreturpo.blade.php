@@ -306,7 +306,7 @@
                                                 </td>
                                                 <td id="tgl_dibuku">
                                                     @if(Auth::user()->hasRole('Purchasing'))
-                                                    <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? '-'}}" readonly>
+                                                    <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{isset($data->tgl_dibuku) ? tanggalindo($data->tgl_dibuku) : '-'}}" readonly>
                                                     @endif
                                                     @if(Auth::user()->hasRole('Finance'))
                                                         @if($data->status_dibuku == "DIKONFIRMASI")
@@ -391,7 +391,7 @@
                                             </td>
                                             <td id="tgl_dibuku">
                                                 @if(Auth::user()->hasRole('Purchasing'))
-                                                <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{$data->tgl_dibuku ?? '-'}}" readonly>
+                                                <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{isset($data->tgl_dibuku) ? tanggalindo($data->tgl_dibuku) : '-'}}" readonly>
                                                 @endif
                                                 @if(Auth::user()->hasRole('Finance'))
                                                     @if($data->status_dibuku == "DIKONFIRMASI")
@@ -475,9 +475,9 @@
               <label for="nominal" class="form-label">Nominal</label>
               <div class="input-group">
                 <span class="input-group-text">Rp. </span>
-                <input type="text" class="form-control"  id="nominal" value="{{ $data->sisa}}">
+                <input type="text" class="form-control"  id="nominal">
               </div>
-              <input type="text" class="form-control"  id="nominal2" name="nominal" value="{{ $data->sisa}}" hidden>
+              <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
             </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
@@ -497,6 +497,17 @@
 
 @section('scripts')
 <script>
+function formatRupiah(angka) {
+            var reverse = angka.toString().split('').reverse().join('');
+            var ribuan = reverse.match(/\d{1,3}/g);
+            ribuan = ribuan.join('.').split('').reverse().join('');
+            return ribuan;
+        }
+    
+
+    function unformatRupiah(formattedValue) {
+        return formattedValue.replace(/\./g, '');
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
          // Initialize input field with formatted value
@@ -516,5 +527,6 @@
         document.getElementById('nominal2').value = unformatRupiah(this.value);
     });
     });
+
 </script>
 @endsection

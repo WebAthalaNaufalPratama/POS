@@ -66,8 +66,8 @@ $user = Auth::user();
                                 <th>Status</th>
                                 <th>Nominal</th>
                                 <th>Sisa Tagihan</th>
-                                <th>Status Purchase</th>
-                                <th>Status Finance</th>
+                                <th>Status dibuat</th>
+                                <th>Status dibuku</th>
                                 <th>Komplain</th>
                                 <th>Aksi</th>
                             </tr>
@@ -83,9 +83,11 @@ $user = Auth::user();
                                 <td>{{ $inv->pembelian->lokasi->nama}}</td>
                                 <td>
                                     @if ($inv->sisa == 0)
-                                        <span class="badge bg-success">Lunas</span>
-                                    @else
-                                        <span class="badge bg-danger">Belum Lunas</span>
+                                        <span class="badges bg-lightgreen">Lunas</span>
+                                    @elseif($inv->sisa !== 0 && $inv->status_dibuat !== 'BATAL')
+                                        <span class="badges bg-lightred">Belum Lunas</span>
+                                    @elseif($inv->status_dibuat == 'BATAL')
+                                    <span class="badges bg-lightgrey">BATAL</span>
                                     @endif
                                 </td>
                                 <td>{{ formatRupiah($inv->total_tagihan) }}</td>
@@ -95,33 +97,55 @@ $user = Auth::user();
                                 </td>
                                 <td>
                                     @if ($inv->status_dibuat == 'TUNDA' || $inv->status_dibuat == null)
-                                        <span class="badge bg-danger">TUNDA</span>
+                                        <span class="badges bg-lightred">TUNDA</span>
                                     @elseif ($inv->status_dibuat == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
+                                        <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @elseif ($inv->status_dibuat == 'BATAL')
-                                        <span class="badge bg-secondary">BATAL</span>
+                                        <span class="badges bg-lightgrey">BATAL</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if ($inv->status_dibuku == 'TUNDA' || $inv->status_dibuku == null)
-                                        <span class="badge bg-danger">TUNDA</span>
+                                        <span class="badges bg-lightred">TUNDA</span>
                                     @elseif ($inv->status_dibuku == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
-                                    @elseif ($inv->status_dibuku == 'BATAL')
-                                        <span class="badge bg-secondary">BATAL</span>
+                                        <span class="badges bg-lightgreen">DIKONFIRMASI</span>
+                                    @elseif ($inv->status_dibuku == 'MENUNGGU PEMBAYARAN' && $inv->sisa !== 0)
+                                        <span class="badges bg-lightyellow">MENUNGGU PEMBAYARAN</span>
+                                    @elseif ($inv->status_dibuku == 'MENUNGGU PEMBAYARAN' && $inv->sisa == 0)
+                                        <span class="badges bg-lightyellow">MENUNGGU KONFIRMASI</span>
                                     @endif
                                 </td>
                                 
                                 <td>
-                                @php
-                                    // Mengambil data retur pertama yang memiliki 'invoicepo_id' sama dengan $inv->id
-                                    $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $inv->id);
-                                @endphp
-                                @if ($invoiceRetur)
-                                {{ $inv->retur->komplain }}   
-                                @endif
- 
+                                    @php
+                                        $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $inv->id);
+                                        $pembelianRetur = $pembelian->firstWhere('no_retur', $inv->retur->no_retur ?? null);
+                                    @endphp
+                                
+                                    @if ($invoiceRetur && isset($inv->retur))
+                                        {{ $inv->retur->komplain }}  
+                                        @if($inv->retur->status_dibuku == null || $inv->retur->status_dibuku == "TUNDA")
+                                        | Belum Dikonfirmasi
+                                        @endif
+
+                                        @if ($inv->retur->komplain == "Retur")
+                                            @if (!$pembelianRetur && $inv->retur->status_dibuku == "DIKONFIRMASI")
+                                                | PO retur belum dibuat
+                                            @elseif($pembelianRetur)
+                                                | {{$pembelianRetur->no_po }}
+                                            @endif
+                                        @endif
+                                        @if ($inv->retur->komplain == "Refund")
+                                            @if ($inv->retur->sisa == 0 )
+                                                | Lunas
+                                            @else
+                                                | Belum Lunas
+                                            @endif
+                                        @endif
+
+                                    @endif
                                 </td>
+                                
                                
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -147,7 +171,7 @@ $user = Auth::user();
                                             </a>
                                         </li> --}}
                                  
-                                        @elseif(($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan) && !$invoiceRetur && ($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null) && $inv->status_dibuat == "DIKONFIRMASI")
+                                        @elseif(($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan) && !$invoiceRetur && ($inv->status_dibuku !== "TUNDA" || $inv->status_dibuku !== null) && $inv->status_dibuat == "DIKONFIRMASI" && $inv->status_dibuku == "MENUNGGU PEMBAYARAN" )
                                             @if(Auth::user()->hasRole('Purchasing'))
                                                 <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain
@@ -165,10 +189,11 @@ $user = Auth::user();
                                                 </li>
                                             @endif
                                         @endif
+                                       
                                     @if(Auth::user()->hasRole('Finance'))
 
                                         @if($inv->sisa == 0)
-                                            @if($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null)
+                                            @if($inv->status_dibuku == "MENUNGGU PEMBAYARAN")
                                             <li>
                                                 <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
@@ -176,18 +201,27 @@ $user = Auth::user();
                                             </li>
                                             @endif
                                         @else
-                                        
+
+                                       
                                         @if(!$invoiceRetur || ($invoiceRetur && $invoiceRetur->status_dibuku =="DIKONFIRMASI"))
+                                            @if ($inv->status_dibuku == "MENUNGGU PEMBAYARAN")
                                             <li>
                                                 <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                 </a>
                                             </li>
-                                            <li>
+                                            {{-- <li>
                                                 <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item">
                                                     <img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar
                                                 </a>
+                                            </li> --}}
+                                            @elseif ($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null )
+                                            <li>
+                                                <a href="{{ route('invoicepurchase.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
+                                                    <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
+                                                </a>
                                             </li>
+                                            @endif
                                         @endif
 
                                         @endif
@@ -319,10 +353,11 @@ $user = Auth::user();
                                             <a href="{{ route('editinvoice.edit', ['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Edit Invoice</a>
                                         </li>
                                         @endif
+
                                         @elseif($user->hasRole(['Auditor']))
-                                        @if($inv->status_dibuku == "TUNDA")
-                                            <a href="{{ route('editinvoice.edit', ['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Edit Invoice</a>
-                                        @endif
+                                            @if($inv->status_dibuku == "TUNDA")
+                                                <a href="{{ route('editinvoice.edit', ['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Edit Invoice</a>
+                                            @endif
                                         @endif
                                         <li>
                                             <a href="{{ route('invoice.show',['datapo' => $inv->poinden->id, 'type' => 'poinden', 'id' => $inv->id]) }}" class="dropdown-item">

@@ -41,11 +41,11 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal PO</label>
-                                                <input type="text" id="tanggal_po" name="tanggal_po" value="{{ old('tanggal_po') ?? tanggalindo($invoice->pembelian->tgl_dibuat) }}" class="form-control" required readonly>
+                                                <input type="text" id="tanggal_po" name="tanggal_po" value="{{ tanggalindo($invoice->pembelian->tgl_dibuat) }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Invoice</label>
-                                                <input type="text" id="tanggal_invoice" name="tanggal_invoice" value="{{ old('tanggal_invoice') ?? tanggalindo($invoice->tgl_inv) }}" class="form-control" required readonly>
+                                                <input type="text" id="tanggal_invoice" name="tanggal_invoice" value="{{ tanggalindo($invoice->tgl_inv) }}" class="form-control" required readonly>
                                             </div>
                                             <input type="hidden" name="invoicepo_id" value="{{ $invoice->id }}">
                                             <div class="form-group">
