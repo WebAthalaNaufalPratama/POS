@@ -12,7 +12,12 @@ Carbon::setLocale('id');
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
+            @if(Auth::user()->hasRole('Purchasing'))
             <h3 class="page-title">Edit Invoice (Purchasing)</h3>
+            @endif
+            @if(Auth::user()->hasRole('Finance'))
+            <h3 class="page-title">Edit Invoice (Finance)</h3>
+            @endif
         </div>
     </div>
 </div>
@@ -273,12 +278,12 @@ Carbon::setLocale('id');
                                                     </h4>
                                                     <h5>
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn ?? '-' }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn ?? 0 }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ $inv_po->ppn  ?? '-'}}" readonly>
+                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ formatRupiah($inv_po->ppn  ?? 0 )}}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -346,15 +351,15 @@ Carbon::setLocale('id');
                         </div>
                          <div class="row justify-content-start">
                             <div class="col-md-6 border rounded pt-3 me-1 mt-2">
-                             
-                                        <table class="table table-responsive border rounded">
-                                            <thead>
-                                                <tr>
-                                                    <th>Dibuat</th>                                              
-                                                    <th>Dibukukan</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
+                                <table class="table table-responsive border rounded">
+                                    <thead>
+                                        <tr>
+                                            <th>Dibuat</th>                                              
+                                            <th>Dibukukan</th>
+                                        </tr>
+                                    </thead>
+                                    @if(Auth::user()->hasRole('Purchasing'))
+                                    <tbody>
                                                 <tr>
                                                     <td id="pembuat">
                                                         <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
@@ -374,7 +379,7 @@ Carbon::setLocale('id');
                                                             <option value="">Pilih Status</option>
                                                             <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' || $inv_po->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            <option value="BATAL" {{ $inv_po->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                            {{-- <option value="BATAL" {{ $inv_po->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                                         </select>
                                                     </td>
                                                     <td id="status_dibuku">
@@ -388,21 +393,64 @@ Carbon::setLocale('id');
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
-                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $inv_po->tgl_dibuat, now()->format('Y-m-d') }}" disabled>
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}">
                                                     </td>
                                                     <td id="tgl_dibuku">
                                                         <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan ?? '-'}}" disabled>
                                                     </td>
                                                 </tr>
-                                            </tbody>
-                                        </table>  
-                                        <br>                                 
+                                    </tbody>
+                                    @endif
+                                    @if(Auth::user()->hasRole('Finance'))
+                                    <tbody>
+                                                <tr>
+                                                    <td id="pembuat">
+                                                        <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
+                                                    </td>
+                                                    <td id="pembuku"> 
+                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                    
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="status_dibuat">
+                                                        {{-- <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}"> --}}
+                                                        <select id="status" name="status_dibuat" class="form-control select2" disabled>
+                                                            <option value="">Pilih Status</option>
+                                                            <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' || $inv_po->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            {{-- <option value="BATAL" {{ $inv_po->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_dibuku">
+                                                        <select id="status" name="status_dibuku" class="form-control select2">
+                                                            <option value="">Pilih Status</option>
+                                                            <option value="TUNDA" {{ $inv_po->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="MENUNGGU PEMBAYARAN" {{ $inv_po->status_dibuku == 'MENUNGGU PEMBAYARAN' || $inv_po->status_dibuku == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
+                                                            @if( $inv_po->sisa == 0)
+                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            @endif
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="tgl_dibuat">
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $inv_po->tgl_dibuat }}" disabled>
+                                                    </td>
+                                                    <td id="tgl_dibuku">
+                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ now()->format('Y-m-d')  }}">
+                                                    </td>
+                                                </tr>
+                                    </tbody>
+                                    @endif
+                                </table>    
                                </div>
                          </div>
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('invoicebeli.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>

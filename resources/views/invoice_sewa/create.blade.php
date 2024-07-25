@@ -121,7 +121,7 @@
                                         <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"  required></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"  required></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"  required readonly></td>
-                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                        <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                     </tr>
                                     @else
                                     @php
@@ -159,9 +159,9 @@
                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}"></td>
                                             <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ old('harga_total.' . $i) ?? $produk->harga_jual }}" required readonly></td>
                                             @if ($i == 0)
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                             @else
-                                                <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                <td><a href="javascript:void(0);" class="btn_remove" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                             @endif
                                             @php
                                                 $i++;
@@ -201,7 +201,7 @@
                                         <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control"></td>
                                         <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"></td>
                                         <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control" readonly></td>
-                                        <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                        <td><a href="javascript:void(0);" id="add2"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -376,7 +376,7 @@
                                             '<td><input type="text" name="harga_satuan[]" id="harga_satuan_' + i + '" oninput="multiply(this)" class="form-control"  required></td>' +
                                             '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control"  required></td>' +
                                             '<td><input type="text" name="harga_total[]" id="harga_total_' + i + '" class="form-control"  required readonly></td>' +
-                                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                                            '<td><a href="javascript:void(0);" class="btn_remove" id="' + i + '"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                                         '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2({
@@ -397,7 +397,7 @@
                             '<td><input type="text" name="harga_satuan[]" id="harga_satuan2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
                             '<td><input type="number" name="jumlah[]" id="jumlah2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
                             '<td><input type="text" name="harga_total[]" id="harga_total2_' + i + '" class="form-control"  required readonly></td>' +
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
+                            '<td><a href="javascript:void(0);" class="btn_remove2" id="' + i + '"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();
                 i++;

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class InventoryIndenController extends Controller
 {
-    public function index()
+    public function index(Request $req)
     {
     $caseStatement = "CASE 
         WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Januari' THEN '01'
@@ -30,10 +30,22 @@ class InventoryIndenController extends Controller
         END";
     
     $rawOrderBy = "CONCAT(RIGHT(bulan_inden, 4), '-', $caseStatement)";
-
-    $data = InventoryInden::orderByRaw($rawOrderBy . ' DESC')->get();
+    $namaproduks = InventoryInden::with('produk')->get()->unique('kode_produk');
+    $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
+    $periodes = InventoryInden::get()->unique('bulan_inden');
+    $query = InventoryInden::orderByRaw($rawOrderBy . ' DESC');
+    if ($req->produk) {
+        $query->where('kode_produk', $req->input('produk'));
+    }
+    if ($req->supplier) {
+        $query->where('supplier_id', $req->input('supplier'));
+    }
+    if ($req->periode) {
+        $query->where('bulan_inden', $req->input('periode'));
+    }
+    $data = $query->get();
     
-    return view('inven_inden.index', compact('data'));
+    return view('inven_inden.index', compact('data', 'namaproduks', 'suppliers', 'periodes'));
     }
 
 

@@ -368,7 +368,7 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ tanggalindo($inv_po->tgl_dibukukan) }}" disabled>
+                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ isset($inv_po->tgl_dibukukan) ? tanggalindo($inv_po->tgl_dibukukan) : '-'}}" disabled>
                                                     </td>
                                                 </tr>
                                             </tbody>

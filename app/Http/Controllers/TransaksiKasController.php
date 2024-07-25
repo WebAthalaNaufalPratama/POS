@@ -39,8 +39,10 @@ class TransaksiKasController extends Controller
         }
         $dataMasuk = $queryMasuk->get();
         $dataKeluar = $queryKeluar->get();
+        $saldoMasuk = $queryMasuk->where('status', 'DIKONFIRMASI')->get()->sum('nominal');
+        $saldoKeluar = $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('nominal') + $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('biaya_lain');
         
-        return view('kas_pusat.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings'));
+        return view('kas_pusat.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 'saldoMasuk', 'saldoKeluar'));
     }
 
     /**
@@ -162,11 +164,11 @@ class TransaksiKasController extends Controller
      */
     public function destroy_pusat($transaksiKas)
     {
-        $data = TransaksiKas::find($transaksiKas);
-        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
-        $check = $data->delete();
-        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
-        return response()->json(['msg' => 'Data berhasil dihapus']);
+        // $data = TransaksiKas::find($transaksiKas);
+        // if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        // $check = $data->delete();
+        // if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
+        // return response()->json(['msg' => 'Data berhasil dihapus']);
     }
 
     public function index_gallery(Request $req)
@@ -202,7 +204,9 @@ class TransaksiKasController extends Controller
         }
         $dataMasuk = $queryMasuk->get();
         $dataKeluar = $queryKeluar->get();
-        return view('kas_gallery.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 'rekeningKeluar', 'lokasi_pengirim'));
+        $saldoMasuk = $queryMasuk->where('status', 'DIKONFIRMASI')->get()->sum('nominal');
+        $saldoKeluar = $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('nominal') + $queryKeluar->where('status', 'DIKONFIRMASI')->get()->sum('biaya_lain');
+        return view('kas_gallery.index', compact('dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 'rekeningKeluar', 'lokasi_pengirim', 'saldoMasuk', 'saldoKeluar'));
     }
 
     /**
@@ -287,14 +291,13 @@ class TransaksiKasController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'akun_id' => 'required|numeric',
+            'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
+            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
-            'kuantitas' => 'required|numeric',
-            'harga_satuan' => 'required|numeric',
-            'harga_total' => 'required|numeric',
-            'lokasi_id' => 'required',
-            'tanggal_transaksi' => 'required|date',
-            'status' => 'required',
+            'nominal' => 'required|numeric',
+            'tanggal' => 'required|date',
+            'status' => 'required|in:DIKONFIRMASI,BATAL'
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -307,12 +310,12 @@ class TransaksiKasController extends Controller
         }
 
         // save data
-        $data['bukti'] = $existingTransaksi->bukti;
-        if ($req->hasFile('bukti')) {
-            $file = $req->file('bukti');
+        $data['file'] = $existingTransaksi->file;
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
             $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
             $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $data['file'] = $filePath;
         }
         $check = TransaksiKas::find($transaksiKas)->update($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
@@ -327,11 +330,11 @@ class TransaksiKasController extends Controller
      */
     public function destroy_gallery($transaksiKas)
     {
-        $data = TransaksiKas::find($transaksiKas);
-        if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
-        $check = $data->delete();
-        if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
-        return response()->json(['msg' => 'Data berhasil dihapus']);
+        // $data = TransaksiKas::find($transaksiKas);
+        // if(!$data) return response()->json(['msg' => 'Data tidak ditemukan'], 404);
+        // $check = $data->delete();
+        // if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
+        // return response()->json(['msg' => 'Data berhasil dihapus']);
     }
 
     public function rekeningPerLokasi(Request $req)

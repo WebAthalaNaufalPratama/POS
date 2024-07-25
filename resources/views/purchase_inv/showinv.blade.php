@@ -153,9 +153,30 @@ Carbon::setLocale('id');
                                             <i class="fa fa-copy" id="copyIcon" style="cursor: pointer; margin-left: 10px;"></i>
                                         </h6>
                                     </br>
-                                        @if($retur->komplain == "Retur")
+                                    @php
+                                    $poretur = $pembelian->firstWhere('no_retur', $retur->no_retur ?? null);
+                                    @endphp
+                                    
+                                    @if(Auth::user()->hasRole('Purchasing'))
+                                        @if($retur->komplain == "Retur" && !$poretur)
                                         <a href="{{ route('pembelian.create') }}" class="btn btn-primary" target="_blank">Buat Pembelian Baru</a>
                                         @endif
+                                    @endif
+                                    @if($retur->komplain == "Retur" && $poretur)
+                                        <a href="{{ route('pembelian.show', ['type' => 'pembelian', 'datapo' => $poretur->id]) }}"  class="btn btn-primary" target="_blank">Lihat PO retur</a>
+                                    @endif
+
+                                            @if($retur->komplain == "Refund" && $retur->sisa !== 0)
+                                                @if(Auth::user()->hasRole('Finance'))
+                                                <a href="{{ route('returbeli.show', ['retur_id' => $retur->id]) }}" class="btn btn-primary" target="_blank">Input Refund</a>
+                                                 @endif
+                                            @else
+                                                @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
+                                                <span class="badges bg-lightgreen">Refund Lunas</span>
+                                                @endif
+                                            @endif
+                                  
+
 
                                         
                                    </div>
@@ -340,7 +361,7 @@ Carbon::setLocale('id');
                                                     <h4>PPN</h4>
                                                     <h5 class="col-lg-5">
                                                             <div class="input-group">
-                                                                <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
+                                                                <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn ?? 0}}" oninput="calculatePPN(this), validatePersen(this)" readonly>
                                                                 <span class="input-group-text">%</span>
                                                             </div>
                                                             <div class="input-group">

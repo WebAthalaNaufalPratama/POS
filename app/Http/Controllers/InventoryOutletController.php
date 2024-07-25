@@ -29,15 +29,17 @@ class InventoryOutletController extends Controller
      */
     public function index()
     {
+        $namaproduks = InventoryOutlet::with('produk')->get()->unique('kode_produk');
+        $outlets = Lokasi::where('tipe_lokasi', 2)->get();
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
-        $arraylokasi = $lokasi->lokasi_id;
-        $data = InventoryOutlet::where('lokasi_id', $arraylokasi)->get();
-        $penjualan = Penjualan::where('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get();
+        $arraylokasi = $lokasi->lokasi_id ?? Lokasi::where('tipe_lokasi', 2)->pluck('id');
+        $data = InventoryOutlet::whereIn('lokasi_id', $arraylokasi)->get();
+        $penjualan = Penjualan::whereIn('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get();
         $mergedriwayat =[];
-        $do = DeliveryOrder::where('lokasi_pengirim', $arraylokasi)->get();
-        $retur = ReturPenjualan::where('lokasi_id', $arraylokasi)->get();
-        $mutasi = Mutasi::where('penerima', $arraylokasi)->where('no_mutasi', 'LIKE', 'MGO%')->get();
+        $do = DeliveryOrder::whereIn('lokasi_pengirim', $arraylokasi)->get();
+        $retur = ReturPenjualan::whereIn('lokasi_id', $arraylokasi)->get();
+        $mutasi = Mutasi::whereIn('penerima', $arraylokasi)->where('no_mutasi', 'LIKE', 'MGO%')->get();
         if($penjualan)
         {
             $arraypenjualan = $penjualan->pluck('no_invoice')->toArray();
@@ -91,7 +93,7 @@ class InventoryOutletController extends Controller
             ->sortByDesc('id')
             ->values()
             ->all();
-        return view('inven_outlet.index', compact('data', 'riwayat'));
+        return view('inven_outlet.index', compact('data', 'riwayat', 'namaproduks', 'outlets'));
     }
 
     /**

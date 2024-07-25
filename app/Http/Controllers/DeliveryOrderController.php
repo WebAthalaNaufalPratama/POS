@@ -338,11 +338,13 @@ class DeliveryOrderController extends Controller
                 }
 
                 // pengurangan stok
-                foreach ($do_sewa->produk as $produk) {
-                    foreach ($produk->komponen as $komponen) {
-                        $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->where('lokasi_id', $do_sewa->kontrak->lokasi_id)->first();
-                        $inventory->jumlah = $inventory->jumlah - (intval($komponen->jumlah) * $produk->jumlah);
-                        $inventory->update();
+                if(Auth::user()->hasRole('AdminGallery')){
+                    foreach ($do_sewa->produk as $produk) {
+                        foreach ($produk->komponen as $komponen) {
+                            $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->where('lokasi_id', $do_sewa->kontrak->lokasi_id)->first();
+                            $inventory->jumlah = $inventory->jumlah - (intval($komponen->jumlah) * $produk->jumlah);
+                            $inventory->update();
+                        }
                     }
                 }
             } else if($req->konfirmasi == 'cancel'){
@@ -390,17 +392,35 @@ class DeliveryOrderController extends Controller
             // cek input dengan sewa
             $sesuaiKontrak = true;
 
-            $produkSewa->each(function ($produk) use($data, &$sesuaiKontrak) {
-                for ($i = 0; $i < count($data['nama_produk']); $i++) {
-                    if ($produk->produk->kode == $data['nama_produk'][$i]) {
-                        $produk->jumlah -= $data['jumlah'][$i];
-                        if ($produk->jumlah < 0) {
-                            $sesuaiKontrak = false;
-                            break;
-                        }
+            $inputProduk = [];
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                $kodeProduk = $data['nama_produk'][$i];
+                $jumlahProduk = $data['jumlah'][$i];
+
+                if (!isset($inputProduk[$kodeProduk])) {
+                    $inputProduk[$kodeProduk] = 0;
+                }
+
+                $inputProduk[$kodeProduk] += $jumlahProduk;
+            }
+            $produkSewa->each(function ($produk) use (&$inputProduk, &$sesuaiKontrak) {
+                $kodeProduk = $produk->produk->kode;
+            
+                if (isset($inputProduk[$kodeProduk])) {
+                    $inputProduk[$kodeProduk] -= $produk->jumlah;
+                    if ($inputProduk[$kodeProduk] < 0) {
+                        $sesuaiKontrak = false;
+                        return false;
+                    }
+                    if ($inputProduk[$kodeProduk] == 0) {
+                        unset($inputProduk[$kodeProduk]);
                     }
                 }
             });
+            
+            if (!empty($inputProduk)) {
+                $sesuaiKontrak = false;
+            }
 
             if (!$sesuaiKontrak) {
                 return redirect()->back()->withInput()->with('fail', 'Produk tidak sesuai kontrak');
@@ -415,10 +435,12 @@ class DeliveryOrderController extends Controller
 
             // delete data
             foreach ($dataProduk as $item) {
-                foreach ($item->komponen as $komponen) { // pengembalian stok
-                    $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
-                        $inventory->jumlah = $inventory->jumlah + (intval($komponen->jumlah) * intval($item->jumlah));
-                        $inventory->update();
+                if($data_do->status == 'DIKONFIRMASI'){
+                    foreach ($item->komponen as $komponen) { // pengembalian stok
+                        $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
+                            $inventory->jumlah = $inventory->jumlah + (intval($komponen->jumlah) * intval($item->jumlah));
+                            $inventory->update();
+                    }
                 }
                 $komponen = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
                 $produkTerjual = Produk_Terjual::find($item->id)->forceDelete();
@@ -454,13 +476,15 @@ class DeliveryOrderController extends Controller
                     if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
                     // pengurangan stok
-                    $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
-                    $inventory->jumlah = $inventory->jumlah - (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
-                    $inventory->update();
+                    if($data_do->status == 'DIKONFIRMASI'){
+                        $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
+                        $inventory->jumlah = $inventory->jumlah - (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                        $inventory->update();
+                    }
                 }
             }
 
-            // // save data tambahan
+            // save data tambahan
             if(isset($data['nama_produk2'][0])){
                 for ($i=0; $i < count($data['nama_produk2']); $i++) { 
                     $getProdukJual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i]);
@@ -489,9 +513,11 @@ class DeliveryOrderController extends Controller
                         if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
                         // pengurangan stok
-                        $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
-                        $inventory->jumlah = $inventory->jumlah - (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
-                        $inventory->update();
+                        if($data_do->status == 'DIKONFIRMASI'){
+                            $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
+                            $inventory->jumlah = $inventory->jumlah - (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                            $inventory->update();
+                        }
                     }
                 }
             }

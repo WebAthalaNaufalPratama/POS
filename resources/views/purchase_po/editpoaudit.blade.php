@@ -111,7 +111,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($beli->tgl_kirim ?? '') }}" disabled>
+                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($beli->tgl_kirim) }}" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
@@ -292,7 +292,7 @@
                         
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>

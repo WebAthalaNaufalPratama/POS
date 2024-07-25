@@ -58,10 +58,10 @@
                     <th>Masa Kontrak</th>
                     <th>Rentang Tanggal</th>
                     <th>Total Biaya</th>
+                    <th>Status</th>
                     <th>Tanggal Dibuat</th>
                     <th>Tanggal Pemeriksa</th>
                     <th>Tanggal Pembuku</th>
-                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -77,10 +77,15 @@
                             <td>{{ $kontrak->masa_sewa ?? '-' }} bulan</td>
                             <td>{{ formatTanggal($kontrak->tanggal_mulai)}} - {{ formatTanggal($kontrak->tanggal_selesai) ?? '-' }}</td>
                             <td>{{ formatRupiah($kontrak->total_harga) ?? '-' }}</td>
+                            <td>
+                                <span class="badges
+                                {{ $kontrak->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : ($kontrak->status == 'TUNDA' ? 'bg-lightred' : 'bg-lightgrey') }}">
+                                {{ $kontrak->status ?? '-' }}
+                                </span>
+                            </td>
                             <td>{{ formatTanggal($kontrak->tanggal_pembuat) ?? '-'  }}</td>
                             <td>{{ $kontrak->tanggal_penyetuju ? formatTanggal($kontrak->tanggal_penyetuju) : '-'  }}</td>
                             <td>{{ $kontrak->tanggal_pemeriksa ? formatTanggal($kontrak->tanggal_pemeriksa) : '-'  }}</td>
-                            <td>{{ $kontrak->status ?? '-'  }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

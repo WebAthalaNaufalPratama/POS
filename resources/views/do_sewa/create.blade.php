@@ -114,7 +114,7 @@
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control"></td>
                                         <td><input type="number" name="harga_satuan[]" id="harga_satuan_0" class="form-control"></td>
                                         <td><input type="number" name="harga_total[]" id="harga_total_0" class="form-control"></td>
-                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                        <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                     </tr>
                                     @else
                                     @php
@@ -153,9 +153,9 @@
                                         <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ old('satuan.' . $i) ?? 'pcs' }}"></td>
                                         <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ old('detail_lokasi.' . $i) }}" required></td>
                                         @if ($i == 0)
-                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                            <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                         @else
-                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                            <td><a href="javascript:void(0);" class="btn_remove" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                         @endif
                                         @php
                                             $i++;
@@ -178,24 +178,24 @@
                                         <th>Nama</th>
                                         <th>Jumlah</th>
                                         <th>Satuan</th>
-                                        <th>Keterangan</th>
-                                        <th></th>
+                                        <th>Detail Lokasi</th>
+                                        <th><a href="javascript:void(0);" id="add2"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field2">
-                                    <tr>
+                                    <tr id="row2{{ $i }}">
                                         <td>
-                                            <select id="produk2_0" name="nama_produk2[]" class="form-control">
+                                            <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
                                                 @foreach ($produkjuals as $produk)
                                                     <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}">{{ $produk->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
-                                        <td><input type="text" name="satuan2[]" id="satuan2_0" class="form-control"></td>
-                                        <td><input type="text" name="keterangan2[]" id="keterangan2_0" class="form-control"></td>
-                                        <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control"></td>
+                                        <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control"></td>
+                                        <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control"></td>
+                                        <td><a href="javascript:void(0);" class="btn_remove2" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -323,7 +323,7 @@
                                             '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
                                             '<td><input type="text" name="satuan[]" id="satuan_' + i + '" class="form-control"></td>' +
                                             '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_' + i + '" class="form-control"></td>' +
-                                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                                            '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                                         '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2({
@@ -344,7 +344,7 @@
                             '<td><input type="number" name="jumlah2[]" id="jumlah2_'+i+'" class="form-control"></td>'+
                             '<td><input type="text" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
                             '<td><input type="text" name="detail_lokasis2[]" id="detail_lokasis2_'+i+'" class="form-control"></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
+                            '<td><a href="javascript:void(0);" class="btn_remove2" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();
                 i++;
