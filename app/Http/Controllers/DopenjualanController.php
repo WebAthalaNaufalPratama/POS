@@ -72,7 +72,7 @@ class DopenjualanController extends Controller
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
         ->orderBy('karyawans.nama')
         ->get();
-        // dd($dopenjualans);
+        
         return view('dopenjualan.index', compact('dopenjualans', 'customer', 'driver'));
     }
 
@@ -130,9 +130,11 @@ class DopenjualanController extends Controller
         $invoice = Penjualan::where('no_invoice', $req->no_referensi)->first();
         $data['alasan_batal'] = $req->alasan;
         $lokasi = Lokasi::where('id', $invoice->lokasi_id)->first();
-
+        if($lokasi->tipe_lokasi == 2) {
+            $data['lokasi_pengirim'] = $lokasi->id; 
+        }
         // cek produk inventory
-        $allStockAvailable = true;
+        // $allStockAvailable = true;
 
         // if ($lokasi->tipe_lokasi == 1) {
         //     // Function to accumulate required quantities for given product names and model
@@ -519,6 +521,7 @@ class DopenjualanController extends Controller
         {
             // Mendapatkan data yang ada berdasarkan id untuk nama_produk
             $exist = Produk_Terjual::where('no_do', $req->no_do)->get();
+            // dd($exist);
             $arrayExist = $exist->pluck('id')->toArray();
 
             $cek = Produk_Terjual::whereIn('id', $arrayExist)->where('no_do', $req->no_do)->get();
@@ -530,6 +533,7 @@ class DopenjualanController extends Controller
             foreach ($exist as $item) {
                 if($item->jenis != 'TAMBAHAN'){
                     $itemKirim = $kirim->where('id', $item->no_invoice)->first();
+                    // dd($item->no_invoice);
                     $tambah = (int)$itemKirim->jumlah_dikirim + (int)$item->jumlah;
                     Produk_Terjual::where('id', $item->no_invoice)->update([
                         'jumlah_dikirim' => $tambah 
@@ -538,8 +542,11 @@ class DopenjualanController extends Controller
             }
             return redirect(route('dopenjualan.index'))->with('success', 'Berhasil Mengupdate Data');
         }
-        
         $lokasipengirim = Penjualan::where('no_invoice', $req->no_referensi)->value('lokasi_pengirim');
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet', 'Auditor', 'Finance'])) {
+            $lokasikirimdo = DeliveryOrder::where('no_do', $req->no_do)->first();
+        }
         $invoice = Penjualan::where('no_invoice', $req->no_referensi)->first();
         // dd($invoice);
         $lokasi = Lokasi::where('id', $invoice->lokasi_id)->first();
@@ -547,14 +554,16 @@ class DopenjualanController extends Controller
         // Mendapatkan data yang ada berdasarkan id untuk nama_produk
         $exist = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
         $arrayExist = $exist->pluck('id')->toArray();
-
-        // Mendapatkan data yang ada berdasarkan id untuk nama_produk2
-        $exist2 = Produk_Terjual::whereIn('id', $req->nama_produk2)->get();
-        $arrayExist2 = $exist2->pluck('id')->toArray();
-
-        // Menggabungkan kedua array
-        $arrayCombined = array_merge($arrayExist, $arrayExist2);
-
+        if(!empty($req->nama_produk2)) {
+            // Mendapatkan data yang ada berdasarkan id untuk nama_produk2
+            $exist2 = Produk_Terjual::whereIn('id', $req->nama_produk2)->get();
+            $arrayExist2 = $exist2->pluck('id')->toArray();
+            // Menggabungkan kedua array
+            $arrayCombined = array_merge($arrayExist, $arrayExist2);
+        }else{
+            $arrayCombined = $arrayExist;
+        }
+    
         $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_do', $req->no_do)->get();
         $ceken = $cek->pluck('id')->toArray();
         $dikirim = Produk_Terjual::whereIn('id', $ceken)->get();
@@ -643,20 +652,19 @@ class DopenjualanController extends Controller
                     {
                         if($req->status == 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
                             //pengurangan inven outlet
-                            $stok = InventoryOutlet::where('lokasi_id', $lokasipengirim)
-                                        ->where('kode_produk', $produk_terjual->produk->kode)
+                            $stok = InventoryOutlet::where('lokasi_id', $lokasikirimdo->lokasi_pengirim)
+                                        ->where('kode_produk', $getProdukJual->produk->kode)
                                         ->first();
-                            // dd($stok);
                         
                             if (!$stok) {
                                 return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
                             }
     
-                            $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                            $stok->jumlah = intval($stok->jumlah) - intval($getProdukJual->jumlah);
                             $stok->save();
                         }elseif($jabatanpegawai == 'finance' || $jabatanpegawai == 'auditor'){
-                            $stok = InventoryOutlet::where('lokasi_id', $lokasipengirim)
-                                        ->where('kode_produk', $produk_terjual->produk->kode)
+                            $stok = InventoryOutlet::where('lokasi_id', $lokasikirimdo->lokasi_pengirim)
+                                        ->where('kode_produk', $getProdukJual->produk->kode)
                                         ->first();
                             // dd($stok);
                         
@@ -666,7 +674,7 @@ class DopenjualanController extends Controller
                             $stok->jumlah = intval($stok->jumlah) + intval($getProdukJual->jumlah);
                             $stok->save();
     
-                            $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                            $stok->jumlah = intval($stok->jumlah) - intval($getProdukJual->jumlah);
                             $stok->save();
                         }
                     }
@@ -729,7 +737,7 @@ class DopenjualanController extends Controller
                         foreach ($getProdukJual->komponen as $komponen) {
                             // Simpan komponen produk terjual
                             $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                                'produk_terjual_id' => $produk_terjual->id,
+                                'produk_terjual_id' => $getProdukJual->id,
                                 'kode_produk' => $komponen->kode_produk,
                                 'nama_produk' => $komponen->nama_produk,
                                 'tipe_produk' => $komponen->tipe_produk,
@@ -747,20 +755,20 @@ class DopenjualanController extends Controller
             
                         // Pengurangan stok jika admin atau kasir
                         if ($req->status == 'DIKONFIRMASI' && ($jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir')) {
-                            $stok = InventoryOutlet::where('lokasi_id', $lokasipengirim)
-                                ->where('kode_produk', $produk_terjual->produk->kode)
+                            $stok = InventoryOutlet::where('lokasi_id', $lokasikirimdo->lokasi_pengirim)
+                                ->where('kode_produk', $getProdukJual->produk->kode)
                                 ->first();
             
                             if (!$stok) {
                                 return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
                             }
             
-                            $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                            $stok->jumlah = intval($stok->jumlah) - intval($getProdukJual->jumlah);
                             $stok->save();
                         }elseif($jabatanpegawai == 'finance' || $jabatanpegawai == 'auditor'){
                             // Pengurangan dan penambahan stok jika bukan admin atau kasir
-                            $stok = InventoryOutlet::where('lokasi_id', $lokasipengirim)
-                                ->where('kode_produk', $produk_terjual->produk->kode)
+                            $stok = InventoryOutlet::where('lokasi_id', $lokasikirimdo->lokasi_pengirim)
+                                ->where('kode_produk', $getProdukJual->produk->kode)
                                 ->first();
             
                             if (!$stok) {
@@ -769,7 +777,7 @@ class DopenjualanController extends Controller
             
                             $stok->jumlah = intval($stok->jumlah) + intval($getProdukJual->jumlah);
                             $stok->save();
-                            $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
+                            $stok->jumlah = intval($stok->jumlah) - intval($getProdukJual->jumlah);
                             $stok->save();
                         }
                     }

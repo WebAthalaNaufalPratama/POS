@@ -111,7 +111,7 @@
                                         <div class="col-md-3">
                                             <div class="form-group">
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
-                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($beli->tgl_kirim ?? '') }}" disabled>
+                                                <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($beli->tgl_kirim) }}" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
@@ -259,7 +259,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? '-'}}" readonly >
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? '-'}}" readonly>
                                             </td>
                                             <td id="tgl_diterima">
                                                 <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ now() }}" >
@@ -275,7 +275,7 @@
                         
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>

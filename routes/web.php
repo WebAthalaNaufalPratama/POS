@@ -65,6 +65,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/', 'DashboardController@index')->name('dashboard.index');
             Route::post('/postauditor', 'DashboardController@update_auditor')->name('auditor.update');
             Route::post('/bukakuncistore', 'DashboardController@bukakunci')->name('bukakunci.store');
+            Route::get('/top-products', 'DashboardController@getTopProducts')->name('getTopProduk');
+            Route::get('/top_minus_produk', 'DashboardController@getTopMinusProduk')->name('getTopMinusProduk');
+            Route::get('/top_sales', 'DashboardController@getTopSales')->name('getTopSales');
+            Route::get('/loyalty', 'DashboardController@getLoyalty')->name('getLoyalty');
         });
 
         /**
@@ -286,6 +290,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pembelian/{datapo}/editpurchase_po', 'PembelianController@po_editpurchase')->name('pembelian.editpurchase');
             Route::post('/{datapo}/update_po_purchase', 'PembelianController@po_update_purchase')->name('pembelian.updatepurchase');
             Route::get('/pembelian/{datapo}/show', 'PembelianController@show')->name('pembelian.show');
+            Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
 
             //akses admin
             Route::get('/pembelian/{datapo}/edit_po', 'PembelianController@po_edit')->name('pembelian.edit');
@@ -296,20 +301,23 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/{datapo}/update_po_audit', 'PembelianController@po_update_audit')->name('pembelian.updateaudit');
 
 
-            
+            //PURCHASE
             Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
             Route::get('/invoice/{type}/{datapo}/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
             Route::post('/store_inv', 'PembelianController@storeinvoice')->name('invoicepo.store');
+            //purchase dan finance halaman untuk edit invoice
+            Route::get('/invoice/{datapo}/edit_inv_nominal', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
+            Route::put('/update/{idinv}/nominal', 'PembelianController@update_purchase_invoice')->name('invoice_purchase.update');        
+
+
+
             Route::get('/invoice/{datapo}/editinvoice', 'PembelianController@editinvoice')->name('editinvoice.edit');
             Route::patch('/{datapo}/editinvoiceupdate', 'PembelianController@editinvoiceupdate')->name('editinvoice.update');
             Route::get('/invoice/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit');
             Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
             Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
-            Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
 
-            //purchase
-            Route::get('/invoice/{datapo}/edit_inv_purchase', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
-            Route::put('/update/{idinv}/purchasing', 'PembelianController@update_purchase_invoice')->name('invoice_purchase.update');        
+         
             
             Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
             Route::post('/storeinden', 'PembelianController@store_inden')->name('inden.store');

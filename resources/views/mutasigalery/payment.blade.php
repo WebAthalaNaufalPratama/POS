@@ -88,14 +88,17 @@
                                             </select>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
-                                            <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                            <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                             </label>
                                             <label class="custom-file-container__custom-file">
-                                                <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required readonly>
+                                                <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" disabled>
                                                 <span class="custom-file-container__custom-file__custom-file-control"></span>
                                             </label>
                                             <span class="text-danger">max 2mb</span>
-                                            <img id="preview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                            <div class="image-preview">
+                                                <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" />
+                                            </div>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -221,20 +224,20 @@
                             </div>
                         </div>
 
-                        <div class="row justify-content-between">
-                            <div class="col-md-12">
-                                <label for=""></label>
-                                <div class="add-icon text-end">
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBayar">add +</button>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-1">
                                 <div class="form-row row">
                                     <div class="mb-4">
                                         <h5>Riwayat Pembayaran</h5>
+                                        </div>
+                                        <div class="row justify-content-between">
+                                            <div class="col-md-12">
+                                                <label for=""></label>
+                                                <div class="add-icon text-end">
+                                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBayar">add +</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table datanew">
@@ -433,7 +436,7 @@
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="no_invoice">Nomor Invoice</label>
+                        <label for="no_invoice">Nomor Invoice Bayar</label>
                         <input type="text" class="form-control" id="no_invoice_byr" name="no_invoice_bayar" placeholder="Nomor Invoice" required readonly>
                     </div>
                     <div class="form-group">
@@ -1188,6 +1191,11 @@
 
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(event.target.files[0]);
             if (file.size > 2 * 1024 * 1024) {
                 toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
                     closeButton: true,

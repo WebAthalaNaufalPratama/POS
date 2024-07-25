@@ -304,11 +304,22 @@ Carbon::setLocale('id');
                                                 </li>
                                              
                                                 <li>
-                                                    <h4>PPN</h4>
-                                                    <h5 class="col-lg-5">
+                                                    <h4>PPN
+                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" disabled>
+                                                            <option value="">Pilih Jenis PPN</option>
+                                                            <option value="exclude" @if($inv_po->ppn !== 0) selected @endif>EXCLUDE</option>
+                                                            <option value="include" @if($inv_po->ppn == 0) selected @endif>INCLUDE</option>
+                                                        </select>
+                                                        
+                                                    </h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn ?? 0 }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{formatRupiah2($inv_po->ppn) }}" readonly>
+                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ formatRupiah($inv_po->ppn  ?? 0 )}}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -417,11 +428,13 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}" readonly>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status" name="status_dibuku" class="form-control select2" required>
+                                                        <select id="status" name="status_dibuku" class="form-control select2">
                                                             <option value="">Pilih Status</option>
-                                                            <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' || old('status_dibuat') == '' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ old('status_dibuat') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            {{-- <option value="BATAL" {{ old('status_dibuat') == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
+                                                            <option value="TUNDA" {{ $inv_po->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="MENUNGGU PEMBAYARAN" {{ $inv_po->status_dibuku == 'MENUNGGU PEMBAYARAN' || $inv_po->status_dibuku == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
+                                                            @if( $inv_po->sisa == 0)
+                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            @endif
                                                         </select>
                                                     </td>
                                                 </tr>
@@ -430,7 +443,7 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
                                                     </td>
                                                     <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ now() }} ">
+                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan }}">
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -441,7 +454,7 @@ Carbon::setLocale('id');
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('invoicebeli.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>
@@ -520,13 +533,6 @@ Carbon::setLocale('id');
             return ribuan;
         }
     
-
-    // Event listener to format input value
-    // document.getElementById('rupiah').addEventListener('keyup', function(e) {
-    //     var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
-    //     this.value = formatRupiah(rupiah);
-    // });
-
 
     function unformatRupiah(formattedValue) {
         return formattedValue.replace(/\./g, '');

@@ -279,7 +279,7 @@ Carbon::setLocale('id');
                                                             <option value="">Pilih Status</option>
                                                             <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' || old('status_dibuat') == '' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" {{ old('status_dibuat') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            <option value="BATAL" {{ old('status_dibuat') == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                            {{-- <option value="BATAL" {{ old('status_dibuat') == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                                         </select>
                                                         
                                                     </td>
@@ -308,7 +308,7 @@ Carbon::setLocale('id');
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('invoicebeli.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>

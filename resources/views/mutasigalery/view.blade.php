@@ -32,7 +32,7 @@
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -88,14 +88,17 @@
                                             </select>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
-                                            <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                            <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                             </label>
                                             <label class="custom-file-container__custom-file">
-                                                <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required readonly>
+                                                <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
                                                 <span class="custom-file-container__custom-file__custom-file-control"></span>
                                             </label>
                                             <span class="text-danger">max 2mb</span>
-                                            <img id="preview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                            <div class="image-preview">
+                                                <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" />
+                                            </div>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -126,10 +129,51 @@
                                                     @foreach ($produks as $produk)
                                                     <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly disabled>
+                                                            @php
+                                                                $isTRDSelected = false;
+                                                                $selectedTRDKode = '';
+                                                                $selectedTRDJumlah = 0;
+                                                            @endphp
+                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" required readonly>
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
+                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>
+                                                                    @if (substr($produk->produk->kode, 0, 3) === 'TRD')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            @if ($found) @break @endif
+                                                                        @endforeach
+                                                                        - {{$komponen->jumlah}}
+                                                                    @elseif (substr($produk->produk->kode, 0, 3) === 'GFT')
+                                                                        {{ $pj->nama }}
+                                                                        @foreach ($produk->komponen as $komponen)
+                                                                            - ( {{$komponen->nama_produk}}
+                                                                            @if ($komponen->kondisi)
+                                                                                @foreach($kondisis as $kondisi)
+                                                                                    @if($kondisi->id == $komponen->kondisi)
+                                                                                        - {{ $kondisi->nama }}
+                                                                                        @php
+                                                                                            $found = true;
+                                                                                            break;
+                                                                                        @endphp
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            @endif
+                                                                            - {{$komponen->jumlah}} )
+                                                                        @endforeach
+                                                                    @endif
+                                                                </option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
@@ -157,20 +201,22 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
-                                                            <th>Penyetuju</th>
+                                                            <th>Pennerima</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
                                                             <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
-                                                            <td id="penyetuju">-</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            <td id="penyetuju">{{ $mutasis->diterima->name ?? '-' }}</td>
+                                                            <td id="pemeriksa">{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                            <td id="pembuku">{{ $mutasis->dibuku->name ?? '-'}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td id="tgl_pembuat" style="width: 25%;">{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            <td id="penyetuju">{{ $mutasis->tanggal_penerima ?? '-' }}</td>
+                                                            <td id="pemeriksa">{{ $mutasis->tanggal_diperiksa ?? '-'}}</td>
+                                                            <td id="pembuku">{{ $mutasis->tanggal_dibukukan ?? '-'}}</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -1025,6 +1071,11 @@
 
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(event.target.files[0]);
             if (file.size > 2 * 1024 * 1024) {
                 toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
                     closeButton: true,

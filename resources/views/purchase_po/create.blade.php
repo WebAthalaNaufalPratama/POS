@@ -80,9 +80,9 @@
                                         <div class="form-group">
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control select2" required>
-                                                <option value="">Pilih Status</option>
+                                                <option value="" disabled>Pilih Status</option>
                                                 <option value="TUNDA" {{ old('status') == 'TUNDA'  ? 'selected' : '' }}>TUNDA</option>
-                                                <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' || old('status') == '' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 {{-- <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                             </select>
                                                 {{-- <input type="text" class="form-control" id="status" name="status" value="Draft" readonly> --}}
@@ -211,84 +211,9 @@
                             </div>
                         </div>
                         
-                        {{-- <div class="row justify-content-end">
-                            <div class="col-md-3 border rounded pt-3 me-1 mt-2">
-                                <table class="table table-responsive border rounded">
-                                    <thead>
-                                        <tr>
-                                            <th>Dibuat Oleh :</th>
-                                            <th>Diterima</th>
-                                            <th>Diperiksa</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td id="pembuat">
-                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
-                                                <input type="text" class="form-control" value="Nama (Purchasing)" disabled>
-                                            </td>
-                                            <td id="penerima">
-                                                <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
-                                                <input type="text" class="form-control" value="Nama (Admin Galery)" disabled>
-                                            </td>
-                                            <td id="pemeriksa">
-                                                <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
-                                                <input type="text" class="form-control" value="Nama (Auditor)" disabled>
-                                            </td>
-                                        </tr>
-                                        
-                                        <tr>
-                                            <td id="status_dibuat">
-                                                <input type="text" class="form-control" id="status_buat" value="{{ old('status')}}" readonly>
-                                                <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                    <option disabled selected>Pilih Status</option>
-                                                    <option value="draft">Draft</option>
-                                                    <option value="publish" selected>Publish</option>
-                                                </select>
-                                            </td>
-                                            
-                                            <td id="status_diterima">
-                                                <input type="text" class="form-control" id="status_diterima" value=""" readonly>
-
-                                                <select id="status_diterima" name="status_diterima" class="form-control" readonly>
-                                                    <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" disabled>Pending</option>
-                                                    <option value="acc" disabled>Accept</option>
-                                                </select>
-                                            </td>
-                                            <td id="status_diperiksa">
-                                                <input type="text" class="form-control" id="status_diperiksa" value=""" readonly>
-
-                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
-                                                    <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" disabled>Pending</option>
-                                                    <option value="acc" disabled>Accept</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" >
-                                            </td>
-                                            <td id="tgl_diterima">
-                                                <input type="datetime-local" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="" readonly>
-                                            </td>
-                                            <td id="tgl_pemeriksa">
-                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <br>
-                            </div>
-                        </div> --}}
-                        
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>

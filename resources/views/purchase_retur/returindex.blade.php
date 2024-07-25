@@ -83,6 +83,9 @@
                                         @endforeach
                                     </ul>
                                 </td>
+                                @php
+                                        $pembelianRetur = $pembelian->firstWhere('no_retur', $data->no_retur ?? null);
+                                @endphp
                                 <td>{{ $data->komplain }} 
                                     @if($data->komplain == "Refund")
                                         @if($data->sisa == 0)
@@ -91,24 +94,27 @@
                                            | Belum Lunas
                                         @endif
                                     @endif
+                                    @if($data->komplain == "Retur")
+                                        @if($pembelianRetur)
+                                           | {{ $pembelianRetur->no_po }}
+                                        @else
+                                           | PO belum dibuat
+                                        @endif
+                                    @endif
                                 </td>
                                 <td>{{ formatRupiah($data->subtotal)}}</td>
                                 <td>
                                     @if ($data->status_dibuat == 'TUNDA' || $data->status_dibuat == null)
-                                        <span class="badge bg-danger">TUNDA</span>
+                                        <span class="badges bg-lightgrey">TUNDA</span>
                                     @elseif ($data->status_dibuat == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
-                                    @else
-                                        <span class="badge bg-primary">{{ $data->status_dibuat }}</span>
+                                        <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if ($data->status_dibuku == 'TUNDA' || $data->status_dibuku == null)
-                                        <span class="badge bg-danger">TUNDA</span>
+                                        <span class="badges bg-lightgrey">TUNDA</span>
                                     @elseif ($data->status_dibuku == 'DIKONFIRMASI')
-                                        <span class="badge bg-success">DIKONFIRMASI</span>
-                                    @else
-                                        <span class="badge bg-primary">{{ $data->status_dibuku }}</span>
+                                        <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @endif
                                 </td>
                                 

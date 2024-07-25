@@ -639,9 +639,12 @@
                                     
                                     <!-- Summary Section -->
                                     <div class="col-lg-4 col-sm-12">
+                                    @if($retur->komplain == 'retur')
+                                        <div class="total-order mt-4">
+                                    @else
                                         <div class="total-order mt-4 calculation-container">
-                                        
                                             <h4 class="calculation-header">Kalkulasi Sebelum Terkena Retur</h4>
+                                    @endif
                                                 <ul>
                                                     <li>
                                                         <h4>Sub Total</h4>
@@ -682,17 +685,35 @@
                                                         </h5>
                                                     </li>
                                                     <li>
-                                                        <h4>Biaya Ongkir</h4>
+                                                        <h4>Biaya Ongkir Sebelum Retur</h4>
                                                         <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.')}}" readonly required></h5>
                                                     </li>
+                                                    @if($retur->komplain == 'retur')
+                                                    <li>
+                                                        <h4>Biaya Ongkir Retur</h4>
+                                                        <h5><input type="text" id="biaya_kirim_retur" name="biaya_kirim_retur" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_kirim_retur, 0, ',', '.')}}" readonly required></h5>
+                                                    </li>
+                                                    @endif
                                                     <li>
                                                         <h4>DP</h4>
                                                         <h5><input type="text" id="dp" name="dp" class="form-control" value="{{ 'Rp '. number_format($penjualans->dp, 0, ',', '.')}}" required readonly></h5>
                                                     </li>
                                                     <li class="total">
-                                                        <h4>Total Tagihan</h4>
+                                                        <h4>Total Tagihan Sebelum Retur</h4>
                                                         <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.')}}" readonly required></h5>
                                                     </li>
+                                                    @if($retur->komplain == 'retur')
+                                                    <li class="total">
+                                                        <h4>Total Tagihan Retur</h4>
+                                                        <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan_retur, 0, ',', '.')}}" readonly required></h5>
+                                                    </li>
+                                                    @endif
+                                                    @if($retur->komplain == 'retur' || 'refund')
+                                                    <li>
+                                                        <h4>Sisa Bayar</h4>
+                                                        <h5><input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{'Rp '. number_format($penjualans->sisa_bayar, 0, ',', '.')}}" readonly required></h5>
+                                                    </li>
+                                                    @endif
                                                 </ul>
                                             </div>
                                     </div>
@@ -733,7 +754,6 @@
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
                                                     <h5><input type="text" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_ongkir, 0, ',', '.')}}" readonly required></h5>
-                                                    <h5><input type="text" id="biaya_kirim_retur" name="biaya_kirim_retur" class="form-control" value="{{ 'Rp '. number_format($penjualans->biaya_kirim_retur, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>DP</h4>

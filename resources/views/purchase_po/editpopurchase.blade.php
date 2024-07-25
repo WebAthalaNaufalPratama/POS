@@ -26,7 +26,15 @@
                 <h4 class="card-title mb-0">
                     Transaksi Pembelian
                 </h4>
+                <label>
+                    <input type="checkbox" id="returCheckbox" {{ $beli->no_retur ? 'checked' : '' }}> Pembelian Retur
+                </label>
+                <div id="returDropdown" style="display: {{ $beli->no_retur ? 'block' : 'none' }}; margin-top: 10px;">
+                    <label for="nomerRetur">Nomor Retur:</label>
+                    <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur', $beli->no_retur) }}">
+                </div>
             </div>
+
             <div class="card-body">
                 {{-- @method('PUT') --}}
                 <div class="row">
@@ -211,7 +219,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ old('tgl_dibuat', $beli->tgl_dibuat) }}" disabled>
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" readonly>
                                             </td>
                                             <td id="tgl_diterima">
                                                 <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', $beli->tgl_diterima_ttd) ?? '-' }}" disabled>
@@ -227,7 +235,7 @@
                         </div>
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
                     </div>
                 </div>
@@ -297,6 +305,26 @@
 @section('scripts')
 <script>
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkbox = document.getElementById('returCheckbox');
+        const dropdown = document.getElementById('returDropdown');
+        
+        checkbox.addEventListener('change', function() {
+            if (checkbox.checked) {
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Set initial state based on the checkbox
+        if (checkbox.checked) {
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
+        }
+    });
 
     function clearFile(){
             $('#bukti').val('');

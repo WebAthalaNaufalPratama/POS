@@ -46,7 +46,7 @@ class DeliveryOrder extends Model
         return $this->belongsTo(User::class, 'pembuat', 'id');
     }
     public function data_driver(){
-        return $this->belongsTo(User::class, 'driver', 'id');
+        return $this->belongsTo(Karyawan::class, 'driver', 'id');
     }
     public function data_penyetuju(){
         return $this->belongsTo(User::class, 'penyetuju', 'id');

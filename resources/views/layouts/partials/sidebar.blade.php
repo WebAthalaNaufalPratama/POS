@@ -15,12 +15,10 @@
                         }
                     }
                 @endphp
-                <li class="submenu">
-                    <a href="javascript:void(0);"><i data-feather="box"></i><span> Dashboard</span> <span class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="{{ route('dashboard.index') }}" class="{{ request()->is('dashboard*') ? 'active' : '' }}">Dashboard</a></li>
-                    </ul>
+                <li class="active">
+                    <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                 </li>
+
 
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
                 <li class="submenu">
