@@ -15,6 +15,38 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="row ps-2 pe-2">
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterProduk" name="filterProduk" class="form-control" title="Produk">
+                        <option value="">Pilih Produk</option>
+                        @foreach ($namaproduks as $item)
+                            <option value="{{ $item->produk->kode }}" {{ $item->produk->kode == request()->input('produk') ? 'selected' : '' }}>{{ $item->produk->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterKondisi" name="filterKondisi" class="form-control" title="Kondisi">
+                        <option value="">Pilih Kondisi</option>
+                        @foreach ($kondisis as $item)
+                            <option value="{{ $item->id }}" {{ $item->id == request()->input('kondisi') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @if(!Auth::user()->hasRole('AdminGallery'))
+                    <div class="col-sm-2 ps-0 pe-0">
+                        <select id="filterGallery" name="filterGallery" class="form-control" title="Gallery">
+                            <option value="">Pilih Gallery</option>
+                            @foreach ($galleries as $item)
+                                <option value="{{ $item->id }}" {{ $item->id == request()->input('gallery') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                <div class="col-sm-6">
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('inven_galeri.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('inven_galeri.index') }}" class="btn btn-warning">Clear</a>
+                </div>
+            </div>
             <div class="table-responsive">
             <table class="table datanew">
                 <thead>
@@ -23,7 +55,9 @@
                     <th>Kode Produk</th>
                     <th>Nama Produk</th>
                     <th>Kondisi</th>
+                    @if(!Auth::user()->hasRole('AdminGallery'))
                     <th>Gallery</th>
+                    @endif
                     <th>Jumlah</th>
                     <th>Minimal Stok</th>
                     <th class="text-center">Aksi</th>
@@ -36,7 +70,9 @@
                             <td>{{ $item->kode_produk ?? '-' }}</td>
                             <td>{{ $item->produk->nama ?? '-' }}</td>
                             <td>{{ $item->kondisi->nama ?? '-' }}</td>
+                            @if(!Auth::user()->hasRole('AdminGallery'))
                             <td>{{ $item->gallery->nama ?? '-' }}</td>
+                            @endif
                             <td>{{ $item->jumlah ?? '-' }}</td>
                             <td>{{ $item->min_stok ?? '-' }}</td>
                             <td class="text-center">
@@ -50,9 +86,6 @@
                                     <li>
                                         <a href="{{ route('inven_galeri.edit', ['inven_galeri' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                     </li>
-                                    {{-- <li>
-                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
-                                    </li> --}}
                                 </ul>
                             </td>
                         </tr>
@@ -81,12 +114,52 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="row ps-2 pe-2">
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterProduk2" name="filterProduk2" class="form-control" title="Produk">
+                        <option value="">Pilih Produk</option>
+                        @foreach ($namaproduks as $item)
+                            <option value="{{ $item->produk->id }}" {{ $item->produk->id == request()->input('produk2') ? 'selected' : '' }}>{{ $item->produk->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterKondisi2" name="filterKondisi2" class="form-control" title="Kondisi">
+                        <option value="">Pilih Kondisi</option>
+                        @foreach ($kondisis as $item)
+                            <option value="{{ $item->id }}" {{ $item->id == request()->input('kondisi2') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @if(!Auth::user()->hasRole('AdminGallery'))
+                    <div class="col-sm-2 ps-0 pe-0">
+                        <select id="filterGallery2" name="filterGallery2" class="form-control" title="Gallery">
+                            <option value="">Pilih Gallery</option>
+                            @foreach ($galleries as $item)
+                                <option value="{{ $item->id }}" {{ $item->id == request()->input('gallery2') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateStart2" id="filterDateStart2" value="{{ request()->input('dateStart2') }}" title="Tanggal Awal">
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <input type="date" class="form-control" name="filterDateEnd2" id="filterDateEnd2" value="{{ request()->input('dateEnd2') }}" title="Tanggal Akhir">
+                </div>
+                <div class="col-sm-2">
+                    <a href="javascript:void(0);" id="filterBtn2" data-base-url="{{ route('inven_galeri.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn2" data-base-url="{{ route('inven_galeri.index') }}" class="btn btn-warning">Clear</a>
+                </div>
+            </div>
             <div class="table-responsive">
             <table class="table datanew">
                 <thead>
                 <tr>
                     <th>No</th>
+                    @if(!Auth::user()->hasRole('AdminGallery'))
                     <th>Lokasi</th>
+                    @endif
                     <th>Nama Produk</th>
                     <th>Kondisi</th>
                     <th>Pemakai</th>
@@ -99,7 +172,9 @@
                     @foreach ($pemakaian_sendiri as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
+                            @if(!Auth::user()->hasRole('AdminGallery'))
                             <td>{{ $item->lokasi->nama ?? '-' }}</td>
+                            @endif
                             <td>{{ $item->produk->nama ?? '-' }}</td>
                             <td>{{ $item->kondisi->nama ?? '-' }}</td>
                             <td>{{ $item->karyawan->nama ?? '-' }}</td>
@@ -236,7 +311,7 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $('#produk_inven_id, #karyawan_id, #lokasi_id').select2()
+            $('#produk_inven_id, #karyawan_id, #lokasi_id, select[id^=filter]').select2()
             var i = 1;
             $('#add').click(function() {
                 if($('#t_body_pemakaian tr').length < 10){
@@ -280,6 +355,140 @@
                 multiply($('#harga_satuan_0'))
                 multiply($('#jumlah_0'))
             });
+        });
+        $('#filterBtn').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var urlString = baseUrl;
+            var first = true;
+            var symbol = '';
+
+            var Produk = $('#filterProduk').val();
+            if (Produk) {
+                var filterProduk = 'produk=' + Produk;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterProduk;
+            }
+
+            var Kondisi = $('#filterKondisi').val();
+            if (Kondisi) {
+                var filterKondisi = 'kondisi=' + Kondisi;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterKondisi;
+            }
+
+            var Gallery = $('#filterGallery').val();
+            if (Gallery) {
+                var filterGallery = 'gallery=' + Gallery;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterGallery;
+            }
+
+            window.location.href = urlString;
+        });
+        $('#clearBtn').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var url = window.location.href;
+            if(url.indexOf('?') !== -1){
+                window.location.href = baseUrl;
+            }
+            return 0;
+        });
+        $('#filterBtn2').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var urlString = baseUrl;
+            var first = true;
+            var symbol = '';
+
+            var Produk = $('#filterProduk2').val();
+            if (Produk) {
+                var filterProduk = 'produk2=' + Produk;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterProduk;
+            }
+            var Kondisi = $('#filterKondisi2').val();
+            if (Kondisi) {
+                var filterKondisi = 'kondisi2=' + Kondisi;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterKondisi;
+            }
+
+            var Gallery = $('#filterGallery2').val();
+            if (Gallery) {
+                var filterGallery = 'gallery2=' + Gallery;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterGallery;
+            }
+
+            var dateStart = $('#filterDateStart2').val();
+            if (dateStart) {
+                var filterDateStart = 'dateStart2=' + dateStart;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterDateStart;
+            }
+
+            var dateEnd = $('#filterDateEnd2').val();
+            if (dateEnd) {
+                var filterDateEnd = 'dateEnd2=' + dateEnd;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterDateEnd;
+            }
+            window.location.href = urlString;
+        });
+        $('#clearBtn2').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var url = window.location.href;
+            if(url.indexOf('?') !== -1){
+                window.location.href = baseUrl;
+            }
+            return 0;
         });
     </script>
 @endsection

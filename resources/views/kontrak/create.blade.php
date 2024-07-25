@@ -156,7 +156,7 @@
                                         <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"  required></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"  required></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"  required readonly></td>
-                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                        <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -204,15 +204,6 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="row align-items-center">
-                                            <div class="col-9 pe-0">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
-                                            </div>
-                                        </div> --}}
                                         <div class="input-group">
                                             <input type="text" id="promo_persen" name="promo_persen" value="{{ old('promo_persen') ?? 0 }}" class="form-control" required aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
@@ -243,14 +234,6 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="input-group">
-                                            <select id="ongkir_id" name="ongkir_id" class="form-control" required>
-                                                <option value="">Pilih Ongkir</option>
-                                                @foreach ($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" {{ old('ongkir_id') == $ongkir->id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div> --}}
                                         <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ old('ongkir_nominal') }}" required>
                                     </div>
                                 </div>
@@ -345,7 +328,7 @@
                             '<td><input type="text" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="text" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
+                            '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
                 i++;

@@ -15,6 +15,36 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="row ps-2 pe-2">
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterProduk" name="filterProduk" class="form-control" title="Produk">
+                        <option value="">Pilih Produk</option>
+                        @foreach ($namaproduks as $item)
+                            <option value="{{ $item->produk->kode }}" {{ $item->produk->kode == request()->input('produk') ? 'selected' : '' }}>{{ $item->produk->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterSupplier" name="filterSupplier" class="form-control" title="Supplier">
+                        <option value="">Pilih Supplier</option>
+                        @foreach ($suppliers as $item)
+                            <option value="{{ $item->id }}" {{ $item->id == request()->input('supplier') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 ps-0 pe-0">
+                    <select id="filterPeriode" name="filterPeriode" class="form-control" title="Periode">
+                        <option value="">Pilih Periode</option>
+                        @foreach ($periodes as $item)
+                            <option value="{{ $item->id }}" {{ $item->id == request()->input('periode') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-6">
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('inven_inden.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('inven_inden.index') }}" class="btn btn-warning">Clear</a>
+                </div>
+            </div>
             <div class="table-responsive">
             <table class="table datanew">
                 <thead>
@@ -69,45 +99,102 @@
 
 @section('scripts')
     <script>
+        $(document).ready(function(){
+            $('select[id^=filter]').select2()
+        })
+        $('#filterBtn').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var urlString = baseUrl;
+            var first = true;
+            var symbol = '';
 
-    function deleteData(id){
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Data ini akan dihapus secara permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    type: "GET",
-                    url: "/inven_inden/"+id+"/delete",
-                    success: function(response) {
-                        toastr.success(response.msg, 'Success', {
-                            closeButton: true,
-                            tapToDismiss: false,
-                            rtl: false,
-                            progressBar: true
-                        });
-        
-                        setTimeout(() => {
-                            location.reload()
-                        }, 2000);
-                    },
-                    error: function(error) {
-                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                            closeButton: true,
-                            tapToDismiss: false,
-                            rtl: false,
-                            progressBar: true
-                        });
-                    }
-                });
+            var Produk = $('#filterProduk').val();
+            if (Produk) {
+                var filterProduk = 'produk=' + Produk;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterProduk;
             }
+
+            var Supplier = $('#filterSupplier').val();
+            if (Supplier) {
+                var filterSupplier = 'supplier=' + Supplier;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterSupplier;
+            }
+
+            var Periode = $('#filterPeriode').val();
+            if (Periode) {
+                var filterPeriode = 'periode=' + Periode;
+                if (first == true) {
+                    symbol = '?';
+                    first = false;
+                } else {
+                    symbol = '&';
+                }
+                urlString += symbol;
+                urlString += filterPeriode;
+            }
+
+            window.location.href = urlString;
         });
-    }
+        $('#clearBtn').click(function(){
+            var baseUrl = $(this).data('base-url');
+            var url = window.location.href;
+            if(url.indexOf('?') !== -1){
+                window.location.href = baseUrl;
+            }
+            return 0;
+        });
+        function deleteData(id){
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data ini akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/inven_inden/"+id+"/delete",
+                        success: function(response) {
+                            toastr.success(response.msg, 'Success', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
+            
+                            setTimeout(() => {
+                                location.reload()
+                            }, 2000);
+                        },
+                        error: function(error) {
+                            toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endsection

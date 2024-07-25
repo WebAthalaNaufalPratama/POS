@@ -149,7 +149,7 @@
                                 </thead>
                                 <tbody id="dynamic_field">
                                     @if(count($produks) < 1)
-                                    <tr>
+                                    <tr id="row0">
                                         <td>
                                             <select id="produk_0" name="nama_produk[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
@@ -161,14 +161,14 @@
                                         <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"></td>
-                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                        <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                     </tr>
                                     @endif
                                     @php
                                     $i = 0;
                                     @endphp
                                     @foreach ($produks as $komponen) 
-                                        <tr>
+                                        <tr id="row{{ $i }}">
                                             <td>
                                                 <select id="produk_{{ $i }}" name="nama_produk[]" class="form-control">
                                                     <option value="">Pilih Produk</option>
@@ -181,9 +181,9 @@
                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->jumlah }}"></td>
                                             <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual }}" readonly></td>
                                             @if ($i == 0)
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                             @else
-                                                <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                <td><a href="javascript:void(0);" class="btn_remove" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                             @endif
                                             @php
                                                 $i++;
@@ -429,7 +429,7 @@
                             '<td><input type="text" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="text" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
+                            '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
                 i++;

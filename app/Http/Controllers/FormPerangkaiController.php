@@ -79,7 +79,7 @@ class FormPerangkaiController extends Controller
             'no_form' => 'required',
             'jenis_rangkaian' => 'required',
             'tanggal' => 'required',
-            'perangkai_id' => 'required',
+            'perangkai_id.*' => 'required',
             'produk_id' => 'required',
             'prdTerjual_id' => 'required'
         ]);

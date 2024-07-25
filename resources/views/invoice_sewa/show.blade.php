@@ -466,11 +466,14 @@
                             <th>Tanggal Bayar</th>
                             <th>Metode</th>
                             <th>Rekening</th>
-                            <th>Bukti</th>
                             <th class="text-center">Status</th>
+                            <th>Aksi</th>
                         </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $i = $pembayaran->where('status_bayar', 'BELUM LUNAS')->count();
+                            @endphp
                             @foreach ($pembayaran as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
@@ -478,18 +481,31 @@
                                 <td>{{ formatRupiah($item->nominal) }}</td>
                                 <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
                                 <td>{{ $item->cara_bayar }}</td>
-                                <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
-                                <td>
-                                    @if ($item->bukti)
-                                        <button onclick="bukti('{{ $item->bukti }}')" class="btn btn-info">Bukti</button>
+                                <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun : '-' }}</td>
+                                <td class="text-center">
+                                    @if ($item->status_bayar == 'LUNAS')
+                                        <span class="badges bg-lightgreen">{{ $item->status_bayar }}</span>
+                                    @elseif ($item->status_bayar == 'BELUM LUNAS')
+                                        <span class="badges bg-lightgrey">Pembayaran {{ $i }}</span>
+                                        @php
+                                            $i--;
+                                        @endphp
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    @if ($item->status_bayar == 'LUNAS')
-                                        <span class="badge bg-success">{{ $item->status_bayar }}</span>
-                                    @elseif ($item->status_bayar == 'BELUM LUNAS')
-                                        <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
-                                    @endif
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="javascript:void(0);"  onclick="bukti('{{ $item->bukti }}')" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
+                                        </li>
+                                        @if(in_array('pembayaran.edit', $thisUserPermissions))
+                                            <li>
+                                                <a href="javascript:void(0);" onclick="editbayar({{ $item->id }})" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                            </li>
+                                        @endif
+                                    </ul>
                                 </td>
                             </tr>
                             @endforeach
@@ -511,28 +527,28 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('pembayaran_sewa.store')}}" method="POST" enctype="multipart/form-data">
+            <form id="bayarForm" action="{{ route('pembayaran_sewa.store')}}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Nomor Kontrak</label>
-                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" disabled>
+                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" disabled>
+                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
                             <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Total Tagihan</label>
-                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" disabled>
+                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Sisa Tagihan</label>
-                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" disabled>
+                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
                         </div>
                     </div>
                     <div class="row">
@@ -567,8 +583,88 @@
                     <div class="row">
                         <div class="form-group col-sm-12">
                             <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti">
+                            <input type="file" class="form-control" id="bukti" name="bukti" required>
                         </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalEditBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Form Pembayaran</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="" method="POST" id="editBayarForm" enctype="multipart/form-data">
+                @csrf
+                @method('patch')
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Nomor Kontrak</label>
+                            <input type="text" class="form-control" id="edit_no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Nomor Invoice</label>
+                            <input type="text" class="form-control" id="edit_no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
+                            <input type="hidden" id="edit_invoice_sewa_id" name="invoice_sewa_id" value="">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Total Tagihan</label>
+                            <input type="text" class="form-control" id="edit_total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="no_invoice">Sisa Tagihan</label>
+                            <input type="text" class="form-control" id="edit_sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="bayar">Cara Bayar</label>
+                            <select class="form-control" id="edit_bayar" name="cara_bayar" required>
+                                <option value="">Pilih Cara Bayar</option>
+                                <option value="cash">Cash</option>
+                                <option value="transfer">Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-6" id="edit_rekening" style="display: none">
+                            <label for="bankpenerima">Rekening Vonflorist</label>
+                            <select class="form-control" id="edit_rekening_id" name="rekening_id" required>
+                                <option value="">Pilih Rekening Von</option>
+                                @foreach ($bankpens as $bankpen)
+                                <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="nominal">Nominal</label>
+                            <input type="text" class="form-control" id="edit_nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="tanggalbayar">Tanggal</label>
+                            <input type="date" class="form-control" id="edit_tanggal_bayar" name="tanggal_bayar" value="" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <label for="buktibayar">Unggah Bukti</label>
+                            <input type="file" class="form-control" id="edit_bukti" name="bukti">
+                        </div>
+                        <img id="edit_preview" src="" alt="your image" style="max-width: 100%"/>
                     </div>
                 </div>
 
@@ -587,7 +683,7 @@
           <h5 class="modal-title" id="addAkunlabel">Bukti</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body d-flex justify-content-center">
             <img id="imgBukti" src="" alt="" style="max-width: 100%;height: auto;">
         </div>
         <div class="modal-footer justify-content-center">
@@ -850,15 +946,74 @@
                 $('#bukti').attr('disabled', true);
             }
         });
+        $('#edit_bayar').on('change', function() {
+            var caraBayar = $(this).val();
+            if (caraBayar == 'transfer') {
+                $('#edit_rekening').show();
+                $('#edit_rekening_id').attr('disabled', false);
+                $('#edit_bukti').attr('disabled', false);
+            } else {
+                $('#edit_rekening').hide();
+                $('#edit_rekening_id').attr('disabled', true);
+                $('#edit_bukti').attr('disabled', true);
+            }
+        });
         $('#nominal').on('input', function() {
-            var nominal = cleanNumber($(this).val());
-            var sisaTagihan = cleanNumber($('#sisa_tagihan').val());
+            var nominal = parseFloat(cleanNumber($(this).val()));
+            var sisaTagihan = parseFloat(cleanNumber($('#sisa_tagihan').val()));
             if(nominal < 0) {
                 $(this).val(0);
             }
             if(nominal > sisaTagihan) {
                 $(this).val(formatNumber(sisaTagihan));
             }
+        });
+        $('#edit_nominal').on('input', function() {
+            var nominal = parseFloat(cleanNumber($(this).val()));
+            var sisaTagihan = parseFloat(cleanNumber($('#edit_sisa_tagihan').val()));
+            if(nominal < 0) {
+                $(this).val(0);
+            }
+            if(nominal > sisaTagihan) {
+                $(this).val(formatNumber(sisaTagihan));
+            }
+        });
+        $(document).on('input', '#nominal, #edit_nominal', function() {
+            let input = $(this);
+            let value = input.val();
+            
+            if (!isNumeric(cleanNumber(value))) {
+            value = value.replace(/[^\d]/g, "");
+            }
+
+            value = cleanNumber(value);
+            let formattedValue = formatNumber(value);
+            
+            input.val(formattedValue);
+        });
+        $('#bayarForm').on('submit', function(e) {
+            let inputs = $('#bayarForm').find('#nominal');
+            inputs.each(function() {
+                let input = $(this);
+                let value = input.val();
+                let cleanedValue = cleanNumber(value);
+
+                input.val(cleanedValue);
+            });
+
+            return true;
+        });
+        $('#editBayarForm').on('submit', function(e) {
+            let inputs = $('#editBayarForm').find('#edit_nominal');
+            inputs.each(function() {
+                let input = $(this);
+                let value = input.val();
+                let cleanedValue = cleanNumber(value);
+
+                input.val(cleanedValue);
+            });
+
+            return true;
         });
         $('.confirm-btn').on('click', function() {
             var action = $(this).data('action');
@@ -1019,8 +1174,8 @@
         function bayar(invoice){
             $('#no_kontrak').val(invoice.no_sewa);
             $('#invoice_sewa_id').val(invoice.id);
-            $('#total_tagihan').val(invoice.total_tagihan);
-            $('#sisa_tagihan').val(invoice.sisa_bayar);
+            $('#total_tagihan').val(formatNumber(invoice.total_tagihan));
+            $('#sisa_tagihan').val(formatNumber(invoice.sisa_bayar));
             $('#nominal').val(formatNumber(invoice.sisa_bayar));
             $('#rekening_id').select2({
                 dropdownParent: $("#modalBayar")
@@ -1047,6 +1202,47 @@
             var fullUrl = baseUrl + '/storage/' + src;
             $('#imgBukti').attr('src', fullUrl);
             $('#modalBukti').modal('show');
+        }
+        function editbayar(id){
+            $.ajax({
+                    type: "GET",
+                    url: "/pembayaran_sewa/"+id+"/show",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        $('#editBayarForm').attr('action', `{{ route("pembayaran_sewa.update", ":id") }}`.replace(':id', id));
+                        $('#edit_no_kontrak').val(response.sewa.no_sewa);
+                        $('#edit_no_invoice_bayar').val(response.no_invoice_bayar);
+                        $('#edit_invoice_sewa_id').val(response.sewa.id);
+                        $('#edit_total_tagihan').val(formatNumber(response.sewa.total_tagihan));
+                        $('#edit_sisa_tagihan').val(formatNumber(parseInt(response.sewa.sisa_bayar) + parseInt(response.nominal)));
+                        $('#edit_nominal').val(formatNumber(response.nominal));
+                        $('#edit_tanggal_bayar').val(response.tanggal_bayar);
+                        $('#edit_rekening_id').val(response.rekening_id).change();
+                        $('#edit_bayar').val(response.cara_bayar).change();
+                        if(response.bukti){
+                            $('#edit_preview').attr('src', '/storage/'+response.bukti);
+                        } else {
+                            $('#edit_preview').attr('src', defaultImg);
+                        }
+                        $('#edit_rekening_id').select2({
+                            dropdownParent: $("#modalEditBayar")
+                        });
+                        $('#edit_bayar').select2({
+                            dropdownParent: $("#modalEditBayar")
+                        });
+                        $('#modalEditBayar').modal('show');
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
+                });
         }
     </script>
 @endsection
