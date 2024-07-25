@@ -42,7 +42,7 @@ class SupplierController extends Controller
             'nama' => 'required',
             'pic' => 'required',
             'tipe_supplier' => 'required',
-            'handphone' => 'required',
+            'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
             'tanggal_bergabung' => 'required',
         ]);
@@ -93,7 +93,7 @@ class SupplierController extends Controller
             'nama' => 'required',
             'pic' => 'required',
             'tipe_supplier' => 'required',
-            'handphone' => 'required',
+            'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
             'tanggal_bergabung' => 'required',
         ]);

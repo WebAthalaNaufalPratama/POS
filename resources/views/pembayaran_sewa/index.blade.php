@@ -43,7 +43,6 @@
                     <th>Tanggal Bayar</th>
                     <th>Metode</th>
                     <th>Rekening</th>
-                    <th class="text-center">Status</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -57,13 +56,7 @@
                             <td>{{ formatRupiah($item->nominal) }}</td>
                             <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
                             <td>{{ $item->cara_bayar }}</td>
-                            <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
-                            <td>
-                                <span class="badges
-                                {{ $item->status_bayar == 'LUNAS' ? 'bg-lightgreen' : 'bg-lightred' }}">
-                                {{ $item->status_bayar }}
-                                </span>
-                            </td>
+                            <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun : '-' }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -143,7 +136,7 @@
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="nominal">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                            <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="tanggalbayar">Tanggal</label>
@@ -195,6 +188,31 @@
             if(nominal > sisaTagihan) {
                 $(this).val(sisaTagihan);
             }
+        });
+        $(document).on('input', '#nominal', function() {
+            let input = $(this);
+            let value = input.val();
+            
+            if (!isNumeric(cleanNumber(value))) {
+            value = value.replace(/[^\d]/g, "");
+            }
+
+            value = cleanNumber(value);
+            let formattedValue = formatNumber(value);
+            
+            input.val(formattedValue);
+        });
+        $('#editBayarForm').on('submit', function(e) {
+            let inputs = $('#editBayarForm').find('#nominal');
+            inputs.each(function() {
+                let input = $(this);
+                let value = input.val();
+                let cleanedValue = cleanNumber(value);
+
+                input.val(cleanedValue);
+            });
+
+            return true;
         });
         $('#filterBtn').click(function(){
             var baseUrl = $(this).data('base-url');
@@ -283,9 +301,9 @@
                         $('#no_kontrak').val(response.sewa.no_sewa);
                         $('#no_invoice_bayar').val(response.no_invoice_bayar);
                         $('#invoice_sewa_id').val(response.sewa.id);
-                        $('#total_tagihan').val(response.sewa.total_tagihan);
-                        $('#sisa_tagihan').val((parseInt(response.sewa.sisa_bayar) + parseInt(response.nominal)));
-                        $('#nominal').val(response.nominal);
+                        $('#total_tagihan').val(formatNumber(response.sewa.total_tagihan));
+                        $('#sisa_tagihan').val(formatNumber(parseInt(response.sewa.sisa_bayar) + parseInt(response.nominal)));
+                        $('#nominal').val(formatNumber(response.nominal));
                         $('#tanggal_bayar').val(response.tanggal_bayar);
                         $('#rekening_id').val(response.rekening_id).change();
                         $('#bayar').val(response.cara_bayar).change();

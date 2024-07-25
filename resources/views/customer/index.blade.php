@@ -113,7 +113,7 @@
             </div>
             <div class="mb-3">
               <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="number" class="form-control hide-arrow" name="handphone" id="add_handphone" required>
+              <input type="number" class="form-control hide-arrow" name="handphone" id="add_handphone" oninput="validatePhoneNumber(this)" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>
@@ -125,7 +125,18 @@
             </div>
             <div class="mb-3">
               <label for="tanggal_bergabung" class="col-form-label">Tanggal Gabung</label>
-              <input type="date" class="form-control" name="tanggal_bergabung" id="add_tanggal_bergabung" required>
+              <input type="date" class="form-control" name="tanggal_bergabung" id="add_tanggal_bergabung" value="{{ date('Y-m-d') }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="lokasi" class="col-form-label">Lokasi</label>
+              <div class="form-group">
+                <select class="select2" name="lokasi_id" id="lokasi_id" required>
+                  <option value="">Pilih Lokasi</option>
+                  @foreach ($lokasis as $item)
+                      <option value="{{ $item->id }}" {{ $item->id == $thisLokasi ? 'selected' : '' }}>{{ $item->nama }}</option>
+                  @endforeach
+                </select>
+              </div>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -164,7 +175,7 @@
             </div>
             <div class="mb-3">
               <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="number" class="form-control hide-arrow" name="handphone" id="edit_handphone" required>
+              <input type="number" class="form-control hide-arrow" name="handphone" id="edit_handphone" oninput="validatePhoneNumber(this)" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>
@@ -177,6 +188,17 @@
             <div class="mb-3">
               <label for="tanggal_bergabung" class="col-form-label">Tanggal Gabung</label>
               <input type="date" class="form-control" name="tanggal_bergabung" id="edit_tanggal_bergabung" required>
+            </div>
+            <div class="mb-3">
+              <label for="lokasi" class="col-form-label">Lokasi</label>
+              <div class="form-group">
+                <select class="select2" name="lokasi_id" id="edit_lokasi_id" required>
+                  <option value="">Pilih Lokasi</option>
+                  @foreach ($lokasis as $item)
+                      <option value="{{ $item->id }}" {{ $item->id == $thisLokasi ? 'selected' : '' }}>{{ $item->nama }}</option>
+                  @endforeach
+                </select>
+              </div>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -193,7 +215,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('#add_tipe, #edit_tipe').select2()
+        $('#add_tipe, #edit_tipe, #lokasi_id, #edit_lokasi_id').select2()
     });
 
     function getData(id){
@@ -211,6 +233,7 @@
                 $('#edit_alamat').val(response.alamat)
                 $('#edit_tanggal_lahir').val(response.tanggal_lahir)
                 $('#edit_tanggal_bergabung').val(response.tanggal_bergabung)
+                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
             },
             error: function(error) {
                 toastr.error('Ambil data error', 'Error', {

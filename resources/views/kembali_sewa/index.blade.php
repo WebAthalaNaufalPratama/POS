@@ -50,10 +50,10 @@
                     <th>Customer</th>
                     <th>Driver</th>
                     <th>Tanggal Kembali</th>
+                    <th>Status</th>
                     <th>Tanggal Dibuat</th>
                     <th>Tanggal Pemeriksa</th>
                     <th>Tanggal Pembuku</th>
-                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -66,14 +66,14 @@
                             <td>{{ $item->sewa->customer->nama }}</td>
                             <td>{{ $item->data_driver->nama }}</td>
                             <td>{{ formatTanggal($item->tanggal_kembali) }}</td>
-                            <td>{{ $item->tanggal_pembuat ? formatTanggal($item->tanggal_pembuat) : '' }}</td>
-                            <td>{{ $item->tanggal_penyetuju ? formatTanggal($item->tanggal_penyetuju) : '' }}</td>
-                            <td>{{ $item->tanggal_pemeriksa ? formatTanggal($item->tanggal_pemeriksa) : '' }}</td>
                             <td>
                                 <span class="badges
                                 {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : ($item->status == 'TUNDA' ? 'bg-lightred' : 'bg-lightgrey') }}">
                                 {{ $item->status ?? '-' }}
                                 </span>
+                            <td>{{ $item->tanggal_pembuat ? formatTanggal($item->tanggal_pembuat) : '' }}</td>
+                            <td>{{ $item->tanggal_penyetuju ? formatTanggal($item->tanggal_penyetuju) : '' }}</td>
+                            <td>{{ $item->tanggal_pemeriksa ? formatTanggal($item->tanggal_pemeriksa) : '' }}</td>
                             </td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">

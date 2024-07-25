@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\Tipe_Produk;
 use App\Models\Karyawan;
+use App\Models\Lokasi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,7 +15,9 @@ class CustomerController extends Controller
     public function index()
     {
         $customer = Customer::all();
-        return view('customer.index', compact('customer'));
+        $lokasis = Lokasi::where('tipe_lokasi', 1)->get();
+        $thisLokasi = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : '';
+        return view('customer.index', compact('customer', 'lokasis', 'thisLokasi'));
     }
 
     /**
@@ -43,11 +46,11 @@ class CustomerController extends Controller
             'alamat' => 'required',
             'tanggal_lahir' => 'required',
             'tanggal_bergabung' => 'required',
+            'lokasi_id' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'route']);
-        $data['lokasi_id'] = Auth::user()->karyawans->lokasi_id;
         
         // save data
         $check = Customer::create($data);
@@ -104,6 +107,7 @@ class CustomerController extends Controller
             'alamat' => 'required',
             'tanggal_lahir' => 'required',
             'tanggal_bergabung' => 'required',
+            'lokasi_id' => 'required',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);

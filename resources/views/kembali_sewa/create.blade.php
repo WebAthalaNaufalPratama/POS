@@ -86,13 +86,13 @@
                                         <th style="width: 20%">No DO</th>
                                         <th style="width: 50%">Nama</th>
                                         <th style="width: 10%">Jumlah</th>
-                                        <th style="width: 20%">Detail Lokasi</th>
-                                        <th></th>
+                                        <th style="width: 15%">Detail Lokasi</th>
+                                        <th style="width: 5%"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field">
                                     @if(count($kontrak->produk) < 1)
-                                    <tr>
+                                    <tr id="row0">
                                         <td>
                                             <select id="no_do_produk_0" name="no_do_produk[]" class="form-control">
                                                 <option value="">Pilih DO</option>
@@ -141,9 +141,9 @@
                                                 </select>
                                             </td>
                                             @if ($i == 0)
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                             @else
-                                                <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                <td><a href="javascript:void(0);" class="btn_remove" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                             @endif
                                             @php
                                                 $i++;
@@ -243,7 +243,7 @@
                                     '<option value="">Pilih Detail Lokasi</option>' +
                                 '</select>' +
                             '</td>' +
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                            '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                             '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2();
@@ -313,7 +313,7 @@
                         $(selectProduk).append('<option value="">Pilih Produk</option>')
                         for (let i = 0; i < response.length; i++) {
                             if(response[i].jenis != 'TAMBAHAN'){
-                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">' + response[i].produk.nama + '</option>');
+                                $(selectProduk).append('<option value="' + response[i].produk.kode + '" data-id="'+response[i].id+'">(' + response[i].id + ') ' + response[i].produk.nama + '</option>');
                                 $(lokasiProduk).append('<option value="' + response[i].detail_lokasi + '">' + response[i].detail_lokasi + '</option>');
                             }
                         }

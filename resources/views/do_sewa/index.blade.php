@@ -51,10 +51,10 @@
                     <th>PIC</th>
                     <th>Driver</th>
                     <th>Tanggal Kirim</th>
+                    <th>Status</th>
                     <th>Tanggal Dibuat</th>
                     <th>Tanggal Pemeriksa</th>
                     <th>Tanggal Pembuku</th>
-                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
@@ -68,15 +68,15 @@
                             <td>{{ $item->pic }}</td>
                             <td>{{ $item->data_driver->nama }}</td>
                             <td>{{ $item->tanggal_kirim ? formatTanggal($item->tanggal_kirim) : '' }}</td>
-                            <td>{{ $item->tanggal_pembuat ? formatTanggal($item->tanggal_pembuat) : '' }}</td>
-                            <td>{{ $item->tanggal_penyetuju ? formatTanggal($item->tanggal_penyetuju) : '' }}</td>
-                            <td>{{ $item->tanggal_pemeriksa ? formatTanggal($item->tanggal_pemeriksa) : '' }}</td>
                             <td>
                                 <span class="badges
                                 {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : ($item->status == 'TUNDA' ? 'bg-lightred' : 'bg-lightgrey') }}">
                                 {{ $item->status ?? '-' }}
                                 </span>
                             </td>
+                            <td>{{ $item->tanggal_pembuat ? formatTanggal($item->tanggal_pembuat) : '' }}</td>
+                            <td>{{ $item->tanggal_penyetuju ? formatTanggal($item->tanggal_penyetuju) : '' }}</td>
+                            <td>{{ $item->tanggal_pemeriksa ? formatTanggal($item->tanggal_pemeriksa) : '' }}</td>
                             <td class="text-center">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

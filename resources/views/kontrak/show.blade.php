@@ -161,7 +161,6 @@
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
                                         <td></td>
                                         <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary">Perangkai</button></td>
-                                        {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
                                     </tr>
                                     @endif
                                     @php
@@ -220,23 +219,23 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_sales" class="col-md-3">
-                                                <label id="tanggal_sales" name="tanggal_sales">{{ isset($kontraks->tanggal_sales) ? \Carbon\Carbon::parse($kontraks->tanggal_sales)->format('Y-m-d') : '' }}</label>
+                                                <label id="tanggal_sales" name="tanggal_sales">{{ isset($kontraks->tanggal_sales) ? \Carbon\Carbon::parse($kontraks->tanggal_sales)->format('d-m-Y') : '' }}</label>
                                             </td>
                                             <td id="tgl_pembuat" class="col-md-3">
-                                                <label id="tanggal_pembuat" name="tanggal_pembuat">{{ isset($kontraks->tanggal_pembuat) ? \Carbon\Carbon::parse($kontraks->tanggal_pembuat)->format('Y-m-d') : '-' }}</label>
+                                                <label id="tanggal_pembuat" name="tanggal_pembuat">{{ isset($kontraks->tanggal_pembuat) ? \Carbon\Carbon::parse($kontraks->tanggal_pembuat)->format('d-m-Y') : '-' }}</label>
                                             </td>
                                             <td id="tgl_penyetuju" class="col-md-3">
                                                 @if(Auth::user()->hasRole('Auditor') && !$kontraks->tanggal_penyetuju)
                                                 <input type="date" class="form-control" name="tanggal_penyetuju" id="tanggal_penyetuju" required value="{{ $kontraks->tanggal_penyetuju ? \Carbon\Carbon::parse($kontraks->tanggal_penyetuju)->format('Y-m-d') : date('Y-m-d') }}">
                                                 @else
-                                                <label id="tanggal_penyetuju" name="tanggal_penyetuju">{{ isset($kontraks->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontraks->tanggal_penyetuju)->format('Y-m-d') : '-' }}</label>
+                                                <label id="tanggal_penyetuju" name="tanggal_penyetuju">{{ isset($kontraks->tanggal_penyetuju) ? \Carbon\Carbon::parse($kontraks->tanggal_penyetuju)->format('d-m-Y') : '-' }}</label>
                                                 @endif
                                             </td>
                                             <td id="tgl_pemeriksa" class="col-md-3">
                                                  @if(Auth::user()->hasRole('Finance') && !$kontraks->tanggal_pemeriksa)
                                                  <input type="date" class="form-control" name="tanggal_pemeriksa" id="tanggal_pemeriksa" value="{{ date('Y-m-d') }}">
                                                  @else
-                                                 <label id="tanggal_pemeriksa" name="tanggal_pemeriksa">{{ isset($kontraks->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontraks->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</label>
+                                                 <label id="tanggal_pemeriksa" name="tanggal_pemeriksa">{{ isset($kontraks->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontraks->tanggal_pemeriksa)->format('d-m-Y') : '-' }}</label>
                                                 @endif
                                             </td>
                                         </tr>                                        
@@ -298,13 +297,6 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="row align-items-center">
-                                            <div class="col-12">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
-                                        </div> --}}
                                         <div class="input-group">
                                             <input type="text" id="promo_persen" name="promo_persen" value="{{ $kontraks->promo_persen ?? 0 }}" class="form-control" readonly aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
@@ -335,14 +327,6 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="input-group">
-                                            <select id="ongkir_id" name="ongkir_id" class="form-control" disabled>
-                                                <option value="">Pilih Ongkir</option>
-                                                @foreach ($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" {{ $ongkir->id == $kontraks->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div> --}}
                                         <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontraks->ongkir_nominal }}" readonly>
                                     </div>
                                 </div>
@@ -744,6 +728,39 @@
                 }
             });
         });
+        $('#form_perangkai').on('submit', function(e){
+            e.preventDefault();
+
+            var jml_perangkai = $('#jml_perangkai').val();
+            var formValid = true;
+
+            if(jml_perangkai == 0){
+                toastr.error('Jumlah perangkai harus lebih dari 1', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                formValid = false;
+            }
+
+            $('[id^=perangkai_id_]').each(function(){
+                if(!$(this).val()){
+                    toastr.error('Perangkai tidak boleh ada yang kosong', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    formValid = false;
+                    return false;
+                }
+            });
+
+            if (formValid) {
+                this.submit();
+            }
+        });
         function multiply(element) {
             var id = 0
             var jumlah = 0
@@ -842,7 +859,6 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    console.log(response);
                     $('#data_produk').val(response.produk.nama);
                     $('#data_produk_id').val(response.id);
                     $('#jml_data_produk').val(response.jumlah);

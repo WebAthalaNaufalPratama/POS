@@ -76,9 +76,11 @@
                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="{{ route('invoice_sewa.cetak', ['invoice_sewa' => $item->id]) }}" class="dropdown-item" target="blank"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
-                                    </li>
+                                    @if(in_array('invoice_sewa.cetak', $thisUserPermissions) && $item->tanggal_pemeriksa && $item->tanggal_penyetuju)
+                                        <li>
+                                            <a href="{{ route('invoice_sewa.cetak', ['invoice_sewa' => $item->id]) }}" class="dropdown-item" target="blank"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
+                                        </li>
+                                    @endif
                                     @if(in_array('do_sewa.show', $thisUserPermissions))
                                         @if((in_array($item->status, ['DIKONFIRMASI', 'BATAL']) && Auth::user()->hasRole('AdminGallery')) || ($item->status == 'DIKONFIRMASI' && (Auth::user()->hasRole('Auditor') && $item->tanggal_penyetuju || Auth::user()->hasRole('Finance') && $item->tanggal_pemeriksa)))
                                             <li>
@@ -128,7 +130,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ route('pembayaran_sewa.store')}}" method="POST" enctype="multipart/form-data">
+            <form id="bayarForm" action="{{ route('pembayaran_sewa.store')}}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row">
@@ -174,7 +176,7 @@
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="nominal">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                            <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="tanggalbayar">Tanggal</label>
@@ -219,13 +221,14 @@
             }
         });
         $('#nominal').on('input', function() {
-            var nominal = parseFloat($(this).val());
-            var sisaTagihan = parseFloat($('#sisa_tagihan').val());
+            var nominal = parseFloat(cleanNumber($(this).val()));
+            console.log(nominal)
+            var sisaTagihan = parseFloat(cleanNumber($('#sisa_tagihan').val()));
             if(nominal < 0) {
                 $(this).val(0);
             }
             if(nominal > sisaTagihan) {
-                $(this).val(sisaTagihan);
+                $(this).val(formatNumber(sisaTagihan));
             }
         });
         $(document).ready(function(){
@@ -285,13 +288,38 @@
             }
             return 0;
         });
+        $(document).on('input', '#nominal', function() {
+            let input = $(this);
+            let value = input.val();
+            
+            if (!isNumeric(cleanNumber(value))) {
+            value = value.replace(/[^\d]/g, "");
+            }
+
+            value = cleanNumber(value);
+            let formattedValue = formatNumber(value);
+            
+            input.val(formattedValue);
+        });
+        $('#bayarForm').on('submit', function(e) {
+            let inputs = $('#bayarForm').find('#nominal');
+            inputs.each(function() {
+                let input = $(this);
+                let value = input.val();
+                let cleanedValue = cleanNumber(value);
+
+                input.val(cleanedValue);
+            });
+
+            return true;
+        });
         
         function bayar(invoice){
             $('#no_kontrak').val(invoice.no_sewa);
             $('#invoice_sewa_id').val(invoice.id);
-            $('#total_tagihan').val(invoice.total_tagihan);
-            $('#sisa_tagihan').val(invoice.sisa_bayar);
-            $('#nominal').val(invoice.sisa_bayar);
+            $('#total_tagihan').val(formatNumber(invoice.total_tagihan));
+            $('#sisa_tagihan').val(formatNumber(invoice.sisa_bayar));
+            $('#nominal').val(formatNumber(invoice.sisa_bayar));
             $('#rekening_id').select2({
                 dropdownParent: $("#modalBayar")
             });

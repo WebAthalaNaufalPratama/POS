@@ -150,14 +150,40 @@ class KembaliSewaController extends Controller
         $produkSewa = $kontrak->produk()->whereHas('produk')->get();
 
         // cek input dengan sewa
-        foreach ($produkSewa as $item) {
-            for ($i=0; $i < count($data['nama_produk']); $i++) {
-                if($data['nama_produk'][$i] == $item->produk->kode){
-                    if($data['jumlah'][$i] > $item->jumlah){
-                        return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai dengan kontrak');
-                    }
+        $sesuaiKontrak = true;
+
+        $inputProduk = [];
+        for ($i = 0; $i < count($data['nama_produk']); $i++) {
+            $kodeProduk = $data['nama_produk'][$i];
+            $jumlahProduk = $data['jumlah'][$i];
+
+            if (!isset($inputProduk[$kodeProduk])) {
+                $inputProduk[$kodeProduk] = 0;
+            }
+
+            $inputProduk[$kodeProduk] += $jumlahProduk;
+        }
+        $produkSewa->each(function ($produk) use (&$inputProduk, &$sesuaiKontrak) {
+            $kodeProduk = $produk->produk->kode;
+        
+            if (isset($inputProduk[$kodeProduk])) {
+                $inputProduk[$kodeProduk] -= $produk->jumlah;
+                if ($inputProduk[$kodeProduk] < 0) {
+                    $sesuaiKontrak = false;
+                    return false;
+                }
+                if ($inputProduk[$kodeProduk] == 0) {
+                    unset($inputProduk[$kodeProduk]);
                 }
             }
+        });
+        
+        if (!empty($inputProduk)) {
+            $sesuaiKontrak = false;
+        }
+
+        if (!$sesuaiKontrak) {
+            return redirect()->back()->withInput()->with('fail', 'Produk tidak sesuai kontrak');
         }
 
         // cek jika ada do
@@ -368,21 +394,23 @@ class KembaliSewaController extends Controller
             if($req->konfirmasi == 'confirm'){
                 $kembaliSewa->status = 'DIKONFIRMASI';
                 // update stok
-                foreach ($kembaliSewa->produk as $produk) {
-                    foreach ($produk->komponen as $komponen) {
-                        if(in_array($komponen->tipe_produk, [1, 2])){
-                            $stok = InventoryGallery::where('lokasi_id', $kembaliSewa->sewa->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                            if(!$stok){
-                                $stok = InventoryGallery::create([
-                                    'kode_produk' => $komponen->kode_produk,
-                                    'kondisi_id' => $komponen->kondisi,
-                                    'lokasi_id' => $kembaliSewa->sewa->lokasi_id,
-                                    'jumlah' => 0,
-                                    'min_stok' => 20,
-                                ]);
+                if(Auth::user()->hasRole('AdminGallery')){
+                    foreach ($kembaliSewa->produk as $produk) {
+                        foreach ($produk->komponen as $komponen) {
+                            if(in_array($komponen->tipe_produk, [1, 2])){
+                                $stok = InventoryGallery::where('lokasi_id', $kembaliSewa->sewa->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
+                                if(!$stok){
+                                    $stok = InventoryGallery::create([
+                                        'kode_produk' => $komponen->kode_produk,
+                                        'kondisi_id' => $komponen->kondisi,
+                                        'lokasi_id' => $kembaliSewa->sewa->lokasi_id,
+                                        'jumlah' => 0,
+                                        'min_stok' => 20,
+                                    ]);
+                                }
+                                $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($produk->jumlah));
+                                $stok->update();
                             }
-                            $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($produk->jumlah));
-                            $stok->update();
                         }
                     }
                 }
@@ -435,24 +463,26 @@ class KembaliSewaController extends Controller
             // old data
             $oldData = KembaliSewa::with('produk.komponen')->find($kembaliSewa);
 
-            // kurangi stok
-            foreach ($oldData->produk as $produk) {
-                foreach ($produk->komponen as $komponen) {
-                    $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                    if(!$stok){
-                        $stok = InventoryGallery::create([
-                            'kode_produk' => $komponen->kode_produk,
-                            'kondisi_id' => $komponen->kondisi,
-                            'lokasi_id' => $kontrak->lokasi_id,
-                            'jumlah' => 0,
-                            'min_stok' => 20,
-                        ]);
+            // kembalikan stok akrea diupdate
+            if($oldData->status == 'DIKONFIRMASI'){
+                foreach ($oldData->produk as $produk) {
+                    foreach ($produk->komponen as $komponen) {
+                        $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
+                        if(!$stok){
+                            $stok = InventoryGallery::create([
+                                'kode_produk' => $komponen->kode_produk,
+                                'kondisi_id' => $komponen->kondisi,
+                                'lokasi_id' => $kontrak->lokasi_id,
+                                'jumlah' => 0,
+                                'min_stok' => 20,
+                            ]);
+                        }
+                        $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($produk->jumlah));
+                        $stok->update();
+                        $komponen->forceDelete();
                     }
-                    $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($produk->jumlah));
-                    $stok->update();
-                    $komponen->forceDelete();
+                    $produk->forceDelete();
                 }
-                $produk->forceDelete();
             }
 
             // save data kembali
@@ -497,7 +527,7 @@ class KembaliSewaController extends Controller
                     if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
                     // update stok
-                    if(in_array($komponen->tipe_produk, [1, 2])){
+                    if(in_array($komponen->tipe_produk, [1, 2]) && $oldData->status == 'DIKONFIRMASI'){
                         $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $tempNama[$data['nama_produk'][$i]][$j])->where('kondisi_id', $tempKondisi[$data['nama_produk'][$i]][$j])->first();
                         if(!$stok){
                             $stok = InventoryGallery::create([

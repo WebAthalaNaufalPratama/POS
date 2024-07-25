@@ -118,7 +118,7 @@
                                     <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control"></td>
                                     <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
                                     <td><input type="number" name="detail_lokasi[]" id="detail_lokasi_0" class="form-control"></td>
-                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                    <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                 </tr>
                                 @else
                                 @php
@@ -157,9 +157,9 @@
                                         <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" required></td>
                                         <td><input type="text" name="detail_lokasi[]" id="detail_lokasi_{{ $i }}" class="form-control" value="{{ $produk->detail_lokasi }}" required></td>
                                         @if ($i == 0)
-                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                            <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                         @else
-                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                            <td><a href="javascript:void(0);" class="btn_remove" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                         @endif
                                     </tr>
                                 @endif 
@@ -184,31 +184,31 @@
                                     <th>Jumlah</th>
                                     <th>Satuan</th>
                                     <th>Detail Lokasi</th>
+                                    <th><a href="javascript:void(0);" id="add2"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></th>
                                 </tr>
                             </thead>
                             <tbody id="dynamic_field2">
                                 @if(count($data->produk) < 1)
-                                <tr>
+                                <tr id="row2{{ $i }}">
                                     <td>
-                                        <select id="produk2_0" name="nama_produk2[]" class="form-control" disabled>
+                                        <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control" disabled>
                                             <option value="">Pilih Produk</option>
                                             @foreach ($produkJuals as $produk)
                                                 <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
-                                    <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
-                                    <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
+                                    <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control"></td>
+                                    <td><input type="number" name="satuan[]" id="satuan_{{ $i }}" class="form-control"></td>
+                                    <td><input type="number" name="keterangan[]" id="keterangan_{{ $i }}" class="form-control"></td>
                                 </tr>
                                 @else
                                 @php
-                                $i = 0;
                                 $hasTambahan = false;
                                 @endphp
                                 @foreach ($data->produk as $produk)
                                 @if ($produk->jenis == 'TAMBAHAN')
-                                    <tr id="row{{ $i }}">
+                                    <tr id="row2{{ $i }}">
                                         <td>
                                             <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
@@ -220,11 +220,7 @@
                                         <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}"></td>
                                         <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}"></td>
                                         <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}"></td>
-                                        @if ($hasTambahan == false)
-                                            <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
-                                        @else
-                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                        @endif
+                                        <td><a href="javascript:void(0);" class="btn_remove2" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                         @php
                                             $i++;
                                             $hasTambahan = true;
@@ -236,19 +232,19 @@
                                 @endphp
                                 @endforeach
                                 @if(!$hasTambahan)
-                                <tr>
+                                <tr id="row2{{ $i }}">
                                     <td>
-                                        <select id="produk2_0" name="nama_produk2[]" class="form-control">
+                                        <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control">
                                             <option value="">Pilih Produk</option>
                                             @foreach ($produkJuals as $produk)
                                                 <option value="{{ $produk->kode }}" data-id="{{ $produk->id }}">{{ $produk->nama }}</option>
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
-                                    <td><input type="text" name="satuan2[]" id="satuan2_0" class="form-control"></td>
-                                    <td><input type="text" name="keterangan2[]" id="keterangan2_0" class="form-control"></td>
-                                    <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                    <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control"></td>
+                                    <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control"></td>
+                                    <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control"></td>
+                                    <td><a href="javascript:void(0);" class="btn_remove2" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                 </tr>
                                 @endif
                                 @endif
@@ -422,7 +418,7 @@
                                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
                                 '<td><input type="text" name="satuan[]" id="satuan_' + i + '" class="form-control"></td>' +
                                 '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_' + i + '" class="form-control"></td>' +
-                                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                                '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                             '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2({
@@ -443,7 +439,7 @@
                             '<td><input type="number" name="jumlah2[]" id="jumlah2_'+i+'" class="form-control"></td>'+
                             '<td><input type="text" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
                             '<td><input type="text" name="keterangan2[]" id="keterangan2_'+i+'" class="form-control"></td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
+                            '<td><a href="javascript:void(0);" class="btn_remove2" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();
                 i++;

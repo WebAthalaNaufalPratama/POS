@@ -81,7 +81,7 @@
                                                 <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"></td>
                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"></td>
                                                 <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"></td>
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -124,7 +124,7 @@
                 '<td><input type="text" name="harga_satuan[]" id="harga_satuan_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
                 '<td><input type="text" name="harga_total[]" id="harga_total_' + i + '" class="form-control"></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                 '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#kode_produk_' + i + ', #kondisi_' + i).select2();
