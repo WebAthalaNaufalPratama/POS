@@ -1798,7 +1798,7 @@ class PembelianController extends Controller
             return redirect()->route('returbeli.index')->with('error', 'Data retur pembelian tidak ditemukan.');
         }
     
-        $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+        $lokasi = Lokasi::find(Auth::user()->karyawans->lokasi_id ?? '');
         $rekenings = Rekening::all();
         $databayars = Pembayaran::where('retur_pembelian_id', $data->id)->get()->sortByDesc('created_at');
     

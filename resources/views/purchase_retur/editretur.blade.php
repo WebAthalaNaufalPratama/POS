@@ -136,7 +136,7 @@
                                         </td>
                                         <td><textarea name="alasan[]" id="alasan_{{ $i }}" class="form-control" cols="30" value="{{ $komponen->alasan}}">{{ $komponen->alasan}}</textarea></td>
                                         <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control jumlah_diterima"   value="{{ $komponen->jumlah}}" data-produk-id="{{ $produk->id }}" required></td>
-                                        <td id="tdDiskon_{{ $i }}"><input type="text" name="diskon[]" id="diskon_{{ $i }}" oninput="multiply(this)" class="form-control" required></td>
+                                        <td id="tdDiskon_{{ $i }}"><input type="text" name="diskon[]" id="diskon_{{ $i }}" oninput="multiply(this), validateDiskon({{ $i }})" class="form-control" required></td>
                                         <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->harga}}" required readonly></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->totharga}}" required readonly></td>
                                         <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
@@ -349,7 +349,7 @@
                                     '</td>'+
                                     '<td><textarea name="alasan[]" id="alasan_'+i+'" class="form-control" cols="30"></textarea></td>' +
                                     '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
-                                    '<td id="tdDiskon_'+i+'"><input type="text" name="diskon[]" id="diskon_'+i+'" oninput="multiply(this)" class="form-control" required></td>' +
+                                    '<td id="tdDiskon_'+i+'"><input type="text" name="diskon[]" id="diskon_'+i+'" oninput="multiply(this), validateDiskon('+i+')" class="form-control" required></td>' +
                                     '<td><input type="text" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control" required readonly></td>'+
                                     '<td><input type="text" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
                                     '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
@@ -616,5 +616,15 @@
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
         };
+        function validateDiskon(index) {
+            let diskon = parseFloat(cleanNumber($(`#diskon_${index}`).val()));
+            let harga_satuan = parseFloat(cleanNumber($(`#harga_satuan_${index}`).val()));
+
+            if (diskon < 0) {
+                $(`#diskon_${index}`).val(0);
+            } else if (diskon > harga_satuan) {
+                $(`#diskon_${index}`).val(harga_satuan);
+            }
+        }
     </script>
 @endsection
