@@ -297,71 +297,77 @@
                             </div>
                         </div>
 
-                        <div class="col-sm">
-                            <div class="row">
-                                <div class="col-md-12 border rounded pt-3 me-1 mt-2">
-                                    <div class="form-row row">
-                                        <div class="mb-4">
-                                            <h5>Tambahan Produk</h5>
-                                        </div>
-                                        <div class="table-responsive">
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Nama</th>
-                                                        <th>Jumlah</th>
-                                                        <th>Unit Satuan</th>
-                                                        <th>Keterangan</th>
-                                                        <th></th>
+                    @foreach ($dopenjualan->produk as $produk)
+                    @if($produk->jenis == 'TAMBAHAN')
+                    @if(count($dopenjualan->produk) > 0)
+                    <div class="col-sm">
+                        <div class="row">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                                <div class="form-row row">
+                                    <div class="mb-4">
+                                        <h5>Tambahan Produk</h5>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nama</th>
+                                                    <th>Jumlah</th>
+                                                    <th>Unit Satuan</th>
+                                                    <th>Keterangan</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="dynamic_field_tambah">
+                                                @if(count($dopenjualan->produk) < 1) <tr>
+                                                    <td>
+                                                        <select id="nama_produk2_0" name="nama_produk2[]" class="form-control" >
+                                                            <option value="">Pilih Produk</option>
+                                                            @foreach ($produkjuals as $produk)
+                                                            <option value="{{ $produk->id }}">{{ $produk->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
+                                                    <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
+                                                    <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
                                                     </tr>
-                                                </thead>
-                                                <tbody id="dynamic_field_tambah">
-                                                    @if(count($dopenjualan->produk) < 1) <tr>
+                                                    @else
+                                                    @php
+                                                    $i = 0;
+                                                    @endphp
+                                                    @foreach ($dopenjualan->produk as $produk)
+                                                    @if ($produk->jenis == 'TAMBAHAN')
+                                                    <tr id="row{{ $i }}">
                                                         <td>
-                                                            <select id="nama_produk2_0" name="nama_produk2[]" class="form-control" >
+                                                            <select id="nama_produk2_{{ $i }}" name="nama_produk2[]" class="form-control" >
                                                                 <option value="">Pilih Produk</option>
-                                                                @foreach ($produkjuals as $produk)
-                                                                <option value="{{ $produk->id }}">{{ $produk->nama }}</option>
+                                                                @foreach ($produkjuals as $pj)
+                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
-                                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" class="form-control"></td>
-                                                        <td><input type="number" name="satuan[]" id="satuan_0" class="form-control"></td>
-                                                        <td><input type="number" name="keterangan[]" id="keterangan_0" class="form-control"></td>
-                                                        </tr>
-                                                        @else
-                                                        @php
-                                                        $i = 0;
-                                                        @endphp
-                                                        @foreach ($dopenjualan->produk as $produk)
-                                                        @if ($produk->jenis == 'TAMBAHAN')
-                                                        <tr id="row{{ $i }}">
-                                                            <td>
-                                                                <select id="nama_produk2_{{ $i }}" name="nama_produk2[]" class="form-control" >
-                                                                    <option value="">Pilih Produk</option>
-                                                                    @foreach ($produkjuals as $pj)
-                                                                    <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </td>
-                                                            <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
-                                                            <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
-                                                            <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
-                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
-                                                        </tr>
-                                                        @endif
-                                                        @php
-                                                        $i++;
-                                                        @endphp
-                                                        @endforeach
-                                                        @endif
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
+                                                        <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
+                                                        <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
+                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                    </tr>
+                                                    @endif
+                                                    @php
+                                                    $i++;
+                                                    @endphp
+                                                    @endforeach
+                                                    @endif
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    @endif
+                    @endif
+                    @endforeach
 
                     <div class="row  justify-content-center pt-3  mt-2">
                         <div class="col-lg-6 col-sm-12 border radius pt-2 pb-2">

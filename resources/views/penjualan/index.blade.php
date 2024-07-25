@@ -122,7 +122,7 @@
                                                 <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('pdfinvoicepenjualan.generate', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak Invoice</a>
-                                            @if(!empty($retur))
+                                            @if(!empty($retur) && $retur->status == 'DIKONFIRMASI')
                                                 <a class="dropdown-item" href="{{ route('penjualan.view', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">View Retur</a>
                                             @endif
                                             @endif

@@ -50,7 +50,7 @@
                                         <div class="form-group">
                                             <label for=""></label>
                                             <div class="add-icon">
-                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" disabled>
                                                     <img src="/assets/img/icons/plus1.svg" alt="img" />
                                                 </button>
                                             </div>
@@ -335,7 +335,7 @@
                                                             <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                             </label>
                                                             <label class="custom-file-container__custom-file">
-                                                                <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
+                                                                <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" disabled>
                                                                 <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                             </label>
                                                             <span class="text-danger">max 2mb</span>
@@ -430,14 +430,6 @@
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.',)}}" readonly required disabled></h5>
                                                 </li>
                                                 <li>
-                                                    <h4><select id="jenis_ppn" name="jenis_ppn" class="form-control" required disabled>
-                                                            <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude" {{ $penjualans->jenis_ppn = 'exclude' ? 'selected' : ''}}> PPN EXCLUDE</option>
-                                                            <option value="include" {{ $penjualans->jenis_ppn = 'include' ? 'selected' : ''}}> PPN INCLUDE</option>
-                                                        </select></h4>
-                                                    <h5><input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.',)}}" required disabled></h5>
-                                                </li>
-                                                <li>
                                                     <h4>Promo</h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="row align-items-center">
@@ -454,6 +446,14 @@
                                                         </div>
                                                         <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ 'Rp '. number_format($penjualans->total_promo, 0, ',', '.',) }}" readonly readonly>
                                                     </h5>
+                                                </li>
+                                                <li>
+                                                    <h4><select id="jenis_ppn" name="jenis_ppn" class="form-control" required disabled>
+                                                            <option value=""> Pilih Jenis PPN</option>
+                                                            <option value="exclude" {{ $penjualans->jenis_ppn = 'exclude' ? 'selected' : ''}}> PPN EXCLUDE</option>
+                                                            <option value="include" {{ $penjualans->jenis_ppn = 'include' ? 'selected' : ''}}> PPN INCLUDE</option>
+                                                        </select></h4>
+                                                    <h5><input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.',)}}" required disabled></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
@@ -767,26 +767,24 @@
 
 <script>
     function showInputType(index) {
-        var selectElement = document.getElementById("jenis_diskon_" + index);
-        var selectedValue = selectElement.value;
-        // console.log(selectedValue);
-        var diskonInput = document.getElementById("diskon_" + index);
-        var nominalInput = document.getElementById("nominalInput_" + index);
-        var persenInput = document.getElementById("persenInput_" + index);
+        var $selectElement = $(`#jenis_diskon_${index}`);
+        var selectedValue = $selectElement.val();
+        var $diskonInput = $(`#diskon_${index}`);
+        var $nominalInput = $(`#nominalInput_${index}`);
+        var $persenInput = $(`#persenInput_${index}`);
 
         if (selectedValue === "Nominal") {
-            diskonInput.style.display = "block";
-            nominalInput.style.display = "block";
-            persenInput.style.display = "none";
+            $diskonInput.show();
+            $nominalInput.show();
+            $persenInput.hide();
         } else if (selectedValue === "persen") {
-            diskonInput.style.display = "block";
-            nominalInput.style.display = "none";
-            persenInput.style.display = "block";
+            $diskonInput.show();
+            $nominalInput.hide();
+            $persenInput.show();
         } else {
-            diskonInput.style.display = "none";
-            nominalInput.style.display = "none";
-            persenInput.style.display = "none";
-            diskonInput.value = 0;
+            $diskonInput.hide().val(0);
+            $nominalInput.hide();
+            $persenInput.hide();
         }
 
         calculateTotal(index);
@@ -797,15 +795,18 @@
         showInputType(index);
     });
 
+    $(document).on('change', "[id^='jenis_diskon_']", function() {
+        var index = this.id.split("_")[2];
+        showInputType(index);
+    });
+
     function calculateTotal(index) {
         var diskonType = $('#jenis_diskon_' + index).val();
-        // console.log(diskonType);
 
         var diskonValue = parseFloat($('#diskon_' + index).val());
         var jumlah = parseFloat($('#jumlah_' + index).val());
         var hargaSatuan = parseFloat($('#harga_satuan_' + index).val());
         var hargaTotal = 0;
-        // console.log(diskonValue);
 
         if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
             hargaTotal = jumlah * hargaSatuan;
@@ -820,7 +821,7 @@
         }
 
         // Set nilai input harga total
-        $('#harga_total_' + index).val(hargaTotal.toFixed(2));
+        // $('#harga_total_' + index).val(hargaTotal.toFixed(2));
 
         // Hitung ulang subtotal
         var subtotal = 0;
@@ -829,7 +830,7 @@
         });
 
         // Set nilai input subtotal
-        $('#sub_total').val(subtotal.toFixed(2));
+        // $('#sub_total').val(subtotal.toFixed(2));
     }
 
     function copyDataToModal(index) {

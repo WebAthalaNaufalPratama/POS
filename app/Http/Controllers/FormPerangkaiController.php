@@ -343,11 +343,8 @@ class FormPerangkaiController extends Controller
         {
             $penjualan = Mutasi::where('pengirim', $lokasi->lokasi_id)->get();
             $penjualanIds = $penjualan->pluck('no_mutasi')->toArray();
-            // dd($penjualanIds);
             $pj = Produk_Terjual::whereNotNull('no_form')->whereIn('no_mutasigo', $penjualanIds)->get();
-            // dd($pj);
             $no_form = $pj->pluck('no_form')->toArray();
-            // dd($no_form);
             $query = FormPerangkai::whereHas('produk_terjual')->whereIn('no_form', $no_form);
         }
 
@@ -371,7 +368,7 @@ class FormPerangkaiController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal', '<=', $req->input('dateEnd'));
         }
-        $data = $query->get();
+        $data = $query->get()->unique('no_form');
         return view('form_jual.index', compact('jenis', 'data', 'perangkai'));
     }
 

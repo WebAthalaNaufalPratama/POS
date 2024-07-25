@@ -50,7 +50,13 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_form ?? '-' }}</td>
-                            <td>{{ $item->produk_terjual->no_invoice ?? '-' }}</td>
+                            <td>
+                            @if(!empty($item->produk_terjual->no_invoice))
+                            {{ $item->produk_terjual->no_invoice ?? '-' }}
+                            @elseif(!empty($item->produk_terjual->no_mutasigo))
+                            {{ $item->produk_terjual->no_mutasigo ?? '-' }}
+                            @endif
+                            </td>
                             <td>{{ $item->produk_terjual->produk->nama ?? '-' }}</td>
                             <td>{{ $item->perangkai->nama ?? '-' }}</td>
                             <td>{{ $item->tanggal ?? '-' }}</td>

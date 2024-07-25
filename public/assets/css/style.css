@@ -214,6 +214,7 @@ div#global-loader,
     display: -ms-inline-flexbox;
     display: inline-flex;
 }
+
 .pass-group .toggle-password,
 .pass-group .toggle-passworda,
 .profile-set .profile-top .profileupload a,

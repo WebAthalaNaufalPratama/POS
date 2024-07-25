@@ -32,7 +32,7 @@
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -135,12 +135,24 @@
                                                         </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly></td>
                                                         <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" readonly></td>
+                                                        @php
+                                                            $user = Auth::user();
+                                                        @endphp
+                                                        @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $produk->no_form == null)
                                                         <td>
                                                             <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                 Set Gift
                                                             </button>
                                                         </td>
                                                         <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                                            <td>
+                                                                <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
+                                                                    Set Gift
+                                                                </button>
+                                                            </td>
+                                                            <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
+                                                        @endif
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -354,7 +366,7 @@
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <!-- <button type="submit" class="btn btn-primary">Simpan</button> -->
+                <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
             </form>
         </div>

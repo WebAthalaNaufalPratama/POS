@@ -60,7 +60,7 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="nama">No Hp/Wa</label>
-                                            <input type="text" class="form-control" id="nohandphone" name="nohandphone" placeholder="Nomor Handphone" value="{{ $customer->handphone }}" disabled>
+                                            <input type="text" class="form-control" id="nohandphone" name="nohandphone" placeholder="Nomor Handphone" value="{{ $customer->handphone ?? '-' }}" disabled>
                                         </div>
                                         <div class="form-group">
                                             <label for="lokasi_id">Lokasi Pembelian</label>
@@ -115,7 +115,7 @@
                                                 @php
                                                     $user = Auth::user();
                                                 @endphp
-                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $dopenjualan->status != 'DIKONFIRMASI')
+                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
                                                     <option value="DIBATALKAN" {{$penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALAKAN</option>
                                                 @endif
                                             </select>
@@ -480,20 +480,6 @@
                                                     <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.',)}}" readonly required></h5>
                                                 </li>
                                                 <li>
-                                                    <h4><select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
-                                                            <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude" {{ $penjualans->jenis_ppn = 'exclude' ? 'selected' : ''}}> PPN EXCLUDE</option>
-                                                            <option value="include" {{ $penjualans->jenis_ppn = 'include' ? 'selected' : ''}}> PPN INCLUDE</option>
-                                                        </select></h4>
-                                                        <h5 class="col-lg-5">
-                                                            <div class="input-group">
-                                                                <input type="text" id="persen_ppn" name="persen_ppn" value="{{ $penjualans->persen_ppn}}" class="form-control" required>
-                                                                <span class="input-group-text">%</span>
-                                                            </div>
-                                                            <input type="text" id="jumlah_ppn" name="jumlah_ppn" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.',)}}" class="form-control" readonly required>
-                                                        </h5>
-                                                </li>
-                                                <li>
                                                     <h4>Promo</h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="row align-items-center">
@@ -509,6 +495,21 @@
                                                             </div>
                                                         </div>
                                                         <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ 'Rp '. number_format($penjualans->total_promo, 0, ',', '.',) }}" readonly>
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>PPN
+                                                        <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
+                                                        <option value=""> Pilih Jenis PPN</option>
+                                                        <option value="exclude" {{ $penjualans->jenis_ppn = 'exclude' ? 'selected' : ''}}> PPN EXCLUDE</option>
+                                                        <option value="include" {{ $penjualans->jenis_ppn = 'include' ? 'selected' : ''}}> PPN INCLUDE</option>
+                                                    </select></h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" value="{{ $penjualans->persen_ppn}}" class="form-control" required>
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.',)}}" class="form-control" readonly required>
                                                     </h5>
                                                 </li>
                                                 <li>
@@ -1401,31 +1402,6 @@
             }
         });
 
-        $('#bukti_file').on('change', function() {
-            const file = $(this)[0].files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(this).val('');
-                return;
-            }
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview').attr('src', e.target.result);
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function clearFile() {
-            $('#bukti_file').val('');
-            $('#preview').attr('src', defaultImg);
-        };
 
         $('#bayar').on('change', function() {
             var caraBayar = $(this).val();
@@ -1632,8 +1608,10 @@
             if (kirim === 'Diambil') {
                 $('#kirimpilih').hide();
                 $('#biaya_ongkir').val(0);
+                $('#inputExspedisi').hide();
             }else if(kirim === 'Dikirim'){
                 $('#kirimpilih').show();
+                $('#inputExspedisi').show();
             }
         });
 
@@ -1912,7 +1890,14 @@
                             total_promo = parseInt(response.diskon_nominal);
                             break;
                         case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
+                            var pointInput = parseFloat($('#point_dipakai').val()) || 0;
+
+                            if ($('#cek_point').prop('checked')) {
+                                total_promo = 'poin ' + response.diskon_poin;
+                            }else{
+                                total_promo = 'poin ' + response.diskon_poin;
+                            }
+                            
                             break;
                         case 'produk':
                             total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
@@ -1920,13 +1905,33 @@
                         default:
                             break;
                     }
-                    $('#total_promo').val(formatRupiah(total_promo, 'Rp '));
+                    switch (response.diskon){
+                        case 'nominal' :
+                            $('#total_promo').val(formatRupiah(total_promo, 'Rp '));
+                            break;
+                        case 'poin' :
+                            $('#total_promo').val(total_promo);
+                            break;
+                        case 'produk' :
+                            $('#total_promo').val(total_promo);
+                            break;
+                        case 'persen':
+                            $('#total_promo').val(total_promo);
+                            break;
+                    }
+                    
                     Totaltagihan();
                 },
                 error: function(xhr, status, error) {
                     console.log(error)
                 }
             });
+        }
+        function parseNumber(rupiah) {
+            rupiah = String(rupiah);
+            rupiah = rupiah.replace(/[^\d,]/g, '');
+            rupiah = rupiah.replace(',', '.');
+            return parseFloat(rupiah);
         }
 
         function Totaltagihan() {
@@ -1936,8 +1941,19 @@
             var dp = parseRupiahToNumber($('#dp').val()) || 0;
             var biayaOngkir = parseRupiahToNumber($('#biaya_ongkir').val()) || 0;
             var diskon_nominal = parseRupiahToNumber($('#total_promo').val()) || 0;
+
+            var pointInput = parseFloat($('#point_dipakai').val()) || 0;
+
+            if ($('#cek_point').prop('checked')) {
+                point = pointInput;
+            }else{
+                point = 0;
+                if(String(diskon_nominal).substring(0, 4) == 'poin'){
+                    diskon_nominal = 0;
+                }
+            }
             // console.log(extot);
-            var promo = subtotal - diskon_nominal;
+            var promo = subtotal - (parseNumber(diskon_nominal) + point);
             var ppn = persenPPN * promo / 100;
             var totalTagihan = promo + ppn + biayaOngkir - dp;
             var sisaBayar = totalTagihan - dp;

@@ -65,6 +65,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/', 'DashboardController@index')->name('dashboard.index');
             Route::post('/postauditor', 'DashboardController@update_auditor')->name('auditor.update');
             Route::post('/bukakuncistore', 'DashboardController@bukakunci')->name('bukakunci.store');
+            Route::get('/top-products', 'DashboardController@getTopProducts')->name('getTopProduk');
+            Route::get('/top_minus_produk', 'DashboardController@getTopMinusProduk')->name('getTopMinusProduk');
+            Route::get('/top_sales', 'DashboardController@getTopSales')->name('getTopSales');
+            Route::get('/loyalty', 'DashboardController@getLoyalty')->name('getLoyalty');
         });
 
         /**
