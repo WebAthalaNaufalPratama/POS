@@ -13,7 +13,7 @@ class ProdukBelis extends Migration
      */
     public function up()
     {
-        Schema::create('ProdukBelis', function (Blueprint $table) {
+        Schema::create('produkbelis', function (Blueprint $table) {
             $table->id();
             $table->integer('pembelian_id')->nullable();
             $table->integer('produk_id')->nullable();

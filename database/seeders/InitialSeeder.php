@@ -118,7 +118,11 @@ class InitialSeeder extends Seeder
                 'addKomponen',
                 'getProdukDo',
                 'rekeningPerLokasi',
-                'dashboard.index'
+                'dashboard.index',
+                'getTopProduk',
+                'getTopMinusProduk',
+                'getTopSales',
+                'getLoyalty',
             ];
 
         // super admin
