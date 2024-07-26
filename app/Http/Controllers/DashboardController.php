@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Lokasi;
 use App\Models\Produk_Terjual;
-use App\models\Produk;
+use App\Models\Produk;
 use App\Models\Penjualan;
 use App\Models\Pembayaran;
 use App\Models\Customer;
