@@ -33,7 +33,7 @@
         <div class="dash-count dash-penjualan-sukses">
             <div class="dash-counts">
                 <h4>{{ $jumlahpenjualan }}</h4>
-                <h5>Penjualan (SUKSES)</h5>
+                <h5>Pembelian (SUKSES)</h5>
             </div>
             <div class="dash-imgs">
                 <i data-feather="shopping-cart"></i>
@@ -69,7 +69,7 @@
         <div class="dash-count dash-customerlama">
             <div class="dash-counts">
                 <h4>{{ $penjualanlama }}</h4>
-                <h5>Customer Lama</h5>
+                <h5>Jumlah Barang Masuk</h5>
             </div>
             <div class="dash-imgs">
                 <i data-feather="user"></i>
@@ -80,7 +80,7 @@
         <div class="dash-count dash-customerbaru">
             <div class="dash-counts">
                 <h4>{{ $penjualanbaru }}</h4>
-                <h5>Customer Baru</h5>
+                <h5>Jumlah Barang Keluar</h5>
             </div>
             <div class="dash-imgs">
                 <i data-feather="user"></i>
@@ -91,7 +91,7 @@
         <div class="dash-count dash-pemasukan">
             <div class="dash-counts">
                 <h4>{{ 'Rp ' . number_format($pemasukan, 0, ',', '.') }}</h4>
-                <h5>Pemasukan</h5>
+                <h5>Pengeluaran</h5>
             </div>
             <div class="dash-imgs">
                 <i data-feather="dollar-sign"></i>
