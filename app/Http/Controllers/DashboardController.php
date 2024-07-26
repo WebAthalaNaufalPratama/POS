@@ -194,6 +194,8 @@ class DashboardController extends Controller
                 $hitungkeluar += $brgmasuk;
             }
 
+            $penjualanbaru = $hitungmasuk;
+
 
             $pembayaranList = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
     
@@ -203,11 +205,13 @@ class DashboardController extends Controller
                 $pengeluaran += $nominal;
             }
 
-            $pembayaranList = Returpembelian::whereIn('pembelian_id', $arrpembelian)->get();
+            $pembayaranList = Returpembelian::whereIn('invoicepo_id', $arrpembelian)
+                        ->where('komplain', 'LIKE', 'Refund')
+                        ->get();
     
             $pemasukan = 0;
             foreach ($pembayaranList as $pembayaran) {
-                $nominal = $pembayaran->totaltagihan;
+                $nominal = $pembayaran->subtotal;
                 $pemasukan += $nominal;
             }
     
