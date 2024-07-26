@@ -33,66 +33,69 @@ class InventoryOutletController extends Controller
         $outlets = Lokasi::where('tipe_lokasi', 2)->get();
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
-        $arraylokasi = $lokasi->lokasi_id ?? Lokasi::where('tipe_lokasi', 2)->pluck('id');
-        $data = InventoryOutlet::whereIn('lokasi_id', $arraylokasi)->get() ?? null;
-        $penjualan = Penjualan::whereIn('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get() ?? null;
-        $mergedriwayat =[];
-        $do = DeliveryOrder::whereIn('lokasi_pengirim', $arraylokasi)->get() ?? null;
-        $retur = ReturPenjualan::whereIn('lokasi_id', $arraylokasi)->get() ?? null;
-        $mutasi = Mutasi::whereIn('penerima', $arraylokasi)->where('no_mutasi', 'LIKE', 'MGO%')->get() ?? null;
-        if(!empty($penjualan))
-        {
-            $arraypenjualan = $penjualan->pluck('no_invoice')->toArray();
-            $produk = Produk_Terjual::whereIn('no_invoice', $arraypenjualan)->get();
-            $arrayproduk = $produk->pluck('id')->toArray();
-            $gabungan = new Collection();
-            $riwayatpenj = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->orderBy('id', 'desc')->get();
-            $mergedriwayat = array_merge($mergedriwayat, [
-                'riwayatpenj' => $riwayatpenj
-            ]);
-        }
-        if(!empty($do)){
-            $arraydo = $do->pluck('no_do')->toArray();
-            $produk = Produk_Terjual::whereIn('no_do', $arraydo)->get();
-            $arrayproduk = $produk->pluck('id')->toArray();
-            $gabungan = new Collection();
-            $riwayatdo = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->orderBy('id', 'desc')->get();
-            $mergedriwayat = array_merge($mergedriwayat, [
-                'riwayatdo' => $riwayatdo
-            ]);
-        }
-        if(!empty($retur)){
-            $arrayretur = $retur->pluck('no_retur')->toArray();
-            $produk = Produk_Terjual::whereIn('no_retur', $arrayretur)->get();
-            $arrayproduk = $produk->pluck('id')->toArray();
-            $gabungan = new Collection();
-            $riwayatretur = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->orderBy('id', 'desc')->get();
-            $mergedriwayat = array_merge($mergedriwayat, [
-                'riwayatretur' => $riwayatretur
-            ]);
-        }
-        if(!empty($mutasi)){
-            $arraymutasi = $mutasi->pluck('no_mutasi')->toArray();
-            $produk = Produk_Terjual::whereIn('no_mutasigo', $arraymutasi)->get();
-            $arrayproduk = $produk->pluck('id')->toArray();
-            $gabungan = new Collection();
-            $riwayatmutasi = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->where('description', 'updated')->orderBy('id', 'desc')->get();
-            // dd($riwayatmutasi);
-            $mergedriwayat = array_merge($mergedriwayat, [
-                'riwayatmutasi' => $riwayatmutasi
-            ]);
+        if($user->hasRole(['KasirOutlet'])) {
+            $arraylokasi = $lokasi->lokasi_id;
+            $data = InventoryOutlet::where('lokasi_id', $arraylokasi)->get() ?? null;
+            $penjualan = Penjualan::where('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get() ?? null;
+            $mergedriwayat =[];
+            $do = DeliveryOrder::where('lokasi_pengirim', $arraylokasi)->get() ?? null;
+            $retur = ReturPenjualan::where('lokasi_id', $arraylokasi)->get() ?? null;
+            $mutasi = Mutasi::where('penerima', $arraylokasi)->where('no_mutasi', 'LIKE', 'MGO%')->get() ?? null;
+            if(!empty($penjualan))
+            {
+                $arraypenjualan = $penjualan->pluck('no_invoice')->toArray();
+                $produk = Produk_Terjual::whereIn('no_invoice', $arraypenjualan)->get();
+                $arrayproduk = $produk->pluck('id')->toArray();
+                $gabungan = new Collection();
+                $riwayatpenj = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->orderBy('id', 'desc')->get();
+                $mergedriwayat = array_merge($mergedriwayat, [
+                    'riwayatpenj' => $riwayatpenj
+                ]);
+            }
+            if(!empty($do)){
+                $arraydo = $do->pluck('no_do')->toArray();
+                $produk = Produk_Terjual::whereIn('no_do', $arraydo)->get();
+                $arrayproduk = $produk->pluck('id')->toArray();
+                $gabungan = new Collection();
+                $riwayatdo = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->orderBy('id', 'desc')->get();
+                $mergedriwayat = array_merge($mergedriwayat, [
+                    'riwayatdo' => $riwayatdo
+                ]);
+            }
+            if(!empty($retur)){
+                $arrayretur = $retur->pluck('no_retur')->toArray();
+                $produk = Produk_Terjual::whereIn('no_retur', $arrayretur)->get();
+                $arrayproduk = $produk->pluck('id')->toArray();
+                $gabungan = new Collection();
+                $riwayatretur = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->orderBy('id', 'desc')->get();
+                $mergedriwayat = array_merge($mergedriwayat, [
+                    'riwayatretur' => $riwayatretur
+                ]);
+            }
+            if(!empty($mutasi)){
+                $arraymutasi = $mutasi->pluck('no_mutasi')->toArray();
+                $produk = Produk_Terjual::whereIn('no_mutasigo', $arraymutasi)->get();
+                $arrayproduk = $produk->pluck('id')->toArray();
+                $gabungan = new Collection();
+                $riwayatmutasi = Activity::where('subject_type', Produk_Terjual::class)->whereIn('subject_id', $arrayproduk)->where('description', 'updated')->orderBy('id', 'desc')->get();
+                // dd($riwayatmutasi);
+                $mergedriwayat = array_merge($mergedriwayat, [
+                    'riwayatmutasi' => $riwayatmutasi
+                ]);
+            }
+            
+            $riwayat = collect($mergedriwayat)
+                ->flatMap(function ($riwayatItem, $jenis) {
+                    return $riwayatItem->map(function ($item) use ($jenis) {
+                        $item->jenis = $jenis;
+                        return $item;
+                    });
+                })
+                ->sortByDesc('id')
+                ->values()
+                ->all();
         }
         
-        $riwayat = collect($mergedriwayat)
-            ->flatMap(function ($riwayatItem, $jenis) {
-                return $riwayatItem->map(function ($item) use ($jenis) {
-                    $item->jenis = $jenis;
-                    return $item;
-                });
-            })
-            ->sortByDesc('id')
-            ->values()
-            ->all();
         return view('inven_outlet.index', compact('data', 'riwayat', 'namaproduks', 'outlets'));
     }
 
