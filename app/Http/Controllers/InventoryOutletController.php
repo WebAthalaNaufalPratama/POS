@@ -34,13 +34,13 @@ class InventoryOutletController extends Controller
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         $arraylokasi = $lokasi->lokasi_id ?? Lokasi::where('tipe_lokasi', 2)->pluck('id');
-        $data = InventoryOutlet::whereIn('lokasi_id', $arraylokasi)->get();
-        $penjualan = Penjualan::whereIn('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get();
+        $data = InventoryOutlet::whereIn('lokasi_id', $arraylokasi)->get() ?? null;
+        $penjualan = Penjualan::whereIn('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get() ?? null;
         $mergedriwayat =[];
-        $do = DeliveryOrder::whereIn('lokasi_pengirim', $arraylokasi)->get();
-        $retur = ReturPenjualan::whereIn('lokasi_id', $arraylokasi)->get();
-        $mutasi = Mutasi::whereIn('penerima', $arraylokasi)->where('no_mutasi', 'LIKE', 'MGO%')->get();
-        if($penjualan)
+        $do = DeliveryOrder::whereIn('lokasi_pengirim', $arraylokasi)->get() ?? null;
+        $retur = ReturPenjualan::whereIn('lokasi_id', $arraylokasi)->get() ?? null;
+        $mutasi = Mutasi::whereIn('penerima', $arraylokasi)->where('no_mutasi', 'LIKE', 'MGO%')->get() ?? null;
+        if(!empty($penjualan))
         {
             $arraypenjualan = $penjualan->pluck('no_invoice')->toArray();
             $produk = Produk_Terjual::whereIn('no_invoice', $arraypenjualan)->get();
@@ -51,7 +51,7 @@ class InventoryOutletController extends Controller
                 'riwayatpenj' => $riwayatpenj
             ]);
         }
-        if($do){
+        if(!empty($do)){
             $arraydo = $do->pluck('no_do')->toArray();
             $produk = Produk_Terjual::whereIn('no_do', $arraydo)->get();
             $arrayproduk = $produk->pluck('id')->toArray();
@@ -61,7 +61,7 @@ class InventoryOutletController extends Controller
                 'riwayatdo' => $riwayatdo
             ]);
         }
-        if($retur){
+        if(!empty($retur)){
             $arrayretur = $retur->pluck('no_retur')->toArray();
             $produk = Produk_Terjual::whereIn('no_retur', $arrayretur)->get();
             $arrayproduk = $produk->pluck('id')->toArray();
@@ -71,7 +71,7 @@ class InventoryOutletController extends Controller
                 'riwayatretur' => $riwayatretur
             ]);
         }
-        if($mutasi){
+        if(!empty($mutasi)){
             $arraymutasi = $mutasi->pluck('no_mutasi')->toArray();
             $produk = Produk_Terjual::whereIn('no_mutasigo', $arraymutasi)->get();
             $arrayproduk = $produk->pluck('id')->toArray();
