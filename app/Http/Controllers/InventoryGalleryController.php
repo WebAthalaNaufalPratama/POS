@@ -66,15 +66,15 @@ class InventoryGalleryController extends Controller
         }
         $pemakaian_sendiri = $query2->get();
 
-        $isSuperAdmin = Auth::user()->hasRole('SuperAdmin', 'kondisis');
+        $isAdminGallery = Auth::user()->hasRole('AdminGallery');
         
         $mergedCollection = collect();
 
         // sewa start
-        $komponenDoSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.do_sewa', 'produk_terjual.do_sewa.data_pembuat', 'produk_terjual.do_sewa.kontrak')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->where('jenis', null)->whereHas('do_sewa', function($p) use($isSuperAdmin){
-                return $p->where('status', 'DIKONFIRMASI')->whereHas('kontrak', function($z) use($isSuperAdmin){
-                    if (!$isSuperAdmin) {
+        $komponenDoSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.do_sewa', 'produk_terjual.do_sewa.data_pembuat', 'produk_terjual.do_sewa.kontrak')->whereHas('produk_terjual', function($q) use($isAdminGallery){
+            return $q->where('jenis', null)->whereHas('do_sewa', function($p) use($isAdminGallery){
+                return $p->where('status', 'DIKONFIRMASI')->whereHas('kontrak', function($z) use($isAdminGallery){
+                    if ($isAdminGallery) {
                         $z->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
                     }
                 });
@@ -98,10 +98,10 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataKomponen);
         }
-        $komponenKblSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.kembali_sewa', 'produk_terjual.kembali_sewa.data_pembuat', 'produk_terjual.kembali_sewa.sewa')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('kembali_sewa', function($p) use($isSuperAdmin){
-                return $p->where('status', 'DIKONFIRMASI')->whereHas('sewa', function($z) use($isSuperAdmin){
-                    if (!$isSuperAdmin) {
+        $komponenKblSewa = Komponen_Produk_Terjual::with('data_kondisi', 'produk', 'produk_terjual', 'produk_terjual.kembali_sewa', 'produk_terjual.kembali_sewa.data_pembuat', 'produk_terjual.kembali_sewa.sewa')->whereHas('produk_terjual', function($q) use($isAdminGallery){
+            return $q->whereHas('kembali_sewa', function($p) use($isAdminGallery){
+                return $p->where('status', 'DIKONFIRMASI')->whereHas('sewa', function($z) use($isAdminGallery){
+                    if ($isAdminGallery) {
                         $z->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
                     }
                 });
@@ -128,10 +128,10 @@ class InventoryGalleryController extends Controller
         // sewa end
 
         // penjualan start
-        $komponenPenjualanDiambil = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('penjualan', function($p) use($isSuperAdmin){
+        $komponenPenjualanDiambil = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isAdminGallery){
+            return $q->whereHas('penjualan', function($p) use($isAdminGallery){
                 $p->where('distribusi', 'Diambil')->where('status', 'DIKONFIRMASI');
-                if (!$isSuperAdmin) {
+                if ($isAdminGallery) {
                     $p->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
                 }
             });
@@ -154,11 +154,11 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataPenjualanDiambil);
         }
-        $komponenPenjualanDikirim = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.do_penjualan.penjualan', 'produk_terjual.do_penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('do_penjualan', function($p) use($isSuperAdmin){
-                $p->where('status', 'DIKONFIRMASI')->whereHas('penjualan', function($z) use($isSuperAdmin){
+        $komponenPenjualanDikirim = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.do_penjualan.penjualan', 'produk_terjual.do_penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isAdminGallery){
+            return $q->whereHas('do_penjualan', function($p) use($isAdminGallery){
+                $p->where('status', 'DIKONFIRMASI')->whereHas('penjualan', function($z) use($isAdminGallery){
                     $z->where('distribusi', 'Dikirim');
-                    if (!$isSuperAdmin) {
+                    if ($isAdminGallery) {
                         $z->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
                     }
                 });
@@ -183,8 +183,8 @@ class InventoryGalleryController extends Controller
             $mergedCollection = $mergedCollection->merge($dataPenjualanDikirim);
         }
 
-        $komponenRetur = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.retur_penjualan', 'produk_terjual.retur_penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('retur_penjualan', function($p) use($isSuperAdmin){
+        $komponenRetur = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.retur_penjualan', 'produk_terjual.retur_penjualan.dibuat')->whereHas('produk_terjual', function($q) use($isAdminGallery){
+            return $q->whereHas('retur_penjualan', function($p) use($isAdminGallery){
                 $p->where('status', 'DIKONFIRMASI');
             });
         })->get();
@@ -209,8 +209,8 @@ class InventoryGalleryController extends Controller
         // penjualan end
 
         // pembelian start (kurang retur inden)
-        $komponenPembelian = Produkbeli::whereHas('pembelian', function($q) use($isSuperAdmin){
-            if (!$isSuperAdmin) {
+        $komponenPembelian = Produkbeli::whereHas('pembelian', function($q) use($isAdminGallery){
+            if ($isAdminGallery) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             }
             $q->whereNotNull('jml_diterima')->where('status_diterima', 'DIKONFIRMASI');
@@ -233,10 +233,10 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataPO);
         }
-        $komponenReturPembelian = Produkretur::with('produkbeli.produk', 'produkbeli.kondisi')->whereHas('returbeli', function($q) use($isSuperAdmin){
-            $q->whereHas('invoice', function($p) use($isSuperAdmin){
-                $p->whereHas('pembelian', function($r) use($isSuperAdmin){
-                    if (!$isSuperAdmin) {
+        $komponenReturPembelian = Produkretur::with('produkbeli.produk', 'produkbeli.kondisi')->whereHas('returbeli', function($q) use($isAdminGallery){
+            $q->whereHas('invoice', function($p) use($isAdminGallery){
+                $p->whereHas('pembelian', function($r) use($isAdminGallery){
+                    if ($isAdminGallery) {
                         $r->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
                     }
                 });
@@ -260,8 +260,8 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($dataReturPO);
         }
-        $komponenPembelianInden = ProdukMutasiInden::with('mutasiinden', 'produk.produk', 'kondisi')->whereNotNull('jml_diterima')->whereHas('mutasiinden', function($q) use($isSuperAdmin){
-            if (!$isSuperAdmin) {
+        $komponenPembelianInden = ProdukMutasiInden::with('mutasiinden', 'produk.produk', 'kondisi')->whereNotNull('jml_diterima')->whereHas('mutasiinden', function($q) use($isAdminGallery){
+            if ($isAdminGallery) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             }
             $q->where('status_diterima', 'DIKONFIRMASI');
@@ -287,10 +287,10 @@ class InventoryGalleryController extends Controller
         // pembelian end
 
         // mutasi start
-        $komponenMutasiKeluar = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.mutasi.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('mutasi', function($p) use($isSuperAdmin){
+        $komponenMutasiKeluar = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.mutasi.dibuat')->whereHas('produk_terjual', function($q) use($isAdminGallery){
+            return $q->whereHas('mutasi', function($p) use($isAdminGallery){
                 $p->where('status', 'DIKONFIRMASI');
-                if (!$isSuperAdmin) {
+                if ($isAdminGallery) {
                     $p->where('pengirim', Auth::user()->karyawans->lokasi_id);
                 }
             });
@@ -313,10 +313,10 @@ class InventoryGalleryController extends Controller
             });
             $mergedCollection = $mergedCollection->merge($datamutasiKeluar);
         }
-        $komponenMutasiMasuk = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.mutasi.dibuat')->whereHas('produk_terjual', function($q) use($isSuperAdmin){
-            return $q->whereHas('mutasi', function($p) use($isSuperAdmin){
+        $komponenMutasiMasuk = Komponen_Produk_Terjual::with('data_kondisi', 'produk_terjual.mutasi.dibuat')->whereHas('produk_terjual', function($q) use($isAdminGallery){
+            return $q->whereHas('mutasi', function($p) use($isAdminGallery){
                 $p->where('status', 'DIKONFIRMASI');
-                if (!$isSuperAdmin) {
+                if ($isAdminGallery) {
                     $p->where('penerima', Auth::user()->karyawans->lokasi_id);
                 }
             });
