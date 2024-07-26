@@ -13,7 +13,7 @@ class AddTypeKomplainToProdukBelis extends Migration
      */
     public function up()
     {
-        Schema::table('ProdukBelis', function (Blueprint $table) {
+        Schema::table('produkbelis', function (Blueprint $table) {
             $table->string('type_komplain')->nullable()->after('totalharga');
             $table->integer('diskon_retur')->nullable()->after('type_komplain');
         });
@@ -26,7 +26,7 @@ class AddTypeKomplainToProdukBelis extends Migration
      */
     public function down()
     {
-        Schema::table('ProdukBelis', function (Blueprint $table) {
+        Schema::table('produkbelis', function (Blueprint $table) {
             $table->dropColumn('type_komplain');
             $table->dropColumn('diskon_retur');
         });
