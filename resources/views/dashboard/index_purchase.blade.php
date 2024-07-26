@@ -45,7 +45,7 @@
         <div class="dash-count dash-penjualan-batal">
             <div class="dash-counts">
                 <h4>{{ $batalpenjualan }}</h4>
-                <h5>Penjualan (BATAL)</h5>
+                <h5>Pembelian (BATAL)</h5>
             </div>
             <div class="dash-imgs">
                 <i data-feather="shopping-cart"></i>
@@ -57,7 +57,7 @@
         <div class="dash-count dash-penjualan-retur">
             <div class="dash-counts">
                 <h4>{{ $returpenjualan }}</h4>
-                <h5>Penjualan (RETUR)</h5>
+                <h5>Pembelian (RETUR)</h5>
             </div>
             <div class="dash-imgs">
                 <i data-feather="shopping-cart"></i>
@@ -117,30 +117,6 @@
             </div>
             <div class="card-body">
                 <div id="top_produk_chart" class="chart-set"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Sales -->
-    <div class="col-lg-7 col-sm-12 col-12 d-flex">
-        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
-            <div class="card-header">
-                <h5 class="card-title">Penjualan Sales</h5>
-            </div>
-            <div class="card-body">
-                <div id="top_sales" class="chart-set"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-5 col-sm-12 col-12 d-flex">
-        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
-            <div class="card-header">
-                <h5 class="card-title">Transaksi Diskon/Loyalty Point</h5>
-            </div>
-            <div class="card-body">
-                <div id="loyalty" class="chart-set"></div>
-                </div>
             </div>
         </div>
     </div>
