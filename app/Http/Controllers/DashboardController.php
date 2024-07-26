@@ -12,14 +12,14 @@ use App\Models\Penjualan;
 use App\Models\Pembayaran;
 use App\Models\Customer;
 use App\Models\Produk_Jual;
-use App\models\ReturPenjualan;
+use App\Models\ReturPenjualan;
 use App\Models\Promo;
 use Carbon\Carbon;
 use App\Models\Pembelian;
 use App\Models\Produkbeli;
 use App\Models\Returpembelian;
 use App\Models\ProdukMutasiInden;
-use App\models\InventoryOutlet;
+use App\Models\InventoryOutlet;
 use App\Models\Produkreturinden;
 use App\Models\Returinden;
 use App\Models\InventoryGallery;
@@ -194,23 +194,25 @@ class DashboardController extends Controller
                 $hitungkeluar += $brgmasuk;
             }
 
-            $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
-            $penjualanIds = $penjualanList->pluck('id');
-            $pembayaranList = Pembayaran::whereIn('invoice_penjualan_id', $penjualanIds)
-                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                $query->where('created_at', '>=', $startOfMonth)
-                                        ->orWhere('created_at', '<=', $endOfMonth);
-                            })       
-                            ->get();
+
+            $pembayaranList = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
+    
+            $pengeluaran = 0;
+            foreach ($pembayaranList as $pembayaran) {
+                $nominal = $pembayaran->totaltagihan;
+                $pengeluaran += $nominal;
+            }
+
+            $pembayaranList = Returpembelian::whereIn('pembelian_id', $arrpembelian)->get();
     
             $pemasukan = 0;
             foreach ($pembayaranList as $pembayaran) {
-                $nominal = $pembayaran->nominal;
+                $nominal = $pembayaran->totaltagihan;
                 $pemasukan += $nominal;
             }
     
             $lokasis = Lokasi::all();
-            return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama'));
+            return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
         }
         
     }
