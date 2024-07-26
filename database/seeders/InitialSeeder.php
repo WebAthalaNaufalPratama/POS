@@ -387,7 +387,8 @@ class InitialSeeder extends Seeder
                 'pemakaian_sendiri.index',
                 'pemakaian_sendiri.show',
                 'pemakaian_sendiri.edit',
-                'pemakaian_sendiri.update'
+                'pemakaian_sendiri.update',
+                'auditor.update',
             ];
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
             $query = Permission::query();
@@ -510,7 +511,8 @@ class InitialSeeder extends Seeder
                 'mutasigalerygalery.view',
                 'kas_gallery.index',
                 'kas_pusat.index',
-                'pemakaian_sendiri.index'
+                'pemakaian_sendiri.index',
+                'auditor.update',
             ];
             $auditorPermissionList = array_merge($basiPermissionList, $auditorPermissionList);
             $query = Permission::query();
