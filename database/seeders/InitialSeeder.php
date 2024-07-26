@@ -243,7 +243,10 @@ class InitialSeeder extends Seeder
                 'pembayaran',
                 'returpenjualan',
                 'inven_outlet',
-                'mutasigalery',
+                'mutasigalery.index',
+                'mutasigalery.acc',
+                'mutasigalery.show',
+                'mutasigalery.view',
                 'mutasioutlet',
                 'pdfinvoicepenjualan.generate',
                 'pdfdopenjualan.generate',
@@ -389,6 +392,7 @@ class InitialSeeder extends Seeder
                 'pemakaian_sendiri.edit',
                 'pemakaian_sendiri.update',
                 'auditor.update',
+                'bukakunci.store',
             ];
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
             $query = Permission::query();
