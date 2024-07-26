@@ -11,12 +11,12 @@ use App\Models\Produk;
 use Spatie\Activitylog\Models\Activity;
 use App\Models\Penjualan;
 use App\Models\Produk_Jual;
-use App\models\Produk_Terjual;
+use App\Models\Produk_Terjual;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Karyawan;
-use App\models\DeliveryOrder;
+use App\Models\DeliveryOrder;
 use App\Models\Mutasi;
-use App\models\ReturPenjualan;
+use App\Models\ReturPenjualan;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 
