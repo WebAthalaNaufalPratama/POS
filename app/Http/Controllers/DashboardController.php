@@ -7,16 +7,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Lokasi;
 use App\Models\Produk_Terjual;
-use App\models\Produk;
+use App\Models\Produk;
 use App\Models\Penjualan;
 use App\Models\Pembayaran;
 use App\Models\Customer;
 use App\Models\Produk_Jual;
-use App\models\ReturPenjualan;
+use App\Models\ReturPenjualan;
 use App\Models\Promo;
 use Carbon\Carbon;
-use App\models\InventoryOutlet;
+use App\Models\Pembelian;
+use App\Models\Produkbeli;
+use App\Models\Returpembelian;
+use App\Models\ProdukMutasiInden;
+use App\Models\InventoryOutlet;
+use App\Models\Produkreturinden;
+use App\Models\Returinden;
 use App\Models\InventoryGallery;
+use App\Models\Invoicepo;
 
 class DashboardController extends Controller
 {
@@ -24,70 +31,194 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
-        
-        if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
-            $lokasiId = $karyawan->lokasi->id;
-        } else {
-            $lokasiId = $req->query('lokasi_id');
-        }
+        if(!$user->hasRole(['Purchasing'])) {
+            if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
+                $lokasiId = $karyawan->lokasi->id;
+            } else {
+                $lokasiId = $req->query('lokasi_id');
+            }
 
-        $jumlahpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
-                            ->whereNotNull('tanggal_dibuat')
-                            ->whereNotNull('tanggal_dibukukan')
-                            ->whereNotNull('tanggal_audit')
-                            ->whereNotNull('dibuat_id')
-                            ->whereNotNull('dibukukan_id')
-                            ->whereNotNull('auditor_id')
-                            ->count();
-        $batalpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIBATALKAN')
-                            ->whereNotNull('tanggal_dibuat')
-                            ->whereNotNull('dibuat_id')
-                            ->count();
-        $returpenjualan = ReturPenjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
-                            ->whereNotNull('tanggal_pembuat')
-                            ->whereNotNull('tanggal_diperiksa')
-                            ->whereNotNull('tanggal_dibukukan')
-                            ->whereNotNull('pembuat')
-                            ->whereNotNull('pemeriksa')
-                            ->whereNotNull('pembuku')
-                            ->count();
-
-
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+            $startOfMonth = Carbon::now()->startOfMonth();
+            $endOfMonth = Carbon::now()->endOfMonth();
     
-        $customerslama = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
-            $query->where('tanggal_bergabung', '<', $startOfMonth)
-                    ->orWhere('tanggal_bergabung', '>', $endOfMonth);
-        })->get();
-        $customersbaru = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
-            $query->where('tanggal_bergabung', '>=', $startOfMonth)
-                    ->orWhere('tanggal_bergabung', '<=', $endOfMonth);
-        })->get();
-        $arrcustomerbaru = $customersbaru->pluck('id')->toArray();
-        $arrcustomerlama = $customerslama->pluck('id')->toArray();
-        $penjualanlama = Penjualan::whereIn('id_customer',$arrcustomerlama)->where('lokasi_id', $lokasiId)
-                        ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                            $query->where('created_at', '>=', $startOfMonth)
-                                    ->orWhere('created_at', '<=', $endOfMonth);
-                        })->count();
-        $penjualanbaru = Penjualan::whereIn('id_customer',$arrcustomerbaru)->where('lokasi_id', $lokasiId)
-                        ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                            $query->where('created_at', '>=', $startOfMonth)
-                                    ->orWhere('created_at', '<=', $endOfMonth);
-                        })->count();
-        $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
-        $penjualanIds = $penjualanList->pluck('id');
-        $pembayaranList = Pembayaran::whereIn('invoice_penjualan_id', $penjualanIds)->get();
+            $jumlahpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
+                                ->whereNotNull('tanggal_dibuat')
+                                ->whereNotNull('tanggal_dibukukan')
+                                ->whereNotNull('tanggal_audit')
+                                ->whereNotNull('dibuat_id')
+                                ->whereNotNull('dibukukan_id')
+                                ->whereNotNull('auditor_id')
+                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                    $query->where('created_at', '<', $startOfMonth)
+                                            ->orWhere('created_at', '>', $endOfMonth);
+                                })
+                                ->count();
+            $batalpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIBATALKAN')
+                                ->whereNotNull('tanggal_dibuat')
+                                ->whereNotNull('dibuat_id')
+                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                    $query->where('created_at', '<', $startOfMonth)
+                                            ->orWhere('created_at', '>', $endOfMonth);
+                                })
+                                ->count();
+            $returpenjualan = ReturPenjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
+                                ->whereNotNull('tanggal_pembuat')
+                                ->whereNotNull('tanggal_diperiksa')
+                                ->whereNotNull('tanggal_dibukukan')
+                                ->whereNotNull('pembuat')
+                                ->whereNotNull('pemeriksa')
+                                ->whereNotNull('pembuku')
+                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                    $query->where('created_at', '<', $startOfMonth)
+                                            ->orWhere('created_at', '>', $endOfMonth);
+                                })
+                                ->count();
+        
+            $customerslama = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('tanggal_bergabung', '<', $startOfMonth)
+                        ->orWhere('tanggal_bergabung', '>', $endOfMonth);
+            })->get();
+            $customersbaru = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('tanggal_bergabung', '>=', $startOfMonth)
+                        ->orWhere('tanggal_bergabung', '<=', $endOfMonth);
+            })->get();
+            $arrcustomerbaru = $customersbaru->pluck('id')->toArray();
+            $arrcustomerlama = $customerslama->pluck('id')->toArray();
+            $penjualanlama = Penjualan::whereIn('id_customer',$arrcustomerlama)->where('lokasi_id', $lokasiId)
+                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                $query->where('created_at', '>=', $startOfMonth)
+                                        ->orWhere('created_at', '<=', $endOfMonth);
+                            })->count();
+            $penjualanbaru = Penjualan::whereIn('id_customer',$arrcustomerbaru)->where('lokasi_id', $lokasiId)
+                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                $query->where('created_at', '>=', $startOfMonth)
+                                        ->orWhere('created_at', '<=', $endOfMonth);
+                            })->count();
+            $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
+            $penjualanIds = $penjualanList->pluck('id');
+            $pembayaranList = Pembayaran::whereIn('invoice_penjualan_id', $penjualanIds)->get();
+    
+            $pemasukan = 0;
+            foreach ($pembayaranList as $pembayaran) {
+                $nominal = $pembayaran->nominal;
+                $pemasukan += $nominal;
+            }
+    
+            $lokasis = Lokasi::all();
+            return view('dashboard.index', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama'));
+        }else{
+            if ($user->hasRole(['Purchasing'])) {
+                $lokasiId = $karyawan->lokasi->id;
+            } else {
+                $lokasiId = $req->query('lokasi_id');
+            }
 
-        $pemasukan = 0;
-        foreach ($pembayaranList as $pembayaran) {
-            $nominal = $pembayaran->nominal;
-            $pemasukan += $nominal;
+            $startOfMonth = Carbon::now()->startOfMonth();
+            $endOfMonth = Carbon::now()->endOfMonth();
+    
+            $jumlahpenjualan = Pembelian::where('lokasi_id', $lokasiId)
+                                ->where('status_dibuat', 'DIKONFIRMASI')
+                                ->where('status_diperiksa', 'DIKONFIRMASI')
+                                ->whereNotNull('tgl_dibuat')
+                                ->whereNotNull('tgl_diperiksa')
+                                ->whereNotNull('pembuat')
+                                ->whereNotNull('pemeriksa')
+                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                    $query->where('created_at', '<', $startOfMonth)
+                                            ->orWhere('created_at', '>', $endOfMonth);
+                                })
+                                ->count();
+            $batalpenjualan = Pembelian::where('lokasi_id', $lokasiId)
+                                ->where('status_dibuat', 'DIBATALKAN')
+                                ->whereNotNull('tgl_dibuat')
+                                ->whereNotNull('pembuat')
+                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                    $query->where('created_at', '<', $startOfMonth)
+                                            ->orWhere('created_at', '>', $endOfMonth);
+                                })
+                                ->count();
+            $pembelian = Pembelian::where('lokasi_id', $lokasiId)
+                    ->where('status_dibuat', 'DIKONFIRMASI')
+                    ->where('status_diperiksa', 'DIKONFIRMASI')
+                    ->whereNotNull('tgl_dibuat')
+                    ->whereNotNull('tgl_diperiksa')
+                    ->whereNotNull('pembuat')
+                    ->whereNotNull('pemeriksa')
+                    ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                        $query->where('created_at', '<', $startOfMonth)
+                                ->orWhere('created_at', '>', $endOfMonth);
+                    })->get();
+            $arrpembelian = $pembelian->pluck('id')->toArray();
+            $invoicepo = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
+            $arrinvoicepo = $invoicepo->pluck('id')->toArray();
+            $returpenjualan = Returpembelian::where('invoicepo_id', $arrinvoicepo)
+                                ->where('status_dibuat', 'DIKONFIRMASI')
+                                ->where('status_dibuku', 'DIKONFIRMASI')
+                                ->whereNotNull('tgl_dibuat')
+                                ->whereNotNull('tgl_dibuku')
+                                ->whereNotNull('pembuat')
+                                ->whereNotNull('pembuku')
+                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                    $query->where('created_at', '<', $startOfMonth)
+                                            ->orWhere('created_at', '>', $endOfMonth);
+                                })
+                                ->count();
+        
+            $barangmasuk = Produkbeli::whereIn('pembelian_id', $arrpembelian)->get();
+            $hitungmasuk = 0;
+            foreach($barangmasuk as $masuk) {
+                $brgmasuk = $masuk->jml_diterima;
+                $hitungmasuk += $brgmasuk;
+            }
+
+            $penjualanlama = $hitungmasuk;
+                                                            
+            $returpem = Returinden::where('status_dibuat', 'DIKONFIRMASI')
+                    ->where('status_dibukukan', 'DIKONFIRMASI')
+                    ->whereNotNull('tgl_dibuat')
+                    ->whereNotNull('tgl_dibukukan')
+                    ->whereNotNull('pembuat_id')
+                    ->whereNotNull('pembuku_id')
+                    ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                        $query->where('created_at', '<', $startOfMonth)
+                                ->orWhere('created_at', '>', $endOfMonth);
+                    })->get();
+            
+            $arrreturpem = $returpem->pluck('id')->toArray();
+            $produkretur = ProdukReturInden::where('returinden_id', $arrreturpem)->get();
+            $arrprodukmutasi = $produkretur->pluck('produk_mutasi_inden_id')->toArray();
+            $produkmutasi = ProdukMutasiInden::whereIn('id',$arrprodukmutasi)->get();
+            $hitungkeluar = 0;
+            foreach($produkmutasi as $keluar) {
+                $brgkeluar = $keluar->jml_diterima;
+                $hitungkeluar += $brgmasuk;
+            }
+
+            $penjualanbaru = $hitungmasuk;
+
+
+            $pembayaranList = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
+    
+            $pengeluaran = 0;
+            foreach ($pembayaranList as $pembayaran) {
+                $nominal = $pembayaran->totaltagihan;
+                $pengeluaran += $nominal;
+            }
+
+            $pembayaranList = Returpembelian::whereIn('invoicepo_id', $arrpembelian)
+                        ->where('komplain', 'LIKE', 'Refund')
+                        ->get();
+    
+            $pemasukan = 0;
+            foreach ($pembayaranList as $pembayaran) {
+                $nominal = $pembayaran->subtotal;
+                $pemasukan += $nominal;
+            }
+    
+            $lokasis = Lokasi::all();
+            return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
         }
-
-        $lokasis = Lokasi::all();
-        return view('dashboard.index', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama'));
+        
     }
 
     public function update_auditor(Request $req){
@@ -159,12 +290,24 @@ class DashboardController extends Controller
         $invoiceIds = $pembayaran->pluck('invoice_penjualan_id')->toArray();
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
         if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
             $lokasi = $karyawan->lokasi->id;
-            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)->get();
+            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)
+                        ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                            $query->where('created_at', '<', $startOfMonth)
+                                    ->orWhere('created_at', '>', $endOfMonth);
+                        })->get();
         } else {
             $lokasi = $req->query('lokasi_id');
-            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)->get();
+            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)
+                        ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                            $query->where('created_at', '<', $startOfMonth)
+                                    ->orWhere('created_at', '>', $endOfMonth);
+                        })->get();
         }
         
         $invoiceNumbers = $penjualanList->pluck('no_invoice')->toArray();
@@ -218,22 +361,31 @@ class DashboardController extends Controller
                     ->orderBy('jumlah', 'asc')
                     ->take(5)
                     ->get();
+
+                if ($topMinusProducts->isEmpty()) {
+                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                }
+        
+                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                
             } elseif ($lokasi->lokasi->tipe_lokasi == 2) {
                 $topMinusProducts = InventoryOutlet::where('lokasi_id', $lokasi->lokasi_id)
                     ->where($query)
                     ->orderBy('jumlah', 'asc')
                     ->take(5)
                     ->get();
+
+                if ($topMinusProducts->isEmpty()) {
+                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                }
+        
+                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                $namaProduk = Produk_Jual::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
             } else {
                 return response()->json(['error' => 'Invalid location type'], 400);
             }
 
-            if ($topMinusProducts->isEmpty()) {
-                return response()->json(['message' => 'No products with low or negative stock found'], 204);
-            }
-    
-            $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
-            $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
         } else {
             $lokasiId = $req->query('lokasi_id');
             $lokasi = Lokasi::find($lokasiId);
@@ -249,22 +401,29 @@ class DashboardController extends Controller
                     ->orderBy('jumlah', 'asc')
                     ->take(5)
                     ->get();
+
+                if ($topMinusProducts->isEmpty()) {
+                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                }
+        
+                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
             } elseif ($lokasi->tipe_lokasi == 2) {
                 $topMinusProducts = InventoryOutlet::where('lokasi_id', $lokasi->id)
                     ->where($query)
                     ->orderBy('jumlah', 'asc')
                     ->take(5)
                     ->get();
+
+                if ($topMinusProducts->isEmpty()) {
+                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                }
+        
+                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                $namaProduk = Produk_Jual::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
             } else {
                 return response()->json(['error' => 'Invalid location type'], 400);
             }
-
-            if ($topMinusProducts->isEmpty()) {
-                return response()->json(['message' => 'No products with low or negative stock found'], 204);
-            }
-    
-            $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
-            $namaProduk = Produk_Jual::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
         }
 
         
@@ -305,13 +464,24 @@ class DashboardController extends Controller
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
 
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
         if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
             $lokasi = $karyawan->lokasi_id;
-            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->get();
+            $penjualanList = Penjualan::where('lokasi_id', $lokasi)
+            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('created_at', '<', $startOfMonth)
+                        ->orWhere('created_at', '>', $endOfMonth);
+            })->get();
         } else {
             $lokasiId = $req->query('lokasi_id');
             $lokasi = Lokasi::find($lokasiId);
-            $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
+            $penjualanList = Penjualan::where('lokasi_id', $lokasiId)
+            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('created_at', '<', $startOfMonth)
+                        ->orWhere('created_at', '>', $endOfMonth);
+            })->get();
         }
 
         
@@ -346,14 +516,24 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
 
         if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
             $lokasi = $karyawan->lokasi_id;
-            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->get();
+            $penjualanList = Penjualan::where('lokasi_id', $lokasi)
+            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('created_at', '<', $startOfMonth)
+                        ->orWhere('created_at', '>', $endOfMonth);
+            })->get();
         } else {
             $lokasiId = $req->query('lokasi_id');
             $lokasi = Lokasi::find($lokasiId);
-            $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
+            $penjualanList = Penjualan::where('lokasi_id', $lokasiId)
+            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                $query->where('created_at', '<', $startOfMonth)
+                        ->orWhere('created_at', '>', $endOfMonth);
+            })->get();
         }
         
         $promoCounts = [];

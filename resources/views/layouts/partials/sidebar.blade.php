@@ -17,6 +17,7 @@
                 @endphp
                 <li class="active">
                     <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
+                    
                 </li>
 
 
