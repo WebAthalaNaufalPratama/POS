@@ -65,7 +65,7 @@
         </div>
     </div>
 
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+    <div class="col-lg-3 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-customerlama">
             <div class="dash-counts">
                 <h4>{{ $penjualanlama }}</h4>
@@ -76,7 +76,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+    <div class="col-lg-3 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-customerbaru">
             <div class="dash-counts">
                 <h4>{{ $penjualanbaru }}</h4>
@@ -87,11 +87,22 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+    <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+        <div class="dash-count dash-pemasukan">
+            <div class="dash-counts">
+                <h4>{{ 'Rp ' . number_format($pengeluaran, 0, ',', '.') }}</h4>
+                <h5>Pengeluaran</h5>
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="dollar-sign"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-pemasukan">
             <div class="dash-counts">
                 <h4>{{ 'Rp ' . number_format($pemasukan, 0, ',', '.') }}</h4>
-                <h5>Pengeluaran</h5>
+                <h5>Pemasukan</h5>
             </div>
             <div class="dash-imgs">
                 <i data-feather="dollar-sign"></i>
@@ -113,7 +124,7 @@
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
             <div class="card-header">
-                <h5 class="card-title">Top Produk Terjual</h5>
+                <h5 class="card-title">Produk Paling Banyak Dibeli</h5>
             </div>
             <div class="card-body">
                 <div id="top_produk_chart" class="chart-set"></div>

@@ -22,6 +22,7 @@ use App\Models\ProdukMutasiInden;
 use App\Models\InventoryOutlet;
 use App\Models\Produkreturinden;
 use App\Models\Returinden;
+use App\Models\InventoryInden;
 use App\Models\InventoryGallery;
 use App\Models\Invoicepo;
 
@@ -31,13 +32,16 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
-        if(!$user->hasRole(['Purchasing'])) {
-            if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
-                $lokasiId = $karyawan->lokasi->id;
-            } else {
-                $lokasiId = $req->query('lokasi_id');
-            }
 
+        if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery', 'Purchasing'])) {
+            $lokasiId = $karyawan->lokasi->id;
+            $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
+        } else {
+            $lokasiId = $req->query('lokasi_id');
+            $lokasinama = Lokasi::find($lokasiId)->value('tipe_lokasi');
+        }
+
+        if($lokasinama != 5) {
             $startOfMonth = Carbon::now()->startOfMonth();
             $endOfMonth = Carbon::now()->endOfMonth();
     
@@ -49,16 +53,16 @@ class DashboardController extends Controller
                                 ->whereNotNull('dibukukan_id')
                                 ->whereNotNull('auditor_id')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '<', $startOfMonth)
-                                            ->orWhere('created_at', '>', $endOfMonth);
+                                    $query->where('created_at', '>=', $startOfMonth)
+                                            ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
             $batalpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIBATALKAN')
                                 ->whereNotNull('tanggal_dibuat')
                                 ->whereNotNull('dibuat_id')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '<', $startOfMonth)
-                                            ->orWhere('created_at', '>', $endOfMonth);
+                                    $query->where('created_at', '>=', $startOfMonth)
+                                            ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
             $returpenjualan = ReturPenjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
@@ -69,8 +73,8 @@ class DashboardController extends Controller
                                 ->whereNotNull('pemeriksa')
                                 ->whereNotNull('pembuku')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '<', $startOfMonth)
-                                            ->orWhere('created_at', '>', $endOfMonth);
+                                    $query->where('created_at', '>=', $startOfMonth)
+                                            ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
         
@@ -124,8 +128,8 @@ class DashboardController extends Controller
                                 ->whereNotNull('pembuat')
                                 ->whereNotNull('pemeriksa')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '<', $startOfMonth)
-                                            ->orWhere('created_at', '>', $endOfMonth);
+                                    $query->where('created_at', '>=', $startOfMonth)
+                                            ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
             $batalpenjualan = Pembelian::where('lokasi_id', $lokasiId)
@@ -133,8 +137,8 @@ class DashboardController extends Controller
                                 ->whereNotNull('tgl_dibuat')
                                 ->whereNotNull('pembuat')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '<', $startOfMonth)
-                                            ->orWhere('created_at', '>', $endOfMonth);
+                                    $query->where('created_at', '>=', $startOfMonth)
+                                            ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
             $pembelian = Pembelian::where('lokasi_id', $lokasiId)
@@ -145,8 +149,8 @@ class DashboardController extends Controller
                     ->whereNotNull('pembuat')
                     ->whereNotNull('pemeriksa')
                     ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                        $query->where('created_at', '<', $startOfMonth)
-                                ->orWhere('created_at', '>', $endOfMonth);
+                        $query->where('created_at', '>=', $startOfMonth)
+                                ->orWhere('created_at', '<=', $endOfMonth);
                     })->get();
             $arrpembelian = $pembelian->pluck('id')->toArray();
             $invoicepo = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
@@ -159,8 +163,8 @@ class DashboardController extends Controller
                                 ->whereNotNull('pembuat')
                                 ->whereNotNull('pembuku')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '<', $startOfMonth)
-                                            ->orWhere('created_at', '>', $endOfMonth);
+                                    $query->where('created_at', '>=', $startOfMonth)
+                                            ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
         
@@ -180,8 +184,8 @@ class DashboardController extends Controller
                     ->whereNotNull('pembuat_id')
                     ->whereNotNull('pembuku_id')
                     ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                        $query->where('created_at', '<', $startOfMonth)
-                                ->orWhere('created_at', '>', $endOfMonth);
+                        $query->where('created_at', '>=', $startOfMonth)
+                                ->orWhere('created_at', '<=', $endOfMonth);
                     })->get();
             
             $arrreturpem = $returpem->pluck('id')->toArray();
@@ -199,20 +203,20 @@ class DashboardController extends Controller
 
             $pembayaranList = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
     
-            $pengeluaran = 0;
+            $pemasukan = 0;
             foreach ($pembayaranList as $pembayaran) {
                 $nominal = $pembayaran->totaltagihan;
-                $pengeluaran += $nominal;
+                $pemasukan += $nominal;
             }
 
             $pembayaranList = Returpembelian::whereIn('invoicepo_id', $arrpembelian)
                         ->where('komplain', 'LIKE', 'Refund')
                         ->get();
     
-            $pemasukan = 0;
+            $pengeluaran = 0;
             foreach ($pembayaranList as $pembayaran) {
                 $nominal = $pembayaran->subtotal;
-                $pemasukan += $nominal;
+                $pengeluaran += $nominal;
             }
     
             $lokasis = Lokasi::all();
@@ -293,170 +297,319 @@ class DashboardController extends Controller
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
-
         if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
             $lokasi = $karyawan->lokasi->id;
-            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)
-                        ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                            $query->where('created_at', '<', $startOfMonth)
-                                    ->orWhere('created_at', '>', $endOfMonth);
-                        })->get();
+            $lokasinama = Lokasi::where('id', $lokasi)->value('tipe_lokasi');
         } else {
             $lokasi = $req->query('lokasi_id');
-            $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)
-                        ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                            $query->where('created_at', '<', $startOfMonth)
-                                    ->orWhere('created_at', '>', $endOfMonth);
-                        })->get();
+            $lokasinama = Lokasi::where('id', $lokasi)->value('tipe_lokasi');
         }
-        
-        $invoiceNumbers = $penjualanList->pluck('no_invoice')->toArray();
-
-        $produkterjual = Produk_Terjual::with('komponen')
-            ->whereIn('no_invoice', $invoiceNumbers)
-            ->get();
-
-        foreach ($produkterjual as $pt) {
-            foreach ($pt->komponen as $komponen) {
-                $namaKomponen = $komponen->nama_produk;
-                $jumlah = $komponen->jumlah ?? 1; 
-                $totaljumlah = $jumlah * $pt->jumlah;
-                
-                if (!isset($componentTotals[$namaKomponen])) {
+        if($lokasinama != 5) {
+            if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
+                $lokasi = $karyawan->lokasi->id;
+                $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)
+                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                $query->where('created_at', '>=', $startOfMonth)
+                                        ->orWhere('created_at', '<=', $endOfMonth);
+                            })->get();
+            } else {
+                $lokasi = $req->query('lokasi_id');
+                $penjualanList = Penjualan::where('lokasi_id', $lokasi)->whereIn('id', $invoiceIds)
+                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                $query->where('created_at', '>=', $startOfMonth)
+                                        ->orWhere('created_at', '<=', $endOfMonth);
+                            })->get();
+            }
+            
+            $invoiceNumbers = $penjualanList->pluck('no_invoice')->toArray();
+    
+            $produkterjual = Produk_Terjual::with('komponen')
+                ->whereIn('no_invoice', $invoiceNumbers)
+                ->get();
+    
+            foreach ($produkterjual as $pt) {
+                foreach ($pt->komponen as $komponen) {
+                    $namaKomponen = $komponen->nama_produk;
+                    $jumlah = $komponen->jumlah ?? 1; 
+                    $totaljumlah = $jumlah * $pt->jumlah;
+                    
+                    if (!isset($componentTotals[$namaKomponen])) {
+                        $componentTotals[$namaKomponen] = 0;
+                    }
+                    $componentTotals[$namaKomponen] += $totaljumlah;
+                }
+            }
+            
+            arsort($componentTotals);
+            
+            $topProducts = array_slice($componentTotals, 0, 5, true);
+    
+            $labels = array_keys($topProducts);
+            $data = array_values($topProducts);
+    
+            return response()->json([
+                'labels' => $labels,
+                'data' => $data
+            ]);
+        }else {
+            if ($user->hasRole(['Purchasing'])) {
+                $lokasi = $karyawan->lokasi->id;
+                $pembelianList = Pembelian::where('lokasi_id', $lokasi)
+                            ->where('status_dibuat', 'DIKONFIRMASI')
+                            ->where('status_diperiksa', 'DIKONFIRMASI')
+                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                $query->where('created_at', '>=', $startOfMonth)
+                                        ->orWhere('created_at', '<=', $endOfMonth);
+                            })->get();
+            } else {
+                $lokasi = $req->query('lokasi_id');
+                $pembelianList = Pembelian::where('lokasi_id', $lokasi)
+                            ->where('status_dibuat', 'DIKONFIRMASI')
+                            ->where('status_diperiksa', 'DIKONFIRMASI')
+                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                $query->where('created_at', '>=', $startOfMonth)
+                                        ->orWhere('created_at', '<=', $endOfMonth);
+                            })->get();
+            }
+            
+            $invoiceNumbers = $pembelianList->pluck('id')->toArray();
+    
+            $produkbeli = Produkbeli::whereIn('pembelian_id', $invoiceNumbers)
+                ->get();
+    
+            foreach ($produkbeli as $pt) {
+                $idkomponen = $pt->produk_id;
+                $jumlah = 1;
+                $totaljumlah = $jumlah * $pt->jml_diterima;
+                $namaKomponen = Produk::where('id', $idkomponen)->value('nama');
+                if(!isset($componentTotals[$namaKomponen])) {
                     $componentTotals[$namaKomponen] = 0;
                 }
                 $componentTotals[$namaKomponen] += $totaljumlah;
             }
+            
+            arsort($componentTotals);
+            
+            $topProducts = array_slice($componentTotals, 0, 5, true);
+    
+            $labels = array_keys($topProducts);
+            $data = array_values($topProducts);
+    
+            return response()->json([
+                'labels' => $labels,
+                'data' => $data
+            ]);
         }
         
-        arsort($componentTotals);
-        
-        $topProducts = array_slice($componentTotals, 0, 5, true);
-
-        $labels = array_keys($topProducts);
-        $data = array_values($topProducts);
-
-        return response()->json([
-            'labels' => $labels,
-            'data' => $data
-        ]);
     }
 
     public function getTopMinusProduk(Request $req) 
     {
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
-
         if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
             $lokasi = $karyawan;
-
-            $query = function ($query) {
-                $query->where('jumlah', '<', 0)
-                    ->orWhereRaw('jumlah < min_stok + 100');
-            };
-    
-            if ($lokasi->lokasi->tipe_lokasi == 1) {
-                $topMinusProducts = InventoryGallery::where('lokasi_id', $lokasi->lokasi_id)
-                    ->where($query)
-                    ->orderBy('jumlah', 'asc')
-                    ->take(5)
-                    ->get();
-
-                if ($topMinusProducts->isEmpty()) {
-                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
-                }
-        
-                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
-                $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
-                
-            } elseif ($lokasi->lokasi->tipe_lokasi == 2) {
-                $topMinusProducts = InventoryOutlet::where('lokasi_id', $lokasi->lokasi_id)
-                    ->where($query)
-                    ->orderBy('jumlah', 'asc')
-                    ->take(5)
-                    ->get();
-
-                if ($topMinusProducts->isEmpty()) {
-                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
-                }
-        
-                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
-                $namaProduk = Produk_Jual::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
-            } else {
-                return response()->json(['error' => 'Invalid location type'], 400);
-            }
-
+            $lokasinama = Lokasi::where('id', $lokasi->lokasi_id)->value('tipe_lokasi');
         } else {
             $lokasiId = $req->query('lokasi_id');
             $lokasi = Lokasi::find($lokasiId);
-
-            $query = function ($query) {
-                $query->where('jumlah', '<', 0)
-                    ->orWhereRaw('jumlah < min_stok + 100');
-            };
+            $lokasinama = Lokasi::find($lokasiId)->value('tipe_lokasi');
+        }
+        if($lokasinama != 5) {
+            if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
+                $lokasi = $karyawan;
     
-            if ($lokasi->tipe_lokasi == 1) {
-                $topMinusProducts = InventoryGallery::where('lokasi_id', $lokasi->id)
-                    ->where($query)
-                    ->orderBy('jumlah', 'asc')
-                    ->take(5)
-                    ->get();
-
-                if ($topMinusProducts->isEmpty()) {
-                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
-                }
+                $query = function ($query) {
+                    $query->where('jumlah', '<', 0)
+                        ->orWhereRaw('jumlah < min_stok + 100');
+                };
         
-                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
-                $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
-            } elseif ($lokasi->tipe_lokasi == 2) {
-                $topMinusProducts = InventoryOutlet::where('lokasi_id', $lokasi->id)
-                    ->where($query)
-                    ->orderBy('jumlah', 'asc')
-                    ->take(5)
-                    ->get();
-
-                if ($topMinusProducts->isEmpty()) {
-                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                if ($lokasi->lokasi->tipe_lokasi == 1) {
+                    $topMinusProducts = InventoryGallery::where('lokasi_id', $lokasi->lokasi_id)
+                        ->where($query)
+                        ->orderBy('jumlah', 'asc')
+                        ->take(5)
+                        ->get();
+    
+                    if ($topMinusProducts->isEmpty()) {
+                        return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                    }
+            
+                    $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                    $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                    
+                } elseif ($lokasi->lokasi->tipe_lokasi == 2) {
+                    $topMinusProducts = InventoryOutlet::where('lokasi_id', $lokasi->lokasi_id)
+                        ->where($query)
+                        ->orderBy('jumlah', 'asc')
+                        ->take(5)
+                        ->get();
+    
+                    if ($topMinusProducts->isEmpty()) {
+                        return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                    }
+            
+                    $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                    $namaProduk = Produk_Jual::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                } else {
+                    return response()->json(['error' => 'Invalid location type'], 400);
                 }
-        
-                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
-                $namaProduk = Produk_Jual::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+    
             } else {
-                return response()->json(['error' => 'Invalid location type'], 400);
-            }
-        }
-
+                $lokasiId = $req->query('lokasi_id');
+                $lokasi = Lokasi::find($lokasiId);
+    
+                $query = function ($query) {
+                    $query->where('jumlah', '<', 0)
+                        ->orWhereRaw('jumlah < min_stok + 100');
+                };
         
+                if ($lokasi->tipe_lokasi == 1) {
+                    $topMinusProducts = InventoryGallery::where('lokasi_id', $lokasi->id)
+                        ->where($query)
+                        ->orderBy('jumlah', 'asc')
+                        ->take(5)
+                        ->get();
+    
+                    if ($topMinusProducts->isEmpty()) {
+                        return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                    }
+            
+                    $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                    $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                } elseif ($lokasi->tipe_lokasi == 2) {
+                    $topMinusProducts = InventoryOutlet::where('lokasi_id', $lokasi->id)
+                        ->where($query)
+                        ->orderBy('jumlah', 'asc')
+                        ->take(5)
+                        ->get();
+    
+                    if ($topMinusProducts->isEmpty()) {
+                        return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                    }
+            
+                    $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                    $namaProduk = Produk_Jual::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                } else {
+                    return response()->json(['error' => 'Invalid location type'], 400);
+                }
+            }
+    
+            
+    
+            $labels = [];
+            $currentStock = [];
+            $minStock = [];
+    
+            foreach ($topMinusProducts as $product) {
+                $labels[] = $namaProduk[$product->kode_produk] ?? 'Unknown Product';
+                $currentStock[] = $product->jumlah;
+                $minStock[] = $product->min_stok ?? null;
+            }
+    
+            $deficit = array_map(function ($min, $current) {
+                return max($min - $current, 0);
+            }, $minStock, $currentStock);
+    
+            $series = [
+                [
+                    'name' => 'Current Stock',
+                    'data' => array_map('abs', $currentStock)
+                ],
+                [
+                    'name' => 'Stock Deficit',
+                    'data' => $deficit
+                ]
+            ];
+    
+            return response()->json([
+                'labels' => $labels,
+                'series' => $series
+            ]);
 
-        $labels = [];
-        $currentStock = [];
-        $minStock = [];
-
-        foreach ($topMinusProducts as $product) {
-            $labels[] = $namaProduk[$product->kode_produk] ?? 'Unknown Product';
-            $currentStock[] = $product->jumlah;
-            $minStock[] = $product->min_stok;
+        }else {
+            if($user->hasRole(['Purchasing'])) {
+                $lokasi = $karyawan;
+    
+                $query = function ($query) {
+                    $query->where('jumlah', '<', 0);
+                };
+        
+                if ($lokasi->lokasi->tipe_lokasi == 4) {
+                    $topMinusProducts = InventoryInden::where($query)
+                        ->orderBy('jumlah', 'asc')
+                        ->take(5)
+                        ->get();
+    
+                    if ($topMinusProducts->isEmpty()) {
+                        return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                    }
+            
+                    $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                    $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                    
+                } else {
+                    return response()->json(['error' => 'Invalid location type'], 400);
+                }
+            } else {
+                $lokasiId = $req->query('lokasi_id');
+                $lokasi = Lokasi::find($lokasiId);
+    
+                $query = function ($query) {
+                    $query->where('jumlah', '<', 0)
+                        ->orWhereRaw('jumlah < min_stok + 100');
+                };
+        
+                if ($lokasi->tipe_lokasi == 1) {
+                    $topMinusProducts = InventoryInden::where('lokasi_id', $lokasi->id)
+                        ->where($query)
+                        ->orderBy('jumlah', 'asc')
+                        ->take(5)
+                        ->get();
+    
+                    if ($topMinusProducts->isEmpty()) {
+                        return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                    }
+            
+                    $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                    $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                } else {
+                    return response()->json(['error' => 'Invalid location type'], 400);
+                }
+            }
+    
+            
+            $labels = [];
+            $currentStock = [];
+            $minStock = [];
+    
+            foreach ($topMinusProducts as $product) {
+                $labels[] = $namaProduk[$product->kode_produk] ?? 'Unknown Product';
+                $currentStock[] = $product->jumlah;
+                $minStock[] = $product->min_stok ?? 0;
+            }
+    
+            $deficit = array_map(function ($min, $current) {
+                return max($min - $current, 0);
+            }, $minStock, $currentStock);
+    
+            $series = [
+                [
+                    'name' => 'Current Stock',
+                    'data' => array_map('abs', $currentStock)
+                ],
+                [
+                    'name' => 'Stock Deficit',
+                    'data' => $deficit
+                ]
+            ];
+    
+            return response()->json([
+                'labels' => $labels,
+                'series' => $series
+            ]);
         }
-
-        $deficit = array_map(function ($min, $current) {
-            return max($min - $current, 0);
-        }, $minStock, $currentStock);
-
-        $series = [
-            [
-                'name' => 'Current Stock',
-                'data' => array_map('abs', $currentStock)
-            ],
-            [
-                'name' => 'Stock Deficit',
-                'data' => $deficit
-            ]
-        ];
-
-        return response()->json([
-            'labels' => $labels,
-            'series' => $series
-        ]);
+        
     }
 
     public function getTopSales(Request $req)
@@ -471,16 +624,16 @@ class DashboardController extends Controller
             $lokasi = $karyawan->lokasi_id;
             $penjualanList = Penjualan::where('lokasi_id', $lokasi)
             ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                $query->where('created_at', '<', $startOfMonth)
-                        ->orWhere('created_at', '>', $endOfMonth);
+                $query->where('created_at', '>=', $startOfMonth)
+                        ->orWhere('created_at', '<=', $endOfMonth);
             })->get();
         } else {
             $lokasiId = $req->query('lokasi_id');
             $lokasi = Lokasi::find($lokasiId);
             $penjualanList = Penjualan::where('lokasi_id', $lokasiId)
             ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                $query->where('created_at', '<', $startOfMonth)
-                        ->orWhere('created_at', '>', $endOfMonth);
+                $query->where('created_at', '>=', $startOfMonth)
+                        ->orWhere('created_at', '<=', $endOfMonth);
             })->get();
         }
 
@@ -523,16 +676,16 @@ class DashboardController extends Controller
             $lokasi = $karyawan->lokasi_id;
             $penjualanList = Penjualan::where('lokasi_id', $lokasi)
             ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                $query->where('created_at', '<', $startOfMonth)
-                        ->orWhere('created_at', '>', $endOfMonth);
+                $query->where('created_at', '>=', $startOfMonth)
+                        ->orWhere('created_at', '<=', $endOfMonth);
             })->get();
         } else {
             $lokasiId = $req->query('lokasi_id');
             $lokasi = Lokasi::find($lokasiId);
             $penjualanList = Penjualan::where('lokasi_id', $lokasiId)
             ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                $query->where('created_at', '<', $startOfMonth)
-                        ->orWhere('created_at', '>', $endOfMonth);
+                $query->where('created_at', '>=', $startOfMonth)
+                        ->orWhere('created_at', '<=', $endOfMonth);
             })->get();
         }
         
