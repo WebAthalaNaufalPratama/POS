@@ -63,16 +63,18 @@
                                             $user = Auth::user();
                                             $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                         @endphp
+                                        @if($mutasi->status != 'DIBATALKAN')
                                         @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                             <a class="dropdown-item" href="{{ route('auditmutasioutlet.edit', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
                                         @elseif($user->hasRole(['AdminGllery', 'KasirGallery', 'KasirOutlet']) && $mutasi->status != 'DIKONFIRMASI')
                                             <a class="dropdown-item" href="{{ route('auditmutasioutlet.edit', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                         @endif
                                         @if($lokasi->lokasi->tipe_lokasi != 1)
-                                            <a class="dropdown-item" href="{{ route('mutasioutlet.payment', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
+                                            <a class="dropdown-item" href="{{ route('mutasioutlet.payment', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">bayar</a>
                                         @endif
                                         @if($lokasi->lokasi->tipe_lokasi != 2)
                                             <a class="dropdown-item" href="{{ route('mutasioutlet.show', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">ACC DITERIMA</a>
+                                        @endif
                                         @endif
                                         <a class="dropdown-item" href="{{ route('mutasioutlet.view', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
                                         </div>

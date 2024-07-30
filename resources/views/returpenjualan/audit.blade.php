@@ -130,12 +130,22 @@
                                         <div class="form-group">
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
-                                                <option value="">Pilih Status</option>
-                                                <option value="TUNDA" {{ $penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
-                                                <option value="DIKONFIRMASI" {{ $penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
-                                                <option value="DIBATALKAN" {{ $penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                                @if($dopenjualan->status != 'DIKONFIRMASI')
+                                                    <option value="">Pilih Status</option>
+                                                    <option value="TUNDA" {{ $penjualans->status == 'TUNDA' ? 'selected': ''}}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $penjualans->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
+                                                    @php
+                                                        $user = Auth::user();
+                                                    @endphp
+                                                    @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
+                                                        <option value="DIBATALKAN" {{ $penjualans->status == 'DIBATALKAN' ? 'selected': ''}}>DIBATALKAN</option>
+                                                    @endif
+                                                @else
+                                                    <option value="DIKONFIRMASI" {{ $penjualans->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
+                                                @endif
                                             </select>
                                         </div>
+                                        
                                         <div class="form-group">
                                             <div id="alasan" style="display: none;">
                                                 <label for="alasan ">Alasan</label>
