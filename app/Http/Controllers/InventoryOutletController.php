@@ -27,7 +27,7 @@ class InventoryOutletController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
         $namaproduks = InventoryOutlet::with('produk')->get()->unique('kode_produk');
         $outlets = Lokasi::where('tipe_lokasi', 2)->get();
@@ -35,7 +35,14 @@ class InventoryOutletController extends Controller
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         if($user->hasRole(['KasirOutlet'])) {
             $arraylokasi = $lokasi->lokasi_id;
-            $data = InventoryOutlet::where('lokasi_id', $arraylokasi)->get() ?? null;
+            $query = InventoryOutlet::where('lokasi_id', $arraylokasi);
+            if ($req->produk) {
+                $query->where('kode_produk', $req->input('produk'));
+            }
+            if ($req->outlet) {
+                $query->where('lokasi_id', $req->input('outlet'));
+            }
+            $data = $query->get();
             $penjualan = Penjualan::where('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get() ?? null;
             $mergedriwayat =[];
             $do = DeliveryOrder::where('lokasi_pengirim', $arraylokasi)->get() ?? null;
