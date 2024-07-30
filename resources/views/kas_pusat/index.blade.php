@@ -86,6 +86,11 @@
               <div class="page-title">
                   <h4>Kas Masuk</h4>
               </div>
+              <div class="page-btn">
+                @if(in_array('kas_pusat.create', $thisUserPermissions) && in_array('kas_pusat.store', $thisUserPermissions))
+                  <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addkasmasuk" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kas Masuk</a>
+                @endif
+              </div>
           </div>
       </div>
       <div class="card-body">
@@ -94,7 +99,7 @@
               <thead>
               <tr>
                   <th>No</th>
-                  <th>Jenis</th>
+                  {{-- <th>Jenis</th> --}}
                   <th>Pengirim</th>
                   <th>Rekening Pengirim</th>
                   <th>Penerima</th>
@@ -104,14 +109,14 @@
                   <th>Biaya Lainnya</th>
                   <th>Keterangan</th>
                   <th>Status</th>
-                  {{-- <th>Aksi</th> --}}
+                  <th>Aksi</th>
               </tr>
               </thead>
               <tbody>
                   @foreach ($dataMasuk as $item)
                       <tr>
                           <td>{{ $loop->iteration }}</td>
-                          <td>{{ $item->jenis ?? '-' }}</td>
+                          {{-- <td>{{ $item->jenis ?? '-' }}</td> --}}
                           <td>{{ $item->lok_pengirim->nama ?? '-' }}</td>
                           <td>{{ $item->rek_pengirim->nama_akun ?? '-' }}</td>
                           <td>{{ $item->lok_penerima->nama ?? '-' }}</td>
@@ -123,16 +128,21 @@
                           <td>
                             <span class="badges {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : 'bg-lightgrey' }}">{{ $item->status ?? '-' }}</span>
                           </td>
-                          {{-- <td class="text-center">
+                          <td class="text-center">
                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
                             <ul class="dropdown-menu">
+                              @if(in_array('kas_pusat.edit', $thisUserPermissions) && in_array('kas_pusat.update', $thisUserPermissions))
                                 <li>
-                                    <a href="javascript:void(0);" onclick="edit({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    <a href="javascript:void(0);" onclick="edit_masuk({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                </li>
+                              @endif
+                                <li>
+                                    <a href="javascript:void(0);" onclick="bukti('{{ $item->file }}')" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
                                 </li>
                             </ul>
-                          </td> --}}
+                          </td>
                       </tr>
                   @endforeach
               </tbody>
@@ -149,7 +159,7 @@
                   <h4>Kas Keluar</h4>
               </div>
               <div class="page-btn">
-                @if(in_array('kas_gallery.create', $thisUserPermissions) && in_array('kas_gallery.store', $thisUserPermissions))
+                @if(in_array('kas_pusat.create', $thisUserPermissions) && in_array('kas_pusat.store', $thisUserPermissions))
                   <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addkaskeluar" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kas Keluar</a>
                 @endif
               </div>
@@ -189,9 +199,9 @@
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
                             <ul class="dropdown-menu">
-                              @if(in_array('kas_gallery.edit', $thisUserPermissions) && in_array('kas_gallery.update', $thisUserPermissions))
+                              @if(in_array('kas_pusat.edit', $thisUserPermissions) && in_array('kas_pusat.update', $thisUserPermissions))
                                 <li>
-                                  <a href="javascript:void(0);" onclick="edit({{ $item->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  <a href="javascript:void(0);" onclick="edit_keluar({{ $item->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                 </li>
                               @endif
                               <li>
@@ -762,7 +772,7 @@
                 'X-CSRF-TOKEN': csrfToken
             },
             success: function(response) {
-                $('#editFormKeluar').attr('action', 'kas_gallery/'+id+'/update');
+                $('#editFormKeluar').attr('action', 'kas_pusat/'+id+'/update');
 
                 $('#edit_keluar_jenis').val(response.jenis).trigger('change')
                 
@@ -779,7 +789,7 @@
                 $('#edit_keluar_biaya_lain').val(response.biaya_lain)
                 $('#edit_keluar_keterangan').val(response.keterangan)
                 $('#edit_keluar_status').val(response.status).trigger('change')
-                $('#edit_preview').val(response.file)
+                $('#edit_keluar_preview').attr('src', 'storage/' + response.file)
                 $('#editkaskeluar').modal('show');
             },
             error: function(error) {
@@ -801,7 +811,7 @@
                 'X-CSRF-TOKEN': csrfToken
             },
             success: function(response) {
-                $('#editFormMasuk').attr('action', 'kas_gallery/'+id+'/update');
+                $('#editFormMasuk').attr('action', 'kas_pusat/'+id+'/update');
                 rekening_pengirim = response.rekening_pengirim;
 
                 $('#edit_masuk_jenis').val(response.jenis).trigger('change')
@@ -819,7 +829,7 @@
                 $('#edit_masuk_biaya_lain').val(response.biaya_lain)
                 $('#edit_masuk_keterangan').val(response.keterangan)
                 $('#edit_masuk_status').val(response.status).trigger('change')
-                $('#edit_preview').val(response.file)
+                $('#edit_masuk_preview').attr('src', 'storage/' + response.file)
                 $('#editkasmasuk').modal('show');
             },
             error: function(error) {
