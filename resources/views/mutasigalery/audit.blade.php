@@ -202,7 +202,7 @@
                                                         </tr>
                                                         <tr>
                                                             @if($user->hasRole(['KasirOutlet']))
-                                                                <td><input type="date" class="form-control" name="tanggal_pembuat" style="width: 25%;" value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
                                                                 <td id="tgl_penerima">-</td>
                                                                 <td id="tgl_penyetuju">-</td>
                                                                 <td id="tgl_pemeriksa">-</td>

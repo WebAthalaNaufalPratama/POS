@@ -734,6 +734,23 @@ class MutasiController extends Controller
         }
         $data = $req->except(['_token', '_method']);
         // dd($data);
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'penerima_id' => $user->id,
+                'tanggal_penerima' => now(),
+            ]);
+        }elseif($user->hasRole(['Auditor'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'dibukukan_id' => $user->id,
+                'tanggal_dibukukan' => now(),
+            ]);
+        }elseif($user->hasRole(['Finance'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'diperiksa_id' => $user->id,
+                'tanggal_diperiksa' => now(),
+            ]);
+        }
         for ($i = 0; $i < count($data['nama_produk']); $i++) {
             $getProdukJual = Produk_Terjual::with('komponen')->where('id', $data['nama_produk'][$i])->first();
             
@@ -1218,6 +1235,23 @@ class MutasiController extends Controller
         }
         $data = $req->except(['_token', '_method']);
         $lokasi = Lokasi::where('id', $req->penerima)->first();
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'penerima_id' => $user->id,
+                'tanggal_penerima' => now(),
+            ]);
+        }elseif($user->hasRole(['Auditor'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'dibukukan_id' => $user->id,
+                'tanggal_dibukukan' => now(),
+            ]);
+        }elseif($user->hasRole(['Finance'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'diperiksa_id' => $user->id,
+                'tanggal_diperiksa' => now(),
+            ]);
+        }
         for ($i = 0; $i < count($data['nama_produk']); $i++) {
             $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigag', $req->no_mutasi)
                                         ->where('id', $data['nama_produk'][$i])
@@ -1595,6 +1629,23 @@ class MutasiController extends Controller
         }
         $data = $req->except(['_token', '_method']);
         $lokasi = Lokasi::where('id', $req->penerima)->first();
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'penerima_id' => $user->id,
+                'tanggal_penerima' => now(),
+            ]);
+        }elseif($user->hasRole(['Auditor'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'dibukukan_id' => $user->id,
+                'tanggal_dibukukan' => now(),
+            ]);
+        }elseif($user->hasRole(['Finance'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'diperiksa_id' => $user->id,
+                'tanggal_diperiksa' => now(),
+            ]);
+        }
         if($lokasi->tipe_lokasi == 1){
             for ($i = 0; $i < count($data['nama_produk']); $i++) {            
                 $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigg', $req->no_mutasi)
