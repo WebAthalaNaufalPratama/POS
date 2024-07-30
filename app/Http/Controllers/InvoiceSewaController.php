@@ -29,7 +29,7 @@ class InvoiceSewaController extends Controller
     public function index(Request $req)
     {
         $query = InvoiceSewa::query();
-        if(Auth::user()->karyawans){
+        if(Auth::user()->hasRole('AdminGallery')){
             $query->whereHas('kontrak', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -52,7 +52,7 @@ class InvoiceSewaController extends Controller
         $customer = Kontrak::whereHas('invoice')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->karyawans, function ($query) {
+        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
