@@ -240,23 +240,54 @@
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
                                                 <table class="table table-responsive border rounded">
+                                                    @php
+                                                        $user = Auth::user();
+                                                    @endphp
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
+                                                            <th>Penerima</th>
                                                             <th>Penyetuju</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
-                                                            <td id="penyetuju">-</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            
+                                                            @if($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
+                                                                <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{ $mutasis->dibuku->name ?? '-'}}</td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
+                                                                <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{ $mutasis->dibuku->name ?? '-'}}</td>
+                                                            @elseif($user->hasRole(['KasirOutlet']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
+                                                                <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{ $mutasis->dibuku->name ?? '-'}}</td>
+                                                            @endif
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            @if($user->hasRole(['KasirOutlet']))
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat" style="width: 25%;" value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat" style="width: 25%;" value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat" style="width: 25%;" value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @endif
                                                         </tr>
                                                     </tbody>
                                                 </table>

@@ -243,23 +243,34 @@
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
                                                 <table class="table table-responsive border rounded">
+                                                    @php
+                                                        $user = Auth::user();
+                                                    @endphp
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
+                                                            <th>Penerima</th>
                                                             <th>Penyetuju</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
-                                                            <td id="penyetuju">-</td>
-                                                            <td id="pemeriksa">-</td>
+                                                            
+                                                            @if($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat->name }}</td>
+                                                                <td id="penerima" >{{ Auth::user()->name}}</td>
+                                                                <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa" >{{ $mutasis->dibuku->name ?? '-'}}</td>
+                                                            @endif
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}</td>
-                                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
-                                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
+                                                            @if($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['KasirGallery', 'AdminGallery']))
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ $mutasis->tanggal_dibukukan ?? '-' }}"></td>
+                                                            @endif
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -433,13 +444,11 @@
 
     function calculateTotal(index) {
         var diskonType = $('#jenis_diskon_' + index).val();
-        // console.log(diskonType);
 
         var diskonValue = parseFloat($('#diskon_' + index).val());
         var jumlah = parseFloat($('#jumlah_' + index).val());
         var hargaSatuan = parseFloat($('#harga_satuan_' + index).val());
         var hargaTotal = 0;
-        // console.log(diskonValue);
 
         if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
             hargaTotal = jumlah * hargaSatuan;
@@ -516,77 +525,6 @@
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
-
-            // var picModal = `<div class="modal fade" id="picModal_${i}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            //                     <div class="modal-dialog" role="document">
-            //                         <div class="modal-content">
-            //                             <div class="modal-header">
-            //                                 <h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ${i}</h5>
-            //                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            //                                     <span aria-hidden="true">&times;</span>
-            //                                 </button>
-            //                             </div>
-            //                             <div class="modal-body">
-            //                                 <div class="form-group">
-            //                                     <label for="tglrangkai_${i}">Tanggal Rangkaian</label>
-            //                                     <input type="date" class="form-control" id="tglrangkai_${i}" name="tglrangkai_${i}">
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jnsrangkai_${i}">Jenis Rangkaian</label>
-            //                                     <input type="text" class="form-control" id="jnsrangkai_${i}" name="jnsrangkai_${i}" value="penjualan" readonly>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="no_invoice_rangkai_${i}">Nomor Invoice</label>
-            //                                     <input type="text" class="form-control" id="no_invoice_rangkai_${i}" name="no_invoice_rangkai_${i}" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jumlahStaff_${i}">Jumlah Staff Perangkai</label>
-            //                                     <input type="text" class="form-control" id="jumlahStaff_${i}" name="jumlahStaff_${i}" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="staffPerangkaiContainer_${i}">Pilih PIC Perangkai</label>
-            //                                     <div id="staffPerangkaiContainer_${i}"></div>
-            //                                 </div>
-            //                                 <div class="table-responsive">
-            //                                     <table class="table">
-            //                                         <thead>
-            //                                             <tr>
-            //                                                 <th>Nama</th>
-            //                                                 <th>Jumlah</th>
-            //                                                 <th></th>
-            //                                             </tr>
-            //                                         </thead>
-            //                                         <tbody id="dynamic_field">
-            //                                             <tr>
-            //                                                 <td>
-            //                                                     <select id="nama_produk" name="nama_produk[]" class="form-control">
-            //                                                         <option value="">Pilih Produk</option>`;
-
-            // @foreach($produks as $produk)
-            // picModal += `<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>`;
-            // @endforeach
-
-            // picModal += `                    </select>
-            //                                                     <input type="hidden" name="kode_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="tipe_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
-            //                                                 </td>
-            //                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
-            //                                             </tr>
-            //                                         </tbody>
-            //                                     </table>
-            //                                 </div>
-            //                             </div>
-            //                             <div class="modal-footer justify-content-center">
-            //                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            //                             </div>
-            //                         </div>
-            //                     </div>
-            //                 </div>`;
-
-
-            // $('body').append(picModal);
-
 
             $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
             i++
