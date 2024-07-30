@@ -430,6 +430,7 @@
             <div class="modal-body">
                 <form action="{{ route('customer.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="lokasi_id" value="{{$lokasis[0]->id}}">
                     <div class="mb-3">
                         <label for="nama" class="col-form-label">Nama</label>
                         <input type="text" class="form-control" name="nama" id="add_nama" required>
@@ -461,7 +462,7 @@
                     </div>
             </div>
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                 <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
             </form>
