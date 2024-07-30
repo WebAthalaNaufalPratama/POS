@@ -38,7 +38,7 @@ class DashboardController extends Controller
             $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
         } else {
             $lokasiId = $req->query('lokasi_id');
-            $lokasinama = Lokasi::find($lokasiId)->value('tipe_lokasi');
+            $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
         }
 
         if($lokasinama != 5) {
@@ -302,6 +302,7 @@ class DashboardController extends Controller
             $lokasinama = Lokasi::where('id', $lokasi)->value('tipe_lokasi');
         } else {
             $lokasi = $req->query('lokasi_id');
+            
             $lokasinama = Lokasi::where('id', $lokasi)->value('tipe_lokasi');
         }
         if($lokasinama != 5) {
@@ -412,8 +413,7 @@ class DashboardController extends Controller
             $lokasinama = Lokasi::where('id', $lokasi->lokasi_id)->value('tipe_lokasi');
         } else {
             $lokasiId = $req->query('lokasi_id');
-            $lokasi = Lokasi::find($lokasiId);
-            $lokasinama = Lokasi::find($lokasiId)->value('tipe_lokasi');
+            $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
         }
         if($lokasinama != 5) {
             if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
@@ -458,6 +458,7 @@ class DashboardController extends Controller
             } else {
                 $lokasiId = $req->query('lokasi_id');
                 $lokasi = Lokasi::find($lokasiId);
+                
     
                 $query = function ($query) {
                     $query->where('jumlah', '<', 0)
