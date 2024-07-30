@@ -363,7 +363,7 @@
                                                                 <button id="btnCheckPromo" name="btndipakai" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                                             </div>
                                                         </div>
-                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="0" readonly>
                                                     </h5>
                                                 </li>
                                                 <li>
@@ -376,7 +376,7 @@
                                                     </h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" readonly required>
+                                                            <input type="number" id="persen_ppn" name="persen_ppn" class="form-control" readonly required>
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                         <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" readonly required>
@@ -869,6 +869,8 @@
         });
         @endforeach
 
+       
+
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
             var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); // Mengonversi format Rupiah menjadi numerik
@@ -1001,6 +1003,19 @@
             Totaltagihan();
         });
 
+        $('#persen_ppn').on('input',function() {
+            var persenppn = parseFloat($(this).val());
+
+            if (persenppn > 100) {
+                alert('Persen PPN Tidak Boleh lebih dari 100');
+                $(this).val(100);
+            } else if (persenppn < 0) {
+                alert('Persen PPN Tidak Boleh kurang dari 0');
+                $(this).val(0);
+            }
+            Totaltagihan();
+        });
+
         $('#jenis_ppn').change(function() {
             var ppn = $(this).val();
             $('#persen_ppn').prop('readonly', true);
@@ -1023,22 +1038,26 @@
         $('#dp').on('input', function() {
             var inputNominal = $(this).val();
             var dpValue = parseRupiahToNumber(inputNominal);
+            var subtotal = parseRupiahToNumber($('#sub_total').val());
+            if (dpValue > subtotal || isNaN(subtotal)) {
+                alert('Jumlah DP tidak boleh melebihi Sub Total');
+                $(this).val(formatRupiah(subtotal, 'Rp '));
+                dpValue = subtotal; 
+            } else if (dpValue < 0) {
+                alert('Jumlah DP tidak boleh kurang dari 0');
+                $(this).val(formatRupiah(0, 'Rp '));
+                dpValue = 0; 
+            } else {
+                $(this).val(formatRupiah(dpValue, 'Rp '));
+            }
 
-            if (dpValue > 0) {
+            if (dpValue >= 0) {
                 $('#inputPembayaran').show();
                 $('#inputRekening').show();
                 $('#inputTanggalBayar').show();
                 $('#inputBuktiBayar').hide();
                 $('#nominal').val(formatRupiah(dpValue, 'Rp '));
-            } else {
-                $('#inputPembayaran').hide();
-                $('#inputRekening').hide();
-                $('#inputTanggalBayar').hide();
-                $('#inputBuktiBayar').hide();
             }
-
-            // Update input value to formatted Rupiah
-            $(this).val(formatRupiah(dpValue, 'Rp '));
         });
 
         $('#promo_id').change(function() {
@@ -1344,9 +1363,14 @@
         
             var promo = subtotal - (parseNumber(diskon_nominal) + point);
             // console.log(diskon_nominal);
-            var ppn = persenPPN * promo / 100;
-            var totalTagihan = promo + ppn + biayaOngkir - dp;
-            var sisaBayar = totalTagihan - dp;
+            var ppn = promo * (persenPPN / 100);
+            var totalTagihan = promo + ppn + biayaOngkir;
+            if(totalTagihan == 0) {
+                var sisaBayar = totalTagihan;
+            }else{
+                var sisaBayar = totalTagihan - dp;
+            }
+            
 
             $('#total_tagihan').val(formatRupiah(totalTagihan, 'Rp '));
             $('#sisa_bayar').val(formatRupiah(sisaBayar, 'Rp '));
