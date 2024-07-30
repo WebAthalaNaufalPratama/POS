@@ -3,23 +3,25 @@
 @section('content')
 <div class="row">
   <div class="col-12">
-    <div class="dash-count">
-      <div class="col-4">
-        <h2>Kas Pusat</h2>
-      </div>
-      <div class="col-lg-4 col-md-4 col-sm-4">
-        <select class="select2" name="rekening" id="filterRekening">
-          <option value="">Rekening</option>
-          @foreach($rekenings as $rekening)
-            <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
-          @endforeach
-        </select>
-      </div>
-      <div class="col-lg-2 col-md-2 col-sm-2">
-        <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kas_pusat.index') }}" class="btn btn-info">Filter</a>
-      </div>
-      <div class="col-lg-2 col-md-2 col-sm-2">
-        <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('kas_pusat.index') }}" class="btn btn-warning">Clear</a>
+    <div class="dash-count" style="background-color: rgb(255, 159, 67)">
+      <div class="row w-100">
+        <div class="col-lg-6 col-md-6 col-sm-12 mb-2 mb-md-0">
+          <h2>Kas Pusat</h2>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-end gap-2">
+          <div class="d-flex flex-column flex-md-row w-100">
+            <select class="form-select select2 w-100 w-md-auto" name="rekening" id="filterRekening">
+              <option value="">Rekening</option>
+              @foreach($rekenings as $rekening)
+              <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
+            @endforeach
+            </select>
+          </div>
+          <div class="d-flex flex-column flex-md-row gap-2 w-100">
+            <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kas_pusat.index') }}" class="btn btn-info w-100">Filter</a>
+            <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('kas_pusat.index') }}" class="btn btn-warning w-100">Clear</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -27,39 +29,54 @@
 <div class="row">
   <div class="col-sm-12">
     <div class="row">
-      <div class="col-lg-4 col-md-4 col-sm-12">
-        <div class="dash-widget dash1">
-          <div class="dash-widgetimg">
-            <span><img src="assets/img/icons/dash2.svg" alt="img" /></span>
-          </div>
-          <div class="dash-widgetcontent">
-            <h5>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h5>
-            <h6>Saldo Masuk</h6>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-4 col-sm-12">
-        <div class="dash-widget dash3">
-          <div class="dash-widgetimg">
-            <span><img src="assets/img/money-send-svgrepo-com.svg" alt="img" style="width: 50%" /></span>
-          </div>
-          <div class="dash-widgetcontent">
-            <h5>Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h5>
-            <h6>Saldo Keluar</h6>
+      <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
+        <div class="card rounded-3 overflow-hidden">
+          <div class="row g-0">
+            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e0f7e9;">
+              <img src="assets/img/icons/dash2.svg" alt="img" style="width: 48px; height: 48px;">
+            </div>
+            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #28a745; color: white;">
+              <div class="card-body">
+                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h3>
+                <h6>Saldo Masuk</h6>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-4 col-sm-12">
-        <div class="dash-widget dash4">
-          <div class="dash-widgetimg">
-            <span><img src="assets/img/balance-sheet.png" style="width: 50%" alt="img" /></span>
-          </div>
-          <div class="dash-widgetcontent">
-            <h5>Rp. <span class="counters-rupiah" data-count="{{  $saldoMasuk - $saldoKeluar }}"></span></h5>
-            <h6>Saldo</h6>
+      
+      <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
+        <div class="card rounded-3 overflow-hidden">
+          <div class="row g-0">
+            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #ffe6e6;">
+              <img src="assets/img/money-send-svgrepo-com.svg" alt="img" style="width: 48px; height: 48px;">
+            </div>
+            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #ff006a; color: white;">
+              <div class="card-body">
+                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h3>
+                <h6>Saldo Keluar</h6>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      
+      <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
+        <div class="card rounded-3 overflow-hidden">
+          <div class="row g-0">
+            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e6f0ff;">
+              <img src="assets/img/balance-sheet.png" alt="img" style="width: 48px; height: 48px;">
+            </div>
+            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #0131c3; color: white;">
+              <div class="card-body">
+                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk - $saldoKeluar }}"></span></h3>
+                <h6>Saldo</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+           
     </div>
   </div>
   <div class="col-sm-12">
@@ -68,9 +85,6 @@
           <div class="page-header">
               <div class="page-title">
                   <h4>Kas Masuk</h4>
-              </div>
-              <div class="page-btn">
-                  <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addkasmasuk" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kas Masuk</a>
               </div>
           </div>
       </div>
@@ -87,10 +101,10 @@
                   <th>Rekening Penerima</th>
                   <th>Tanggal</th>
                   <th>Nominal</th>
-                  <th>Biaya Lain</th>
+                  <th>Biaya Lainnya</th>
                   <th>Keterangan</th>
                   <th>Status</th>
-                  <th>Aksi</th>
+                  {{-- <th>Aksi</th> --}}
               </tr>
               </thead>
               <tbody>
@@ -109,21 +123,16 @@
                           <td>
                             <span class="badges {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : 'bg-lightgrey' }}">{{ $item->status ?? '-' }}</span>
                           </td>
-                          <td class="text-center">
+                          {{-- <td class="text-center">
                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
                             <ul class="dropdown-menu">
-                              @if(in_array('kas_pusat.edit', $thisUserPermissions) && in_array('kas_pusat.update', $thisUserPermissions))
                                 <li>
-                                    <a href="javascript:void(0);" onclick="edit_masuk({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    <a href="javascript:void(0);" onclick="edit({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                 </li>
-                              @endif
-                              <li>
-                                <a href="javascript:void(0);" onclick="bukti('{{ $item->file }}')" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
-                              </li>
                             </ul>
-                          </td>
+                          </td> --}}
                       </tr>
                   @endforeach
               </tbody>
@@ -140,7 +149,9 @@
                   <h4>Kas Keluar</h4>
               </div>
               <div class="page-btn">
+                @if(in_array('kas_gallery.create', $thisUserPermissions) && in_array('kas_gallery.store', $thisUserPermissions))
                   <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addkaskeluar" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Kas Keluar</a>
+                @endif
               </div>
           </div>
       </div>
@@ -150,14 +161,11 @@
               <thead>
               <tr>
                   <th>No</th>
+                  <th>Rekening</th>
                   <th>Jenis</th>
-                  <th>Pengirim</th>
-                  <th>Rekening Pengirim</th>
-                  <th>Penerima</th>
-                  <th>Rekening Penerima</th>
                   <th>Tanggal</th>
                   <th>Nominal</th>
-                  <th>Biaya Lain</th>
+                  <th>Biaya Lainnya</th>
                   <th>Keterangan</th>
                   <th>Status</th>
                   <th>Aksi</th>
@@ -167,11 +175,8 @@
                   @foreach ($dataKeluar as $item)
                       <tr>
                           <td>{{ $loop->iteration }}</td>
-                          <td>{{ $item->jenis ?? '-' }}</td>
-                          <td>{{ $item->lok_pengirim->nama ?? '-' }}</td>
                           <td>{{ $item->rek_pengirim->nama_akun ?? '-' }}</td>
-                          <td>{{ $item->lok_penerima->nama ?? '-' }}</td>
-                          <td>{{ $item->rek_penerima->nama_akun ?? '-' }}</td>
+                          <td>{{ $item->jenis ?? '-' }}</td>
                           <td>{{ $item->tanggal ? formatTanggal($item->tanggal) : '-' }}</td>
                           <td>{{ $item->nominal ? formatRupiah($item->nominal) : '-' }}</td>
                           <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : '-' }}</td>
@@ -184,10 +189,12 @@
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
                             <ul class="dropdown-menu">
+                              @if(in_array('kas_gallery.edit', $thisUserPermissions) && in_array('kas_gallery.update', $thisUserPermissions))
                                 <li>
-                                    <a href="javascript:void(0);" onclick="edit_keluar({{ $item->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                  <a href="javascript:void(0);" onclick="edit({{ $item->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                 </li>
-                                <li>
+                              @endif
+                              <li>
                                   <a href="javascript:void(0);" onclick="bukti('{{ $item->file }}')" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
                               </li>
                             </ul>

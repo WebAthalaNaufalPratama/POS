@@ -104,10 +104,10 @@
                     <h4>Pemakaian Sendiri</h4>
                 </div>
                 <div class="page-btn">
-                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalPemakaianSendiri" class="btn btn-secondary d-flex justify-content-center align-items-center mt-1"><img src="assets/img/icons/plus.svg" style="filter: brightness(0) invert(1);" alt="img" class="me-1" />
+                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalPemakaianSendiri" class="btn btn-added d-flex justify-content-center align-items-center mt-1"><img src="assets/img/icons/plus.svg" style="filter: brightness(0) invert(1);" alt="img" class="me-1" />
                         Tambah Pemakaian
                     </a>                    
-                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalLog" class="btn btn-secondary d-flex justify-content-center align-items-center mt-1"><img src="assets/img/icons/plus.svg" style="filter: brightness(0) invert(1);" alt="img" class="me-1" />
+                    <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalLog" class="btn btn-secondary d-flex justify-content-center align-items-center mt-1">
                         Log
                     </a>                    
                 </div>
@@ -193,7 +193,7 @@
 
 {{-- modal start --}}
 <div class="modal fade" id="modalPemakaianSendiri" tabindex="-1" aria-labelledby="modalPemakaianSendirilabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modalPemakaianSendirilabel">Pemakaian Sendiri</h5>
@@ -203,8 +203,8 @@
           <form action="{{ route('pemakaian_sendiri.store') }}" method="POST">
             @csrf
             <label for="lokasi_id" class="col-form-label">Lokasi</label>
-            <div class="row">
-                <div class="col">
+            <div class="row mb-2">
+                <div class="col-4">
                     <select id="lokasi_id" name="lokasi_id" class="form-control" required>
                         @if (Auth::user()->roles()->value('name') == 'AdminGallery')
                         <option value="{{ Auth::user()->karyawans->lokasi_id }}">{{ Auth::user()->karyawans->lokasi->nama }}</option>
@@ -216,20 +216,18 @@
                         @endif
                     </select>
                 </div>
-                <div class="col text-end">
-                    <button type="button" class="btn btn-info" id="add"><img src="assets/img/icons/plus.svg" alt="img" /></button>
-                </div>
             </div>
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
                            <th style="width: 5%">No</th> 
-                           <th>Tanggal</th> 
-                           <th>Produk</th> 
+                           <th style="width: 15%">Tanggal</th> 
+                           <th style="width: 30%">Produk</th> 
                            <th style="width: 5%">Jumlah</th> 
-                           <th>Pemakai</th> 
-                           <th>Alasan</th> 
+                           <th style="width: 20%">Pemakai</th> 
+                           <th style="width: 20%">Alasan</th>
+                           <th style="width: 5%" class="text-center"><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></th>
                         </tr>
                     </thead>
                     <tbody id="t_body_pemakaian">
@@ -269,26 +267,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- @php
-                            $previousId = null;
-                        @endphp --}}
                         @foreach ($mergedCollection as $key => $item)
                             <tr>
-                                {{-- @if ($item['Id Produk Terjual'] == $previousId)
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                @else --}}
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item['Waktu'] }}</td>
                                     <td>{{ $item['Pengubah'] }}</td>
                                     <td>{{ $item['No Referensi'] }}</td>
                                     <td>({{ $item['Kode Produk Jual'] }}) {{ $item['Nama Produk Jual'] }}</td>
-                                    {{-- @php
-                                        $previousId = $item['Id Produk Terjual'];
-                                    @endphp
-                                @endif --}}
                                 <td>({{ $item['Kode Komponen'] }}) {{ $item['Nama Komponen'] }}</td>
                                 <td>{{ $item['Kondisi'] }}</td>
                                 <td>{{ $item['Masuk'] }}</td>
@@ -342,7 +327,7 @@
                             '<td>'+
                                 '<textarea name="alasan[]" id="alasan_' + i + '" class="form-control" style="min-width:10rem" required></textarea>'+
                             '</td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                            '<td class="text-center"><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                             '</tr>';
                     $('#t_body_pemakaian').append(newRow);
                     $('#produk_inven_id_' + i + ', #karyawan_id_' + i).select2();
