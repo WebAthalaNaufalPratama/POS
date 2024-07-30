@@ -32,7 +32,7 @@
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -91,11 +91,14 @@
                                             <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                             </label>
                                             <label class="custom-file-container__custom-file">
-                                                <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required readonly>
+                                                <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
                                                 <span class="custom-file-container__custom-file__custom-file-control"></span>
                                             </label>
                                             <span class="text-danger">max 2mb</span>
-                                            <img id="preview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                            <div class="image-preview">
+                                                <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                            </div>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -158,7 +161,7 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                <div class="col-lg-8 col-sm-12 col-12 border radius mt-1">
+                                    <div class="col-lg-8 col-sm-12 col-12 border radius mt-1">
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
                                                 <table class="table table-responsive border rounded">
@@ -228,7 +231,7 @@
                         </div>
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="{{ route('mutasigalery.index') }}" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('mutasigalerygalery.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>
@@ -930,6 +933,11 @@
 
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(event.target.files[0]);
             if (file.size > 2 * 1024 * 1024) {
                 toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
                     closeButton: true,

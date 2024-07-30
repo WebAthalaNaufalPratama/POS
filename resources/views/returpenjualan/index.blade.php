@@ -88,7 +88,7 @@
                                             @if($retur->status != 'DIBATALKAN')
                                             @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
                                                 <a class="dropdown-item" href="{{ route('auditretur.edit', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Auditor</a>
-                                            @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirAdmin']) && $retur->status != 'DIKONFIRMASI')
+                                            @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $retur->status != 'DIKONFIRMASI')
                                                 <a class="dropdown-item" href="{{ route('auditretur.edit', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                             @endif
                                             @if($lokasi->lokasi->tipe_lokasi != 2 && $retur->komplain == 'retur')
@@ -100,7 +100,7 @@
                                             @if($lokasi->lokasi->tipe_lokasi != 2)
                                             <a class="dropdown-item" href="{{ route('returpenjualan.view', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">View</a>
                                             @endif
-                                            @if($lokasi->lokasi->tipe_lokasi == 2)
+                                            @if($lokasi->lokasi->tipe_lokasi == 2 & $retur->status == 'DIKONFIRMASI')
                                                 <a class="dropdown-item" href="{{ route('mutasioutlet.create', ['returpenjualan' => $retur->id]) }}"><img src="assets/img/icons/truck.svg" class="me-2" alt="img">Mutasi Outlet Ke Galery</a>
                                             @endif
                                             @else

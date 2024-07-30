@@ -92,11 +92,12 @@
                                                 <label>Bukti<a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*">
+                                                    <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <img id="preview" />
+                                                <div class="custom-file-container__image-preview"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -211,7 +212,7 @@
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="{{ route('penjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('mutasighgalery.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>
@@ -409,7 +410,7 @@
             $('#biaya_pengiriman').val(parseRupiahToNumber($('#biaya_pengiriman').val()));
         });
 
-        $('#bukti').on('change', function() {
+        $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
             if (file.size > 2 * 1024 * 1024) {
                 toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
@@ -431,7 +432,7 @@
         });
 
         function clearFile() {
-            $('#bukti').val('');
+            $('#bukti_file').val('');
             $('#preview').attr('src', defaultImg);
         };
     });

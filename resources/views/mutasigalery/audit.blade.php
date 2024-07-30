@@ -225,7 +225,7 @@
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Biaya</h4>
-                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ 'Rp '. number_format($mutasis->total_biaya, 0, ',', '.') }}"  required></h5>
+                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ 'Rp '. number_format($mutasis->total_biaya, 0, ',', '.') }}"  required readonly></h5>
                                                 </li>
                                             </ul>
                                         </div>

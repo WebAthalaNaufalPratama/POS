@@ -32,7 +32,7 @@
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -60,14 +60,14 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="no_mutasi">No Mutasi</label>
-                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" >
+                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -121,7 +121,7 @@
                                                     <tr>
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
+
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -139,40 +139,43 @@
                                                             <input type="hidden" name="nama_produk[]" class="form-control" value="{{ $produk->id}}">
                                                             <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" >
                                                                 @php
-                                                                    $isTRDSelected = false; // Reset the variable each time the loop starts
-                                                                    $selectedTRDKode = ''; // Initialize the selected TRD product code
-                                                                    $selectedGFTKode = ''; // Initialize the selected GFT product code
+                                                                    $isTRDSelected = false; 
+                                                                    $selectedTRDKode = ''; 
+                                                                    $selectedGFTKode = ''; 
                                                                 @endphp
                                                                 @foreach ($produkjuals as $index => $pj)
-                                                                    @php
-                                                                    if($pj->produk && $produk->produk->kode){
-                                                                        $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
-                                                                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
-                                                                        if($isSelectedTRD){
-                                                                            $isTRDSelected = true;                                             // Reset selected TRD code
-                                                                            $selectedTRDKode = '';
-                                                                            foreach ($pj->komponen as $komponen) {
-                                                                                if ($komponen->kondisi) {
-                                                                                    foreach($kondisis as $kondisi) {
-                                                                                        if($kondisi->id == $komponen->kondisi) {
-                                                                                            // Set selected TRD code based on condition
-                                                                                            $selectedTRDKode = $kondisi->nama;
-                                                                                            $selectedTRDJumlah = $komponen->jumlah;
-                                                                                        }
+                                                                @php
+                                                                if($pj->produk && $produk->produk->kode){
+                                                                    $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                                                                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                                                                    if($isSelectedTRD) {
+                                                                        $isTRDSelected = true;
+                                                                        // Reset selected TRD code
+                                                                        $selectedTRDKode = '';
+                                                                        foreach ($pj->komponen as $komponen) {
+                                                                            if ($komponen->kondisi) {
+                                                                                foreach($kondisis as $kondisi) {
+                                                                                    if($kondisi->id == $komponen->kondisi) {
+                                                                                        // Set selected TRD code based on condition
+                                                                                        $selectedTRDKode = $kondisi->nama;
+                                                                                        $selectedTRDJumlah = $komponen->jumlah;
                                                                                     }
                                                                                 }
                                                                             }
                                                                         }
                                                                     }
-                                                                    @endphp
-                                                                    <option value="{{ $pj->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
-                                                                        @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
-                                                                            {{ $pj->produk->nama }}
-                                                                        @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
-                                                                            {{ $pj->produk->nama }}
-                                                                        @endif
-                                                                    </option>
-                                                                @endforeach
+                                                                }
+                                                                @endphp
+                                                                <!-- @if($pj->produk) -->
+                                                                <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                                    @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                                        {{ $pj->produk->nama }}
+                                                                    @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                        {{ $pj->produk->nama }}
+                                                                    @endif
+                                                                </option>
+                                                                <!-- @endif -->
+                                                            @endforeach
                                                             </select>
                                                             @if($isTRDSelected)
                                                                 <div class="row mt-2">
@@ -219,7 +222,6 @@
 
                                                         </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
-                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}"></td>
 
 
                                                     </tr>
@@ -297,7 +299,7 @@
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Biaya</h4>
-                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ 'Rp '. number_format($mutasis->total_biaya, 0, ',', '.') }}"  required></h5>
+                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ 'Rp '. number_format($mutasis->total_biaya, 0, ',', '.') }}"  required readonly></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -307,7 +309,7 @@
                         </div>
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            <a href="{{ route('mutasigalery.index') }}" class="btn btn-secondary" type="button">Back</a>
+                            <a href="{{ route('mutasioutlet.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
         </div>
@@ -791,114 +793,63 @@
             updateHargaSatuan(this);
         });
 
-        // $('#delivery_order_section').show();
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
 
-        // $('#distribusi').change(function() {
-        //     if ($(this).val() === 'Diambil') {
-        //         $('#delivery_order_section').hide();
-        //     } else {
-        //         $('#delivery_order_section').show();
-        //     }
-        // });
-
-        $('#btnCheckPromo').click(function(e) {
-            e.preventDefault();
-            var total_transaksi = $('#total_tagihan').val();
-            // console.log(total_transaksi);
-            var produk = [];
-            var tipe_produk = [];
-            $('select[id^="nama_produk_"]').each(function() {
-                produk.push($(this).val());
-                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
-            });
-            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
-            checkPromo(total_transaksi, tipe_produk, produk);
-        });
-
-        $('#cara_bayar').change(function() {
-            var pembayaran = $(this).val();
-
-            $('#inputCash').hide();
-            $('#inputTransfer').hide();
-
-            if (pembayaran === "cash") {
-                $('#inputCash').show();
-            } else if (pembayaran === "transfer") {
-                $('#inputTransfer').show();
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
             }
-        });
 
-        var pilihan = "{{ $mutasis->pilih_pengiriman}}";
-        if (pilihan === "sameday") {
-            $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
-        } else if (pilihan === "exspedisi") {
-            $('#inputExspedisi').show();
-            $('#biaya_pengiriman').prop('readonly', true);
-            ongkirId();
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
         }
+
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
             var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
 
             $('#inputOngkir').hide();
             $('#inputExspedisi').hide();
-            if (pilihan === "sameday") {
+
+            if (pengiriman === "sameday") {
                 $('#inputOngkir').show();
                 $('#biaya_pengiriman').prop('readonly', false);
-            } else if (pilihan === "exspedisi") {
+            } else if (pengiriman === "exspedisi") {
                 $('#inputExspedisi').show();
                 $('#biaya_pengiriman').prop('readonly', true);
-                ongkirId();
+                $('#ongkir_id').trigger('change');
             }
         });
 
-        $('#ongkir_id').change(function() {
+         $('#pilih_pengiriman').trigger('change');
+
+         $('#ongkir_id').on('change',function() {
             var selectedOption = $(this).find('option:selected');
             var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
-            $('#biaya_pengiriman').val(ongkirValue);
+            $('#biaya_pengiriman').val(formatRupiah(ongkirValue));
             Totaltagihan();
         });
 
-        $('#jenis_ppn').change(function() {
-            var ppn = $(this).val();
-            $('#persen_ppn').prop('readonly', true);
-            var subtotal = parseFloat($('#sub_total').val()) || 0;
-            var hitungppn = (11 * subtotal) / 100;
-            console.log(hitungppn);
+        if ($('#pilih_pengiriman').val() === "exspedisi") {
+            $('#ongkir_id').trigger('change');
+        }
 
-            if (ppn === "include") {
-                $('#persen_ppn').val(0);
-                $('#jumlah_ppn').val(0);
-                $('#persen_ppn').prop('readonly', true);
-            } else if (ppn === "exclude") {
-                $('#persen_ppn').prop('readonly', false);
-                $('#persen_ppn').val(11);
-                $('#jumlah_ppn').val(hitungppn);
-            }
-            Totaltagihan();
-        });
+        Totaltagihan();
 
-        $('#dp').on('input', function() {
-            var inputNominal = $(this).val();
-            var dpValue = parseFloat($(this).val());
+        function Totaltagihan() {
+            var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
+            var totalTagihan = biayaOngkir;
 
-            if (parseInt(inputNominal) > 0) {
-                $('#inputPembayaran').show();
-                $('#inputRekening').show();
-                $('#inputTanggalBayar').show();
-                $('#inputBuktiBayar').show();
-                $('#nominal').val(dpValue);
-                // alert('Nominal pembayaran tidak boleh lebih dari sisa bayar!');
-                // $(this).val(0);
-            } else {
-                $('#inputPembayaran').hide();
-                $('#inputRekening').hide();
-                $('#inputTanggalBayar').hide();
-                $('#inputBuktiBayar').hide();
-            }
-        });
+            $('#total_biaya').val(formatRupiah(totalTagihan));
+            $('#biaya_pengiriman').val(formatRupiah(biayaOngkir));
+        }
+
+        $('#biaya_pengiriman').on('input', Totaltagihan);
 
         $('input[id^="jumlah_diterima_"]').on('input', function() {
             var inputDiterima = $(this).val();
@@ -910,117 +861,6 @@
             }
         });
 
-        $('#promo_id').change(function() {
-            var promo_id = $(this).select2().find(":selected").val()
-            if (!promo_id) {
-                $('#total_promo').val(0);
-                total_harga();
-                return 0;
-            }
-            calculatePromo(promo_id);
-        });
-
-        $('#id_customer').change(function() {
-            var pointInput = $('#point_dipakai');
-            var selectedOption = $(this).find('option:selected');
-            var pointValue = selectedOption.data('point');
-            if ($('#cek_point').prop('checked')) {
-                pointInput.val(pointValue);
-            } else {
-                pointInput.val(0);
-            }
-            var hpInput = $('#nohandphone');
-            var hpValue = selectedOption.data('hp');
-            hpInput.val(hpValue);
-        });
-
-        $('#cek_point').change(function() {
-            var pointInput = $('#point_dipakai');
-            var selectedOption = $('#id_customer').find('option:selected');
-            var pointValue = selectedOption.data('point');
-            if ($(this).prop('checked')) {
-                pointInput.val(pointValue);
-            } else {
-                pointInput.val(0);
-            }
-        });
-
-
-        function checkPromo(total_transaksi, tipe_produk, produk) {
-            $('#total_promo').val(0);
-            var data = {
-                total_transaksi: total_transaksi,
-                tipe_produk: tipe_produk,
-                produk: produk
-            };
-            $.ajax({
-                url: '/checkPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    $('#promo_id').empty()
-                    $('#promo_id').append('<option value="">Pilih Diskon</option>')
-
-                    var min_transaksi = response.min_transaksi;
-                    for (var j = 0; j < min_transaksi.length; j++) {
-                        var promo = min_transaksi[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    var tipe_produk = response.tipe_produk;
-                    for (var j = 0; j < tipe_produk.length; j++) {
-                        var promo = tipe_produk[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    var produk = response.produk;
-                    for (var j = 0; j < produk.length; j++) {
-                        var promo = produk[j];
-                        $('#promo_id').append('<option value="' + promo.id + '">' + promo.nama + '</option>');
-                    }
-                    $('#promo_id').attr('disabled', false);
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                },
-                complete: function() {
-                    $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip"></i>')
-                }
-            });
-        }
-
-        function updateHargaSatuan(select) {
-            var index = select.selectedIndex;
-            var hargaSatuanInput = $('#harga_satuan_0');
-            var selectedOption = $(select).find('option').eq(index);
-            var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
-        }
-        $('#nama_produk').on('change', function() {
-            updateHargaSatuan(this);
-        });
-
-        function updateHargaSatuan(select) {
-            var index = select.selectedIndex;
-            var hargaSatuanInput = $('#harga_satuan_' + select.id.split('_')[2]);
-            var selectedOption = $(select).find('option').eq(index);
-            var hargaProduk = selectedOption.data('harga');
-            hargaSatuanInput.val(hargaProduk);
-            multiply(hargaSatuanInput);
-        }
-
-        function updateSubTotal() {
-            var subTotalInput = $('#sub_total');
-            var hargaTotalInputs = $('input[name="harga_total[]"]');
-            var subTotal = 0;
-
-            hargaTotalInputs.each(function() {
-                subTotal += parseFloat($(this).val()) || 0;
-            });
-
-            subTotalInput.val(subTotal.toFixed(2));
-        }
 
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
@@ -1047,46 +887,6 @@
             $('#bukti_file').val('');
             $('#preview').attr('src', defaultImg);
         };
-
-        function calculatePromo(promo_id) {
-            var data = {
-                promo_id: promo_id,
-            };
-            $.ajax({
-                url: '/getPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
-                    var total_promo;
-                    switch (response.diskon) {
-                        case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
-                            // console.log(total_promo);
-                            break;
-                        case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
-                            break;
-                        case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
-                            break;
-                        case 'produk':
-                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
-                            break;
-                        default:
-                            break;
-                    }
-                    $('#total_promo').val(total_promo);
-                    Totaltagihan();
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                }
-            });
-        }
 
         function Totaltagihan() {
             var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;

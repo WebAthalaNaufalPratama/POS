@@ -32,7 +32,7 @@
                         @csrf
                         @method('patch')
                         <div class="row justify-content-around">
-                            <div class="col-md-6 border rounded pt-3 me-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Mutasi</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -67,7 +67,7 @@
                             </div>
 
 
-                            <div class="col-md-5 border rounded pt-3 ms-1">
+                            <div class="col-md-6 border rounded pt-3">
                                 <!-- <h5>Informasi Invoice</h5> -->
                                 <div class="row">
                                     <div class="col-md-12">
@@ -87,15 +87,21 @@
                                                 <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
                                             </select>
                                         </div>
-                                        <div class="custom-file-container" data-upload-id="myFirstImage">
-                                            <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                            </label>
-                                            <label class="custom-file-container__custom-file">
-                                                <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required readonly>
-                                                <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                            </label>
-                                            <span class="text-danger">max 2mb</span>
-                                            <img id="preview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                        <div class="form-group">
+                                            <!-- <input type="file" id="bukti_file" name="bukti_file" placeholder="Bukti File Invoice" aria-describedby="inputGroupPrepend2" required disabled> -->
+                                            <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                <label>Bukti Mutasi <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                </label>
+                                                <label class="custom-file-container__custom-file">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
+                                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                </label>
+                                                <span class="text-danger">max 2mb</span>
+                                                <div class="image-preview">
+                                                    <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" />
+                                                </div>
+                                                
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -119,7 +125,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
-                                                    @if(count($mutasis->produkMutasiOutlet) > 0)
+                                                @if(count($mutasis->produkMutasiOutlet) > 0)
                                                     @php
                                                     $i = 0;
                                                     @endphp
@@ -129,48 +135,51 @@
                                                         @php
                                                             $isTRDSelected = false;
                                                         @endphp
-                                                            
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly>
+                                                            <input type="hidden" name="nama_produk[]" class="form-control" value="{{ $produk->id}}">
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" disabled>
                                                                 @php
-                                                                    $isTRDSelected = false; // Reset the variable each time the loop starts
-                                                                    $selectedTRDKode = ''; // Initialize the selected TRD product code
-                                                                    $selectedGFTKode = ''; // Initialize the selected GFT product code
+                                                                    $isTRDSelected = false; 
+                                                                    $selectedTRDKode = ''; 
+                                                                    $selectedGFTKode = ''; 
                                                                 @endphp
                                                                 @foreach ($produkjuals as $index => $pj)
-                                                                    @php
-                                                                    if($pj->produk && $produk->produk->kode){
-                                                                        $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
-                                                                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_mutasiog ==  $mutasis->no_mutasi && $pj->jenis != 'TAMBAHAN');
-                                                                        if($isSelectedTRD){
-                                                                            $isTRDSelected = true;                                             // Reset selected TRD code
-                                                                            $selectedTRDKode = '';
-                                                                            foreach ($pj->komponen as $komponen) {
-                                                                                if ($komponen->kondisi) {
-                                                                                    foreach($kondisis as $kondisi) {
-                                                                                        if($kondisi->id == $komponen->kondisi) {
-                                                                                            // Set selected TRD code based on condition
-                                                                                            $selectedTRDKode = $kondisi->nama;
-                                                                                            $selectedTRDJumlah = $komponen->jumlah;
-                                                                                        }
+                                                                @php
+                                                                if($pj->produk && $produk->produk->kode){
+                                                                    $isSelectedTRD = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'TRD' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                                                                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                                                                    if($isSelectedTRD) {
+                                                                        $isTRDSelected = true;
+                                                                        // Reset selected TRD code
+                                                                        $selectedTRDKode = '';
+                                                                        foreach ($pj->komponen as $komponen) {
+                                                                            if ($komponen->kondisi) {
+                                                                                foreach($kondisis as $kondisi) {
+                                                                                    if($kondisi->id == $komponen->kondisi) {
+                                                                                        // Set selected TRD code based on condition
+                                                                                        $selectedTRDKode = $kondisi->nama;
+                                                                                        $selectedTRDJumlah = $komponen->jumlah;
                                                                                     }
                                                                                 }
                                                                             }
                                                                         }
                                                                     }
-                                                                    @endphp
-                                                                    <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
-                                                                        @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
-                                                                            {{ $pj->produk->nama }}
-                                                                        @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
-                                                                            {{ $pj->produk->nama }}
-                                                                        @endif
-                                                                    </option>
-                                                                @endforeach
+                                                                }
+                                                                @endphp
+                                                                <!-- @if($pj->produk) -->
+                                                                <option value="{{ $produk->id }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }} readonly>
+                                                                    @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                                        {{ $pj->produk->nama }}
+                                                                    @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                        {{ $pj->produk->nama }}
+                                                                    @endif
+                                                                </option>
+                                                                <!-- @endif -->
+                                                            @endforeach
                                                             </select>
                                                             @if($isTRDSelected)
                                                                 <div class="row mt-2">
                                                                     <div class="col">
-                                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" disabled>
                                                                             <option value=""> Pilih Kondisi </option>
                                                                             @foreach ($kondisis as $kondisi)
                                                                             <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
@@ -191,7 +200,7 @@
                                                                                     <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                                 </div>
                                                                                 <div class="col">
-                                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" readonly>
+                                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" disabled>
                                                                                         <option value=""> Pilih Kondisi </option>
                                                                                         @foreach ($kondisis as $kondisi)
                                                                                         <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
@@ -262,7 +271,7 @@
                                             <ul>
                                                 <li>
                                                     <h4>Pengiriman
-                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" readonly>
+                                                    <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control" disabled>
                                                         <option value="">Pilih Jenis Pengiriman</option>
                                                         <option value="exspedisi" {{ $mutasis->pilih_pengiriman == 'exspedisi' ? 'selected' : ''}}>Ekspedisi</option>
                                                         <option value="sameday" {{ $mutasis->pilih_pengiriman == 'sameday' ? 'selected' : ''}}>SameDay</option>
@@ -275,7 +284,7 @@
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
-                                                        <select id="ongkir_id" name="ongkir_id" class="form-control" readonly>
+                                                        <select id="ongkir_id" name="ongkir_id" class="form-control" disabled>
                                                             <option value="">Pilih Alamat Tujuan</option>
                                                             @foreach($ongkirs as $ongkir)
                                                             <option value="{{ $ongkir->id }}" data-biaya_pengiriman="{{ $ongkir->biaya}}" {{ $mutasis->ongkir_id == $ongkir->id ? 'selected' : ''}}>{{ $ongkir->nama }}</option>
@@ -997,6 +1006,11 @@
 
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(event.target.files[0]);
             if (file.size > 2 * 1024 * 1024) {
                 toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
                     closeButton: true,
@@ -1020,46 +1034,6 @@
             $('#bukti_file').val('');
             $('#preview').attr('src', defaultImg);
         };
-
-        function calculatePromo(promo_id) {
-            var data = {
-                promo_id: promo_id,
-            };
-            $.ajax({
-                url: '/getPromo',
-                type: 'GET',
-                data: data,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
-                    var total_promo;
-                    switch (response.diskon) {
-                        case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
-                            // console.log(total_promo);
-                            break;
-                        case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
-                            break;
-                        case 'poin':
-                            total_promo = 'poin ' + response.diskon_poin;
-                            break;
-                        case 'produk':
-                            total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
-                            break;
-                        default:
-                            break;
-                    }
-                    $('#total_promo').val(total_promo);
-                    Totaltagihan();
-                },
-                error: function(xhr, status, error) {
-                    console.log(error)
-                }
-            });
-        }
 
         function Totaltagihan() {
             var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
