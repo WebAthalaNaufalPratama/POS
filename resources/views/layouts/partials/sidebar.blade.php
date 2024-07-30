@@ -184,6 +184,12 @@
                     </ul>
                 </li>
                 @endrole
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/purchase1.svg" alt="img"><span> Laporan</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan.kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                    </ul>
+                </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>
