@@ -43,7 +43,7 @@ class OngkirController extends Controller
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
             'lokasi_id' => 'required|integer',
-            'biaya' => 'required',
+            'biaya' => 'required|integer',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);

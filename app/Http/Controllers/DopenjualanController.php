@@ -83,7 +83,7 @@ class DopenjualanController extends Controller
         // dd($penjualans);
         $kondisis = Kondisi::all();
         $user = Auth::user();
-        $lokasis = Lokasi::find($user);
+        // $lokasis = Lokasi::find($user);
         $karyawans = Karyawan::where('jabatan', 'Driver')->get();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         // dd($produks);
@@ -99,7 +99,7 @@ class DopenjualanController extends Controller
         }
         // dd($produks);
 
-        return view('dopenjualan.create', compact('kondisis','penjualans', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals', 'cekInvoice'));
+        return view('dopenjualan.create', compact('kondisis','penjualans', 'karyawans', 'produks', 'customers', 'produks', 'produkjuals', 'cekInvoice'));
     }
 
     public function store(Request $req)
