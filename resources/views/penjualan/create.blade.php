@@ -671,7 +671,7 @@
         var diskonType = $('#jenis_diskon_' + index).val();
         var diskonValue = parseFloat($('#diskon_' + index).val());
         var jumlah = parseFloat($('#jumlah_' + index).val());
-        var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_satuan_' + index).val()));
+        var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_satuan_' + index).val())); // Mengonversi hargaSatuan ke angka
         var hargaTotal = 0;
 
         if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
@@ -680,20 +680,26 @@
 
         if (!isNaN(hargaTotal)) {
             if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue;
-                if(hargaTotal <= 0){
-                    hargaTotal = 0;
-                    alert('nominal tidak boleh melebihi harga total');
+                if (diskonValue > hargaTotal) {
+                    alert('Nominal tidak boleh melebihi harga total');
                     diskonValue = 0;
+                    $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
+                } else {
+                    hargaTotal -= diskonValue;
+                    $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
                 }
-                $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
             } else if (diskonType === "persen" && !isNaN(diskonValue)) {
-                var diskonPersen = (hargaTotal * diskonValue / 100); 
-                hargaTotal -= diskonPersen; 
-                if(hargaTotal <= 0){
-                    hargaTotal = 0;
-                    alert('diskon tidak boleh melebihi harga total');
-                    diskonPersen = 0;
+                if (diskonValue > 100) {
+                    alert('Diskon tidak boleh 100% atau lebih');
+                    diskonValue = 0;
+                    $('#diskon_' + index).val(diskonValue);
+                } else {
+                    var diskonPersen = (hargaTotal * diskonValue / 100);
+                    if (diskonPersen > hargaTotal) {
+                        alert('Diskon tidak boleh melebihi harga total');
+                        diskonPersen = 0;
+                    }
+                    hargaTotal -= diskonPersen;
                 }
             }
         }
@@ -711,9 +717,21 @@
 
         // Format subtotal kembali ke format Rupiah sebelum menetapkannya ke input
         $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
+        $('#jenis_ppn').trigger('change');
     }
 
+    function validateNumericInput() {
+        $('input[id^="diskon_"]').on('input', function() {
+            var value = $(this).val();
+            var numericValue = value.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
 
+            if (numericValue !== value) {
+                $(this).val(numericValue);
+            }
+        });
+    }
+
+    validateNumericInput();
 
     function copyDataToModal(index) {
         var namaProdukValue = $('#nama_produk_' + index).val();
