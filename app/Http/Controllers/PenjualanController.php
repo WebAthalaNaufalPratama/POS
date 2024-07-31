@@ -902,15 +902,14 @@ class PenjualanController extends Controller
         $penjualan = Penjualan::where('id', $penjualanId)->first();
 
         if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
-            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua') ||
-            (!$user->hasRole(['Auditor', 'Finance']))) {
+            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua')) {
             $deletepj = Produk_Terjual::with('komponen')->where('no_invoice', $penjualan->no_invoice)->get();
             //penambahan komponen produk terjual yang di edit
             $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
             if($lokasi->tipe_lokasi == 1) {
                 foreach($deletepj as $deletepjList) 
                 {
-                    foreach($deletepj->komponen as $komponen) 
+                    foreach($deletepjList->komponen as $komponen) 
                     {
                         $allStockAvailable = true;
 
@@ -934,7 +933,7 @@ class PenjualanController extends Controller
             }else if($lokasi->tipe_lokasi == 2) {
                 foreach($deletepj as $deletepjList) 
                 {
-                    foreach($deletepj->komponen as $komponen) 
+                    foreach($deletepjList->komponen as $komponen) 
                     {
                         $allStockAvailable = true;
 
