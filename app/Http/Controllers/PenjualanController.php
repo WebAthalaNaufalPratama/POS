@@ -900,6 +900,70 @@ class PenjualanController extends Controller
         $data = $req->except(['_token', '_method', 'bukti', 'status_bayar', 'nominal', 'no_invoice_bayar', 'harga_total', 'diskon','jenis_diskon',  'jumlah', 'harga_satuan', 'nama_produk', 'DataTables_Table_0_length', 'DataTables_Table_1_length' , 'penjualan', 'file', 'ubahapa' ]);
 
         $penjualan = Penjualan::where('id', $penjualanId)->first();
+
+        if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
+            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua') ||
+            (!$user->hasRole(['Auditor', 'Finance']))) {
+            $deletepj = Produk_Terjual::with('komponen')->where('no_invoice', $penjualan->no_invoice)->get();
+            //penambahan komponen produk terjual yang di edit
+            $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+            if($lokasi->tipe_lokasi == 1) {
+                foreach($deletepj as $deletepjList) 
+                {
+                    foreach($deletepj->komponen as $komponen) 
+                    {
+                        $allStockAvailable = true;
+
+                        $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if (!$stok) {
+                            $allStockAvailable = false;
+                            break 2; // Keluar dari kedua loop
+                        }
+
+                        $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($deletepjList->jumlah));
+                        $stok->update();
+                    }
+                }
+
+                if (!$allStockAvailable) {
+                    return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                }
+            }else if($lokasi->tipe_lokasi == 2) {
+                foreach($deletepj as $deletepjList) 
+                {
+                    foreach($deletepj->komponen as $komponen) 
+                    {
+                        $allStockAvailable = true;
+
+                        $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if (!$stok) {
+                            $allStockAvailable = false;
+                            break 2; // Keluar dari kedua loop
+                        }
+
+                        $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($deletepjList->jumlah));
+                        $stok->update();
+                    }
+                }
+
+                if (!$allStockAvailable) {
+                    return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                }
+            }
+            
+            //
+            if ($deletepj->isNotEmpty()) {
+                $array = $deletepj->pluck('id')->toArray();
+                Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
+                Produk_Terjual::whereIn('id', $array)->forceDelete();
+            }
+        }
         //update poin
         if($penjualan->status == 'DIKONFIRMASI'){
             function extractNumber($string) {
@@ -932,16 +996,6 @@ class PenjualanController extends Controller
             $data['auditor_id'] = Auth::user()->id;
         }elseif($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
             $data['dibukukan_id'] = Auth::user()->id;
-        }
-        if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
-            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua') ||
-            (!$user->hasRole(['Auditor', 'Finance']))) {
-            $deletepj = Produk_Terjual::where('no_invoice', $penjualan->no_invoice)->get();
-            if ($deletepj->isNotEmpty()) {
-                $array = $deletepj->pluck('id')->toArray();
-                Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
-                Produk_Terjual::whereIn('id', $array)->forceDelete();
-            }
         }
 
         if ($penjualan) {
