@@ -962,7 +962,16 @@ class PenjualanController extends Controller
                 Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
                 Produk_Terjual::whereIn('id', $array)->forceDelete();
             }
+        }else if(!$user->hasRole(['Auditor', 'Finance'])) {
+
+            $deletepj = Produk_Terjual::with('komponen')->where('no_invoice', $penjualan->no_invoice)->get();
+            if ($deletepj->isNotEmpty()) {
+                $array = $deletepj->pluck('id')->toArray();
+                Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
+                Produk_Terjual::whereIn('id', $array)->forceDelete();
+            }
         }
+        
         //update poin
         if($penjualan->status == 'DIKONFIRMASI'){
             function extractNumber($string) {

@@ -110,11 +110,13 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
-                                                <option value="TUNDA" {{$penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
-                                                <option value="DIKONFIRMASI" {{$penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
                                                 @php
                                                     $user = Auth::user();
                                                 @endphp
+                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
+                                                    <option value="TUNDA" {{$penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                @endif
+                                                <option value="DIKONFIRMASI" {{$penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
                                                 @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
                                                     <option value="DIBATALKAN" {{$penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALAKAN</option>
                                                 @endif
