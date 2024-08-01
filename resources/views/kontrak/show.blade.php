@@ -141,8 +141,10 @@
                                         <th>Harga Satuan</th>
                                         <th>Jumlah</th>
                                         <th>Harga Total</th>
+                                        @if(in_array('getProdukTerjual', $thisUserPermissions) && (($kontraks->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery')) || $kontraks->status == 'DIKONFIRMASI' && Auth::user()->hasRole('Auditor') || Auth::user()->hasRole('Finance')))
                                         <th></th>
                                         <th></th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field">
@@ -179,7 +181,7 @@
                                             <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->harga }}" disabled></td>
                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ $komponen->jumlah }}" disabled></td>
                                             <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ $komponen->harga_jual }}" readonly></td>
-                                            @if( in_array('getProdukTerjual', $thisUserPermissions))
+                                            @if(in_array('getProdukTerjual', $thisUserPermissions) && (($kontraks->status == 'TUNDA' && Auth::user()->hasRole('AdminGallery')) || $kontraks->status == 'DIKONFIRMASI' && Auth::user()->hasRole('Auditor') || Auth::user()->hasRole('Finance')))
                                             <td>
                                                 @if ($komponen->produk->tipe_produk == 6)
                                                 <button id="btnGift_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-info w-100">Set Gift</button>
@@ -443,7 +445,7 @@
             </div>
             <div class="mb-3">
               <label for="jml_perangkai" class="col-form-label">Jumlah Perangkai</label>
-              <input type="number" class="form-control" name="jml_perangkai" id="jml_perangkai" required>
+              <input type="number" class="form-control" name="jml_perangkai" id="jml_perangkai" min="0" oninput="validateMinZero(this, 10)" required>
             </div>
             <div class="mb-3">
                 <label for="perangkai_id" class="col-form-label">Perangkai</label>
@@ -469,7 +471,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalSetGift">Atur Gift</h5>
+          <h5 class="modal-title" >Atur Gift</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
@@ -491,7 +493,7 @@
             </div>
             <div class="mb-3">
               <label for="jml_new_produk" class="col-form-label">Jumlah Bunga/Pot</label>
-              <input type="number" class="form-control" id="jml_new_produk" required>
+              <input type="number" class="form-control" id="jml_new_produk" min="0" oninput="validateMinZero(this, 10)" required>
             </div>
             <div class="mb-3">
                 <label for="new_produk" class="col-form-label">Bunga/Pot</label>
@@ -499,7 +501,7 @@
                     <div id="div_produk_jumlah_0" class="row">
                         <div class="col-sm-6">
                             <select id="new_produk_0" name="new_produk[]" class="form-control" required>
-                                <option value="">Pilih Bunga/Produk</option>
+                                <option value="">Pilih Bunga/Pot</option>
                                 @foreach ($bungapot as $item)
                                   <option value="{{ $item->id }}">({{ $item->tipe->nama }}) {{ $item->nama }}</option>
                                 @endforeach
@@ -534,6 +536,7 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
+            $('#sales').trigger('change');
             $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
             var i = 1;
             $('#add').click(function(){
@@ -590,40 +593,6 @@
             $('#tanggal_selesai').val(tanggalAkhir);
             $('#masa_sewa').val(12);
         });
-        $('#ongkir_id').on('change', function() {
-            var ongkir = $("#ongkir_id option:selected").text();
-            var biaya = ongkir.split('-')[1];
-            $('#ongkir_nominal').val(parseInt(biaya));
-            total_harga();
-        });
-        $('#btnCheckPromo').click(function(e) {
-            e.preventDefault();
-            var total_transaksi = $('#subtotal').val();
-            var produk = [];
-            var tipe_produk = [];
-            $('select[id^="produk_"]').each(function() {
-                produk.push($(this).val());
-                tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
-
-            });
-            $(this).html('<span class="spinner-border spinner-border-sm me-2">')
-            checkPromo(total_transaksi, tipe_produk, produk);
-        });
-        $('#promo_id').change(function() {
-            var promo_id = $(this).select2().find(":selected").val()
-            if(!promo_id){
-                $('#total_promo').val(0);
-                var inputs = $('input[name="harga_total[]"]');
-                var subtotal = 0;
-                inputs.each(function() {
-                    subtotal += parseInt($(this).val()) || 0;
-                });
-                $('#subtotal').val(subtotal)
-                total_harga();
-                return 0;
-            } 
-            calculatePromo(promo_id);
-        });
         $('#btnAddCustomer').click(function(e) {
             e.preventDefault()
             $('#addcustomer').modal('show');
@@ -674,7 +643,7 @@
                     '<div id="div_produk_jumlah_'+i+'" class="row g-0">' +
                     '<div class="col-sm-6"">' +
                     '<select id="new_produk_' + i + '" name="new_produk[]" class="form-control">' +
-                    '<option value="">Pilih Bunga/Produk</option>' +
+                    '<option value="">Pilih Bunga/Pot</option>' +
                     '@foreach ($bungapot as $item)' +
                     '<option value="{{ $item->id }}">({{ $item->tipe->nama }}){{ $item->nama }}</option>' +
                     '@endforeach' +
@@ -688,7 +657,7 @@
                     '</select>' +
                     '</div>' +
                     '<div class="col-sm-2">' +
-                    '<input type="number" class="form-control" id="jml_tambahan_'+i+'" name="jml_tambahan[]" placeholder="Jumlah">' +
+                    '<input type="number" class="form-control" id="jml_tambahan_'+i+'" name="jml_tambahan[]" placeholder="Jumlah" oninput="validateMinZero(this, 20)">' +
                     '</div>' +
                     '</div>';
                 $('#div_new_produk').append(row_bungapot);
@@ -813,7 +782,11 @@
                 headers: {
                     'X-CSRF-TOKEN': csrfToken
                 },
+                beforeSend: function() {
+                    $('#global-loader-transparent').show();
+                },
                 success: function(response) {
+                    $('#global-loader-transparent').hide();
                     $('#prdTerjual').val(response.produk.nama);
                     $('#prdTerjual_id').val(response.id);
                     $('#jml_produk').val(response.jumlah);
@@ -822,6 +795,7 @@
                     $('[id^="perangkai_id_"]').each(function() {
                         $(this).remove();
                     });
+                    $('#div_perangkai').empty();
                     if(response.perangkai.length > 0){
                         for(var i = 0; i < response.perangkai.length; i++){
                             var rowPerangkai = 
@@ -843,6 +817,7 @@
                     $('#modalPerangkai').modal('show');
                 },
                 error: function(xhr, status, error) {
+                    $('#global-loader-transparent').hide();
                     console.log(error)
                 }
             });
@@ -858,7 +833,11 @@
                 headers: {
                     'X-CSRF-TOKEN': csrfToken
                 },
+                beforeSend: function() {
+                    $('#global-loader-transparent').show();
+                },
                 success: function(response) {
+                    $('#global-loader-transparent').hide();
                     $('#data_produk').val(response.produk.nama);
                     $('#data_produk_id').val(response.id);
                     $('#jml_data_produk').val(response.jumlah);
@@ -867,6 +846,7 @@
                         $(this).remove();
                     });
 
+                    $('#div_new_produk').empty();
                     var pot_bunga = 0
                     if(response.komponen.length > 0){
                         for(var i = 0; i < response.komponen.length; i++){
@@ -876,7 +856,7 @@
                                 '<div id="div_produk_jumlah_'+i+'" class="row g-0">' +
                                 '<div class="col-sm-6"">' +
                                 '<select id="new_produk_' + i + '" name="new_produk[]" class="form-control">' +
-                                '<option value="">Pilih Bunga/Produk</option>' +
+                                '<option value="">Pilih Bunga/Pot</option>' +
                                 '@foreach ($bungapot as $item)' +
                                 '<option value="{{ $item->id }}">({{ $item->tipe->nama }}){{ $item->nama }}</option>' +
                                 '@endforeach' +
@@ -910,6 +890,7 @@
                     $('#modalSetGift').modal('show');
                 },
                 error: function(xhr, status, error) {
+                    $('#global-loader-transparent').hide();
                     console.log(error)
                 }
             });

@@ -15,4 +15,9 @@ class Customer extends Model
     {
         return $this->hasMany(Penjualan::class);
     }
+
+    public function kontrak()
+    {
+        return $this->hasMany(Kontrak::class);
+    }
 }

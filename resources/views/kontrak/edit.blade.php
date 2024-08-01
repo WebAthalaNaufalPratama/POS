@@ -36,29 +36,29 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>PIC</label>
-                                                <input type="text" id="pic" name="pic" value="{{ $kontraks->pic }}" class="form-control">
+                                                <input type="text" id="pic" name="pic" value="{{ $kontraks->pic }}" oninput="validateName(this)" placeholder="contoh: Ahmad Al Mansyur" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>No NPWP</label>
-                                                <input type="text" id="no_npwp" name="no_npwp" value="{{ $kontraks->no_npwp }}" class="form-control">
+                                                <input type="text" id="no_npwp" name="no_npwp" value="{{ $kontraks->no_npwp }}" oninput="validateDotStripNumber(this)" placeholder="contoh: 12.345.678.9-501.000" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Alamat</label>
-                                                <textarea type="text" id="alamat" name="alamat" class="form-control">{{ $kontraks->alamat }}</textarea>
+                                                <textarea type="text" id="alamat" name="alamat" class="form-control"  placeholder="contoh: Jalan Merpati no.1" required>{{ $kontraks->alamat }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Handphone</label>
-                                                <input type="text" id="handhpone" name="handphone" value="{{ $kontraks->handphone }}" class="form-control">
+                                                <input type="text" id="handhpone" name="handphone" value="{{ $kontraks->handphone }}" class="form-control" placeholder="contoh: 081234567890" required oninput="validatePhoneNumber(this)">
                                             </div>
                                             <div class="form-group">
                                                 <label>Nama NPWP</label>
-                                                <input type="text" id="nama_npwp" name="nama_npwp" value="{{ $kontraks->nama_npwp }}" class="form-control">
+                                                <input type="text" id="nama_npwp" name="nama_npwp" value="{{ $kontraks->nama_npwp }}" class="form-control" placeholder="contoh: Ahmad Al Mansyur">
                                             </div>
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <select id="status" name="status" class="form-control">
+                                                <select id="status" name="status" class="form-control" required>
                                                     <option value="TUNDA" {{ $kontraks->status == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $kontraks->status == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                     <option value="BATAL" {{ $kontraks->status == 'BATAL' ? 'selected' : '' }}>BATAL</option>
@@ -73,16 +73,16 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>No Kontrak</label>
-                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $kontraks->no_kontrak }}" class="form-control" readonly>
+                                                <input type="text" id="no_kontrak" name="no_kontrak" value="{{ $kontraks->no_kontrak }}" class="form-control" required readonly>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Mulai</label>
-                                                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ $kontraks->tanggal_mulai }}" class="form-control">
+                                                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="{{ $kontraks->tanggal_mulai }}" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Masa Sewa</label>
                                                 <div class="input-group">
-                                                    <input type="text" id="masa_sewa" name="masa_sewa" value="{{ $kontraks->masa_sewa }}" class="form-control" placeholder="Masa sewa" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                                                    <input type="text" id="masa_sewa" name="masa_sewa" value="{{ $kontraks->masa_sewa }}" class="form-control" required readonly placeholder="Masa sewa" aria-label="Recipient's username" aria-describedby="basic-addon2">
                                                     <span class="input-group-text" id="basic-addon2">bulan</span>
                                                 </div>
                                             </div>
@@ -93,21 +93,21 @@
                                                 </div>
                                             </div>
                                             @if ($kontraks->file)
-                                                <a href="/storage/{{ $kontraks->file }}" target="_balnk">Lihat File</a>
+                                                <a href="/storage/{{ $kontraks->file }}" target="_blank">Lihat File</a>
                                             @endif
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Tanggal Kontrak</label>
-                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ $kontraks->tanggal_kontrak }}" class="form-control">
+                                                <input type="date" id="tanggal_kontrak" name="tanggal_kontrak" value="{{ $kontraks->tanggal_kontrak }}" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Tanggal Selesai</label>
-                                                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ $kontraks->tanggal_selesai }}" class="form-control">
+                                                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="{{ $kontraks->tanggal_selesai }}" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Sales</label>
-                                                <select id="sales" name="sales" class="form-control">
+                                                <select id="sales" name="sales" class="form-control" required>
                                                     <option value="">Pilih Sales</option>
                                                     @foreach ($sales as $item)
                                                         <option value="{{ $item->id }}" {{ $kontraks->sales == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
@@ -116,7 +116,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Rekening</label>
-                                                <select id="rekening_id" name="rekening_id" class="form-control">
+                                                <select id="rekening_id" name="rekening_id" class="form-control" required>
                                                     <option value="">Pilih Rekening</option>
                                                     @foreach ($rekenings as $rekening)
                                                         <option value="{{ $rekening->id }}" {{ $kontraks->rekening_id == $rekening->id ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
@@ -125,7 +125,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Catatan</label>
-                                                <textarea type="text" id="catatan" name="catatan" class="form-control">{{ $kontraks->catatan }}</textarea>
+                                                <textarea type="text" id="catatan" name="catatan" class="form-control" placeholder="Masukkan catatan terkait kontrak">{{ $kontraks->catatan }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -287,21 +287,11 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Diskon</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="row align-items-center">
-                                            <div class="col-9 pe-0">
-                                                <select id="promo_id" name="promo_id" class="form-control" disabled>
-                                                </select>
-                                            </div>
-                                            <input type="hidden" id="old_promo_id" value="{{ $kontraks->promo_id }}">
-                                            <div class="col-3 ps-0 mb-0">
-                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip" title="" data-bs-original-title="fa fa-search" aria-label="fa fa-search"></i></button>
-                                            </div>
-                                        </div> --}}
                                         <div class="input-group">
                                             <input type="text" id="promo_persen" name="promo_persen" value="{{ $kontraks->promo_persen ?? 0 }}" class="form-control" aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ $kontraks->total_promo ?? 0 }}" required>
+                                        <input type="text" class="form-control" name="total_promo" id="total_promo" value="{{ $kontraks->total_promo ?? 0 }}" placeholder="contoh: 10.000" required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -311,7 +301,7 @@
                                             <input type="number" id="ppn_persen" name="ppn_persen" value="{{ $kontraks->ppn_persen ?? 11 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ $kontraks->ppn_nominal }}" required>
+                                        <input type="text" class="form-control" name="ppn_nominal" id="ppn_nominal" value="{{ $kontraks->ppn_nominal }}" placeholder="contoh: 10.000" required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
@@ -321,20 +311,12 @@
                                             <input type="number" id="pph_persen" name="pph_persen" value="{{ $kontraks->pph_persen ?? 2 }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" oninput="validatePersen(this)">
                                             <span class="input-group-text" id="basic-addon3">%</span>
                                         </div>
-                                        <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" required>
+                                        <input type="text" class="form-control" name="pph_nominal" id="pph_nominal" value="{{ $kontraks->pph_nominal }}" placeholder="contoh: 10.000" required>
                                     </div>
                                 </div>
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Ongkir</label>
                                     <div class="col-lg-9">
-                                        {{-- <div class="input-group">
-                                            <select id="ongkir_id" name="ongkir_id" class="form-control">
-                                                <option value="">Pilih Ongkir</option>
-                                                @foreach ($ongkirs as $ongkir)
-                                                    <option value="{{ $ongkir->id }}" {{ $ongkir->id == $kontraks->ongkir_id ? 'selected' : '' }}>{{ $ongkir->nama }}-{{ $ongkir->biaya }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div> --}}
                                         <input type="text" class="form-control" name="ongkir_nominal" id="ongkir_nominal" value="{{ $kontraks->ongkir_nominal }}" required>
                                     </div>
                                 </div>
@@ -372,19 +354,19 @@
             <input type="hidden" name="route" value="{{ request()->route()->getName() }},kontrak,{{ request()->route()->parameter('kontrak') }}">
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="add_nama" required>
+              <input type="text" class="form-control" name="nama" id="add_nama" oninput="validateName(this)" required>
             </div>
             <div class="mb-3">
               <label for="tipe" class="col-form-label">Tipe Customer</label>
               <div class="form-group">
-                <select id="add_tipe" name="tipe" class="form-control">
+                <select id="add_tipe" name="tipe" class="form-control" required>
                     <option value="sewa">Sewa</option>
                 </select>
               </div>
             </div>
             <div class="mb-3">
               <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="text" class="form-control" name="handphone" id="add_handphone" required>
+              <input type="text" class="form-control" name="handphone" id="add_handphone" oninput="validatePhoneNumber(this)" placeholder="081234567890" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>
@@ -392,11 +374,21 @@
             </div>
             <div class="mb-3">
               <label for="tanggal_lahir" class="col-form-label">Tanggal Lahir</label>
-              <input type="date" class="form-control" name="tanggal_lahir" id="add_tanggal_lahir" required>
+              <input type="date" class="form-control" name="tanggal_lahir" id="add_tanggal_lahir" max="{{ date('Y-m-d') }}" required>
             </div>
             <div class="mb-3">
               <label for="tanggal_bergabung" class="col-form-label">Tanggal Gabung</label>
-              <input type="date" class="form-control" name="tanggal_bergabung" id="add_tanggal_bergabung" required>
+              <input type="date" class="form-control" name="tanggal_bergabung" id="add_tanggal_bergabung" max="{{ date('Y-m-d') }}" required disabled>
+            </div>
+            <div class="mb-3">
+                <label for="lokasi_id" class="col-form-label">Lokasi</label>
+                <div class="form-group">
+                  <select id="add_lokasi_id" name="lokasi_id" class="form-control" required>
+                    @foreach ($lokasis as $item)
+                        <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                    @endforeach
+                  </select>
+                </div>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -415,7 +407,7 @@
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
             $('#sales').trigger('change');
-            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe').select2();
+            $('[id^=produk], #customer_id, #sales, #rekening_id, #status, #ongkir_id, #promo_id, #add_tipe, #add_lokasi_id').select2();
             var i = $('[id^=produk]').length;
             $('#add').click(function(){
             var newRow = '<tr id="row'+i+'"><td>' + 
@@ -434,7 +426,7 @@
                 $('#produk_' + i).select2();
                 i++;
            })
-           $(document).on('input', '[id^=handhpone], #add_handphone, #ppn_persen, #pph_persen', function() {
+            $(document).on('input', '[id^=handhpone], #add_handphone, #ppn_persen, #pph_persen', function() {
                 let input = $(this);
                 let value = input.val();
                 
@@ -466,16 +458,29 @@
                 $('#promo_persen').val(0);
                 var value = $(this).val().trim();
 
-                if (isNaN(value) || value === "") {
+                if (value === "") {
+                    $(this).val(0);
+                    value = 0;
+                } else {
+                    if (!value.startsWith("0.")) {
+                        value = value.replace(/^0+/, '');
+                        $(this).val(value);
+                    }
+                }
+
+                if (!isNumeric(cleanNumber(value))) {
                     return;
                 }
+
                 var total_promo = $(this).val();
                 var inputs = $('input[name="harga_total[]"]');
                 var total = 0;
                 inputs.each(function() {
                     total += parseInt(cleanNumber($(this).val())) || 0;
                 });
-                $('#subtotal').val(formatNumber((total) - (cleanNumber(total_promo)))) 
+                validateCantExceed($(this), total);
+                nilai = cleanNumber($(this).val());
+                $('#subtotal').val(formatNumber((total) - nilai)) 
                 update_pajak(cleanNumber($('#subtotal').val()));
                 total_harga();
             });
@@ -500,15 +505,27 @@
                 $('#ppn_persen').val(0);
                 var value = $(this).val().trim();
 
-                if (isNaN(value) || value === "") {
+                if (value === "") {
+                    $(this).val(0);
+                    value = 0;
+                } else {
+                    if (!value.startsWith("0.")) {
+                        value = value.replace(/^0+/, '');
+                        $(this).val(value);
+                    }
+                }
+
+                if (!isNumeric(cleanNumber(value))) {
                     return;
                 }
+
                 var total_promo = $('#total_promo').val();
                 var inputs = $('input[name="harga_total[]"]');
                 var total = 0;
                 inputs.each(function() {
                     total += parseInt(cleanNumber($(this).val())) || 0;
                 });
+                validateCantExceed($(this), total);
                 $('#subtotal').val(formatNumber((total) - (cleanNumber(total_promo)))) 
                 total_harga();
             });
@@ -535,15 +552,27 @@
                 $('#pph_persen').val(0);
                 var value = $(this).val().trim();
 
-                if (isNaN(value) || value === "") {
+                if (value === "") {
+                    $(this).val(0);
+                    value = 0;
+                } else {
+                    if (!value.startsWith("0.")) {
+                        value = value.replace(/^0+/, '');
+                        $(this).val(value);
+                    }
+                }
+
+                if (!isNumeric(cleanNumber(value))) {
                     return;
                 }
+
                 var total_promo = $('#total_promo').val();
                 var inputs = $('input[name="harga_total[]"]');
                 var total = 0;
                 inputs.each(function() {
                     total += parseInt(cleanNumber($(this).val())) || 0;
                 });
+                validateCantExceed($(this), total);
                 $('#subtotal').val(formatNumber((total) - (cleanNumber(total_promo)))) 
                 total_harga();
             });
@@ -610,10 +639,44 @@
             $('#tanggal_selesai').val(tanggalAkhir);
             $('#masa_sewa').val(12);
         });
+        $('#tanggal_selesai').on('input', function() {
+            var tanggal_mulai = $('#tanggal_mulai').val();
+            var tanggal_selesai = $(this).val();
+            
+            if (!tanggal_selesai || !tanggal_mulai) {
+                $('#masa_sewa').val(0);
+                return;
+            }
+            
+            var mulai = new Date(tanggal_mulai);
+            var selesai = new Date(tanggal_selesai);
+            
+            var tahunMulai = mulai.getFullYear();
+            var tahunSelesai = selesai.getFullYear();
+            var bulanMulai = mulai.getMonth();
+            var bulanSelesai = selesai.getMonth();
+            
+            var bulan = (tahunSelesai - tahunMulai) * 12 + (bulanSelesai - bulanMulai);
+            
+            if (bulan < 0) {
+                bulan = 0;
+            }
+            
+            $('#masa_sewa').val(bulan);
+        });
         $('#btnAddCustomer').click(function(e) {
             e.preventDefault()
             $('#addcustomer').modal('show');
         });
+        $('#add_tanggal_lahir').on('change', function(){
+            if($(this).val()){
+                $('#add_tanggal_bergabung').attr('disabled', false)
+                $('#add_tanggal_bergabung').attr('min', $(this).val())
+            } else {
+                $('#add_tanggal_bergabung').attr('disabled', true)
+                $('#add_tanggal_bergabung').attr('min', 0)
+            }
+        })
         $(document).on('change', '[id^=produk_]', function(){
             var id = $(this).attr('id');
             var parts = id.split('_');

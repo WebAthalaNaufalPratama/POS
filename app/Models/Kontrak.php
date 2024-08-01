@@ -65,7 +65,7 @@ class Kontrak extends Model
     }
     
     public function data_sales(){
-        return $this->belongsTo(User::class, 'sales', 'id');
+        return $this->belongsTo(Karyawan::class, 'sales', 'id');
     }
         
     public function data_pembuat(){
