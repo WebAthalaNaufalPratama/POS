@@ -233,7 +233,7 @@ class InvoiceSewaController extends Controller
 
             // Commit transaction
             DB::commit();
-            return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
+            return redirect(route('invoice_sewa.index'))->with('success', 'Data tersimpan');
 
         } catch (\Exception $e) {
             DB::rollBack();

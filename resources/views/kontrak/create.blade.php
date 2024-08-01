@@ -154,7 +154,7 @@
                                             </select>
                                         </td>
                                         <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"  required></td>
-                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"  required></td>
+                                        <td><input type="text" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"  required></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"  required readonly></td>
                                         <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                     </tr>
@@ -336,7 +336,7 @@
                                 '</select>'+
                             '</td>'+
                             '<td><input type="text" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
-                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
+                            '<td><input type="text" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="text" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
                             '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field').append(newRow);
@@ -354,7 +354,7 @@
 
             input.val(value);
         });
-        $(document).on('input', '[id^=harga_satuan], #total_promo, #pph_nominal, #ppn_nominal, #ongkir_nominal', function() {
+        $(document).on('input', '[id^=harga_satuan], #total_promo, #pph_nominal, #ppn_nominal, #ongkir_nominal, [id^=jumlah]', function() {
             let input = $(this);
             let value = input.val();
             if (!isNumeric(cleanNumber(value))) {
@@ -521,7 +521,7 @@
 
         $('#addForm').on('submit', function(e) {
             // Add input number cleaning for specific inputs
-            let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga');
+            let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, [id^=jumlah]');
             inputs.each(function() {
                 let input = $(this);
                 let value = input.val();
