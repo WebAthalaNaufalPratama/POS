@@ -363,7 +363,7 @@
                                                                 <button id="btnCheckPromo" name="btndipakai" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                                             </div>
                                                         </div>
-                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ old('total_promo') }}" readonly>
+                                                        <input type="text" class="form-control" required name="total_promo" id="total_promo" value="0" readonly>
                                                     </h5>
                                                 </li>
                                                 <li>
@@ -376,7 +376,7 @@
                                                     </h4>
                                                     <h5 class="col-lg-5">
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" readonly required>
+                                                            <input type="number" id="persen_ppn" name="persen_ppn" class="form-control" readonly required>
                                                             <span class="input-group-text">%</span>
                                                         </div>
                                                         <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" readonly required>
@@ -430,6 +430,7 @@
             <div class="modal-body">
                 <form action="{{ route('customer.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="lokasi_id" value="{{$lokasis[0]->id}}">
                     <div class="mb-3">
                         <label for="nama" class="col-form-label">Nama</label>
                         <input type="text" class="form-control" name="nama" id="add_nama" required>
@@ -461,7 +462,7 @@
                     </div>
             </div>
             <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                 <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
             </form>
@@ -670,7 +671,7 @@
         var diskonType = $('#jenis_diskon_' + index).val();
         var diskonValue = parseFloat($('#diskon_' + index).val());
         var jumlah = parseFloat($('#jumlah_' + index).val());
-        var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_satuan_' + index).val()));
+        var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_satuan_' + index).val())); // Mengonversi hargaSatuan ke angka
         var hargaTotal = 0;
 
         if (!isNaN(jumlah) && !isNaN(hargaSatuan)) {
@@ -679,20 +680,26 @@
 
         if (!isNaN(hargaTotal)) {
             if (diskonType === "Nominal" && !isNaN(diskonValue)) {
-                hargaTotal -= diskonValue;
-                if(hargaTotal <= 0){
-                    hargaTotal = 0;
-                    alert('nominal tidak boleh melebihi harga total');
+                if (diskonValue > hargaTotal) {
+                    alert('Nominal tidak boleh melebihi harga total');
                     diskonValue = 0;
+                    $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
+                } else {
+                    hargaTotal -= diskonValue;
+                    $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
                 }
-                $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
             } else if (diskonType === "persen" && !isNaN(diskonValue)) {
-                var diskonPersen = (hargaTotal * diskonValue / 100); 
-                hargaTotal -= diskonPersen; 
-                if(hargaTotal <= 0){
-                    hargaTotal = 0;
-                    alert('diskon tidak boleh melebihi harga total');
-                    diskonPersen = 0;
+                if (diskonValue > 100) {
+                    alert('Diskon tidak boleh 100% atau lebih');
+                    diskonValue = 0;
+                    $('#diskon_' + index).val(diskonValue);
+                } else {
+                    var diskonPersen = (hargaTotal * diskonValue / 100);
+                    if (diskonPersen > hargaTotal) {
+                        alert('Diskon tidak boleh melebihi harga total');
+                        diskonPersen = 0;
+                    }
+                    hargaTotal -= diskonPersen;
                 }
             }
         }
@@ -710,9 +717,21 @@
 
         // Format subtotal kembali ke format Rupiah sebelum menetapkannya ke input
         $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
+        $('#jenis_ppn').trigger('change');
     }
 
+    function validateNumericInput() {
+        $('input[id^="diskon_"]').on('input', function() {
+            var value = $(this).val();
+            var numericValue = value.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
 
+            if (numericValue !== value) {
+                $(this).val(numericValue);
+            }
+        });
+    }
+
+    validateNumericInput();
 
     function copyDataToModal(index) {
         var namaProdukValue = $('#nama_produk_' + index).val();
@@ -869,6 +888,8 @@
         });
         @endforeach
 
+       
+
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
             var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); // Mengonversi format Rupiah menjadi numerik
@@ -1001,6 +1022,19 @@
             Totaltagihan();
         });
 
+        $('#persen_ppn').on('input',function() {
+            var persenppn = parseFloat($(this).val());
+
+            if (persenppn > 100) {
+                alert('Persen PPN Tidak Boleh lebih dari 100');
+                $(this).val(100);
+            } else if (persenppn < 0) {
+                alert('Persen PPN Tidak Boleh kurang dari 0');
+                $(this).val(0);
+            }
+            Totaltagihan();
+        });
+
         $('#jenis_ppn').change(function() {
             var ppn = $(this).val();
             $('#persen_ppn').prop('readonly', true);
@@ -1023,22 +1057,26 @@
         $('#dp').on('input', function() {
             var inputNominal = $(this).val();
             var dpValue = parseRupiahToNumber(inputNominal);
+            var subtotal = parseRupiahToNumber($('#sub_total').val());
+            if (dpValue > subtotal || isNaN(subtotal)) {
+                alert('Jumlah DP tidak boleh melebihi Sub Total');
+                $(this).val(formatRupiah(subtotal, 'Rp '));
+                dpValue = subtotal; 
+            } else if (dpValue < 0) {
+                alert('Jumlah DP tidak boleh kurang dari 0');
+                $(this).val(formatRupiah(0, 'Rp '));
+                dpValue = 0; 
+            } else {
+                $(this).val(formatRupiah(dpValue, 'Rp '));
+            }
 
-            if (dpValue > 0) {
+            if (dpValue >= 0) {
                 $('#inputPembayaran').show();
                 $('#inputRekening').show();
                 $('#inputTanggalBayar').show();
                 $('#inputBuktiBayar').hide();
                 $('#nominal').val(formatRupiah(dpValue, 'Rp '));
-            } else {
-                $('#inputPembayaran').hide();
-                $('#inputRekening').hide();
-                $('#inputTanggalBayar').hide();
-                $('#inputBuktiBayar').hide();
             }
-
-            // Update input value to formatted Rupiah
-            $(this).val(formatRupiah(dpValue, 'Rp '));
         });
 
         $('#promo_id').change(function() {
@@ -1344,9 +1382,14 @@
         
             var promo = subtotal - (parseNumber(diskon_nominal) + point);
             // console.log(diskon_nominal);
-            var ppn = persenPPN * promo / 100;
-            var totalTagihan = promo + ppn + biayaOngkir - dp;
-            var sisaBayar = totalTagihan - dp;
+            var ppn = promo * (persenPPN / 100);
+            var totalTagihan = promo + ppn + biayaOngkir;
+            if(totalTagihan == 0) {
+                var sisaBayar = totalTagihan;
+            }else{
+                var sisaBayar = totalTagihan - dp;
+            }
+            
 
             $('#total_tagihan').val(formatRupiah(totalTagihan, 'Rp '));
             $('#sisa_bayar').val(formatRupiah(sisaBayar, 'Rp '));

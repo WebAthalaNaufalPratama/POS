@@ -118,6 +118,205 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
+        .nav-item .nav-link {
+            display: flex;
+            align-items: center;
+            padding-left: 15px;  /* Sesuaikan nilai ini untuk mengontrol jarak dari tepi kiri */
+        }
+
+        .nav-item .nav-link i {
+            margin-right: 10px;  /* Sesuaikan nilai ini untuk mengontrol jarak antara ikon dan teks */
+        }
+
+        .dash-widget {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            width: 100%;
+            color: #fff;
+        }
+
+        .dash-widget-content {
+            flex: 1;
+        }
+
+        .dash-widget-content h5 {
+            margin: 0;
+            padding: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #currentDate {
+            font-size: 20px;
+            font-weight: normal;
+        }
+
+        .dash-count {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .dash-penjualan-sukses {
+            background: linear-gradient(135deg, #42f573, #64d147);
+        }
+        .dash-penjualan-batal {
+            background: linear-gradient(135deg, #f54242, #d14747);
+        }
+        .dash-penjualan-retur {
+            background: linear-gradient(135deg, #42a5f5, #478ed1);
+        }
+
+        .dash-customerlama {
+            background: linear-gradient(135deg, #66bbae, #409d8e);
+        }
+        .dash-customerbaru {
+            background: linear-gradient(135deg, #8766bb, #6a42a8);
+        }
+        .dash-pemasukan {
+            background: linear-gradient(135deg, #66bb6a, #43a047);
+        }
+
+        .dash-counts {
+            flex: 1;
+        }
+
+        .dash-counts h4 {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .dash-counts h5 {
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .dash-imgs i {
+            font-size: 40px;
+            color: #fff;
+            margin-left: 15px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 15px;
+            color: #fff;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .chart-set {
+            height: 300px;
+        }
+
+        .dataview table thead th {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: bold;
+        }
+
+        .dataview table tbody tr {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .productimgname .product-img img {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .productimgname a {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .productimgname a:hover {
+            text-decoration: underline;
+        }
+
+        .custom-select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select {
+            display: block;
+            width: 100%;
+            height: 40px; /* Adjust height */
+            padding: 0 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            font-size: 16px; /* Adjust font size */
+            line-height: 40px; /* Center text vertically */
+            appearance: none;
+            -webkit-appearance: none; /* Hide default styling in WebKit browsers */
+        }
+
+        .custom-select::after {
+            content: '▼'; /* Arrow icon */
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #333;
+        }
+
+        .custom-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25);
+        }
+
+        .custom-select-option {
+            background-color: #fff;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .custom-select-option:hover {
+            background-color: #f1f1f1;
+        }
+
+        .custom-select-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 5px;
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-50%);
+        }
+
   </style>
   
   @yield('css')

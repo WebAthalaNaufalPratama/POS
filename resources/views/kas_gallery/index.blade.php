@@ -3,53 +3,59 @@
 @section('content')
 <div class="row">
   <div class="col-12">
-    <div class="dash-count">
+    <div class="dash-count" style="background-color: rgb(255, 159, 67)">
       @role('Finance')
       <div class="row w-100">
-        <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="col-lg-4 col-md-4 col-sm-12 mb-2 mb-md-0">
           <h2>Kas Gallery</h2>
         </div>
-        <div class="col-lg-3 col-md-3 col-sm-3">
-          <select class="select2" name="lokasi" id="filterLokasi" onchange="getRekening(this, 'filterRekening')">
-            <option value="">Lokasi</option>
-            @foreach($lokasis as $lokasi)
-              <option value="{{ $lokasi->id }}" {{ $lokasi->id == $lokasi_pengirim ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="col-lg-3 col-md-3 col-sm-3">
-          <select class="select2" name="rekening" id="filterRekening" disabled>
-            <option value="">Rekening</option>
-            @foreach($rekenings as $rekening)
-            @if($rekening->lokasi_id == $lokasi_pengirim)
-              <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
-            @endif
-            @endforeach
-          </select>
-        </div>
-        <div class="col-lg-2 col-md-2 col-sm-2 mr-1 ml-auto">
-          <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-info">Filter</a>
-          <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-warning">Clear</a>
+        <div class="col-lg-8 col-md-8 col-sm-12 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-end gap-2">
+          <div class="w-100 mb-2 mb-md-0">
+            <select class="select2 form-select w-100" name="lokasi" id="filterLokasi" onchange="getRekening(this, 'filterRekening')">
+              <option value="">Lokasi</option>
+              @foreach($lokasis as $lokasi)
+                <option value="{{ $lokasi->id }}" {{ $lokasi->id == $lokasi_pengirim ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="w-100 mb-2 mb-md-0">
+            <select class="select2 form-select w-100" name="rekening" id="filterRekening" disabled>
+              <option value="">Rekening</option>
+              @foreach($rekenings as $rekening)
+              @if($rekening->lokasi_id == $lokasi_pengirim)
+                <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
+              @endif
+              @endforeach
+            </select>
+          </div>
+          <div class="d-flex flex-column flex-md-row gap-2 w-100">
+            <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-info w-100 w-md-auto">Filter</a>
+            <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-warning w-100 w-md-auto">Clear</a>
+          </div>
         </div>
       </div>
       @endrole
       @role('AdminGallery')
-      <div class="col-lg-4 col-md-4 col-sm-4">
-        <h2>Kas Gallery</h2>
-      </div>
-      <div class="col-lg-5 col-md-5 col-sm-5">
-        <select class="select2" name="rekening" id="filterRekening">
-          <option value="">Rekening</option>
-          @foreach($rekenings as $rekening)
-          @if($rekening->lokasi_id == Auth::user()->karyawans->lokasi_id)
-            <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
-          @endif
-          @endforeach
-        </select>
-      </div>
-      <div class="col-lg-3 col-md-3 col-sm-3">
-        <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-info">Filter</a>
-        <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-warning">Clear</a>
+      <div class="row w-100">
+        <div class="col-lg-6 col-md-6 col-sm-12 mb-2 mb-md-0">
+          <h2>Kas Gallery</h2>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-end gap-2">
+          <div class="d-flex flex-column flex-md-row w-100">
+            <select class="form-select select2 w-100" name="rekening" id="filterRekening">
+              <option value="">Rekening</option>
+              @foreach($rekenings as $rekening)
+              @if($rekening->lokasi_id == Auth::user()->karyawans->lokasi_id)
+                <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
+              @endif
+              @endforeach
+            </select>
+          </div>
+          <div class="d-flex flex-column flex-md-row gap-2 w-100">
+            <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-info w-100">Filter</a>
+            <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('kas_gallery.index') }}" class="btn btn-warning w-100">Clear</a>
+          </div>
+        </div>
       </div>
       @endrole
     </div>
@@ -58,39 +64,54 @@
 <div class="row">
   <div class="col-sm-12">
     <div class="row">
-      <div class="col-lg-4 col-md-4 col-sm-12">
-        <div class="dash-widget dash1">
-          <div class="dash-widgetimg">
-            <span><img src="assets/img/icons/dash2.svg" alt="img" /></span>
-          </div>
-          <div class="dash-widgetcontent">
-            <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h3>
-            <h6>Saldo Masuk</h6>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-4 col-sm-12">
-        <div class="dash-widget dash3">
-          <div class="dash-widgetimg">
-            <span><img src="assets/img/money-send-svgrepo-com.svg" alt="img" style="width: 50%" /></span>
-          </div>
-          <div class="dash-widgetcontent">
-            <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h3>
-            <h6>Saldo Keluar</h6>
+      <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
+        <div class="card rounded-3 overflow-hidden">
+          <div class="row g-0">
+            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e0f7e9;">
+              <img src="assets/img/icons/dash2.svg" alt="img" style="width: 48px; height: 48px;">
+            </div>
+            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #28a745; color: white;">
+              <div class="card-body">
+                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h3>
+                <h6>Saldo Masuk</h6>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-4 col-sm-12">
-        <div class="dash-widget dash4">
-          <div class="dash-widgetimg">
-            <span><img src="assets/img/balance-sheet.png" style="width: 50%" alt="img" /></span>
-          </div>
-          <div class="dash-widgetcontent">
-            <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk - $saldoKeluar }}"></span></h3>
-            <h6>Saldo</h6>
+      
+      <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
+        <div class="card rounded-3 overflow-hidden">
+          <div class="row g-0">
+            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #ffe6e6;">
+              <img src="assets/img/money-send-svgrepo-com.svg" alt="img" style="width: 48px; height: 48px;">
+            </div>
+            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #ff006a; color: white;">
+              <div class="card-body">
+                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h3>
+                <h6>Saldo Keluar</h6>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      
+      <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
+        <div class="card rounded-3 overflow-hidden">
+          <div class="row g-0">
+            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e6f0ff;">
+              <img src="assets/img/balance-sheet.png" alt="img" style="width: 48px; height: 48px;">
+            </div>
+            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #0131c3; color: white;">
+              <div class="card-body">
+                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk - $saldoKeluar }}"></span></h3>
+                <h6>Saldo</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+           
     </div>
   </div>
   <div class="col-sm-12">

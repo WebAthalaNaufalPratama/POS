@@ -27,7 +27,7 @@ class KembaliSewaController extends Controller
     public function index(Request $req)
     {
         $query = KembaliSewa::query();
-        if(Auth::user()->karyawans){
+        if(Auth::user()->hasRole('AdminGallery')){
             $query->whereHas('sewa', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -53,7 +53,7 @@ class KembaliSewaController extends Controller
         $customer = Kontrak::whereHas('kembali_sewa')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->karyawans, function ($query) {
+        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -61,7 +61,7 @@ class KembaliSewaController extends Controller
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
-        ->when(Auth::user()->karyawans, function ($query) {
+        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -87,7 +87,7 @@ class KembaliSewaController extends Controller
         // data
         $kontrak = Kontrak::with('produk')->find($data['kontrak']);
         $do = DeliveryOrder::with('produk', 'produk.komponen', 'produk.produk')->where('no_referensi', $kontrak->no_kontrak)->get();
-        $drivers = Karyawan::where('jabatan', 'Driver')->when(Auth::user()->roles()->value('name') != 'admin', function ($query) {
+        $drivers = Karyawan::where('jabatan', 'Driver')->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->get();
         $produkjuals = Produk_Jual::all();

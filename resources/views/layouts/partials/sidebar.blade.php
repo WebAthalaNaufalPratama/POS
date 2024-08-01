@@ -15,12 +15,11 @@
                         }
                     }
                 @endphp
-                <li class="submenu">
-                    <a href="javascript:void(0);"><i data-feather="box"></i><span> Dashboard</span> <span class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="{{ route('dashboard.index') }}" class="{{ request()->is('dashboard*') ? 'active' : '' }}">Dashboard</a></li>
-                    </ul>
+                <li class="active">
+                    <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
+                    
                 </li>
+
 
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
                 <li class="submenu">
@@ -185,6 +184,12 @@
                     </ul>
                 </li>
                 @endrole
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/purchase1.svg" alt="img"><span> Laporan</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan.kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                    </ul>
+                </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>

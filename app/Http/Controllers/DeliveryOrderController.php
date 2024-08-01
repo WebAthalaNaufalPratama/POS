@@ -25,7 +25,7 @@ class DeliveryOrderController extends Controller
     public function index_sewa(Request $req)
     {
         $query = DeliveryOrder::where('jenis_do', 'SEWA');
-        if(Auth::user()->karyawans){
+        if(Auth::user()->hasRole('AdminGallery')){
             $query->whereHas('kontrak', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -49,7 +49,7 @@ class DeliveryOrderController extends Controller
         $customer = DeliveryOrder::select('customer_id')
         ->distinct()
         ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->karyawans, function ($query) {
+        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -57,7 +57,7 @@ class DeliveryOrderController extends Controller
         $driver = DeliveryOrder::select('driver')
         ->distinct()
         ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
-        ->when(Auth::user()->karyawans, function ($query) {
+        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -85,7 +85,7 @@ class DeliveryOrderController extends Controller
 
         // data
         $kontrak = Kontrak::with('produk')->find($data['kontrak']);
-        if(Auth::user()->roles()->value('name') != 'admin'){
+        if(Auth::user()->hasRole('AdminGallery')){
             $drivers = Karyawan::where('jabatan', 'driver')->where('lokasi_id',Auth::user()->karyawans->lokasi_id)->get();
         } else {
             $drivers = Karyawan::where('jabatan', 'driver')->get();

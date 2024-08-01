@@ -130,12 +130,22 @@
                                         <div class="form-group">
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required>
-                                                <option value="">Pilih Status</option>
-                                                <option value="TUNDA" {{ $penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
-                                                <option value="DIKONFIRMASI" {{ $penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
-                                                <option value="DIBATALKAN" {{ $penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                                @if($dopenjualan->status != 'DIKONFIRMASI')
+                                                    <option value="">Pilih Status</option>
+                                                    <option value="TUNDA" {{ $penjualans->status == 'TUNDA' ? 'selected': ''}}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ $penjualans->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
+                                                    @php
+                                                        $user = Auth::user();
+                                                    @endphp
+                                                    @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
+                                                        <option value="DIBATALKAN" {{ $penjualans->status == 'DIBATALKAN' ? 'selected': ''}}>DIBATALKAN</option>
+                                                    @endif
+                                                @else
+                                                    <option value="DIKONFIRMASI" {{ $penjualans->status == 'DIKONFIRMASI' ? 'selected': ''}}>DIKONFIRMASI</option>
+                                                @endif
                                             </select>
                                         </div>
+                                        
                                         <div class="form-group">
                                             <div id="alasan" style="display: none;">
                                                 <label for="alasan ">Alasan</label>
@@ -515,11 +525,11 @@
                                                 </li>
                                                 <li id="cekretur" style="display:none;">
                                                     <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $penjualans->biaya_pengiriman }}" readonly required></h5>
+                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ 'Rp ' . number_format($penjualans->biaya_pengiriman, 0, ',', '.') }}" readonly required></h5>
                                                 </li>
                                                 <li>
                                                     <h4>Total</h4>
-                                                    <h5><input type="text" id="total" name="total" class="form-control" value="{{$penjualans->total}}" readonly required></h5>
+                                                    <h5><input type="text" id="total" name="total" class="form-control" value="{{'Rp '. number_format($penjualans->total, 0, ',', '.')}}" readonly required></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -1086,15 +1096,17 @@
             $('[id^=diskon_]').each(function() {
                 var diskonInput = $(this);
                 var index = diskonInput.attr('id').split('_')[1];
-
                 if(komplain == 'refund') {
                     diskonInput.val(0);
                     diskonInput.prop('readonly', true);
+                    $('[id^=jenis_diskon]').prop('disabled', false);
                 } else if(komplain == 'diskon') {
                     diskonInput.prop('readonly', false);
+                    $('[id^=jenis_diskon]').prop('disabled', false);
                     // showInputType(index);
                 } else if(komplain == 'retur'){
                     diskonInput.val(0);
+                    $('[id^=jenis_diskon]').prop('disabled', true);
                     diskonInput.prop('readonly', true);
                 }
             });
@@ -1202,6 +1214,7 @@
             var hasilInput = $(this);
             var index = hasilInput.attr('id').split('_')[1]; 
             var jenisInput = $('#jenis_diskon_' + index); 
+            var komplain = $('#komplain').val();
             var selectedValue = jenisInput.val(); 
             var jumlah = $('#jumlah_' + index).val();
             var hargaSatuan = parseFloat(parseRupiahToNumber($('#harga_' + index).val())) || 0;  
@@ -1231,7 +1244,9 @@
             });
 
             $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
-            $('#total').val(formatRupiah(subtotal, 'Rp '));
+            if(komplain == 'diskon') {
+                $('#total').val(formatRupiah(subtotal, 'Rp '));
+            }
         });
 
         $('[id^=diskon_]').each(function() {

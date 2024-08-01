@@ -131,12 +131,14 @@
                                     $properties = json_decode($item->properties, true);
                                     
                             @endphp
-                            <td>@if($properties['attributes']['no_invoice'] != null)
+                            <td>@if($properties['attributes']['no_invoice'] != null && $properties['attributes']['no_do'] == null)
                                     {{$properties['attributes']['no_invoice']}}
-                                @elseif($properties['attributes']['no_do'] != null)
+                                @elseif($properties['attributes']['no_do'] != null && $properties['attributes']['no_retur'] == null)
                                     {{$properties['attributes']['no_do']}}
-                                @elseif($properties['attributes']['no_retur'] != null)
+                                @elseif($properties['attributes']['no_retur'] != null && $properties['attributes']['no_mutasiog'] == null)
                                     {{$properties['attributes']['no_retur']}}
+                                @elseif($properties['attributes']['no_retur'] != null && $properties['attributes']['no_mutasiog'] != null)
+                                    {{$properties['attributes']['no_mutasiog']}}
                                 @elseif($properties['attributes']['no_mutasigo'] != null)
                                     {{ $properties['attributes']['no_mutasigo'] ?? '-' }}
                                 @endif
@@ -209,6 +211,7 @@
             var symbol = '';
 
             var Produk = $('#filterProduk').val();
+            console.log(Produk);
             if (Produk) {
                 var filterProduk = 'produk=' + Produk;
                 if (first == true) {

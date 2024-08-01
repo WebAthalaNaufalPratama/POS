@@ -10,6 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Produkbeli extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity;
+    protected $table = 'produkbelis';
     protected $guarded = ['id'];
     protected static $logAttributes = [
         'pembelian_id',

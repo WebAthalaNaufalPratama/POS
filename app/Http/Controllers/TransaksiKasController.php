@@ -76,14 +76,14 @@ class TransaksiKasController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        $data['status'] = 'AKTIF';
+        $data['status'] = 'DIKONFIRMASI';
 
         // save data
-        if ($req->hasFile('bukti')) {
-            $file = $req->file('bukti');
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
             $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
             $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $data['file'] = $filePath;
         }
         $check = TransaksiKas::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
@@ -124,14 +124,12 @@ class TransaksiKasController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'akun_id' => 'required|numeric',
+            'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
+            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
-            'kuantitas' => 'required|numeric',
-            'harga_satuan' => 'required|numeric',
-            'harga_total' => 'required|numeric',
-            'lokasi_id' => 'required',
-            'tanggal_transaksi' => 'required|date',
-            'status' => 'required',
+            'nominal' => 'required|numeric',
+            'tanggal' => 'required|date',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -144,12 +142,12 @@ class TransaksiKasController extends Controller
         }
 
         // save data
-        $data['bukti'] = $existingTransaksi->bukti;
-        if ($req->hasFile('bukti')) {
-            $file = $req->file('bukti');
+        $data['file'] = $existingTransaksi->file;
+        if ($req->hasFile('file')) {
+            $file = $req->file('file');
             $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
             $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $data['file'] = $filePath;
         }
         $check = TransaksiKas::find($transaksiKas)->update($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');

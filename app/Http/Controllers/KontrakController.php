@@ -33,7 +33,7 @@ class KontrakController extends Controller
     public function index(Request $req)
     {
         $query = Kontrak::with('customer', 'invoice');
-        if(Auth::user()->karyawans){
+        if(Auth::user()->hasRole('AdminGallery')){
             $query->where('lokasi_id',Auth::user()->karyawans->lokasi_id);
         }
         if ($req->customer) {
@@ -59,7 +59,7 @@ class KontrakController extends Controller
         $customer = Kontrak::select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->karyawans, function ($query) {
+        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('customers.nama')
@@ -67,7 +67,7 @@ class KontrakController extends Controller
         $sales = Kontrak::select('sales')
         ->distinct()
         ->join('karyawans', 'kontraks.sales', '=', 'karyawans.id')
-        ->when(Auth::user()->karyawans, function ($query) {
+        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
         })
         ->orderBy('karyawans.nama')
@@ -82,7 +82,7 @@ class KontrakController extends Controller
      */
     public function create()
     {
-        if (Auth::user()->karyawans) {
+        if (Auth::user()->hasRole('AdminGallery')) {
             $produkjuals = Produk_Jual::all();
             $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -154,7 +154,7 @@ class KontrakController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
-        $data['lokasi_id'] = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : 1;
+        $data['lokasi_id'] = Auth::user()->karyawans->lokasi_id ?? '';
         $data['pembuat'] = Auth::user()->id;
         $data['tanggal_pembuat'] = now();
         if ($req->hasFile('file')) {

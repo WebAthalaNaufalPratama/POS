@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanController;
 use App\Models\Pembelian;
 use Illuminate\Support\Facades\Route;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
@@ -65,6 +66,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/', 'DashboardController@index')->name('dashboard.index');
             Route::post('/postauditor', 'DashboardController@update_auditor')->name('auditor.update');
             Route::post('/bukakuncistore', 'DashboardController@bukakunci')->name('bukakunci.store');
+            Route::get('/top-products', 'DashboardController@getTopProducts')->name('getTopProduk');
+            Route::get('/top_minus_produk', 'DashboardController@getTopMinusProduk')->name('getTopMinusProduk');
+            Route::get('/top_sales', 'DashboardController@getTopSales')->name('getTopSales');
+            Route::get('/loyalty', 'DashboardController@getLoyalty')->name('getLoyalty');
         });
 
         /**
@@ -619,26 +624,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::patch('/auditmutasiGAG', 'MutasiController@audit_GAGUpdate')->name('auditmutasigalerygalery.update');
         });
 
-        // Route::group(['prefix' => 'kas_pusat'], function() {
-        //     Route::get('/', 'TransaksiKasController@index_pusat')->name('kas_pusat.index');
-        //     Route::get('/create', 'TransaksiKasController@create_pusat')->name('kas_pusat.create');
-        //     Route::post('/store', 'TransaksiKasController@store_pusat')->name('kas_pusat.store');
-        //     Route::get('/{kas_pusat}/show', 'TransaksiKasController@show_pusat')->name('kas_pusat.show');
-        //     Route::get('/{kas_pusat}/edit', 'TransaksiKasController@edit_pusat')->name('kas_pusat.edit');
-        //     Route::patch('/{kas_pusat}/update', 'TransaksiKasController@update_pusat')->name('kas_pusat.update');
-        //     Route::get('/{kas_pusat}/delete', 'TransaksiKasController@destroy_pusat')->name('kas_pusat.destroy');
-        // });
-
-        // Route::group(['prefix' => 'kas_gallery'], function() {
-        //     Route::get('/', 'TransaksiKasController@index_gallery')->name('kas_gallery.index');
-        //     Route::get('/create', 'TransaksiKasController@create_gallery')->name('kas_gallery.create');
-        //     Route::post('/store', 'TransaksiKasController@store_gallery')->name('kas_gallery.store');
-        //     Route::get('/{kas_gallery}/show', 'TransaksiKasController@show_gallery')->name('kas_gallery.show');
-        //     Route::get('/{kas_gallery}/edit', 'TransaksiKasController@edit_gallery')->name('kas_gallery.edit');
-        //     Route::patch('/{kas_gallery}/update', 'TransaksiKasController@update_gallery')->name('kas_gallery.update');
-        //     Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
-        // });
-
         Route::group(['prefix' => 'pemakaian_sendiri'], function() {
             Route::get('/', 'PemakaianSendiriController@index')->name('pemakaian_sendiri.index');
             Route::get('/create', 'PemakaianSendiriController@create')->name('pemakaian_sendiri.create');
@@ -647,6 +632,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{pemakaian_sendiri}/edit', 'PemakaianSendiriController@edit')->name('pemakaian_sendiri.edit');
             Route::patch('/{pemakaian_sendiri}/update', 'PemakaianSendiriController@update')->name('pemakaian_sendiri.update');
             Route::get('/{pemakaian_sendiri}/delete', 'PemakaianSendiriController@destroy')->name('pemakaian_sendiri.destroy');
+        });
+
+        Route::group(['prefix' => 'laporan'], function() {
+            Route::get('/kontrak', 'LaporanController@kontrak_index')->name('laporan.kontrak');
+            Route::get('/kontrak-pdf', 'LaporanController@kontrak_pdf')->name('laporan.kontrak-pdf');
+            Route::get('/kontrak-excel', 'LaporanController@kontrak_excel')->name('laporan.kontrak-excel');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

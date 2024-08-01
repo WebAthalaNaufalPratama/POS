@@ -132,10 +132,15 @@
                 <td style="width: 20%">Nomor</td>
                 <td style="width: 20%" class="text-start">: {{ $produk_terjual['mutasi']['no_mutasi'] }}</td>
             </tr>
-            <tr>
+                @php
+                    $perangkaiId = \App\Models\FormPerangkai::where('no_form', $no_form)->get();
+                @endphp
+                @foreach ($perangkaiId as $prk)
+                <tr>
                 <td style="width: 20%">Staff Perangkai</td>
-                <td style="width: 20%" class="text-start">: {{ $perangkai['nama'] }}</td>
-            </tr>
+                <td style="width: 20%" class="text-start">: {{ $prk->perangkai->nama }}</td>
+                </tr>
+                @endforeach
         </table>
         <br>
         <table class="full-width border">

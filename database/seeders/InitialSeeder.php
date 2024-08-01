@@ -118,7 +118,11 @@ class InitialSeeder extends Seeder
                 'addKomponen',
                 'getProdukDo',
                 'rekeningPerLokasi',
-                'dashboard.index'
+                'dashboard.index',
+                'getTopProduk',
+                'getTopMinusProduk',
+                'getTopSales',
+                'getLoyalty',
             ];
 
         // super admin
@@ -239,7 +243,10 @@ class InitialSeeder extends Seeder
                 'pembayaran',
                 'returpenjualan',
                 'inven_outlet',
-                'mutasigalery',
+                'mutasigalery.index',
+                'mutasigalery.acc',
+                'mutasigalery.show',
+                'mutasigalery.view',
                 'mutasioutlet',
                 'pdfinvoicepenjualan.generate',
                 'pdfdopenjualan.generate',
@@ -383,7 +390,9 @@ class InitialSeeder extends Seeder
                 'pemakaian_sendiri.index',
                 'pemakaian_sendiri.show',
                 'pemakaian_sendiri.edit',
-                'pemakaian_sendiri.update'
+                'pemakaian_sendiri.update',
+                'auditor.update',
+                'bukakunci.store',
             ];
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
             $query = Permission::query();
@@ -506,7 +515,8 @@ class InitialSeeder extends Seeder
                 'mutasigalerygalery.view',
                 'kas_gallery.index',
                 'kas_pusat.index',
-                'pemakaian_sendiri.index'
+                'pemakaian_sendiri.index',
+                'auditor.update',
             ];
             $auditorPermissionList = array_merge($basiPermissionList, $auditorPermissionList);
             $query = Permission::query();

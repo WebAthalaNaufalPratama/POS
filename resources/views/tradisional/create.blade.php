@@ -80,7 +80,7 @@
                                                 </td>
                                                 <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control"></td>
                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control"></td>
-                                                <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"></td>
+                                                <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
                                                 <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                             </tr>
                                         </tbody>
@@ -161,7 +161,14 @@
 
                 return true;
             });
+
+            // $('#harga_jual').change(function() {
+            //     var hargajual = $(this).val();
+            //     var harga = $('# ')
+            //     if(hargajual < )
+            // });
         });
+
         function multiply(element) {
             var id = 0
             var jumlah = 0
