@@ -96,7 +96,6 @@ class ProdukJualController extends Controller
      */
     public function store(Request $req)
     {
-        // dd($req);
         $path = $req->path();
         $path = explode('/', $path);
         $jenis = $path[0];
@@ -108,10 +107,15 @@ class ProdukJualController extends Controller
                 'harga' => 'required|integer',
                 'harga_jual' => 'required|integer',
                 'deskripsi' => 'required',
+                'kode_produk*' => 'required|exists:produks,kode',
+                'kondisi*' => 'required|exists:kondisis,id',
+                'jumlah*' => 'required|integer|min:0',
+                'harga_total*' => 'required|integer|min:0',
             ]);
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
             if(count($req->kode_produk) < 1 || $req->kode_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
+            if($req->harga_jual < $req->harga) return redirect()->back()->withInput()->with('fail', 'Harga jual tidak boleh kurang dari harga');
             $data = $req->except(['_token', '_method']);
 
             // ambil tipe
@@ -153,6 +157,7 @@ class ProdukJualController extends Controller
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
             if(count($req->kode_produk) < 1 || $req->kode_produk[0] == null) return redirect()->back()->withInput()->with('fail', 'Komponen tidak boleh kosong');
+            if($req->harga_jual < $req->harga) return redirect()->back()->withInput()->with('fail', 'Harga jual tidak boleh kurang dari harga');
             $data = $req->except(['_token', '_method']);
 
             // ambil tipe

@@ -620,6 +620,12 @@
             }
         }
 
+        function validateDigit(element, limit) {
+            if (element.value.length > limit) {
+                element.value = element.value.slice(0, limit);
+            }
+        }
+
         function validateName(element) {
             element.value = element.value.replace(/[^a-zA-Z\s'-]/g, '');
         }
@@ -630,14 +636,12 @@
 
         function validateCantExceed(element, limit) {
             var value = $(element).val();
-            // console.log('before :' + value);
             if (value.includes('.')) {
               value = cleanNumber(value);
             } else {
               value = parseInt(value) || 0;
             }
             
-            // console.log('after :' + value);
             if (value > limit) {
                 value = limit;
                 $(element).val(formatNumber(value));

@@ -41,9 +41,9 @@ class KaryawanController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
-            'jabatan' => 'required',
-            'lokasi_id' => 'required',
-            'handphone' => 'required',
+            'jabatan' => 'required|exists:jabatans,nama',
+            'lokasi_id' => 'required|exists:lokasis,id',
+            'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
         ]);
         $error = $validator->errors()->all();
@@ -93,9 +93,9 @@ class KaryawanController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
-            'jabatan' => 'required',
-            'lokasi_id' => 'required',
-            'handphone' => 'required',
+            'jabatan' => 'required|exists:jabatans,nama',
+            'lokasi_id' => 'required|exists:lokasis,id',
+            'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
         ]);
         $error = $validator->errors()->all();

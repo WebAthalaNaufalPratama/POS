@@ -75,7 +75,7 @@
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="add_nama" required>
+              <input type="text" class="form-control" name="nama" id="add_nama" oninput="validateName(this)" required>
             </div>
             <div class="mb-3">
               <label for="jabatan" class="col-form-label">Jabatan</label>
@@ -100,8 +100,8 @@
               </div>
             </div>
             <div class="mb-3">
-              <label for="handphone" class="col-form-label"> No Handphone</label>
-              <input type="number" class="form-control hide-arrow" name="handphone" id="add_handphone" oninput="validatePhoneNumber(this)" required>
+              <label for="handphone" class="col-form-label">No Handphone</label>
+              <input type="text" class="form-control hide-arrow" name="handphone" id="add_handphone" oninput="validatePhoneNumber(this)" required>
             </div>
             <div class="mb-3">
               <label for="alamat" class="col-form-label">Alamat</label>
@@ -140,7 +140,7 @@
             @method('PATCH')
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
-              <input type="text" class="form-control" name="nama" id="edit_nama" required>
+              <input type="text" class="form-control" name="nama" id="edit_nama" oninput="validateName(this)" required>
             </div>
             <div class="mb-3">
               <label for="jabatan" class="col-form-label">Jabatan</label>
@@ -199,6 +199,16 @@
     <script>
     $(document).ready(function() {
         $('#add_lokasi_id, #edit_lokasi_id, #add_jabatan, #edit_jabatan, #add_user_id, #edit_user_id').select2()
+    });
+    $(document).on('input', '#add_handphone, #edit_handphone', function() {
+        let input = $(this);
+        let value = input.val();
+        
+        if (!isNumeric(value)) {
+        value = value.replace(/[^\d]/g, "");
+        }
+
+        input.val(value);
     });
 
     function getData(id){

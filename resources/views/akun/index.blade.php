@@ -67,7 +67,7 @@
             @csrf
             <div class="mb-3">
               <label for="no_akun" class="col-form-label">Nomor akun</label>
-              <input type="text" class="form-control" name="no_akun" id="add_no_akun" required>
+              <input type="text" class="form-control" name="no_akun" id="add_no_akun" oninput="validateDigit(this, 10)" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>
@@ -95,7 +95,7 @@
             @method('PATCH')
             <div class="mb-3">
               <label for="no_akun" class="col-form-label">Nomor akun</label>
-              <input type="text" class="form-control" name="no_akun" id="edit_no_akun" required>
+              <input type="text" class="form-control" name="no_akun" id="edit_no_akun" oninput="validateDigit(this, 10)" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>
@@ -116,6 +116,16 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
+    });
+    $(document).on('input', '#add_no_akun, #edit_no_akun', function() {
+        let input = $(this);
+        let value = input.val();
+        
+        if (!isNumeric(value)) {
+        value = value.replace(/[^\d]/g, "");
+        }
+
+        input.val(value);
     });
 
     function getData(id){
