@@ -9,9 +9,11 @@
                     <div class="page-title">
                         <h4>Mutasi Inden ke Gallery/GreenHouse</h4>
                     </div>
+                    @if(Auth::user()->hasRole('Purchasing'))
                     <div class="page-btn">
                         <a href="{{ route('mutasiindengh.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
                     </div>
+                    @endif
                 </div>
             </div>
             <div class="card-body">

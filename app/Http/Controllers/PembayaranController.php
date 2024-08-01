@@ -513,6 +513,7 @@ class PembayaranController extends Controller
             $query2->where('tanggal_bayar', '<=', $req->input('dateEnd2'));
         }
         $data2 = $query2->orderByDesc('id')->get();
+        // dd($data, $data2); // Tambahkan ini untuk debug
         return view('purchase.indexpembayaran', compact('data', 'data2'));
     }
 

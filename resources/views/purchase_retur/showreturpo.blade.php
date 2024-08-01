@@ -101,7 +101,7 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>No</th>
+                                        {{-- <th>No</th> --}}
                                         {{-- <th>Kode Produk</th> --}}
                                         <th>Nama Produk</th>
                                         <th>Alasan</th>
@@ -115,7 +115,7 @@
                                 <tbody id="dynamic_field">
                                     @foreach ($data->produkretur as $item)
                                         <tr>
-                                            <td>1</td>
+                                            {{-- <td>1</td> --}}
                                             <input type="hidden" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly>
                                             <td style="width: 20%">
                                                 <select id="produk_0" name="nama_produk[]" class="form-control" required disabled>
@@ -339,15 +339,15 @@
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
                                             <td id="pembuku">
-                                                @if(Auth::user()->hasRole('Purchasing'))
+                                                {{-- @if(Auth::user()->hasRole('Purchasing')) --}}
                                                     @if (!$pembuku )
                                                     <input type="text" class="form-control" value="Nama (Finance)"  disabled>
                                                     @else
                                                     <input type="text" class="form-control" value="{{ $pembuku }} ({{ $pembukujbt }})"  disabled>
                                                     @endif
-                                                @endif
+                                                {{-- @endif --}}
 
-                                                @if(Auth::user()->hasRole('Finance'))
+                                                {{-- @if(Auth::user()->hasRole('Finance'))
                                                     @if($data->status_dibuku == "DIKONFIRMASI")
 
                                                     <input type="text" class="form-control" value="{{ $pembuku  }} ({{ $pembukujbt  }})"  disabled>
@@ -357,20 +357,18 @@
                                                     <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
 
                                                     @endif
-                                                @endif
-                                            </td>
-
-                                            
+                                                @endif --}}
+                                            </td>                                         
                                         </tr>
                                         <tr>
                                             <td id="status_dibuat">
                                                 <input type="text" class="form-control" id="status_buat" value="{{ $data->status_dibuat }}" readonly>
                                             </td>
                                             <td id="status_dibuku">
-                                                @if(Auth::user()->hasRole('Purchasing'))
+                                                {{-- @if(Auth::user()->hasRole('Purchasing')) --}}
                                                 <input type="text" class="form-control" id="status_dibuku" value="{{ $data->status_dibuku ?? '-' }}" readonly>
-                                                @endif
-                                                @if(Auth::user()->hasRole('Finance'))
+                                                {{-- @endif --}}
+                                                {{-- @if(Auth::user()->hasRole('Finance'))
 
                                                     @if($data->status_dibuku == "DIKONFIRMASI")
                                                     <input type="text" class="form-control" id="status_buku" value="{{ $data->status_dibuku }}" readonly>
@@ -381,7 +379,7 @@
                                                         <option value="DIKONFIRMASI" {{ old('status_dibuku', $data->status_dibuku)  == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                     </select>
                                                     @endif
-                                                @endif
+                                                @endif --}}
 
                                             </td>
                                         </tr>
@@ -390,16 +388,16 @@
                                                 <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{tanggalindo($data->tgl_dibuat) }}" readonly>
                                             </td>
                                             <td id="tgl_dibuku">
-                                                @if(Auth::user()->hasRole('Purchasing'))
+                                                {{-- @if(Auth::user()->hasRole('Purchasing')) --}}
                                                 <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{isset($data->tgl_dibuku) ? tanggalindo($data->tgl_dibuku) : '-'}}" readonly>
-                                                @endif
+                                                {{-- @endif
                                                 @if(Auth::user()->hasRole('Finance'))
                                                     @if($data->status_dibuku == "DIKONFIRMASI")
                                                     <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuku" value="{{tanggalindo($data->tgl_dibuku) }}" readonly>
                                                     @else
                                                     <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuku" value="{{ now()->format('Y-m-d') }}" >
                                                     @endif
-                                                @endif
+                                                @endif --}}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -430,9 +428,9 @@
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    @if(Auth::user()->hasRole('Finance') && ($data->status_dibuku == "TUNDA" || $data->status_dibuku == null))
+                    {{-- @if(Auth::user()->hasRole('Finance') && ($data->status_dibuku == "TUNDA" || $data->status_dibuku == null))
                     <button class="btn btn-primary" type="submit">Submit</button>
-                    @endif
+                    @endif --}}
                     <a href="{{ route('returbeli.index') }}" class="btn btn-secondary" type="button">Back</a>
                 </div>
             </form>

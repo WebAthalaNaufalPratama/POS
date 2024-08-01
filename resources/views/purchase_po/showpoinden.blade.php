@@ -134,7 +134,7 @@
                                         <tr>
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required disabled>
-                                                    <option disabled selected>Pilih Status</option>
+                                                    <option disabled>Pilih Status</option>
                                                     <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                     <option value="BATAL" {{ $beli->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
@@ -144,7 +144,7 @@
                                             @if($pemeriksa)
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" disabled>
-                                                    <option disabled selected>Pilih Status</option>
+                                                    <option disabled>Pilih Status</option>
                                                     <option value="TUNDA" {{ $beli->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $beli->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>

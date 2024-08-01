@@ -362,7 +362,9 @@ Carbon::setLocale('id');
                                     <tbody>
                                                 <tr>
                                                     <td id="pembuat">
+                                                        <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
+
                                                     </td>
                                                     <td id="pembuku"> 
                                                         @if (!$pembuku )
@@ -376,7 +378,7 @@ Carbon::setLocale('id');
                                                     <td id="status_dibuat">
                                                         {{-- <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}"> --}}
                                                         <select id="status" name="status_dibuat" class="form-control select2" required>
-                                                            <option value="">Pilih Status</option>
+                                                            <option disabled>Pilih Status</option>
                                                             <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' || $inv_po->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             {{-- <option value="BATAL" {{ $inv_po->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
@@ -417,7 +419,7 @@ Carbon::setLocale('id');
                                                     <td id="status_dibuat">
                                                         {{-- <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}"> --}}
                                                         <select id="status" name="status_dibuat" class="form-control select2" disabled>
-                                                            <option value="">Pilih Status</option>
+                                                            <option disabled>Pilih Status</option>
                                                             <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' || $inv_po->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             {{-- <option value="BATAL" {{ $inv_po->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
@@ -425,7 +427,7 @@ Carbon::setLocale('id');
                                                     </td>
                                                     <td id="status_dibuku">
                                                         <select id="status" name="status_dibuku" class="form-control select2">
-                                                            <option value="">Pilih Status</option>
+                                                            <option disabled>Pilih Status</option>
                                                             <option value="TUNDA" {{ $inv_po->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="MENUNGGU PEMBAYARAN" {{ $inv_po->status_dibuku == 'MENUNGGU PEMBAYARAN' || $inv_po->status_dibuku == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
                                                             @if( $inv_po->sisa == 0)

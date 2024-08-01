@@ -117,7 +117,7 @@ class MutasiindensController extends Controller
         $produks = InventoryInden::get();
         $no_mutasi = $this->generatemutasiNumber();
         $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
-        $lokasi = Lokasi::whereIn('tipe_lokasi', [1, 3])->get();
+        $lokasi = Lokasi::whereIn('tipe_lokasi', [1, 3, 4])->get();
         $kondisis = Kondisi::all();
         // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
 
@@ -143,20 +143,42 @@ class MutasiindensController extends Controller
         return response()->json($kodeInden);
     }
 
-    public function getkategoriInden($kode_inden, $bulan_inden, $supplier_id)
+    // public function getkategoriInden($kode_inden, $bulan_inden, $supplier_id)
+    // {
+    //     // Ambil data kategori berdasarkan supplier_id, bulan_inden, dan kode_produk_inden
+    //     $kategori = InventoryInden::where('supplier_id', $supplier_id)
+    //         ->where('bulan_inden', $bulan_inden)
+    //         ->where('kode_produk_inden', $kode_inden)
+    //         ->with('produk') // Load relasi dengan produk
+    //         ->first()->produk->nama; // Ambil kategori dari relasi dengan produk
+       
+
+    //     return response()->json($kategori);
+        
+
+    // }
+    public function getKategoriInden($kode_inden, $bulan_inden, $supplier_id)
     {
-        // Ambil data kategori berdasarkan supplier_id, bulan_inden, dan kode_produk_inden
-        $kategori = InventoryInden::where('supplier_id', $supplier_id)
+        // Ambil data kategori dan jumlah berdasarkan supplier_id, bulan_inden, dan kode_produk_inden
+        $inden = InventoryInden::where('supplier_id', $supplier_id)
             ->where('bulan_inden', $bulan_inden)
             ->where('kode_produk_inden', $kode_inden)
             ->with('produk') // Load relasi dengan produk
-            ->first()->produk->nama; // Ambil kategori dari relasi dengan produk
-       
-
-        return response()->json($kategori);
+            ->first();
         
+        if ($inden) {
+            $kategori = $inden->produk->nama; // Ambil kategori dari relasi dengan produk
+            $jumlah = $inden->jumlah; // Ambil jumlah dari tabel InventoryInden
+            
+            return response()->json([
+                'kategori' => $kategori,
+                'jumlah' => $jumlah,
+            ]);
+        }
 
+        return response()->json(['error' => 'Data tidak ditemukan'], 404);
     }
+
         /**
      * Store a newly created resource in storage.
      *
@@ -169,7 +191,12 @@ class MutasiindensController extends Controller
         $validator = Validator::make($request->all(), [
             'supplier_id' => 'required',
             'lokasi_id' => 'required',
-            // 'tgl_dikirim' => 'required|date',
+            'tgl_dikirim' => 'required|date',
+            'sub_total' => 'required',
+            'total_tagihan' => 'required',
+            'pembuat' => 'required',
+            'tgl_dibuat' => 'required',
+            'status_dibuat' => 'required',
             // Tambahkan validasi sesuai kebutuhan lainnya
         ]);
 
@@ -199,11 +226,12 @@ class MutasiindensController extends Controller
         $no_mutasi = $mutasiinden->no_mutasi = $request->no_mutasi;
         $mutasiinden->supplier_id = $request->supplier_id;
         $mutasiinden->lokasi_id = $request->lokasi_id;
-        $mutasiinden->tgl_dikirim = $request->tgl_kirim;
+        $mutasiinden->tgl_dikirim = $request->tgl_dikirim;
         $mutasiinden->subtotal = $request->sub_total ?? null;
         $mutasiinden->biaya_perawatan = $request->biaya_rwt ?? null;
         $mutasiinden->biaya_pengiriman = $request->biaya_ongkir ?? null;
         $mutasiinden->total_biaya = $request->total_tagihan ?? null;
+        $mutasiinden->sisa_bayar = $request->total_tagihan ?? null;
         $mutasiinden->pembuat_id = $request->pembuat;
         $mutasiinden->status_dibuat = $request->status_dibuat;
         $mutasiinden->tgl_dibuat = $request->tgl_dibuat;
@@ -235,11 +263,18 @@ class MutasiindensController extends Controller
                 $produkMutasiInden->biaya_rawat = $request->rawat[$key] ?? null;
                 $produkMutasiInden->totalharga = $request->jumlah[$key] ?? null;
                 // Tambahkan atribut lainnya sesuai kebutuhan
-                $produkMutasiInden->save();
+                $check1 = $produkMutasiInden->save();
+
+                if($check1){ 
+                    $inventoryInden->jumlah -= $request->qtykrm[$key];
+                    $inventoryInden->update();
+                }
             } else {
                 // Handle jika tidak ditemukan record di InventoryInden
                 return redirect()->back()->withInput()->with('fail', 'tidak ditemukan record di InventoryInden');
             }
+
+
    
         }
         return redirect(route('mutasiindengh.index'))->with('success', 'Data Mutasi berhasil disimpan. Nomor Mutasi: ' . $no_mutasi);

@@ -156,12 +156,15 @@ Carbon::setLocale('id');
                                     @php
                                     $poretur = $pembelian->firstWhere('no_retur', $retur->no_retur ?? null);
                                     @endphp
-                                    
-                                    @if(Auth::user()->hasRole('Purchasing'))
-                                        @if($retur->komplain == "Retur" && !$poretur)
-                                        <a href="{{ route('pembelian.create') }}" class="btn btn-primary" target="_blank">Buat Pembelian Baru</a>
+
+                                    @if($retur->status_dibuku == "DIKONFIRMASI")
+                                        @if(Auth::user()->hasRole('Purchasing'))
+                                            @if($retur->komplain == "Retur" && !$poretur)
+                                            <a href="{{ route('pembelian.create') }}" class="btn btn-primary" target="_blank">Buat Pembelian Baru</a>
+                                            @endif
                                         @endif
                                     @endif
+
                                     @if($retur->komplain == "Retur" && $poretur)
                                         <a href="{{ route('pembelian.show', ['type' => 'pembelian', 'datapo' => $poretur->id]) }}"  class="btn btn-primary" target="_blank">Lihat PO retur</a>
                                     @endif
@@ -170,14 +173,15 @@ Carbon::setLocale('id');
                                                 @if(Auth::user()->hasRole('Finance'))
                                                 <a href="{{ route('returbeli.show', ['retur_id' => $retur->id]) }}" class="btn btn-primary" target="_blank">Input Refund</a>
                                                  @endif
-                                            @else
+                                            @elseif($retur->komplain == "Refund" && $retur->sisa == 0)
                                                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                                                 <span class="badges bg-lightgreen">Refund Lunas</span>
                                                 @endif
                                             @endif
-                                  
+                                    @if($retur->status_dibuku !== "DIKONFIRMASI")
+                                    <span class="badges bg-lightred">Komplain Belum Dikonfirmasi Finance</span>
 
-
+                                    @endif
                                         
                                    </div>
                                    {{-- komplain --}}
@@ -410,7 +414,7 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
-                                                @if (!$retur)
+                                                @if (!$retur)  
                                                 <li>
                                                     <h4>Total Diskon</h4>
                                                     <h5 class="col-lg-5">
@@ -419,8 +423,8 @@ Carbon::setLocale('id');
                                                             <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
                                                         </div>
                                                     </h5>
-                                                  
                                                 </li>
+                                                @endif
                                                 <li>
                                                     <h4>DP</h4>
                                                     <h5>
@@ -432,7 +436,6 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                @endif
                                                 <li>
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>

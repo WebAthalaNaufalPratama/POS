@@ -49,8 +49,8 @@
                                 <th>Jumlah</th>
                                 <th>Komplain</th>
                                 <th>Total Harga</th>
-                                <th>Status Purchase</th>
-                                <th>Status Finance</th>
+                                <th>Status dibuat</th>
+                                <th>Status dibuku</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -104,15 +104,19 @@
                                 </td>
                                 <td>{{ formatRupiah($data->subtotal)}}</td>
                                 <td>
-                                    @if ($data->status_dibuat == 'TUNDA' || $data->status_dibuat == null)
-                                        <span class="badges bg-lightgrey">TUNDA</span>
+                                    @if ($data->status_dibuat == 'BATAL')
+                                        <span class="badges bg-lightgrey">BATAL</span>
+                                    @elseif ($data->status_dibuat == 'TUNDA' || $data->status_dibuat == null)
+                                        <span class="badges bg-lightred">TUNDA</span>
                                     @elseif ($data->status_dibuat == 'DIKONFIRMASI')
                                         <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @endif
                                 </td>
                                 <td>
-                                    @if ($data->status_dibuku == 'TUNDA' || $data->status_dibuku == null)
-                                        <span class="badges bg-lightgrey">TUNDA</span>
+                                    @if ($data->status_dibuku == 'BATAL')
+                                        <span class="badges bg-lightgrey">BATAL</span>
+                                    @elseif ($data->status_dibuku == 'TUNDA' || $data->status_dibuku == null)
+                                        <span class="badges bg-lightred">TUNDA</span>
                                     @elseif ($data->status_dibuku == 'DIKONFIRMASI')
                                         <span class="badges bg-lightgreen">DIKONFIRMASI</span>
                                     @endif
@@ -128,7 +132,7 @@
                                         <li>
                                             <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">
-                                                @if($data->komplain == "Refund" && ($data->status_dibuku == "TUNDA" || is_null($data->status_dibuku)))
+                                                @if($data->komplain == "Refund" && $data->sisa !== 0 )
                                                     Input Refund
                                                 @else
                                                     Detail Retur
@@ -136,20 +140,24 @@
                                             </a>
                                         </li>
                                         @endif
+
                                         @if(Auth::user()->hasRole('Purchasing'))
                                         <li>
                                             <a href="{{ route('returbeli.show', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur</a>
                                         </li>
-                                        @if($data->status_dibuat == "TUNDA")
+                                        @if($data->status_dibuat == "TUNDA" || $data->status_dibuat == "BATAL")
                                         <li>
                                             <a href="{{ route('returbeli.edit', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur</a>
                                         </li>
                                         @endif
+
                                         @endif
                                         @if(Auth::user()->hasRole(['Finance']))
-                                        <li>
-                                        <a href="{{ route('returbeli.edit', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur</a>
-                                        </li>
+                                            @if($data->status_dibuat == "DIKONFIRMASI" && ( $data->status_dibuku == "TUNDA" || $data->status_dibuku == null || $data->status_dibuku == "BATAL" )  )
+                                            <li>
+                                            <a href="{{ route('returbeli.edit', ['retur_id' => $data->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur</a>
+                                            </li>
+                                            @endif
                                         @endif
                                         <li>
                                             <a href="{{ route('invoice.show', ['datapo' => $data->invoice->pembelian_id, 'type'=>"pembelian", 'id' => $data->invoice->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Invoice</a>

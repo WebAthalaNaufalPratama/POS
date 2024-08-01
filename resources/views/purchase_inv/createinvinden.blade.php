@@ -215,17 +215,8 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
-                                                    <h4>Total Diskon</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total_dis') }}" readonly>
-                                                            {{-- <input type="hidden" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total') }}" > --}}
-                                                        </div>
-                                                    </h5>
-                                                </li>
-                                                <li>
+                                               
+                                               <li>
                                                     <h4>PPN
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
                                                             <option value=""> Pilih Jenis PPN</option>
@@ -233,10 +224,14 @@ Carbon::setLocale('id');
                                                             <option value="include" selected>INCLUDE</option>
                                                         </select>
                                                     </h4>
-                                                    <h5 class="col-lg-5">
+                                                    <h5>
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ old('persen_ppn') }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
                                                             <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ old('nominal_ppn') }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -257,6 +252,16 @@ Carbon::setLocale('id');
                                                             <span class="input-group-text">Rp. </span> 
                                                             <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly value="{{ old('total_tagihan_dis') }}" required>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly value="{{ old('total_tagihan') }}" required>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Total Diskon</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total_dis') }}" readonly>
+                                                            {{-- <input type="hidden" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total') }}" > --}}
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -300,34 +305,21 @@ Carbon::setLocale('id');
                                                         <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
                                                     </td>
-                                                    <!-- <td id="pembuku">
-                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td> -->
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
                                                         <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ (old('status_dibuat') == 'DIKONFIRMASI') || (old('status_dibuat') == null) ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option disabled>Pilih Status</option>
+                                                            <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' || old('status_dibuat') == null ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ (old('status_dibuat') == 'DIKONFIRMASI') ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
-                                                    <!-- <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
-                                                        </select>
-                                                    </td> -->
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
                                                     </td>
-                                                    <!-- <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="" disabled>
-                                                    </td> -->
+                                                 
                                                 </tr>
                                             </tbody>
                                         </table>  
@@ -545,11 +537,14 @@ function calculateTotalAll() {
 document.getElementById('jenis_ppn').addEventListener('change', function() {
     var selectedOption = this.value;
     var persenPpnInput = document.getElementById('persen_ppn');
+    var nominalppn = document.getElementById('nominal_ppn');
+
     if (selectedOption === 'exclude') {
         persenPpnInput.readOnly = false;
     } else {
         persenPpnInput.readOnly = true;
-        persenPpnInput.value = ''; // Set nilai input menjadi string kosong
+        persenPpnInput.value = '';
+        nominalppn.value = ''; // Set nilai input menjadi string kosong
     }
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
 });
@@ -568,7 +563,15 @@ document.querySelectorAll('input[name^="jumlah"], #diskon_total, #biaya_ongkir, 
         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
     });
 });
-    
+
+function calculatePPN()
+{
+    let ppn_persen = $('#persen_ppn').val();
+    let subtotal = $('#sub_total_int').val();
+    if(isNaN(ppn_persen) || isNaN(subtotal) || ppn_persen > 100) return;
+    let nominal_ppn = ppn_persen * subtotal / 100;
+    $('#nominal_ppn').val(formatNumber(nominal_ppn));
+}
 
 
 // function unformatRupiah(rupiah) {

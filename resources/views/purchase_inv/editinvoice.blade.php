@@ -7,14 +7,22 @@ Carbon::setLocale('id');
 @extends('layouts.app-von')
 
 @section('content')
-
+@php
+$user = Auth::user();
+@endphp
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Create Invoice</h3>
+            @if($user->hasRole(['Purchasing']))
+            <h3 class="page-title">Edit Invoice (Purchasing)</h3>
+            @elseif($user->hasRole(['Finance']))
+            <h3 class="page-title">Edit Invoice (Finance)</h3>
+            @endif
         </div>
     </div>
 </div>
+
+
 
 <div class="row">
     <div class="card">
@@ -50,8 +58,7 @@ Carbon::setLocale('id');
                                         </div>
                                         <div class="form-group">
                                             <label for="tg_inv">Tanggal Invoice</label>
-                                            <input type="date" class="form-control" id="tgl_inv" name="tgl_inv" 
-                                            value="{{ $inv_po->tgl_inv }}">
+                                            <input type="date" class="form-control" id="tgl_inv" name="tgl_inv" value="{{ $inv_po->tgl_inv }}">
                                          </div>
                                         
                                         {{-- <div class="form-group">
@@ -74,7 +81,7 @@ Carbon::setLocale('id');
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_po">No. Purchase Order inden</label>
-                                            <input type="text" class="form-control" id="no_po" name="id_po" value="{{ $beli->id }}" readonly hidden>
+                                            <input type="hidden" class="form-control" id="no_po" name="id_po" value="{{ $beli->id }}" readonly>
                                             <input type="hidden" name="type" value="poinden">
                                             <input type="text" class="form-control" id="no_po" name="no_po" value="{{ $beli->no_po }}" readonly>
                                         </div>
@@ -83,7 +90,6 @@ Carbon::setLocale('id');
                                                 <input type="text" class="form-control" id="tgl_po" name="tgl_po" value="{{ \Carbon\Carbon::parse($beli->created_at)->translatedFormat('d F Y') }}" readonly>
                                         </div>
                                     </div>
-                                    
                                 </div>
                             </div>
                         </div>
@@ -134,7 +140,9 @@ Carbon::setLocale('id');
                                                        
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}">
+                                                                <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="limitDiskon({{ $index }}), calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}">
+
+                                                                {{-- <input type="text"  name="diskon_display[]" id="diskon2_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ formatRupiah2($item->diskon) }}"> --}}
                                                                 <input type="hidden" name="diskon[]" id="diskon_{{ $index }}" class="form-control" oninput="calculateTotal({{ $index }})" value="{{ $item->diskon }}">
                                                             </div>
                                                     </td>
@@ -208,34 +216,29 @@ Carbon::setLocale('id');
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            
                                                             <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ formatRupiah2($inv_po->subtotal) }}"readonly required>
-                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ old('sub_total') }}"readonly required>
+                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" value="{{ $inv_po->subtotal }}"readonly required>
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
-                                                    <h4>Total Diskon</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total" oninput="calculateTotal(0)"  value="{{ $totalDis }}" readonly>
-                                                            {{-- <input type="hidden" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total') }}" > --}}
-                                                        </div>
-                                                    </h5>
-                                                </li>
+                                                
                                                 <li>
                                                     <h4>PPN
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
-                                                            <option value=""> Pilih Jenis PPN</option>
-                                                            <option value="exclude" {{ $inv_po->ppn != null ? 'selected' : ''}}>EXCLUDE</option>
-                                                            <option value="include" {{ $inv_po->ppn == null ? 'selected' : ''}}>INCLUDE</option>
+                                                            <option value="">Pilih Jenis PPN</option>
+                                                            <option value="exclude" @if($inv_po->ppn !== 0) selected @endif>EXCLUDE</option>
+                                                            <option value="include" @if($inv_po->ppn == 0) selected @endif>INCLUDE</option>
                                                         </select>
+                                                        
                                                     </h4>
-                                                    <h5 class="col-lg-5">
+                                                    <h5>
                                                         <div class="input-group">
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="11" readonly>
+                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn ?? 0 }}" oninput="calculatePPN(this), validatePersen(this)" readonly>
                                                             <span class="input-group-text">%</span>
+                                                        </div>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ formatRupiah($inv_po->ppn  ?? 0 )}}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -255,11 +258,21 @@ Carbon::setLocale('id');
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
                                                             <input type="text" id="total_tagihan" name="total_tagihan_dis" class="form-control" readonly value="{{ formatRupiah2($inv_po->total_tagihan) }}" required>
-                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly value="{{ old('total_tagihan') }}" required>
+                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan" class="form-control" readonly value="{{ $inv_po->total_tagihan }}" required>
                                                         </div>
                                                     </h5>
                                                 </li>
                                                 <li>
+                                                    <h4>Total Diskon</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total" oninput="calculateTotal(0)"  value="{{ $totalDis }}" readonly>
+                                                            {{-- <input type="hidden" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total') }}" > --}}
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                {{-- <li>
                                                     <h4>DP</h4>
                                                     <h5>
                                                         <div class="input-group">
@@ -276,78 +289,113 @@ Carbon::setLocale('id');
                                                             <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" value="{{ $inv_po->sisa }}" readonly required>
                                                         </div>
                                                     </h5>
-                                                </li>
+                                                </li> --}}
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                         <div class="row justify-content-start">
-                            <div class="col-md-3 border rounded pt-3 me-1 mt-2">
-                                @php
-                                    $user = Auth::user();
-                                @endphp
-                             
-                                        <table class="table table-responsive border rounded">
-                                            <thead>
+                        <div class="row justify-content-start">
+                            <div class="col-md-6 border rounded pt-3 me-1 mt-2">
+                                <table class="table table-responsive border rounded">
+                                    <thead>
+                                        <tr>
+                                            <th>Dibuat</th>                                              
+                                            <th>Dibukukan</th>
+                                        </tr>
+                                    </thead>
+                                    @if(Auth::user()->hasRole('Purchasing'))
+                                    <tbody>
                                                 <tr>
-                                                    @if($user->hasRole(['Purchasing']))
-                                                    <th>Dibuat</th>
-                                                    @elseif($user->hasRole(['Auditor']))                                              
-                                                    <th>Dibukukan</th>
-                                                    @endif
+                                                    <td id="pembuat">
+                                                        <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
+                                                    </td>
+                                                    <td id="pembuku"> 
+                                                        @if (!$pembuku )
+                                                        <input type="text" class="form-control" value="Nama (Finance)"  disabled>
+                                                        @else
+                                                        <input type="text" class="form-control" value="{{ $pembuku }} ({{ $pembukujbt }})"  disabled>
+                                                        @endif
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
                                                 <tr>
-                                                @if($user->hasRole(['Purchasing']))
+                                                    <td id="status_dibuat">
+                                                        {{-- <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}"> --}}
+                                                        <select id="status" name="status_dibuat" class="form-control select2" required>
+                                                            <option disabled>Pilih Status</option>
+                                                            <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' || $inv_po->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            {{-- <option value="BATAL" {{ $inv_po->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
+                                                        </select>
+                                                    </td>
+                                                    <td id="status_dibuku">
+                                                        <input type="text" class="form-control" id="status_dibuku" value="{{ $inv_po->status_dibuku ?? '-' }}" readonly>
+
+                                                           {{-- <select id="status_dibukukan" name="status_dibukukan" class="form-control" required>
+                                                               <option value="pending" {{ $inv_po->status_dibuku == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                               <option value="acc" {{ $inv_po->status_dibuku == 'acc' ? 'selected' : '' }}>Accept</option>
+                                                           </select> --}}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="tgl_dibuat">
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}">
+                                                    </td>
+                                                    <td id="tgl_dibuku">
+                                                        <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan ?? '-'}}" disabled>
+                                                    </td>
+                                                </tr>
+                                    </tbody>
+                                    @endif
+                                    @if(Auth::user()->hasRole('Finance'))
+                                    <tbody>
+                                                <tr>
                                                     <td id="pembuat">
                                                         <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                        <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
                                                     </td>
-                                                @elseif($user->hasRole(['Auditor']))
-                                                    <td id="pembuku">
+                                                    <td id="pembuku"> 
                                                         <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                    
                                                     </td>
-                                                @endif
                                                 </tr>
                                                 <tr>
-                                                @if($user->hasRole(['Purchasing']))
                                                     <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                        {{-- <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}"> --}}
+                                                        <select id="status" name="status_dibuat" class="form-control select2" disabled>
+                                                            <option disabled>Pilih Status</option>
+                                                            <option value="TUNDA" {{ $inv_po->status_dibuat == 'TUNDA' || $inv_po->status_dibuat == '' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" {{ $inv_po->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            {{-- <option value="BATAL" {{ $inv_po->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                                         </select>
                                                     </td>
-                                                @elseif($user->hasRole(['Auditor']))
                                                     <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control">
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="TUNDA" {{ $inv_po->status_dibukukan == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibukukan == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                        <select id="status" name="status_dibuku" class="form-control select2">
+                                                            <option disabled>Pilih Status</option>
+                                                            <option value="TUNDA" {{ $inv_po->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="MENUNGGU PEMBAYARAN" {{ $inv_po->status_dibuku == 'MENUNGGU PEMBAYARAN' || $inv_po->status_dibuku == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
+                                                            @if( $inv_po->sisa == 0)
+                                                            <option value="DIKONFIRMASI" {{ $inv_po->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            @endif
                                                         </select>
                                                     </td>
-                                                @endif
                                                 </tr>
                                                 <tr>
-                                                @if($user->hasRole(['Purchasing']))
                                                     <td id="tgl_dibuat">
-                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
+                                                        <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $inv_po->tgl_dibuat }}" disabled>
                                                     </td>
-                                                @elseif($user->hasRole(['Auditor']))
                                                     <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ now()->format('Y-m-d') }}">
+                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{ now()->format('Y-m-d')  }}">
                                                     </td>
-                                                @endif
                                                 </tr>
-                                            </tbody>
-                                        </table>  
-                                        <br>                                 
+                                    </tbody>
+                                    @endif
+                                </table>    
                                </div>
                          </div>
+
 
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
@@ -412,7 +460,14 @@ function unformatRupiah(formattedValue) {
         //     calculateTotalAll(); // Recalculate total on change
         // });
 
-        
+        function calculatePPN()
+        {
+            let ppn_persen = $('#persen_ppn').val();
+            let subtotal = $('#sub_total_int').val();
+            if(isNaN(ppn_persen) || isNaN(subtotal) || ppn_persen > 100) return;
+            let nominal_ppn = ppn_persen * subtotal / 100;
+            $('#nominal_ppn').val(formatNumber(nominal_ppn));
+        }
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -449,6 +504,19 @@ document.addEventListener('DOMContentLoaded', function() {
     @endforeach
 });
 
+function limitDiskon(index) 
+{
+    let diskon = parseInt(unformatRupiah($('#diskon2_' + index).val()));
+    let harga_satuan = parseInt(unformatRupiah($('#harga2_' + index).val()));
+
+    if (diskon > harga_satuan) {
+        $('#diskon2_' + index).val(formatRupiah(harga_satuan));
+        return;
+    }
+
+    $('#diskon2_' + index).val(formatRupiah(diskon));
+}
+
 // Fungsi untuk menghitung total harga per baris
 function calculateTotal(index) {
     var qtytrm = parseFloat(document.getElementById('qtytrm_' + index).value) || 0;
@@ -459,16 +527,16 @@ function calculateTotal(index) {
     var distot = (qtytrm * diskon); 
     var jumlah = (qtytrm * harga) - distot;
 
-    if (diskon > harga) {
-        alert('Harga diskon tidak boleh melebihi harga');
-    }
+   
 
     document.getElementById('jumlahint_' + index).value = jumlah;
     document.getElementById('jumlah_' + index).value = formatRupiah(jumlah.toString());
     document.getElementById('distot_int_' + index).value = distot;
     document.getElementById('distot_' + index).value = formatRupiah(distot.toString());
 
-    calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
+    calculateTotalAll();
+    calculatePPN();
+     // Memanggil fungsi untuk menghitung total keseluruhan
 }
 
 // Fungsi untuk menghitung total tagihan
@@ -514,20 +582,21 @@ function calculateTotalAll() {
 }
 
 // Event listener untuk perubahan jenis PPN
-function jenisPPN() {
-    var selectedOption = $('#jenis_ppn').val();
+document.getElementById('jenis_ppn').addEventListener('change', function() {
+    var selectedOption = this.value;
     var persenPpnInput = document.getElementById('persen_ppn');
+    var nominalppn = document.getElementById('nominal_ppn');
+
     if (selectedOption === 'exclude') {
         persenPpnInput.readOnly = false;
     } else {
         persenPpnInput.readOnly = true;
-        persenPpnInput.value = ''; // Set nilai input menjadi string kosong
+        persenPpnInput.value = '';
+        nominalppn.value = '';
+
+        // Set nilai input menjadi string kosong
     }
     calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-};
-
-$(document).ready(function () {
-    $('#jenis_ppn').change(jenisPPN());
 });
 
 // Panggil fungsi calculateTotal ketika ada perubahan pada input harga atau diskon per baris
