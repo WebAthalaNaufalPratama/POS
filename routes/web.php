@@ -639,6 +639,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/tagihan_sewa', 'LaporanController@tagihan_sewa_index')->name('laporan.tagihan_sewa');
             Route::get('/tagihan_sewa-pdf', 'LaporanController@tagihan_sewa_pdf')->name('laporan.tagihan_sewa-pdf');
             Route::get('/tagihan_sewa-excel', 'LaporanController@tagihan_sewa_excel')->name('laporan.tagihan_sewa-excel');
+            Route::get('/do_sewa', 'LaporanController@do_sewa_index')->name('laporan.do_sewa');
+            Route::get('/do_sewa-pdf', 'LaporanController@do_sewa_pdf')->name('laporan.do_sewa-pdf');
+            Route::get('/do_sewa-excel', 'LaporanController@do_sewa_excel')->name('laporan.do_sewa-excel');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

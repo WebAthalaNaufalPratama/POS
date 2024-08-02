@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DOSewaExport;
 use App\Exports\KontrakExport;
 use App\Exports\TagihanSewaExport;
 use App\Models\Customer;
+use App\Models\DeliveryOrder;
 use App\Models\InvoiceSewa;
 use App\Models\Kontrak;
 use App\Models\Lokasi;
@@ -241,5 +243,91 @@ class LaporanController extends Controller
         });
         if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new TagihanSewaExport($data), 'tagihan_sewa.xlsx');
+    }
+
+    public function do_sewa_index(Request $req)
+    {
+        $query = DeliveryOrder::with(['produk' => function($q) {
+            $q->whereNull('no_kembali_sewa');
+            },'produk.produk', 'produk.komponen.produk', 'produk.komponen.data_kondisi', 'kontrak.customer', 'data_driver'])->where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI');
+
+        if ($req->customer) {
+            $query->whereHas('kontrak', function($q) use($req){
+                $q->where('customer_id', $req->customer);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('kontrak', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kirim', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        $customer = Customer::whereHas('kontrak')->get();
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        return view('laporan.do_sewa', compact('data', 'customer', 'galleries'));
+    }
+
+    public function do_sewa_pdf(Request $req)
+    {
+        $query = DeliveryOrder::with(['produk' => function($q) {
+            $q->whereNull('no_kembali_sewa');
+            },'produk.produk', 'produk.komponen.produk', 'produk.komponen.data_kondisi', 'kontrak.customer', 'data_driver'])->where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI');
+
+        if ($req->customer) {
+            $query->whereHas('kontrak', function($q) use($req){
+                $q->where('customer_id', $req->customer);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('kontrak', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kirim', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.do_sewa_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('do_sewa.pdf');
+    }
+
+    public function do_sewa_excel(Request $req)
+    {
+        $query = DeliveryOrder::with(['produk' => function($q) {
+            $q->whereNull('no_kembali_sewa');
+            },'produk.produk', 'produk.komponen.produk', 'produk.komponen.data_kondisi', 'kontrak.customer', 'data_driver'])->where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI');
+
+        if ($req->customer) {
+            $query->whereHas('kontrak', function($q) use($req){
+                $q->where('customer_id', $req->customer);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('kontrak', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_kirim', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new DOSewaExport($data), 'do_sewa.xlsx');
     }
 }
