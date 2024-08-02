@@ -187,7 +187,7 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/purchase1.svg" alt="img"><span> Laporan</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan.kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan/kontrak') ? 'active' : '' }}">Kontrak </a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
