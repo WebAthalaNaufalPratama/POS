@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="text-end mt-3">
-                        <button class="btn btn-primary" type="submit">Submit</button>
+                        <!-- <button class="btn btn-primary" type="submit">Submit</button> -->
                         <a href="{{ route('formpenjualan.index') }}" class="btn btn-secondary" type="button">Back</a>
                     </div>
                 </form>

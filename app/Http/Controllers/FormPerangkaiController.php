@@ -244,6 +244,7 @@ class FormPerangkaiController extends Controller
             foreach($updateProdukTerjual->komponen as $komponen) 
             {
                 $allStockAvailable = true;
+                $cekstokproduk = true;
         
                 $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
                                             ->where('kode_produk', $komponen->kode_produk)
@@ -253,18 +254,26 @@ class FormPerangkaiController extends Controller
                     $allStockAvailable = false;
                     break;
                 }
-
+                
                 $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($req->jml_produk));
+                if ($stok->jumlah < 0) {
+                    $cekstokproduk = false;
+                    break;
+                }
                 $stok->update();
             }
             if (!$allStockAvailable) {
                 return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+            }
+            if (!$cekstokproduk) {
+                return redirect(route('inven_galeri.create'))->with('fail', 'Jumlah Produk Kurang Dari Stok');
             }
         }else if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 2)
         {
             foreach($updateProdukTerjual->komponen as $komponen) 
             {
                 $allStockAvailable = true;
+                $cekstokproduk = true;
         
                 $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
                                             ->where('kode_produk', $komponen->kode_produk)
@@ -276,10 +285,17 @@ class FormPerangkaiController extends Controller
                 }
 
                 $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($req->jml_produk));
+                if ($stok->jumlah < 0) {
+                    $cekstokproduk = false;
+                    break;
+                }
                 $stok->update();
             }
             if (!$allStockAvailable) {
                 return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+            }
+            if (!$cekstokproduk) {
+                return redirect(route('inven_galeri.create'))->with('fail', 'Jumlah Produk Kurang Dari Stok');
             }
         }
 

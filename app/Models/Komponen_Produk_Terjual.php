@@ -47,4 +47,9 @@ class Komponen_Produk_Terjual extends Model
     {
         return $this->belongsTo(Kondisi::class, 'kondisi', 'id');
     }
+
+    public function kondisi_dit()
+    {
+        return $this->belongsTo(Kondisi::class, 'kondisi_diterima', 'id');
+    }
 }

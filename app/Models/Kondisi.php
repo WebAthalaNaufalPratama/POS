@@ -17,4 +17,9 @@ class Kondisi extends Model
     public function produkbeli (){
         return $this->hasMany(produkbeli::class);
     }
+
+    public function kondisi_diterima()
+    {
+        return $this->hasMany(Kondisi::class, 'kondisi_diterima', 'id');
+    }
 }

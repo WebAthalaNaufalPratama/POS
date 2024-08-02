@@ -39,6 +39,10 @@ class Lokasi extends Model
         return $this->hasMany(Promo::class);
     }
 
+    public function do_lokasikirim() {
+        return $this->hasMany(DeliveryOrder::class);
+    }
+
     public function penjualan()
     {
         return $this->hasMany(Penjualan::class);
