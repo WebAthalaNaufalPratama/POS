@@ -37,9 +37,9 @@ class RekeningController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'bank' => 'required',
-            'nomor_rekening' => 'required',
+            'nomor_rekening' => 'required|numeric|digits_between:10,16',
             'nama_akun' => 'required',
-            'lokasi_id' => 'required',
+            'lokasi_id' => 'required|exists:lokasis,id',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -87,9 +87,9 @@ class RekeningController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'bank' => 'required',
-            'nomor_rekening' => 'required',
+            'nomor_rekening' => 'required|numeric|digits_between:10,16',
             'nama_akun' => 'required',
-            'lokasi_id' => 'required',
+            'lokasi_id' => 'required|exists:lokasis,id',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);

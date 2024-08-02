@@ -131,7 +131,7 @@
                                             </select>
                                         </td>
                                         td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" disabled></td>
-                                        <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" disabled></td>
+                                        <td><input type="text" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" disabled></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" disabled></td>
                                     </tr>
                                     @else
@@ -150,7 +150,7 @@
                                                 </select>
                                             </td>
                                             <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" value="{{ old('satuan.' . $i) ?? $produk->harga }}" class="form-control" disabled></td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" disabled></td>
+                                            <td><input type="text" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" disabled></td>
                                             <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ old('harga_total.' . $i) ?? $produk->harga_jual }}" disabled></td>
                                             @php
                                                 $i++;
@@ -189,7 +189,7 @@
                                             </select>
                                         </td>
                                         <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control" disabled></td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control" disabled></td>
+                                        <td><input type="text" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control" disabled></td>
                                         <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control" disabled readonly></td>
                                     </tr>
                                     @else
@@ -208,7 +208,7 @@
                                                 </select>
                                             </td>
                                             <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->harga }}" disabled></td>
-                                            <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->jumlah }}" disabled></td>
+                                            <td><input type="text" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->jumlah }}" disabled></td>
                                             <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="{{ $produk->harga_jual }}" readonly disabled></td>
                                         </tr>
                                         @php
@@ -228,7 +228,7 @@
                                             </select>
                                         </td>
                                         <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="" disabled></td>
-                                        <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="" disabled></td>
+                                        <td><input type="text" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="" disabled></td>
                                         <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="" disabled></td>
                                         {{-- <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td> --}}
                                     </tr>
@@ -713,7 +713,7 @@
                                 '</select>'+
                             '</td>'+
                             '<td><input type="number" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
-                            '<td><input type="number" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
+                            '<td><input type="text" name="jumlah[]" id="jumlah_'+i+'" oninput="multiply(this)" class="form-control"></td>'+
                             '<td><input type="number" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
                 $('#dynamic_field').append(newRow);
@@ -730,7 +730,7 @@
                                 '</select>'+
                             '</td>'+
                             '<td><input type="text" name="harga_satuan2[]" id="harga_satuan2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
-                            '<td><input type="number" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
+                            '<td><input type="text" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
                             '<td><input type="text" name="harga_total2[]" id="harga_total2_' + i + '" class="form-control"  required readonly></td>' +
                             '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
                 $('#dynamic_field2').append(newRow);
@@ -750,7 +750,7 @@
                 
                 input.val(formattedValue);
             });
-            let inputs = $('.card-body').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, #sisa_bayar, #dp, #nominal');
+            let inputs = $('.card-body').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, #sisa_bayar, #dp, #nominal, [id^=jumlah]');
             inputs.each(function() {
                 let input = $(this);
                 let value = input.val();

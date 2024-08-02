@@ -1,12 +1,6 @@
 @extends('layouts.app-von')
 
 @section('css')
-<style>
-    .accordion-head:hover {
-        background: rgba(0, 0, 0, 0.1);
-        transition: background 0.3s ease;
-    }
-</style>
 @endsection
 @section('content')
 <div class="row">
@@ -127,7 +121,7 @@
                                                 </select>
                                             </td>
                                             td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" required></td>
-                                            <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" required></td>
+                                            <td><input type="text" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" required></td>
                                             <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" required></td>
                                         </tr>
                                         @else
@@ -164,7 +158,7 @@
                                                     </select>
                                                 </td>
                                                 <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" oninput="multiply(this)" value="{{ old('satuan.' . $i) ?? $produk->harga }}" class="form-control" required></td>
-                                                <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required></td>
+                                                <td><input type="text" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply(this)" class="form-control" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required></td>
                                                 <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ old('harga_total.' . $i) ?? $produk->harga_jual }}" required></td>
                                                 @php
                                                     $i++;
@@ -189,7 +183,7 @@
                                             <th>Harga Satuan</th>
                                             <th>Jumlah</th>
                                             <th>Harga Total</th>
-                                            <th></th>
+                                            <th><a href="javascript:void(0);" id="add2"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></th>
                                         </tr>
                                     </thead>
                                     <tbody id="dynamic_field2">
@@ -204,9 +198,9 @@
                                                 </select>
                                             </td>
                                             <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_0" oninput="multiply2(this)" class="form-control"  required></td>
-                                            <td><input type="number" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"  required></td>
+                                            <td><input type="text" name="jumlah2[]" id="jumlah2_0" oninput="multiply2(this)" class="form-control"  required></td>
                                             <td><input type="text" name="harga_total2[]" id="harga_total2_0" class="form-control"  required readonly></td>
-                                            <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                            <td><a href="javascript:void(0);" class="btn_remove2" id="0"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                         </tr>
                                         @else
                                         @php
@@ -224,13 +218,9 @@
                                                     </select>
                                                 </td>
                                                 <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->harga }}"></td>
-                                                <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->jumlah }}"></td>
+                                                <td><input type="text" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value="{{ $produk->jumlah }}"></td>
                                                 <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="{{ $produk->harga_jual }}" readonly></td>
-                                                @if($j == 0)
-                                                <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
-                                                @else
-                                                <td><button type="button" name="remove" id="{{ $j }}" class="btn btn-danger btn_remove2">x</button></td>
-                                                @endif
+                                                <td><a href="javascript:void(0);" class="btn_remove2" id="{{ $j }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                             </tr>
                                             @php
                                                 $j++;
@@ -239,7 +229,7 @@
                                         @endforeach
                                         @endif
                                         @if($j == 0)
-                                        <tr>
+                                        <tr id="row2{{ $j }}">
                                             <td>
                                                 <select id="produk2_{{ $j }}" name="nama_produk2[]" class="form-control">
                                                     <option value="">Pilih Produk</option>
@@ -249,9 +239,9 @@
                                                 </select>
                                             </td>
                                             <td><input type="text" name="harga_satuan2[]" id="harga_satuan2_{{ $j }}" oninput="multiply2(this)" class="form-control" value=""></td>
-                                            <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value=""></td>
+                                            <td><input type="text" name="jumlah2[]" id="jumlah2_{{ $j }}" oninput="multiply2(this)" class="form-control" value=""></td>
                                             <td><input type="text" name="harga_total2[]" id="harga_total2_{{ $j }}" class="form-control" value="" readonly></td>
-                                            <td><button type="button" name="add2" id="add2" class="btn btn-success">+</button></td>
+                                            <td><a href="javascript:void(0);" class="btn_remove2" id="{{ $j }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                         </tr>
                                         @endif
                                     </tbody>
@@ -399,17 +389,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                {{-- <div class="col-md-4 border rounded mt-3 pt-3">
-                                    <div class="custom-file-container" data-upload-id="myFirstImage">
-                                        <label>Bukti Kirim (Single File) <a href="javascript:void(0)" class="custom-file-container__image-clear" title="Clear Image">clear</a></label>
-                                        <label class="custom-file-container__custom-file">
-                                        <input type="file" class="custom-file-container__custom-file__custom-file-input" accept="image/*">
-                                        <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
-                                        <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                        </label>
-                                        <div class="custom-file-container__image-preview"></div>
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </div>
@@ -466,10 +445,10 @@
 
                             newRow += '</select>' +
                                             '</td>' +
-                                            '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
+                                            '<td><input type="text" name="jumlah[]" id="jumlah_' + i + '" class="form-control"></td>' +
                                             '<td><input type="text" name="satuan[]" id="satuan_' + i + '" class="form-control"></td>' +
                                             '<td><input type="text" name="detail_lokasi[]" id="detail_lokasi_' + i + '" class="form-control"></td>' +
-                                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                                            '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                                         '</tr>';
                 $('#dynamic_field').append(newRow);
                 $('#produk_' + i).select2({
@@ -483,19 +462,19 @@
                                 '<select id="produk2_'+i+'" name="nama_produk2[]" class="form-control">'+
                                     '<option value="">Pilih Produk</option>'+
                                     '@foreach ($produkjuals as $pj)'+
-                                        '<option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" data-harga_jual="{{ $produk->harga }}">{{ $pj->nama }}</option>'+
+                                        '<option value="{{ $pj->kode }}" data-id="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" data-harga_jual="{{ $pj->harga }}">{{ $pj->nama }}</option>'+
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
                             '<td><input type="text" name="harga_satuan2[]" id="harga_satuan2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
-                            '<td><input type="number" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
+                            '<td><input type="text" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply2(this)" class="form-control"  required></td>' +
                             '<td><input type="text" name="harga_total2[]" id="harga_total2_' + i + '" class="form-control"  required readonly></td>' +
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove2">x</button></td></tr>';
+                            '<td><a href="javascript:void(0);" class="btn_remove2" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();
                 i++;
             })
-            $(document).on('input', '[id^=harga_satuan], #dp, #ongkir_nominal, #pph_nominal, #ppn_nominal, #total_promo', function() {
+            $(document).on('input', '[id^=harga_satuan], #dp, #ongkir_nominal, #pph_nominal, #ppn_nominal, #total_promo, [id^=jumlah]', function() {
                 let input = $(this);
                 let value = input.val();
                 
@@ -508,7 +487,7 @@
                 
                 input.val(formattedValue);
             });
-            let inputs = $('.card-body').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, #sisa_bayar, #dp, #nominal');
+            let inputs = $('.card-body').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, #sisa_bayar, #dp, #nominal, [id^=jumlah]');
             inputs.each(function() {
                 let input = $(this);
                 let value = input.val();
@@ -519,7 +498,7 @@
             });
             $('#addForm').on('submit', function(e) {
                 // Add input number cleaning for specific inputs
-                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, #sisa_bayar, #dp');
+                let inputs = $('#addForm').find('[id^=harga_satuan], [id^=harga_total], #subtotal, #total_promo, #ppn_nominal, #pph_nominal, #ongkir_nominal, #total_harga, #sisa_bayar, #dp, [id^=jumlah]');
                 inputs.each(function() {
                     let input = $(this);
                     let value = input.val();
@@ -729,6 +708,14 @@
             if(nominal > sisaTagihan) {
                 $(this).val(formatNumber(sisaTagihan));
             }
+        });
+        $(document).on('change', '[id^=produk2_]', function(){
+            var id = $(this).attr('id');
+            var parts = id.split('_');
+            var nomor = parts[parts.length - 1];
+            var harga_jual = $(this).find(":selected").data("harga_jual") ?? 0;
+            $('#harga_satuan2_' + nomor).val(formatNumber(harga_jual));
+            multiply2('#harga_satuan2_' + nomor);
         });
         function multiply(element) {
             let input = $(element);

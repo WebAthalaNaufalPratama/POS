@@ -19,6 +19,7 @@ use App\Models\Rekening;
 use PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Activitylog\Models\Activity;
@@ -84,7 +85,7 @@ class KontrakController extends Controller
     {
         if (Auth::user()->hasRole('AdminGallery')) {
             $produkjuals = Produk_Jual::all();
-            $lokasis = Lokasi::find(Auth::user()->karyawans->lokasi_id);
+            $lokasis = Lokasi::where('id', Auth::user()->karyawans->lokasi_id)->get();
             $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
             $rekenings = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
             $promos = Promo::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
@@ -135,15 +136,15 @@ class KontrakController extends Controller
             'tanggal_selesai' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
             'pic' => 'required',
-            'handphone' => 'required|numeric',
+            'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
-            'no_npwp' => 'required|',
+            'no_npwp' => 'required',
             'nama_npwp' => 'required',
             'ppn_nominal' => 'required|integer',
             'pph_nominal' => 'required|integer',
             'subtotal' => 'required|integer',
             'total_harga' => 'required|integer',
-            'status' => 'required',
+            'status' => 'required|in:TUNDA,DIKONFIRMASI,BATAL',
             'sales' => 'required|exists:karyawans,id',
             'rekening_id' => 'required|exists:rekenings,id',
             'tanggal_sales' => 'required|date',
@@ -244,7 +245,7 @@ class KontrakController extends Controller
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_sewa', $kontraks->no_kontrak)->get();
         $riwayat = Activity::where('subject_type', Kontrak::class)->where('subject_id', $kontrak)->orderBy('id', 'desc')->get();
         $produkjuals = Produk_Jual::all();
-        $lokasis = Lokasi::find($kontraks->lokasi_id);
+        $lokasis = Lokasi::where('id', $kontraks->lokasi_id)->get();
         $customers = Customer::where('tipe', 'sewa')->where('lokasi_id', $kontraks->lokasi_id)->get();
         $rekenings = Rekening::where('lokasi_id', $kontraks->lokasi_id)->get();
         $promos = Promo::where('lokasi_id', $kontraks->lokasi_id)->get();
@@ -286,7 +287,7 @@ class KontrakController extends Controller
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');
             return redirect()->back()->withInput()->with('success', 'Data Berhasil ' . $msg);
         } else {
-            // validasi
+            // Validasi
             $validator = Validator::make($req->all(), [
                 'no_kontrak' => 'required',
                 'masa_sewa' => 'required|integer',
@@ -295,15 +296,15 @@ class KontrakController extends Controller
                 'tanggal_selesai' => 'required|date',
                 'customer_id' => 'required|exists:customers,id',
                 'pic' => 'required',
-                'handphone' => 'required|numeric',
+                'handphone' => 'required|numeric|digits_between:11,13',
                 'alamat' => 'required',
-                'no_npwp' => 'required|',
+                'no_npwp' => 'required',
                 'nama_npwp' => 'required',
                 'ppn_nominal' => 'required|integer',
                 'pph_nominal' => 'required|integer',
                 'subtotal' => 'required|integer',
                 'total_harga' => 'required|integer',
-                'status' => 'required',
+                'status' => 'required|in:TUNDA,DIKONFIRMASI,BATAL',
                 'sales' => 'required|exists:karyawans,id',
                 'rekening_id' => 'required|exists:rekenings,id',
                 'tanggal_sales' => 'required|date',
@@ -313,58 +314,73 @@ class KontrakController extends Controller
             ]);
             $error = $validator->errors()->all();
             if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
             $data = $req->except(['_token', '_method', 'log']);
-            
-            $dataKontrak = Kontrak::find($kontrak);
-            $data['lokasi_id'] = $dataKontrak->lokasi_id;
-            $data['pembuat'] = $dataKontrak->pembuat;
-            $data['tanggal_pembuat'] = $dataKontrak->tanggal_pembuat;
-            if ($req->hasFile('file')) {
-                $file = $req->file('file');
-                $fileName = $req->no_kontrak . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_kontrak', $fileName, 'public');
-                $data['file'] = $filePath;
-            }
 
-            // save data kontrak
-            $check = Kontrak::find($kontrak)->update($data);
-            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            
-            $dataProduk = Produk_Terjual::where('no_sewa', $dataKontrak->no_kontrak)->get();
-            // delete data
-            foreach ($dataProduk as $item) {
-                $komponen = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
-                $produkTerjual = Produk_terjual::find($item->id)->forceDelete();
-            }
+            DB::beginTransaction();
 
-            // create new data
-            for ($i=0; $i < count($data['nama_produk']); $i++) { 
-                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-                $produk_terjual = Produk_Terjual::create([
-                    'produk_jual_id' => $getProdukJual->id,
-                    'no_sewa' => $dataKontrak->no_kontrak,
-                    'harga' => $data['harga_satuan'][$i],
-                    'jumlah' => $data['jumlah'][$i],
-                    'harga_jual' => $data['harga_total'][$i]
-                ]);
-
-                if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                foreach ($getProdukJual->komponen as $komponen ) {
-                    $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                        'produk_terjual_id' => $produk_terjual->id,
-                        'kode_produk' => $komponen->kode_produk,
-                        'nama_produk' => $komponen->nama_produk,
-                        'tipe_produk' => $komponen->tipe_produk,
-                        'kondisi' => $komponen->kondisi,
-                        'deskripsi' => $komponen->deskripsi,
-                        'jumlah' => $komponen->jumlah,
-                        'harga_satuan' => $komponen->harga_satuan,
-                        'harga_total' => $komponen->harga_total
-                    ]);
-                    if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            try {
+                $dataKontrak = Kontrak::find($kontrak);
+                $data['lokasi_id'] = $dataKontrak->lokasi_id;
+                $data['pembuat'] = $dataKontrak->pembuat;
+                $data['tanggal_pembuat'] = $dataKontrak->tanggal_pembuat;
+                
+                if ($req->hasFile('file')) {
+                    $file = $req->file('file');
+                    $fileName = $req->no_kontrak . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                    $filePath = $file->storeAs('bukti_kontrak', $fileName, 'public');
+                    $data['file'] = $filePath;
                 }
+
+                // Save data kontrak
+                $check = Kontrak::find($kontrak)->update($data);
+                if (!$check) throw new \Exception('Gagal menyimpan data');
+
+                $dataProduk = Produk_Terjual::where('no_sewa', $dataKontrak->no_kontrak)->get();
+
+                // Delete data
+                foreach ($dataProduk as $item) {
+                    Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
+                    Produk_Terjual::find($item->id)->forceDelete();
+                }
+
+                // Create new data
+                for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                    $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
+                    $produk_terjual = Produk_Terjual::create([
+                        'produk_jual_id' => $getProdukJual->id,
+                        'no_sewa' => $dataKontrak->no_kontrak,
+                        'harga' => $data['harga_satuan'][$i],
+                        'jumlah' => $data['jumlah'][$i],
+                        'harga_jual' => $data['harga_total'][$i]
+                    ]);
+
+                    if (!$produk_terjual) throw new \Exception('Gagal menyimpan data');
+
+                    foreach ($getProdukJual->komponen as $komponen) {
+                        $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                            'produk_terjual_id' => $produk_terjual->id,
+                            'kode_produk' => $komponen->kode_produk,
+                            'nama_produk' => $komponen->nama_produk,
+                            'tipe_produk' => $komponen->tipe_produk,
+                            'kondisi' => $komponen->kondisi,
+                            'deskripsi' => $komponen->deskripsi,
+                            'jumlah' => $komponen->jumlah,
+                            'harga_satuan' => $komponen->harga_satuan,
+                            'harga_total' => $komponen->harga_total
+                        ]);
+
+                        if (!$komponen_produk_terjual) throw new \Exception('Gagal menyimpan data');
+                    }
+                }
+
+                DB::commit();
+                return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', $e->getMessage());
             }
-            return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
         }
     }
 
