@@ -519,6 +519,8 @@ class PenjualanController extends Controller
 
     public function store_komponen(Request $req)
     {
+
+        //hanya update komponen terjual
         $validator = Validator::make($req->all(), [
             'komponen_id' => 'required',
             'kondisi_id' => 'required',
@@ -533,30 +535,15 @@ class PenjualanController extends Controller
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
      
         $exsist = Komponen_Produk_Terjual::where('produk_terjual_id', $req->prdTerjual_id)->get();
-        if($exsist)
-        {
-            $exsist->each->forceDelete();
-        }
-        // dd($req->prdTerjual_id);
+        
         $jumlahItem = count($req->komponen_id);
-        if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI')
+        if($req->status == 'DIKONFIRMASI')
         {
             if ($exsist) {
-                foreach ($exsist as $komponen ) {
-                    $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
-                                            ->where('kode_produk', $komponen->kode_produk)
-                                            ->where('kondisi_id', $komponen->kondisi)
-                                            ->first();
-                    //penambahan komponen
-                    $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($req->jml_produk));
-                    $stok->update();
-                }
+                $exsist->each->forceDelete(); 
             }
+            
         }
-        $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
-        // dd($updateProdukTerjual);
-        $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
-        // dd($lokasi);
         
         // Create new komponen produk terjual and decrement stock
         for ($i = 0; $i < $jumlahItem; $i++) {
@@ -574,30 +561,10 @@ class PenjualanController extends Controller
             $data['harga_total'] = 0;
 
             $check = Komponen_Produk_Terjual::create($data);
-            if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI')
-            {
-                $allStockAvailable = true;
             
-                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
-                                            ->where('kode_produk', $data['kode_produk'])
-                                            ->where('kondisi_id', $data['kondisi'])
-                                            ->first();
-                if (!$stok) {
-                    $allStockAvailable = false;
-                    break;
-                }
-
-                $stok->jumlah = intval($stok->jumlah) - (intval($data['jumlah']) * intval($req->jml_produk));
-                $stok->update();
-            }
 
             if (!$check) {
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            }
-        }
-        if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI'){
-            if (!$allStockAvailable) {
-                return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
             }
         }
 
@@ -933,6 +900,78 @@ class PenjualanController extends Controller
         $data = $req->except(['_token', '_method', 'bukti', 'status_bayar', 'nominal', 'no_invoice_bayar', 'harga_total', 'diskon','jenis_diskon',  'jumlah', 'harga_satuan', 'nama_produk', 'DataTables_Table_0_length', 'DataTables_Table_1_length' , 'penjualan', 'file', 'ubahapa' ]);
 
         $penjualan = Penjualan::where('id', $penjualanId)->first();
+
+        if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
+            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua')) {
+            $deletepj = Produk_Terjual::with('komponen')->where('no_invoice', $penjualan->no_invoice)->get();
+            //penambahan komponen produk terjual yang di edit
+            $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+            if($lokasi->tipe_lokasi == 1) {
+                foreach($deletepj as $deletepjList) 
+                {
+                    foreach($deletepjList->komponen as $komponen) 
+                    {
+                        $allStockAvailable = true;
+
+                        $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if (!$stok) {
+                            $allStockAvailable = false;
+                            break 2; // Keluar dari kedua loop
+                        }
+
+                        $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($deletepjList->jumlah));
+                        $stok->update();
+                    }
+                }
+
+                if (!$allStockAvailable) {
+                    return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                }
+            }else if($lokasi->tipe_lokasi == 2) {
+                foreach($deletepj as $deletepjList) 
+                {
+                    foreach($deletepjList->komponen as $komponen) 
+                    {
+                        $allStockAvailable = true;
+
+                        $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
+                                                ->where('kode_produk', $komponen->kode_produk)
+                                                ->where('kondisi_id', $komponen->kondisi)
+                                                ->first();
+                        if (!$stok) {
+                            $allStockAvailable = false;
+                            break 2; // Keluar dari kedua loop
+                        }
+
+                        $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($deletepjList->jumlah));
+                        $stok->update();
+                    }
+                }
+
+                if (!$allStockAvailable) {
+                    return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                }
+            }
+            
+            //
+            if ($deletepj->isNotEmpty()) {
+                $array = $deletepj->pluck('id')->toArray();
+                Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
+                Produk_Terjual::whereIn('id', $array)->forceDelete();
+            }
+        }else if(!$user->hasRole(['Auditor', 'Finance'])) {
+
+            $deletepj = Produk_Terjual::with('komponen')->where('no_invoice', $penjualan->no_invoice)->get();
+            if ($deletepj->isNotEmpty()) {
+                $array = $deletepj->pluck('id')->toArray();
+                Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
+                Produk_Terjual::whereIn('id', $array)->forceDelete();
+            }
+        }
+        
         //update poin
         if($penjualan->status == 'DIKONFIRMASI'){
             function extractNumber($string) {
@@ -965,16 +1004,6 @@ class PenjualanController extends Controller
             $data['auditor_id'] = Auth::user()->id;
         }elseif($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
             $data['dibukukan_id'] = Auth::user()->id;
-        }
-        if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
-            ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua') ||
-            (!$user->hasRole(['Auditor', 'Finance']))) {
-            $deletepj = Produk_Terjual::where('no_invoice', $penjualan->no_invoice)->get();
-            if ($deletepj->isNotEmpty()) {
-                $array = $deletepj->pluck('id')->toArray();
-                Komponen_Produk_Terjual::whereIn('produk_terjual_id', $array)->forceDelete();
-                Produk_Terjual::whereIn('id', $array)->forceDelete();
-            }
         }
 
         if ($penjualan) {
@@ -1075,8 +1104,6 @@ class PenjualanController extends Controller
                 // Update the customer's status correctly
                 $updatecust = Customer::where('id', $data['id_customer'])->update(['status_piutang' => $status]);
                 $pembayaran = Pembayaran::create($data);
-        
-                return redirect()->back()->with('success', 'Tagihan sudah Lunas');
             } else {
                 $data['invoice_penjualan_id'] = $penjualanId;
                 $data['no_invoice_bayar'] = 'INV' .date('Ymd') . 001;

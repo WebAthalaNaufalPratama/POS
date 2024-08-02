@@ -161,7 +161,14 @@
 
                 return true;
             });
+
+            // $('#harga_jual').change(function() {
+            //     var hargajual = $(this).val();
+            //     var harga = $('# ')
+            //     if(hargajual < )
+            // });
         });
+
         function multiply(element) {
             var value = $(element).val().trim();
             if (value === "") {
