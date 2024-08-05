@@ -9,9 +9,48 @@
                     <div class="page-title">
                         <h4>Laporan Pembayaran</h4>
                     </div>
+                    <div class="page-btn">
+                        <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
+                            <img src="/assets/img/icons/pdf.svg" alt="PDF" style="height: 1rem;"/> PDF
+                        </button>
+                        <button class="btn btn-outline-success" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="excel()">
+                            <img src="/assets/img/icons/excel.svg" alt="EXCEL" style="height: 1rem;"/> EXCEL
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
+                <div class="row mb-2">
+                    <row class="col-lg-12 col-sm-12">
+                        <div class="row">
+                            <div class="col-lg col-sm-6 col-12">
+                                <select id="filterMetode" name="filterMetode" class="form-control" title="Metode">
+                                    <option value="">Pilih Metode Bayar</option>
+                                    <option value="transfer" {{ 'transfer' == request()->input('metode') ? 'selected' : '' }}>Transfer</option>
+                                    <option value="cash" {{ 'cash' == request()->input('metode') ? 'selected' : '' }}>Cash</option>
+                                </select>
+                            </div>
+                            <div class="col-lg col-sm-6 col-12">
+                                <select id="filterRekening" name="filterRekening" class="form-control" title="Rekening">
+                                    <option value="">Pilih Nama Akun</option>
+                                    @foreach ($rekenings as $item)
+                                        <option value="{{ $item->id }}" {{ $item->id == request()->input('rekening') ? 'selected' : '' }}>{{ $item->nama_akun }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg col-sm-6 col-12">
+                                <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Awal Sewa">
+                            </div>
+                            <div class="col-lg col-sm-6 col-12">
+                                <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Akhir Sewa">
+                            </div>
+                            <div class="col-lg col-sm-6 col-12">
+                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.pembayaran') }}" class="btn btn-info">Filter</a>
+                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.pembayaran') }}" class="btn btn-warning">Clear</a>
+                            </div>
+                        </div>
+                    </row>
+                </div>
                 <div class="table-responsive">
                     <table class="table datanew">
                         <thead>
@@ -20,7 +59,6 @@
                                 <th>Cara Pembayaran</th>
                                 <th>Nama Akun</th>
                                 <th>Jumlah Transaksi</th>
-                                <!-- <th>Total Penjualan</th> -->
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -88,30 +126,7 @@
     }
 </script>
 <script>
-    $(document).ready(function(){
-        $('#rekening_id, #bayar, #filterMetode, #filterSales').select2();
-    });
-
-    $('#bayar').on('change', function() {
-        var caraBayar = $(this).val();
-        if (caraBayar == 'transfer') {
-            $('#rekening').show();
-            $('#rekening_id').attr('required', true);
-        } else {
-            $('#rekening').hide();
-            $('#rekening_id').attr('required', false);
-        }
-    });
-    $('#nominal').on('input', function() {
-        var nominal = parseFloat($(this).val());
-        var sisaTagihan = parseFloat($('#sisa_tagihan').val());
-        if(nominal < 0) {
-            $(this).val(0);
-        }
-        if(nominal > sisaTagihan) {
-            $(this).val(sisaTagihan);
-        }
-    });
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');
         var urlString = baseUrl;
@@ -131,9 +146,9 @@
             urlString += filterMetode;
         }
 
-        var sales = $('#filterSales').val();
-        if (sales) {
-            var filterSales = 'sales=' + sales;
+        var rekening = $('#filterRekening').val();
+        if (rekening) {
+            var filterRekening = 'rekening=' + rekening;
             if (first == true) {
                 symbol = '?';
                 first = false;
@@ -141,33 +156,7 @@
                 symbol = '&';
             }
             urlString += symbol;
-            urlString += filterSales;
-        }
-
-        var status_bayar = $('#filterStatusBayar').val();
-        if (status_bayar) {
-            var filterStatusBayar = 'status_bayar=' + status_bayar;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterStatusBayar;
-        }
-
-        var customer = $('#filterCustomer').val();
-        if (customer) {
-            var filterCustomer = 'customer=' + customer;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterCustomer;
+            urlString += filterRekening;
         }
 
         var dateStart = $('#filterDateStart').val();
@@ -205,28 +194,71 @@
         }
         return 0;
     });
-    
-    function bayar(invoice){
-        console.log(invoice)
-        $('#no_kontrak').val(invoice.no_sewa);
-        $('#invoice_sewa_id').val(invoice.id);
-        $('#total_tagihan').val(invoice.total_tagihan);
-        $('#sisa_tagihan').val(invoice.sisa_bayar);
-        $('#nominal').val(invoice.sisa_bayar);
-        $('#modalBayar').modal('show');
-        generateInvoice();
+    function pdf(){
+        var filterMetode = $('#filterMetode').val();
+        var filterRekening = $('#filterRekening').val();
+        var filterDateStart = $('#filterDateStart').val();
+        var filterDateEnd = $('#filterDateEnd').val();
+
+        var desc = 'Cetak laporan tanpa filter';
+        if(filterMetode || filterRekening || filterDateStart || filterDateEnd){
+            desc = 'cetak laporan dengan filter';
+        }
+        
+        Swal.fire({
+            title: 'Cetak PDF?',
+            text: desc,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Cetak',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var url = "{{ route('laporan.pembayaran-pdf') }}" + '?' + $.param({
+                    metode: filterMetode,
+                    rekening: filterRekening,
+                    dateStart: filterDateStart,
+                    dateEnd: filterDateEnd,
+                });
+                
+                window.open(url, '_blank');
+            }
+        });
     }
+    function excel(){
+        var filterMetode = $('#filterMetode').val();
+        var filterRekening = $('#filterRekening').val();
+        var filterDateStart = $('#filterDateStart').val();
+        var filterDateEnd = $('#filterDateEnd').val();
 
-    function generateInvoice() {
-        var invoicePrefix = "BYR";
-        var currentDate = new Date();
-        var year = currentDate.getFullYear();
-        var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        var day = currentDate.getDate().toString().padStart(2, '0');
-        var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-        var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-        $('#no_invoice_bayar').val(generatedInvoice);
+        var desc = 'Cetak laporan tanpa filter';
+        if(filterMetode || filterRekening || filterDateStart || filterDateEnd){
+            desc = 'cetak laporan dengan filter';
+        }
+        
+        Swal.fire({
+            title: 'Cetak Excel?',
+            text: desc,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Cetak',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var url = "{{ route('laporan.pembayaran-excel') }}" + '?' + $.param({
+                    metode: filterMetode,
+                    rekening: filterRekening,
+                    dateStart: filterDateStart,
+                    dateEnd: filterDateEnd,
+                });
+                
+                window.location.href = url;
+            }
+        });
     }
 </script>
 
