@@ -980,28 +980,23 @@
                 }
             }
         }
-
-        // Set nilai input harga total dengan format Rupiah
+        
         $('#harga_total_' + index).val(formatRupiah(hargaTotal, 'Rp '));
 
-        // Hitung ulang subtotal
         var subtotal = 0;
         $('input[name="harga_total[]"]').each(function() {
-            // Mengonversi format Rupiah menjadi nilai numerik
             var harga_total = parseRupiahToNumber($(this).val());
             subtotal += harga_total || 0;
         });
 
-        // Format subtotal kembali ke format Rupiah sebelum menetapkannya ke input
         $('#sub_total').val(formatRupiah(subtotal, 'Rp '));
         $('#jenis_ppn').trigger('change');
     }
 
-    // Function to validate input fields to allow only numeric values
     function validateNumericInput() {
         $('input[id^="diskon_"]').on('input', function() {
             var value = $(this).val();
-            var numericValue = value.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+            var numericValue = value.replace(/[^0-9]/g, ''); 
 
             if (numericValue !== value) {
                 $(this).val(numericValue);

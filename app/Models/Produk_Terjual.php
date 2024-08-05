@@ -73,6 +73,18 @@ class Produk_Terjual extends Model
         return $this->belongsTo(Mutasi::class, 'no_mutasigo', 'no_mutasi');
     }
 
+    public function mutasiog(){
+        return $this->belongsTo(Mutasi::class, 'no_mutasiog', 'no_mutasi');
+    }
+
+    public function mutasigg(){
+        return $this->belongsTo(Mutasi::class, 'no_mutasigg', 'no_mutasi');
+    }
+
+    public function mutasigag(){
+        return $this->belongsTo(Mutasi::class, 'no_mutasigag', 'no_mutasi');
+    }
+
     public function do_penjualan(){
         return $this->belongsTo(DeliveryOrder::class, 'no_do', 'no_do');
     }
