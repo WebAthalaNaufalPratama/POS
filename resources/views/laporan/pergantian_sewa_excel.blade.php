@@ -82,6 +82,16 @@
         .text-center {
             text-align: center;
         }
+        ul {
+            list-style-type: none; 
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
@@ -93,27 +103,50 @@
         <table>
             <thead>
                 <tr>
-                    <th class="align-middle">No</th>
-                    <th class="align-middle">No Kontrak</th>
-                    <th class="align-middle">No Invoice</th>
-                    <th class="align-middle">Customer</th>
-                    <th class="align-middle">Tanggal Invoice</th>
-                    <th class="align-middle">Total Nilai</th>
-                    <th class="align-middle">Terbayar</th>
-                    <th class="align-middle">Sisa Pembayaran</th>
+                    <th rowspan="2" class="align-middle">No</th>
+                    <th rowspan="2" class="align-middle">Customer</th>
+                    <th rowspan="1" colspan="2" class="align-middle text-center">Produk Sewa</th>
+                    <th rowspan="2" class="align-middle text-center">Jumlah Pengiriman</th>
+                    <th rowspan="2" class="align-middle text-center">Jumlah Kembali</th>
+                </tr>
+                <tr>
+                    <th rowspan="1" class="text-center">Jumlah</th>
+                    <th rowspan="1" class="text-center">Nama</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($data as $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->no_sewa }}</td>
-                    <td>{{ $item->no_invoice }}</td>
-                    <td>{{ $item->kontrak->customer->nama }}</td>
-                    <td>{{ tanggalindo($item->tanggal_invoice) }}</td>
-                    <td>{{ formatRupiah($item->total_tagihan) }}</td>
-                    <td>{{ formatRupiah($item->terbayar) }}</td>
-                    <td>{{ formatRupiah($item->sisa_bayar) }}</td>
+                    <td>{{ $item['nama_customer'] }}</td>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['jumlah_sewa'] }}</li>
+                        @endforeach
+                        </ul>
+                    </td>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['nama_produk'] }}</li>
+                        @endforeach
+                        </ul>
+                    </td>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['jumlah_dikirim'] }}</li>
+                        @endforeach
+                        </ul>
+                    </td>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['jumlah_kembali'] }}</li>
+                        @endforeach
+                        </ul>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>

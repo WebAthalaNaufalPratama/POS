@@ -76,6 +76,12 @@
         tr {
             page-break-inside: avoid;
         }
+        .align-middle {
+            vertical-align: middle;
+        }
+        .text-center {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
