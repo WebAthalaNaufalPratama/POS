@@ -669,6 +669,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/mutasiinden', 'LaporanController@mutasiinden_index')->name('laporan.mutasiinden');
             Route::get('/mutasiinden-pdf', 'LaporanController@mutasiinden_pdf')->name('laporan.mutasiinden-pdf');
             Route::get('/mutasiinden-excel', 'LaporanController@mutasiinden_excel')->name('laporan.mutasiinden-excel');
+            Route::get('/kas_pusat', 'LaporanController@kas_pusat_index')->name('laporan.kas_pusat');
+            Route::get('/kas_pusat-pdf', 'LaporanController@kas_pusat_pdf')->name('laporan.kas_pusat-pdf');
+            Route::get('/kas_pusat-excel', 'LaporanController@kas_pusat_excel')->name('laporan.kas_pusat-excel');
+            Route::get('/kas_gallery', 'LaporanController@kas_gallery_index')->name('laporan.kas_gallery');
+            Route::get('/kas_gallery-pdf', 'LaporanController@kas_gallery_pdf')->name('laporan.kas_gallery-pdf');
+            Route::get('/kas_gallery-excel', 'LaporanController@kas_gallery_excel')->name('laporan.kas_gallery-excel');
 
 
         });
