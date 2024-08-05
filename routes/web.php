@@ -672,6 +672,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/kas_gallery', 'LaporanController@kas_gallery_index')->name('laporan.kas_gallery');
             Route::get('/kas_gallery-pdf', 'LaporanController@kas_gallery_pdf')->name('laporan.kas_gallery-pdf');
             Route::get('/kas_gallery-excel', 'LaporanController@kas_gallery_excel')->name('laporan.kas_gallery-excel');
+            Route::get('/pembelian', 'LaporanController@pembelian_index')->name('laporan.pembelian');
+            Route::get('/pembelian-pdf', 'LaporanController@pembelian_pdf')->name('laporan.pembelian-pdf');
+            Route::get('/pembelian-excel', 'LaporanController@pembelian_excel')->name('laporan.pembelian-excel');
+            Route::get('/pembelian_inden', 'LaporanController@pembelian_inden_index')->name('laporan.pembelian_inden');
+            Route::get('/pembelian_inden-pdf', 'LaporanController@pembelian_inden_pdf')->name('laporan.pembelian_inden-pdf');
+            Route::get('/pembelian_inden-excel', 'LaporanController@pembelian_inden_excel')->name('laporan.pembelian_inden-excel');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

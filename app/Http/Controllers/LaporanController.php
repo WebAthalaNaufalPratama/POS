@@ -15,8 +15,11 @@ use App\Exports\MutasiExport;
 use App\Exports\PenjualanExport;
 use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
+use App\Exports\PembelianExport;
+use App\Exports\PembelianIndenExport;
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
+use App\Models\Invoicepo;
 use App\Models\InvoiceSewa;
 use App\Models\KembaliSewa;
 use App\Models\Kontrak;
@@ -1178,7 +1181,167 @@ class LaporanController extends Controller
         return Excel::download(new KasPusatExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash), 'kas_pusat.xlsx');
     }
 
-    public function penjualanproduk_index()
+    public function pembelian_index(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        $supplier = Supplier::whereHas('pembelian')->get();
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        return view('laporan.pembelian', compact('data', 'supplier', 'galleries'));
+    }
+
+    public function pembelian_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pembelian_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pembelian.pdf');
+    }
+
+    public function pembelian_excel(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PembelianExport($data), 'pembelian.xlsx');
+    }
+
+    public function pembelian_inden_index(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        $supplier = Supplier::whereHas('poinden')->get();
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        return view('laporan.pembelian_inden', compact('data', 'supplier', 'galleries'));
+    }
+
+    public function pembelian_inden_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pembelian_inden_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pembelian_inden.pdf');
+    }
+
+    public function pembelian_inden_excel(Request $req)
+    {
+        $query = Invoicepo::with(['poineden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PembelianIndenExport($data), 'pembelian_inden.xlsx');
+    }
+
+    public function penjualanproduk_index(Request $req)
     {
         $produkjual = Produk_Jual::all();
         $query = Penjualan::where('status', 'DIKONFIRMASI')
