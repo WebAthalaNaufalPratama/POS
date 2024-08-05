@@ -152,8 +152,8 @@
                           <td>{{ $item->lok_penerima->nama ?? '-' }}</td>
                           <td>{{ $item->rek_penerima->nama_akun ?? '-' }}</td>
                           <td>{{ $item->tanggal ? formatTanggal($item->tanggal) : '-' }}</td>
-                          <td>{{ $item->nominal ? formatRupiah($item->nominal) : '-' }}</td>
-                          <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : '-' }}</td>
+                          <td>{{ $item->nominal ? formatRupiah($item->nominal) : 0 }}</td>
+                          <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : 0 }}</td>
                           <td>{{ $item->keterangan ?? '-' }}</td>
                           <td>
                             <span class="badges {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : 'bg-lightgrey' }}">{{ $item->status ?? '-' }}</span>
@@ -196,8 +196,9 @@
               <thead>
               <tr>
                   <th>No</th>
-                  <th>Rekening</th>
                   <th>Jenis</th>
+                  <th>Metode</th>
+                  <th>Rekening</th>
                   <th>Tanggal</th>
                   <th>Nominal</th>
                   <th>Biaya Lainnya</th>
@@ -210,11 +211,12 @@
                   @foreach ($dataKeluar as $item)
                       <tr>
                           <td>{{ $loop->iteration }}</td>
-                          <td>{{ $item->rek_pengirim->nama_akun ?? '-' }}</td>
                           <td>{{ $item->jenis ?? '-' }}</td>
+                          <td>{{ $item->metode ?? '-' }}</td>
+                          <td>{{ $item->rek_pengirim->nama_akun ?? '-' }}</td>
                           <td>{{ $item->tanggal ? formatTanggal($item->tanggal) : '-' }}</td>
-                          <td>{{ $item->nominal ? formatRupiah($item->nominal) : '-' }}</td>
-                          <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : '-' }}</td>
+                          <td>{{ $item->nominal ? formatRupiah($item->nominal) : 0 }}</td>
+                          <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : 0 }}</td>
                           <td>{{ $item->keterangan ?? '-' }}</td>
                           <td>
                             <span class="badges {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : 'bg-lightgrey' }}">{{ $item->status ?? '-' }}</span>
@@ -249,7 +251,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addkaskeluarlabel">Tambah Transaksi Masuk</h5>
+          <h5 class="modal-title" id="addkaskeluarlabel">Tambah Transaksi Keluar</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
@@ -260,6 +262,13 @@
             <div class="row">
               <div class="col-6">
                 <div class="col-12 mb-2">
+                  <label for="metode" class="col-form-label">Metode</label>
+                  <select class="select2" name="metode" id="keluar_metode" required>
+                    <option value="Transfer">Transfer</option>
+                    <option value="Cash">Cash</option>
+                  </select>
+                </div>
+                <div class="col-12 mb-2" id="div_add_rekening_keluar">
                   <label for="rekening_pengirim" class="col-form-label">Rekening</label>
                   <select class="select2" name="rekening_pengirim" id="keluar_rekening_pengirim" required>
                     <option value="">Rekening</option>
@@ -325,7 +334,14 @@
                     <option value="DIKONFIRMASI">DIKONFIRMASI</option>
                   </select>
                 </div>
-                <div class="col-sm-12 col-md-6 col-lg-6 mb-2">
+                <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
+                  <label for="metode" class="col-form-label">Metode</label>
+                  <select class="select2" name="metode" id="edit_keluar_metode" required>
+                    <option value="Transfer">Transfer</option>
+                    <option value="Cash">Cash</option>
+                  </select>
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-6 mb-2" id="div_edit_rekening_keluar">
                   <label for="rekening_pengirim" class="col-form-label">Rekening</label>
                   <select class="select2" name="rekening_pengirim" id="edit_keluar_rekening_pengirim" required>
                     <option value="">Rekening</option>
@@ -334,7 +350,7 @@
                     @endforeach
                   </select>
                 </div>
-                <div class="col-sm-12 col-md-6 col-lg-6 mb-2">
+                <div class="col-sm-12 col-md-6 col-lg-6 mb-2" id="div_edit_keluar_tanggal">
                   <label for="tanggal" class="col-form-label">Tanggal</label>
                   <input type="date" class="form-control" name="tanggal" id="edit_keluar_tanggal" value="{{ date('Y-m-d') }}" required>
                 </div>
@@ -393,7 +409,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_status, #edit_keluar_rekening_pengirim').select2()
+        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_status, #edit_keluar_rekening_pengirim, #keluar_metode, #edit_keluar_metode').select2()
     });
     function bukti(src){
         var baseUrl = window.location.origin;
@@ -436,6 +452,32 @@
 
         return true;
     });
+    $('#keluar_metode').on('change', function() {
+      var value = $(this).val();
+      if(value == 'Transfer'){
+        $('#div_add_rekening_keluar').show();
+        $('#keluar_rekening_pengirim').attr('disabled', false);
+      } else {
+        $('#div_add_rekening_keluar').hide();
+        $('#keluar_rekening_pengirim').attr('disabled', true);
+      }
+    });
+    $('#edit_keluar_metode').on('change', function() {
+      var value = $(this).val();
+      if(value == 'Transfer'){
+        $('#div_edit_rekening_keluar').show();
+        $('#edit_keluar_rekening_pengirim').attr('disabled', false);
+        $('#div_edit_keluar_tanggal')
+          .removeClass('col-sm-12 col-md-12 col-lg-12 mb-2')
+          .addClass('col-sm-12 col-md-6 col-lg-6 mb-2');
+        } else {
+          $('#div_edit_rekening_keluar').hide();
+          $('#edit_keluar_rekening_pengirim').attr('disabled', true);
+          $('#div_edit_keluar_tanggal')
+            .removeClass('col-sm-12 col-md-6 col-lg-6 mb-2')
+            .addClass('col-sm-12 col-md-12 col-lg-12 mb-2');
+      }
+    });
 
     function edit(id){
         $.ajax({
@@ -448,6 +490,7 @@
                 // console.log(response)
                 $('#editForm').attr('action', 'kas_gallery/'+id+'/update');
                 $('#edit_keluar_rekening_pengirim').val(response.rekening_pengirim).trigger('change')
+                $('#edit_keluar_metode').val(response.metode).trigger('change')
                 $('#edit_keluar_tanggal').val(response.tanggal)
                 $('#edit_keluar_nominal').val(response.nominal)
                 $('#edit_keluar_biaya_lain').val(response.biaya_lain)
