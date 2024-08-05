@@ -198,6 +198,8 @@
                         <li><a href="{{ route('laporan.returpenjualan') }}" class="{{ request()->is('laporan/returpenjualan*') ? 'active' : '' }}">Retur Penjualan</a></li>
                         <li><a href="{{ route('laporan.penjualan') }}" class="{{ request()->is('laporan/penjualan') ? 'active' : '' }}">Penjualan</a></li>
                         <li><a href="{{ route('laporan.mutasi') }}" class="{{ request()->is('laporan/mutasi*') ? 'active' : '' }}">Mutasi</a></li>
+                        <li><a href="{{ route('laporan.kas_pusat') }}" class="{{ request()->is('laporan/kas_pusat*') ? 'active' : '' }}">Kas Pusat</a></li>
+                        <li><a href="{{ route('laporan.kas_gallery') }}" class="{{ request()->is('laporan/kas_gallery*') ? 'active' : '' }}">Kas Gallery</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
