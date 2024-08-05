@@ -197,7 +197,8 @@
                         <li><a href="{{ route('laporan.dopenjualan') }}" class="{{ request()->is('laporan/dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
                         <li><a href="{{ route('laporan.returpenjualan') }}" class="{{ request()->is('laporan/returpenjualan*') ? 'active' : '' }}">Retur Penjualan</a></li>
                         <li><a href="{{ route('laporan.penjualan') }}" class="{{ request()->is('laporan/penjualan') ? 'active' : '' }}">Penjualan</a></li>
-                        <li><a href="{{ route('laporan.mutasi') }}" class="{{ request()->is('laporan/mutasi*') ? 'active' : '' }}">Mutasi</a></li>
+                        <li><a href="{{ route('laporan.mutasi') }}" class="{{ request()->is('laporan/mutasi') ? 'active' : '' }}">Mutasi</a></li>
+                        <li><a href="{{ route('laporan.mutasiinden') }}" class="{{ request()->is('laporan/mutasiinden*') ? 'active' : '' }}">Mutasi Inden</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
