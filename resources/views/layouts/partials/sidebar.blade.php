@@ -187,7 +187,10 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/purchase1.svg" alt="img"><span> Laporan</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan.kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan/kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                        <li><a href="{{ route('laporan.tagihan_sewa') }}" class="{{ request()->is('laporan/tagihan_sewa') ? 'active' : '' }}">Tagihan Sewa </a></li>
+                        <li><a href="{{ route('laporan.do_sewa') }}" class="{{ request()->is('laporan/do_sewa') ? 'active' : '' }}">Delivery Order Sewa </a></li>
+                        <li><a href="{{ route('laporan.pergantian_sewa') }}" class="{{ request()->is('laporan/pergantian_sewa') ? 'active' : '' }}">Pergantian Sewa </a></li>
                         <li><a href="{{ route('laporan.penjualanproduk') }}" class="{{ request()->is('laporan/penjualanproduk*') ? 'active' : '' }}">Penjualan Produk </a></li>
                         <li><a href="{{ route('laporan.pelanggan') }}" class="{{ request()->is('laporan/pelanggan*') ? 'active' : '' }}">Pelanggan</a></li>
                         <li><a href="{{ route('laporan.pembayaran') }}" class="{{ request()->is('laporan/pembayaran*') ? 'active' : '' }}">Pembayaran</a></li>

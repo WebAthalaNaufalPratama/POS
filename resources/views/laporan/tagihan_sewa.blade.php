@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Laporan Kontrak</h4>
+                        <h4>Laporan Tagihan Sewa</h4>
                     </div>
                     <div class="page-btn">
                         <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
@@ -40,30 +40,14 @@
                                 </select>
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterMasaSewa" name="filterMasaSewa" class="form-control" title="MasaSewa">
-                                    <option value="">Masa Sewa</option>
-                                    @foreach ($masa_sewa as $item)
-                                        <option value="{{ $item }}" {{ $item == request()->input('masa_sewa') ? 'selected' : '' }}>{{ $item }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg col-sm-6 col-12">
-                                <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
-                                    <option value="">Pilih Status</option>
-                                    @foreach ($statuses as $item)
-                                        <option value="{{ $item }}" {{ $item == request()->input('status') ? 'selected' : '' }}>{{ $item }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg col-sm-6 col-12">
                                 <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Awal Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
                                 <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Akhir Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.kontrak') }}" class="btn btn-info">Filter</a>
-                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.kontrak') }}" class="btn btn-warning">Clear</a>
+                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.tagihan_sewa') }}" class="btn btn-info">Filter</a>
+                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.tagihan_sewa') }}" class="btn btn-warning">Clear</a>
                             </div>
                         </div>
                     </row>
@@ -72,64 +56,27 @@
                     <table class="table datanew" id="dataTable">
                         <thead>
                             <tr>
-                                <th rowspan="2" class="align-middle">No</th>
-                                <th rowspan="2" class="align-middle">Customer</th>
-                                <th rowspan="2" class="align-middle">Masa Sewa</th>
-                                <th colspan="2" class="text-center">Tanggal Kontrak</th>
-                                <th rowspan="2" class="align-middle">Produk Sewa</th>
-                                <th rowspan="2" class="align-middle">Jumlah</th>
-                                <th rowspan="2" class="align-middle">Harga Satuan</th>
-                                <th rowspan="2" class="align-middle">Total Harga</th>
-                                <th rowspan="2" class="align-middle">PPN</th>
-                                <th rowspan="2" class="align-middle">PPH</th>
-                                <th rowspan="2" class="align-middle">Total Yang Diterima</th>
-                                <th rowspan="2" class="align-middle">Status</th>
-                            </tr>
-                            <tr>
-                                <th>Awal Sewa</th>
-                                <th>Akhir Sewa</th>
+                                <th class="align-middle">No</th>
+                                <th class="align-middle">No Kontrak</th>
+                                <th class="align-middle">No Invoice</th>
+                                <th class="align-middle">Customer</th>
+                                <th class="align-middle">Tanggal Invoice</th>
+                                <th class="align-middle">Total Nilai</th>
+                                <th class="align-middle">Terbayar</th>
+                                <th class="align-middle">Sisa Pembayaran</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($data as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item->customer->nama }}</td>
-                                <td>{{ $item->masa_sewa }} bulan</td>
-                                <td>{{ tanggalindo($item->tanggal_mulai) }}</td>
-                                <td>{{ tanggalindo($item->tanggal_selesai) }}</td>
-                                <td>
-                                    <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ $produk->produk->nama }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </table>
-                                </td>
-                                <td>
-                                    <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ $produk->jumlah }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </table>
-                                </td>
-                                <td>
-                                    <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ formatRupiah($produk->harga) }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </table>
-                                </td>
-                                <td>{{ formatRupiah($item->subtotal) }}</td>
-                                <td>{{ formatRupiah($item->ppn_nominal) }} ({{ $item->ppn_persen }}%)</td>
-                                <td>{{ formatRupiah($item->pph_nominal) }} ({{ $item->pph_persen }}%)</td>
-                                <td>{{ formatRupiah($item->total_harga) }}</td>
-                                <td>{{ $item->status_kontrak }}</td>
+                                <td>{{ $item->no_sewa }}</td>
+                                <td>{{ $item->no_invoice }}</td>
+                                <td>{{ $item->kontrak->customer->nama }}</td>
+                                <td>{{ tanggalindo($item->tanggal_invoice) }}</td>
+                                <td>{{ formatRupiah($item->total_tagihan) }}</td>
+                                <td>{{ formatRupiah($item->terbayar) }}</td>
+                                <td>{{ formatRupiah($item->sisa_bayar) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -264,7 +211,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.kontrak-pdf') }}" + '?' + $.param({
+                    var url = "{{ route('laporan.tagihan_sewa-pdf') }}" + '?' + $.param({
                         customer: filterCustomer,
                         gallery: filterGallery,
                         masa_sewa: filterMasaSewa,
@@ -301,7 +248,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.kontrak-excel') }}" + '?' + $.param({
+                    var url = "{{ route('laporan.tagihan_sewa-excel') }}" + '?' + $.param({
                         customer: filterCustomer,
                         gallery: filterGallery,
                         masa_sewa: filterMasaSewa,

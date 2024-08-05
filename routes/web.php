@@ -636,6 +636,15 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/kontrak', 'LaporanController@kontrak_index')->name('laporan.kontrak');
             Route::get('/kontrak-pdf', 'LaporanController@kontrak_pdf')->name('laporan.kontrak-pdf');
             Route::get('/kontrak-excel', 'LaporanController@kontrak_excel')->name('laporan.kontrak-excel');
+            Route::get('/tagihan_sewa', 'LaporanController@tagihan_sewa_index')->name('laporan.tagihan_sewa');
+            Route::get('/tagihan_sewa-pdf', 'LaporanController@tagihan_sewa_pdf')->name('laporan.tagihan_sewa-pdf');
+            Route::get('/tagihan_sewa-excel', 'LaporanController@tagihan_sewa_excel')->name('laporan.tagihan_sewa-excel');
+            Route::get('/do_sewa', 'LaporanController@do_sewa_index')->name('laporan.do_sewa');
+            Route::get('/do_sewa-pdf', 'LaporanController@do_sewa_pdf')->name('laporan.do_sewa-pdf');
+            Route::get('/do_sewa-excel', 'LaporanController@do_sewa_excel')->name('laporan.do_sewa-excel');
+            Route::get('/pergantian_sewa', 'LaporanController@pergantian_sewa_index')->name('laporan.pergantian_sewa');
+            Route::get('/pergantian_sewa-pdf', 'LaporanController@pergantian_sewa_pdf')->name('laporan.pergantian_sewa-pdf');
+            Route::get('/pergantian_sewa-excel', 'LaporanController@pergantian_sewa_excel')->name('laporan.pergantian_sewa-excel');
             Route::get('/penjualanproduk', 'LaporanController@penjualanproduk_index')->name('laporan.penjualanproduk');
             Route::get('/penjualanproduk-pdf', 'LaporanController@penjualanproduk_pdf')->name('laporan.penjualanproduk-pdf');
             Route::get('/penjualanproduk-excel', 'LaporanController@penjualanproduk_excel')->name('laporan.penjualanproduk-excel');

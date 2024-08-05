@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Kontrak</title>
+    <title>Laporan Tagihan Sewa</title>
     <style>
         @page {
             size: A4 landscape;
@@ -82,6 +82,16 @@
         .text-center {
             text-align: center;
         }
+        ul {
+            list-style-type: none; 
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
@@ -93,64 +103,50 @@
         <table>
             <thead>
                 <tr>
-                    <th rowspan="2">No</th>
-                    <th rowspan="2">Customer</th>
-                    <th rowspan="2">Masa Sewa</th>
-                    <th colspan="2">Tanggal Kontrak</th>
-                    <th rowspan="2">Produk Sewa</th>
-                    <th rowspan="2">Jumlah</th>
-                    <th rowspan="2">Harga Satuan</th>
-                    <th rowspan="2">Total Harga</th>
-                    <th rowspan="2">PPN</th>
-                    <th rowspan="2">PPH</th>
-                    <th rowspan="2">Total Yang Diterima</th>
-                    <th rowspan="2">Status</th>
+                    <th rowspan="2" class="align-middle">No</th>
+                    <th rowspan="2" class="align-middle">Customer</th>
+                    <th rowspan="1" colspan="2" class="align-middle text-center">Produk Sewa</th>
+                    <th rowspan="2" class="align-middle text-center">Jumlah Pengiriman</th>
+                    <th rowspan="2" class="align-middle text-center">Jumlah Kembali</th>
                 </tr>
                 <tr>
-                    <th>Awal Sewa</th>
-                    <th>Akhir Sewa</th>
+                    <th rowspan="1" class="text-center">Jumlah</th>
+                    <th rowspan="1" class="text-center">Nama</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($data as $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->customer->nama }}</td>
-                    <td>{{ $item->masa_sewa }} bulan</td>
-                    <td>{{ tanggalindo($item->tanggal_mulai) }}</td>
-                    <td>{{ tanggalindo($item->tanggal_selesai) }}</td>
-                    <td>
-                        <table>
-                            @foreach ($item->produk as $produk)
-                            <tr>
-                                <td>{{ $produk->produk->nama }}</td>
-                            </tr>
-                            @endforeach
-                        </table>
+                    <td>{{ $item['nama_customer'] }}</td>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['jumlah_sewa'] }}</li>
+                        @endforeach
+                        </ul>
                     </td>
-                    <td>
-                        <table>
-                            @foreach ($item->produk as $produk)
-                            <tr>
-                                <td>{{ $produk->jumlah }}</td>
-                            </tr>
-                            @endforeach
-                        </table>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['nama_produk'] }}</li>
+                        @endforeach
+                        </ul>
                     </td>
-                    <td>
-                        <table>
-                            @foreach ($item->produk as $produk)
-                            <tr>
-                                <td>{{ formatRupiah($produk->harga) }}</td>
-                            </tr>
-                            @endforeach
-                        </table>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['jumlah_dikirim'] }}</li>
+                        @endforeach
+                        </ul>
                     </td>
-                    <td>{{ formatRupiah($item->subtotal) }}</td>
-                    <td>{{ formatRupiah($item->ppn_nominal) }} ({{ $item->ppn_persen }}%)</td>
-                    <td>{{ formatRupiah($item->pph_nominal) }} ({{ $item->pph_persen }}%)</td>
-                    <td>{{ formatRupiah($item->total_harga) }}</td>
-                    <td>{{ $item->status_kontrak }}</td>
+                    <td class="text-center">
+                        <ul>
+                        @foreach ($item['produk_list'] as $detail)
+                            <li>{{ $detail['jumlah_kembali'] }}</li>
+                        @endforeach
+                        </ul>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>

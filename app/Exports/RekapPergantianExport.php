@@ -5,7 +5,7 @@ namespace App\Exports;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 
-class KontrakExport implements FromView
+class RekapPergantianExport implements FromView
 {
     protected $data;
 
@@ -16,7 +16,7 @@ class KontrakExport implements FromView
 
     public function view(): View
     {
-        return view('laporan.kontrak_excel', [
+        return view('laporan.pergantian_sewa_excel', [
             'data' => $this->data
         ]);
     }

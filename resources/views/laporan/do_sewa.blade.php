@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Laporan Kontrak</h4>
+                        <h4>Laporan Delivery Order Sewa</h4>
                     </div>
                     <div class="page-btn">
                         <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
@@ -40,30 +40,14 @@
                                 </select>
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterMasaSewa" name="filterMasaSewa" class="form-control" title="MasaSewa">
-                                    <option value="">Masa Sewa</option>
-                                    @foreach ($masa_sewa as $item)
-                                        <option value="{{ $item }}" {{ $item == request()->input('masa_sewa') ? 'selected' : '' }}>{{ $item }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg col-sm-6 col-12">
-                                <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
-                                    <option value="">Pilih Status</option>
-                                    @foreach ($statuses as $item)
-                                        <option value="{{ $item }}" {{ $item == request()->input('status') ? 'selected' : '' }}>{{ $item }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg col-sm-6 col-12">
                                 <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Awal Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
                                 <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Akhir Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.kontrak') }}" class="btn btn-info">Filter</a>
-                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.kontrak') }}" class="btn btn-warning">Clear</a>
+                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.do_sewa') }}" class="btn btn-info">Filter</a>
+                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.do_sewa') }}" class="btn btn-warning">Clear</a>
                             </div>
                         </div>
                     </row>
@@ -73,63 +57,125 @@
                         <thead>
                             <tr>
                                 <th rowspan="2" class="align-middle">No</th>
-                                <th rowspan="2" class="align-middle">Customer</th>
+                                <th rowspan="2" class="align-middle">No DO</th>
+                                <th rowspan="2" class="align-middle">Gallery</th>
+                                <th rowspan="2" class="align-middle">No Sewa</th>
                                 <th rowspan="2" class="align-middle">Masa Sewa</th>
-                                <th colspan="2" class="text-center">Tanggal Kontrak</th>
-                                <th rowspan="2" class="align-middle">Produk Sewa</th>
-                                <th rowspan="2" class="align-middle">Jumlah</th>
-                                <th rowspan="2" class="align-middle">Harga Satuan</th>
-                                <th rowspan="2" class="align-middle">Total Harga</th>
-                                <th rowspan="2" class="align-middle">PPN</th>
-                                <th rowspan="2" class="align-middle">PPH</th>
-                                <th rowspan="2" class="align-middle">Total Yang Diterima</th>
-                                <th rowspan="2" class="align-middle">Status</th>
+                                <th rowspan="2" class="align-middle">Driver</th>
+                                <th rowspan="2" class="align-middle">Nama Produk Jual</th>
+                                <th rowspan="2" class="align-middle">Jumlah Produk Jual</th>
+                                <th rowspan="2" class="align-middle">Nama Produk</th>
+                                <th rowspan="1" colspan="3" class="text-center">Kondisi</th>
+                                <th rowspan="2" class="align-middle">Unit Satuan</th>
+                                <th rowspan="2" class="align-middle">Unit Detail Lokasi</th>
                             </tr>
                             <tr>
-                                <th>Awal Sewa</th>
-                                <th>Akhir Sewa</th>
+                                <th>Bagus</th>
+                                <th>Afkir</th>
+                                <th>Bonggol</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($data as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item->customer->nama }}</td>
-                                <td>{{ $item->masa_sewa }} bulan</td>
-                                <td>{{ tanggalindo($item->tanggal_mulai) }}</td>
-                                <td>{{ tanggalindo($item->tanggal_selesai) }}</td>
+                                <td>{{ $item->no_do }}</td>
+                                <td>{{ $item->kontrak->lokasi->nama }}</td>
+                                <td>{{ $item->no_referensi }}</td>
+                                <td>{{ $item->kontrak->masa_sewa }} bulan</td>
+                                <td>{{ $item->data_driver->nama }}</td>
                                 <td>
                                     <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ $produk->produk->nama }}</td>
-                                        </tr>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            <tr>
+                                                <td>{{ $produk_terjual->produk->nama }}</td>
+                                            </tr>
                                         @endforeach
                                     </table>
                                 </td>
                                 <td>
                                     <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ $produk->jumlah }}</td>
-                                        </tr>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            <tr>
+                                                <td>{{ $produk_terjual->jumlah }}</td>
+                                            </tr>
                                         @endforeach
                                     </table>
                                 </td>
                                 <td>
                                     <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ formatRupiah($produk->harga) }}</td>
-                                        </tr>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            @foreach ($produk_terjual->komponen as $komponen)
+                                                <tr>
+                                                    <td>{{ $komponen->produk->nama }}</td>
+                                                </tr>
+                                            @endforeach
                                         @endforeach
                                     </table>
                                 </td>
-                                <td>{{ formatRupiah($item->subtotal) }}</td>
-                                <td>{{ formatRupiah($item->ppn_nominal) }} ({{ $item->ppn_persen }}%)</td>
-                                <td>{{ formatRupiah($item->pph_nominal) }} ({{ $item->pph_persen }}%)</td>
-                                <td>{{ formatRupiah($item->total_harga) }}</td>
-                                <td>{{ $item->status_kontrak }}</td>
+                                <td>
+                                    <table>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            @foreach ($produk_terjual->komponen as $komponen)
+                                                <tr>
+                                                    @if($komponen->data_kondisi->nama == 'Baik')
+                                                        <td>{{ $komponen->jumlah }}</td>
+                                                    @else
+                                                        <td>0</td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        @endforeach
+                                    </table>
+                                </td>
+                                <td>
+                                    <table>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            @foreach ($produk_terjual->komponen as $komponen)
+                                                <tr>
+                                                    @if($komponen->data_kondisi->nama == 'Afkir')
+                                                        <td>{{ $komponen->jumlah }}</td>
+                                                    @else
+                                                        <td>0</td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        @endforeach
+                                    </table>
+                                </td>
+                                <td>
+                                    <table>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            @foreach ($produk_terjual->komponen as $komponen)
+                                                <tr>
+                                                    @if($komponen->data_kondisi->nama == 'Bonggol')
+                                                        <td>{{ $komponen->jumlah }}</td>
+                                                    @else
+                                                        <td>0</td>
+                                                    @endif
+                                                </tr>
+                                            @endforeach
+                                        @endforeach
+                                    </table>
+                                </td>
+                                <td>
+                                    <table>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            <tr>
+                                                <td>{{ $produk_terjual->satuan }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </table>
+                                </td>
+                                <td>
+                                    <table>
+                                        @foreach ($item->produk as $produk_terjual)
+                                            <tr>
+                                                <td>{{ $produk_terjual->detail_lokasi }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </table>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -264,7 +310,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.kontrak-pdf') }}" + '?' + $.param({
+                    var url = "{{ route('laporan.do_sewa-pdf') }}" + '?' + $.param({
                         customer: filterCustomer,
                         gallery: filterGallery,
                         masa_sewa: filterMasaSewa,
@@ -301,7 +347,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.kontrak-excel') }}" + '?' + $.param({
+                    var url = "{{ route('laporan.do_sewa-excel') }}" + '?' + $.param({
                         customer: filterCustomer,
                         gallery: filterGallery,
                         masa_sewa: filterMasaSewa,

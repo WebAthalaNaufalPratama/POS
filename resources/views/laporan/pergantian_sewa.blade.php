@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Laporan Kontrak</h4>
+                        <h4>Laporan Pergantian Sewa</h4>
                     </div>
                     <div class="page-btn">
                         <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
@@ -40,30 +40,24 @@
                                 </select>
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterMasaSewa" name="filterMasaSewa" class="form-control" title="MasaSewa">
-                                    <option value="">Masa Sewa</option>
-                                    @foreach ($masa_sewa as $item)
-                                        <option value="{{ $item }}" {{ $item == request()->input('masa_sewa') ? 'selected' : '' }}>{{ $item }}</option>
+                                <select id="filterBulan" name="filterBulan" class="form-control" title="Gallery">
+                                    <option value="">Pilih Bulan</option>
+                                    @foreach ($bulan as $key => $value)
+                                        <option value="{{ $key }}" {{ $key == request()->input('bulan') ? 'selected' : '' }}>{{ $value }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
-                                    <option value="">Pilih Status</option>
-                                    @foreach ($statuses as $item)
-                                        <option value="{{ $item }}" {{ $item == request()->input('status') ? 'selected' : '' }}>{{ $item }}</option>
+                                <select id="filterTahun" name="filterTahun" class="form-control" title="Gallery">
+                                    <option value="">Pilih Tahun</option>
+                                    @foreach ($tahun as $item)
+                                        <option value="{{ $item }}" {{ $item == request()->input('tahun') ? 'selected' : '' }}>{{ $item }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Awal Sewa">
-                            </div>
-                            <div class="col-lg col-sm-6 col-12">
-                                <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Akhir Sewa">
-                            </div>
-                            <div class="col-lg col-sm-6 col-12">
-                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.kontrak') }}" class="btn btn-info">Filter</a>
-                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.kontrak') }}" class="btn btn-warning">Clear</a>
+                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.pergantian_sewa') }}" class="btn btn-info">Filter</a>
+                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.pergantian_sewa') }}" class="btn btn-warning">Clear</a>
                             </div>
                         </div>
                     </row>
@@ -74,62 +68,48 @@
                             <tr>
                                 <th rowspan="2" class="align-middle">No</th>
                                 <th rowspan="2" class="align-middle">Customer</th>
-                                <th rowspan="2" class="align-middle">Masa Sewa</th>
-                                <th colspan="2" class="text-center">Tanggal Kontrak</th>
-                                <th rowspan="2" class="align-middle">Produk Sewa</th>
-                                <th rowspan="2" class="align-middle">Jumlah</th>
-                                <th rowspan="2" class="align-middle">Harga Satuan</th>
-                                <th rowspan="2" class="align-middle">Total Harga</th>
-                                <th rowspan="2" class="align-middle">PPN</th>
-                                <th rowspan="2" class="align-middle">PPH</th>
-                                <th rowspan="2" class="align-middle">Total Yang Diterima</th>
-                                <th rowspan="2" class="align-middle">Status</th>
+                                <th rowspan="1" colspan="2" class="align-middle text-center">Produk Sewa</th>
+                                <th rowspan="2" class="align-middle text-center">Jumlah Pengiriman</th>
+                                <th rowspan="2" class="align-middle text-center">Jumlah Kembali</th>
                             </tr>
                             <tr>
-                                <th>Awal Sewa</th>
-                                <th>Akhir Sewa</th>
+                                <th rowspan="1" class="text-center">Jumlah</th>
+                                <th rowspan="1" class="text-center">Nama</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($data as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item->customer->nama }}</td>
-                                <td>{{ $item->masa_sewa }} bulan</td>
-                                <td>{{ tanggalindo($item->tanggal_mulai) }}</td>
-                                <td>{{ tanggalindo($item->tanggal_selesai) }}</td>
-                                <td>
-                                    <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ $produk->produk->nama }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </table>
+                                <td>{{ $item['nama_customer'] }}</td>
+                                <td class="text-center">
+                                    <ul>
+                                    @foreach ($item['produk_list'] as $detail)
+                                        <li>{{ $detail['jumlah_sewa'] }}</li>
+                                    @endforeach
+                                    </ul>
                                 </td>
-                                <td>
-                                    <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ $produk->jumlah }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </table>
+                                <td class="text-center">
+                                    <ul>
+                                    @foreach ($item['produk_list'] as $detail)
+                                        <li>{{ $detail['nama_produk'] }}</li>
+                                    @endforeach
+                                    </ul>
                                 </td>
-                                <td>
-                                    <table>
-                                        @foreach ($item->produk as $produk)
-                                        <tr>
-                                            <td>{{ formatRupiah($produk->harga) }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </table>
+                                <td class="text-center">
+                                    <ul>
+                                    @foreach ($item['produk_list'] as $detail)
+                                        <li>{{ $detail['jumlah_dikirim'] }}</li>
+                                    @endforeach
+                                    </ul>
                                 </td>
-                                <td>{{ formatRupiah($item->subtotal) }}</td>
-                                <td>{{ formatRupiah($item->ppn_nominal) }} ({{ $item->ppn_persen }}%)</td>
-                                <td>{{ formatRupiah($item->pph_nominal) }} ({{ $item->pph_persen }}%)</td>
-                                <td>{{ formatRupiah($item->total_harga) }}</td>
-                                <td>{{ $item->status_kontrak }}</td>
+                                <td class="text-center">
+                                    <ul>
+                                    @foreach ($item['produk_list'] as $detail)
+                                        <li>{{ $detail['jumlah_kembali'] }}</li>
+                                    @endforeach
+                                    </ul>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -178,9 +158,9 @@
                     urlString += filterGallery;
                 }
 
-                var MasaSewa = $('#filterMasaSewa').val();
-                if (MasaSewa) {
-                    var filterMasaSewa = 'masa_sewa=' + MasaSewa;
+                var bulan = $('#filterBulan').val();
+                if (bulan) {
+                    var filterBulan = 'bulan=' + bulan;
                     if (first == true) {
                         symbol = '?';
                         first = false;
@@ -188,12 +168,12 @@
                         symbol = '&';
                     }
                     urlString += symbol;
-                    urlString += filterMasaSewa;
+                    urlString += filterBulan;
                 }
 
-                var Status = $('#filterStatus').val();
-                if (Status) {
-                    var filterStatus = 'status=' + Status;
+                var tahun = $('#filterTahun').val();
+                if (tahun) {
+                    var filterTahun = 'tahun=' + tahun;
                     if (first == true) {
                         symbol = '?';
                         first = false;
@@ -201,33 +181,7 @@
                         symbol = '&';
                     }
                     urlString += symbol;
-                    urlString += filterStatus;
-                }
-
-                var dateStart = $('#filterDateStart').val();
-                if (dateStart) {
-                    var filterDateStart = 'dateStart=' + dateStart;
-                    if (first == true) {
-                        symbol = '?';
-                        first = false;
-                    } else {
-                        symbol = '&';
-                    }
-                    urlString += symbol;
-                    urlString += filterDateStart;
-                }
-
-                var dateEnd = $('#filterDateEnd').val();
-                if (dateEnd) {
-                    var filterDateEnd = 'dateEnd=' + dateEnd;
-                    if (first == true) {
-                        symbol = '?';
-                        first = false;
-                    } else {
-                        symbol = '&';
-                    }
-                    urlString += symbol;
-                    urlString += filterDateEnd;
+                    urlString += filterTahun;
                 }
                 window.location.href = urlString;
             });
@@ -243,13 +197,11 @@
         function pdf(){
             var filterCustomer = $('#filterCustomer').val();
             var filterGallery = $('#filterGallery').val();
-            var filterMasaSewa = $('#filterMasaSewa').val();
-            var filterStatus = $('#filterStatus').val();
-            var filterDateStart = $('#filterDateStart').val();
-            var filterDateEnd = $('#filterDateEnd').val();
+            var filterBulan = $('#filterBulan').val();
+            var filterTahun = $('#filterTahun').val();
 
             var desc = 'Cetak laporan tanpa filter';
-            if(filterCustomer || filterGallery || filterMasaSewa || filterStatus || filterDateStart || filterDateEnd){
+            if(filterCustomer || filterGallery || filterBulan || filterTahun){
                 desc = 'cetak laporan dengan filter';
             }
             
@@ -264,13 +216,11 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.kontrak-pdf') }}" + '?' + $.param({
+                    var url = "{{ route('laporan.pergantian_sewa-pdf') }}" + '?' + $.param({
                         customer: filterCustomer,
                         gallery: filterGallery,
-                        masa_sewa: filterMasaSewa,
-                        status: filterStatus,
-                        dateStart: filterDateStart,
-                        dateEnd: filterDateEnd,
+                        bulan: filterBulan,
+                        tahun: filterTahun,
                     });
                     
                     window.open(url, '_blank');
@@ -280,13 +230,11 @@
         function excel(){
             var filterCustomer = $('#filterCustomer').val();
             var filterGallery = $('#filterGallery').val();
-            var filterMasaSewa = $('#filterMasaSewa').val();
-            var filterStatus = $('#filterStatus').val();
-            var filterDateStart = $('#filterDateStart').val();
-            var filterDateEnd = $('#filterDateEnd').val();
+            var filterBulan = $('#filterBulan').val();
+            var filterTahun = $('#filterTahun').val();
 
             var desc = 'Cetak laporan tanpa filter';
-            if(filterCustomer || filterGallery || filterMasaSewa || filterStatus || filterDateStart || filterDateEnd){
+            if(filterCustomer || filterGallery || filterBulan || filterTahun){
                 desc = 'cetak laporan dengan filter';
             }
             
@@ -301,13 +249,11 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.kontrak-excel') }}" + '?' + $.param({
+                    var url = "{{ route('laporan.pergantian_sewa-excel') }}" + '?' + $.param({
                         customer: filterCustomer,
                         gallery: filterGallery,
-                        masa_sewa: filterMasaSewa,
-                        status: filterStatus,
-                        dateStart: filterDateStart,
-                        dateEnd: filterDateEnd,
+                        bulan: filterBulan,
+                        tahun: filterTahun,
                     });
                     
                     window.location.href = url;
