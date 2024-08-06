@@ -84,6 +84,8 @@
                     <th rowspan="2">Jumlah</th>
                     <th rowspan="2">Harga Satuan</th>
                     <th rowspan="2">Total Harga</th>
+                    <th rowspan="2">Diskon</th>
+                    <th rowspan="2">Total Harga Akhir</th>
                     <th rowspan="2">PPN</th>
                     <th rowspan="2">PPH</th>
                     <th rowspan="2">Total Yang Diterima</th>
@@ -95,34 +97,36 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->customer->nama }}</td>
-                    <td>{{ $item->masa_sewa }} bulan</td>
-                    <td>{{ tanggalindo($item->tanggal_mulai) }}</td>
-                    <td>{{ tanggalindo($item->tanggal_selesai) }}</td>
-                    <td class="nested-table">
-                        @foreach ($item->produk as $produk)
-                            {{ $produk->produk->nama }}<br>
-                        @endforeach
-                    </td>
-                    <td class="nested-table">
-                        @foreach ($item->produk as $produk)
-                            {{ $produk->jumlah }}<br>
-                        @endforeach
-                    </td>
-                    <td class="nested-table">
-                        @foreach ($item->produk as $produk)
-                            {{ formatRupiah($produk->harga) }}<br>
-                        @endforeach
-                    </td>
-                    <td>{{ formatRupiah($item->subtotal) }}</td>
-                    <td>{{ formatRupiah($item->ppn_nominal) }} ({{ $item->ppn_persen }}%)</td>
-                    <td>{{ formatRupiah($item->pph_nominal) }} ({{ $item->pph_persen }}%)</td>
-                    <td>{{ formatRupiah($item->total_harga) }}</td>
-                    <td>{{ $item->status_kontrak }}</td>
-                </tr>
+                @foreach ($data as $outerIndex => $item)
+                @php
+                    $rowCount = 0;
+                    $produk = [];
+                    $produk = $item->produk;
+                    $rowCount = count($produk);
+                @endphp
+                @foreach ($produk as $index => $produkItem)
+                    <tr>
+                        @if ($index === 0)
+                            <td rowspan="{{ $rowCount }}">{{ $outerIndex + 1 }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ $item->customer->nama }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ $item->masa_sewa }} bulan</td>
+                            <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tanggal_mulai) }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tanggal_selesai) }}</td>
+                        @endif
+                        <td>{{ $produkItem->produk->nama }}</td>
+                        <td>{{ $produkItem->jumlah }}</td>
+                        <td>{{ formatRupiah($produkItem->harga) }}</td>
+                        @if ($index === 0)
+                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->total_sebelum_diskon) }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->total_promo) }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->subtotal) }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->ppn_nominal) }} ({{ $item->ppn_persen }}%)</td>
+                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->pph_nominal) }} ({{ $item->pph_persen }}%)</td>
+                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->total_harga) }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ $item->status_kontrak }}</td>
+                        @endif
+                    </tr>
+                @endforeach                
                 @endforeach
             </tbody>
         </table>

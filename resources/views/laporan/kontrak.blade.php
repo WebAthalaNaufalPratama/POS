@@ -80,6 +80,8 @@
                                 <th rowspan="2" class="align-middle">Jumlah</th>
                                 <th rowspan="2" class="align-middle">Harga Satuan</th>
                                 <th rowspan="2" class="align-middle">Total Harga</th>
+                                <th rowspan="2" class="align-middle">Diskon</th>
+                                <th rowspan="2" class="align-middle">Total Harga Akhir</th>
                                 <th rowspan="2" class="align-middle">PPN</th>
                                 <th rowspan="2" class="align-middle">PPH</th>
                                 <th rowspan="2" class="align-middle">Total Yang Diterima</th>
@@ -125,6 +127,8 @@
                                         @endforeach
                                     </table>
                                 </td>
+                                <td>{{ formatRupiah($item->total_sebelum_diskon) }}</td>
+                                <td>{{ formatRupiah($item->total_promo) }}</td>
                                 <td>{{ formatRupiah($item->subtotal) }}</td>
                                 <td>{{ formatRupiah($item->ppn_nominal) }} ({{ $item->ppn_persen }}%)</td>
                                 <td>{{ formatRupiah($item->pph_nominal) }} ({{ $item->pph_persen }}%)</td>

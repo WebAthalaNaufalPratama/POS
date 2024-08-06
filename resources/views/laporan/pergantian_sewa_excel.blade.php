@@ -115,39 +115,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item['nama_customer'] }}</td>
-                    <td class="text-center">
-                        <ul>
-                        @foreach ($item['produk_list'] as $detail)
-                            <li>{{ $detail['jumlah_sewa'] }}</li>
-                        @endforeach
-                        </ul>
-                    </td>
-                    <td class="text-center">
-                        <ul>
-                        @foreach ($item['produk_list'] as $detail)
-                            <li>{{ $detail['nama_produk'] }}</li>
-                        @endforeach
-                        </ul>
-                    </td>
-                    <td class="text-center">
-                        <ul>
-                        @foreach ($item['produk_list'] as $detail)
-                            <li>{{ $detail['jumlah_dikirim'] }}</li>
-                        @endforeach
-                        </ul>
-                    </td>
-                    <td class="text-center">
-                        <ul>
-                        @foreach ($item['produk_list'] as $detail)
-                            <li>{{ $detail['jumlah_kembali'] }}</li>
-                        @endforeach
-                        </ul>
-                    </td>
-                </tr>
+                @foreach ($data as $outerIndex => $item)
+                @php
+                    $produkListCount = count($item['produk_list']);
+                @endphp
+                @foreach ($item['produk_list'] as $index => $detail)
+                    <tr>
+                        @if ($index === 0)
+                            <td rowspan="{{ $produkListCount }}">{{ $loop->iteration }}</td>
+                            <td rowspan="{{ $produkListCount }}">{{ $item['nama_customer'] }}</td>
+                        @endif
+                        <td class="text-center">{{ $detail['jumlah_sewa'] }}</td>
+                        <td class="text-center">{{ $detail['nama_produk'] }}</td>
+                        <td class="text-center">{{ $detail['jumlah_dikirim'] }}</td>
+                        <td class="text-center">{{ $detail['jumlah_kembali'] }}</td>
+                    </tr>
+                @endforeach
                 @endforeach
             </tbody>
         </table>

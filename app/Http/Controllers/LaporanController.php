@@ -78,6 +78,7 @@ class LaporanController extends Controller
         }
 
         $data = $query->get()->map(function($item) {
+            $item->total_sebelum_diskon = $item->subtotal + $item->total_promo;
             $tanggalMulai = Carbon::parse($item->tanggal_mulai);
             $tanggalSekarang = Carbon::now();
         
@@ -126,6 +127,7 @@ class LaporanController extends Controller
         }
 
         $data = $query->get()->map(function($item) {
+            $item->total_sebelum_diskon = $item->subtotal + $item->total_promo;
             $tanggalMulai = Carbon::parse($item->tanggal_mulai);
             $tanggalSekarang = Carbon::now();
         
@@ -172,6 +174,7 @@ class LaporanController extends Controller
         }
 
         $data = $query->get()->map(function($item) {
+            $item->total_sebelum_diskon = $item->subtotal + $item->total_promo;
             $tanggalMulai = Carbon::parse($item->tanggal_mulai);
             $tanggalSekarang = Carbon::now();
         

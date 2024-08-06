@@ -113,78 +113,61 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->no_do }}</td>
-                    <td>{{ $item->kontrak->lokasi->nama }}</td>
-                    <td>{{ $item->no_referensi }}</td>
-                    <td>{{ $item->kontrak->masa_sewa }} bulan</td>
-                    <td>{{ $item->data_driver->nama }}</td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                                {{ $produk_terjual->produk->nama }}<br>
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                                {{ $produk_terjual->jumlah }}<br>
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                            @foreach ($produk_terjual->komponen as $komponen)
-                                    {{ $komponen->produk->nama }}<br>
-                            @endforeach
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                            @foreach ($produk_terjual->komponen as $komponen)
-                                    @if($komponen->data_kondisi->nama == 'Baik')
-                                        {{ $komponen->jumlah }}<br>
-                                    @else
-                                        0<br>
-                                    @endif
-                            @endforeach
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                            @foreach ($produk_terjual->komponen as $komponen)
-                                    @if($komponen->data_kondisi->nama == 'Afkir')
-                                        {{ $komponen->jumlah }}<br>
-                                    @else
-                                        0<br>
-                                    @endif
-                            @endforeach
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                            @foreach ($produk_terjual->komponen as $komponen)
-                                    @if($komponen->data_kondisi->nama == 'Bonggol')
-                                        {{ $komponen->jumlah }}<br>
-                                    @else
-                                        0<br>
-                                    @endif
-                            @endforeach
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                                {{ $produk_terjual->satuan }}<br>
-                        @endforeach
-                    </td>
-                    <td>
-                        @foreach ($item->produk as $produk_terjual)
-                                {{ $produk_terjual->detail_lokasi }}<br>
-                        @endforeach
-                    </td>
-                </tr>
+                @foreach ($data as $outerIndex => $item)
+                @php
+                    $produk = $item->produk;
+                    $totalKomponenCount = 0;
+                    foreach ($produk as $produk_terjual) {
+                        $totalKomponenCount += count($produk_terjual->komponen);
+                    }
+                @endphp
+                @foreach ($produk as $index => $produk_terjual)
+                    @foreach ($produk_terjual->komponen as $komponenIndex => $komponen)
+                        <tr>
+                            @if ($index === 0 && $komponenIndex === 0)
+                                <td rowspan="{{ $totalKomponenCount }}">{{ $outerIndex + 1 }}</td>
+                                <td rowspan="{{ $totalKomponenCount }}">{{ $item->no_do }}</td>
+                                <td rowspan="{{ $totalKomponenCount }}">{{ $item->kontrak->lokasi->nama }}</td>
+                                <td rowspan="{{ $totalKomponenCount }}">{{ $item->no_referensi }}</td>
+                                <td rowspan="{{ $totalKomponenCount }}">{{ $item->kontrak->masa_sewa }} bulan</td>
+                                <td rowspan="{{ $totalKomponenCount }}">{{ $item->data_driver->nama }}</td>
+                            @endif
+                            @if ($komponenIndex === 0)
+                                <td rowspan="{{ count($produk_terjual->komponen) }}">{{ $produk_terjual->produk->nama }}</td>
+                                <td rowspan="{{ count($produk_terjual->komponen) }}">{{ $produk_terjual->jumlah }}</td>
+                            @endif
+                            <td>{{ $komponen->produk->nama }}</td>
+                            <td>
+                                @if($komponen->data_kondisi->nama == 'Baik')
+                                    {{ $komponen->jumlah }}
+                                @else
+                                    0
+                                @endif
+                            </td>
+                            <td>
+                                @if($komponen->data_kondisi->nama == 'Afkir')
+                                    {{ $komponen->jumlah }}
+                                @else
+                                    0
+                                @endif
+                            </td>
+                            <td>
+                                @if($komponen->data_kondisi->nama == 'Bonggol')
+                                    {{ $komponen->jumlah }}
+                                @else
+                                    0
+                                @endif
+                            </td>
+                            @if ($komponenIndex === 0)
+                                <td rowspan="{{ count($produk_terjual->komponen) }}">{{ $produk_terjual->satuan }}</td>
+                                <td rowspan="{{ count($produk_terjual->komponen) }}">{{ $produk_terjual->detail_lokasi }}</td>
+                            @endif
+                        </tr>
+                    @endforeach
+                @endforeach
                 @endforeach
             </tbody>
-        </table>
+        </table>        
     </div>
 </body>
 </html>
