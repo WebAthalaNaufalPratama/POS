@@ -137,6 +137,7 @@ class PembelianController extends Controller
         
         $rawOrderBy = "CONCAT(RIGHT(bulan_inden, 4), '-', $caseStatement)";
         
+        
         $query2 = ModelsPoinden::query();
         
         if (Auth::user()->hasRole(['Auditor', 'Finance'])) {
@@ -2186,13 +2187,15 @@ class PembelianController extends Controller
 
         if ($pembelian->tgl_diterima == null && in_array($pembelian->lokasi->tipe_lokasi, [3, 4])) {      
             $pembelian->tgl_diterima = $request->tgl_diterima;
+            
             $pembelian->pemeriksa = $request->pemeriksa;
             $pembelian->status_diperiksa = $request->status;
             $pembelian->tgl_diperiksa= $request->tgl_diperiksa;
-            // $pembelian->penerima = '-';
-            $pembelian->status_diterima = '-';
-            // $pembelian->tgl_diterima_ttd= '-';
-            $check1 = $pembelian->save(); 
+
+            $pembelian->penerima = $request->pemeriksa;;
+            $pembelian->status_diterima = $request->status;
+            $pembelian->tgl_diterima_ttd= $request->tgl_diperiksa;
+            $check1 = $pembelian->save();
 
             $produkIds = $request->id;
             $kode = $request->kode;

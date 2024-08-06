@@ -52,6 +52,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::get('/get-bulan-inden/{supplier_id}', 'MutasiindensController@getBulanInden')->name('getBulan');
         Route::get('/get-kode-inden/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkodeInden')->name('getKode');
         Route::get('/get-kategori-inden/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriInden')->name('getKategori');
+        Route::get('/get-kategori-inden-edit/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriIndenEdit')->name('getKategoriEdit');
 
         Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
         Route::get('checkPromo', 'PromoController@checkPromo')->name('checkPromo');
@@ -570,10 +571,13 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create');
             Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');
             Route::get('/{mutasiIG}/editpurchase', 'MutasiindensController@editpurchase_indengh')->name('mutasiindengh.editpurchase');
+            Route::get('/{mutasiIG}/editfinance', 'MutasiindensController@editfinance_indengh')->name('mutasiindengh.editfinance');
             Route::get('/{mutasiIG}/show', 'MutasiindensController@show_indengh')->name('mutasiindengh.show');
             Route::post('/store/retur', 'MutasiindensController@store_retur')->name('retur.store');
             Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store');
             Route::patch('/{mutasiIG}/update', 'MutasiindensController@update_indengh')->name('mutasiindengh.update');
+            Route::patch('/mutasiindengh/{mutasiIG}/update-pembuku', 'MutasiindensController@updatePembuku')->name('mutasiindengh.updatePembuku');
+
             // Route::patch('/{mutasiIG}/update_gambar', 'MutasiindensController@updategambar_indengh')->name('gambarinden.update');
             Route::get('/{mutasiIG}/delete', 'MutasiindensController@destroy_indengh')->name('mutasiindengh.destroy');
             

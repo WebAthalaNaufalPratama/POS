@@ -25,6 +25,7 @@ class ProdukMutasiInden extends Model
     public function mutasiinden (){
         return $this->belongsTo(Mutasiindens::class, 'mutasiinden_id', 'id');
     }
+    
     public function produk (){
         return $this->belongsTo(InventoryInden::class, 'inventoryinden_id', 'id');
     }

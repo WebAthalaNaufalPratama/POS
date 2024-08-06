@@ -105,7 +105,7 @@
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <img id="preview" />
+                                                <img id="preview" src="{{ old('bukti', ($data->bukti ? '/storage/' . $data->bukti : '')) }}" alt="your image" />
                                             </div>
 
                                             
@@ -130,9 +130,9 @@
                                                     <th>QTY Kirim</th>
                                                     <th>QTY Terima</th>
                                                     <th>Kondisi</th>
-                                                    <th>Biaya Perawatan</th>
+                                                    {{-- <th>Biaya Perawatan</th>
                                                     <th>Total Biaya Perawatan</th>
-                                                    <th></th>
+                                                    <th></th> --}}
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
@@ -146,20 +146,25 @@
                                                         <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_{{ $index }}" value="{{ $item->produk->kode_produk_inden }}" readonly>
                                                     </td>
                                                     <td>
+                                                    <input type="hidden" class="form-control" name="idinven[]" id="idinven_{{ $index }}" value="{{ $item->inventoryinden_id }}" readonly>
                                                     <input type="text" class="form-control" name="kategori[]" id="kategori_{{ $index }}" value="{{ $item->produk->produk->nama }}" readonly>
-                                                    <input type="hidden" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $item->produk->produk->nama}}" readonly>
+                                                    <input type="hidden" class="form-control" name="kode[]" id="kode_{{ $index }}" value="{{ $item->produk->produk->kode }}" readonly></td>
+
                                                     </td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" onchange="calculateTotal({{ $index }})" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" value="{{ $item->jml_diterima ?? '' }}" oninput="calculateTotal({{ $index }})"></td>
                                                     <td>
-                                                        <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control">
+                                                        <input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" value="{{ old('qtytrm.' . $index, $item->jml_diterima) }}" oninput="calculateTotal({{ $index }})" required>
+                                                    </td>
+                                                    <td>
+                                                        <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control" required>
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
-                                                                <option value="{{ $kondisi->id }}" {{ $item->kondisi_id == $kondisi->id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
+                                                                <option value="{{ $kondisi->id }}" {{ old('kondisi.' . $index, $item->kondisi_id) == $kondisi->id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td>
+                                                    
+                                                    {{-- <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
                                                             <input type="text" name="rawat2[]" id="rawat2_{{ $index }}" value="{{ $item->biaya_rawat }}" class="form-control-banyak" oninput="calculateTotal({{ $index }})" readonly>
@@ -172,7 +177,7 @@
                                                             <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" value="{{ $item->totalharga }}" class="form-control-banyak" readonly>
                                                             <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" value="{{ $item->totalharga }}" class="form-control">
                                                         </div>
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -221,7 +226,7 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="col-lg-5 float-md-right">
+                                    {{-- <div class="col-lg-5 float-md-right">
                                         <div class="total-order">
                                             <ul>
                                                 <li>
@@ -278,7 +283,7 @@
                                                 </li>
                                             </ul>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
                         </div>
@@ -338,7 +343,7 @@
                                                     </td>
                                                     <td id="status_diterima">
                                                         <select id="status_diterima" name="status_diterima" class="form-control" {{ Auth::user()->hasRole('AdminGallery') ? 'required' : 'readonly' }}>
-                                                            <option selected>Pilih Status</option>
+                                                            <option disabled>Pilih Status</option>
                                                             {{-- <option value="TUNDA" {{ $data->status_diterima == 'TUNDA' ? 'selected' : '' }}>TUNDA</option> --}}
                                                             <option value="DIKONFIRMASI" {{ $data->status_diterima == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             {{-- <option value="BATAL" {{ $data->status_diterima == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
@@ -355,7 +360,7 @@
                                                     @if(Auth::user()->hasRole('Auditor'))
                                                     <td id="status_dibuku">
                                                         <select id="status_diperiksa" name="status_diperiksa" class="form-control" required>
-                                                            <option selected>Pilih Status</option>
+                                                            <option disabled>Pilih Status</option>
                                                             <option value="DIKONFIRMASI" {{ $data->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
@@ -436,7 +441,6 @@
               <label for="bukti" class="form-label">Bukti</label>
               <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
             </div>
-            
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-primary">Simpan</button>
