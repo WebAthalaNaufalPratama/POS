@@ -517,6 +517,8 @@ class InitialSeeder extends Seeder
                 'kas_pusat.index',
                 'pemakaian_sendiri.index',
                 'auditor.update',
+                'pembelian.edit',
+                'pembelian.update',
             ];
             $auditorPermissionList = array_merge($basiPermissionList, $auditorPermissionList);
             $query = Permission::query();

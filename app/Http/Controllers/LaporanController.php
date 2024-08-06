@@ -18,6 +18,7 @@ use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
 use App\Exports\PembelianExport;
 use App\Exports\PembelianIndenExport;
+use App\Exports\StokIndenExport;
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
 use App\Models\Invoicepo;
@@ -1343,6 +1344,212 @@ class LaporanController extends Controller
         $data = $query->get();
         if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new PembelianIndenExport($data), 'pembelian_inden.xlsx');
+    }
+
+    public function stok_inden_index(Request $req)
+    {
+        $query = InventoryInden::with(['produk', 'supplier']);
+
+        $allData = $query->get();
+
+        $tahun = $allData->map(function($item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            return count($bulan_inden) == 2 ? $bulan_inden[1] : null;
+        })->filter()->unique();
+
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->supplier);
+        }
+        if ($req->tahun) {
+            $query->where('bulan_inden', 'LIKE', '%-' . $req->input('tahun'));
+        }
+
+        $result = $query->get();
+
+        $produk = $result->mapWithKeys(function($item) {
+            return [$item->produk->kode => $item->produk->nama];
+        })->unique();
+
+        $supplier = $result->mapWithKeys(function($item) {
+            return [$item->supplier->id => $item->supplier->nama];
+        })->unique();
+
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $data = array_fill_keys($bulan, array_fill_keys($produk->values()->toArray(), 0));
+
+        foreach ($result as $item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            if (count($bulan_inden) == 2) {
+                $bulan_key = $bulan_inden[0];
+                
+                $bulan_key = array_search($bulan_key, $bulan);
+                if ($bulan_key !== false) {
+                    $bulan_name = $bulan[$bulan_key];
+                    
+                    $nama_produk = $item->produk->nama;
+                    if (array_key_exists($nama_produk, $data[$bulan_name])) {
+                        $data[$bulan_name][$nama_produk] += $item->jumlah;
+                    }
+                }
+            }
+        }
+
+        $total = array_fill_keys($produk->values()->toArray(), 0);
+
+        foreach ($data as $key => $value) {
+            foreach ($value as $key1 => $item1) {
+                $total[$key1] += $item1;
+            }
+        }
+
+        $totalSisaBunga = array_sum($total);
+
+        return view('laporan.stok_inden', compact('data', 'supplier', 'bulan', 'tahun', 'produk', 'total', 'totalSisaBunga'));
+    }
+
+    public function stok_inden_pdf(Request $req)
+    {
+        $query = InventoryInden::with(['produk', 'supplier']);
+
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->supplier);
+        }
+        if ($req->tahun) {
+            $query->where('bulan_inden', 'LIKE', '%-' . $req->input('tahun'));
+        }
+
+        $result = $query->get();
+
+        $produk = $result->mapWithKeys(function($item) {
+            return [$item->produk->kode => $item->produk->nama];
+        })->unique();
+
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $data = array_fill_keys($bulan, array_fill_keys($produk->values()->toArray(), 0));
+
+        foreach ($result as $item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            if (count($bulan_inden) == 2) {
+                $bulan_key = $bulan_inden[0];
+                
+                $bulan_key = array_search($bulan_key, $bulan);
+                if ($bulan_key !== false) {
+                    $bulan_name = $bulan[$bulan_key];
+                    
+                    $nama_produk = $item->produk->nama;
+                    if (array_key_exists($nama_produk, $data[$bulan_name])) {
+                        $data[$bulan_name][$nama_produk] += $item->jumlah;
+                    }
+                }
+            }
+        }
+
+        $total = array_fill_keys($produk->values()->toArray(), 0);
+
+        foreach ($data as $key => $value) {
+            foreach ($value as $key1 => $item1) {
+                $total[$key1] += $item1;
+            }
+        }
+
+        $totalSisaBunga = array_sum($total);
+
+        if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.stok_inden_pdf', compact('data', 'produk', 'total', 'totalSisaBunga'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('stok_inden.pdf');
+    }
+
+    public function stok_inden_excel(Request $req)
+    {
+        $query = InventoryInden::with(['produk', 'supplier']);
+
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->supplier);
+        }
+        if ($req->tahun) {
+            $query->where('bulan_inden', 'LIKE', '%-' . $req->input('tahun'));
+        }
+
+        $result = $query->get();
+
+        $produk = $result->mapWithKeys(function($item) {
+            return [$item->produk->kode => $item->produk->nama];
+        })->unique();
+
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $data = array_fill_keys($bulan, array_fill_keys($produk->values()->toArray(), 0));
+
+        foreach ($result as $item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            if (count($bulan_inden) == 2) {
+                $bulan_key = $bulan_inden[0];
+                
+                $bulan_key = array_search($bulan_key, $bulan);
+                if ($bulan_key !== false) {
+                    $bulan_name = $bulan[$bulan_key];
+                    
+                    $nama_produk = $item->produk->nama;
+                    if (array_key_exists($nama_produk, $data[$bulan_name])) {
+                        $data[$bulan_name][$nama_produk] += $item->jumlah;
+                    }
+                }
+            }
+        }
+
+        $total = array_fill_keys($produk->values()->toArray(), 0);
+
+        foreach ($data as $key => $value) {
+            foreach ($value as $key1 => $item1) {
+                $total[$key1] += $item1;
+            }
+        }
+
+        $totalSisaBunga = array_sum($total);
+
+        if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new StokIndenExport($data, $produk, $total, $totalSisaBunga), 'pembelian_inden.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)
