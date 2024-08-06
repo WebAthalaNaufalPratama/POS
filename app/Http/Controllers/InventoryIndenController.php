@@ -14,6 +14,7 @@ class InventoryIndenController extends Controller
 {
     public function index(Request $req)
     {
+        
     $caseStatement = "CASE 
         WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Januari' THEN '01'
         WHEN SUBSTRING_INDEX(bulan_inden, '-', 1) = 'Februari' THEN '02'
@@ -30,9 +31,11 @@ class InventoryIndenController extends Controller
         END";
     
     $rawOrderBy = "CONCAT(RIGHT(bulan_inden, 4), '-', $caseStatement)";
+
     $namaproduks = InventoryInden::with('produk')->get()->unique('kode_produk');
     $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
     $periodes = InventoryInden::get()->unique('bulan_inden');
+    // dd($periodes);
     $query = InventoryInden::orderByRaw($rawOrderBy . ' DESC');
     if ($req->produk) {
         $query->where('kode_produk', $req->input('produk'));

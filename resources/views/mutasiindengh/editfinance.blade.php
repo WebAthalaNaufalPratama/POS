@@ -22,13 +22,13 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi Inden ke Galery/GreenHouse</h3>
+            <h3 class="page-title">Edit Mutasi Inden ke Galery/GreenHouse (Finance)</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    Inden Ke GreenHouse
+                    Inden ke {{ $data->lokasi->nama }}
                 </li>
             </ul>
         </div>
@@ -54,8 +54,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="tgl_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" 
-                                            value="{{ $data->tgl_dikirim }}">
+                                            <input type="date" class="form-control" id="tgl_kirim" name="tgl_dikirim" value="{{ $data->tgl_dikirim }}" readonly>
                                          </div>
                                         
                                         {{-- <div class="form-group">
@@ -75,33 +74,40 @@
                                             </div>
                                         </div> --}}
                                     </div>
-                                    <div class="col-md-4">
+                                    {{-- <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="supplier">Supplier Pengirim</label>
-                                            <select id="supplier" name="supplier_id" class="form-control select2" required>
+                                            <select id="supplier" name="supplier_id" class="form-control select2" readonly>
                                                 <option value="">Pilih Supplier</option>
                                                 @foreach ($suppliers as $supplier)
-                                                <option value="{{ $supplier->id }}" {{ $supplier->id == $data->supplier->id  ? 'selected' : ''}}>{{ $supplier->nama }}</option>
+                                                <option value="{{ $supplier->id }}" {{ $supplier->id == $data->supplier->id  ? 'selected' : ''}} disabled>{{ $supplier->nama }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label for="penerima">Lokasi Penerima</label>
-                                            <select id="penerima" name="lokasi_id" class="form-control select2" required>
+                                            <select id="penerima" name="lokasi_id" class="form-control select2" required readonly>
                                                 <option value="">Pilih Lokasi</option>
                                                 @foreach ($lokasi as $lok)
-                                                <option value="{{ $lok->id }}" {{ $lok->id == $data->lokasi->id  ? 'selected' : ''}}>{{ $lok->nama }}</option>
+                                                <option value="{{ $lok->id }}" {{ $lok->id == $data->lokasi->id  ? 'selected' : ''}} disabled>{{ $lok->nama }}</option>
                                                 @endforeach
                                             </select>
+                                        </div>
+                                    </div> --}}
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="supplier">Supplier</label>
+                                                <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $data->supplier->nama }}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="penerima">Lokasi</label>
+                                            <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $data->lokasi->nama }}" readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="tgl_terima">Tanggal Diterima</label>
-                                            <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" 
-                                            value="{{ $data->tgl_diterima }}" 
-                                            min="{{ now()->format('Y-m-d') }}" 
-                                            max="{{ now()->addYear()->format('Y-m-d') }}" readonly>
+                                            <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima"  value="{{ $data->tgl_diterima }}" readonly>
                                          </div>
                                         <div class="form-group">
                                             <div class="custom-file-container" data-upload-id="myFirstImage">
@@ -112,10 +118,8 @@
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <img id="preview" />
+                                                <img id="preview" src="{{ old('bukti', ($data->bukti ? '/storage/' . $data->bukti : '')) }}" alt="your image" />
                                             </div>
-
-                                            
                                         </div>
                                     </div>
                                 </div>
@@ -155,8 +159,8 @@
                                                             <option value="">Pilih Kode Inden</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_10" readonly></td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" required></td>
+                                                    <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_0" readonly></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td>
                                                         <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
@@ -169,14 +173,14 @@
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control form-control-banyak" oninput="calculateTotal(0)">
+                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control-banyak" oninput="calculateTotal(0)">
                                                             <input type="hidden" name="rawat[]" id="rawat_0" class="form-control" oninput="calculateTotal(0)">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="jumlah_display[]" id="jumlah_0" class="form-control form-control-banyak" oninput="calculateTotal(0)" readonly></td>
+                                                            <input type="text" name="jumlah_display[]" id="jumlah_0" class="form-control-banyak" oninput="calculateTotal(0)" readonly></td>
                                                             <input type="hidden" name="jumlah[]" id="jumlahint_0" class="form-control" oninput="calculateTotal(0)"></td>
                                                         </div>
                                                     </td>
@@ -189,39 +193,44 @@
                                                 @foreach ($data->produkmutasi as $index => $produk)
                                                     <tr>
                                                         <td>
-                                                            <input type="hidden" class="form-control" name="id[]" id="id_{{ $index }}" value="{{ $produk->id }}" readonly>
-                                                            <select class="form-control" id="bulan_inden_{{ $i }}" name="bulan_inden[]">
+                                                            <input type="hidden" class="form-control" name="id[]" id="id_{{ $i }}" value="{{ $produk->id }}" readonly>
+                                                            <input type="text" class="form-control" name="bulan_inden[]" id="bulan_inden_{{ $i }}" value="{{ $produk->produk->bulan_inden }}" readonly>
+                                                            {{-- <select class="form-control" id="bulan_inden_{{ $i }}" name="bulan_inden[]" readonly>
                                                                 <option value="">Pilih Bulan Inden</option>
-                                                            </select>
+                                                            </select> --}}
                                                         </td>
                                                         <td>
-                                                            <select class="form-control" id="kode_inden_{{ $i }}" name="kode_inden[]">
+                                                            <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_{{ $i }}" value="{{ $produk->produk->kode_produk_inden }}" readonly>
+
+                                                            {{-- <select class="form-control" id="kode_inden_{{ $i }}" name="kode_inden[]" readonly>
                                                                 <option value="">Pilih Kode Inden</option>
-                                                            </select>
+                                                            </select> --}}
                                                         </td>
-                                                        <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_{{ $i }}" value="{{ $produk->produk->produk->nama }}" readonly></td>
-                                                        <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $produk->jml_dikirim ?? 0 }}" onchange="calculateTotal(0)" required></td>
-                                                        <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal(0)" readonly></td>
+                                                        <td><input type="hidden" class="form-control" name="idinven[]" id="idinven_{{ $i }}" value="{{ $produk->inventoryinden_id }}" readonly>
+                                                            <input type="text" class="form-control" name="kategori1[]" id="kategori1_{{ $i }}" value="{{ $produk->produk->produk->nama }}" readonly>
+                                                            <input type="hidden" class="form-control" name="kode[]" id="kode_{{ $i }}" value="{{ $produk->produk->produk->kode }}" readonly></td>
+                                                        <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $produk->jml_dikirim ?? 0 }}" oninput="validateQty({{ $i }})" data-jumlah="{{ $produk->produk->jumlah }}" required readonly></td>
+                                                        <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal({{ $i }})" readonly></td>
                                                         <td>
                                                             <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
                                                                 <option value="">Pilih Kondisi</option>
                                                                 @foreach ($kondisis as $kondisi)
-                                                                    <option value="{{ $kondisi->id }}" {{ $kondisi->id == $produk->kondisi_id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
+                                                                    <option value="{{ $kondisi->id }}" {{ $kondisi->id == $produk->kondisi_id ? 'selected' : '' }} disabled>{{ $kondisi->nama }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </td>
                                                         <td>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text" name="rawat2[]" id="rawat2_{{ $i }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control form-control-banyak" oninput="calculateTotal(0)">
-                                                                <input type="hidden" name="rawat[]" id="rawat_{{ $i }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control" oninput="calculateTotal(0)">
+                                                                <input type="text" name="rawat2[]" id="rawat2_{{ $i }}" value="{{$produk->biaya_rawat ? formatRupiah2($produk->biaya_rawat) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $i }})">
+                                                                <input type="hidden" name="rawat[]" id="rawat_{{ $i }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control" oninput="calculateTotal({{ $i }})">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $i }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control form-control-banyak" oninput="calculateTotal(0)" readonly></td>
-                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $i }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control" oninput="calculateTotal(0)"></td>
+                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $i }}" value="{{ $produk->totalharga ? formatRupiah2($produk->totalharga) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $i }})" readonly></td>
+                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $i }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control" oninput="calculateTotal({{ $i }})"></td>
                                                             </div>
                                                         </td>
                                                         {{-- @if($i == 0)
@@ -276,7 +285,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" value="{{ $data->subtotal ?? 0 }}" onchange="calculateTotal(0)" readonly>
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" value="{{ $data->subtotal ? formatRupiah2($data->subtotal) : 0 }}" onchange="calculateTotal(0)" readonly>
                                                             <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" value="{{ $data->subtotal ?? 0 }}" onchange="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
@@ -286,7 +295,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis" class="form-control" value="{{ $data->biaya_perawatan ?? 0 }}" oninput="calculateTotal(0)">
+                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis" class="form-control" value="{{ $data->biaya_perawatan ? formatrupiah2($data->biaya_perawatan): 0 }}" oninput="calculateTotal(0)">
                                                             <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" value="{{ $data->biaya_perawatan ?? 0 }}" oninput="calculateTotal(0)">
                                                         </div>
                                                     </h5>
@@ -296,7 +305,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis" class="form-control" value="{{ $data->biaya_pengiriman ?? 0 }}" oninput="calculateTotal(0)" required>
+                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis" class="form-control" value="{{ $data->biaya_pengiriman ? formatRupiah2($data->biaya_pengiriman) : 0 }}" oninput="calculateTotal(0)" required>
                                                             <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ $data->biaya_pengiriman ?? 0 }}" oninput="calculateTotal(0)" required>
                                                         </div>
                                                     </h5>
@@ -306,12 +315,12 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" value="{{ $data->total_biaya ?? 0 }}" class="form-control" readonly>
+                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" value="{{ $data->total_biaya ? formatRupiah2($data->total_biaya): 0 }}" class="form-control" readonly>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" value="{{ $data->total_biaya ?? 0 }}" class="form-control" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
+                                                {{-- <li>
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>
                                                         <div class="input-group">
@@ -319,7 +328,7 @@
                                                             <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly>
                                                         </div>
                                                     </h5>
-                                                </li>
+                                                </li> --}}
                                             </ul>
                                         </div>
                                     </div>
@@ -328,80 +337,77 @@
                         </div>
                         
                         <div class="row justify-content-start">
-                            <div class="col-3 border rounded pt-3 me-1 mt-2"> 
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2"> 
                                 <div class="table-responsive">
                                     <table class="table border rounded">
                                         <thead>
                                             <tr>
                                                 <th>Dibuat</th>                                              
-                                                {{-- <th>Diterima</th>                                              
+                                                <th>Diterima</th>                                              
                                                 <th>Dibukukan</th>
-                                                <th>Diperiksa</th> --}}
+                                                <th>Diperiksa</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
                                                 <td id="pembuat">
-                                                    <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" required readonly>
+                                                    {{-- <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}"> --}}
+                                                    <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatanbuat ?? '' }})" readonly>
                                                 </td>
-                                                {{-- <td id="penerima">
+                                                <td id="penerima">
                                                     <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
-                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                </td>
-                                                <td id="pembuku">
-                                                    <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                    @if($penerima)
+                                                    <input type="text" class="form-control" value="{{ $penerima ?? '' }} ({{ $jabatanterima ?? '' }})" readonly>
+                                                    @else
+                                                    <input type="text" class="form-control" value="Nama (Admin Gallery)" readonly>
+                                                    @endif
                                                 </td>
                                                 <td id="pemeriksa">
                                                     <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
-                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                </td> --}}
+                                                    @if($pemeriksa)
+                                                    <input type="text" class="form-control" value="{{ $pemeriksa ?? '' }} ({{ $jabatanperiksa ?? '' }})" readonly>
+                                                    @else
+                                                    <input type="text" class="form-control" value="Nama (Auditor)" readonly>
+                                                    @endif
+                                                </td>
+                                                <td id="pembuku">
+                                                    <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                    <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" required readonly>
+                                                </td>
+                                                
                                             </tr>
                                             <tr>
                                                 <td id="status_dibuat">
-                                                    <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                        <option>Pilih Status</option>
-                                                        <option value="TUNDA" {{ $data->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                        <option value="DIKONFIRMASI" {{ $data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                        <option value="BATAL" {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                    <input type="text" class="form-control" value="{{ $data->status_dibuat }}" readonly>
+                                                </td>
+                                                <td id="status_diterima">
+                                                    <input type="text" class="form-control" value="{{ $data->status_diterima ?? '-'}}" readonly>
+                                                </td>
+                                                <td id="status_diperiksa">
+                                                    <input type="text" class="form-control" value="{{ $data->status_diperiksa ?? '-'}}" readonly>
+                                                </td>
+                                                <td id="status_dibukukan">
+                                                    <select id="status_dibukukan" name="status_dibukukan" class="form-control" required>
+                                                        <option disabled>Pilih Status</option>
+                                                        <option value="TUNDA" {{ $data->status_dibukukan == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                        <option value="MENUNGGU PEMBAYARAN" {{ $data->status_dibukukan == 'MENUNGGU PEMBAYARAN' || $data->status_dibukukan == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
+                                                        {{-- <option value="BATAL" {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                                     </select>
                                                 </td>
-                                                {{-- <td id="status_diterima">
-                                                    <select id="status_diterima" name="status_diterima" class="form-control" readonly>
-                                                        <option disabled selected>Pilih Status</option>
-                                                        <option value="pending" {{ old('status_diterima') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                        <option value="acc" {{ old('status_diterima') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
-                                                    </select>
-                                                </td>
-                                                <td id="status_dibuku">
-                                                    <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
-                                                        <option disabled selected>Pilih Status</option>
-                                                        <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                        <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
-                                                    </select>
-                                                </td>
-                                                <td id="status_dibuku">
-                                                    <select id="status_diperiksa" name="status_dibuku" class="form-control" readonly>
-                                                        <option disabled selected>Pilih Status</option>
-                                                        <option value="pending" {{ old('status_diperiksa') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                        <option value="acc" {{ old('status_diperiksa') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
-                                                    </select>
-                                                </td> --}}
                                             </tr>
                                             <tr>
                                                 <td id="tgl_dibuat">
-                                                    <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" required>
+                                                    <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($data->tgl_dibuat) }}"readonly >
                                                 </td>
-                                                {{-- <td id="tgl_diterima">
-                                                    <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" readonly>
-                                                </td>
-                                                <td id="tgl_dibuku">
-                                                    <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" readonly>
+                                                <td id="tgl_diterima">
+                                                    <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $data->tgl_diterima_ttd ? tanggalindo($data->tgl_diterima_ttd) : '-' }}" readonly>
                                                 </td>
                                                 <td id="tgl_diperiksa">
-                                                    <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', now()->format('Y-m-d')) }}" readonly >
-                                                </td> --}}
+                                                    <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ $data->tgl_diperiksa ? tanggalindo($data->tgl_diperiksa) : '-' }}"  readonly>
+                                                </td>
+                                                <td id="tgl_dibukukan">
+                                                    <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ now()->format('Y-m-d') }}" required>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -513,6 +519,7 @@ document.querySelectorAll('input[id^="rawat2_"], input[id^="biaya_rwt2"], input[
 });
 
 function calculateTotal(index) {
+    
     var qtyKirimElem = document.getElementById('qtykrm_' + index);
     var rawatElem = document.getElementById('rawat2_' + index);
 
@@ -552,13 +559,36 @@ function calculateTotalAll() {
 
 }
 
+function validateQty(index) {
+            let qtyKrm = parseFloat($(`#qtykrm_${index}`).val());
+            let jumlah = parseFloat($(`#qtykrm_${index}`).data('jumlah')); // Ambil jumlah dari atribut data
+
+            console.log('Validating quantity:', qtyKrm, 'against:', jumlah); // Debug log
+
+            if (qtyKrm < 0) {
+                $(`#qtykrm_${index}`).val(0);
+            } else if (qtyKrm > jumlah) {
+                $(`#qtykrm_${index}`).val(jumlah);
+            }
+            calculateTotal(index);
+    } 
 
     $(document).ready(function() {
 
         $('.select2').select2();
+
+        $(document).on('input change', 'input[name="qtykrm[]"]', function () {
+        let index = $(this).attr('id').split('_')[1];
+        validateQty(index);
+        });
+
         var t = $('#supplier').val()
         populateBulan(t)
-        bindSelectEvents(0);
+        for (let index = 0; index < $('[id^=bulan_inden_]').length; index++) {
+                  
+            bindSelectEvents(index);
+        }
+
 
             if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
@@ -688,6 +718,15 @@ function bindSelectEvents(index) {
         kodeIndenDropdown.empty();
         kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
 
+        $('#kategori1_' + index).val('');
+        $('#idinven_' + index).val('');
+        $('#qtykrm_'+ index ).val('');
+
+        $('#rawat_'+ index ).val('');
+        $('#rawat2_'+ index ).val('');
+        $('#jumlah_'+ index ).val('');
+        $('#jumlahint_'+ index ).val('');
+
         if (bulanInden) {
             $.ajax({
                 url: `/get-kode-inden/${bulanInden}/${supplierId}`,
@@ -712,15 +751,27 @@ function bindSelectEvents(index) {
         const supplierId = $('#supplier').val();
         const bulanInden = $('#bulan_inden_' + index).val();
         const kodeInden = $(this).val();
-        const kategoriInput = $('#kategori1_' + index); 
+        const kategoriInput = $('#kategori1_' + index);
+        const jumlahkirimInput = $('#qtykrm_' + index); 
+        const inventoryinden_id = $('#idinven_' + index); 
+          
+        $('#rawat_'+ index ).val('');
+        $('#rawat2_'+ index ).val('');
+        $('#jumlah_'+ index ).val('');
+        $('#jumlahint_'+ index ).val('');
 
         if (kodeInden) {
             $.ajax({
                 url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
                 type: 'GET',
-                success: function(kategori) {
-                    kategoriInput.val(kategori);
+                success: function(response) {
+                    kategoriInput.val(response.kategori);
+                    jumlahkirimInput.val(response.jumlah);
+                    inventoryinden_id.val(response.idinven);
+                    jumlahkirimInput.data('jumlah', response.jumlah); // Simpan jumlah dalam atribut data
+                    console.log('Jumlah saved in data attribute:', response.jumlah); 
                 },
+              
                 error: function() {
                     alert('Gagal mengambil data kategori');
                 }
@@ -742,6 +793,13 @@ $('#supplier').change(function() {
         $(this).empty();
         $(this).append('<option value="">Pilih Kode Inden</option>');
     });
+    $('input[name="idinven[]"]').val('');
+    $('input[name="kategori1[]"]').val('');
+    $('input[name="qtykrm[]"]').val('');
+    $('input[name="rawat[]"]').val('');
+    $('input[name="rawat2[]"]').val('');
+    $('input[name="jumlah[]"]').val('');
+    $('input[name="jumlah_display[]"]').val('');
     
 
     if (supplierId) {
@@ -773,8 +831,11 @@ $(document).on('change', 'select[id^="bulan_inden_"]', function(){
     var bulanInden = $(this).val();
     var supplier_id = $('#supplier').val();
     var id_row = $(this).attr('id').split('_')[2];
+   
+
     console.log(bulanInden, supplier_id, id_row)
     populateKodeInden(bulanInden, supplier_id, id_row);
+
 });
 
 $(document).on('change', 'select[id^="kode_inden_"]', function() {
@@ -782,14 +843,25 @@ $(document).on('change', 'select[id^="kode_inden_"]', function() {
         var supplierId = $('#supplier').val();
         var bulanInden = $('#bulan_inden_' + id_row).val();
         var kodeInden = $(this).val();
-        var kategoriInput = $('#kategori1_' + id_row); 
+        var kategoriInput = $('#kategori1_' + id_row);
+        var jumlahkirimInput = $('#qtykrm_' + id_row);  
+        var inventoryinden_id = $('#idinven_' + index);
+
+        $('#rawat_'+ index ).val('');
+        $('#rawat2_'+ index ).val('');
+        $('#jumlah_'+ index ).val('');
+        $('#jumlahint_'+ index ).val('');
 
         if (kodeInden) {
             $.ajax({
                 url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
                 type: 'GET',
-                success: function(kategori) {
-                    kategoriInput.val(kategori);
+                success: function(response) {
+                    kategoriInput.val(response.kategori);
+                    jumlahkirimInput.val(response.jumlah);
+                    inventoryinden_id.val(response.idinven);
+                    jumlahkirimInput.data('jumlah', response.jumlah); // Simpan jumlah dalam atribut data
+                    console.log('Jumlah saved in data attribute:', response.jumlah); 
                 },
                 error: function() {
                     alert('Gagal mengambil data kategori');
@@ -860,5 +932,7 @@ $(document).on('change', 'select[id^="kode_inden_"]', function() {
                 }
             });
     }
+
+    
 </script>
 @endsection

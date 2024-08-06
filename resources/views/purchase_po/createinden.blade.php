@@ -123,35 +123,20 @@
                                                 <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                             </td>
-                                            <!-- <td id="pemeriksa">
-                                                <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
-                                            </td> -->
                                         </tr>
-                                        
                                         <tr>
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                    <option disabled selected>Pilih Status</option>
-                                                    <option value="TUNDA">TUNDA</option>
-                                                    <option value="DIKONFIRMASI" selected>DIKONFIRMASI</option>
+                                                    <option disabled>Pilih Status</option>
+                                                    <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA'  ? 'selected' : '' }}>TUNDA</option>
+                                                    <option value="DIKONFIRMASI" {{ old('status_dibuat') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>
                                             </td>
-                                            <!-- <td id="status_diperiksa">
-                                                <select id="status_diperiksa" name="status_diperiksa" class="form-control" required readonly>
-                                                    <option disabled selected>Pilih Status</option>
-                                                    <option value="pending" disabled>Pending</option>
-                                                    <option value="acc" disabled>Accept</option>
-                                                </select>
-                                            </td> -->
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
                                                 <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" >
                                             </td>
-                                            <!-- <td id="tgl_pemeriksa">
-                                                <input type="datetime-local" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="" readonly>
-                                            </td> -->
                                         </tr>
                                     </tbody>
                                 </table>

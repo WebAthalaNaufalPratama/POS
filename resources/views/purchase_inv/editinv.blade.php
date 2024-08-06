@@ -372,8 +372,8 @@ Carbon::setLocale('id');
                                                             <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
                                                         </div>
                                                     </h5>
-                                                  
                                                 </li>
+                                                @endif
                                                 <li>
                                                     <h4>DP</h4>
                                                     <h5>
@@ -385,7 +385,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                @endif
+                                               
                                                 <li>
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>
@@ -429,10 +429,9 @@ Carbon::setLocale('id');
                                                     </td>
                                                     <td id="status_dibuku">
                                                         <select id="status" name="status_dibuku" class="form-control select2">
-                                                            <option value="">Pilih Status</option>
-                                                            <option value="TUNDA" {{ $inv_po->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option disabled>Pilih Status</option>
                                                             <option value="MENUNGGU PEMBAYARAN" {{ $inv_po->status_dibuku == 'MENUNGGU PEMBAYARAN' || $inv_po->status_dibuku == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
-                                                            @if( $inv_po->sisa == 0)
+                                                            @if( $inv_po->sisa == 0 || ($inv_po->sisa == 0 && $inv_po->retur->sisa == 0))
                                                             <option value="DIKONFIRMASI" {{ $inv_po->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             @endif
                                                         </select>

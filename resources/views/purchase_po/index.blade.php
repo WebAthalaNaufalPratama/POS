@@ -48,7 +48,7 @@
                     @if(Auth::user()->hasRole('Purchasing'))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
-                            <option value="">Pilih Status</option>
+                            <option disabled>Pilih Status</option>
                             <option value="Lunas" {{ request()->input('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                             <option value="Belum Ada Tagihan" {{ request()->input('status') == 'Belum Ada Tagihan' ? 'selected' : '' }}>Belum Ada Tagihan</option>
@@ -273,7 +273,7 @@
 </div>
 {{-- @unless(Auth::user()->hasRole('AdminGallery')) --}}
    
-@if(Auth::user()->hasRole('Purchasing') || Auth::user()->hasRole('Auditor'))
+@if(Auth::user()->hasRole('Purchasing') || Auth::user()->hasRole('Auditor') || Auth::user()->hasRole('Finance'))
 <div class="row">
     <div class="col-sm-12">
         <div class="card">
@@ -308,11 +308,11 @@
                     @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatusInd" name="filterStatusInd" class="form-control" title="Status">
-                             <option value="">Pilih Status</option>
+                            <option disabled>Pilih Status</option>
                             <option value="Lunas" {{ request()->input('statusind') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('statusind') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                             <option value="Belum Ada Tagihan" {{ request()->input('statusind') == 'Belum Ada Tagihan' ? 'selected' : '' }}>Belum Ada Tagihan</option>
-                            <option value="Invoice Batal" {{ request()->input('statusind') == 'Invoice Batal' ? 'selected' : '' }}>Invoice Batal</option>
+                            {{-- <option value="Invoice Batal" {{ request()->input('statusind') == 'Invoice Batal' ? 'selected' : '' }}>Invoice Batal</option> --}}
                         </select>
                     </div>
                     @endif
@@ -366,7 +366,6 @@
                                     @endif
                                 </td>
                                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
-
                                 <td>
                                     @if ($inden->invoice !== null && $inden->invoice->sisa == 0)
                                     Lunas
@@ -381,61 +380,64 @@
                                     @endif
                                 </td>
                                 @endif
-                                
-                            
-                                            @php
-                                                $invoiceExists = $datainv->where('poinden_id', $inden->id)
-                                                                        ->where('status_dibuat', '!=', 'BATAL');
+                                    @php
+                                        $invoiceExists = $datainv->where('poinden_id', $inden->id)
+                                                                ->where('status_dibuat', '!=', 'BATAL');
                                                 // Mengambil data retur pertama yang memiliki 'invoicepo_id' sama dengan $inv->id
                                                 // $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $inden->id);
-                                            @endphp
+                                    @endphp
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
-                                    <ul class="dropdown-menu">
-                                @if ($inden->tgl_diperiksa !== null)
-                                @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
-                                    <li>
-                                    @foreach ($invoiceExists as $invoice)
-                                            @if ($invoice->sisa != 0)
-                                                <a href="{{ route('invoice.edit',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
-                                                </a>
-                                            @elseif($invoice->sisa == 0)
-                                                <a href="{{ route('invoice.show',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
-                                                </a>
-                                            @else
-                                                <a href="{{ route('invoicebiasa.create', ['type' => 'poinden', 'datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
-                                                </a>
-                                            @endif
-                                    @endforeach
-                                    </li>
-                                @endif
-                                @endif
+                                <ul class="dropdown-menu">
 
+                                {{-- @if ($inden->status_diperiksa == "DIKONFIRMASI")
+                                    @if(Auth::user()->hasRole(['Finance']))
+                                        <li>
+                                        @foreach ($invoiceExists as $invoice)
+                                                @if ($invoice->sisa != 0)
+                                                    <a href="{{ route('invoice.edit',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
+                                                        <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
+                                                    </a>
+                                                @elseif($invoice->sisa == 0)
+                                                    <a href="{{ route('invoice.show',['datapo' => $inden->id, 'type' => 'poinden', 'id' => $datainv->id]) }}" class="dropdown-item">
+                                                        <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Detail Invoice
+                                                    </a>
+                                                @endif
+                                        @endforeach
+                                        </li>
+                                    @endif
+                                @endif --}}
+
+                                @if ($inden->status_diperiksa == "DIKONFIRMASI")
+                                    @if(Auth::user()->hasRole(['Purchasing']))
+                                        <li>
+                                            <a href="{{ route('invoicebiasa.create', ['type' => 'poinden', 'datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endif
                                         <li>
                                             <a href="{{ route('pembelian.show', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail PO</a>
                                         </li>
-                                        @if(Auth::user()->hasRole('Purchasing'))
-                                        @if ($inden->tgl_diperiksa === null && ($inden->status_dibuat == "TUNDA" || $inden->status_dibuat == null ))
+
+                                @if(Auth::user()->hasRole('Purchasing'))
+                                    @if ($inden->status_dibuat == "TUNDA" || $inden->status_dibuat == null )
                                         <li>
                                             <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit PO</a>
                                         </li>
-                                        @endif
-                                        @endif
-                                        @if(Auth::user()->hasRole('Auditor'))
-                                            @if ($inden->tgl_diperiksa === null && $inden->status_dibuat == "DIKONFIRMASI")
-                                            <li>
-                                                <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Periksa</a>
-                                            </li>
-                                            @endif
-                                         @endif
+                                    @endif
+                                @endif
 
+                                @if(Auth::user()->hasRole('Auditor'))
+                                    @if ($inden->status_diperiksa == null && $inden->status_dibuat == "DIKONFIRMASI")
                                         <li>
-                                            {{-- <a href="#" class="dropdown-item" onclick="deleteData({{ $inden->id }})"><img src="/assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a> --}}
+                                            <a href="{{ route('pembelian.edit', ['type' => 'poinden','datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Periksa</a>
                                         </li>
+                                    @endif
+                                @endif
+
                                     </ul>
                                 </td>
                             </tr>

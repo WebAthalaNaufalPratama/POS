@@ -80,7 +80,7 @@
                                         <div class="form-group">
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control select2" required>
-                                                <option value="" disabled>Pilih Status</option>
+                                                <option disabled>Pilih Status</option>
                                                 <option value="TUNDA" {{ old('status') == 'TUNDA'  ? 'selected' : '' }}>TUNDA</option>
                                                 <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 {{-- <option value="BATAL" {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}

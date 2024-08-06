@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
@@ -18,6 +19,7 @@ use ProdukMutasiIndens;
 use App\Models\Produk;
 use App\Models\InventoryGallery;
 use App\Models\InventoryGreenHouse;
+use App\Models\InventoryGudang;
 use App\Models\InventoryInden;
 use App\Models\Produkreturinden;
 use App\Models\Returinden;
@@ -87,19 +89,64 @@ class MutasiindensController extends Controller
         return $no_retur;
     }
 
+    public function generatebayarmutasiNumber() {
+        $date = date('Ymd');  // Tanggal hari ini dalam format YYYYMMDD
+        $prefix = 'BYMI_' . $date . '_';
+        $lastPayment = Pembayaran::where('no_invoice_bayar', 'like', $prefix . '%')
+                        ->orderBy('no_invoice_bayar', 'desc')
+                        ->first();
+    
+        if (!$lastPayment) {
+            return $prefix . '001';
+        }
+    
+        $lastNumber = intval(substr($lastPayment->no_invoice_bayar, -3));
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+    
+        return $prefix . $newNumber;
+    }
+
     public function index_indengh(Request $req)
     {
-        $query = Mutasiindens::orderBy('created_at', 'desc');
+        $query = Mutasiindens::query();
 
-        if(Auth::user()->hasRole(['Auditor', 'AdminGallery'])){
-            $query->where('status_dibuat', 'DIKONFIRMASI');
-        }
+  
+        $query->when(Auth::user()->hasRole('AdminGallery'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI')
+            ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+
+        $query->when(Auth::user()->hasRole('Finance'), function($q){
+            $q->where('status_diperiksa', 'DIKONFIRMASI');
+            // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+    
+    
+        $query->when(Auth::user()->hasRole('Auditor'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI')
+            ->where(function($query) {
+                $query->where('status_diterima', 'DIKONFIRMASI')
+                ->orWhere('status_diterima', '-')
+                        ->orWhere(function($subQuery) {
+                            $subQuery->whereNull('status_diterima')
+                                    ->whereHas('lokasi.tipe', function($lokasiQuery) {
+                                        $lokasiQuery->whereIn('tipe_lokasi', [3, 4]);
+                                    });
+                        });
+            });
+        });
+    
+        $query->orderBy('created_at', 'desc');
+  
+        // if(Auth::user()->hasRole(['Auditor', 'AdminGallery'])){
+        //     $query->where('status_dibuat', 'DIKONFIRMASI');
+        // }
 
         if ($req->dateStart) {
-            $query->where('created_at', '>=', $req->input('dateStart'));
+            $query->where('tgl_dikirim', '>=', $req->input('dateStart'));
         }
         if ($req->dateEnd) {
-            $query->where('created_at', '<=', $req->input('dateEnd'));
+            $query->where('tgl_dikirim', '<=', $req->input('dateEnd'));
         }
         $mutasis = $query->get();
 
@@ -117,7 +164,7 @@ class MutasiindensController extends Controller
         $produks = InventoryInden::get();
         $no_mutasi = $this->generatemutasiNumber();
         $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
-        $lokasi = Lokasi::whereIn('tipe_lokasi', [1, 3])->get();
+        $lokasi = Lokasi::whereIn('tipe_lokasi', [1, 3, 4])->get();
         $kondisis = Kondisi::all();
         // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
 
@@ -143,7 +190,7 @@ class MutasiindensController extends Controller
         return response()->json($kodeInden);
     }
 
-    public function getkategoriInden($kode_inden, $bulan_inden, $supplier_id)
+    public function getkategoriIndenEdit($kode_inden, $bulan_inden, $supplier_id)
     {
         // Ambil data kategori berdasarkan supplier_id, bulan_inden, dan kode_produk_inden
         $kategori = InventoryInden::where('supplier_id', $supplier_id)
@@ -157,6 +204,30 @@ class MutasiindensController extends Controller
         
 
     }
+    public function getKategoriInden($kode_inden, $bulan_inden, $supplier_id)
+    {
+        // Ambil data kategori dan jumlah berdasarkan supplier_id, bulan_inden, dan kode_produk_inden
+        $inden = InventoryInden::where('supplier_id', $supplier_id)
+            ->where('bulan_inden', $bulan_inden)
+            ->where('kode_produk_inden', $kode_inden)
+            ->with('produk') // Load relasi dengan produk
+            ->first();
+        
+        if ($inden) {
+            $kategori = $inden->produk->nama; // Ambil kategori dari relasi dengan produk
+            $jumlah = $inden->jumlah; // Ambil jumlah dari tabel InventoryInden
+            $idinven = $inden->id; // Ambil jumlah dari tabel InventoryInden
+            
+            return response()->json([
+                'kategori' => $kategori,
+                'jumlah' => $jumlah,
+                'idinven' => $idinven
+            ]);
+        }
+
+        return response()->json(['error' => 'Data tidak ditemukan'], 404);
+    }
+
         /**
      * Store a newly created resource in storage.
      *
@@ -169,7 +240,12 @@ class MutasiindensController extends Controller
         $validator = Validator::make($request->all(), [
             'supplier_id' => 'required',
             'lokasi_id' => 'required',
-            // 'tgl_dikirim' => 'required|date',
+            'tgl_dikirim' => 'required|date',
+            'sub_total' => 'required',
+            'total_tagihan' => 'required',
+            'pembuat' => 'required',
+            'tgl_dibuat' => 'required',
+            'status_dibuat' => 'required',
             // Tambahkan validasi sesuai kebutuhan lainnya
         ]);
 
@@ -199,11 +275,12 @@ class MutasiindensController extends Controller
         $no_mutasi = $mutasiinden->no_mutasi = $request->no_mutasi;
         $mutasiinden->supplier_id = $request->supplier_id;
         $mutasiinden->lokasi_id = $request->lokasi_id;
-        $mutasiinden->tgl_dikirim = $request->tgl_kirim;
+        $mutasiinden->tgl_dikirim = $request->tgl_dikirim;
         $mutasiinden->subtotal = $request->sub_total ?? null;
         $mutasiinden->biaya_perawatan = $request->biaya_rwt ?? null;
         $mutasiinden->biaya_pengiriman = $request->biaya_ongkir ?? null;
         $mutasiinden->total_biaya = $request->total_tagihan ?? null;
+        $mutasiinden->sisa_bayar = $request->total_tagihan ?? null;
         $mutasiinden->pembuat_id = $request->pembuat;
         $mutasiinden->status_dibuat = $request->status_dibuat;
         $mutasiinden->tgl_dibuat = $request->tgl_dibuat;
@@ -220,48 +297,47 @@ class MutasiindensController extends Controller
         // Simpan detail barang ke tabel produk_mutasi_indens
         foreach ($request->bulan_inden as $key => $bulanInden) {
             // Cari inventoryinden_id berdasarkan kode_inden, bulan_inden, dan supplier_id
-            $inventoryInden = InventoryInden::where('kode_produk_inden', $request->kode_inden[$key])
+            $inventoryInden = InventoryInden::where('id', $request->idinven[$key])
+                ->where('kode_produk_inden', $request->kode_inden[$key])
                 ->where('bulan_inden', $bulanInden)
                 ->where('supplier_id', $request->supplier_id)
                 ->first();
+            
+            if(!$inventoryInden){
+                return redirect()->back()->withInput()->with('fail', 'tidak ditemukan record di InventoryInden');
+            }
+            // $inventoryInden = InventoryInden::where('id', $request->idinven[$key])->first();
 
             if ($inventoryInden) {
                 $produkMutasiInden = new ProdukMutasiInden();
                 $produkMutasiInden->mutasiinden_id = $mutasiinden->id;
-                $produkMutasiInden->inventoryinden_id = $inventoryInden->id;
+                $produkMutasiInden->inventoryinden_id = $request->idinven[$key];
                 $produkMutasiInden->jml_dikirim = $request->qtykrm[$key];
                 $produkMutasiInden->jml_diterima = $request->qtytrm[$key] ?? null;
                 $produkMutasiInden->kondisi_id = $request->kondisi[$key] ?? null;
                 $produkMutasiInden->biaya_rawat = $request->rawat[$key] ?? null;
                 $produkMutasiInden->totalharga = $request->jumlah[$key] ?? null;
                 // Tambahkan atribut lainnya sesuai kebutuhan
-                $produkMutasiInden->save();
+                $check1 = $produkMutasiInden->save();
+                
+                if($check1 && $request->status_dibuat == "DIKONFIRMASI"){ 
+                    $inventoryInden->jumlah -= $request->qtykrm[$key];
+                    $inventoryInden->update();
+                }
+
             } else {
                 // Handle jika tidak ditemukan record di InventoryInden
                 return redirect()->back()->withInput()->with('fail', 'tidak ditemukan record di InventoryInden');
             }
+
+
    
         }
         return redirect(route('mutasiindengh.index'))->with('success', 'Data Mutasi berhasil disimpan. Nomor Mutasi: ' . $no_mutasi);
  
     }
 
-    public function generatebayarmutasiNumber() {
-        $date = date('Ymd');  // Tanggal hari ini dalam format YYYYMMDD
-        $prefix = 'BYMI_' . $date . '_';
-        $lastPayment = Pembayaran::where('no_invoice_bayar', 'like', $prefix . '%')
-                        ->orderBy('no_invoice_bayar', 'desc')
-                        ->first();
     
-        if (!$lastPayment) {
-            return $prefix . '001';
-        }
-    
-        $lastNumber = intval(substr($lastPayment->no_invoice_bayar, -3));
-        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-    
-        return $prefix . $newNumber;
-    }
 
     /**
      * Display the specified resource.
@@ -335,21 +411,53 @@ class MutasiindensController extends Controller
     public function editpurchase_indengh($mutasiIG)
     {
         $data = Mutasiindens::with('produkmutasi')->where('id', $mutasiIG)->first();
+        
+
         $pembuat = Karyawan::where('user_id',$data->pembuat_id)->value('nama');
         // return $pembuat;
         $jabatan = Karyawan::where('user_id',$data->pembuat_id)->value('jabatan');
         $barangmutasi = ProdukMutasiInden::where('mutasiinden_id',$data->id)->get();
+
         // return $barangmutasi;
         $produks = InventoryInden::get();
         // $no_mutasi = $this->generatemutasiNumber();
         $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
-        $lokasi = Lokasi::all();
+        $lokasi = Lokasi::whereIn('tipe_lokasi', [1, 3, 4])->get();
         $kondisis = Kondisi::all();
         $bulanInden = InventoryInden::where('supplier_id', $data->supplier_id)->pluck('bulan_inden')->unique()->values()->all();
         
         // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
         // return view('mutasiindengh.create', compact('lokasipengirim','lokasipenerima','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
-        return view('mutasiindengh.editpurchase',compact('data','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','jabatan', 'bulanInden'));
+        return view('mutasiindengh.editpurchasemutasi',compact('data','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','jabatan', 'bulanInden'));
+    }
+
+    public function editfinance_indengh($mutasiIG)
+    {
+        $data = Mutasiindens::with('produkmutasi')->where('id', $mutasiIG)->first();
+        
+
+        $pembuat = Karyawan::where('user_id',$data->pembuat_id)->value('nama');
+        $jabatanbuat = Karyawan::where('user_id',$data->pembuat_id)->value('jabatan');
+        $penerima = Karyawan::where('user_id',$data->penerima_id)->value('nama');
+        $jabatanterima = Karyawan::where('user_id',$data->penerima_id)->value('jabatan');
+        $pembuku = Karyawan::where('user_id',$data->pembuku_id)->value('nama');
+        $jabatanbuku = Karyawan::where('user_id',$data->pembuku_id)->value('jabatan');
+        $pemeriksa = Karyawan::where('user_id',$data->pemeriksa_id)->value('nama');
+        $jabatanperiksa = Karyawan::where('user_id',$data->pemeriksa_id)->value('jabatan');
+
+        $barangmutasi = ProdukMutasiInden::where('mutasiinden_id',$data->id)->get();
+
+        // return $barangmutasi;
+        $produks = InventoryInden::get();
+        // $no_mutasi = $this->generatemutasiNumber();
+        $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
+        $lokasi = Lokasi::whereIn('tipe_lokasi', [1, 3, 4])->get();
+        $kondisis = Kondisi::all();
+        $bulanInden = InventoryInden::where('supplier_id', $data->supplier_id)->pluck('bulan_inden')->unique()->values()->all();
+        
+        // $pembayarans = Pembayaran::where('no_invoice_bayar','LIKE','%','MUTIN')->where('mutasiinden_id','')
+        // return view('mutasiindengh.create', compact('lokasipengirim','lokasipenerima','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
+        return view('mutasiindengh.editfinance',compact('data','suppliers','lokasi','produks','kondisis','barangmutasi','pembuat','jabatanbuat','penerima','jabatanterima','pemeriksa','jabatanperiksa', 'bulanInden'));
     }
 
     public function edit_indengh($mutasiIG)
@@ -369,7 +477,7 @@ class MutasiindensController extends Controller
         $produks = InventoryInden::get();
         // $no_mutasi = $this->generatemutasiNumber();
         $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
-        $lokasi = Lokasi::all();
+        $lokasi = Lokasi::whereIn('tipe_lokasi', [1, 3, 4])->get();
         $kondisis = Kondisi::all();
 
         
@@ -445,22 +553,54 @@ class MutasiindensController extends Controller
      */
     public function update_indengh(Request $request, $mutasiIG)
     {
-        // dd($request);
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'supplier_id' => 'required',
-            'lokasi_id' => 'required',
-        ]);
-        $validator->sometimes('tgl_diterima', 'required|date', function ($q) {
-            return !Auth::user()->hasRole('Purchasing');
-        });
-        $validator->sometimes('tgl_dibuat', 'required|date', function ($q) {
-            return Auth::user()->hasRole('Purchasing');
-        });
-        if ($validator->fails()) {
-            $errors = $validator->errors()->all();
-            return redirect()->back()->withInput()->with('fail', $errors);
+        $validator = Validator::make($request->all(), []);
+
+        // Validasi untuk peran Purchasing
+        if (Auth::user() && Auth::user()->hasRole('Purchasing')) {
+            $validator->validate([
+                'tgl_dikirim' => 'required|date',
+                'tgl_dibuat' => 'required|date',
+                'status_dibuat' => 'required',
+                'pembuat' => 'required',
+                'supplier_id' => 'required',
+                'lokasi_id' => 'required'
+            ]);
         }
+
+        // Validasi untuk peran AdminGallery
+        if (Auth::user() && Auth::user()->hasRole('AdminGallery')) {
+            $validator->validate([
+                'tgl_diterima' => 'required|date',
+                'tgl_diterima_ttd' => 'required|date',
+                'status_diterima' => 'required',
+                'penerima' => 'required'
+            ]);
+        }
+
+        // Validasi untuk peran Auditor
+        if (Auth::user() && Auth::user()->hasRole('Auditor')) {
+            $validator->validate([
+                'tgl_diperiksa' => 'required|date',
+                'status_diperiksa' => 'required',
+                'pemeriksa' => 'required'
+            ]);
+        }
+
+        // // Validasi untuk peran Finance
+        // if (Auth::user() && Auth::user()->hasRole('Finance')) {
+        //     $validator->validate([
+        //         'tgl_dibukukan' => 'required|date',
+        //         'status_dibukukan' => 'required',
+        //         'pembuku' => 'required'
+        //     ]);
+        // }
+
+        // Cek apakah ada kesalahan validasi
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Lanjutkan dengan logika penyimpanan data lainnya
         // Simpan data ke tabel mutasiindens
 
         $mutasiinden = Mutasiindens::find($mutasiIG);
@@ -469,29 +609,54 @@ class MutasiindensController extends Controller
         }
 
     
-        $mutasiinden->tgl_diterima = $request->tgl_diterima;     
-        $mutasiinden->subtotal = $request->sub_total ?? null;
-        $mutasiinden->biaya_perawatan = $request->biaya_rwt ?? null;
-        $mutasiinden->biaya_pengiriman = $request->biaya_ongkir ?? null;
-        $mutasiinden->total_biaya = $request->total_tagihan ?? null;
-        $mutasiinden->sisa_bayar = $request->total_tagihan ?? null;
         if(Auth::user()->hasRole('Auditor')){
+
+            $mutasiinden->tgl_diterima = $request->tgl_diterima ?? null;  //pusat
             $mutasiinden->pemeriksa_id = $request->pemeriksa ?? null;
             $mutasiinden->status_diperiksa = $request->status_diperiksa ?? null;
             $mutasiinden->tgl_diperiksa = $request->tgl_diperiksa ?? null;
+            
+            if($mutasiinden->lokasi->tipe_lokasi == 3 || $mutasiinden->lokasi->tipe_lokasi == 4){
+                $mutasiinden->penerima_id = $request->pemeriksa ?? null;
+                $mutasiinden->status_diterima = $request->status_diperiksa ?? null;
+                $mutasiinden->tgl_diterima_ttd = $request->tgl_diperiksa ?? null;
+            }
         }
         if(Auth::user()->hasRole('AdminGallery')){
+            $mutasiinden->tgl_diterima = $request->tgl_diterima ?? null;  
             $mutasiinden->penerima_id = $request->penerima ?? null;
             $mutasiinden->status_diterima = $request->status_diterima ?? null;
             $mutasiinden->tgl_diterima_ttd = $request->tgl_diterima_ttd ?? null;
         }
         if(Auth::user()->hasRole('Finance')){
+            $mutasiinden->subtotal = $request->sub_total ?? null;
+            $mutasiinden->biaya_pengiriman = $request->biaya_ongkir ?? null;
+            $mutasiinden->biaya_perawatan = $request->biaya_rwt ?? null;
+            $mutasiinden->total_biaya = $request->total_tagihan ?? null;
+            $mutasiinden->sisa_bayar = $request->total_tagihan ?? null;
             $mutasiinden->pembuku_id = $request->pembuku ?? null;
             $mutasiinden->status_dibukukan = $request->status_dibukukan ?? null;
             $mutasiinden->tgl_dibukukan = $request->tgl_dibukukan ?? null;
         }
-        $mutasiinden->status_dibuat = $request->status_dibuat ?? null;
-        $mutasiinden->tgl_dibuat = $request->tgl_dibuat ?? null;
+        if(Auth::user()->hasRole('Purchasing')){
+            $mutasiinden->supplier_id = $request->supplier_id ?? null;     
+            $mutasiinden->lokasi_id = $request->lokasi_id?? null;     
+            $mutasiinden->tgl_dikirim = $request->tgl_dikirim ?? null;     
+            $mutasiinden->subtotal = $request->sub_total ?? null;
+            $mutasiinden->biaya_pengiriman = $request->biaya_ongkir ?? null;
+            $mutasiinden->biaya_perawatan = $request->biaya_rwt ?? null;
+            $mutasiinden->total_biaya = $request->total_tagihan ?? null;
+            $mutasiinden->sisa_bayar = $request->total_tagihan ?? null;
+            $mutasiinden->pembuat_id = $request->pembuat ?? null;
+            $mutasiinden->status_dibuat = $request->status_dibuat ?? null;
+            $mutasiinden->tgl_dibuat = $request->tgl_dibuat ?? null;
+            
+            if($mutasiinden->status_dibuat == "BATAL"){
+                $mutasiinden->status_diterima = $request->status_dibuat;
+                $mutasiinden->status_dibukukan = $request->status_dibuat;
+                $mutasiinden->status_diperiksa = $request->status_dibuat;
+            }
+        }
 
         if ($request->hasFile('bukti')) {
             $file = $request->file('bukti');
@@ -503,7 +668,9 @@ class MutasiindensController extends Controller
         $check1 = $mutasiinden->save();
 
         $produkIds = $request->id;
-        $qty = $request->qtytrm;
+        $kode = $request->kode;
+        $idinven = $request->idinven;
+        $qty = $request->qtytrm; 
         $qty2 = $request->qtykrm;
         $kondisi = $request->kondisi;
         $rawat = $request->rawat;
@@ -512,74 +679,155 @@ class MutasiindensController extends Controller
         $kode_inden = $request->kode_inden;
     
         $check2 = true;
-    
-        foreach ($produkIds as $index => $produkId) {
-            $produkmutasi = ProdukMutasiInden::find($produkId);
-            $id_inveninden = InventoryInden::where('supplier_id', $mutasiinden->supplier_id)->where('bulan_inden', $bulan_inden)->where('kode_produk_inden', $kode_inden)->first();
-            
-            if (!$produkmutasi) {
-                $check2 = false;
-                continue;
-            }
-    
-            $inveninden = InventoryInden::where('id', $produkmutasi->inventoryinden_id)->first();
-    
-            if ($inveninden && $inveninden->jumlah >= $qty[$index]) {
-                if(Auth::user()->hasRole(['Auditor', 'AdminGallery'])){
-                    $inveninden->jumlah -= $qty[$index];
-                    $inveninden->save(); // Simpan perubahan jumlah ke database
+       
+        DB::beginTransaction();
+
+        try {
+            foreach ($produkIds as $index => $produkId) {
+                $produkmutasi = ProdukMutasiInden::find($produkId);
+
+                if (!$produkmutasi) {
+                    $check2 = false;
+                    continue;
                 }
-            } else {
-                return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data inven inden/stok di inden kurang');     
-            }
-    
-            $produkmutasi->jml_diterima = $qty[$index];
-            $produkmutasi->jml_dikirim = $qty2[$index];
-            $produkmutasi->kondisi_id = $kondisi[$index];
-            $produkmutasi->biaya_rawat = $rawat[$index];
-            $produkmutasi->totalharga = $jml[$index];
-            $produkmutasi->inventoryinden_id = $id_inveninden->id;
-            $check2 = $produkmutasi->save();
-    
-            $lokasi = Lokasi::find($mutasiinden->lokasi_id);
-            $produk = Produk::where('kode', $request->kategori1[$index])->first();
-    
-            if ($lokasi && $produk) {
-                if ($lokasi->tipe_lokasi == 1) {
-                    $checkInven = InventoryGallery::where('kode_produk', $produk->kode)
-                        ->where('kondisi_id', $kondisi[$index])
-                        ->where('lokasi_id', $lokasi->id)
-                        ->first();
-                    if ($checkInven) {
-                        $checkInven->jumlah += $qty[$index];
-                        $checkInven->update();
-                    } else {
-                        $createProduk = new InventoryGallery();
-                        $createProduk->kode_produk = $produk->kode;
-                        $createProduk->kondisi_id = $kondisi[$index];
-                        $createProduk->jumlah = $qty[$index];
-                        $createProduk->lokasi_id = $lokasi->id;
-                        $createProduk->save();
-                    }
-                } elseif ($lokasi->tipe_lokasi == 3) {
-                    $checkInven = InventoryGreenHouse::where('kode_produk', $produk->kode)
-                        ->where('kondisi_id', $kondisi[$index])
-                        ->where('lokasi_id', $lokasi->id)
-                        ->first();
-                    if ($checkInven) {
-                        $checkInven->jumlah += $qty[$index];
-                        $checkInven->update();
-                    } else {
-                        $createProduk = new InventoryGreenHouse();
-                        $createProduk->kode_produk = $produk->kode;
-                        $createProduk->kondisi_id = $kondisi[$index];
-                        $createProduk->jumlah = $qty[$index];
-                        $createProduk->lokasi_id = $lokasi->id;
-                        $createProduk->save();
+                
+                // if (Auth::user()->hasRole(['Auditor', 'AdminGallery'])) {
+                //     // khusus yang menerima karena inventoryinden_id sudah ada di $produkmutasi
+                //     $inveninden = InventoryInden::where('id', $produkmutasi->inventoryinden_id)->first();
+
+                //     if ($inveninden && $inveninden->jumlah >= $qty[$index]) {
+                //         $inveninden->jumlah += $qty2[$index];
+                //         $inveninden->jumlah -= $qty[$index];
+                //         $inveninden->save(); // Simpan perubahan jumlah ke database
+                //     } elseif (!$inveninden || $inveninden->jumlah <= $qty[$index]) {
+                //         throw new Exception('stok di inden kurang untuk produk: ' . $inveninden->kode_produk_inden .'/'. $inveninden->produk->nama);
+                //     }
+                // }
+
+                //update inventory inden oleh purchasing ketika edit di purchase
+                if (Auth::user()->hasRole(['Purchasing'])) {
+                    // khusus purchasing ketika inventory_id berubah jadi sesuai requestnya $idinven
+                    $id_inveninden = InventoryInden::where('id', $idinven[$index])->first();
+
+                    if ($id_inveninden && $request->status_dibuat == "DIKONFIRMASI") {
+                        if ($id_inveninden->jumlah >= $qty2[$index]) { // Periksa apakah jumlah cukup untuk dikurangi
+                            $id_inveninden->jumlah -= $qty2[$index];
+                            $id_inveninden->save(); // Simpan perubahan jumlah ke database
+                        } else {
+                            throw new Exception('stok di inden kurang untuk produk: ' . $id_inveninden->kode_produk_inden .'/'. $id_inveninden->produk->nama);
+                        }
+                    } 
+                }
+
+                if (Auth::user()->hasRole(['Purchasing','Finance'])) {
+                    $produkmutasi->inventoryinden_id = $idinven[$index];
+                    $produkmutasi->jml_dikirim = $qty2[$index];
+                    $produkmutasi->biaya_rawat = $rawat[$index];
+                    $produkmutasi->totalharga = $jml[$index];
+                    $check2 = $produkmutasi->save();
+                }
+
+                $lokasi = Lokasi::find($mutasiinden->lokasi_id);
+                $produk = Produk::where('kode', $request->kode[$index])->first(); // khusus penerima
+
+                if ($lokasi && $produk) {
+                    if (Auth::user()->hasRole(['AdminGallery'])) {
+                        if ($lokasi->tipe_lokasi == 1) {
+                            $checkInven = InventoryGallery::where('kode_produk', $produk->kode)
+                                ->where('kondisi_id', $kondisi[$index])
+                                ->where('lokasi_id', $lokasi->id)
+                                ->first();
+                            if ($checkInven) {
+                                $checkInven->jumlah += $qty[$index];
+                                $checkInven->update();
+                            } else {
+                                $createProduk = new InventoryGallery();
+                                $createProduk->kode_produk = $produk->kode;
+                                $createProduk->kondisi_id = $kondisi[$index];
+                                $createProduk->jumlah = $qty[$index];
+                                $createProduk->lokasi_id = $lokasi->id;
+                                $createProduk->save();
+                            }
+                        }
+                    } elseif (Auth::user()->hasRole(['Auditor'])) {
+
+                        if ($lokasi->tipe_lokasi == 1) {
+                            $checkInvenLama = InventoryGallery::where('kode_produk', $produk->kode)
+                                ->where('kondisi_id', $produkmutasi->kondisi_id)
+                                ->where('lokasi_id', $lokasi->id)
+                                ->first();
+                            if ($checkInvenLama) {
+                                $checkInvenLama->jumlah -= $produkmutasi->jml_diterima;
+                                $checkInvenLama->update();
+                            }
+
+                            $checkInvenBaru = InventoryGallery::where('kode_produk', $produk->kode)
+                                ->where('kondisi_id', $kondisi[$index])
+                                ->where('lokasi_id', $lokasi->id)
+                                ->first();
+
+                            if ($checkInvenBaru) {
+                                $checkInvenBaru->jumlah += $qty[$index];
+                                $checkInvenBaru->update();
+                            } else {
+                                $createProduk = new InventoryGallery();
+                                $createProduk->kode_produk = $produk->kode;
+                                $createProduk->kondisi_id = $kondisi[$index];
+                                $createProduk->jumlah = $qty[$index];
+                                $createProduk->lokasi_id = $lokasi->id;
+                                $createProduk->save();
+                            }
+                    
+                        } elseif ($lokasi->tipe_lokasi == 3) {
+                            $checkInven = InventoryGreenHouse::where('kode_produk', $produk->kode)
+                                ->where('kondisi_id', $kondisi[$index])
+                                ->where('lokasi_id', $lokasi->id)
+                                ->first();
+                            if ($checkInven) {
+                                $checkInven->jumlah += $qty[$index];
+                                $checkInven->update();
+                            } else {
+                                $createProduk = new InventoryGreenHouse();
+                                $createProduk->kode_produk = $produk->kode;
+                                $createProduk->kondisi_id = $kondisi[$index];
+                                $createProduk->jumlah = $qty[$index];
+                                $createProduk->lokasi_id = $lokasi->id;
+                                $createProduk->save();
+                            }
+                        } elseif ($lokasi->tipe_lokasi == 4) {
+                            $checkInven = InventoryGudang::where('kode_produk', $produk->kode)
+                                ->where('kondisi_id', $kondisi[$index])
+                                ->where('lokasi_id', $lokasi->id)
+                                ->first();
+                            if ($checkInven) {
+                                $checkInven->jumlah += $qty[$index];
+                                $checkInven->update();
+                            } else {
+                                $createProduk = new InventoryGudang();
+                                $createProduk->kode_produk = $produk->kode;
+                                $createProduk->kondisi_id = $kondisi[$index];
+                                $createProduk->jumlah = $qty[$index];
+                                $createProduk->lokasi_id = $lokasi->id;
+                                $createProduk->save();
+                            }
+                        }
                     }
                 }
+
+                if (Auth::user()->hasRole(['Auditor', 'AdminGallery'])) {
+                    $produkmutasi->jml_diterima = $qty[$index];
+                    $produkmutasi->kondisi_id = $kondisi[$index];
+                    $check2 = $produkmutasi->save();
+                }
             }
+
+            DB::commit();
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', $e->getMessage());
         }
+
     
         if (!$check1 || !$check2) {
             return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data');
@@ -599,6 +847,45 @@ class MutasiindensController extends Controller
     public function destroy(Mutasiindens $mutasiindens)
     {
         //
+    }
+
+    public function updatePembuku(Request $request, $mutasiIG)
+    {
+    // Validasi input
+    $request->validate([
+        'pembuku' => 'required|exists:users,id',
+        'status_dibukukan' => 'required|string',
+        'tgl_dibukukan' => 'required|date'
+    ]);
+
+    // Temukan data mutasi berdasarkan ID
+    $mutasiinden = Mutasiindens::find($mutasiIG);
+    if (!$mutasiinden) {
+        return redirect()->back()->with('fail', 'Mutasi tidak ditemukan');
+    }
+
+    // Mulai transaksi database
+    DB::beginTransaction();
+    
+    try {
+        // Simpan data
+        $mutasiinden->pembuku_id = $request->pembuku; // ID pembuku
+        $mutasiinden->status_dibukukan = $request->status_dibukukan; // Status dibukukan
+        $mutasiinden->tgl_dibukukan = $request->tgl_dibukukan; // Tanggal dibukukan
+
+        // Simpan perubahan
+        $mutasiinden->save();
+        
+        // Commit transaksi
+        DB::commit();
+
+        return redirect(route('mutasiindengh.show', ['mutasiIG' => $mutasiIG]))->with('success', 'Data berhasil diperbarui');
+        
+    } catch (\Exception $e) {
+        // Rollback jika terjadi kesalahan
+        DB::rollBack();
+        return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data: ' . $e->getMessage());
+    }
     }
 
     // public function store_retur(Request $request)

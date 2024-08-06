@@ -46,7 +46,7 @@ class Invoicepo extends Model
     public function pembuku(){
         return $this->belongsTo(User::class, 'pembuku', 'id');
     }
-    public function retur (){
+    public function retur(){
         return $this->hasOne(Returpembelian::class, 'invoicepo_id', 'id');
     }
 }

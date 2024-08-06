@@ -44,7 +44,7 @@
                 <tr>
                     <th>No</th>
                     <th>No PO</th>
-                    <th>No Invoice Tagihan</th>
+                    <th>No Invoice Purchase</th>
                     <th>No Invoice Pembayaran</th>
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
@@ -58,8 +58,14 @@
                     @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->po->pembelian->no_po ?? $item->po->poinden->no_po }}</td>
-                            <td>{{ $item->po->no_inv }}</td>
+                            <td>
+                                @if ($item->po)
+                                    {{ $item->po->pembelian ? $item->po->pembelian->no_po : ($item->po->poinden ? $item->po->poinden->no_po : '') }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>{{ $item->po ? $item->po->no_inv : '-' }}</td>
                             <td>{{ $item->no_invoice_bayar }}</td>
                             <td>{{ formatRupiah($item->nominal) }}</td>
                             <td>{{ tanggalindo($item->tanggal_bayar) }}</td>
@@ -67,9 +73,9 @@
                             <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
                             <td class="text-center">
                                 @if ($item->status_bayar == 'LUNAS')
-                                    <span class="badge bg-success">{{ $item->status_bayar }}</span>
+                                    <span class="badges bg-lightgreen">{{ $item->status_bayar }}</span>
                                 @else
-                                    <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
+                                    <span class="badges bg-lightgrey">{{ $item->status_bayar }}</span>
                                 @endif
                             </td>
                         </tr>
@@ -126,7 +132,7 @@
                 <tr>
                     <th>No</th>
                     <th>No PO</th>
-                    <th>No Invoice Tagihan</th>
+                    <th>No Invoice Purchase</th>
                     <th>No Invoice Pembayaran</th>
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
@@ -140,8 +146,14 @@
                     @foreach ($data2 as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->retur->invoice->pembelian->no_po ?? $item->retur->invoice->poinden->no_po }}</td>
-                            <td>{{ $item->retur->invoice->no_inv }}</td>
+                            <td>
+                                @if ($item->retur && $item->retur->invoice)
+                                    {{ $item->retur->invoice->pembelian ? $item->retur->invoice->pembelian->no_po : ($item->retur->invoice->poinden ? $item->retur->invoice->poinden->no_po : '') }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>{{ $item->retur && $item->retur->invoice ? $item->retur->invoice->no_inv : '-' }}</td>
                             <td>{{ $item->no_invoice_bayar }}</td>
                             <td>{{ formatRupiah($item->nominal) }}</td>
                             <td>{{ tanggalindo($item->tanggal_bayar) }}</td>
@@ -149,14 +161,16 @@
                             <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun.' ('.$item->rekening->nomor_rekening.')' : '-' }}</td>
                             <td class="text-center">
                                 @if ($item->status_bayar == 'LUNAS')
-                                    <span class="badge bg-success">{{ $item->status_bayar }}</span>
+                                    <span class="badges bg-lightgreen">{{ $item->status_bayar }}</span>
                                 @else
-                                    <span class="badge bg-secondary">{{ $item->status_bayar }}</span>
+                                    <span class="badges bg-lightgrey">{{ $item->status_bayar }}</span>
                                 @endif
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
+                
+                
                 
             </table>
             </div>
