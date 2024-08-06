@@ -11,6 +11,7 @@ use App\Exports\TagihanSewaExport;
 use App\Exports\PenjualanProdukExport;
 use App\Exports\PelangganExport;
 use App\Exports\DeliveryOrderExport;
+use App\Exports\HutangSupplierExport;
 use App\Exports\MutasiExport;
 use App\Exports\MutasiindenExport;
 use App\Exports\PenjualanExport;
@@ -1357,6 +1358,10 @@ class LaporanController extends Controller
             return count($bulan_inden) == 2 ? $bulan_inden[1] : null;
         })->filter()->unique();
 
+        $supplier = $allData->mapWithKeys(function($item) {
+            return [$item->supplier->id => $item->supplier->nama];
+        })->unique();
+
         if ($req->supplier) {
             $query->where('supplier_id', $req->supplier);
         }
@@ -1368,10 +1373,6 @@ class LaporanController extends Controller
 
         $produk = $result->mapWithKeys(function($item) {
             return [$item->produk->kode => $item->produk->nama];
-        })->unique();
-
-        $supplier = $result->mapWithKeys(function($item) {
-            return [$item->supplier->id => $item->supplier->nama];
         })->unique();
 
         $bulan = [
@@ -1550,6 +1551,167 @@ class LaporanController extends Controller
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new StokIndenExport($data, $produk, $total, $totalSisaBunga), 'pembelian_inden.xlsx');
+    }
+
+    public function hutang_supplier_index(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli', 'pembelian.produkbeli'])
+            ->where('status_dibuat', 'DIKONFIRMASI');
+
+        $allData = $query->get();
+
+        if ($req->supplier) {
+            $query->where(function($q) use($req) {
+                $q->whereHas('poinden', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                })
+                ->orWhereHas('pembelian', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $supplier = null;
+            $supplierName = null;
+            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier = $item->poinden->supplier->id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
+                $supplier = $item->pembelian->supplier->id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+
+            $item->supplier_nama = $supplierName;
+            return $item;
+        });
+
+        $totalTagihan = $data->sum('sisa');
+
+        $supplier = $allData->flatMap(function($item) {
+            $supplier = null;
+            $supplierName = null;
+        
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier = $item->poinden->supplier->id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
+                $supplier = $item->pembelian->supplier->id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+        
+            return $supplier ? [$supplier => $supplierName] : [];
+        })->unique();
+
+        return view('laporan.hutang_supplier', compact('data', 'supplier', 'totalTagihan'));
+    }
+
+    public function hutang_supplier_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli', 'pembelian.produkbeli'])
+            ->where('status_dibuat', 'DIKONFIRMASI');
+
+        $allData = $query->get();
+
+        if ($req->supplier) {
+            $query->where(function($q) use($req) {
+                $q->whereHas('poinden', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                })
+                ->orWhereHas('pembelian', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $supplier = null;
+            $supplierName = null;
+            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier = $item->poinden->supplier->id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
+                $supplier = $item->pembelian->supplier->id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+
+            $item->supplier_nama = $supplierName;
+            return $item;
+        });
+
+        $totalTagihan = $data->sum('sisa');
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.hutang_supplier_pdf', compact('data', 'totalTagihan'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('hutang_supplier.pdf');
+    }
+
+    public function hutang_supplier_excel(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli', 'pembelian.produkbeli'])
+            ->where('status_dibuat', 'DIKONFIRMASI');
+
+        $allData = $query->get();
+
+        if ($req->supplier) {
+            $query->where(function($q) use($req) {
+                $q->whereHas('poinden', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                })
+                ->orWhereHas('pembelian', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $supplier = null;
+            $supplierName = null;
+            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier = $item->poinden->supplier->id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
+                $supplier = $item->pembelian->supplier->id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+
+            $item->supplier_nama = $supplierName;
+            return $item;
+        });
+
+        $totalTagihan = $data->sum('sisa');
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new HutangSupplierExport($data, $totalTagihan), 'hutang_supplier.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)

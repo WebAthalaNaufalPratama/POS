@@ -684,6 +684,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/stok_inden', 'LaporanController@stok_inden_index')->name('laporan.stok_inden');
             Route::get('/stok_inden-pdf', 'LaporanController@stok_inden_pdf')->name('laporan.stok_inden-pdf');
             Route::get('/stok_inden-excel', 'LaporanController@stok_inden_excel')->name('laporan.stok_inden-excel');
+            Route::get('/hutang_supplier', 'LaporanController@hutang_supplier_index')->name('laporan.hutang_supplier');
+            Route::get('/hutang_supplier-pdf', 'LaporanController@hutang_supplier_pdf')->name('laporan.hutang_supplier-pdf');
+            Route::get('/hutang_supplier-excel', 'LaporanController@hutang_supplier_excel')->name('laporan.hutang_supplier-excel');
 
 
         });

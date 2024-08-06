@@ -204,6 +204,7 @@
                         <li><a href="{{ route('laporan.pembelian') }}" class="{{ request()->is('laporan/pembelian') ? 'active' : '' }}">Pembelian</a></li>
                         <li><a href="{{ route('laporan.pembelian_inden') }}" class="{{ request()->is('laporan/pembelian_inden*') ? 'active' : '' }}">Pembelian Inden</a></li>
                         <li><a href="{{ route('laporan.stok_inden') }}" class="{{ request()->is('laporan/stok_inden*') ? 'active' : '' }}">Stok Inden</a></li>
+                        <li><a href="{{ route('laporan.hutang_supplier') }}" class="{{ request()->is('laporan/hutang_supplier*') ? 'active' : '' }}">Hutang Supplier</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
