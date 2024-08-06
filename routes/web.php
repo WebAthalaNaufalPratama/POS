@@ -666,6 +666,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/mutasi', 'LaporanController@mutasi_index')->name('laporan.mutasi');
             Route::get('/mutasi-pdf', 'LaporanController@mutasi_pdf')->name('laporan.mutasi-pdf');
             Route::get('/mutasi-excel', 'LaporanController@mutasi_excel')->name('laporan.mutasi-excel');
+            Route::get('/mutasiinden', 'LaporanController@mutasiinden_index')->name('laporan.mutasiinden');
+            Route::get('/mutasiinden-pdf', 'LaporanController@mutasiinden_pdf')->name('laporan.mutasiinden-pdf');
+            Route::get('/mutasiinden-excel', 'LaporanController@mutasiinden_excel')->name('laporan.mutasiinden-excel');
             Route::get('/kas_pusat', 'LaporanController@kas_pusat_index')->name('laporan.kas_pusat');
             Route::get('/kas_pusat-pdf', 'LaporanController@kas_pusat_pdf')->name('laporan.kas_pusat-pdf');
             Route::get('/kas_pusat-excel', 'LaporanController@kas_pusat_excel')->name('laporan.kas_pusat-excel');
@@ -678,6 +681,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pembelian_inden', 'LaporanController@pembelian_inden_index')->name('laporan.pembelian_inden');
             Route::get('/pembelian_inden-pdf', 'LaporanController@pembelian_inden_pdf')->name('laporan.pembelian_inden-pdf');
             Route::get('/pembelian_inden-excel', 'LaporanController@pembelian_inden_excel')->name('laporan.pembelian_inden-excel');
+
+
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

@@ -12,6 +12,7 @@ use App\Exports\PenjualanProdukExport;
 use App\Exports\PelangganExport;
 use App\Exports\DeliveryOrderExport;
 use App\Exports\MutasiExport;
+use App\Exports\MutasiindenExport;
 use App\Exports\PenjualanExport;
 use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
@@ -20,6 +21,7 @@ use App\Exports\PembelianIndenExport;
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
 use App\Models\Invoicepo;
+use App\Models\InventoryInden;
 use App\Models\InvoiceSewa;
 use App\Models\KembaliSewa;
 use App\Models\Kontrak;
@@ -40,6 +42,8 @@ use App\Models\Rekening;
 use App\Models\Mutasi;
 use App\Models\Supplier;
 use App\Models\ReturPenjualan;
+use App\Models\Mutasiindens;
+use App\Models\ProdukMutasiInden;
 use App\Models\TransaksiKas;
 
 class LaporanController extends Controller
@@ -3134,5 +3138,193 @@ class LaporanController extends Controller
 
     }
 
+    public function mutasiinden_index(Request $req) 
+    {
+        $querymutasi = ProdukMutasiInden::query();
+
+        if ($req->bulan) {
+            $querymutasi->where('inventoryinden_id', $req->bulan);
+        }
+        
+        $produkmutasiinden = $querymutasi->get();
+        
+        if ($produkmutasiinden->isEmpty()) {
+            return view('laporan.mutasiinden', [
+                'produkterjual' => collect(),
+                'mutasiinden' => collect(),
+                'suppliers' => Supplier::all(),
+                'galleries' => Lokasi::where('tipe_lokasi', 1)->get(),
+                'inventorys' => InventoryInden::all()
+            ]);
+        }
+
+        $mutasiindenQuery = Mutasiindens::whereNotNull('pembuat_id')
+            ->whereNotNull('pembuku_id')
+            ->whereNotNull('penerima_id')
+            ->whereNotNull('pemeriksa_id')
+            ->whereNotNull('tgl_dibuat')
+            ->whereNotNull('tgl_dibukukan')
+            ->whereNotNull('tgl_diterima_ttd')
+            ->whereNotNull('tgl_diperiksa')
+            ->where('status_dibuat', 'DIKONFIRMASI')
+            ->where('status_diterima', 'DIKONFIRMASI')
+            ->where('status_dibukukan', 'DIKONFIRMASI')
+            ->where('status_diperiksa', 'DIKONFIRMASI');
+
+        if ($req->pengirim) {
+            $mutasiindenQuery->where('supplier_id', $req->pengirim);
+        }
+        if ($req->penerima) {
+            $mutasiindenQuery->where('lokasi_id', $req->penerima);
+        }
+        if ($req->tanggaldikirim) {
+            $mutasiindenQuery->where('tgl_dikirim', $req->tanggaldikirim);
+        }
+        if ($req->tanggalditerima) {
+            $mutasiindenQuery->where('tgl_diterima', $req->tanggalditerima);
+        }
+
+        $mutasiinden = $mutasiindenQuery->get();
+
+        $produkterjual = collect();
+        foreach ($mutasiinden as $mutasi) {
+            $querymutasi = ProdukMutasiInden::where('mutasiinden_id', $mutasi->id);
+            if ($req->bulan) {
+                $querymutasi->where('inventoryinden_id', $req->bulan);
+            }
+            $produkmutasiinden = $querymutasi->get();
+            $produkterjual = $produkterjual->merge($produkmutasiinden);
+        }
+        
+        $suppliers = Supplier::all();
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        $inventorys = InventoryInden::all();
+
+        return view('laporan.mutasiinden', compact('produkterjual', 'mutasiinden', 'suppliers', 'galleries', 'inventorys'));
+    }
+
+
+    public function mutasiinden_pdf(Request $req) 
+    {
+        $querymutasi = ProdukMutasiInden::query();
+
+        if ($req->bulan) {
+            $querymutasi->where('inventoryinden_id', $req->bulan);
+        }
+
+        $produkmutasiinden = $querymutasi->get();
+
+        if ($produkmutasiinden->isEmpty()) {
+            return view('laporan.mutasiinden', [
+                'produkterjual' => collect(),
+                'mutasiinden' => collect(),
+                'suppliers' => Supplier::all(),
+                'galleries' => Lokasi::where('tipe_lokasi', 1)->get(),
+                'inventorys' => InventoryInden::all()
+            ]);
+        }
+
+        $mutasiinden = Mutasiindens::whereNotNull('pembuat_id')
+            ->whereNotNull('pembuku_id')
+            ->whereNotNull('penerima_id')
+            ->whereNotNull('pemeriksa_id')
+            ->whereNotNull('tgl_dibuat')
+            ->whereNotNull('tgl_dibukukan')
+            ->whereNotNull('tgl_diterima_ttd')
+            ->whereNotNull('tgl_diperiksa')
+            ->where('status_dibuat', 'DIKONFIRMASI')
+            ->where('status_diterima', 'DIKONFIRMASI')
+            ->where('status_dibukukan', 'DIKONFIRMASI')
+            ->where('status_diperiksa', 'DIKONFIRMASI');
+
+        if ($req->pengirim) {
+            $mutasiinden->where('supplier_id', $req->pengirim);
+        }
+        if ($req->penerima) {
+            $mutasiinden->where('lokasi_id', $req->penerima);
+        }
+        if ($req->tanggaldikirim) {
+            $mutasiinden->where('tgl_dikirim', $req->tanggaldikirim);
+        }
+        if ($req->tanggalditerima) {
+            $mutasiinden->where('tgl_diterima', $req->tanggalditerima);
+        }
+
+        $mutasiindenRecords = $mutasiinden->get();
+
+        $produkterjual = $mutasiindenRecords->map(function ($mutasi) use ($req) {
+            return ProdukMutasiInden::where('mutasiinden_id', $mutasi->id)
+                ->when($req->bulan, function ($query) use ($req) {
+                    return $query->where('inventoryinden_id', $req->bulan);
+                })
+                ->get();
+        })->flatten();
+        // dd($produkterjual);
+        
+        $pdf = Pdf::loadView('laporan.mutasiinden_pdf', compact('produkterjual', 'mutasiindenRecords'))->setPaper('a4', 'portrait');
+        return $pdf->stream('mutasiinden.pdf');
+
+    }
+
+    public function mutasiinden_excel(Request $req) 
+    {
+        $querymutasi = ProdukMutasiInden::query();
+
+        if ($req->bulan) {
+            $querymutasi->where('inventoryinden_id', $req->bulan);
+        }
+
+        $produkmutasiinden = $querymutasi->get();
+
+        if ($produkmutasiinden->isEmpty()) {
+            return view('laporan.mutasiinden', [
+                'produkterjual' => collect(),
+                'mutasiinden' => collect(),
+                'suppliers' => Supplier::all(),
+                'galleries' => Lokasi::where('tipe_lokasi', 1)->get(),
+                'inventorys' => InventoryInden::all()
+            ]);
+        }
+
+        $mutasiinden = Mutasiindens::whereNotNull('pembuat_id')
+            ->whereNotNull('pembuku_id')
+            ->whereNotNull('penerima_id')
+            ->whereNotNull('pemeriksa_id')
+            ->whereNotNull('tgl_dibuat')
+            ->whereNotNull('tgl_dibukukan')
+            ->whereNotNull('tgl_diterima_ttd')
+            ->whereNotNull('tgl_diperiksa')
+            ->where('status_dibuat', 'DIKONFIRMASI')
+            ->where('status_diterima', 'DIKONFIRMASI')
+            ->where('status_dibukukan', 'DIKONFIRMASI')
+            ->where('status_diperiksa', 'DIKONFIRMASI');
+
+        if ($req->pengirim) {
+            $mutasiinden->where('supplier_id', $req->pengirim);
+        }
+        if ($req->penerima) {
+            $mutasiinden->where('lokasi_id', $req->penerima);
+        }
+        if ($req->tanggaldikirim) {
+            $mutasiinden->where('tgl_dikirim', $req->tanggaldikirim);
+        }
+        if ($req->tanggalditerima) {
+            $mutasiinden->where('tgl_diterima', $req->tanggalditerima);
+        }
+
+        $mutasiindenRecords = $mutasiinden->get();
+
+        $produkterjual = $mutasiindenRecords->map(function ($mutasi) use ($req) {
+            return ProdukMutasiInden::where('mutasiinden_id', $mutasi->id)
+                ->when($req->bulan, function ($query) use ($req) {
+                    return $query->where('inventoryinden_id', $req->bulan);
+                })
+                ->get();
+        })->flatten();
+
+        if($produkterjual->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new MutasiindenExport($produkterjual, $mutasiindenRecords), 'mutasi.xlsx');
+    }
+    
     
 }
