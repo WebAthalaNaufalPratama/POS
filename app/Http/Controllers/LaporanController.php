@@ -1555,8 +1555,7 @@ class LaporanController extends Controller
 
     public function hutang_supplier_index(Request $req)
     {
-        $query = Invoicepo::with(['poinden.produkbeli', 'pembelian.produkbeli'])
-            ->where('status_dibuat', 'DIKONFIRMASI');
+        $query = Invoicepo::where('status_dibuat', 'DIKONFIRMASI');
 
         $allData = $query->get();
 
@@ -1598,20 +1597,19 @@ class LaporanController extends Controller
         $totalTagihan = $data->sum('sisa');
 
         $supplier = $allData->flatMap(function($item) {
-            $supplier = null;
+            $supplier_id = null;
             $supplierName = null;
         
             if ($item->poinden && $item->poinden->supplier) {
-                $supplier = $item->poinden->supplier->id;
+                $supplier_id = $item->poinden->supplier_id;
                 $supplierName = $item->poinden->supplier->nama;
             }
         
-            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
-                $supplier = $item->pembelian->supplier->id;
+            if (!$supplier_id && $item->pembelian && $item->pembelian->supplier) {
+                $supplier_id = $item->pembelian->supplier_id;
                 $supplierName = $item->pembelian->supplier->nama;
             }
-        
-            return $supplier ? [$supplier => $supplierName] : [];
+            return $supplier_id ? [$supplier_id => $supplierName] : [];
         })->unique();
 
         return view('laporan.hutang_supplier', compact('data', 'supplier', 'totalTagihan'));

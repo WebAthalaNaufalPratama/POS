@@ -62,35 +62,30 @@
                         <tbody>
                             @foreach ($data as $item)
                                 @php
-                                    $rowCount = 0;
-                                    $produkbeli = [];
-                        
-                                    if ($item->poinden && $item->poinden->produkbeli) {
-                                        $produkbeli = $item->poinden->produkbeli;
-                                        $rowCount = count($produkbeli);
-                                    } elseif ($item->pembelian && $item->pembelian->produkbeli) {
-                                        $produkbeli = $item->pembelian->produkbeli;
-                                        $rowCount = count($produkbeli);
-                                    }
+                                    $produkbeli = $item->poinden->produkbeli ?? $item->pembelian->produkbeli ?? [];
                                 @endphp
-                        
-                                @foreach ($produkbeli as $index => $produkbeliItem)
-                                    <tr>
-                                        @if ($index === 0)
-                                            <td rowspan="{{ $rowCount }}">{{ $loop->iteration }}</td>
-                                            <td rowspan="{{ $rowCount }}">{{ $item->no_inv }}</td>
-                                            <td rowspan="{{ $rowCount }}">{{ $item->supplier_nama }}</td>
-                                            <td rowspan="{{ $rowCount }}">{{ $item->tgl_inv }}</td>
-                                        @endif
-                                        <td>{{ $produkbeliItem->produk->nama }}</td>
-                                        <td>{{ $produkbeliItem->jml_dikirim }}</td>
-                                        @if ($index === 0)
-                                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->total_tagihan) }}</td>
-                                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->terbayar) }}</td>
-                                            <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->sisa) }}</td>
-                                        @endif
-                                    </tr>
-                                @endforeach
+                                
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->no_inv }}</td>
+                                    <td>{{ $item->supplier_nama }}</td>
+                                    <td>{{ $item->tgl_inv }}</td>
+                                    <td colspan="2">
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach ($produkbeli as $produkbeliItem)
+                                                    <tr>
+                                                        <td>{{ $produkbeliItem->produk->nama }}</td>
+                                                        <td>{{ $produkbeliItem->jml_dikirim }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>{{ formatRupiah($item->total_tagihan) }}</td>
+                                    <td>{{ formatRupiah($item->terbayar) }}</td>
+                                    <td>{{ formatRupiah($item->sisa) }}</td>
+                                </tr>
                             @endforeach
                         </tbody>
                         
