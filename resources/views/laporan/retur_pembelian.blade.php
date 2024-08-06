@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Laporan Hutang Supplier</h4>
+                        <h4>Laporan Retur Pembelian</h4>
                     </div>
                     <div class="page-btn">
                         <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
@@ -24,22 +24,14 @@
                     <row class="col-lg-12 col-sm-12">
                         <div class="row">
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterSupplier" name="filterSupplier" class="form-control" title="Supplier">
-                                    <option value="">Pilih Supplier</option>
-                                    @foreach ($supplier as $key => $value)
-                                        <option value="{{ $key }}" {{ $key == request()->input('supplier') ? 'selected' : '' }}>{{ $value }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg col-sm-6 col-12">
                                 <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Awal Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
                                 <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Akhir Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.hutang_supplier') }}" class="btn btn-info">Filter</a>
-                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.hutang_supplier') }}" class="btn btn-warning">Clear</a>
+                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.retur_pembelian') }}" class="btn btn-info">Filter</a>
+                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.retur_pembelian') }}" class="btn btn-warning">Clear</a>
                             </div>
                         </div>
                     </row>
@@ -49,62 +41,87 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>No Invoice</th>
-                                <th>Supplier</th>
-                                <th>Tanggal Invoice</th>
-                                <th>List Barang</th>
+                                <th>No PO</th>
+                                <th>No Retur</th>
+                                <th>Tanggal Retur</th>
+                                <th>Barang</th>
+                                <th>Harga</th>
                                 <th>QTY</th>
-                                <th>Tagihan</th>
-                                <th>Terbayar</th>
-                                <th>Sisa Tagihan</th>
+                                <th>Komplain</th>
+                                <th>Total Diskon</th>
+                                <th>Penanganan Komplain</th>
+                                <th>Supplier</th>
+                                <th>Gallery</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($data as $item)
-                                @php
-                                    $produkbeli = $item->poinden->produkbeli ?? $item->pembelian->produkbeli ?? [];
-                                @endphp
-                                
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item->no_inv }}</td>
+                                    <td>{{ $item->no_po }}</td>
+                                    <td>{{ $item->no_retur }}</td>
+                                    <td>{{ $item->tgl_retur }}</td>
+                                    <td>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach ($item->produkretur as $produkretur)
+                                                    <tr>
+                                                        <td>{{ $produkretur->produkbeli->produk->nama }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach ($item->produkretur as $produkretur)
+                                                    <tr>
+                                                        <td>{{ $produkretur->harga }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach ($item->produkretur as $produkretur)
+                                                    <tr>
+                                                        <td>{{ $produkretur->jumlah }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach ($item->produkretur as $produkretur)
+                                                    <tr>
+                                                        <td>{{ $produkretur->alasan }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach ($item->produkretur as $produkretur)
+                                                    <tr>
+                                                        <td>{{ $produkretur->diskon }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td>{{ $item->komplain }}</td>
                                     <td>{{ $item->supplier_nama }}</td>
-                                    <td>{{ $item->tgl_inv }}</td>
-                                    <td>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tbody>
-                                                @foreach ($produkbeli as $produkbeliItem)
-                                                    <tr>
-                                                        <td>{{ $produkbeliItem->produk->nama }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tbody>
-                                                @foreach ($produkbeli as $produkbeliItem)
-                                                    <tr>
-                                                        <td>{{ $produkbeliItem->jml_dikirim }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td>{{ formatRupiah($item->total_tagihan) }}</td>
-                                    <td>{{ formatRupiah($item->terbayar) }}</td>
-                                    <td>{{ formatRupiah($item->sisa) }}</td>
+                                    <td>{{ $item->gallery_nama }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
-                        
-                        <tfoot>
-                            <tr>
-                                <th colspan="8" class="text-center">TOTAL TAGIHAN</th>
-                                <th>{{ formatRupiah($totalTagihan) }}</th>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -123,19 +140,6 @@
                 var urlString = baseUrl;
                 var first = true;
                 var symbol = '';
-
-                var Supplier = $('#filterSupplier').val();
-                if (Supplier) {
-                    var filterSupplier = 'supplier=' + Supplier;
-                    if (first == true) {
-                        symbol = '?';
-                        first = false;
-                    } else {
-                        symbol = '&';
-                    }
-                    urlString += symbol;
-                    urlString += filterSupplier;
-                }
 
                 var dateStart = $('#filterDateStart').val();
                 if (dateStart) {
@@ -174,12 +178,11 @@
             });
         });
         function pdf(){
-            var filterSupplier = $('#filterSupplier').val();
             var filterDateStart = $('#filterDateStart').val();
             var filterDateEnd = $('#filterDateEnd').val();
 
             var desc = 'Cetak laporan tanpa filter';
-            if(filterSupplier || filterDateStart || filterDateEnd){
+            if(filterDateStart || filterDateEnd){
                 desc = 'cetak laporan dengan filter';
             }
             
@@ -194,8 +197,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.hutang_supplier-pdf') }}" + '?' + $.param({
-                        supplier: filterSupplier,
+                    var url = "{{ route('laporan.retur_pembelian-pdf') }}" + '?' + $.param({
                         dateStart: filterDateStart,
                         dateEnd: filterDateEnd,
                     });
@@ -205,12 +207,11 @@
             });
         }
         function excel(){
-            var filterSupplier = $('#filterSupplier').val();
             var filterDateStart = $('#filterDateStart').val();
             var filterDateEnd = $('#filterDateEnd').val();
 
             var desc = 'Cetak laporan tanpa filter';
-            if(filterSupplier || filterDateStart || filterDateEnd){
+            if(filterDateStart || filterDateEnd){
                 desc = 'cetak laporan dengan filter';
             }
             
@@ -225,8 +226,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.hutang_supplier-excel') }}" + '?' + $.param({
-                        supplier: filterSupplier,
+                    var url = "{{ route('laporan.retur_pembelian-excel') }}" + '?' + $.param({
                         dateStart: filterDateStart,
                         dateEnd: filterDateEnd,
                     });

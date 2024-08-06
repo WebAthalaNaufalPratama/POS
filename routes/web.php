@@ -687,6 +687,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/hutang_supplier', 'LaporanController@hutang_supplier_index')->name('laporan.hutang_supplier');
             Route::get('/hutang_supplier-pdf', 'LaporanController@hutang_supplier_pdf')->name('laporan.hutang_supplier-pdf');
             Route::get('/hutang_supplier-excel', 'LaporanController@hutang_supplier_excel')->name('laporan.hutang_supplier-excel');
+            Route::get('/retur_pembelian', 'LaporanController@retur_pembelian_index')->name('laporan.retur_pembelian');
+            Route::get('/retur_pembelian-pdf', 'LaporanController@retur_pembelian_pdf')->name('laporan.retur_pembelian-pdf');
+            Route::get('/retur_pembelian-excel', 'LaporanController@retur_pembelian_excel')->name('laporan.retur_pembelian-excel');
+            Route::get('/retur_pembelian_inden', 'LaporanController@retur_pembelian_inden_index')->name('laporan.retur_pembelian_inden');
+            Route::get('/retur_pembelian_inden-pdf', 'LaporanController@retur_pembelian_inden_pdf')->name('laporan.retur_pembelian_inden-pdf');
+            Route::get('/retur_pembelian_inden-excel', 'LaporanController@retur_pembelian_inden_excel')->name('laporan.retur_pembelian_inden-excel');
 
 
         });

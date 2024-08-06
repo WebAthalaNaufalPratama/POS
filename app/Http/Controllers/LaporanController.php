@@ -19,6 +19,8 @@ use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
 use App\Exports\PembelianExport;
 use App\Exports\PembelianIndenExport;
+use App\Exports\ReturPembelianExport;
+use App\Exports\ReturPembelianIndenExport;
 use App\Exports\StokIndenExport;
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
@@ -46,6 +48,8 @@ use App\Models\Supplier;
 use App\Models\ReturPenjualan;
 use App\Models\Mutasiindens;
 use App\Models\ProdukMutasiInden;
+use App\Models\Returinden;
+use App\Models\Returpembelian;
 use App\Models\TransaksiKas;
 
 class LaporanController extends Controller
@@ -1710,6 +1714,138 @@ class LaporanController extends Controller
 
         if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new HutangSupplierExport($data, $totalTagihan), 'hutang_supplier.xlsx');
+    }
+
+    public function retur_pembelian_index(Request $req)
+    {
+        $queryPO = Returpembelian::with('invoice.pembelian.lokasi', 'invoice.pembelian.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryPO->where('tgl_retur', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryPO->where('tgl_retur', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryPO->get()->map(function($item){
+            $item->no_po = $item->invoice->pembelian->no_po;
+            $item->supplier_nama = $item->invoice->pembelian->supplier->nama;
+            $item->gallery_nama = $item->invoice->pembelian->lokasi->nama;
+            return $item;
+        });
+
+        return view('laporan.retur_pembelian', compact('data'));
+    }
+
+    public function retur_pembelian_pdf(Request $req)
+    {
+        $queryPO = Returpembelian::with('invoice.pembelian.lokasi', 'invoice.pembelian.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryPO->where('tgl_retur', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryPO->where('tgl_retur', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryPO->get()->map(function($item){
+            $item->no_po = $item->invoice->pembelian->no_po;
+            $item->supplier_nama = $item->invoice->pembelian->supplier->nama;
+            $item->gallery_nama = $item->invoice->pembelian->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.retur_pembelian_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('retur_pembelian.pdf');
+    }
+
+    public function retur_pembelian_excel(Request $req)
+    {
+        $queryPO = Returpembelian::with('invoice.pembelian.lokasi', 'invoice.pembelian.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryPO->where('tgl_retur', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryPO->where('tgl_retur', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryPO->get()->map(function($item){
+            $item->no_po = $item->invoice->pembelian->no_po;
+            $item->supplier_nama = $item->invoice->pembelian->supplier->nama;
+            $item->gallery_nama = $item->invoice->pembelian->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new ReturPembelianExport($data), 'retur_pembelian.xlsx');
+    }
+
+    public function retur_pembelian_inden_index(Request $req)
+    {
+        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryInden->get()->map(function($item){
+            $item->no_po = $item->mutasiinden->no_mutasi;
+            $item->supplier_nama = $item->mutasiinden->supplier->nama;
+            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
+            return $item;
+        });
+
+        return view('laporan.retur_pembelian_inden', compact('data'));
+    }
+
+    public function retur_pembelian_inden_pdf(Request $req)
+    {
+        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryInden->get()->map(function($item){
+            $item->no_po = $item->mutasiinden->no_mutasi;
+            $item->supplier_nama = $item->mutasiinden->supplier->nama;
+            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.retur_pembelian_inden_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('retur_pembelian_inden.pdf');
+    }
+
+    public function retur_pembelian_inden_excel(Request $req)
+    {
+        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryInden->get()->map(function($item){
+            $item->no_po = $item->mutasiinden->no_mutasi;
+            $item->supplier_nama = $item->mutasiinden->supplier->nama;
+            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new ReturPembelianIndenExport($data), 'retur_pembelian_inden.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)
