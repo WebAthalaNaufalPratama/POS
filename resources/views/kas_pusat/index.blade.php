@@ -99,7 +99,7 @@
               <thead>
               <tr>
                   <th>No</th>
-                  {{-- <th>Jenis</th> --}}
+                  <th>Metode</th>
                   <th>Pengirim</th>
                   <th>Rekening Pengirim</th>
                   <th>Penerima</th>
@@ -116,7 +116,7 @@
                   @foreach ($dataMasuk as $item)
                       <tr>
                           <td>{{ $loop->iteration }}</td>
-                          {{-- <td>{{ $item->jenis ?? '-' }}</td> --}}
+                          <td>{{ $item->metode ?? '-' }}</td>
                           <td>{{ $item->lok_pengirim->nama ?? '-' }}</td>
                           <td>{{ $item->rek_pengirim->nama_akun ?? '-' }}</td>
                           <td>{{ $item->lok_penerima->nama ?? '-' }}</td>
@@ -171,8 +171,10 @@
               <thead>
               <tr>
                   <th>No</th>
-                  <th>Rekening</th>
+                  <th>Metode</th>
                   <th>Jenis</th>
+                  <th>Metode</th>
+                  <th>Rekening</th>
                   <th>Tanggal</th>
                   <th>Nominal</th>
                   <th>Biaya Lainnya</th>
@@ -185,8 +187,10 @@
                   @foreach ($dataKeluar as $item)
                       <tr>
                           <td>{{ $loop->iteration }}</td>
-                          <td>{{ $item->rek_pengirim->nama_akun ?? '-' }}</td>
+                          <td>{{ $item->metode ?? '-' }}</td>
                           <td>{{ $item->jenis ?? '-' }}</td>
+                          <td>{{ $item->metode ?? '-' }}</td>
+                          <td>{{ $item->rek_pengirim->nama_akun ?? '-' }}</td>
                           <td>{{ $item->tanggal ? formatTanggal($item->tanggal) : '-' }}</td>
                           <td>{{ $item->nominal ? formatRupiah($item->nominal) : '-' }}</td>
                           <td>{{ $item->biaya_lain ? formatRupiah($item->biaya_lain) : '-' }}</td>
@@ -234,6 +238,13 @@
             <div class="row">
               <div class="col-6">
                 <div class="row">
+                  <div class="col-12 mb-2">
+                    <label for="metode" class="col-form-label">Metode</label>
+                    <select class="select2" name="metode" id="masuk_metode" required>
+                      <option value="Transfer">Transfer</option>
+                      <option value="Cash">Cash</option>
+                    </select>
+                  </div>
                   <div class="col-6">
                     <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
                     <div class="form-group">
@@ -258,7 +269,7 @@
                       </select>
                     </div>
                   </div>
-                  <div class="col-6">
+                  <div class="col-6" id="div_rekening_pengirim_masuk">
                     <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
                     <div class="form-group">
                       <select class="select2" name="rekening_pengirim" id="masuk_rekening_pengirim" disabled>
@@ -266,7 +277,7 @@
                       </select>
                     </div>
                   </div>
-                  <div class="col-6">
+                  <div class="col-6" id="div_rekening_penerima_masuk">
                     <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
                     <div class="form-group">
                       <select class="select2" name="rekening_penerima" id="masuk_rekening_penerima" required>
@@ -335,6 +346,13 @@
                     </select>
                   </div>
                 </div>
+                <div class="col-12 mb-2">
+                  <label for="metode" class="col-form-label">Metode</label>
+                  <select class="select2" name="metode" id="keluar_metode" required>
+                    <option value="Transfer">Transfer</option>
+                    <option value="Cash">Cash</option>
+                  </select>
+                </div>
                 <div class="row pemindahan_saldo">
                   <div class="col-6">
                     <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
@@ -358,13 +376,13 @@
                   </div>
                 </div>
                 <div class="row pemindahan_saldo">
-                  <div class="col-6">
+                  <div class="col-6" id="div_rekening_pengirim_keluar">
                     <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
                     <select class="select2" name="rekening_pengirim" id="keluar_rekening_pengirim" disabled>
                       <option value="">Rekening Pengirim</option>
                     </select>
                   </div>
-                  <div class="col-6">
+                  <div class="col-6" id="div_rekening_penerima_keluar">
                     <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
                     <select class="select2" name="rekening_penerima" id="keluar_rekening_penerima" disabled>
                       <option value="">Rekening Penerima</option>
@@ -372,10 +390,10 @@
                   </div>
                 </div>
                 <div class="row lainnya d-none">
-                  <div class="col-6">
-                    <label for="lokasi_pengirim" class="col-form-label">lokasi</label>
+                  <div class="col-6" id="div_lokasi_keluar">
+                    <label for="lokasi_pengirim" class="col-form-label">Lokasi</label>
                     <select class="select2" name="lokasi_pengirim" id="keluar_lokasi" disabled>
-                      <option value="">lokasi</option>
+                      <option value="">Lokasi</option>
                       @foreach($lokasis as $lokasi)
                           @if($lokasi->operasional_id == 1)
                             <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
@@ -383,7 +401,7 @@
                         @endforeach
                     </select>
                   </div>
-                  <div class="col-6">
+                  <div class="col-6" id="div_rekening_keluar">
                     <label for="rekening_pengirim" class="col-form-label">Rekening</label>
                     <select class="select2" name="rekening_pengirim" id="keluar_rekening" disabled>
                       <option value="">Rekening</option>
@@ -455,6 +473,13 @@
                       <option value="DIKONFIRMASI">DIKONFIRMASI</option>
                     </select>
                   </div>
+                  <div class="col-12 mb-2">
+                    <label for="metode" class="col-form-label">Metode</label>
+                    <select class="select2" name="metode" id="edit_masuk_metode" required>
+                      <option value="Transfer">Transfer</option>
+                      <option value="Cash">Cash</option>
+                    </select>
+                  </div>
                   <div class="col-6">
                     <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
                     <div class="form-group">
@@ -481,7 +506,7 @@
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-6">
+                  <div class="col-6" id="edit_div_rekening_pengirim_masuk">
                     <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
                     <div class="form-group">
                       <select class="select2" name="rekening_pengirim" id="edit_masuk_rekening_pengirim" disabled>
@@ -489,7 +514,7 @@
                       </select>
                     </div>
                   </div>
-                  <div class="col-6">
+                  <div class="col-6" id="edit_div_rekening_penerima_masuk">
                     <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
                     <div class="form-group">
                       <select class="select2" name="rekening_penerima" id="edit_masuk_rekening_penerima" required>
@@ -562,6 +587,13 @@
                       <option value="DIKONFIRMASI">DIKONFIRMASI</option>
                     </select>
                   </div>
+                  <div class="col-12 mb-2">
+                    <label for="metode" class="col-form-label">Metode</label>
+                    <select class="select2" name="metode" id="edit_keluar_metode" required>
+                      <option value="Transfer">Transfer</option>
+                      <option value="Cash">Cash</option>
+                    </select>
+                  </div>
                   <div class="col-12">
                     <label for="jenis" class="col-form-label">Jenis</label>
                     <div class="form-group">
@@ -576,7 +608,7 @@
                   <div class="col-6">
                     <label for="lokasi_pengirim" class="col-form-label">Lokasi Pengirim</label>
                     <div class="form-group">
-                      <select class="select2" name="lokasi_pengirim" id="edit_keluar_lokasi_pengirim" onchange="getRekening(this, 'keluar_rekening_pengirim')" required>
+                      <select class="select2" name="lokasi_pengirim" id="edit_keluar_lokasi_pengirim" onchange="getRekening(this, 'edit_keluar_rekening_pengirim')" required>
                         <option value="">Lokasi Pengirim</option>
                         @foreach($lokasis as $lokasi)
                           @if($lokasi->operasional_id == 1)
@@ -589,7 +621,7 @@
                   <div class="col-6">
                     <label for="lokasi_penerima" class="col-form-label">Lokasi Penerima</label>
                     <div class="form-group">
-                      <select class="select2" name="lokasi_penerima" id="edit_keluar_lokasi_penerima" onchange="getRekening(this, 'keluar_rekening_penerima')" required>
+                      <select class="select2" name="lokasi_penerima" id="edit_keluar_lokasi_penerima" onchange="getRekening(this, 'edit_keluar_rekening_penerima')" required>
                         <option value="">Lokasi Penerima</option>
                         @foreach($lokasis as $lokasi)
                           <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
@@ -599,7 +631,7 @@
                   </div>
                 </div>
                 <div class="row pemindahan_saldo">
-                  <div class="col-6">
+                  <div class="col-6" id="edit_div_rekening_pengirim_keluar">
                     <label for="rekening_pengirim" class="col-form-label">Rekening Pengirim</label>
                     <div class="form-group">
                       <select class="select2" name="rekening_pengirim" id="edit_keluar_rekening_pengirim" disabled>
@@ -607,7 +639,7 @@
                       </select>
                     </div>
                   </div>
-                  <div class="col-6">
+                  <div class="col-6" id="edit_div_rekening_penerima_keluar">
                     <label for="rekening_penerima" class="col-form-label">Rekening Penerima</label>
                     <div class="form-group">
                       <select class="select2" name="rekening_penerima" id="edit_keluar_rekening_penerima" disabled>
@@ -617,10 +649,10 @@
                   </div>
                 </div>
                 <div class="row lainnya d-none">
-                  <div class="col-6">
-                    <label for="lokasi_pengirim" class="col-form-label">lokasi</label>
+                  <div class="col-6" id="edit_div_lokasi_keluar">
+                    <label for="lokasi_pengirim" class="col-form-label">Lokasi</label>
                     <select class="select2" name="lokasi_pengirim" id="edit_keluar_lokasi" disabled>
-                      <option value="">lokasi</option>
+                      <option value="">Lokasi</option>
                       @foreach($lokasis as $lokasi)
                           @if($lokasi->operasional_id == 1)
                             <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
@@ -628,7 +660,7 @@
                         @endforeach
                     </select>
                   </div>
-                  <div class="col-6">
+                  <div class="col-6" id="edit_div_rekening_keluar">
                     <label for="rekening_pengirim" class="col-form-label">Rekening</label>
                     <select class="select2" name="rekening_pengirim" id="edit_keluar_rekening" disabled>
                       <option value="">Rekening</option>
@@ -708,7 +740,7 @@
       var rekening_pengirim;
     $(document).ready(function() {
         // getRekening($('#filterLokasi'), 'filterRekening')
-        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #keluar_jenis, #keluar_rekening, #keluar_lokasi, [id^=edit_masuk_rekening_], [id^=edit_keluar_rekening_], [id^=edit_masuk_lokasi_], [id^=edit_keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_jenis, #edit_keluar_rekening, #edit_keluar_lokasi, #edit_keluar_status, #edit_masuk_status').select2()
+        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #keluar_jenis, #keluar_rekening, #keluar_lokasi, [id^=edit_masuk_rekening_], [id^=edit_keluar_rekening_], [id^=edit_masuk_lokasi_], [id^=edit_keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_jenis, #edit_keluar_rekening, #edit_keluar_lokasi, #edit_keluar_status, #edit_masuk_status, #masuk_metode, #keluar_metode, #edit_masuk_metode, #edit_keluar_metode').select2()
     });
     function bukti(src){
         var baseUrl = window.location.origin;
@@ -763,6 +795,102 @@
             });
         }
     });
+    $('#masuk_metode').on('change', function() {
+      var value = $(this).val();
+      if(value == 'Transfer'){
+        $('#masuk_rekening_pengirim').attr('disabled', false);
+        $('#masuk_rekening_penerima').attr('disabled', false);
+        $('#masuk_rekening_pengirim').prop('required', true);
+        $('#masuk_rekening_penerima').prop('required', true);
+        $('#div_rekening_pengirim_masuk').show();
+        $('#div_rekening_penerima_masuk').show();
+        } else {
+          $('#masuk_rekening_pengirim').attr('disabled', true);
+          $('#masuk_rekening_penerima').attr('disabled', true);
+          $('#masuk_rekening_pengirim').prop('required', false);
+          $('#masuk_rekening_penerima').prop('required', false);
+          $('#div_rekening_pengirim_masuk').hide();
+          $('#div_rekening_penerima_masuk').hide();
+      }
+    });
+    $('#edit_masuk_metode').on('change', function() {
+      var value = $(this).val();
+      if(value == 'Transfer'){
+        $('#edit_masuk_rekening_pengirim').attr('disabled', false);
+        $('#edit_masuk_rekening_penerima').attr('disabled', false);
+        $('#edit_masuk_rekening_pengirim').prop('required', true);
+        $('#edit_masuk_rekening_penerima').prop('required', true);
+        $('#edit_div_rekening_pengirim_masuk').show();
+        $('#edit_div_rekening_penerima_masuk').show();
+      } else {
+        $('#edit_masuk_rekening_pengirim').attr('disabled', true);
+        $('#edit_masuk_rekening_penerima').attr('disabled', true);
+        $('#edit_masuk_rekening_pengirim').prop('required', false);
+        $('#edit_masuk_rekening_penerima').prop('required', false);
+        $('#edit_div_rekening_pengirim_masuk').hide();
+        $('#edit_div_rekening_penerima_masuk').hide();
+      }
+    });
+    $('#keluar_metode').on('change', function() {
+      var value = $(this).val();
+      if(value == 'Transfer'){
+        $('#keluar_rekening_pengirim').attr('disabled', false);
+        $('#keluar_rekening_penerima').attr('disabled', false);
+        $('#keluar_rekening').attr('disabled', false);
+        $('#keluar_rekening_pengirim').prop('required', true);
+        $('#keluar_rekening_penerima').prop('required', true);
+        $('#keluar_rekening').prop('required', true);
+        $('#div_rekening_pengirim_keluar').show();
+        $('#div_rekening_penerima_keluar').show();
+        $('#div_rekening_keluar').show();
+        $('#div_lokasi_keluar')
+          .removeClass('col-12')
+          .addClass('col-6');
+      } else {
+        $('#keluar_rekening_pengirim').attr('disabled', true);
+        $('#keluar_rekening_penerima').attr('disabled', true);
+        $('#keluar_rekening').attr('disabled', true);
+        $('#keluar_rekening_pengirim').prop('required', false);
+        $('#keluar_rekening_penerima').prop('required', false);
+        $('#keluar_rekening').prop('required', false);
+        $('#div_rekening_pengirim_keluar').hide();
+        $('#div_rekening_penerima_keluar').hide();
+        $('#div_rekening_keluar').hide();
+        $('#div_lokasi_keluar')
+            .removeClass('col-6')
+            .addClass('col-12');
+      }
+    });
+    $('#edit_keluar_metode').on('change', function() {
+      var value = $(this).val();
+      if(value == 'Transfer'){
+        $('#edit_keluar_rekening_pengirim').attr('disabled', false);
+        $('#edit_keluar_rekening_penerima').attr('disabled', false);
+        // $('#edit_keluar_rekening').attr('disabled', false);
+        $('#edit_keluar_rekening_pengirim').prop('required', true);
+        $('#edit_keluar_rekening_penerima').prop('required', true);
+        // $('#edit_keluar_rekening').prop('required', true);
+        $('#edit_div_rekening_pengirim_keluar').show();
+        $('#edit_div_rekening_penerima_keluar').show();
+        $('#edit_div_rekening_keluar').show();
+        $('#edit_div_lokasi_keluar')
+          .removeClass('col-12')
+          .addClass('col-6');
+      } else {
+        $('#edit_keluar_rekening_pengirim').attr('disabled', true);
+        $('#edit_keluar_rekening_penerima').attr('disabled', true);
+        // $('#edit_keluar_rekening').attr('disabled', true);
+        $('#edit_keluar_rekening_pengirim').prop('required', false);
+        $('#edit_keluar_rekening_penerima').prop('required', false);
+        // $('#edit_keluar_rekening').prop('required', false);
+        $('#edit_div_rekening_pengirim_keluar').hide();
+        $('#edit_div_rekening_penerima_keluar').hide();
+        $('#edit_div_rekening_keluar').hide();
+        $('#edit_div_lokasi_keluar')
+            .removeClass('col-6')
+            .addClass('col-12');
+      }
+    });
 
     function edit_keluar(id){
         $.ajax({
@@ -778,6 +906,8 @@
                 
                 $('#edit_keluar_rekening').val(response.rekening_pengirim).trigger('change')
                 $('#edit_keluar_lokasi').val(response.lokasi_pengirim).trigger('change')
+                $('#edit_keluar_metode').val(response.metode).trigger('change')
+
 
                 $('#edit_keluar_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change')
                 $('#edit_keluar_lokasi_penerima').val(response.lokasi_penerima).trigger('change')
@@ -818,6 +948,7 @@
                 
                 $('#edit_masuk_rekening').val(response.rekening_pengirim).trigger('change')
                 $('#edit_masuk_lokasi').val(response.lokasi_pengirim).trigger('change')
+                $('#edit_masuk_metode').val(response.metode).trigger('change')
 
                 $('#edit_masuk_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change')
                 $('#edit_masuk_lokasi_penerima').val(response.lokasi_penerima).trigger('change')
@@ -935,6 +1066,10 @@
         }
         rekeningElement.append('<option value="'+item['id']+'" '+isSelected+'>'+item['nama_akun']+'</option>')
       })
+      $('#masuk_metode').trigger('change');
+      $('#edit_masuk_metode').trigger('change');
+      $('#keluar_metode').trigger('change');
+      $('#edit_keluar_metode').trigger('change');
     }
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');

@@ -75,7 +75,7 @@
             </div>
             <div class="mb-3">
               <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
-              <input type="number" class="form-control hide-arrow" name="nomor_rekening" id="add_nomor_rekening" required>
+              <input type="text" class="form-control hide-arrow" name="nomor_rekening" id="add_nomor_rekening" oninput="validateDigit(this, 16)" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>
@@ -118,7 +118,7 @@
             </div>
             <div class="mb-3">
               <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
-              <input type="number" class="form-control hide-arrow" name="nomor_rekening" id="edit_nomor_rekening" required>
+              <input type="text" class="form-control hide-arrow" name="nomor_rekening" id="edit_nomor_rekening" oninput="validateDigit(this, 16)" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>
@@ -151,6 +151,16 @@
     <script>
     $(document).ready(function() {
         $('#add_lokasi_id, #edit_lokasi_id').select2()
+    });
+    $(document).on('input', '#add_nomor_rekening, #edit_nomor_rekening', function() {
+        let input = $(this);
+        let value = input.val();
+        
+        if (!isNumeric(value)) {
+        value = value.replace(/[^\d]/g, "");
+        }
+
+        input.val(value);
     });
 
     function getData(id){

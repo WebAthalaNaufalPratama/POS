@@ -39,7 +39,7 @@ class AkunController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'no_akun' => 'required',
+            'no_akun' => 'required|numeric|digits_between:5,10',
             'nama_akun' => 'required',
         ]);
         $error = $validator->errors()->all();
@@ -88,7 +88,7 @@ class AkunController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'no_akun' => 'required',
+            'no_akun' => 'required|numeric|digits_between:5,10',
             'nama_akun' => 'required',
         ]);
         $error = $validator->errors()->all();

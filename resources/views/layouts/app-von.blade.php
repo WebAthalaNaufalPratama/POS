@@ -316,16 +316,18 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transform: translateY(-50%);
         }
-
   </style>
   
   @yield('css')
 </head>
 
 <body>
-  <div id="global-loader">
+  {{-- <div id="global-loader">
     <div class="whirly-loader"> </div>
-  </div>
+  </div> --}}
+  {{-- <div id="global-loader-transparent">
+    <div class="whirly-loader-transparent"> </div>
+  </div> --}}
 
   <div class="main-wrapper">
 
@@ -577,21 +579,21 @@
 
     <script src="/assets/js/script.js"></script>
     <script type="text/javascript">
-      var csrfToken = $('meta[name="csrf-token"]').attr('content');
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-      function formatNumber(value) {
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      }
+        function formatNumber(value) {
+          return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
 
-      function cleanNumber(value) {
-        return value.replace(/\./g, "");
-      }
+        function cleanNumber(value) {
+          return value.replace(/\./g, '');
+        }
 
-      function isNumeric(value) {
-        return /^\d*$/.test(value);
-      }
+        function isNumeric(value) {
+          return /^\d*$/.test(value);
+        }
 
-      function validatePersen(element) {
+        function validatePersen(element) {
             var value = $(element).val().trim();
 
             if (value !== "" && !value.startsWith("0.") && value.length > 1) {
@@ -611,10 +613,66 @@
             $(element).val(value);
             return true;
         }
+
         function validatePhoneNumber(element) {
             if (element.value.length > 13) {
                 element.value = element.value.slice(0, 13);
             }
+        }
+
+        function validateDigit(element, limit) {
+            if (element.value.length > limit) {
+                element.value = element.value.slice(0, limit);
+            }
+        }
+
+        function validateName(element) {
+            element.value = element.value.replace(/[^a-zA-Z\s'-]/g, '');
+        }
+
+        function validateDotStripNumber(element) {
+          element.value = element.value.replace(/[^0-9.-]/g, '');
+        }
+
+        function validateCantExceed(element, limit) {
+            var value = $(element).val();
+            if (value.includes('.')) {
+              value = cleanNumber(value);
+            } else {
+              value = parseInt(value) || 0;
+            }
+            
+            if (value > limit) {
+                value = limit;
+                $(element).val(formatNumber(value));
+              } 
+              if (isNaN(value)) {
+                value = 0;
+                $(element).val(formatNumber(value));
+            } 
+        }
+
+        function validateMinZero(element, limit) {
+            var value = $(element).val().trim();
+
+            if (value !== "" && !value.startsWith("0.") && value.length > 1) {
+                value = value.replace(/^0+/, '');
+            }
+
+            value = parseFloat(value);
+
+            if (isNaN(value) || value < 0) {
+                $(element).val(0);
+                return false;
+            } else if (value > limit) {
+                value = limit;
+              } 
+              if (isNaN(value)) {
+                value = 0;
+            } 
+
+            $(element).val(value);
+            return true;
         }
 
       $(document).ready(function() {

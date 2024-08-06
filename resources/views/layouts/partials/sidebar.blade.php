@@ -187,7 +187,20 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/purchase1.svg" alt="img"><span> Laporan</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan.kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                        <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan/kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                        <li><a href="{{ route('laporan.tagihan_sewa') }}" class="{{ request()->is('laporan/tagihan_sewa') ? 'active' : '' }}">Tagihan Sewa </a></li>
+                        <li><a href="{{ route('laporan.do_sewa') }}" class="{{ request()->is('laporan/do_sewa') ? 'active' : '' }}">Delivery Order Sewa </a></li>
+                        <li><a href="{{ route('laporan.pergantian_sewa') }}" class="{{ request()->is('laporan/pergantian_sewa') ? 'active' : '' }}">Pergantian Sewa </a></li>
+                        <li><a href="{{ route('laporan.penjualanproduk') }}" class="{{ request()->is('laporan/penjualanproduk*') ? 'active' : '' }}">Penjualan Produk </a></li>
+                        <li><a href="{{ route('laporan.pelanggan') }}" class="{{ request()->is('laporan/pelanggan*') ? 'active' : '' }}">Pelanggan</a></li>
+                        <li><a href="{{ route('laporan.pembayaran') }}" class="{{ request()->is('laporan/pembayaran*') ? 'active' : '' }}">Pembayaran</a></li>
+                        <li><a href="{{ route('laporan.dopenjualan') }}" class="{{ request()->is('laporan/dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
+                        <li><a href="{{ route('laporan.returpenjualan') }}" class="{{ request()->is('laporan/returpenjualan*') ? 'active' : '' }}">Retur Penjualan</a></li>
+                        <li><a href="{{ route('laporan.penjualan') }}" class="{{ request()->is('laporan/penjualan') ? 'active' : '' }}">Penjualan</a></li>
+                        <li><a href="{{ route('laporan.mutasi') }}" class="{{ request()->is('laporan/mutasi') ? 'active' : '' }}">Mutasi</a></li>
+                        <li><a href="{{ route('laporan.mutasiinden') }}" class="{{ request()->is('laporan/mutasiinden*') ? 'active' : '' }}">Mutasi Inden</a></li>
+                        <li><a href="{{ route('laporan.kas_pusat') }}" class="{{ request()->is('laporan/kas_pusat*') ? 'active' : '' }}">Kas Pusat</a></li>
+                        <li><a href="{{ route('laporan.kas_gallery') }}" class="{{ request()->is('laporan/kas_gallery*') ? 'active' : '' }}">Kas Gallery</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))

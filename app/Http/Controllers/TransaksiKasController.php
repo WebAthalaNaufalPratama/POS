@@ -29,13 +29,17 @@ class TransaksiKasController extends Controller
         if($req->lokasi){
             $queryMasuk->where('lokasi_penerima', $req->lokasi);
             $queryKeluar->where('lokasi_pengirim', $req->lokasi);
+        } else {
+            $queryMasuk->whereHas('lok_penerima', function($q){
+                $q->where('operasional_id', 1);
+            });
+            $queryKeluar->whereHas('lok_pengirim', function($q){
+                $q->where('operasional_id', 1);
+            });
         }
         if($req->rekening){
             $queryMasuk->where('rekening_penerima', $req->rekening);
             $queryKeluar->where('rekening_pengirim', $req->rekening);
-        } else {
-            $queryMasuk->whereIn('rekening_penerima', $rekenings->pluck('id'));
-            $queryKeluar->whereIn('rekening_pengirim', $rekenings->pluck('id'));
         }
         $dataMasuk = $queryMasuk->get();
         $dataKeluar = $queryKeluar->get();
@@ -66,7 +70,8 @@ class TransaksiKasController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
-            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'metode' => 'required|in:Transfer,Cash',
+            'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
             'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
             'nominal' => 'required|numeric',
@@ -125,7 +130,8 @@ class TransaksiKasController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
-            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'metode' => 'required|in:Transfer,Cash',
+            'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
             'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
             'nominal' => 'required|numeric',
@@ -139,6 +145,10 @@ class TransaksiKasController extends Controller
         $existingTransaksi = TransaksiKas::find($transaksiKas);
         if (!$existingTransaksi) {
             return redirect()->back()->with('fail', 'Transaksi tidak ditemukan.');
+        }
+        if($req->metode == 'Cash'){
+            $data['rekening_penerima'] = null;
+            $data['rekening_pengirim'] = null;
         }
 
         // save data
@@ -191,14 +201,13 @@ class TransaksiKasController extends Controller
             } else {
                 $lokasi_pengirim = $lokasis->first()->id;
                 $rekeningKeluar = Rekening::where('lokasi_id', $lokasi_pengirim)->get();
+                $queryMasuk->where('lokasi_penerima', $lokasis->first()->id);
+                $queryKeluar->where('lokasi_pengirim', $lokasis->first()->id);
             }
         }
         if($req->rekening){
             $queryMasuk->where('rekening_penerima', $req->rekening);
             $queryKeluar->where('rekening_pengirim', $req->rekening);
-        } else {
-            $queryMasuk->whereIn('rekening_penerima', $rekenings->pluck('id'));
-            $queryKeluar->whereIn('rekening_pengirim', $rekenings->pluck('id'));
         }
         $dataMasuk = $queryMasuk->get();
         $dataKeluar = $queryKeluar->get();
@@ -228,7 +237,8 @@ class TransaksiKasController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
-            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'metode' => 'required|in:Transfer,Cash',
+            'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
             'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
             'nominal' => 'required|numeric',
@@ -290,7 +300,8 @@ class TransaksiKasController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
-            'rekening_pengirim' => 'required|numeric|exists:rekenings,id',
+            'metode' => 'required|in:Transfer,Cash',
+            'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
             'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'keterangan' => 'required',
             'nominal' => 'required|numeric',

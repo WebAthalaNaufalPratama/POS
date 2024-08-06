@@ -642,6 +642,47 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/kontrak', 'LaporanController@kontrak_index')->name('laporan.kontrak');
             Route::get('/kontrak-pdf', 'LaporanController@kontrak_pdf')->name('laporan.kontrak-pdf');
             Route::get('/kontrak-excel', 'LaporanController@kontrak_excel')->name('laporan.kontrak-excel');
+            Route::get('/tagihan_sewa', 'LaporanController@tagihan_sewa_index')->name('laporan.tagihan_sewa');
+            Route::get('/tagihan_sewa-pdf', 'LaporanController@tagihan_sewa_pdf')->name('laporan.tagihan_sewa-pdf');
+            Route::get('/tagihan_sewa-excel', 'LaporanController@tagihan_sewa_excel')->name('laporan.tagihan_sewa-excel');
+            Route::get('/do_sewa', 'LaporanController@do_sewa_index')->name('laporan.do_sewa');
+            Route::get('/do_sewa-pdf', 'LaporanController@do_sewa_pdf')->name('laporan.do_sewa-pdf');
+            Route::get('/do_sewa-excel', 'LaporanController@do_sewa_excel')->name('laporan.do_sewa-excel');
+            Route::get('/pergantian_sewa', 'LaporanController@pergantian_sewa_index')->name('laporan.pergantian_sewa');
+            Route::get('/pergantian_sewa-pdf', 'LaporanController@pergantian_sewa_pdf')->name('laporan.pergantian_sewa-pdf');
+            Route::get('/pergantian_sewa-excel', 'LaporanController@pergantian_sewa_excel')->name('laporan.pergantian_sewa-excel');
+            Route::get('/penjualanproduk', 'LaporanController@penjualanproduk_index')->name('laporan.penjualanproduk');
+            Route::get('/penjualanproduk-pdf', 'LaporanController@penjualanproduk_pdf')->name('laporan.penjualanproduk-pdf');
+            Route::get('/penjualanproduk-excel', 'LaporanController@penjualanproduk_excel')->name('laporan.penjualanproduk-excel');
+            Route::get('/pelanggan', 'LaporanController@pelanggan_index')->name('laporan.pelanggan');
+            Route::get('/pelanggan-pdf', 'LaporanController@pelanggan_pdf')->name('laporan.pelanggan-pdf');
+            Route::get('/pelanggan-excel', 'LaporanController@pelanggan_excel')->name('laporan.pelanggan-excel');
+            Route::get('/pembayaran', 'LaporanController@pembayaran_index')->name('laporan.pembayaran');
+            Route::get('/pembayaran-pdf', 'LaporanController@pembayaran_pdf')->name('laporan.pembayaran-pdf');
+            Route::get('/pembayaran-excel', 'LaporanController@pembayaran_excel')->name('laporan.pembayaran-excel');
+            Route::get('/dopenjualan', 'LaporanController@dopenjualan_index')->name('laporan.dopenjualan');
+            Route::get('/dopenjualan-pdf', 'LaporanController@dopenjualan_pdf')->name('laporan.dopenjualan-pdf');
+            Route::get('/dopenjualan-excel', 'LaporanController@dopenjualan_excel')->name('laporan.dopenjualan-excel');
+            Route::get('/returpenjualan', 'LaporanController@returpenjualan_index')->name('laporan.returpenjualan');
+            Route::get('/returpenjualan-pdf', 'LaporanController@returpenjualan_pdf')->name('laporan.returpenjualan-pdf');
+            Route::get('/returpenjualan-excel', 'LaporanController@returpenjualan_excel')->name('laporan.returpenjualan-excel');
+            Route::get('/penjualan', 'LaporanController@penjualan_index')->name('laporan.penjualan');
+            Route::get('/penjualan-pdf', 'LaporanController@penjualan_pdf')->name('laporan.penjualan-pdf');
+            Route::get('/penjualan-excel', 'LaporanController@penjualan_excel')->name('laporan.penjualan-excel');
+            Route::get('/mutasi', 'LaporanController@mutasi_index')->name('laporan.mutasi');
+            Route::get('/mutasi-pdf', 'LaporanController@mutasi_pdf')->name('laporan.mutasi-pdf');
+            Route::get('/mutasi-excel', 'LaporanController@mutasi_excel')->name('laporan.mutasi-excel');
+            Route::get('/mutasiinden', 'LaporanController@mutasiinden_index')->name('laporan.mutasiinden');
+            Route::get('/mutasiinden-pdf', 'LaporanController@mutasiinden_pdf')->name('laporan.mutasiinden-pdf');
+            Route::get('/mutasiinden-excel', 'LaporanController@mutasiinden_excel')->name('laporan.mutasiinden-excel');
+            Route::get('/kas_pusat', 'LaporanController@kas_pusat_index')->name('laporan.kas_pusat');
+            Route::get('/kas_pusat-pdf', 'LaporanController@kas_pusat_pdf')->name('laporan.kas_pusat-pdf');
+            Route::get('/kas_pusat-excel', 'LaporanController@kas_pusat_excel')->name('laporan.kas_pusat-excel');
+            Route::get('/kas_gallery', 'LaporanController@kas_gallery_index')->name('laporan.kas_gallery');
+            Route::get('/kas_gallery-pdf', 'LaporanController@kas_gallery_pdf')->name('laporan.kas_gallery-pdf');
+            Route::get('/kas_gallery-excel', 'LaporanController@kas_gallery_excel')->name('laporan.kas_gallery-excel');
+
+
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
