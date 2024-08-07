@@ -295,7 +295,7 @@ class DeliveryOrderController extends Controller
             }
 
             DB::commit();
-            return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
+            return redirect(route('do_sewa.index'))->with('success', 'Data tersimpan');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());

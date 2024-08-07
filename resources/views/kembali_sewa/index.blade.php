@@ -61,11 +61,11 @@
                     @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->no_kembali }}</td>
-                            <td>{{ $item->no_sewa }}</td>
-                            <td>{{ $item->sewa->customer->nama }}</td>
-                            <td>{{ $item->data_driver->nama }}</td>
-                            <td>{{ formatTanggal($item->tanggal_kembali) }}</td>
+                            <td>{{ $item->no_kembali ?? '' }}</td>
+                            <td>{{ $item->no_sewa ?? '' }}</td>
+                            <td>{{ $item->sewa->customer->nama ?? '' }}</td>
+                            <td>{{ $item->data_driver->nama ?? '' }}</td>
+                            <td>{{ formatTanggal($item->tanggal_kembali) ?? '' }}</td>
                             <td>
                                 <span class="badges
                                 {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : ($item->status == 'TUNDA' ? 'bg-lightred' : 'bg-lightgrey') }}">

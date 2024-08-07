@@ -96,9 +96,9 @@
                                             <a href="{{ route('kontrak.pdfKontrak', ['kontrak' => $kontrak->id]) }}" target="_blank" class="dropdown-item"><img src="assets/img/icons/pdf.svg" class="me-2" alt="img">Kontrak</a>
                                         </li>
                                     @endif
-                                    @if($kontrak->status == 'DIKONFIRMASI' && in_array('kontrak.excelPergantian', $thisUserPermissions) && $kontrak->tanggal_pemeriksa && $kontrak->tanggal_penyetuju && empty($kontrak->kembali_sewa))
+                                    @if($kontrak->status == 'DIKONFIRMASI' && in_array('kontrak.excelPergantian', $thisUserPermissions) && $kontrak->tanggal_pemeriksa && $kontrak->tanggal_penyetuju && !empty($kontrak->kembali_sewa))
                                         <li>
-                                            <a href="{{ route('kontrak.excelPergantian', ['kontrak' => $kontrak->id]) }}" target="_blank" class="dropdown-item"><img src="assets/img/icons/reverse-alt.svg" class="me-2" alt="img">Pergantian</a>
+                                            <a href="{{ route('kontrak.excelPergantian', ['kontrak' => $kontrak->id]) }}" class="dropdown-item"><img src="assets/img/icons/reverse-alt.svg" class="me-2" alt="img">Pergantian</a>
                                         </li>
                                     @endif
                                     @if(in_array('do_sewa.create', $thisUserPermissions) && $kontrak->status == 'DIKONFIRMASI')

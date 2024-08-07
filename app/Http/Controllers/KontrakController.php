@@ -450,6 +450,110 @@ class KontrakController extends Controller
 
     public function excelPergantian($id)
     {
-        return Excel::download(new PergantianExport($id), 'users.xlsx');
+        // Ambil data yang diperlukan
+        $data = Kontrak::with(['customer', 'data_sales', 'do_sewa.produk.komponen'])
+            ->findOrFail($id);
+
+        // Inisialisasi variabel untuk menyimpan hasil perhitungan
+        $totalKirimPot = 0;
+        $totalKirimTanaman = 0;
+        $totalKembaliPot = 0;
+        $totalKembaliTanaman = 0;
+
+        // Proses data DO dan Produk
+        $doSewaData = $data->do_sewa->map(function($item) use (&$totalKirimPot, &$totalKirimTanaman) {
+            return $item->produk->map(function($produk) use (&$totalKirimPot, &$totalKirimTanaman, $item) {
+                if ($produk->jenis == null) {
+                    $pot = 0;
+                    $tanaman = 0;
+                    $baik = 0;
+                    $afkir = 0;
+                    $bonggol = 0;
+
+                    foreach ($produk->komponen as $komponen) {
+                        if ($komponen->tipe_produk == 2) {
+                            $pot += $komponen->jumlah * $produk->jumlah;
+                        } elseif ($komponen->tipe_produk == 1) {
+                            $tanaman += $komponen->jumlah * $produk->jumlah;
+                            if ($komponen->kondisi == 1) {
+                                $baik += $komponen->jumlah * $produk->jumlah;
+                            } elseif ($komponen->kondisi == 2) {
+                                $afkir += $komponen->jumlah * $produk->jumlah;
+                            } elseif ($komponen->kondisi == 3) {
+                                $bonggol += $komponen->jumlah * $produk->jumlah;
+                            }
+                        }
+                    }
+                    
+                    $totalKirimPot += $pot;
+                    $totalKirimTanaman += $tanaman;
+
+                    return [
+                        'isDO' => true,
+                        'no_referensi' => $item->no_do,
+                        'tanggal' => formatTanggal($item->tanggal_kirim),
+                        'produk' => $produk->produk->nama,
+                        'pot' => $pot,
+                        'tanaman' => $tanaman,
+                        'baik' => $baik,
+                        'afkir' => $afkir,
+                        'bonggol' => $bonggol
+                    ];
+                }
+            })->filter();
+        })->flatten(1);
+
+        // Proses data Kembali Sewa
+        $produkKembaliData = $data->kembali_sewa->map(function($item) use (&$totalKembaliPot, &$totalKembaliTanaman) {
+            return $item->produk->map(function($produk) use (&$totalKembaliPot, &$totalKembaliTanaman) {
+                if ($produk->jenis == 'KEMBALI_SEWA') {
+                    $baik = 0;
+                    $afkir = 0;
+                    $bonggol = 0;
+                    $kembaliPot = 0;
+                    foreach ($produk->komponen as $komponen) {
+                        if ($komponen->tipe_produk == 1) {
+                            if ($komponen->kondisi == 1) {
+                                $baik += $komponen->jumlah * $produk->jumlah;
+                            } elseif ($komponen->kondisi == 2) {
+                                $afkir += $komponen->jumlah * $produk->jumlah;
+                            } elseif ($komponen->kondisi == 3) {
+                                $bonggol += $komponen->jumlah * $produk->jumlah;
+                            }
+                        } elseif ($komponen->tipe_produk == 2) {
+                            $kembaliPot += $komponen->jumlah * $produk->jumlah;
+                        }
+                    }
+                    $totalKembaliPot += $kembaliPot;
+                    $totalKembaliTanaman += ($baik + $afkir + $bonggol);
+
+                    return [
+                        'isDO' => false,
+                        'no_referensi' => $produk->no_kembali_sewa,
+                        'tanggal' => formatTanggal($produk->kembali_sewa->tanggal_kembali),
+                        'produk' => $produk->produk->nama,
+                        'pot' => $kembaliPot,
+                        'tanaman' => $baik + $afkir + $bonggol,
+                        'baik' => $baik,
+                        'afkir' => $afkir,
+                        'bonggol' => $bonggol
+                    ];
+                }
+            })->filter();
+        })->flatten(1);
+
+        // Menggabungkan data DO dan Kembali
+        $tableData = $doSewaData->merge($produkKembaliData);
+
+        $result = [
+            'data' => $data,
+            'tableData' => $tableData,
+            'totalKirimPot' => $totalKirimPot,
+            'totalKirimTanaman' => $totalKirimTanaman,
+            'totalKembaliPot' => $totalKembaliPot,
+            'totalKembaliTanaman' => $totalKembaliTanaman
+        ];
+
+        return Excel::download(new PergantianExport($result), 'pergantian_barang.xlsx');
     }
 }
