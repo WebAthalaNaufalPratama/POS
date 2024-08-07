@@ -444,7 +444,7 @@
                         <div class="page-title">
                             <h4 class="card-title">Pembayaran</h4>
                         </div>
-                        @if(in_array('pembayaran_sewa.store', $thisUserPermissions))
+                        @if(in_array('pembayaran_sewa.store', $thisUserPermissions) && $data->status == 'DIKONFIRMASI')
                         <div class="page-btn">
                             <a href="javascript:void(0);" onclick="bayar({{ $data }})" class="btn btn-added">Tambah Pembayaran</a>
                         </div>
@@ -537,7 +537,7 @@
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
+                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="{{ $invoice_bayar }}" required readonly>
                             <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
                         </div>
                     </div>
@@ -583,7 +583,7 @@
                     <div class="row">
                         <div class="form-group col-sm-12">
                             <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" required>
+                            <input type="file" class="form-control" id="bukti" name="bukti" required accept="image/*">
                         </div>
                     </div>
                 </div>
@@ -662,7 +662,7 @@
                     <div class="row">
                         <div class="form-group col-sm-12">
                             <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="edit_bukti" name="bukti">
+                            <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*">
                         </div>
                         <img id="edit_preview" src="" alt="your image" style="max-width: 100%"/>
                     </div>
@@ -1157,7 +1157,7 @@
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(formatNumber(harga_total));
             var dp = parseInt(cleanNumber($('#dp').val()));
-            $('#sisa_bayar').val(formatNumber(harga_total - dp));
+            // $('#sisa_bayar').val(formatNumber(harga_total - dp));
         }
         function update_pajak(subtotal){
             var ppn_persen = $('#ppn_persen').val() || 0;
@@ -1184,18 +1184,7 @@
                 dropdownParent: $("#modalBayar")
             });
             $('#modalBayar').modal('show');
-            generateInvoice();
-        }
-        function generateInvoice() {
-            var invoicePrefix = "BYR";
-            var currentDate = new Date();
-            var year = currentDate.getFullYear();
-            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            var day = currentDate.getDate().toString().padStart(2, '0');
-            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-            $('#no_invoice_bayar').val(generatedInvoice);
+            $('#bayar').trigger('change');
         }
         function bukti(src){
             var baseUrl = window.location.origin;
@@ -1233,6 +1222,7 @@
                             dropdownParent: $("#modalEditBayar")
                         });
                         $('#modalEditBayar').modal('show');
+                        $('#edit_bayar').trigger('change');
                     },
                     error: function(error) {
                         toastr.error(JSON.parse(error.responseText).msg, 'Error', {
