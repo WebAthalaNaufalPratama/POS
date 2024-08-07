@@ -43,15 +43,15 @@ class InvoiceSewa extends Model
     }
         
     public function data_pembuat(){
-        return $this->belongsTo(Karyawan::class, 'pembuat', 'id');
+        return $this->belongsTo(User::class, 'pembuat', 'id');
     }
         
     public function data_penyetuju(){
-        return $this->belongsTo(Karyawan::class, 'penyetuju', 'id');
+        return $this->belongsTo(User::class, 'penyetuju', 'id');
     }
         
     public function data_pemeriksa(){
-        return $this->belongsTo(Karyawan::class, 'pemeriksa', 'id');
+        return $this->belongsTo(User::class, 'pemeriksa', 'id');
     }
 
     public function pembayaran(){

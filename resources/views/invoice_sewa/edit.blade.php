@@ -265,9 +265,9 @@
                                         <tbody>
                                             <tr>
                                                 <td id="sales">{{ $data->data_sales->nama }}</td>
-                                                <td id="pembuat">{{ $data->data_pembuat->nama ?? '-' }}</td>
-                                                <td id="penyetuju">{{ $data->data_penyetuju->nama ?? '-' }}</td>
-                                                <td id="pemeriksa">{{ $data->data_pemeriksa->nama ?? '-' }}</td>
+                                                <td id="pembuat">{{ $data->data_pembuat->name ?? '-' }}</td>
+                                                <td id="penyetuju">{{ $data->data_penyetuju->name ?? '-' }}</td>
+                                                <td id="pemeriksa">{{ $data->data_pemeriksa->name ?? '-' }}</td>
                                             </tr>
                                             <tr>
                                                 <td style="width: 25%;">{{ isset($data->tanggal_sales) ? formatTanggal($data->tanggal_sales) : '-' }}</td>

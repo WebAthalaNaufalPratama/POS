@@ -48,11 +48,11 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <label for="jumlah" class="col-form-label">Jumlah</label>
-                            <input type="number" class="form-control" name="jumlah" id="jumlah" required>
+                            <input type="number" class="form-control" name="jumlah" id="jumlah" oninput="validateMinZero(this, 10000)" required>
                         </div>
                         <div class="col-sm-6">
                             <label for="min_stok" class="col-form-label">Minimal Stok</label>
-                            <input type="number" class="form-control" name="min_stok" id="min_stok" required>
+                            <input type="number" class="form-control" name="min_stok" id="min_stok" oninput="validateMinZero(this, 100)" required>
                         </div>
                     </div>
                     <div class="text-end mt-3">

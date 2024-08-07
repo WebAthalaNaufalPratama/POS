@@ -254,9 +254,9 @@
                                     <tbody>
                                         <tr>
                                             <td id="sales">{{ $data->data_sales->nama }}</td>
-                                            <td id="pembuat">{{ $data->data_pembuat->nama ?? '-' }}</td>
-                                            <td id="penyetuju">{{ $kontraks->data_penyetuju->name ?? (Auth::user()->hasRole('Auditor') ? Auth::user()->name : '') }}</td>
-                                            <td id="pemeriksa">{{ $kontraks->data_pemeriksa->name ?? (Auth::user()->hasRole('Finance') ? Auth::user()->name : '') }}</td>
+                                            <td id="pembuat">{{ $data->data_pembuat->name ?? '-' }}</td>
+                                            <td id="penyetuju">{{ $data->data_penyetuju->name ?? (Auth::user()->hasRole('Auditor') ? Auth::user()->name : '') }}</td>
+                                            <td id="pemeriksa">{{ $data->data_pemeriksa->name ?? (Auth::user()->hasRole('Finance') ? Auth::user()->name : '') }}</td>
                                         </tr>
                                         <tr>
                                             <td style="width: 25%;">{{ isset($data->tanggal_sales) ? formatTanggal($data->tanggal_sales) : '-' }}</td>
