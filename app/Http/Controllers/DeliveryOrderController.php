@@ -12,6 +12,7 @@ use App\Models\Produk_Jual;
 use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
 
@@ -109,11 +110,6 @@ class DeliveryOrderController extends Controller
             }
         }
 
-        // cek jika sudah terkirim semua
-        // $terkirimSemua = false;
-        // if ($produkSewa->isEmpty()) {
-        //     $terkirimSemua = true;
-        // }
         return view('do_sewa.create', compact('kontrak', 'drivers', 'produkjuals', 'getKode', 'produkSewa'));
     }
 
@@ -136,13 +132,18 @@ class DeliveryOrderController extends Controller
             'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
         ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+        if ($validator->fails()) {
+            $error = $validator->errors()->all();
+            return redirect()->back()->withInput()->with('fail', $error);
+        }
+
         $data = $req->except(['_token', '_method']);
         $data['jenis_do'] = 'SEWA';
         $data['status'] = 'TUNDA';
         $data['tanggal_pembuat'] = now();
         $data['pembuat'] = Auth::user()->id;
+
         if ($req->hasFile('file')) {
             $file = $req->file('file');
             $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
@@ -150,111 +151,91 @@ class DeliveryOrderController extends Controller
             $data['file'] = $filePath;
         }
 
-        // check produk and quantity from sewa
-        $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_referensi'])->first();
-        $produkSewa = $kontrak->produk()->whereHas('produk', function($q){
-            $q->whereColumn('jumlah_dikirim', '<', 'jumlah')->orWhere('jumlah_dikirim', null);
-        })->get();
+        DB::beginTransaction();
+        try {
+            // Check produk and quantity from sewa
+            $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_referensi'])->first();
+            $produkSewa = $kontrak->produk()->whereHas('produk', function ($q) {
+                $q->whereColumn('jumlah_dikirim', '<', 'jumlah')->orWhereNull('jumlah_dikirim');
+            })->get();
 
-        // cek input dengan sewa
-        foreach ($produkSewa as $item) {
-            for ($i=0; $i < count($data['produk_id']); $i++) {
-                if($data['produk_id'][$i] == $item->id){
-                    if($data['jumlah'][$i] > $item->jumlah || $data['jumlah'][$i] > ($item->jumlah - $item->jumlah_dikirim)){
-                        return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai dengan kontrak');
+            // Cek input dengan sewa
+            foreach ($produkSewa as $item) {
+                for ($i = 0; $i < count($data['produk_id']); $i++) {
+                    if ($data['produk_id'][$i] == $item->id) {
+                        if ($data['jumlah'][$i] > $item->jumlah || $data['jumlah'][$i] > ($item->jumlah - $item->jumlah_dikirim)) {
+                            DB::rollBack();
+                            return redirect()->back()->withInput()->with('fail', 'Jumlah produk tidak sesuai dengan kontrak');
+                        }
                     }
                 }
             }
-        }
 
-
-        // ambil akumulasi komponen DO
-        $dataDO = [];
-        for ($i=0; $i < count($data['produk_id']); $i++) { 
-            $produkTerjual = Produk_Terjual::find($data['produk_id'][$i])->komponen;
-            foreach ($produkTerjual as $item) {
-                if(isset($dataDO[$item->kode_produk]['kondisi'])){
-                    $dataDO[$item->kode_produk]['jumlah'] += $item->jumlah * $data['jumlah'][$i];
-                } else {
-                    $dataDO[$item->kode_produk] = ['kondisi' => $item->kondisi, 'jumlah' => $item->jumlah * $data['jumlah'][$i]];
-                }
-            }
-        }
-
-        // ambil akumulasi komponen tambahan DO
-        $dataTambahanDO = [];
-        if(isset($data['nama_produk2'][0])){
-            for ($i=0; $i < count($data['produk_id2']); $i++) { 
-                $produkTerjual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i])->komponen;
+            // Ambil akumulasi komponen DO
+            $dataDO = [];
+            for ($i = 0; $i < count($data['produk_id']); $i++) {
+                $produkTerjual = Produk_Terjual::find($data['produk_id'][$i])->komponen;
                 foreach ($produkTerjual as $item) {
-                    if(isset($dataTambahanDO[$item->kode_produk]['kondisi'])){
-                        $dataTambahanDO[$item->kode_produk]['jumlah'] += $item->jumlah * $data['jumlah2'][$i];
+                    if (isset($dataDO[$item->kode_produk]['kondisi'])) {
+                        $dataDO[$item->kode_produk]['jumlah'] += $item->jumlah * $data['jumlah'][$i];
                     } else {
-                        $dataTambahanDO[$item->kode_produk] = ['kondisi' => $item->kondisi, 'jumlah' => $item->jumlah * $data['jumlah2'][$i]];
+                        $dataDO[$item->kode_produk] = ['kondisi' => $item->kondisi, 'jumlah' => $item->jumlah * $data['jumlah'][$i]];
                     }
                 }
             }
 
-            // penggabungan data DO dan tambahan
-            foreach ($dataTambahanDO as $key => $value) {
-                if (isset($dataDO[$key]) && $dataDO[$key]['kondisi'] == $value['kondisi']) {
-                    $dataDO[$key]['jumlah'] += $value['jumlah'];
-                } else {
-                    $dataDO[$key] = $value;
+            // Ambil akumulasi komponen tambahan DO
+            $dataTambahanDO = [];
+            if (isset($data['nama_produk2'][0])) {
+                for ($i = 0; $i < count($data['produk_id2']); $i++) {
+                    $produkTerjual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i])->komponen;
+                    foreach ($produkTerjual as $item) {
+                        if (isset($dataTambahanDO[$item->kode_produk]['kondisi'])) {
+                            $dataTambahanDO[$item->kode_produk]['jumlah'] += $item->jumlah * $data['jumlah2'][$i];
+                        } else {
+                            $dataTambahanDO[$item->kode_produk] = ['kondisi' => $item->kondisi, 'jumlah' => $item->jumlah * $data['jumlah2'][$i]];
+                        }
+                    }
+                }
+
+                // Penggabungan data DO dan tambahan
+                foreach ($dataTambahanDO as $key => $value) {
+                    if (isset($dataDO[$key]) && $dataDO[$key]['kondisi'] == $value['kondisi']) {
+                        $dataDO[$key]['jumlah'] += $value['jumlah'];
+                    } else {
+                        $dataDO[$key] = $value;
+                    }
                 }
             }
-        }
 
-        // save data do
-        $check = DeliveryOrder::create($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-        // save produk do
-        for ($i=0; $i < count($data['nama_produk']); $i++) { 
-            $getProdukTerjual = Produk_Terjual::with('komponen')->find($data['produk_id'][$i]);
-            $produk_terjual = Produk_Terjual::create([
-                'produk_jual_id' => $getProdukTerjual->produk_jual_id,
-                'no_do' => $check->no_do,
-                'jumlah' => $data['jumlah'][$i],
-                'satuan' => $data['satuan'][$i],
-                'detail_lokasi' => $data['detail_lokasi'][$i]
-            ]);
-            $getProdukSewa = Produk_Terjual::find($data['produk_id'][$i]);
-            $getProdukSewa->jumlah_dikirim = ($getProdukSewa->jumlah_dikirim ?? 0) + intval($data['jumlah'][$i]);
-            $getProdukSewa->update();
-
-            if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-            foreach ($getProdukTerjual->komponen as $komponen ) {
-                $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                    'produk_terjual_id' => $produk_terjual->id,
-                    'kode_produk' => $komponen->kode_produk,
-                    'nama_produk' => $komponen->nama_produk,
-                    'tipe_produk' => $komponen->tipe_produk,
-                    'kondisi' => $komponen->kondisi,
-                    'deskripsi' => $komponen->deskripsi,
-                    'jumlah' => $komponen->jumlah,
-                    'harga_satuan' => $komponen->harga_satuan,
-                    'harga_total' => $komponen->harga_total
-                ]);
-                if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            // Save data DO
+            $check = DeliveryOrder::create($data);
+            if (!$check) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
-        }
 
-        // save data tambahan
-        if(isset($data['nama_produk2'][0])){
-            for ($i=0; $i < count($data['nama_produk2']); $i++) { 
-                $getProdukJual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i]);
+            // Save produk DO
+            for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                $getProdukTerjual = Produk_Terjual::with('komponen')->find($data['produk_id'][$i]);
                 $produk_terjual = Produk_Terjual::create([
-                    'produk_jual_id' => $getProdukJual->id,
+                    'produk_jual_id' => $getProdukTerjual->produk_jual_id,
                     'no_do' => $check->no_do,
-                    'jumlah' => $data['jumlah2'][$i],
-                    'satuan' => $data['satuan2'][$i],
-                    'jenis' => 'TAMBAHAN',
-                    'keterangan' => $data['keterangan2'][$i]
+                    'jumlah' => $data['jumlah'][$i],
+                    'satuan' => $data['satuan'][$i],
+                    'detail_lokasi' => $data['detail_lokasi'][$i]
                 ]);
-    
-                if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                foreach ($getProdukJual->komponen as $komponen ) {
+
+                if (!$produk_terjual) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                }
+
+                $getProdukSewa = Produk_Terjual::find($data['produk_id'][$i]);
+                $getProdukSewa->jumlah_dikirim = ($getProdukSewa->jumlah_dikirim ?? 0) + intval($data['jumlah'][$i]);
+                $getProdukSewa->update();
+
+                foreach ($getProdukTerjual->komponen as $komponen) {
                     $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                         'produk_terjual_id' => $produk_terjual->id,
                         'kode_produk' => $komponen->kode_produk,
@@ -266,14 +247,60 @@ class DeliveryOrderController extends Controller
                         'harga_satuan' => $komponen->harga_satuan,
                         'harga_total' => $komponen->harga_total
                     ]);
-                    if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+
+                    if (!$komponen_produk_terjual) {
+                        DB::rollBack();
+                        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    }
                 }
             }
+
+            // Save data tambahan
+            if (isset($data['nama_produk2'][0])) {
+                for ($i = 0; $i < count($data['nama_produk2']); $i++) {
+                    $getProdukJual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i]);
+                    $produk_terjual = Produk_Terjual::create([
+                        'produk_jual_id' => $getProdukJual->id,
+                        'no_do' => $check->no_do,
+                        'jumlah' => $data['jumlah2'][$i],
+                        'satuan' => $data['satuan2'][$i],
+                        'jenis' => 'TAMBAHAN',
+                        'keterangan' => $data['keterangan2'][$i]
+                    ]);
+
+                    if (!$produk_terjual) {
+                        DB::rollBack();
+                        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    }
+
+                    foreach ($getProdukJual->komponen as $komponen) {
+                        $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                            'produk_terjual_id' => $produk_terjual->id,
+                            'kode_produk' => $komponen->kode_produk,
+                            'nama_produk' => $komponen->nama_produk,
+                            'tipe_produk' => $komponen->tipe_produk,
+                            'kondisi' => $komponen->kondisi,
+                            'deskripsi' => $komponen->deskripsi,
+                            'jumlah' => $komponen->jumlah,
+                            'harga_satuan' => $komponen->harga_satuan,
+                            'harga_total' => $komponen->harga_total
+                        ]);
+
+                        if (!$komponen_produk_terjual) {
+                            DB::rollBack();
+                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                        }
+                    }
+                }
+            }
+
+            DB::commit();
+            return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        return redirect(route('kontrak.index'))->with('success', 'Data tersimpan');
     }
-
     /**
      * Display the specified resource.
      *
@@ -318,54 +345,88 @@ class DeliveryOrderController extends Controller
     public function update_sewa(Request $req, $deliveryOrder)
     {
         if($req->konfirmasi){
-            $do_sewa = DeliveryOrder::find($deliveryOrder);
-            if($req->konfirmasi == 'confirm'){
-                $do_sewa->status = 'DIKONFIRMASI';
-                $msg = 'Dikonfirmasi';
-                
-                // cek stok inventory
-                foreach ($do_sewa->produk as $produk) {
-                    foreach ($produk->komponen as $komponen) {
-                        $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->where('lokasi_id', $do_sewa->kontrak->lokasi_id)->first();
-                        if(!$inventory) return redirect()->back()->withInput()->with('fail', 'Stok '.$komponen->kode_produk.' tidak ada');
-                        if($inventory->jumlah > ($komponen->jumlah * $produk->jumlah)){
-                            $sufficient = $inventory->jumlah - ($komponen->jumlah * $produk->jumlah) >= $inventory->min_stok;
-                            if(!$sufficient) return redirect()->back()->withInput()->with('fail', 'Stok '.$komponen->kode_produk.' dibawah minimum');
-                        } else {
-                            return redirect()->back()->withInput()->with('fail', 'Stok '.$komponen->kode_produk.' tidak mencukupi');
-                        }
-                    }
+            DB::beginTransaction();
+            try {
+                $do_sewa = DeliveryOrder::find($deliveryOrder);
+                if (!$do_sewa) {
+                    return redirect()->back()->withInput()->with('fail', 'Delivery order not found');
                 }
 
-                // pengurangan stok
-                if(Auth::user()->hasRole('AdminGallery')){
+                if ($req->konfirmasi == 'confirm') {
+                    $do_sewa->status = 'DIKONFIRMASI';
+                    $msg = 'Dikonfirmasi';
+
+                    // Check inventory stock
                     foreach ($do_sewa->produk as $produk) {
                         foreach ($produk->komponen as $komponen) {
-                            $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->where('lokasi_id', $do_sewa->kontrak->lokasi_id)->first();
-                            $inventory->jumlah = $inventory->jumlah - (intval($komponen->jumlah) * $produk->jumlah);
-                            $inventory->update();
+                            $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)
+                                ->where('kondisi_id', $komponen->kondisi)
+                                ->where('lokasi_id', $do_sewa->kontrak->lokasi_id)
+                                ->first();
+
+                            if (!$inventory) {
+                                DB::rollBack();
+                                return redirect()->back()->withInput()->with('fail', 'Stok '.$komponen->kode_produk.' tidak ada');
+                            }
+
+                            $requiredQuantity = $komponen->jumlah * $produk->jumlah;
+                            if ($inventory->jumlah < $requiredQuantity) {
+                                DB::rollBack();
+                                return redirect()->back()->withInput()->with('fail', 'Stok '.$komponen->kode_produk.' tidak mencukupi');
+                            }
+
+                            $sufficient = $inventory->jumlah - $requiredQuantity >= $inventory->min_stok;
+                            if (!$sufficient) {
+                                DB::rollBack();
+                                return redirect()->back()->withInput()->with('fail', 'Stok '.$komponen->kode_produk.' dibawah minimum');
+                            }
                         }
                     }
+
+                    // Deduct stock if the user has the 'AdminGallery' role
+                    if (Auth::user()->hasRole('AdminGallery')) {
+                        foreach ($do_sewa->produk as $produk) {
+                            foreach ($produk->komponen as $komponen) {
+                                $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)
+                                    ->where('kondisi_id', $komponen->kondisi)
+                                    ->where('lokasi_id', $do_sewa->kontrak->lokasi_id)
+                                    ->first();
+                                $inventory->jumlah -= intval($komponen->jumlah) * $produk->jumlah;
+                                $inventory->save();
+                            }
+                        }
+                    }
+
+                } elseif ($req->konfirmasi == 'cancel') {
+                    $do_sewa->status = 'BATAL';
+                    $msg = 'Dibatalkan';
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');
                 }
-            } else if($req->konfirmasi == 'cancel'){
-                $do_sewa->status = 'BATAl';
-                $msg = 'Dibatalkan';
-            } else {
-                return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');
+
+                // Update approval information based on user role
+                if (Auth::user()->hasRole('Auditor')) {
+                    $do_sewa->penyetuju = Auth::user()->id;
+                    $do_sewa->tanggal_penyetuju = $req->tanggal_penyetuju;
+                }
+
+                if (Auth::user()->hasRole('Finance')) {
+                    $do_sewa->pemeriksa = Auth::user()->id;
+                    $do_sewa->tanggal_pemeriksa = $req->tanggal_pemeriksa;
+                }
+
+                $do_sewa->save();
+
+                DB::commit();
+                return redirect()->back()->withInput()->with('success', 'Data Berhasil ' . $msg);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status: ' . $e->getMessage());
             }
-            if(Auth::user()->hasRole('Auditor')){
-                $do_sewa->penyetuju = Auth::user()->id;
-                $do_sewa->tanggal_penyetuju = $req->tanggal_penyetuju;
-            }
-            if(Auth::user()->hasRole('Finance')){
-                $do_sewa->pemeriksa = Auth::user()->id;
-                $do_sewa->tanggal_pemeriksa = $req->tanggal_pemeriksa;
-            }
-            $check = $do_sewa->update();
-            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');
-            return redirect()->back()->withInput()->with('success', 'Data Berhasil ' . $msg);
         } else {
-            // validasi
+            // Validation
             $validator = Validator::make($req->all(), [
                 'no_do' => 'required',
                 'no_referensi' => 'required',
@@ -376,129 +437,106 @@ class DeliveryOrderController extends Controller
                 'handphone' => 'required|numeric|digits_between:11,13',
                 'alamat' => 'required',
             ]);
-            $error = $validator->errors()->all();
-            if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-            $data = $req->except(['_token', '_method']);
-            if ($req->hasFile('file')) {
-                $file = $req->file('file');
-                $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_do_sewa', $fileName, 'public');
-                $data['file'] = $filePath;
+
+            if ($validator->fails()) {
+                return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
             }
-            // check produk and quantity from sewa
-            $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_referensi'])->first();
-            $produkSewa = $kontrak->produk()->whereHas('produk')->get();
 
-            // cek input dengan sewa
-            $sesuaiKontrak = true;
-
-            $inputProduk = [];
-            for ($i = 0; $i < count($data['nama_produk']); $i++) {
-                $kodeProduk = $data['nama_produk'][$i];
-                $jumlahProduk = $data['jumlah'][$i];
-
-                if (!isset($inputProduk[$kodeProduk])) {
-                    $inputProduk[$kodeProduk] = 0;
+            // Start DB transaction
+            DB::beginTransaction();
+            try {
+                $data = $req->except(['_token', '_method']);
+                if ($req->hasFile('file')) {
+                    $file = $req->file('file');
+                    $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                    $filePath = $file->storeAs('bukti_do_sewa', $fileName, 'public');
+                    $data['file'] = $filePath;
                 }
 
-                $inputProduk[$kodeProduk] += $jumlahProduk;
-            }
-            $produkSewa->each(function ($produk) use (&$inputProduk, &$sesuaiKontrak) {
-                $kodeProduk = $produk->produk->kode;
-            
-                if (isset($inputProduk[$kodeProduk])) {
-                    $inputProduk[$kodeProduk] -= $produk->jumlah;
-                    if ($inputProduk[$kodeProduk] < 0) {
-                        $sesuaiKontrak = false;
-                        return false;
+                // Check produk and quantity from sewa
+                $kontrak = Kontrak::with('produk')->where('no_kontrak', $data['no_referensi'])->first();
+                $produkSewa = $kontrak->produk()->whereHas('produk')->get();
+
+                // Cek input dengan sewa
+                $sesuaiKontrak = true;
+                $inputProduk = [];
+                for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                    $kodeProduk = $data['nama_produk'][$i];
+                    $jumlahProduk = $data['jumlah'][$i];
+
+                    if (!isset($inputProduk[$kodeProduk])) {
+                        $inputProduk[$kodeProduk] = 0;
                     }
-                    if ($inputProduk[$kodeProduk] == 0) {
-                        unset($inputProduk[$kodeProduk]);
-                    }
+
+                    $inputProduk[$kodeProduk] += $jumlahProduk;
                 }
-            });
-            
-            if (!empty($inputProduk)) {
-                $sesuaiKontrak = false;
-            }
 
-            if (!$sesuaiKontrak) {
-                return redirect()->back()->withInput()->with('fail', 'Produk tidak sesuai kontrak');
-            }
+                $produkSewa->each(function ($produk) use (&$inputProduk, &$sesuaiKontrak) {
+                    $kodeProduk = $produk->produk->kode;
 
-            // save data do
-            $check = DeliveryOrder::find($deliveryOrder)->update($data);
-            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate data');
+                    if (isset($inputProduk[$kodeProduk])) {
+                        $inputProduk[$kodeProduk] -= $produk->jumlah;
+                        if ($inputProduk[$kodeProduk] < 0) {
+                            $sesuaiKontrak = false;
+                            return false;
+                        }
+                        if ($inputProduk[$kodeProduk] == 0) {
+                            unset($inputProduk[$kodeProduk]);
+                        }
+                    }
+                });
 
-            $data_do =  DeliveryOrder::find($deliveryOrder);
-            $dataProduk = Produk_Terjual::where('no_do', $data_do->no_do)->get();
+                if (!empty($inputProduk)) {
+                    $sesuaiKontrak = false;
+                }
 
-            // delete data
-            foreach ($dataProduk as $item) {
-                if($data_do->status == 'DIKONFIRMASI'){
-                    foreach ($item->komponen as $komponen) { // pengembalian stok
-                        $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
-                            $inventory->jumlah = $inventory->jumlah + (intval($komponen->jumlah) * intval($item->jumlah));
+                if (!$sesuaiKontrak) {
+                    return redirect()->back()->withInput()->with('fail', 'Produk tidak sesuai kontrak');
+                }
+
+                // Save data do
+                $deliveryOrder = DeliveryOrder::find($deliveryOrder);
+                $deliveryOrder->update($data);
+
+                $data_do = DeliveryOrder::find($deliveryOrder->id);
+                $dataProduk = Produk_Terjual::where('no_do', $data_do->no_do)->get();
+
+                // Delete old data
+                foreach ($dataProduk as $item) {
+                    if ($data_do->status == 'DIKONFIRMASI') {
+                        foreach ($item->komponen as $komponen) {
+                            // Pengembalian stok
+                            $inventory = InventoryGallery::where('kode_produk', $komponen->kode_produk)
+                                ->where('kondisi_id', $komponen->kondisi)
+                                ->where('lokasi_id', $kontrak->lokasi_id)
+                                ->first();
+                            $inventory->jumlah += (intval($komponen->jumlah) * intval($item->jumlah));
                             $inventory->update();
+                        }
                     }
+                    Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
+                    $item->forceDelete();
                 }
-                $komponen = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
-                $produkTerjual = Produk_Terjual::find($item->id)->forceDelete();
-            }
 
-            // save produk do
-            for ($i=0; $i < count($data['nama_produk']); $i++) { 
-                $getProdukTerjual = Produk_Terjual::with('komponen')->find($data['produk_id'][$i]);
-                $produk_terjual = Produk_Terjual::create([
-                    'produk_jual_id' => $getProdukTerjual->produk_jual_id,
-                    'no_do' => $data_do->no_do,
-                    'jumlah' => $data['jumlah'][$i],
-                    'satuan' => $data['satuan'][$i],
-                    'detail_lokasi' => $data['detail_lokasi'][$i]
-                ]);
-                $getProdukSewa = Produk_Terjual::find($data['produk_id'][$i]);
-                $getProdukSewa->jumlah_dikirim = ($getProdukSewa->jumlah_dikirim ?? 0) + intval($data['jumlah'][$i]);
-                $getProdukSewa->update();
-
-                if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                foreach ($getProdukTerjual->komponen as $komponen ) {
-                    $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                        'produk_terjual_id' => $produk_terjual->id,
-                        'kode_produk' => $komponen->kode_produk,
-                        'nama_produk' => $komponen->nama_produk,
-                        'tipe_produk' => $komponen->tipe_produk,
-                        'kondisi' => $komponen->kondisi,
-                        'deskripsi' => $komponen->deskripsi,
-                        'jumlah' => $komponen->jumlah,
-                        'harga_satuan' => $komponen->harga_satuan,
-                        'harga_total' => $komponen->harga_total
-                    ]);
-                    if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-                    // pengurangan stok
-                    if($data_do->status == 'DIKONFIRMASI'){
-                        $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
-                        $inventory->jumlah = $inventory->jumlah - (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
-                        $inventory->update();
-                    }
-                }
-            }
-
-            // save data tambahan
-            if(isset($data['nama_produk2'][0])){
-                for ($i=0; $i < count($data['nama_produk2']); $i++) { 
-                    $getProdukJual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i]);
+                // Save new produk do
+                for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                    $getProdukTerjual = Produk_Terjual::with('komponen')->find($data['produk_id'][$i]);
                     $produk_terjual = Produk_Terjual::create([
-                        'produk_jual_id' => $getProdukJual->id,
+                        'produk_jual_id' => $getProdukTerjual->produk_jual_id,
                         'no_do' => $data_do->no_do,
-                        'jumlah' => $data['jumlah2'][$i],
-                        'satuan' => $data['satuan2'][$i],
-                        'jenis' => 'TAMBAHAN',
-                        'keterangan' => $data['keterangan2'][$i]
+                        'jumlah' => $data['jumlah'][$i],
+                        'satuan' => $data['satuan'][$i],
+                        'detail_lokasi' => $data['detail_lokasi'][$i]
                     ]);
-        
-                    if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                    foreach ($getProdukJual->komponen as $komponen ) {
+                    $getProdukSewa = Produk_Terjual::find($data['produk_id'][$i]);
+                    $getProdukSewa->jumlah_dikirim = ($getProdukSewa->jumlah_dikirim ?? 0) + intval($data['jumlah'][$i]);
+                    $getProdukSewa->update();
+
+                    if (!$produk_terjual) {
+                        DB::rollBack();
+                        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    }
+                    foreach ($getProdukTerjual->komponen as $komponen) {
                         $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                             'produk_terjual_id' => $produk_terjual->id,
                             'kode_produk' => $komponen->kode_produk,
@@ -510,19 +548,79 @@ class DeliveryOrderController extends Controller
                             'harga_satuan' => $komponen->harga_satuan,
                             'harga_total' => $komponen->harga_total
                         ]);
-                        if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
-                        // pengurangan stok
-                        if($data_do->status == 'DIKONFIRMASI'){
-                            $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->where('lokasi_id', $kontrak->lokasi_id)->first();
-                            $inventory->jumlah = $inventory->jumlah - (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                        if (!$komponen_produk_terjual) {
+                            DB::rollBack();
+                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                        }
+
+                        // Pengurangan stok
+                        if ($data_do->status == 'DIKONFIRMASI') {
+                            $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)
+                                ->where('kondisi_id', $komponen_produk_terjual->kondisi)
+                                ->where('lokasi_id', $kontrak->lokasi_id)
+                                ->first();
+                            $inventory->jumlah -= (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
                             $inventory->update();
                         }
                     }
                 }
-            }
 
-            return redirect(route('do_sewa.index'))->with('success', 'Data tersimpan');
+                // Save additional data
+                if (isset($data['nama_produk2'][0])) {
+                    for ($i = 0; $i < count($data['nama_produk2']); $i++) {
+                        $getProdukJual = Produk_Jual::with('komponen')->find($data['produk_id2'][$i]);
+                        $produk_terjual = Produk_Terjual::create([
+                            'produk_jual_id' => $getProdukJual->id,
+                            'no_do' => $data_do->no_do,
+                            'jumlah' => $data['jumlah2'][$i],
+                            'satuan' => $data['satuan2'][$i],
+                            'jenis' => 'TAMBAHAN',
+                            'keterangan' => $data['keterangan2'][$i]
+                        ]);
+
+                        if (!$produk_terjual) {
+                            DB::rollBack();
+                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                        }
+
+                        foreach ($getProdukJual->komponen as $komponen) {
+                            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                                'produk_terjual_id' => $produk_terjual->id,
+                                'kode_produk' => $komponen->kode_produk,
+                                'nama_produk' => $komponen->nama_produk,
+                                'tipe_produk' => $komponen->tipe_produk,
+                                'kondisi' => $komponen->kondisi,
+                                'deskripsi' => $komponen->deskripsi,
+                                'jumlah' => $komponen->jumlah,
+                                'harga_satuan' => $komponen->harga_satuan,
+                                'harga_total' => $komponen->harga_total
+                            ]);
+
+                            if (!$komponen_produk_terjual) {
+                                DB::rollBack();
+                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                            }
+
+                            // Pengurangan stok
+                            if ($data_do->status == 'DIKONFIRMASI') {
+                                $inventory = InventoryGallery::where('kode_produk', $komponen_produk_terjual->kode_produk)
+                                    ->where('kondisi_id', $komponen_produk_terjual->kondisi)
+                                    ->where('lokasi_id', $kontrak->lokasi_id)
+                                    ->first();
+                                $inventory->jumlah -= (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                                $inventory->update();
+                            }
+                        }
+                    }
+                }
+
+                DB::commit();
+                return redirect(route('do_sewa.index'))->with('success', 'Data tersimpan');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Gagal update data: ' . $e->getMessage());
+            }
         }
     }
 
