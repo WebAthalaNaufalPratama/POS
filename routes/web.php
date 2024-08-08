@@ -702,6 +702,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/omset', 'LaporanController@omset_index')->name('laporan.omset');
             Route::get('/omset-pdf', 'LaporanController@omset_pdf')->name('laporan.omset-pdf');
             Route::get('/omset-excel', 'LaporanController@omset_excel')->name('laporan.omset-excel');
+            Route::get('/promo', 'LaporanController@promo_index')->name('laporan.promo');
+            Route::get('/promo-pdf', 'LaporanController@promo_pdf')->name('laporan.promo-pdf');
+            Route::get('/promo-excel', 'LaporanController@promo_excel')->name('laporan.promo-excel');
 
 
         });

@@ -208,6 +208,7 @@
                         <li><a href="{{ route('laporan.retur_pembelian') }}" class="{{ request()->is('laporan/retur_pembelian') ? 'active' : '' }}">Retur Pembelian</a></li>
                         <li><a href="{{ route('laporan.retur_pembelian_inden') }}" class="{{ request()->is('laporan/retur_pembelian_inden*') ? 'active' : '' }}">Retur Pembelian Inden</a></li>
                         <li><a href="{{ route('laporan.omset') }}" class="{{ request()->is('laporan/omset*') ? 'active' : '' }}">Omset</a></li>
+                        <li><a href="{{ route('laporan.promo') }}" class="{{ request()->is('laporan/promo*') ? 'active' : '' }}">Promo</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))

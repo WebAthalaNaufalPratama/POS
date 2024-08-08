@@ -20,6 +20,7 @@ use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
 use App\Exports\PembelianExport;
 use App\Exports\PembelianIndenExport;
+use App\Exports\PromoExport;
 use App\Exports\ReturPembelianExport;
 use App\Exports\ReturPembelianIndenExport;
 use App\Exports\StokIndenExport;
@@ -2392,6 +2393,66 @@ class LaporanController extends Controller
 
         if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new OmsetExport($data), 'omset.xlsx');
+    }
+
+    public function promo_index(Request $req)
+    {
+        $query = Penjualan::with('customer', 'karyawan', 'promo')
+        ->whereHas('promo')->where('status', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->total_with_diskon = $item->sub_total - $item->total_promo;
+            return $item;
+        });
+        return view('laporan.promo', compact('data'));
+    }
+
+    public function promo_pdf(Request $req)
+    {
+        $query = Penjualan::with('customer', 'karyawan', 'promo')
+        ->whereHas('promo')->where('status', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->total_with_diskon = $item->sub_total - $item->total_promo;
+            return $item;
+        });
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.promo_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('promo.pdf');
+    }
+
+    public function promo_excel(Request $req)
+    {
+        $query = Penjualan::with('customer', 'karyawan', 'promo')
+        ->whereHas('promo')->where('status', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->total_with_diskon = $item->sub_total - $item->total_promo;
+            return $item;
+        });
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PromoExport($data), 'promo.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)
