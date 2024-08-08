@@ -31,52 +31,64 @@
     <div class="row">
       <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
         <div class="card rounded-3 overflow-hidden">
-          <div class="row g-0">
-            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e0f7e9;">
-              <img src="assets/img/icons/dash2.svg" alt="img" style="width: 48px; height: 48px;">
+            <div class="row g-0">
+                <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e0f7e9;">
+                    <img src="assets/img/icons/dash2.svg" alt="img" style="width: 48px; height: 48px;">
+                </div>
+                <div class="col-8" style="background-color: #28a745; color: white;">
+                    <div class="card-body">
+                        <h3 class="mb-0">Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h3>
+                        <p class="mb-0">Saldo Masuk</p>
+                        <hr class="my-2">
+                        <div class="small">
+                            <p class="mb-1">Rekening: Rp. <span class="counters-rupiah" data-count="{{ $saldoMasukRekening }}"></span></p>
+                            <p class="mb-0">Cash: Rp. <span class="counters-rupiah" data-count="{{ $saldoMasukCash }}"></span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #28a745; color: white;">
-              <div class="card-body">
-                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h3>
-                <h6>Saldo Masuk</h6>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-      
       <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
         <div class="card rounded-3 overflow-hidden">
-          <div class="row g-0">
-            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #ffe6e6;">
-              <img src="assets/img/money-send-svgrepo-com.svg" alt="img" style="width: 48px; height: 48px;">
+            <div class="row g-0">
+                <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #ffe6e6;">
+                  <img src="assets/img/money-send-svgrepo-com.svg" alt="img" style="width: 48px; height: 48px;">
+                </div>
+                <div class="col-8" style="background-color: #ff006a; color: white;">
+                    <div class="card-body">
+                        <h3 class="mb-0">Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h3>
+                        <p class="mb-0">Saldo Keluar</p>
+                        <hr class="my-2">
+                        <div class="small">
+                            <p class="mb-1">Rekening: Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluarRekening }}"></span></p>
+                            <p class="mb-0">Cash: Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluarCash }}"></span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #ff006a; color: white;">
-              <div class="card-body">
-                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h3>
-                <h6>Saldo Keluar</h6>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-      
       <div class="col-lg-4 col-md-4 col-sm-12 mb-lg-4 mb-md-0 mb-sm-0">
         <div class="card rounded-3 overflow-hidden">
-          <div class="row g-0">
-            <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e6f0ff;">
-              <img src="assets/img/balance-sheet.png" alt="img" style="width: 48px; height: 48px;">
+            <div class="row g-0">
+                <div class="col-4 d-flex align-items-center justify-content-center" style="background-color: #e6f0ff;">
+                  <img src="assets/img/balance-sheet.png" alt="img" style="width: 48px; height: 48px;">
+                </div>
+                <div class="col-8" style="background-color: #0131c3; color: white;">
+                    <div class="card-body">
+                        <h3 class="mb-0">Rp. <span class="counters-rupiah" data-count="{{ $saldo }}"></span></h3>
+                        <p class="mb-0">Saldo </p>
+                        <hr class="my-2">
+                        <div class="small">
+                            <p class="mb-1">Rekening: Rp. <span class="counters-rupiah" data-count="{{ $saldoRekening }}"></span></p>
+                            <p class="mb-0">Cash: Rp. <span class="counters-rupiah" data-count="{{ $saldoCash }}"></span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-8 d-flex flex-column justify-content-center" style="background-color: #0131c3; color: white;">
-              <div class="card-body">
-                <h3>Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk - $saldoKeluar }}"></span></h3>
-                <h6>Saldo</h6>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-           
     </div>
   </div>
   <div class="col-sm-12">
