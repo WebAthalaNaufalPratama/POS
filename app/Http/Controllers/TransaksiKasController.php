@@ -430,14 +430,4 @@ class TransaksiKasController extends Controller
         $rekenings = Rekening::where('lokasi_id', $req->lokasi_id)->get();
         return response()->json($rekenings);
     }
-
-    public function cekSaldo($lokasi_id = null, $rekening_id = null)
-    {
-        if($lokasi_id != null){
-            $transaksiKeluar =  TransaksiKas::where('lokasi_pengirim', $lokasi_id)->where('status', 'IKONFIRMASI')->get()->sum('nominal', 'biaya_lain');
-            $transaksiMasuk =  TransaksiKas::where('lokasi_penerima', $lokasi_id)->where('status', 'IKONFIRMASI')->get()->sum('nominal');
-        } elseif($rekening_id){
-
-        }
-    }
 }

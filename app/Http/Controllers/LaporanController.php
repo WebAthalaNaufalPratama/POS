@@ -741,10 +741,11 @@ class LaporanController extends Controller
             ->unique()
             ->sort()
             ->values();
-        $saldo = 0;
+        
         if($req->gallery){
             $query->where('lokasi_penerima', $req->gallery)
             ->orWhere('lokasi_pengirim', $req->gallery);
+            $id_galleries = $req->gallery;
         } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
 
@@ -753,6 +754,7 @@ class LaporanController extends Controller
                     ->orWhereIn('lokasi_pengirim', $id_galleries);
             });
         }
+        
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -767,24 +769,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if($item->lokasi_penerima == $id_galleries) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if($item->lokasi_pengirim == $id_galleries) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -809,17 +815,18 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
         $galleries = Lokasi::where('tipe_lokasi', 1)->get();
     
-        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'));
+        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'));
     }
 
     public function kas_gallery_pdf(Request $req)
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
+
         if($req->gallery){
             $query->where('lokasi_penerima', $req->gallery)
             ->orWhere('lokasi_pengirim', $req->gallery);
+            $id_galleries = $req->gallery;
         } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
 
@@ -842,24 +849,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if($item->lokasi_penerima == $id_galleries) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if($item->lokasi_pengirim == $id_galleries) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -884,7 +895,7 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'))->setPaper('a4', 'landscape');;
+        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'))->setPaper('a4', 'landscape');;
         return $pdf->stream('kas_gallery.pdf');
     }
 
@@ -892,10 +903,11 @@ class LaporanController extends Controller
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
+
         if($req->gallery){
             $query->where('lokasi_penerima', $req->gallery)
             ->orWhere('lokasi_pengirim', $req->gallery);
+            $id_galleries = $req->gallery;
         } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
 
@@ -918,24 +930,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if($item->lokasi_penerima == $id_galleries) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if($item->lokasi_pengirim == $id_galleries) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -960,7 +976,7 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash), 'kas_gallery.xlsx');
+        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries), 'kas_gallery.xlsx');
     }
 
     public function kas_pusat_index(Request $req)
@@ -974,18 +990,19 @@ class LaporanController extends Controller
             ->unique()
             ->sort()
             ->values();
-        $saldo = 0;
-        if($req->gallery){
-            $query->where('lokasi_penerima', $req->gallery)
-            ->orWhere('lokasi_pengirim', $req->gallery);
-        } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
 
-            $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
-            });
-        }
+        // if($req->gallery){
+        //     $query->where('lokasi_penerima', $req->gallery)
+        //     ->orWhere('lokasi_pengirim', $req->gallery);
+        //     $id_galleries = $req->gallery;
+        // } else {
+        $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
+
+        $query->where(function($query) use ($id_galleries) {
+            $query->whereIn('lokasi_penerima', $id_galleries)
+                ->orWhereIn('lokasi_pengirim', $id_galleries);
+        });
+        // }
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -1000,24 +1017,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if (in_array($item->lokasi_penerima, $id_galleries)) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if (in_array($item->lokasi_pengirim, $id_galleries)) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -1042,25 +1063,26 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
         $galleries = Lokasi::where('tipe_lokasi', 5)->get();
     
-        return view('laporan.kas_pusat', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'));
+        return view('laporan.kas_pusat', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'));
     }
 
     public function kas_pusat_pdf(Request $req)
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
-        if($req->gallery){
-            $query->where('lokasi_penerima', $req->gallery)
-            ->orWhere('lokasi_pengirim', $req->gallery);
-        } else {
+
+        // if($req->gallery){
+        //     $query->where('lokasi_penerima', $req->gallery)
+        //     ->orWhere('lokasi_pengirim', $req->gallery);
+        //     $id_galleries = $req->gallery;
+        // } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
 
             $query->where(function($query) use ($id_galleries) {
                 $query->whereIn('lokasi_penerima', $id_galleries)
                     ->orWhereIn('lokasi_pengirim', $id_galleries);
             });
-        }
+        // }
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -1075,24 +1097,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if (in_array($item->lokasi_penerima, $id_galleries)) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if (in_array($item->lokasi_pengirim, $id_galleries)) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -1117,7 +1143,7 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        $pdf = Pdf::loadView('laporan.kas_pusat_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'))->setPaper('a4', 'landscape');;
+        $pdf = Pdf::loadView('laporan.kas_pusat_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'))->setPaper('a4', 'landscape');;
         return $pdf->stream('kas_pusat.pdf');
     }
 
@@ -1125,18 +1151,19 @@ class LaporanController extends Controller
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
-        if($req->gallery){
-            $query->where('lokasi_penerima', $req->gallery)
-            ->orWhere('lokasi_pengirim', $req->gallery);
-        } else {
+
+        // if($req->gallery){
+        //     $query->where('lokasi_penerima', $req->gallery)
+        //     ->orWhere('lokasi_pengirim', $req->gallery);
+        //     $id_galleries = $req->gallery;
+        // } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
 
             $query->where(function($query) use ($id_galleries) {
                 $query->whereIn('lokasi_penerima', $id_galleries)
                     ->orWhereIn('lokasi_pengirim', $id_galleries);
             });
-        }
+        // }
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -1151,25 +1178,29 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if (in_array($item->lokasi_penerima, $id_galleries)) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if (in_array($item->lokasi_pengirim, $id_galleries)) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
             }
+            $item->nominal = ($item->nominal + $item->biaya_lain);
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
             return $item;
@@ -1193,7 +1224,7 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new KasPusatExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash), 'kas_pusat.xlsx');
+        return Excel::download(new KasPusatExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries), 'kas_pusat.xlsx');
     }
 
     public function pembelian_index(Request $req)
