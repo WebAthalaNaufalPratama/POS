@@ -163,6 +163,7 @@ class InitialSeeder extends Seeder
                 'pembelian.edit',
                 'pembelian.show',
                 'pembelian.update',
+                'auditpenjualan'
             ];
             $admingalleryPermissionList = array_merge($basiPermissionList, $admingalleryPermissionList);
             $query = Permission::query();

@@ -14,6 +14,7 @@ use App\Exports\DeliveryOrderExport;
 use App\Exports\HutangSupplierExport;
 use App\Exports\MutasiExport;
 use App\Exports\MutasiindenExport;
+use App\Exports\OmsetExport;
 use App\Exports\PenjualanExport;
 use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
@@ -1849,6 +1850,548 @@ class LaporanController extends Controller
 
         if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new ReturPembelianIndenExport($data), 'retur_pembelian_inden.xlsx');
+    }
+
+    public function mergeItems($item, $collection) {
+        $existingItem = $collection->firstWhere('no_invoice', $item->no_invoice);
+        
+        if (!$existingItem) {
+            $collection->push($item);
+        }
+    }
+
+    public function omset_index(Request $req)
+    {
+        // Eager load relationships and filter by status
+        $querySewa = InvoiceSewa::with('kontrak.customer', 'kontrak.lokasi', 'data_sales', 'pembayaran', 'produk.produk')
+            ->where('status', 'DIKONFIRMASI');
+        $queryPenjualan = Penjualan::with('customer', 'lokasi', 'karyawan', 'pembayaran', 'produk.produk', 'ongkir')
+            ->where('status', 'DIKONFIRMASI');
+
+
+        if ($req->tipe_penjualan === 'Tradisional') {
+            $querySewa->whereRaw('1 = 0');
+        } elseif ($req->tipe_penjualan === 'Sewa') {
+            $queryPenjualan->whereRaw('1 = 0');
+        }
+
+        // Retrieve data
+        $allDataSewa = $querySewa->get();
+        $allDataPenjualan = $queryPenjualan->get();
+
+        // Extract unique product names
+        $produkSewa = collect();
+        $produkPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkSewa->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+        
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkPenjualan->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+
+        $produkSewa = $produkSewa->unique();
+        $produkPenjualan = $produkPenjualan->unique();
+
+        $combinedProduk = $produkSewa->concat($produkPenjualan);
+
+        $produk = $combinedProduk->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $produk = $produk->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Extract unique sales names
+        $salesSewa = collect();
+        $salesPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->data_sales) && isset($item->data_sales->id) && isset($item->data_sales->nama)) {
+                $salesSewa->put($item->data_sales->id, $item->data_sales->nama);
+            }
+        }
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->karyawan) && isset($item->karyawan->id) && isset($item->karyawan->nama)) {
+                $salesPenjualan->put($item->karyawan->id, $item->karyawan->nama);
+            }
+        }
+
+        $salesSewa = $salesSewa->unique();
+        $salesPenjualan = $salesPenjualan->unique();
+        
+        $combinedSales = $salesSewa->concat($salesPenjualan);
+
+        $sales = $combinedSales->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $sales = $sales->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Apply filters based on request
+        if ($req->tanggal_invoice) {
+            $querySewa->whereDate('tanggal_invoice', $req->tanggal_invoice);
+            $queryPenjualan->whereDate('tanggal_invoice', $req->tanggal_invoice);
+        }
+        if ($req->tanggal_pembayaran) {
+            $querySewa->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+            $queryPenjualan->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+        }
+        if ($req->produk) {
+            $querySewa->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+            $queryPenjualan->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+        }
+        if ($req->sales) {
+            $querySewa->where('sales', $req->input('sales'));
+            $queryPenjualan->where('employee_id', $req->input('sales'));
+        }
+        if ($req->status == 'Sudah Dibayar') {
+            $querySewa->whereHas('pembayaran');
+            $queryPenjualan->whereHas('pembayaran');
+        } elseif ($req->status == 'Belum Dibayar') {
+            $querySewa->whereDoesntHave('pembayaran');
+            $queryPenjualan->whereDoesntHave('pembayaran');
+        }
+
+        // Map data and format fields
+        $dataSewa = $querySewa->get()->map(function($item) {
+            $item->nama_sales = $item->data_sales->nama;
+            $item->nama_customer = $item->kontrak->customer->nama;
+            $item->jumlah = formatRupiah(($item->subtotal + $item->total_promo));
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->ppn_nominal);
+            $item->pph_nominal = formatRupiah($item->pph_nominal);
+            $item->ongkir_nominal = formatRupiah($item->ongkir_nominal);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $dataPenjualan = $queryPenjualan->get()->map(function($item) {
+            $item->nama_sales = $item->karyawan->nama;
+            $item->nama_customer = $item->customer->nama;
+            $item->jumlah = formatRupiah($item->sub_total);
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->jumlah_ppn);
+            $item->pph_nominal = formatRupiah(0);
+            $item->ongkir_nominal = formatRupiah($item->biaya_ongkir);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $data = collect();
+
+        // Add items from $dataSewa
+        $dataSewa->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        // Add items from $dataPenjualan
+        $dataPenjualan->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+        
+        return view('laporan.omset', compact('data', 'sales', 'produk'));
+    }
+
+    public function omset_pdf(Request $req)
+    {
+        // Eager load relationships and filter by status
+        $querySewa = InvoiceSewa::with('kontrak.customer', 'kontrak.lokasi', 'data_sales', 'pembayaran', 'produk.produk')
+            ->where('status', 'DIKONFIRMASI');
+        $queryPenjualan = Penjualan::with('customer', 'lokasi', 'karyawan', 'pembayaran', 'produk.produk', 'ongkir')
+            ->where('status', 'DIKONFIRMASI');
+
+
+        if ($req->tipe_penjualan === 'Tradisional') {
+            $querySewa->whereRaw('1 = 0');
+        } elseif ($req->tipe_penjualan === 'Sewa') {
+            $queryPenjualan->whereRaw('1 = 0');
+        }
+
+        // Retrieve data
+        $allDataSewa = $querySewa->get();
+        $allDataPenjualan = $queryPenjualan->get();
+
+        // Extract unique product names
+        $produkSewa = collect();
+        $produkPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkSewa->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+        
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkPenjualan->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+
+        $produkSewa = $produkSewa->unique();
+        $produkPenjualan = $produkPenjualan->unique();
+
+        $combinedProduk = $produkSewa->concat($produkPenjualan);
+
+        $produk = $combinedProduk->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $produk = $produk->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Extract unique sales names
+        $salesSewa = collect();
+        $salesPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->data_sales) && isset($item->data_sales->id) && isset($item->data_sales->nama)) {
+                $salesSewa->put($item->data_sales->id, $item->data_sales->nama);
+            }
+        }
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->karyawan) && isset($item->karyawan->id) && isset($item->karyawan->nama)) {
+                $salesPenjualan->put($item->karyawan->id, $item->karyawan->nama);
+            }
+        }
+
+        $salesSewa = $salesSewa->unique();
+        $salesPenjualan = $salesPenjualan->unique();
+        
+        $combinedSales = $salesSewa->concat($salesPenjualan);
+
+        $sales = $combinedSales->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $sales = $sales->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Apply filters based on request
+        if ($req->tanggal_invoice) {
+            $querySewa->whereDate('tanggal_invoice', $req->tanggal_invoice);
+            $queryPenjualan->whereDate('tanggal_invoice', $req->tanggal_invoice);
+        }
+        if ($req->tanggal_pembayaran) {
+            $querySewa->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+            $queryPenjualan->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+        }
+        if ($req->produk) {
+            $querySewa->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+            $queryPenjualan->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+        }
+        if ($req->sales) {
+            $querySewa->where('sales', $req->input('sales'));
+            $queryPenjualan->where('employee_id', $req->input('sales'));
+        }
+        if ($req->status == 'Sudah Dibayar') {
+            $querySewa->whereHas('pembayaran');
+            $queryPenjualan->whereHas('pembayaran');
+        } elseif ($req->status == 'Belum Dibayar') {
+            $querySewa->whereDoesntHave('pembayaran');
+            $queryPenjualan->whereDoesntHave('pembayaran');
+        }
+
+        // Map data and format fields
+        $dataSewa = $querySewa->get()->map(function($item) {
+            $item->nama_sales = $item->data_sales->nama;
+            $item->nama_customer = $item->kontrak->customer->nama;
+            $item->jumlah = formatRupiah(($item->subtotal + $item->total_promo));
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->ppn_nominal);
+            $item->pph_nominal = formatRupiah($item->pph_nominal);
+            $item->ongkir_nominal = formatRupiah($item->ongkir_nominal);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $dataPenjualan = $queryPenjualan->get()->map(function($item) {
+            $item->nama_sales = $item->karyawan->nama;
+            $item->nama_customer = $item->customer->nama;
+            $item->jumlah = formatRupiah($item->sub_total);
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->jumlah_ppn);
+            $item->pph_nominal = formatRupiah(0);
+            $item->ongkir_nominal = formatRupiah($item->biaya_ongkir);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $data = collect();
+
+        // Add items from $dataSewa
+        $dataSewa->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        // Add items from $dataPenjualan
+        $dataPenjualan->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.omset_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('omset.pdf');
+    }
+
+    public function omset_excel(Request $req)
+    {
+        // Eager load relationships and filter by status
+        $querySewa = InvoiceSewa::with('kontrak.customer', 'kontrak.lokasi', 'data_sales', 'pembayaran', 'produk.produk')
+            ->where('status', 'DIKONFIRMASI');
+        $queryPenjualan = Penjualan::with('customer', 'lokasi', 'karyawan', 'pembayaran', 'produk.produk', 'ongkir')
+            ->where('status', 'DIKONFIRMASI');
+
+
+        if ($req->tipe_penjualan === 'Tradisional') {
+            $querySewa->whereRaw('1 = 0');
+        } elseif ($req->tipe_penjualan === 'Sewa') {
+            $queryPenjualan->whereRaw('1 = 0');
+        }
+
+        // Retrieve data
+        $allDataSewa = $querySewa->get();
+        $allDataPenjualan = $queryPenjualan->get();
+
+        // Extract unique product names
+        $produkSewa = collect();
+        $produkPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkSewa->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+        
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkPenjualan->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+
+        $produkSewa = $produkSewa->unique();
+        $produkPenjualan = $produkPenjualan->unique();
+
+        $combinedProduk = $produkSewa->concat($produkPenjualan);
+
+        $produk = $combinedProduk->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $produk = $produk->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Extract unique sales names
+        $salesSewa = collect();
+        $salesPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->data_sales) && isset($item->data_sales->id) && isset($item->data_sales->nama)) {
+                $salesSewa->put($item->data_sales->id, $item->data_sales->nama);
+            }
+        }
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->karyawan) && isset($item->karyawan->id) && isset($item->karyawan->nama)) {
+                $salesPenjualan->put($item->karyawan->id, $item->karyawan->nama);
+            }
+        }
+
+        $salesSewa = $salesSewa->unique();
+        $salesPenjualan = $salesPenjualan->unique();
+        
+        $combinedSales = $salesSewa->concat($salesPenjualan);
+
+        $sales = $combinedSales->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $sales = $sales->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Apply filters based on request
+        if ($req->tanggal_invoice) {
+            $querySewa->whereDate('tanggal_invoice', $req->tanggal_invoice);
+            $queryPenjualan->whereDate('tanggal_invoice', $req->tanggal_invoice);
+        }
+        if ($req->tanggal_pembayaran) {
+            $querySewa->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+            $queryPenjualan->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+        }
+        if ($req->produk) {
+            $querySewa->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+            $queryPenjualan->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+        }
+        if ($req->sales) {
+            $querySewa->where('sales', $req->input('sales'));
+            $queryPenjualan->where('employee_id', $req->input('sales'));
+        }
+        if ($req->status == 'Sudah Dibayar') {
+            $querySewa->whereHas('pembayaran');
+            $queryPenjualan->whereHas('pembayaran');
+        } elseif ($req->status == 'Belum Dibayar') {
+            $querySewa->whereDoesntHave('pembayaran');
+            $queryPenjualan->whereDoesntHave('pembayaran');
+        }
+
+        // Map data and format fields
+        $dataSewa = $querySewa->get()->map(function($item) {
+            $item->nama_sales = $item->data_sales->nama;
+            $item->nama_customer = $item->kontrak->customer->nama;
+            $item->jumlah = formatRupiah(($item->subtotal + $item->total_promo));
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->ppn_nominal);
+            $item->pph_nominal = formatRupiah($item->pph_nominal);
+            $item->ongkir_nominal = formatRupiah($item->ongkir_nominal);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $dataPenjualan = $queryPenjualan->get()->map(function($item) {
+            $item->nama_sales = $item->karyawan->nama;
+            $item->nama_customer = $item->customer->nama;
+            $item->jumlah = formatRupiah($item->sub_total);
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->jumlah_ppn);
+            $item->pph_nominal = formatRupiah(0);
+            $item->ongkir_nominal = formatRupiah($item->biaya_ongkir);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $data = collect();
+
+        // Add items from $dataSewa
+        $dataSewa->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        // Add items from $dataPenjualan
+        $dataPenjualan->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new OmsetExport($data), 'omset.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)

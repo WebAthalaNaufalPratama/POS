@@ -82,7 +82,7 @@ class Penjualan extends Model
 
     public function pembayaran()
     {
-        return $this->hasMany(Pembayaran::class);
+        return $this->hasMany(Pembayaran::class, 'invoice_penjualan_id', 'id');
     }
     public function produk(){
         return $this->hasMany(Produk_Terjual::class, 'no_invoice', 'no_invoice');

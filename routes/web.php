@@ -699,6 +699,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/retur_pembelian_inden', 'LaporanController@retur_pembelian_inden_index')->name('laporan.retur_pembelian_inden');
             Route::get('/retur_pembelian_inden-pdf', 'LaporanController@retur_pembelian_inden_pdf')->name('laporan.retur_pembelian_inden-pdf');
             Route::get('/retur_pembelian_inden-excel', 'LaporanController@retur_pembelian_inden_excel')->name('laporan.retur_pembelian_inden-excel');
+            Route::get('/omset', 'LaporanController@omset_index')->name('laporan.omset');
+            Route::get('/omset-pdf', 'LaporanController@omset_pdf')->name('laporan.omset-pdf');
+            Route::get('/omset-excel', 'LaporanController@omset_excel')->name('laporan.omset-excel');
 
 
         });
