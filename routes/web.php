@@ -685,6 +685,27 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/kas_gallery', 'LaporanController@kas_gallery_index')->name('laporan.kas_gallery');
             Route::get('/kas_gallery-pdf', 'LaporanController@kas_gallery_pdf')->name('laporan.kas_gallery-pdf');
             Route::get('/kas_gallery-excel', 'LaporanController@kas_gallery_excel')->name('laporan.kas_gallery-excel');
+            Route::get('/pembelian', 'LaporanController@pembelian_index')->name('laporan.pembelian');
+            Route::get('/pembelian-pdf', 'LaporanController@pembelian_pdf')->name('laporan.pembelian-pdf');
+            Route::get('/pembelian-excel', 'LaporanController@pembelian_excel')->name('laporan.pembelian-excel');
+            Route::get('/pembelian_inden', 'LaporanController@pembelian_inden_index')->name('laporan.pembelian_inden');
+            Route::get('/pembelian_inden-pdf', 'LaporanController@pembelian_inden_pdf')->name('laporan.pembelian_inden-pdf');
+            Route::get('/pembelian_inden-excel', 'LaporanController@pembelian_inden_excel')->name('laporan.pembelian_inden-excel');
+            Route::get('/stok_inden', 'LaporanController@stok_inden_index')->name('laporan.stok_inden');
+            Route::get('/stok_inden-pdf', 'LaporanController@stok_inden_pdf')->name('laporan.stok_inden-pdf');
+            Route::get('/stok_inden-excel', 'LaporanController@stok_inden_excel')->name('laporan.stok_inden-excel');
+            Route::get('/hutang_supplier', 'LaporanController@hutang_supplier_index')->name('laporan.hutang_supplier');
+            Route::get('/hutang_supplier-pdf', 'LaporanController@hutang_supplier_pdf')->name('laporan.hutang_supplier-pdf');
+            Route::get('/hutang_supplier-excel', 'LaporanController@hutang_supplier_excel')->name('laporan.hutang_supplier-excel');
+            Route::get('/retur_pembelian', 'LaporanController@retur_pembelian_index')->name('laporan.retur_pembelian');
+            Route::get('/retur_pembelian-pdf', 'LaporanController@retur_pembelian_pdf')->name('laporan.retur_pembelian-pdf');
+            Route::get('/retur_pembelian-excel', 'LaporanController@retur_pembelian_excel')->name('laporan.retur_pembelian-excel');
+            Route::get('/retur_pembelian_inden', 'LaporanController@retur_pembelian_inden_index')->name('laporan.retur_pembelian_inden');
+            Route::get('/retur_pembelian_inden-pdf', 'LaporanController@retur_pembelian_inden_pdf')->name('laporan.retur_pembelian_inden-pdf');
+            Route::get('/retur_pembelian_inden-excel', 'LaporanController@retur_pembelian_inden_excel')->name('laporan.retur_pembelian_inden-excel');
+            Route::get('/omset', 'LaporanController@omset_index')->name('laporan.omset');
+            Route::get('/omset-pdf', 'LaporanController@omset_pdf')->name('laporan.omset-pdf');
+            Route::get('/omset-excel', 'LaporanController@omset_excel')->name('laporan.omset-excel');
 
 
         });

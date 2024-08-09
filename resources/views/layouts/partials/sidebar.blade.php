@@ -201,6 +201,13 @@
                         <li><a href="{{ route('laporan.mutasiinden') }}" class="{{ request()->is('laporan/mutasiinden*') ? 'active' : '' }}">Mutasi Inden</a></li>
                         <li><a href="{{ route('laporan.kas_pusat') }}" class="{{ request()->is('laporan/kas_pusat*') ? 'active' : '' }}">Kas Pusat</a></li>
                         <li><a href="{{ route('laporan.kas_gallery') }}" class="{{ request()->is('laporan/kas_gallery*') ? 'active' : '' }}">Kas Gallery</a></li>
+                        <li><a href="{{ route('laporan.pembelian') }}" class="{{ request()->is('laporan/pembelian') ? 'active' : '' }}">Pembelian</a></li>
+                        <li><a href="{{ route('laporan.pembelian_inden') }}" class="{{ request()->is('laporan/pembelian_inden*') ? 'active' : '' }}">Pembelian Inden</a></li>
+                        <li><a href="{{ route('laporan.stok_inden') }}" class="{{ request()->is('laporan/stok_inden*') ? 'active' : '' }}">Stok Inden</a></li>
+                        <li><a href="{{ route('laporan.hutang_supplier') }}" class="{{ request()->is('laporan/hutang_supplier*') ? 'active' : '' }}">Hutang Supplier</a></li>
+                        <li><a href="{{ route('laporan.retur_pembelian') }}" class="{{ request()->is('laporan/retur_pembelian') ? 'active' : '' }}">Retur Pembelian</a></li>
+                        <li><a href="{{ route('laporan.retur_pembelian_inden') }}" class="{{ request()->is('laporan/retur_pembelian_inden*') ? 'active' : '' }}">Retur Pembelian Inden</a></li>
+                        <li><a href="{{ route('laporan.omset') }}" class="{{ request()->is('laporan/omset*') ? 'active' : '' }}">Omset</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))

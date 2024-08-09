@@ -233,8 +233,8 @@
                                                 <input type="date" class="form-control" id="tgl_sales" name="tanggal_sales" value="{{ date('Y-m-d') }}">
                                             </td>
                                             <td id="tgl_pembuat" style="width: 25%;">{{ date('Y-m-d') }}</td>
-                                            <td id="tgl_penyetuju" style="width: 25%;">{{ isset($kontrak->tanggal_penyetujju) ? \Carbon\Carbon::parse($kontrak->tanggal_penyetujju)->format('Y-m-d') : '-' }}</td>
-                                            <td id="tgl_pemeriksa" style="width: 25%;">{{ isset($kontrak->tanggal_pemeriksa) ? \Carbon\Carbon::parse($kontrak->tanggal_pemeriksa)->format('Y-m-d') : '-' }}</td>
+                                            <td id="tgl_penyetuju" style="width: 25%;">-</td>
+                                            <td id="tgl_pemeriksa" style="width: 25%;">-</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -303,7 +303,7 @@
                                 <div class="form-group row mt-1">
                                     <label class="col-lg-3 col-form-label">Sisa Bayar</label>
                                     <div class="col-lg-9">
-                                        <input type="text" id="sisa_bayar" name="sisa_bayar" value="" class="form-control" required readonly>
+                                        <input type="text" id="sisa_bayar" name="sisa_bayar" value="0" class="form-control" required readonly>
                                     </div>
                                 </div>
                             </div>

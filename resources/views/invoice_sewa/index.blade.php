@@ -122,7 +122,7 @@
 </div>
 
 <div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Form Pembayaran</h5>
@@ -134,61 +134,69 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Kontrak</label>
-                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Nomor Kontrak</label>
+                                    <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Nomor Invoice</label>
+                                    <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
+                                    <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Total Tagihan</label>
+                                    <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Sisa Tagihan</label>
+                                    <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="bayar">Cara Bayar</label>
+                                    <select class="form-control" id="bayar" name="cara_bayar" required>
+                                        <option value="">Pilih Cara Bayar</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="transfer">Transfer</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-12" id="rekening" style="display: none">
+                                    <label for="bankpenerima">Rekening Vonflorist</label>
+                                    <select class="form-control" id="rekening_id" name="rekening_id" required>
+                                        <option value="">Pilih Rekening Von</option>
+                                        @foreach ($bankpens as $bankpen)
+                                        <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="nominal">Nominal</label>
+                                    <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="tanggalbayar">Tanggal</label>
+                                    <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
-                            <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="buktibayar">Unggah Bukti</label>
+                                    <input type="file" class="form-control" id="bukti" name="bukti" onchange="previewImage(this, 'pembayaran_preview')" accept="image/*" required>
+                                    <img class="mt-2" src="" alt="" id="pembayaran_preview" style="width: 100%;height:auto;">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Total Tagihan</label>
-                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Sisa Tagihan</label>
-                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="bayar">Cara Bayar</label>
-                            <select class="form-control" id="bayar" name="cara_bayar" required>
-                                <option value="">Pilih Cara Bayar</option>
-                                <option value="cash">Cash</option>
-                                <option value="transfer">Transfer</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-6" id="rekening" style="display: none">
-                            <label for="bankpenerima">Rekening Vonflorist</label>
-                            <select class="form-control" id="rekening_id" name="rekening_id" required>
-                                <option value="">Pilih Rekening Von</option>
-                                @foreach ($bankpens as $bankpen)
-                                <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="nominal">Nominal</label>
-                            <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="tanggalbayar">Tanggal</label>
-                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-12">
-                            <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" required>
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <div class="modal-footer justify-content-center">
@@ -206,8 +214,11 @@
         var cekInvoiceNumbers = "{{ $invoice_bayar }}";
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){
+            if ($('#pembayaran_preview').attr('src') === '') {
+                $('#pembayaran_preview').attr('src', defaultImg);
+            }
         });
-
+        
         $('#bayar').on('change', function() {
             var caraBayar = $(this).val();
             if (caraBayar == 'transfer') {
@@ -382,5 +393,25 @@
             }
         });
     }
+    function previewImage(element, preview_id) {
+        const file = $(element)[0].files[0];
+        if (file.size > 2 * 1024 * 1024) { 
+            toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                closeButton: true,
+                tapToDismiss: false,
+                rtl: false,
+                progressBar: true
+            });
+            $(this).val(''); 
+            return;
+        }
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#' + preview_id).attr('src', e.target.result);
+            }
+            reader.readAsDataURL(file);
+        }
+    };
     </script>
 @endsection

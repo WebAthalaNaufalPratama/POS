@@ -265,9 +265,9 @@
                                         <tbody>
                                             <tr>
                                                 <td id="sales">{{ $data->data_sales->nama }}</td>
-                                                <td id="pembuat">{{ $data->data_pembuat->nama ?? '-' }}</td>
-                                                <td id="penyetuju">{{ $data->data_penyetuju->nama ?? '-' }}</td>
-                                                <td id="pemeriksa">{{ $data->data_pemeriksa->nama ?? '-' }}</td>
+                                                <td id="pembuat">{{ $data->data_pembuat->name ?? '-' }}</td>
+                                                <td id="penyetuju">{{ $data->data_penyetuju->name ?? '-' }}</td>
+                                                <td id="pemeriksa">{{ $data->data_pemeriksa->name ?? '-' }}</td>
                                             </tr>
                                             <tr>
                                                 <td style="width: 25%;">{{ isset($data->tanggal_sales) ? formatTanggal($data->tanggal_sales) : '-' }}</td>
@@ -664,8 +664,8 @@
             var dp = cleanNumber($(this).val());
             $(this).val(formatNumber(dp))
             var total_harga = cleanNumber($('#total_harga').val());
-            sisa_bayar = total_harga - dp;
-            $('#sisa_bayar').val(formatNumber(sisa_bayar));
+            // sisa_bayar = total_harga - dp;
+            // $('#sisa_bayar').val(formatNumber(sisa_bayar));
         });
         $('#dp_persen').on('input', function(){
             var total_harga = cleanNumber($('#total_harga').val());
@@ -673,8 +673,8 @@
             var dp_persen = $(this).val()
             var dp_nominal = dp_persen * total_harga / 100
             sisa_bayar = total_harga - dp_nominal;
-            $('#dp').val(formatNumber(dp_nominal))
-            $('#sisa_bayar').val(formatNumber(sisa_bayar));
+            // $('#dp').val(formatNumber(dp_nominal))
+            // $('#sisa_bayar').val(formatNumber(sisa_bayar));
         });
         // dp end
         
@@ -831,7 +831,7 @@
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(formatNumber(harga_total));
             var dp = parseInt(cleanNumber($('#dp').val()));
-            $('#sisa_bayar').val(formatNumber(harga_total - dp));
+            // $('#sisa_bayar').val(formatNumber(harga_total - dp));
         }
         function update_pajak(subtotal){
             var ppn_persen = $('#ppn_persen').val() || 0;

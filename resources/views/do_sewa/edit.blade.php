@@ -189,7 +189,7 @@
                             </thead>
                             <tbody id="dynamic_field2">
                                 @if(count($data->produk) < 1)
-                                <tr id="row2{{ $i }}">
+                                {{-- <tr id="row2{{ $i }}">
                                     <td>
                                         <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control" disabled>
                                             <option value="">Pilih Produk</option>
@@ -201,7 +201,7 @@
                                     <td><input type="number" name="jumlah2[]" id="jumlah2_{{ $i }}" class="form-control"></td>
                                     <td><input type="number" name="satuan[]" id="satuan_{{ $i }}" class="form-control"></td>
                                     <td><input type="number" name="keterangan[]" id="keterangan_{{ $i }}" class="form-control"></td>
-                                </tr>
+                                </tr> --}}
                                 @else
                                 @php
                                 $hasTambahan = false;
@@ -232,7 +232,7 @@
                                 @endphp
                                 @endforeach
                                 @if(!$hasTambahan)
-                                <tr id="row2{{ $i }}">
+                                {{-- <tr id="row2{{ $i }}">
                                     <td>
                                         <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control">
                                             <option value="">Pilih Produk</option>
@@ -245,7 +245,7 @@
                                     <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control"></td>
                                     <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control"></td>
                                     <td><a href="javascript:void(0);" class="btn_remove2" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
-                                </tr>
+                                </tr> --}}
                                 @endif
                                 @endif
                             </tbody>

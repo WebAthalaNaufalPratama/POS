@@ -183,7 +183,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="dynamic_field2">
-                                    <tr id="row2{{ $i }}">
+                                    {{-- <tr id="row2{{ $i }}">
                                         <td>
                                             <select id="produk2_{{ $i }}" name="nama_produk2[]" class="form-control">
                                                 <option value="">Pilih Produk</option>
@@ -196,7 +196,7 @@
                                         <td><input type="text" name="satuan2[]" id="satuan2_{{ $i }}" class="form-control"></td>
                                         <td><input type="text" name="keterangan2[]" id="keterangan2_{{ $i }}" class="form-control"></td>
                                         <td><a href="javascript:void(0);" class="btn_remove2" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
-                                    </tr>
+                                    </tr> --}}
                                 </tbody>
                             </table>
                         </div>

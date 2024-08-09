@@ -347,83 +347,71 @@ class InvoiceSewaController extends Controller
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal mengubah status');
             return redirect()->back()->withInput()->with('success', 'Data Berhasil ' . $msg);
         } else {
-            // validasi
-            $validator = Validator::make($req->all(), [
-                'no_invoice' => 'required',
-                'no_sewa' => 'required',
-                'tanggal_invoice' => 'required',
-                'jatuh_tempo' => 'required',
-                'rekening_id' => 'required',
-                'total_tagihan' => 'required',
-                'sisa_bayar' => 'required',
-                'sales' => 'required',
-                'rekening_id' => 'required',
-                // 'tanggal_sales' => 'required',
-            ]);
-            $error = $validator->errors()->all();
-            if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-            $data = $req->except(['_token', '_method']);
-
-            // save data invoice
-            $check = InvoiceSewa::find($invoiceSewa)->update($data);
-            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-            // update data produk invoice
-            $datainvoice = InvoiceSewa::find($invoiceSewa);
-            $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
-
-            $dataProduk = Produk_Terjual::where('no_invoice', $datainvoice->no_invoice)->get();
-            // delete data
-            foreach ($dataProduk as $item) {
-                $komponen = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
-                $produkTerjual = Produk_terjual::find($item->id)->forceDelete();
-            }
-            
-            for ($i=0; $i < count($data['nama_produk']); $i++) { 
-                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-                $produk_terjual = Produk_Terjual::create([
-                    'produk_jual_id' => $getProdukJual->id,
-                    'no_invoice' => $datainvoice->no_invoice,
-                    'harga' => $data['harga_satuan'][$i],
-                    'jumlah' => $data['jumlah'][$i],
-                    'harga_jual' => $data['harga_total'][$i]
+            try {
+                // Validasi
+                $validator = Validator::make($req->all(), [
+                    'no_invoice' => 'required',
+                    'no_sewa' => 'required',
+                    'tanggal_invoice' => 'required',
+                    'jatuh_tempo' => 'required',
+                    'rekening_id' => 'required',
+                    'total_tagihan' => 'required',
+                    'sisa_bayar' => 'required',
+                    'sales' => 'required',
+                    'rekening_id' => 'required',
                 ]);
-
-                if(!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                foreach ($getProdukJual->komponen as $komponen ) {
-                    $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                        'produk_terjual_id' => $produk_terjual->id,
-                        'kode_produk' => $komponen->kode_produk,
-                        'nama_produk' => $komponen->nama_produk,
-                        'tipe_produk' => $komponen->tipe_produk,
-                        'kondisi' => $komponen->kondisi,
-                        'deskripsi' => $komponen->deskripsi,
-                        'jumlah' => $komponen->jumlah,
-                        'harga_satuan' => $komponen->harga_satuan,
-                        'harga_total' => $komponen->harga_total
-                    ]);
-                    if(!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            
+                $error = $validator->errors()->all();
+                if ($validator->fails()) {
+                    return redirect()->back()->withInput()->with('fail', $error);
                 }
-            }
-
-            // Save additional product data
-            if (isset($data['nama_produk2'][0])) {
-                for ($i = 0; $i < count($data['nama_produk2']); $i++) {
-                    $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk2'][$i])->first();
+            
+                $data = $req->except(['_token', '_method']);
+            
+                // Get pembayaran terkait
+                $pembayaran = Pembayaran::where('invoice_sewa_id', $invoiceSewa)->get();
+            
+                // Cek jika pembayaran melebihi total invoice baru
+                $totalPembayaran = $pembayaran->sum('nominal');
+                $newNominal = intval($req->total_tagihan);
+            
+                if ($totalPembayaran > $newNominal) {
+                    return redirect()->back()->withInput()->with('fail', 'Pembayaran sudah melebihi total tagihan baru');
+                }
+            
+                // Save data invoice
+                $check = InvoiceSewa::find($invoiceSewa)->update($data);
+                if (!$check) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                }
+            
+                // Update data produk invoice
+                $datainvoice = InvoiceSewa::find($invoiceSewa);
+                $kontrak = Kontrak::where('no_kontrak', $data['no_sewa'])->first();
+            
+                $dataProduk = Produk_Terjual::where('no_invoice', $datainvoice->no_invoice)->get();
+                // Delete data
+                foreach ($dataProduk as $item) {
+                    Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->forceDelete();
+                    Produk_Terjual::find($item->id)->forceDelete();
+                }
+            
+                for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                    $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
                     $produk_terjual = Produk_Terjual::create([
                         'produk_jual_id' => $getProdukJual->id,
                         'no_invoice' => $datainvoice->no_invoice,
-                        'harga' => $data['harga_satuan2'][$i],
-                        'jumlah' => $data['jumlah2'][$i],
-                        'jenis' => 'TAMBAHAN',
-                        'harga_jual' => $data['harga_total2'][$i]
+                        'harga' => $data['harga_satuan'][$i],
+                        'jumlah' => $data['jumlah'][$i],
+                        'harga_jual' => $data['harga_total'][$i]
                     ]);
-
+            
                     if (!$produk_terjual) {
                         DB::rollBack();
                         return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                     }
-
+            
                     foreach ($getProdukJual->komponen as $komponen) {
                         $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                             'produk_terjual_id' => $produk_terjual->id,
@@ -436,13 +424,65 @@ class InvoiceSewaController extends Controller
                             'harga_satuan' => $komponen->harga_satuan,
                             'harga_total' => $komponen->harga_total
                         ]);
-
+            
                         if (!$komponen_produk_terjual) {
                             DB::rollBack();
                             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                         }
                     }
                 }
+            
+                // Save additional product data
+                if (isset($data['nama_produk2'][0])) {
+                    for ($i = 0; $i < count($data['nama_produk2']); $i++) {
+                        $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk2'][$i])->first();
+                        $produk_terjual = Produk_Terjual::create([
+                            'produk_jual_id' => $getProdukJual->id,
+                            'no_invoice' => $datainvoice->no_invoice,
+                            'harga' => $data['harga_satuan2'][$i],
+                            'jumlah' => $data['jumlah2'][$i],
+                            'jenis' => 'TAMBAHAN',
+                            'harga_jual' => $data['harga_total2'][$i]
+                        ]);
+            
+                        if (!$produk_terjual) {
+                            DB::rollBack();
+                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                        }
+            
+                        foreach ($getProdukJual->komponen as $komponen) {
+                            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                                'produk_terjual_id' => $produk_terjual->id,
+                                'kode_produk' => $komponen->kode_produk,
+                                'nama_produk' => $komponen->nama_produk,
+                                'tipe_produk' => $komponen->tipe_produk,
+                                'kondisi' => $komponen->kondisi,
+                                'deskripsi' => $komponen->deskripsi,
+                                'jumlah' => $komponen->jumlah,
+                                'harga_satuan' => $komponen->harga_satuan,
+                                'harga_total' => $komponen->harga_total
+                            ]);
+            
+                            if (!$komponen_produk_terjual) {
+                                DB::rollBack();
+                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                            }
+                        }
+                    }
+                }
+            
+                // Update pembayaran
+                $pembayaran->each(function ($item) {
+                    $item->status_bayar = 'BELUM LUNAS';
+                    $item->save();
+                });
+            
+                DB::commit();
+                return redirect()->back()->with('success', 'Data berhasil disimpan');
+            
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
             }
         }
 
