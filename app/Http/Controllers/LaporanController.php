@@ -49,6 +49,8 @@ use App\Models\Mutasi;
 use App\Models\Supplier;
 use App\Models\ReturPenjualan;
 use App\Models\Mutasiindens;
+use App\Models\Pembelian;
+use App\Models\Produk;
 use App\Models\ProdukMutasiInden;
 use App\Models\Returinden;
 use App\Models\Returpembelian;
@@ -2486,6 +2488,424 @@ class LaporanController extends Controller
         return Excel::download(new PromoExport($data), 'promo.xlsx');
     }
 
+    public function stok_gallery_index(Request $req)
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        
+        $thisLokasi = $req->gallery ?? $galleries->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $galleries->where('id', $req->gallery)->first() : $galleries->first();
+        $listDate = $this->listDatePerMonth($thisMonth, $thisYear);
+
+        // data do sewa
+        $DOSewa = DeliveryOrder::where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+            ->whereMonth('tanggal_kirim', $thisMonth)
+            ->where(function($q) use($thisLokasi){
+                $q->whereHas('kontrak', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+            });
+        })->get();
+
+        // data kembali sewa
+        $KembaliSewa = KembaliSewa::where('status', 'DIKONFIRMASI')->with('produk.komponen.produk')->whereYear('tanggal_kembali', $thisYear)
+            ->whereMonth('tanggal_kembali', $thisMonth)
+            ->where(function($q) use($thisLokasi){
+                $q->whereHas('sewa', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+            });
+        })->get();
+
+        // data do penjualan
+        $DOPenjualan = DeliveryOrder::where('status', 'DIKONFIRMASI')->where('jenis_do', 'PENJUALAN')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+            ->whereMonth('tanggal_kirim', $thisMonth)
+            ->where(function($q) use($thisLokasi){
+                $q->whereHas('penjualan', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+            });
+        })->get();
+
+        // data ambil langsung penjualan
+        $ambilLangsungPenjualan = Penjualan::where('status', 'DIKONFIRMASI')
+            ->with('produk.komponen.produk')
+            ->where('distribusi', 'Diambil')
+            ->where('lokasi_id', $thisLokasi)
+            ->whereYear('tanggal_invoice', $thisYear)
+            ->whereMonth('tanggal_invoice', $thisMonth)
+        ->get();
+
+        // data mutasi
+        $mutasi = Mutasi::where('status', 'DIKONFIRMASI')
+            ->where(function($q) use($thisLokasi) {
+                $q->where('penerima', $thisLokasi)
+                ->orWhere('pengirim', $thisLokasi);
+            })
+            ->whereYear('tanggal_kirim', $thisYear)
+            ->whereMonth('tanggal_kirim', $thisMonth)
+            ->with([
+                'produkMutasi.komponen',
+                'produkMutasiOutlet.komponen',
+                'produkMutasiGG.komponen',
+                'produkMutasiGAG.komponen'
+            ])
+        ->get();
+
+        // data pembelian
+        $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->where('lokasi_id', $thisLokasi)
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->whereNotNull('penerima')
+            ->with([
+                'produkbeli.produk'
+            ])
+        ->get();
+
+        // data retur pembelian
+        $returPembelian = Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->whereHas('invoice', function($q) use($thisLokasi){
+                $q->whereHas('pembelian', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+                });
+            })
+            ->whereYear('tgl_retur', $thisYear)
+            ->whereMonth('tgl_retur', $thisMonth)
+            ->with([
+                'produkretur.produkbeli.produk',
+                'invoice.pembelian'
+            ])
+        ->get();
+
+        // data mutasi inden
+        $mutasiInden = Mutasiindens::where('status_diterima', 'DIKONFIRMASI')
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+            ->with([
+                'produkmutasi.produk.produk'
+            ])
+        ->get();
+
+        // data return mutasi inden
+        $returMutasiInden = Returinden::where('status_dibukukan', 'DIKONFIRMASI')
+            ->whereYear('tgl_dibukukan', $thisYear)
+            ->whereMonth('tgl_dibukukan', $thisMonth)
+            ->whereHas('mutasiinden', function($q) use($thisLokasi){
+                $q->where('lokasi_id', $thisLokasi);
+            })
+            ->with([
+                'produkreturinden.produk.produk.produk'
+            ])
+        ->get();
+
+        // tahun dari data DO Sewa
+        $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+
+        // tahun dari data Kembali Sewa
+        $years = $years->merge($KembaliSewa->pluck('tanggal_kembali')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data DO Penjualan
+        $years = $years->merge($DOPenjualan->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data Ambil Langsung Penjualan
+        $years = $years->merge($ambilLangsungPenjualan->pluck('tanggal_invoice')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($mutasi->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data pembelian
+        $years = $years->merge($pembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data retur pembelian
+        $years = $years->merge($returPembelian->pluck('tgl_retur')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi inden
+        $years = $years->merge($returPembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data retur mutasi inden
+        $years = $years->merge($returMutasiInden->pluck('tgl_dibukukan')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // Ambil tahun yang unik dan urutkan
+        $tahun = $years->unique()->sort()->values();
+
+        // integrate data
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+            // Inisialisasi list data dengan saldo awal 0
+            $item->dates = collect($listDate)->mapWithKeys(function($date) {
+                return [
+                    $date => [
+                        'stok_masuk' => 0,
+                        'stok_keluar' => 0,
+                        'stok_retur' => 0,
+                        'saldo' => 0
+                    ]
+                ];
+            });
+        
+            // Fungsi untuk memperbarui stok dan saldo
+            $updateSaldo = function($date, $stokKeluar, $stokMasuk, $stokRetur) use(&$item) {
+                $current = $item->dates[$date];
+                $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
+        
+                // Jika ada tanggal sebelumnya, ambil saldo sebelumnya
+                $previousSaldo = $item->dates->has($previousDate) ? $item->dates[$previousDate]['saldo'] : 0;
+        
+                $current['stok_keluar'] += $stokKeluar;
+                $current['stok_masuk'] += $stokMasuk;
+                $current['stok_retur'] += $stokRetur;
+                $current['saldo'] = $previousSaldo + $current['stok_masuk'] - $current['stok_keluar'] + $current['stok_retur'];
+        
+                $item->dates = $item->dates->put($date, $current);
+            };
+        
+            // Proses DO Sewa
+            $DOSewa->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    if($product->no_kembali_sewa == null){
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_kirim)->format('Y-m-d');
+                                $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                            }
+                        });
+                    }
+                });
+            });
+        
+            // Proses Kembali Sewa
+            $KembaliSewa->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                        if ($komponen->kode_produk == $item->kode) {
+                            $date = Carbon::parse($order->tanggal_kembali)->format('Y-m-d');
+                            $updateSaldo($date, 0, 0, ($komponen->jumlah * $product->jumlah));
+                        }
+                    });
+                });
+            });
+        
+            // Proses DO Penjualan
+            $DOPenjualan->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                        if ($komponen->kode_produk == $item->kode) {
+                            $date = Carbon::parse($order->tanggal_kirim)->format('Y-m-d');
+                            $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                        }
+                    });
+                });
+            });
+        
+            // Proses Ambil Langsung Penjualan
+            $ambilLangsungPenjualan->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                        if ($komponen->kode_produk == $item->kode) {
+                            $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                            $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                        }
+                    });
+                });
+            });
+
+            // Proses Mutasi
+            $mutasi->each(function($order) use($item, $thisLokasi, $updateSaldo) {
+                if($item->penerima == $thisLokasi){
+                    $order->produkMutasiOutlet->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                    $order->produkMutasiGG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                    $order->produkMutasiGAG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                }
+                if($item->pengirim == $thisLokasi){
+                    $order->produkMutasi->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                            }
+                        });
+                    });
+                    $order->produkMutasiGAG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                            }
+                        });
+                    });
+                }
+            });
+
+            // Proses Pembelian
+            $pembelian->each(function($order) use($item, $updateSaldo) {
+                $order->produkbeli->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_diterima)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+
+            // Proses Retur Pembelian
+            $returPembelian->each(function($order) use($item, $updateSaldo) {
+                $order->produkretur->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produkbeli->produk_id == $item->id) {
+                        $date = Carbon::parse($order->tgl_retur)->format('Y-m-d');
+                        $updateSaldo($date, $product->jumlah, 0, 0);
+                    }
+                });
+            });
+            
+            // Proses Mutasi Inden
+            $mutasiInden->each(function($order) use($item, $updateSaldo) {
+                $order->produkmutasi->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produk->produk->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_diterima)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+            
+            // Proses Retur Mutasi Inden
+            $returMutasiInden->each(function($order) use($item, $updateSaldo) {
+                $order->produkreturinden->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produk->produk->produk->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_dibukukan)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+
+            // Update saldo untuk hari-hari yang tidak ada transaksi
+            foreach ($listDate as $index => $date) {
+                if ($index > 0) {
+                    $previousDate = $listDate[$index - 1];
+                    if ($item->dates[$date]['saldo'] == 0) {
+
+                        $previousSaldo = $item->dates[$previousDate]['saldo'];
+                        $current = $item->dates[$date];
+                        $current['saldo'] = $previousSaldo;
+        
+                        $item->dates = $item->dates->put($date, $current);
+                    }
+                }
+            }
+        
+            $item->totalMasuk = $item->dates->sum('stok_masuk');
+            $item->totalKeluar = $item->dates->sum('stok_keluar');
+            $item->totalRetur = $item->dates->sum('stok_retur');
+            return $item;
+        });
+        
+        return view('laporan.stok_gallery', compact('data', 'listDate', 'bulan', 'galleries', 'lokasi', 'tahun'));
+    }
+
+    public function stok_gallery_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pembelian_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pembelian.pdf');
+    }
+
+    public function stok_gallery_excel(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PembelianExport($data), 'pembelian.xlsx');
+    }
+
     public function penjualanproduk_index(Request $req)
     {
         $produkjual = Produk_Jual::all();
@@ -4467,5 +4887,20 @@ class LaporanController extends Controller
         return Excel::download(new MutasiindenExport($produkterjual, $mutasiindenRecords), 'mutasi.xlsx');
     }
     
-    
+    public function listDatePerMonth($month = null, $year = null)
+    {
+        $month = $month ?? date('m');
+        $year = $year ?? date('Y');
+
+        $start = Carbon::create($year, $month, 1)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+
+        $dates = [];
+
+        for ($date = $start; $date->lte($end); $date->addDay()) {
+            $dates[] = $date->format('Y-m-d');
+        }
+
+        return $dates;
+    }
 }

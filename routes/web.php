@@ -705,6 +705,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/promo', 'LaporanController@promo_index')->name('laporan.promo');
             Route::get('/promo-pdf', 'LaporanController@promo_pdf')->name('laporan.promo-pdf');
             Route::get('/promo-excel', 'LaporanController@promo_excel')->name('laporan.promo-excel');
+            Route::get('/stok_gallery', 'LaporanController@stok_gallery_index')->name('laporan.stok_gallery');
+            Route::get('/stok_gallery-pdf', 'LaporanController@stok_gallery_pdf')->name('laporan.stok_gallery-pdf');
+            Route::get('/stok_gallery-excel', 'LaporanController@stok_gallery_excel')->name('laporan.stok_gallery-excel');
 
 
         });
