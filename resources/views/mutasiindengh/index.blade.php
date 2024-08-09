@@ -136,7 +136,7 @@
 
                                 </td>
                                 <td>
-                                    @if ( $mutasi->returinden !== null  ) 
+                                    @if ( $mutasi->returinden !== null && $mutasi->returinden->status_dibuat !== "BATAL" ) 
 
                                       {{ $mutasi->returinden->tipe_komplain }} : {{ formatRupiah($mutasi->returinden->refund) }}
                                     @else
@@ -213,7 +213,7 @@
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi
                                                 </a>
                                             </li>
-                                            @elseif ($mutasi->status_dibukukan == "MENUNGGU PEMBAYARAN" && $mutasi->sisa_bayar == 0 && !$mutasi->returinden)
+                                            @elseif ($mutasi->status_dibukukan == "MENUNGGU PEMBAYARAN" && $mutasi->sisa_bayar == 0 && (!$mutasi->returinden || ($mutasi->returinden && $mutasi->returinden->status_dibuat == "BATAL")) )
                                                 <li>
                                                     <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}">
                                                         <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi

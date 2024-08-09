@@ -136,11 +136,11 @@
                                                     <th>Kondisi</th>
                                                     <th>Biaya Perawatan</th>
                                                     <th>Total Biaya Perawatan</th>
-                                                    {{-- <th></th> --}}
+                                                    <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
-                                                @if(count($data->produkmutasi) == 0)
+                                                {{-- @if(count($data->produkmutasi) == 0)
                                                 <tr>
                                                     <td>
                                                         <select class="form-control" id="bulan_inden_0" name="bulan_inden[]">
@@ -177,9 +177,9 @@
                                                             <input type="hidden" name="jumlah[]" id="jumlahint_0" class="form-control" oninput="calculateTotal(0)"></td>
                                                         </div>
                                                     </td>
-                                                    {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
+                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                 </tr>
-                                                @else
+                                                @else --}}
                                                 @php
                                                     $i = 0;
                                                 @endphp
@@ -233,7 +233,7 @@
                                                         $i++;
                                                     @endphp
                                                 @endforeach
-                                                @endif
+                                                {{-- @endif --}}
                                             </tbody>
                                         </table>
                                     </div>
@@ -615,46 +615,55 @@ function validateQty(index) {
 
     $('#add').click(function() {
         var newRow = `
-            <tr id="row${i}">
-                <td>
-                    <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
-                        <option value="">Pilih Bulan Inden</option>
-                        ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
-                    </select>
-                </td>
-                <td>
-                    <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
-                        <option value="">Pilih Kode Inden</option>
-                    </select>
-                </td>
-                <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_${i}" readonly></td>
-                <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" onchange="calculateTotal(${i})"></td>
-                <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly></td>
-                <td>
-                    <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
-                        <option value="">Pilih Kondisi</option>
-                        @foreach ($kondisis as $kondisi)
-                         <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp. </span>
-                        <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control" oninput="calculateTotal(${i})">
-                        <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control">
-                    </div>
-                </td>
-                <td>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp. </span>
-                        <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control" readonly>
-                        <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" readonly>
-                    </div>
-                </td>
-                <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
-            </tr>
-        `;
+        <tr id="row${i}">
+            <td>
+                <input type="hidden" class="form-control" name="id[]" id="id_${i}" readonly>
+                <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
+                    <option value="">Pilih Bulan Inden</option>
+                    ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
+                </select>
+            </td>
+            <td>
+                <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
+                    <option value="">Pilih Kode Inden</option>
+                </select>
+            </td>
+            <td>
+                <input type="hidden" class="form-control" name="idinven[]" id="idinven_${i}" readonly>
+                <input type="text" class="form-control" name="kategori1[]" id="kategori1_${i}" readonly>
+                <input type="hidden" class="form-control" name="kode[]" id="kode_${i}" readonly>
+            </td>
+            <td>
+                <input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" oninput="validateQty(${i})" required>
+            </td>
+            <td>
+                <input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly>
+            </td>
+            <td>
+                <select id="kondisi_${i}" name="kondisi[]" class="form-control" onchange="showInputType(${i})" readonly>
+                    <option value="">Pilih Kondisi</option>
+                    @foreach ($kondisis as $kondisi)
+                        <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">Rp. </span> 
+                    <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control-banyak" oninput="calculateTotal(${i})">
+                    <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" oninput="calculateTotal(${i})">
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">Rp. </span> 
+                    <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control-banyak" oninput="calculateTotal(${i})" readonly>
+                    <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" oninput="calculateTotal(${i})">
+                </div>
+            </td>
+            <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
+        </tr>
+    `;
 
         $('#dynamic_field').append(newRow);
         // bindSelectEvents(i);
@@ -832,36 +841,37 @@ $(document).on('change', 'select[id^="bulan_inden_"]', function(){
 });
 
 $(document).on('change', 'select[id^="kode_inden_"]', function() {
-        var id_row = $(this).attr('id').split('_')[2];
-        var supplierId = $('#supplier').val();
-        var bulanInden = $('#bulan_inden_' + id_row).val();
-        var kodeInden = $(this).val();
-        var kategoriInput = $('#kategori1_' + id_row);
-        var jumlahkirimInput = $('#qtykrm_' + id_row);  
-        var inventoryinden_id = $('#idinven_' + index);
+    var id_row = $(this).attr('id').split('_')[2];
+    var supplierId = $('#supplier').val();
+    var bulanInden = $('#bulan_inden_' + id_row).val();
+    var kodeInden = $(this).val();
+    var kategoriInput = $('#kategori1_' + id_row);
+    var jumlahkirimInput = $('#qtykrm_' + id_row);  
+    var inventoryinden_id = $('#idinven_' + id_row);
 
-        $('#rawat_'+ index ).val('');
-        $('#rawat2_'+ index ).val('');
-        $('#jumlah_'+ index ).val('');
-        $('#jumlahint_'+ index ).val('');
+    $('#rawat_' + id_row).val('');
+    $('#rawat2_' + id_row).val('');
+    $('#jumlah_' + id_row).val('');
+    $('#jumlahint_' + id_row).val('');
 
-        if (kodeInden) {
-            $.ajax({
-                url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
-                type: 'GET',
-                success: function(response) {
-                    kategoriInput.val(response.kategori);
-                    jumlahkirimInput.val(response.jumlah);
-                    inventoryinden_id.val(response.idinven);
-                    jumlahkirimInput.data('jumlah', response.jumlah); // Simpan jumlah dalam atribut data
-                    console.log('Jumlah saved in data attribute:', response.jumlah); 
-                },
-                error: function() {
-                    alert('Gagal mengambil data kategori');
-                }
-            });
-        }
-    });
+    if (kodeInden) {
+        $.ajax({
+            url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
+            type: 'GET',
+            success: function(response) {
+                kategoriInput.val(response.kategori);
+                jumlahkirimInput.val(response.jumlah);
+                inventoryinden_id.val(response.idinven);
+                jumlahkirimInput.data('jumlah', response.jumlah); // Simpan jumlah dalam atribut data
+                console.log('Jumlah saved in data attribute:', response.jumlah); 
+            },
+            error: function() {
+                alert('Gagal mengambil data kategori');
+            }
+        });
+    }
+});
+
 
     function clearFile(){
         $('#bukti').val('');

@@ -147,7 +147,7 @@ $user = Auth::user();
                                                             @endforeach
                                                         </select> --}}
                                                     </td>
-                                                    @if($user->hasRole(['Purchasing','Finance']) && !$data->returinden)  
+                                                    @if($user->hasRole(['Purchasing','Finance']) && (!$data->returinden || ($data->returinden && $data->returinden->status_dibuat == "BATAL")))   
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
@@ -171,7 +171,7 @@ $user = Auth::user();
                                 </div>
                             </div>
                         </div>
-                        @if($user->hasRole(['Purchasing','Finance']) && !$data->returinden)  
+                        @if($user->hasRole(['Purchasing','Finance']) && !$data->returinden || ($data->returinden && $data->returinden->status_dibuat == "BATAL"))   
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
@@ -442,7 +442,7 @@ $user = Auth::user();
                                                     <select id="status_dibukukan" name="status_dibukukan" class="form-control">
                                                         <option disabled>Pilih Status</option>
                                                         <option value="MENUNGGU PEMBAYARAN" {{ $data->status_dibukukan == 'MENUNGGU PEMBAYARAN' ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
-                                                        @if( ($data->returinden ==null && $data->sisa_bayar == 0) || ($data->returinden !== null && $data->sisa_bayar == 0 && $data->returinden->sisa_refund == 0 && $data->returinden->status_dibukukan == "DIKONFIRMASI" &&  $data->returinden->status_dibuat == "DIKONFIRMASI"))
+                                                        @if( ($data->returinden ==null && $data->sisa_bayar == 0) || ($data->returinden && $data->returinden->status_dibuat == "BATAL" && $data->sisa_bayar == 0) || ($data->returinden !== null && $data->sisa_bayar == 0 && $data->returinden->sisa_refund == 0 && $data->returinden->status_dibukukan == "DIKONFIRMASI" &&  $data->returinden->status_dibuat == "DIKONFIRMASI"))
                                                         <option value="DIKONFIRMASI" {{ $data->status_dibukukan == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         @endif
                                                     </select>

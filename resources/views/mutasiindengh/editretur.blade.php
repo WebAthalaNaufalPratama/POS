@@ -515,6 +515,7 @@
                                                     @if (Auth::user()->hasRole('Purchasing')) 
                                                         <select id="status" name="status_dibuat" class="form-control select2" required>
                                                             <option disabled>Pilih Status</option>
+                                                            <option value="BATAL" {{ $dataretur->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
                                                             <option value="TUNDA" {{ $dataretur->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" {{ $dataretur->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>

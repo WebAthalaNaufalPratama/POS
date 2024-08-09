@@ -49,7 +49,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
          * Logout Routes
          * 
          */
-        Route::get('/get-bulan-inden/{supplier_id}', 'MutasiindensController@getBulanInden')->name('getBulan');
+        Route::get('/get-bulan-inden/{supplier_id}', 'MutasiindensController@getBulanInden')->name('getBulan'); 
         Route::get('/get-kode-inden/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkodeInden')->name('getKode');
         Route::get('/get-kategori-inden/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriInden')->name('getKategori');
         Route::get('/get-kategori-inden-edit/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriIndenEdit')->name('getKategoriEdit');

@@ -83,7 +83,7 @@ class MutasiindensController extends Controller
         $urutan = 1;
         if ($last) {
             // Jika ada nomor PO pada hari ini, ambil urutan berikutnya
-            $urutan = intval(substr($last->no_mutasi, -3)) + 1;
+            $urutan = intval(substr($last->no_retur, -3)) + 1;
         }
     
         // Format nomor PO dengan pola 'PO_tgl_urutanpo'
@@ -724,13 +724,7 @@ class MutasiindensController extends Controller
                     } 
                 }
 
-                if (Auth::user()->hasRole(['Purchasing','Finance'])) {
-                    $produkmutasi->inventoryinden_id = $idinven[$index];
-                    $produkmutasi->jml_dikirim = $qty2[$index];
-                    $produkmutasi->biaya_rawat = $rawat[$index];
-                    $produkmutasi->totalharga = $jml[$index];
-                    $check2 = $produkmutasi->save();
-                }
+                
 
                 $lokasi = Lokasi::find($mutasiinden->lokasi_id);
                 $produk = Produk::where('kode', $request->kode[$index])->first(); // khusus penerima
@@ -819,13 +813,20 @@ class MutasiindensController extends Controller
                     }
                 }
 
+                if (Auth::user()->hasRole(['Purchasing','Finance'])) {
+                    $produkmutasi->inventoryinden_id = $idinven[$index];
+                    $produkmutasi->jml_dikirim = $qty2[$index];
+                    $produkmutasi->biaya_rawat = $rawat[$index];
+                    $produkmutasi->totalharga = $jml[$index];
+                    $check2 = $produkmutasi->save();
+                }
                 if (Auth::user()->hasRole(['Auditor', 'AdminGallery'])) {
                     $produkmutasi->jml_diterima = $qty[$index];
                     $produkmutasi->kondisi_id = $kondisi[$index];
                     $check2 = $produkmutasi->save();
                 }
             }
-
+        
         //     DB::commit();
 
         // } catch (Exception $e) {
@@ -1308,9 +1309,11 @@ class MutasiindensController extends Controller
                     ]);
                 }
             }
-            
-           
 
+            if($retur->status_dibuat == "BATAL"){
+                $retur->status_dibukukan = $request->status_dibuat;
+            }
+            
                 // Upload file retur jika ada
             if ($request->hasFile('file_retur')) {
                 $file = $request->file('file_retur');
