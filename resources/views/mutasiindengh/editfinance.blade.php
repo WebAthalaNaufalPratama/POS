@@ -147,72 +147,28 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
-                                                @if(count($data->produkmutasi) == 0)
-                                                <tr>
-                                                    <td>
-                                                        <select class="form-control" id="bulan_inden_0" name="bulan_inden[]">
-                                                            <option value="">Pilih Bulan Inden</option>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select class="form-control" id="kode_inden_0" name="kode_inden[]">
-                                                            <option value="">Pilih Kode Inden</option>
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_0" readonly></td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                                                    <td>
-                                                        <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
-                                                            <option value="">Pilih Kondisi</option>
-                                                            @foreach ($kondisis as $kondisi)
-                                                                <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control-banyak" oninput="calculateTotal(0)">
-                                                            <input type="hidden" name="rawat[]" id="rawat_0" class="form-control" oninput="calculateTotal(0)">
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="jumlah_display[]" id="jumlah_0" class="form-control-banyak" oninput="calculateTotal(0)" readonly></td>
-                                                            <input type="hidden" name="jumlah[]" id="jumlahint_0" class="form-control" oninput="calculateTotal(0)"></td>
-                                                        </div>
-                                                    </td>
-                                                    {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
-                                                </tr>
-                                                @else
-                                                @php
-                                                    $i = 0;
-                                                @endphp
                                                 @foreach ($data->produkmutasi as $index => $produk)
                                                     <tr>
                                                         <td>
-                                                            <input type="hidden" class="form-control" name="id[]" id="id_{{ $i }}" value="{{ $produk->id }}" readonly>
-                                                            <input type="text" class="form-control" name="bulan_inden[]" id="bulan_inden_{{ $i }}" value="{{ $produk->produk->bulan_inden }}" readonly>
-                                                            {{-- <select class="form-control" id="bulan_inden_{{ $i }}" name="bulan_inden[]" readonly>
-                                                                <option value="">Pilih Bulan Inden</option>
-                                                            </select> --}}
+                                                            <input type="hidden" class="form-control" name="id[]" id="id_{{ $index }}" value="{{ $produk->id }}" readonly>
+                                                            <input type="text" class="form-control" name="bulan_inden[]" id="bulan_inden_{{ $index }}" value="{{ $produk->produk->bulan_inden }}" readonly>
                                                         </td>
                                                         <td>
-                                                            <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_{{ $i }}" value="{{ $produk->produk->kode_produk_inden }}" readonly>
-
-                                                            {{-- <select class="form-control" id="kode_inden_{{ $i }}" name="kode_inden[]" readonly>
-                                                                <option value="">Pilih Kode Inden</option>
-                                                            </select> --}}
+                                                            <input type="text" class="form-control" name="kode_inden[]" id="kode_inden_{{ $index }}" value="{{ $produk->produk->kode_produk_inden }}" readonly>
                                                         </td>
-                                                        <td><input type="hidden" class="form-control" name="idinven[]" id="idinven_{{ $i }}" value="{{ $produk->inventoryinden_id }}" readonly>
-                                                            <input type="text" class="form-control" name="kategori1[]" id="kategori1_{{ $i }}" value="{{ $produk->produk->produk->nama }}" readonly>
-                                                            <input type="hidden" class="form-control" name="kode[]" id="kode_{{ $i }}" value="{{ $produk->produk->produk->kode }}" readonly></td>
-                                                        <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $produk->jml_dikirim ?? 0 }}" oninput="validateQty({{ $i }})" data-jumlah="{{ $produk->produk->jumlah }}" required readonly></td>
-                                                        <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal({{ $i }})" readonly></td>
                                                         <td>
-                                                            <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
+                                                            <input type="hidden" class="form-control" name="idinven[]" id="idinven_{{ $index }}" value="{{ $produk->inventoryinden_id }}" readonly>
+                                                            <input type="text" class="form-control" name="kategori1[]" id="kategori1_{{ $index }}" value="{{ $produk->produk->produk->nama }}" readonly>
+                                                            <input type="hidden" class="form-control" name="kode[]" id="kode_{{ $index }}" value="{{ $produk->produk->produk->kode }}" readonly>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" value="{{ $produk->jml_dikirim ?? 0 }}" oninput="validateQty({{ $index }})" data-jumlah="{{ $produk->produk->jumlah }}" required readonly>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal({{ $index }})" readonly>
+                                                        </td>
+                                                        <td>
+                                                            <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
                                                                 <option value="">Pilih Kondisi</option>
                                                                 @foreach ($kondisis as $kondisi)
                                                                     <option value="{{ $kondisi->id }}" {{ $kondisi->id == $produk->kondisi_id ? 'selected' : '' }} disabled>{{ $kondisi->nama }}</option>
@@ -222,29 +178,21 @@
                                                         <td>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text" name="rawat2[]" id="rawat2_{{ $i }}" value="{{$produk->biaya_rawat ? formatRupiah2($produk->biaya_rawat) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $i }})">
-                                                                <input type="hidden" name="rawat[]" id="rawat_{{ $i }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control" oninput="calculateTotal({{ $i }})">
+                                                                <input type="text" name="rawat2[]" id="rawat2_{{ $index }}" value="{{ $produk->biaya_rawat ? formatRupiah2($produk->biaya_rawat) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $index }})">
+                                                                <input type="hidden" name="rawat[]" id="rawat_{{ $index }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control" oninput="calculateTotal({{ $index }})">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $i }}" value="{{ $produk->totalharga ? formatRupiah2($produk->totalharga) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $i }})" readonly></td>
-                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $i }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control" oninput="calculateTotal({{ $i }})"></td>
+                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $index }}" value="{{ $produk->totalharga ? formatRupiah2($produk->totalharga) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $index }})" readonly>
+                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control" oninput="calculateTotal({{ $index }})">
                                                             </div>
                                                         </td>
-                                                        {{-- @if($i == 0)
-                                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                                        @else
-                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">X</button></td>
-                                                        @endif --}}
                                                     </tr>
-                                                    @php
-                                                        $i++;
-                                                    @endphp
                                                 @endforeach
-                                                @endif
                                             </tbody>
+                                            
                                         </table>
                                     </div>
                                 </div>

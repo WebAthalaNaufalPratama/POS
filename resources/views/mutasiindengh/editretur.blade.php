@@ -33,7 +33,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Create Retur Mutasi Inden</h3>
+            <h3 class="page-title">Edit Retur Mutasi Inden</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
@@ -46,7 +46,7 @@
        
             <div class="form-group-retur">
                 <label for="no_retur" class="label-retur">Nomor Retur :</label>
-                <input type="text" class="form-control" id="no_retur" name="no_retur" value="{{ $no_retur }}" readonly>
+                <input type="text" class="form-control" id="no_retur" name="no_retur" value="{{ $dataretur->no_retur }}" readonly>
             </div>
             
         </div>
@@ -108,9 +108,9 @@
                                                  <img id="preview" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" />                                            
                                          </div>
                                     </div>
-                                    <div class="col-md-3">
-                                    </div>
                                     
+                                        
+                                  
                                 </div>
                             </div>
                         </div>
@@ -183,10 +183,11 @@
                             </div>
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
-                                    <form action="{{ route('retur.store') }}" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('returinden.update', $dataretur->id ) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
+                                        @method('patch')
                                         <input type="hidden" id="id_mutasi" name="mutasiinden_id" class="form-control" value="{{ $data->id }}" readonly>
-                                        <input type="hidden" class="form-control" id="no_retur" name="no_retur" value="{{ $no_retur }}" readonly>
+                                        <input type="hidden" class="form-control" id="no_retur" name="no_retur" value="{{ $dataretur->no_retur }}" readonly>
                                     <div class="mb-4">
                                         <h5>List Produk Komplain</h5>
                                     </div>
@@ -204,41 +205,53 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field2">
-                                                <tr>   
-                                                    <td>
-                                                        <select class="form-control" id="kode_inden_retur_0" name="kode_inden_retur[]" onchange="updateKategori(this, 0)">
-                                                            <option value="" disabled selected>Pilih Kode Inden</option>
-                                                            @foreach ($barangmutasi as $index => $item)
-                                                            <option value="{{ $item->produk->kode_produk_inden }}" data-kategori="{{ $item->produk->produk->nama }}" data-diterima="{{ $item->jml_diterima }}" data-produk-id="{{ $item->id }}">
-                                                                {{ $item->produk->kode_produk_inden }}
-                                                            </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                    <input type="hidden" class="form-control" name="produk_mutasi_inden_id[]" id="produk_mutasi_inden_id_0" readonly>
-                                                    <input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_0" readonly>
-                                                    </td>
-                                                    
-                                                    <td><textarea name="alasan[]" id="alasan_0" class="form-control" cols="30"></textarea></td>
-                                                    <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_0"  oninput="calculateJumlahRetur(0)" value=""></td>
-                                                    <td>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="rawat_retur_dis[]" id="rawat_retur_dis_0" class="form-control-banyak"  oninput="calculateJumlahRetur(0)">
-                                                            <input type="hidden" name="harga_satuan[]" id="rawat_retur_0" class="form-control">
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="jumlah_retur_dis[]" id="jumlah_retur_dis_0" class="form-control-banyak" readonly>
-                                                            <input type="hidden" name="totalharga[]" id="jumlah_retur_0" class="form-control">
-                                                        </div>
-                                                    </td>
-                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                                </tr>
+                                                @php
+                                                    $indexRetur = 0;
+                                                @endphp
+                                                @foreach($barangretur as $qy => $produkretur)
+                                                    <tr>   
+                                                        <td>
+                                                            <select class="form-control" id="kode_inden_retur_{{ $indexRetur }}" name="kode_inden_retur[]" onchange="updateKategori(this, {{ $indexRetur }})">
+                                                                <option value="" disabled selected>Pilih Kode Inden</option>
+                                                                @foreach ($barangmutasi as $itemIndex => $item)
+                                                                    <option value="{{ $item->produk->kode_produk_inden }}" {{ $item->produk->kode_produk_inden == $produkretur->produk->produk->kode_produk_inden ? 'selected' : ''  }}  data-kategori="{{ $item->produk->produk->nama }}" data-diterima="{{ $item->jml_diterima }}" data-produk-id="{{ $item->id }}">
+                                                                        {{ $item->produk->kode_produk_inden }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="hidden" class="form-control" name="produk_mutasi_inden_id[]" id="produk_mutasi_inden_id_{{ $indexRetur }}" value="{{ $produkretur->produk_mutasi_inden_id }}" readonly>
+                                                            <input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_{{ $indexRetur }}" value="{{ $produkretur->produk->produk->produk->nama }}" readonly>
+                                                        </td>
+                                                        <td><textarea name="alasan[]" id="alasan_{{ $indexRetur }}" class="form-control" cols="30" value="{{ $produkretur->alasan }}">{{ $produkretur->alasan }}</textarea></td>
+                                                        <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_{{ $indexRetur }}" data-produk-id="{{ $produkretur->produk_mutasi_inden_id }}" oninput="cantMinus(this)" value="{{ $produkretur->jml_diretur }}"></td>
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span> 
+                                                                <input type="text" name="rawat_retur_dis[]" id="rawat_retur_dis_{{ $indexRetur }}" class="form-control-banyak"  oninput="calculateJumlahRetur({{ $indexRetur }})" value="{{ formatRupiah2($produkretur->harga_satuan) }}">
+                                                                <input type="hidden" name="harga_satuan[]" id="rawat_retur_{{ $indexRetur }}" class="form-control" value="{{ $produkretur->harga_satuan }}" >
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span> 
+                                                                <input type="text" name="jumlah_retur_dis[]" id="jumlah_retur_dis_{{ $indexRetur }}" class="form-control-banyak" value="{{  formatRupiah2($produkretur->totalharga) }}" readonly>
+                                                                <input type="hidden" name="totalharga[]" id="jumlah_retur_{{ $indexRetur }}" class="form-control" value="{{ $produkretur->totalharga }}">
+                                                            </div>
+                                                        </td>
+                                                        @if($indexRetur == 0)
+                                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                        @else
+                                                            <td><button type="button" name="remove" id="{{ $indexRetur }}" class="btn btn-danger remove">x</button></td>
+                                                        @endif
+                                                    </tr>
+                                                    @php
+                                                        $indexRetur++;
+                                                    @endphp
+                                                @endforeach
                                             </tbody>
+                                            
                                         </table>
                                     </div>
                                 </div>
@@ -247,17 +260,18 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
-                                    <div class="col-lg-4 float-md-right">
+                                    <div class="col-md-4">
                                     <div class="form-group">
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
                                             <label>File Retur <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
                                             </label>
                                             <label class="custom-file-container__custom-file">
-                                                <input type="file" id="fileretur" class="custom-file-container__custom-file__custom-file-input" name="file_retur" accept="image/*" required>
+                                                <input type="file" id="fileretur" class="custom-file-container__custom-file__custom-file-input" name="file_retur" accept="image/*">
                                                 <span class="custom-file-container__custom-file__custom-file-control"></span>
                                             </label>
                                             <span class="text-danger">max 2mb</span>
-                                            <img id="preview2" src="" alt="your image" />
+                                            {{-- <img id="preview2" src="" alt="your image" /> --}}
+                                            <img id="preview2" src="{{ $dataretur->foto ? '/storage/' . $dataretur->foto : '' }}" alt="your image" />                                            
                                         </div>
                                     </div>
                                     </div>
@@ -307,14 +321,15 @@
                                                         </div>
                                                     </h5>
                                                 </li>
+
                                                 @if ($data->total_biaya == $data->sisa_bayar)
                                                 <li class="total">
                                                     <h4>Diskon</h4>
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_refund_dis" name="total_refund_dis" class="form-control" value="" readonly>
-                                                            <input type="hidden" id="total_refund" name="refund" class="form-control" readonly>
+                                                            <input type="text" id="total_refund_dis" name="total_refund_dis" class="form-control" value="{{ formatRupiah2($dataretur->refund) }}" readonly>
+                                                            <input type="hidden" id="total_refund" name="refund" class="form-control" value="{{ $dataretur->refund }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -323,8 +338,8 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_tagihan_akhir_dis" name="total_tagihan_akhir_dis" class="form-control" value="" readonly>
-                                                            <input type="hidden" id="total_tagihan_akhir" name="total_akhir" class="form-control" readonly>
+                                                            <input type="text" id="total_tagihan_akhir_dis" name="total_tagihan_akhir_dis" class="form-control" value="{{ formatRupiah2($dataretur->sisa_refund) }}" readonly>
+                                                            <input type="hidden" id="total_tagihan_akhir" name="total_akhir" class="form-control" value="{{ $dataretur->refund }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -334,12 +349,13 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_refund_dis" name="total_refund_dis" class="form-control" value="" readonly>
-                                                            <input type="hidden" id="total_refund" name="refund" class="form-control" readonly>
+                                                            <input type="text" id="total_refund_dis" name="total_refund_dis" class="form-control" value="{{ formatRupiah2($dataretur->refund) }}" readonly>
+                                                            <input type="hidden" id="total_refund" name="refund" class="form-control" value="{{ $dataretur->refund }}" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
                                                 @endif
+                                                
                                                 
                                             </ul>
                                         </div>
@@ -347,7 +363,6 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
-                                       
                                         <div class="page-btn">
                                            Riwayat Pembayaran
                                             {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
@@ -461,14 +476,14 @@
                             </div>
                         </div>
                         <div class="row justify-content-start">
-                            <div class="col-md-3 border rounded pt-3 me-1 mt-2"> 
+                            <div class="col-md-6 border rounded pt-3 me-1 mt-2"> 
                              
                                         <table class="table table-responsive border rounded">
                                             <thead>
                                                 <tr>
                                                     <th>Dibuat</th>                                              
-                                                    {{-- <th>Diterima</th>                                              
                                                     <th>Dibukukan</th>
+                                                    {{-- <th>Diterima</th>                                              
                                                     <th>Diperiksa</th> --}}
                                                 </tr>
                                             </thead>
@@ -476,16 +491,20 @@
                                                 <tr>
                                                     <td id="pembuat">
                                                         <input type="hidden" name="pembuat_id" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
+                                                        <input type="text" class="form-control" value="{{ $pembuat ?? '' }} ({{ $jabatanbuat ?? '' }})" disabled>
                                                     </td>
                                                     {{-- <td id=penerima">
                                                         <input type="hidden" name=penerima_id" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
                                                     </td> --}}
-                                                    {{-- <td id="pembuku">
+                                                    <td id="pembuku">
+                                                    @if (Auth::user()->hasRole('Finance'))  
                                                         <input type="hidden" name="pembuku_id" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td> --}}
+                                                        <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                                        @else
+                                                        <input type="text" class="form-control" value="{{ $pembuku ?? 'Nama' }} ({{ $jabatanbuku ?? 'Finance' }})" disabled>
+                                                    @endif
+                                                    </td>
                                                     {{-- <td id="pemeriksa">
                                                         <input type="hidden" name="pemeriksa_id" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
@@ -493,11 +512,16 @@
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
+                                                    @if (Auth::user()->hasRole('Purchasing')) 
                                                         <select id="status" name="status_dibuat" class="form-control select2" required>
                                                             <option disabled>Pilih Status</option>
-                                                            <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' || old('status') == null ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" {{ (old('status_dibuat') ?? 'DIKONFIRMASI') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            <option value="TUNDA" {{ $dataretur->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ $dataretur->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
+                                                    @else
+                                                        <input type="text" class="form-control" value="{{ $dataretur->status_dibuat ?? '-' }}" disabled>
+                                                    
+                                                    @endif
                                                     </td>
                                                     {{-- <td id="status_diterima">
                                                         <select id="status_diterima" name="status_diterima" class="form-control" readonly>
@@ -506,13 +530,23 @@
                                                             <option value="acc" {{ old('status_diterima') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
                                                         </select>
                                                     </td> --}}
-                                                    {{-- <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibukukan" class="form-control" readonly>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
-                                                            <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
+                                                    <td id="status_dibuku">
+                                                    @if (Auth::user()->hasRole('Finance'))  
+                                                        <select id="status_dibukukan" name="status_dibukukan" class="form-control">
+                                                            <option disabled>Pilih Status</option>
+                                                            <option value="TUNDA" {{ $dataretur->status_dibukukan == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
+                                                            {{-- @if ($dataretur->sisa_refund !== 0) --}}
+                                                            <option value="MENUNGGU PEMBAYARAN" {{ $dataretur->status_dibukukan == 'MENUNGGU PEMBAYARAN' ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
+                                                            {{-- @elseif ($dataretur->sisa_refund == 0)
+                                                            <option value="DIKONFIRMASI" {{ $dataretur->status_dibukukan == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                            @endif --}}
                                                         </select>
-                                                    </td> --}}
+                                                    @else
+                                                        <input type="text" class="form-control" value="{{ $dataretur->status_dibukukan ?? '-' }}" disabled>
+                                                    @endif
+                                                    </td>
+                                                    
+                                    
                                                     {{-- <td id="status_dibuku">
                                                         <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
@@ -523,14 +557,24 @@
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
+                                                        @if (Auth::user()->hasRole('Purchasing')) 
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
+                                                        @else
+                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{$dataretur->tgl_dibuat ? tanggalindo($dataretur->tgl_dibuat) : '-'}}" disabled>
+
+                                                        @endif
                                                     </td>
                                                     {{-- <td id="tgl_diterima">
                                                         <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" readonly>
                                                     </td> --}}
-                                                    {{-- <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" readonly>
-                                                    </td> --}}
+                                                    <td id="tgl_dibuku">
+                                                        @if (Auth::user()->hasRole('Finance')) 
+                                                        <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}">
+                                                        @else
+                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ $dataretur->tgl_dibukukan ? tanggalindo($dataretur->tgl_dibukukan) : '-' }}" disabled>
+
+                                                        @endif
+                                                    </td>
                                                     {{-- <td id="tgl_diperiksa">
                                                         <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', now()->format('Y-m-d')) }}" readonly >
                                                     </td> --}}
@@ -669,7 +713,7 @@ function clearFile(){
             <input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_${counter}" readonly>
             </td>
             <td><textarea name="alasan[]" id="alasan_${counter}" class="form-control" cols="30"></textarea></td>
-            <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_${counter}" oninput="calculateJumlahRetur(${counter})"></td>
+            <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_${counter}" oninput="cantMinus(this)"></td>
             <td>
                 <div class="input-group">
                     <span class="input-group-text">Rp. </span> 
@@ -708,31 +752,36 @@ function clearFile(){
     $(document).ready(function() {
 
 
-        $(document).on('input', '.qty_retur', function() {
-            var qtyRetur = parseInt($(this).val(), 10); // Ambil nilai qty_retur dari input
-            var produkId = $(this).data('produk-id'); // Ambil nilai produk-id dari atribut data
+    $(document).on('input', '.qty_retur', function() {
+        var qtyRetur = parseInt($(this).val(), 10); // Ambil nilai qty_retur dari input
+        var produkId = $(this).data('produk-id'); // Ambil nilai produk-id dari atribut data
+        var indexRetur = $(this).attr('id').split('_')[2]; // Ambil nilai index dari id input
 
-            console.log('Produk ID:', produkId);
-            console.log('qtyRetur:', qtyRetur);
+        console.log('Produk ID:', produkId);
+        console.log('qtyRetur:', qtyRetur);
 
-            // Ambil nilai qtytrm berdasarkan produk-id
-            var qtyTrm = parseInt($(`select option[data-produk-id='${produkId}']`).attr('data-diterima'), 10);
+        // Ambil nilai qtytrm berdasarkan produk-id
+        var qtyTrm = parseInt($(`select option[data-produk-id='${produkId}']`).attr('data-diterima'), 10);
 
-            console.log('qtyTrm:', qtyTrm);
+        console.log('qtyTrm:', qtyTrm);
 
-            // Validasi jika qty_retur melebihi qtytrm
-            if (qtyRetur > qtyTrm) {
-                toastr.warning('Jumlah retur tidak boleh lebih besar dari jumlah diterima.', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
+        // Validasi jika qty_retur melebihi qtytrm
+        if (qtyRetur > qtyTrm) {
+            toastr.warning('Jumlah retur tidak boleh lebih besar dari jumlah diterima.', {
+                closeButton: true,
+                tapToDismiss: false,
+                rtl: false,
+                progressBar: true
+            });
 
-                // Reset nilai qty_retur ke nilai qtytrm
-                $(this).val(qtyTrm);
-            }
-        });
+            // Reset nilai qty_retur ke nilai qtytrm
+            $(this).val(qtyTrm);
+        }
+
+        // Panggil fungsi calculateJumlahRetur setelah validasi
+        calculateJumlahRetur(indexRetur);
+    });
+
 
         if ($('#preview2').attr('src') === '') {
                 $('#preview2').attr('src', defaultImg);

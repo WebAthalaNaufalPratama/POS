@@ -584,9 +584,13 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
         
         Route::group(['prefix' => 'returinden'], function() {
+            Route::patch('/{idretur}/update-pembuku', 'MutasiindensController@updatePembukuRetur')->name('returinden.updatePembuku');
             Route::get('/{mutasiIG}/create/retur', 'MutasiindensController@create_retur')->name('create.retur');
+            Route::get('/{idretur}/retur/edit', 'MutasiindensController@edit_retur')->name('edit.retur');
+            Route::patch('/{idretur}/update', 'MutasiindensController@update_retur')->name('returinden.update');
             Route::get('/', 'MutasiindensController@index_returinden')->name('returinden.index');
             Route::get('/{mutasiIG}/show', 'MutasiindensController@show_returinden')->name('show.returinden');
+
 
         });
 
