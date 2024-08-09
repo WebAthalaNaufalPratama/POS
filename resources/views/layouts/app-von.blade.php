@@ -367,7 +367,7 @@
                     $user = Auth::user();                    
                     $lokasis = \App\Models\Lokasi::all();
                   @endphp
-                  @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance']))
+                  @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance', 'Purchasing']))
                   <div class="form-group">
                       <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
                           <option value="">Pilih Lokasi</option>
@@ -673,6 +673,26 @@
 
             $(element).val(value);
             return true;
+        }
+
+        function cantMinus(element) {
+          console.log('awal')
+          var value = $(element).val().trim();
+          
+          if (value !== "" && !value.startsWith("0.") && value.length > 1) {
+            value = value.replace(/^0+/, '');
+          }
+          
+          value = parseFloat(value);
+          
+          if (isNaN(value) || value < 0) {
+            console.log('akhir')
+            $(element).val(0);
+            return false;
+          }
+
+          $(element).val(value);
+          return true;
         }
 
       $(document).ready(function() {

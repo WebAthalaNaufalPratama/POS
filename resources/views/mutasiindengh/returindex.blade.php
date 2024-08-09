@@ -32,13 +32,16 @@
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>Tanggal Komplain</th>
                                 <th>No Retur</th>
                                 <th>No Mutasi</th>
+                                <th>Tipe Komplain</th>
                                 <th>Kode Inden</th>
                                 <th>Nama Produk</th>
                                 <th>QTY</th>
                                 <th>Tanggal Kirim</th>
-                                <th>Tanggal Komplain</th>
+                                <th>Status dibuat</th>
+                                <th>Status dibuku</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -46,8 +49,17 @@
                             @foreach ($returs as $retur)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                <td>{{ tanggalindo($retur->tgl_dibuat) }}</td>
                                 <td>{{ $retur->no_retur }}</td>
                                 <td>{{ $retur->mutasiinden->no_mutasi}}</td>
+                                <td>{{ $retur->tipe_komplain}}
+                                    @if ( $retur->tipe_komplain == "Refund" && $retur->sisa_refund == 0)
+                                        | Lunas
+                                    @elseif( $retur->tipe_komplain == "Refund" && $retur->sisa_refund !== 0)
+                                        | Belum Lunas
+                                    @endif
+
+                                </td>
                                 <td>
                                     <ul>
                                         @foreach($retur->produkreturinden as $produkretur)
@@ -70,34 +82,80 @@
                                     </ul>
                                 </td>
                                 <td>{{ tanggalindo($retur->mutasiinden->tgl_dikirim) }}</td>
-                                <td>{{ tanggalindo($retur->tgl_dibuat) }}</td>
-                                <td></td>
-                               
-                               
-                                {{-- <td class="text-center">
+                                <td>
+
+                                @if ($retur->status_dibuat == 'TUNDA' || $retur->status_dibuat == null)
+                                    <span class="badges bg-lightred">TUNDA</span>
+                                @elseif ($retur->status_dibuat == 'DIKONFIRMASI')
+                                    <span class="badges bg-lightgreen">DIKONFIRMASI</span>
+                                @elseif ($retur->status_dibuat == 'BATAL')
+                                    <span class="badges bg-lightgrey">BATAL</span>
+                                @endif
+
+                                </td>
+                                <td>
+                                    @if($retur->status_dibukukan == 'BATAL')
+                                        <span class="badges bg-lightgrey">BATAL</span>
+                                    @elseif($retur->status_dibukukan == 'TUNDA' || $retur->status_dibukukan == null)
+                                        <span class="badges bg-lightred">TUNDA</span>
+                                    @elseif ($retur->status_dibukukan == 'DIKONFIRMASI')
+                                        <span class="badges bg-lightgreen">DIKONFIRMASI</span>
+                                    @elseif ($retur->status_dibukukan == 'MENUNGGU PEMBAYARAN' && $retur->sisa_refund !== 0 && $retur->mutasiinden->sisa_bayar !== 0 && $retur->tipe_komplain == "Refund") 
+                                        <span class="badges bg-lightyellow">MENUNGGU PEMBAYARAN</span>
+                                    @elseif ($retur->status_dibukukan == 'MENUNGGU PEMBAYARAN' && $retur->sisa_refund == 0 && $retur->mutasiinden->sisa_bayar !== 0 && $retur->tipe_komplain == "Diskon") 
+                                        <span class="badges bg-lightyellow">MENUNGGU PEMBAYARAN</span>
+                                    @elseif ($retur->status_dibukukan == 'MENUNGGU PEMBAYARAN' && $retur->sisa_refund == 0 && $retur->mutasiinden->sisa_bayar == 0)
+                                        <span class="badges bg-lightyellow">MENUNGGU KONFIRMASI</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        @if ($mutasi->tgl_diterima == null)               
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima</a>
-                                        </li>
+                                        @role('Purchasing')
+                                            @if ($retur->status_dibuat == "TUNDA")               
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('edit.retur', ['idretur' => $retur->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain</a>
+                                            </li>
+                                            @else
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur</a>
+                                            </li>
+                                            @endif
+                                        @endrole
+                                        @role('Finance')
+                                        @if ($retur->status_dibukukan == "TUNDA" || $retur->status_dibukukan == null )               
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('edit.retur', ['idretur' => $retur->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain</a>
+                                            </li>
+                                        @elseif($retur->status_dibukukan == "MENUNGGU PEMBAYARAN" && $retur->sisa_Refund == 0 && $retur->mutasiinden->sisa_bayar == 0)  
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi</a>
+                                            </li>
+                                        @elseif($retur->status_dibukukan == "MENUNGGU PEMBAYARAN" && ($retur->sisa_Refund !== 0 || $retur->mutasiinden->sisa_bayar !== 0))  
+                                            <li>
+                                                 <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar</a>
+                                             </li>
+                                        @elseif($retur->status_dibukukan == "DIKONFIRMASI" )  
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur</a>
+                                            </li>
                                         @endif
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi</a>
-                                    </li>
-                                    <li>
+                                        @endrole
+                                        
+                                        
+                                        {{-- <li>
 
-                                        @if ($mutasi->returinden !== null)
-                                        <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Lihat Komplain</a>
+                                            @if ($mutasi->returinden !== null)
+                                            <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Lihat Komplain</a>
 
-                                        @else              
-                                        <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
-                                        @endif
-                                    </li>
+                                            @else              
+                                            <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
+                                            @endif
+                                        </li> --}}
                                     </ul>
-                                </td> --}}
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
