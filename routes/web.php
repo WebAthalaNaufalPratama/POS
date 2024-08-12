@@ -659,6 +659,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/penjualanproduk-pdf', 'LaporanController@penjualanproduk_pdf')->name('laporan.penjualanproduk-pdf');
             Route::get('/penjualanproduk-excel', 'LaporanController@penjualanproduk_excel')->name('laporan.penjualanproduk-excel');
             Route::get('/pelanggan', 'LaporanController@pelanggan_index')->name('laporan.pelanggan');
+            Route::get('/tagihanpelanggan-pdf', 'LaporanController@tagihanpelanggan_pdf')->name('laporan.tagihanpelanggan-pdf');
+            Route::get('/tagihanpelanggan-excel', 'LaporanController@tagihanpelanggan_excel')->name('laporan.tagihanpelanggan-excel');
             Route::get('/pelanggan-pdf', 'LaporanController@pelanggan_pdf')->name('laporan.pelanggan-pdf');
             Route::get('/pelanggan-excel', 'LaporanController@pelanggan_excel')->name('laporan.pelanggan-excel');
             Route::get('/pembayaran', 'LaporanController@pembayaran_index')->name('laporan.pembayaran');
@@ -676,6 +678,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/mutasi', 'LaporanController@mutasi_index')->name('laporan.mutasi');
             Route::get('/mutasi-pdf', 'LaporanController@mutasi_pdf')->name('laporan.mutasi-pdf');
             Route::get('/mutasi-excel', 'LaporanController@mutasi_excel')->name('laporan.mutasi-excel');
+            Route::get('/promo', 'LaporanController@promo_index')->name('laporan.promo');
+            Route::get('/promo-pdf', 'LaporanController@promo_pdf')->name('laporan.promo-pdf');
+            Route::get('/promo-excel', 'LaporanController@promo_excel')->name('laporan.promo-excel');
             Route::get('/mutasiinden', 'LaporanController@mutasiinden_index')->name('laporan.mutasiinden');
             Route::get('/mutasiinden-pdf', 'LaporanController@mutasiinden_pdf')->name('laporan.mutasiinden-pdf');
             Route::get('/mutasiinden-excel', 'LaporanController@mutasiinden_excel')->name('laporan.mutasiinden-excel');

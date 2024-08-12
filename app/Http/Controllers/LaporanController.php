@@ -11,6 +11,8 @@ use App\Exports\TagihanSewaExport;
 use App\Exports\PenjualanProdukExport;
 use App\Exports\PelangganExport;
 use App\Exports\DeliveryOrderExport;
+use App\Exports\TagihanPelangganExport;
+
 use App\Exports\HutangSupplierExport;
 use App\Exports\MutasiExport;
 use App\Exports\MutasiindenExport;
@@ -3419,6 +3421,7 @@ class LaporanController extends Controller
         $penjualan = $query->get();
 
         $groupedPenjualan = $penjualan->groupBy('id_customer')->map(function ($group) {
+            $group[0]->id = $group->pluck('id')->implode(', ');
             $group[0]->no_invoice = $group->pluck('no_invoice')->implode(', ');
             $group[0]->lokasi_id = $group->pluck('lokasi_id')->implode(',');
             $group[0]->tanggal_invoice = $group->pluck('tanggal_invoice')->implode(', ');
@@ -3934,7 +3937,7 @@ class LaporanController extends Controller
         });
 
         if($combinedData->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new DeliveryOrderExport($combinedData), 'deliveryorderpenjualan.xlsx');
+        return Excel::download(new DeliveryOrderExport($combinedData), 'dopenjualan.xlsx');
     }
 
     public function returpenjualan_index(Request $req)
@@ -5190,7 +5193,6 @@ class LaporanController extends Controller
         if($produkterjual->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new MutasiindenExport($produkterjual, $mutasiindenRecords), 'mutasi.xlsx');
     }
-    
     public function listDatePerMonth($month = null, $year = null)
     {
         $month = $month ?? date('m');
@@ -5207,4 +5209,50 @@ class LaporanController extends Controller
 
         return $dates;
     }
+
+    public function tagihanpelanggan_pdf(Request $req)
+    {
+        $penjualan = Penjualan::where('status', 'DIKONFIRMASI')
+            ->whereNotNull('dibuat_id')
+            ->whereNotNull('dibukukan_id')
+            ->whereNotNull('auditor_id')
+            ->whereNotNull('tanggal_dibuat')
+            ->whereNotNull('tanggal_dibukukan')
+            ->whereNotNull('tanggal_audit')
+            ->where('id_customer', $req->pelanggan)
+            ->get();
+
+        $produkterjual = Produk_Terjual::with('produk')
+            ->whereIn('no_invoice', $penjualan->pluck('no_invoice'))
+            ->get();
+
+
+        $pdf = Pdf::loadView('laporan.tagihanpelanggan_pdf', compact('penjualan', 'produkterjual'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream('tagihanpelanggan.pdf');
+    }
+
+
+    public function tagihanpelanggan_excel(Request $req)
+    {
+        $penjualan = Penjualan::where('status', 'DIKONFIRMASI')
+            ->whereNotNull('dibuat_id')
+            ->whereNotNull('dibukukan_id')
+            ->whereNotNull('auditor_id')
+            ->whereNotNull('tanggal_dibuat')
+            ->whereNotNull('tanggal_dibukukan')
+            ->whereNotNull('tanggal_audit')
+            ->where('id_customer', $req->pelanggan)
+            ->get();
+
+        $produkterjual = Produk_Terjual::with('produk')
+            ->whereIn('no_invoice', $penjualan->pluck('no_invoice'))
+            ->get();  
+            
+        if($produkterjual->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new TagihanPelangganExport($produkterjual, $penjualan), 'tagihan_pelanggan.xlsx');
+    }
+
+    
 }

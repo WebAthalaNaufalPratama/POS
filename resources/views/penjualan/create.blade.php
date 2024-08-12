@@ -50,7 +50,7 @@
                                         <div class="form-group">
                                             <label for=""></label>
                                             <div class="add-icon">
-                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" >
                                                     <img src="/assets/img/icons/plus1.svg" alt="img" />
                                                 </button>
                                             </div>
@@ -85,7 +85,12 @@
                                             <label for="distribusi">Distribusi Produk</label>
                                             <select id="distribusi" name="distribusi" class="form-control" required>
                                                 <option value="">Pilih Distribusi Produk</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if(!$user->hasRole(['KasirOutlet']))
                                                 <option value="Dikirim">Dikirim</option>
+                                                @endif
                                                 <option value="Diambil">Langsung Diambil</option>
                                             </select>
                                         </div>
@@ -257,7 +262,7 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <div id="inputBuktiBayar" style="display: none;">
-                                                        <label for="buktibayar">Unggah Bukti</label>
+                                                        <label for="buktibayar">Unggah Bukti Pembayaran</label>
                                                         <input type="file" class="form-control" id="bukti" name="bukti">
                                                     </div>
                                                 </div>
@@ -446,7 +451,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="handphone" class="col-form-label"> No Handphone</label>
-                        <input type="text" class="form-control" name="handphone" id="add_handphone" required>
+                        <input type="number" class="form-control" name="handphone" id="add_handphone" required>
                     </div>
                     <div class="mb-3">
                         <label for="alamat" class="col-form-label">Alamat</label>
@@ -723,7 +728,7 @@
     function validateNumericInput() {
         $('input[id^="diskon_"]').on('input', function() {
             var value = $(this).val();
-            var numericValue = value.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+            var numericValue = value.replace(/[^0-9.]/g, '');
 
             if (numericValue !== value) {
                 $(this).val(numericValue);
@@ -796,6 +801,20 @@
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
+
+            function validateNumericInput() {
+                $('input[id^="diskon_"]').on('input', function() {
+                    var value = $(this).val();
+                    var numericValue = value.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+
+                    if (numericValue !== value) {
+                        $(this).val(numericValue);
+                    }
+                });
+            }
+
+            validateNumericInput();
+            
             i++;
         });
 
@@ -844,9 +863,6 @@
             // Memanggil fungsi updateHargaSatuan
             updateHargaSatuan(this);
         });
-
-
-
 
         @foreach($produks as $index => $produk)
         $('#jumlahStaff_{{ $index }}').on('input', function() {
@@ -1074,7 +1090,7 @@
                 $('#inputPembayaran').show();
                 $('#inputRekening').show();
                 $('#inputTanggalBayar').show();
-                $('#inputBuktiBayar').hide();
+                $('#inputBuktiBayar').show();
                 $('#nominal').val(formatRupiah(dpValue, 'Rp '));
             }
         });
@@ -1135,6 +1151,7 @@
 
         function checkPromo(total_transaksi, tipe_produk, produk) {
             $('#total_promo').val(0);
+            Totaltagihan();
             var data = {
                 total_transaksi: total_transaksi,
                 tipe_produk: tipe_produk,
@@ -1176,34 +1193,6 @@
                 }
             });
         }
-
-        // function updateHargaSatuan(select) {
-        //     var index = select.selectedIndex;
-        //     var hargaSatuanInput = $('#harga_satuan_0');
-        //     var selectedOption = $(select).find('option').eq(index);
-        //     var hargaProduk = selectedOption.data('harga');
-                
-        //     hargaSatuanInput.val(hargaProduk);
-            
-        // }
-        // $('#nama_produk').on('change', function() {
-        //     updateHargaSatuan(this);
-        // });
-
-        // function updateHargaSatuan(select) {
-        //     var index = select.selectedIndex;
-        //     var hargaSatuanInput = $('#harga_satuan_0');
-        //     var selectedOption = $(select).find('option').eq(index);
-        //     var hargaProduk = selectedOption.data('harga');
-            
-        //     var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
-            
-        //     hargaSatuanInput.val(formattedHarga);
-        // }
-
-        // $('#nama_produk').on('change', function() {
-        //     updateHargaSatuan(this);
-        // });
 
         function updateHargaSatuan(select) {
             var index = select.selectedIndex;

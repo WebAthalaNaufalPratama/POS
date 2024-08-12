@@ -22,7 +22,7 @@
 </div>
 
 <div class="row">
-    <class="card">
+    <div class="card">
         <div class="card-header">
             <h4 class="card-title mb-0">
                 Delivery Order Penjualan
@@ -102,7 +102,7 @@
                                                     @php
                                                         $user = Auth::user();
                                                     @endphp
-                                                    @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $dopenjualan->status != 'DIKONFIRMASI')
+                                                    @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $dopenjualan->status != 'DIKONFIRMASI')
                                                         <option value="DIBATALKAN" {{ $dopenjualan->status == 'DIBATALKAN' ? 'selected': ''}}>DIBATALKAN</option>
                                                     @endif
                                                 @else
@@ -235,7 +235,14 @@
                                                         @if ($produk->jenis == null)
                                                         <tr id="row{{ $i }}">
                                                             <td>
-                                                                <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" >
+                                                                @php
+                                                                    $user = Auth::user();
+                                                                @endphp
+                                                                @if($user->hasRole(['Auditor', 'Finance']))
+                                                                <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly>
+                                                                @else
+                                                                <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control">
+                                                                @endif
                                                                     <option value="">Pilih Produk</option>
                                                                     @foreach ($produkjuals as $pj)
                                                                     <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>
@@ -278,10 +285,18 @@
                                                                     @endforeach
                                                                 </select>
                                                             </td>
+                                                            @if($user->hasRole(['Auditor', 'Finance']))
+                                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}" readonly></td>
+                                                            @else
                                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}"></td>
+                                                            @endif
                                                             <td><input type="text" name="satuan[]" id="satuan_{{ $i }}" class="form-control" value="{{ $produk->satuan }}" ></td>
                                                             <td><input type="text" name="keterangan[]" id="ketarangan_{{ $i }}" class="form-control" value="{{ $produk->keterangan }}" ></td>
-                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button></td>
+                                                            <td>
+                                                                @if(!$user->hasRole(['Auditor', 'Finance']))
+                                                                <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                         @endif
                                                         @php
@@ -385,7 +400,7 @@
                                                     $user = Auth::user();
                                                 @endphp
                                                 <tr>
-                                                    @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                    @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']))
                                                         <td id="pembuat">{{ Auth::user()->name }}</td>
                                                         <td id="penyetuju">-</td>
                                                         <td id="pemeriksa">-</td>
@@ -400,17 +415,17 @@
                                                     @endif
                                                 </tr>
                                                 <tr>
-                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']))
                                                     <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
                                                     <td>-</td>
                                                     <td>-</td>
                                                 @elseif($user->hasRole(['Finance']))
-                                                    <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat)) }}" disabled ></td>
+                                                    <td><input type="date" class="form-control" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat)) }}" disabled ></td>
                                                     <td><input type="date" class="form-control" name="tanggal_penyetuju" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
-                                                    <td><input type="date" class="form-control" name="tanggal_pemeriksa" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pemeriksa)) }}" disabled></td>
+                                                    <td><input type="date" class="form-control value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pemeriksa)) }}" disabled></td>
                                                 @elseif($user->hasRole(['Auditor']))
-                                                    <td><input type="date" class="form-control" name="tanggal_pembuat" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat)) }}" disabled></td>
-                                                    <td><input type="date" class="form-control" name="tanggal_penyetuju" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_penyetuju)) }}" disabled></td>
+                                                    <td><input type="date" class="form-control" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_pembuat)) }}" disabled></td>
+                                                    <td><input type="date" class="form-control" value="{{ date('Y-m-d', strtotime($dopenjualan->tanggal_penyetuju)) }}" disabled></td>
                                                     <td><input type="date" class="form-control" name="tanggal_pemeriksa" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
                                                 @endif
                                                 </tr>
@@ -610,6 +625,10 @@
                 i++;
             });
         }
+
+        $('[id^=nama_produk_]').on('mousedown click focus', function(e) {
+            e.preventDefault();
+        });
 
         function updateIndicesProdukTambahan() {
             var i = 0;

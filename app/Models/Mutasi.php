@@ -51,7 +51,7 @@ class Mutasi extends Model
     }
 
     public function dibuku(){
-        return $this->belongsTo(User::class, 'dibuku_id', 'id');
+        return $this->belongsTo(User::class, 'dibukukan_id', 'id');
     }
 
     public function rekening() {

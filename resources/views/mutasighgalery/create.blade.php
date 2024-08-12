@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}">{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -84,7 +95,7 @@
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA">TUNDA</option>
-                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
+                                                <!-- <option value="DIKONFIRMASI">DIKONFIRMASI</option> -->
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -142,11 +153,12 @@
                                 <div class="row">
                                 <div class="col-lg-8 col-sm-6 col-12 ">
                                         <div class="row mt-4">
-                                            <div class="col-lg-8">
-                                                <table class="table table-responsive border rounded">
+                                            <div class="col-lg-12">
+                                            <table class="table table-responsive border rounded">
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
+                                                            <th>Penerima</th>
                                                             <th>Penyetuju</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
@@ -154,11 +166,13 @@
                                                     <tbody>
                                                         <tr>
                                                             <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                            <td id="penerima">-</td>
                                                             <td id="penyetuju">-</td>
                                                             <td id="pemeriksa">-</td>
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                                            <td id="tgl_pembuat"><input type="date" class="form-control" name="tanggal_pembuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            <td id="tgl_penerima" style="width: 25%;">-</td>
                                                             <td id="tgl_penyetuju" style="width: 25%;">-</td>
                                                             <td id="tgl_pemeriksa" style="width: 25%;">-</td>
                                                         </tr>
@@ -395,6 +409,18 @@
             $('#biaya_pengiriman').val(formatRupiah(ongkirValue,'Rp '));
             Totaltagihan();
         });
+
+        function validateNumericInput() {
+            $('#biaya_pengiriman').on('input', function() {
+                var value = $(this).val();
+                var numericValue = value.replace(/[^0-9.]/g, '');
+
+                if (numericValue !== value) {
+                    $(this).val(numericValue);
+                }
+            });
+        }
+        validateNumericInput();
 
         function Totaltagihan() {
             var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;

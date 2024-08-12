@@ -145,6 +145,10 @@
                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                             </a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="{{ route('laporan.tagihanpelanggan-pdf', ['pelanggan' => $item->customer->id]) }}"><img src="/assets/img/icons/pdf.svg" class="me-2" alt="img">Cetak Tagihan Pelanggan PDF</a>
+                                                <!-- <a class="dropdown-item" href="{{ route('laporan.tagihanpelanggan-excel', ['pelanggan' => $item->customer->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Cetak Tagihan Pelanggan Excel</a> -->
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

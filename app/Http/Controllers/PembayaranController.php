@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Pembayaran;
 use App\Models\Penjualan;
 use App\Models\Rekening;
+use App\Models\Customer;
 use App\Models\Karyawan;
 use App\Models\Lokasi;
 use App\Models\Returinden;
@@ -61,14 +62,12 @@ class PembayaranController extends Controller
         // dd($pembayaran);
         $bankpens = Rekening::all();
         $data = Pembayaran::with('rekening')->find($pembayaran);
-        // dd($data);
-        return view('pembayaran.edit', compact('data', 'bankpens'));
+        $penjualan = Penjualan::where('id', $data->invoice_penjualan_id)->first();
+        return view('pembayaran.edit', compact('data', 'bankpens', 'penjualan'));
     }
 
     public function update(Request $req, $pembayaran)
     {
-        // dd($pembayaran);
-        // dd($req->hasFile('bukti'));
         if ($req->hasFile('bukti')) {
             $file = $req->file('bukti');
             $fileName = $req->no_invoice_bayar . date('YmdHis') . '.' . $file->getClientOriginalExtension();
@@ -79,7 +78,7 @@ class PembayaranController extends Controller
 
             $penjualan = Penjualan::find($do->invoice_penjualan_id);
 
-            // dd($penjualan);
+            
             $resetTagihan = $penjualan->sisa_bayar + $do->nominal;
             $penjualan->update([
                 'sisa_bayar' => $resetTagihan,
@@ -92,6 +91,9 @@ class PembayaranController extends Controller
             // dd($cek);
             if ($cek <= 0) {
                 $data['status_bayar'] = 'LUNAS';
+                $customer = Customer::where('id', $penjualan->id_customer)->update([
+                    'status_piutang' => 'LUNAS',
+                ]);
             } else {
                 $data['status_bayar'] = 'BELUM LUNAS';
             }
@@ -106,6 +108,14 @@ class PembayaranController extends Controller
         } else {
             return redirect()->back()->with('fail', 'Gagal mengedit');
         }
+    }
+
+    private function parseRupiahToNumber($rupiah)
+    {
+        $cleaned = str_replace('.', '', $rupiah); 
+        $cleaned = str_replace(',', '.', $cleaned); 
+
+        return (float) $cleaned; 
     }
 
     public function store(Request $req)
@@ -126,8 +136,6 @@ class PembayaranController extends Controller
 
         $data = $req->except(['_token', '_method', 'bukti', 'status_bayar']);
 
-        // dd($data);
-
         if ($req->hasFile('bukti')) {
             $file = $req->file('bukti');
             $fileName = time() . '_' . $file->getClientOriginalName();
@@ -135,11 +143,10 @@ class PembayaranController extends Controller
             $data['bukti'] = $filePath;
         }
 
+        $data['nominal'] = $this->parseRupiahToNumber($data['nominal']);
         $penjualan = Penjualan::find($req->invoice_penjualan_id);
-
-        // dd($penjualan);
         if ($penjualan) {
-            $cekTotalTagihan = $penjualan->sisa_bayar - $req->nominal;
+            $cekTotalTagihan = $penjualan->sisa_bayar - $data['nominal'];
             $penjualan->update([
                 'sisa_bayar' => $cekTotalTagihan,
             ]);

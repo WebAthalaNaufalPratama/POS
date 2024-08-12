@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}">{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -154,9 +165,6 @@
                                                         </tr>
                                                     @endforeach
                                                 @endif
-
-
-
                                                 </tbody>
                                             </table>
                                         </div>
@@ -168,9 +176,9 @@
                                 <div class="row">
                                     <div class="col-lg-8 col-sm-6 col-12 ">
                                         <div class="row mt-4">
-                                            <div class="col-lg-8">
-                                                <table class="table table-responsive border rounded">
-                                                @php
+                                            <div class="col-lg-12">
+                                            <table class="table table-responsive border rounded">
+                                                    @php
                                                         $user = Auth::user();
                                                     @endphp
                                                     <thead>
@@ -194,7 +202,7 @@
                                                                 <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
                                                                 <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
                                                                 <td id="pemeriksa">{{ Auth::user()->name}}</td>
-                                                            @elseif($user->hasRole(['KasirOutlet']))
+                                                            @elseif($user->hasRole(['Purchasing', 'SuperAdmin']))
                                                                 <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
                                                                 <td id="penerima" >-</td>
                                                                 <td id="penyetuju" >-</td>
@@ -202,7 +210,7 @@
                                                             @endif
                                                         </tr>
                                                         <tr>
-                                                            @if($user->hasRole(['KasirOutlet']))
+                                                            @if($user->hasRole(['Purchasing', 'SuperAdmin']))
                                                                 <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
                                                                 <td id="tgl_penerima">-</td>
                                                                 <td id="tgl_penyetuju">-</td>

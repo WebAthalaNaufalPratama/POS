@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required readonly>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}" {{ $mutasis->rekening_id == $rekening->id ? 'selected':''}}>{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -83,8 +94,9 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required disabled>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $mutasis->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -119,6 +131,9 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Nama</th>
+                                                        <th>Nama Komponen</th>
+                                                        <th>KondisiKomponen</th>
+                                                        <th>jumlah Komponen</th>
                                                         <th>Jumlah Dikirim</th>
                                                         <th>Jumlah Diterima</th>
                                                         <th></th>
@@ -176,50 +191,59 @@
                                                                 <!-- @endif -->
                                                             @endforeach
                                                             </select>
+                                                            </td>
                                                             @if($isTRDSelected)
-                                                                <div class="row mt-2">
-                                                                    <div class="col">
-                                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" disabled>
-                                                                            <option value=""> Pilih Kondisi </option>
-                                                                            @foreach ($kondisis as $kondisi)
-                                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col">
-                                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
-                                                                    </div>
-                                                                </div>
+                                                            <td>Tidak Ada Komponen</td>
+                                                            <td>
+                                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                                    <option value=""> Pilih Kondisi </option>
+                                                                    @foreach ($kondisis as $kondisi)
+                                                                    <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                            </td>
                                                             @elseif($perPendapatan)
                                                                 @foreach ($perPendapatan as $noMOG => $items)
                                                                     @if($noMOG == $produk->id)
-                                                                        @foreach ($items as $komponen)
+                                                                    <td>
+                                                                    @foreach ($items as $komponen)
                                                                             <div class="row mt-2">
                                                                                 <div class="col">
-                                                                                <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
+                                                                                    <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
                                                                                     <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                                 </div>
+                                                                            </div>
+                                                                    @endforeach
+                                                                    </td>
+                                                                    <td>
+                                                                    @foreach ($items as $komponen)
+                                                                            <div class="row mt-2">
                                                                                 <div class="col">
-                                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" disabled>
+                                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" readonly>
                                                                                         <option value=""> Pilih Kondisi </option>
                                                                                         @foreach ($kondisis as $kondisi)
                                                                                         <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                                                         @endforeach
                                                                                     </select>
                                                                                 </div>
+                                                                            </div>
+                                                                    @endforeach
+                                                                    </td>
+                                                                    <td>
+                                                                    @foreach ($items as $komponen)
+                                                                            <div class="row mt-2">
                                                                                 <div class="col">
                                                                                     <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required readonly>
                                                                                 </div>
-                                                                                <!-- <div class="col">
-                                                                                <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>                                                               
-                                                                                </div> -->
                                                                             </div>
-                                                                        @endforeach
+                                                                    @endforeach
+                                                                    </td>
                                                                     @endif
                                                                 @endforeach
                                                             @endif
-
-                                                        </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly></td>
                                                         <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}" readonly></td>
 
@@ -281,12 +305,12 @@
                                                                 <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
                                                             @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
-                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
                                                             @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
-                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>

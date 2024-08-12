@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}">{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -115,6 +126,9 @@
                                             <thead>
                                                 <tr>
                                                     <th>Nama</th>
+                                                    <th>Nama Komponen</th>
+                                                    <th>Kondisi Komponen</th>
+                                                    <th>Jumlah Komponen</th>
                                                     <th>Jumlah Dikirim</th>
                                                     <th></th>
                                                 </tr>
@@ -137,8 +151,13 @@
                                                             $isTRDSelected = false; 
                                                             $selectedTRDKode = ''; 
                                                             $selectedGFTKode = ''; 
-                                                            $do = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
-                                                            $harga = \App\Models\Produk_Terjual::where('id', $do->no_invoice)->first();
+                                                            if($cekpenjualan->distribusi == 'Diambil'){
+                                                                $harga = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
+                                                            }elseif($cekpenjualan->distribusi == 'Dikirim') {
+                                                                $do = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
+                                                                $harga = \App\Models\Produk_Terjual::where('id', $do->no_invoice)->first();
+                                                            }
+                                                            
                                                         @endphp
                                                         @foreach ($produkjuals as $index => $pj)
                                                             @php
@@ -174,31 +193,37 @@
                                                             <!-- @endif -->
                                                         @endforeach
                                                     </select>
+                                                    </td>
                                                     @if($isTRDSelected)
-                                                        <div class="row mt-2">
-                                                            <div class="col">
-                                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
-                                                                    <option value=""> Pilih Kondisi </option>
-                                                                    @foreach ($kondisis as $kondisi)
-                                                                    <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                            <div class="col">
-                                                                <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}">
-                                                            </div>
-                                                        </div>
+                                                    <td>Tidak Ada Komponen</td>
+                                                    <td>
+                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                            <option value=""> Pilih Kondisi </option>
+                                                            @foreach ($kondisis as $kondisi)
+                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                    </td>
                                                     @elseif($perPendapatan)
                                                         @foreach ($perPendapatan as $noRETUR => $items)
                                                             @if($noRETUR == $produk->no_retur)
-                                                                @foreach ($items as $komponen)
+                                                            <td>
+                                                            @foreach ($items as $komponen)
                                                                     <div class="row mt-2">
                                                                         <div class="col">
-                                                                            <input type="hidden" name="idgiftproduk_{{ $i }}[]" id="idgiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['id'] }}">
                                                                             <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
                                                                             <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
-                                                                            </div>
-                                                                            <div class="col">
+                                                                        </div>
+                                                                    </div>
+                                                            @endforeach
+                                                            </td>
+                                                            <td>
+                                                            @foreach ($items as $komponen)
+                                                                    <div class="row mt-2">
+                                                                        <div class="col">
                                                                             <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" readonly>
                                                                                 <option value=""> Pilih Kondisi </option>
                                                                                 @foreach ($kondisis as $kondisi)
@@ -206,16 +231,22 @@
                                                                                 @endforeach
                                                                             </select>
                                                                         </div>
+                                                                    </div>
+                                                            @endforeach
+                                                            </td>
+                                                            <td>
+                                                            @foreach ($items as $komponen)
+                                                                    <div class="row mt-2">
                                                                         <div class="col">
                                                                             <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required readonly>
                                                                         </div>
                                                                     </div>
-                                                                @endforeach
+                                                            @endforeach
+                                                            </td>
                                                             @endif
                                                         @endforeach
                                                     @endif
 
-                                                    </td>
                                                     <td><input type="number" name="jumlah_dikirim[]" id="jumlah_{{ $i }}" class="form-control" data-index="{{ $i }}" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required></td>
                                                     <td>
                                                         @if ($i == 0)
@@ -243,13 +274,14 @@
                         <!-- <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2"> -->
                                 <div class="row">
-                                    <div class="col-lg-8 col-sm-6 col-12">
+                                    <div class="col-lg-8 col-sm-6 col-12 border radius">
                                         <div class="row mt-4">
-                                            <div class="col-lg-8">
+                                            <div class="col-lg-12">
                                                 <table class="table table-responsive border rounded">
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
+                                                            <th>Penerima</th>
                                                             <th>Penyetuju</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
@@ -257,11 +289,13 @@
                                                     <tbody>
                                                         <tr>
                                                             <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                            <td id="penerima">-</td>
                                                             <td id="penyetuju">-</td>
                                                             <td id="pemeriksa">-</td>
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                                            <td id="tgl_pembuat"><input type="date" class="form-control" name="tanggal_pembuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            <td id="tgl_penerima" style="width: 25%;">-</td>
                                                             <td id="tgl_penyetuju" style="width: 25%;">-</td>
                                                             <td id="tgl_pemeriksa" style="width: 25%;">-</td>
                                                         </tr>
@@ -447,6 +481,10 @@
             $('#preview').attr('src', defaultImg);
         };
 
+        $('[id^=nama_produk_]').on('mousedown click focus', function(e) {
+            e.preventDefault();
+        });
+
         function formatRupiah(angka, prefix) {
             var numberString = angka.toString().replace(/[^,\d]/g, ''),
                 split = numberString.split(','),
@@ -481,6 +519,50 @@
                 $('#inputExspedisi').show();
                 $('#biaya_pengiriman').prop('readonly', true);
                 ongkirId();
+            }
+        });
+
+        function validateNumericInput() {
+            $('#biaya_pengiriman').on('input', function() {
+                var value = $(this).val();
+                var numericValue = value.replace(/[^0-9.]/g, '');
+
+                if (numericValue !== value) {
+                    $(this).val(numericValue);
+                }
+            });
+        }
+
+        validateNumericInput();
+
+        var jumlahDO = [];
+
+        @if($cekpenjualan->distribusi == 'Diambil')
+                @foreach ($penjualans->produk_retur as $produk)
+                    jumlahDO.push({{ $produk->jumlah }});
+                @endforeach
+        @elseif($cekpenjualan->distribusi == 'Dikirim')
+            @foreach ($penjualans->deliveryorder as $deliveryOrder)
+                @foreach ($deliveryOrder->produk as $produk)
+                    jumlahDO.push({{ $produk->jumlah }});
+                @endforeach
+            @endforeach
+        @endif
+
+        // console.log(jumlahDO);
+
+        $('[id^=jumlah_]').on('input', function() {
+            var jumlahInput = $(this);
+            var index = jumlahInput.attr('id').split('_')[1];
+            var inputJumlah = $(this).val();
+            // console.log(jumlahDO[index]);
+            if (parseInt(inputJumlah) > jumlahDO[index]) {
+
+                alert('Jumlah Komplain harus sesuai dengan jumlah DO!');
+                $(this).val(jumlahDO[index]);
+            } else if (parseInt(inputJumlah) < 0) {
+                alert('Jumlah Komplain tidak boleh kurang dari 0');
+                $(this).val(0);
             }
         });
 

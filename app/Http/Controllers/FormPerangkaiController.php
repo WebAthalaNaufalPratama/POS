@@ -239,7 +239,7 @@ class FormPerangkaiController extends Controller
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
         
         //pengurangan inventory gallery dan outlet dari admin
-        if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 1)
+        if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $req->jenis_rangkaian == 'Penjualan' || $req->jenis_rangkaian == 'Retur Penjualan' || $req->jenis_rangkaian == 'MUTASIGO')
         {
             foreach($updateProdukTerjual->komponen as $komponen) 
             {
@@ -264,35 +264,6 @@ class FormPerangkaiController extends Controller
             }
             if (!$allStockAvailable) {
                 return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
-            }
-            if (!$cekstokproduk) {
-                return redirect(route('inven_galeri.create'))->with('fail', 'Jumlah Produk Kurang Dari Stok');
-            }
-        }else if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 2)
-        {
-            foreach($updateProdukTerjual->komponen as $komponen) 
-            {
-                $allStockAvailable = true;
-                $cekstokproduk = true;
-        
-                $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
-                                            ->where('kode_produk', $komponen->kode_produk)
-                                            ->where('kondisi_id', $komponen->kondisi)
-                                            ->first();
-                if (!$stok) {
-                    $allStockAvailable = false;
-                    break;
-                }
-
-                $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($req->jml_produk));
-                if ($stok->jumlah < 0) {
-                    $cekstokproduk = false;
-                    break;
-                }
-                $stok->update();
-            }
-            if (!$allStockAvailable) {
-                return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
             }
             if (!$cekstokproduk) {
                 return redirect(route('inven_galeri.create'))->with('fail', 'Jumlah Produk Kurang Dari Stok');
@@ -324,7 +295,11 @@ class FormPerangkaiController extends Controller
                 return redirect()->route($route[0])->with('success', 'Form Perangkai ditambahkan');
             } elseif($route[1] == 'form') {
                 return redirect()->route($route[0], [$route[1] => $check->id])->with('success', 'Form Perangkai ditambahkan');
-            } else {
+            } else if($req->jenis_rangkaian == 'Retur Penjualan') {
+                return redirect()->back()->with('success','Produk Ganti dan Perangkai Telah Tersimpan');
+            }elseif($req->jenis_rangkaian == 'MUTASIGO'){
+                return redirect()->back()->with('success', 'Berhasil Menyimpan Perangkai dan Gift');
+            }else {
                 return redirect()->route($route[0], [$route[1] => $route[2]])->with('success', 'Form Perangkai ditambahkan');
             }
         }

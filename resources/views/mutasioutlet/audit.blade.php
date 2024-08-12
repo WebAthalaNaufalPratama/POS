@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}" {{ $mutasis->rekening_id == $rekening->id ? 'selected':''}}>{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -83,9 +94,16 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required >
                                                 <option value="">Pilih Status</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if($user->hasRole(['KasirOutlet']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                @endif
                                                 <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                @if($user->hasRole(['KasirOutlet']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -94,15 +112,20 @@
                                                 <textarea name="alasan" id="alasan"></textarea>
                                             </div>
                                         </div>
-                                        <div class="custom-file-container" data-upload-id="myFirstImage">
-                                            <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
-                                            </label>
-                                            <label class="custom-file-container__custom-file">
-                                                <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
-                                                <span class="custom-file-container__custom-file__custom-file-control"></span>
-                                            </label>
-                                            <span class="text-danger">max 2mb</span>
-                                            <img id="preview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                        <div class="form-group">
+                                            <div class="custom-file-container" data-upload-id="myFirstImage">
+                                                <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                </label>
+                                                <label class="custom-file-container__custom-file">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*" >
+                                                    <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                                </label>
+                                                <span class="text-danger">max 2mb</span>
+                                                <div class="image-preview">
+                                                    <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" />
+                                                </div>
+                                                
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -120,9 +143,10 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Nama</th>
+                                                        <th>Nama Komponen</th>
+                                                        <th>Kondisi Komponen</th>
+                                                        <th>Jumlah Komponen</th>
                                                         <th>Jumlah Dikirim</th>
-
-                                                        <th></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
@@ -136,8 +160,8 @@
                                                         @php
                                                             $isTRDSelected = false;
                                                         @endphp
-                                                            <input type="hidden" name="nama_produk[]" class="form-control" value="{{ $produk->id}}">
-                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" >
+                                                            <input type="hidden" name="nama_produk[]" id="nama_produk_{{$i}}" class="form-control" value="{{ $produk->id}}">
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" readonly>
                                                                 @php
                                                                     $isTRDSelected = false; 
                                                                     $selectedTRDKode = ''; 
@@ -178,52 +202,59 @@
                                                             @endforeach
                                                             </select>
                                                             @if($isTRDSelected)
-                                                                <div class="row mt-2">
-                                                                    <div class="col">
-                                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" >
-                                                                            <option value=""> Pilih Kondisi </option>
-                                                                            @foreach ($kondisis as $kondisi)
-                                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                    </div>
-                                                                    <div class="col">
-                                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" >
-                                                                    </div>
-                                                                </div>
+                                                            <td>Tidak Ada Komponen</td>
+                                                            <td>
+                                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                                    <option value=""> Pilih Kondisi </option>
+                                                                    @foreach ($kondisis as $kondisi)
+                                                                    <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                            </td>
                                                             @elseif($perPendapatan)
                                                                 @foreach ($perPendapatan as $noMOG => $items)
                                                                     @if($noMOG == $produk->id)
-                                                                        @foreach ($items as $komponen)
+                                                                    <td>
+                                                                    @foreach ($items as $komponen)
                                                                             <div class="row mt-2">
                                                                                 <div class="col">
-                                                                                <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" >
-                                                                                    <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" >
+                                                                                    <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
+                                                                                    <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
                                                                                 </div>
+                                                                            </div>
+                                                                    @endforeach
+                                                                    </td>
+                                                                    <td>
+                                                                    @foreach ($items as $komponen)
+                                                                            <div class="row mt-2">
                                                                                 <div class="col">
-                                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" >
+                                                                                    <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" readonly>
                                                                                         <option value=""> Pilih Kondisi </option>
                                                                                         @foreach ($kondisis as $kondisi)
                                                                                         <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                                                         @endforeach
                                                                                     </select>
                                                                                 </div>
-                                                                                <div class="col">
-                                                                                    <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required >
-                                                                                </div>
-                                                                                <!-- <div class="col">
-                                                                                <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>                                                               
-                                                                                </div> -->
                                                                             </div>
-                                                                        @endforeach
+                                                                    @endforeach
+                                                                    </td>
+                                                                    <td>
+                                                                    @foreach ($items as $komponen)
+                                                                            <div class="row mt-2">
+                                                                                <div class="col">
+                                                                                    <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required readonly>
+                                                                                </div>
+                                                                            </div>
+                                                                    @endforeach
+                                                                    </td>
                                                                     @endif
                                                                 @endforeach
                                                             @endif
 
-                                                        </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
-
-
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -281,14 +312,14 @@
                                                                 <td id="tgl_penyetuju">-</td>
                                                                 <td id="tgl_pemeriksa">-</td>
                                                             @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
-                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat }}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" value="{{ $mutasis->tanggal_pembuat }}" readonly></td>
+                                                                <td><input type="date" class="form-control" value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" ></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                                <td><input type="date" class="form-control"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
                                                             @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
-                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat }}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
+                                                                <td><input type="date" class="form-control"  value="{{ $mutasis->tanggal_pembuat }}" readonly></td>
+                                                                <td><input type="date" class="form-control"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control"  value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
                                                                 <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
                                                             @endif
                                                         </tr>
@@ -330,7 +361,8 @@
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Biaya</h4>
-                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ 'Rp '. number_format($mutasis->total_biaya, 0, ',', '.') }}"  required readonly></h5>
+                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ 'Rp '. number_format($mutasis->total_biaya, 0, ',', '.') }}"  required readonly>
+                                                </h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -629,6 +661,10 @@
             calculateTotal(0);
         });
 
+        $('[id^=kode_produk], [id^=kondisitradproduk], [id^=kondisigiftproduk]').on('mousedown click focus', function(e) {
+            e.preventDefault();
+        });
+
         function addModal() {
             let i = $('.modal').length;
         }
@@ -636,6 +672,62 @@
             addModal();
         });
 
+        var jumlahDO = [];
+
+        
+        @foreach ($mutasis->produkMutasiOutlet as $produk)
+                jumlahDO.push({{ $produk->jumlah }});
+        @endforeach
+
+        // console.log(jumlahDO);
+
+        $('[id^=jumlah_dikirim_]').on('input', function() {
+            var jumlahInput = $(this);
+            var index = jumlahInput.attr('id').split('_')[2];
+            // console.log(jumlahInput.attr('id').split('_')[2]);
+            var inputJumlah = $(this).val();
+            // console.log(jumlahDO[index]);
+            if (parseInt(inputJumlah) > jumlahDO[index]) {
+
+                alert('Jumlah Komplain harus sesuai dengan jumlah DO!');
+                $(this).val(jumlahDO[index]);
+            } else if (parseInt(inputJumlah) < 0) {
+                alert('Jumlah Komplain tidak boleh kurang dari 0');
+                $(this).val(0);
+            }
+        });
+
+        $('#bukti_file').on('change', function() {
+            const file = $(this)[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(event.target.files[0]);
+            if (file.size > 2 * 1024 * 1024) {
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val('');
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function clearFile() {
+            $('#bukti_file').val('');
+            $('#preview').attr('src', defaultImg);
+        };
+        
         $('[id^=btnGift]').click(function(e) {
             console.log('coba');
             e.preventDefault();
@@ -874,6 +966,7 @@
 
         function Totaltagihan() {
             var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
+            
             var totalTagihan = biayaOngkir;
 
             $('#total_biaya').val(formatRupiah(totalTagihan));
@@ -891,42 +984,6 @@
                 $(this).val(jumlahkirim);
             }
         });
-
-
-        $('#bukti_file').on('change', function() {
-            const file = $(this)[0].files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(this).val('');
-                return;
-            }
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview').attr('src', e.target.result);
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function clearFile() {
-            $('#bukti_file').val('');
-            $('#preview').attr('src', defaultImg);
-        };
-
-        function Totaltagihan() {
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
-            var totalTagihan = biayaOngkir;
-
-            $('#total_biaya').val(totalTagihan.toFixed(2));
-            $('#sisa_bayar').val(sisaBayar.toFixed(2));
-            $('#jumlah_ppn').val(ppn.toFixed(2));
-        }
 
         $('#biaya_pengiriman').on('input', Totaltagihan);
 

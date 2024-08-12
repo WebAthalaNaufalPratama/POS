@@ -48,7 +48,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $mutasi->no_mutasi }}</td>
                                 <td>{{ $mutasi->lokasi->nama }}</td>
-                                <td>{{ $mutasi->lokasi->nama }}</td>
+                                <td>{{ $mutasi->lokasi_penerima->nama }}</td>
                                 <td>{{ date('d F Y', strtotime($mutasi->tanggal_kirim)) }}</td>
                                 <td>{{ date('d F Y', strtotime($mutasi->tanggal_diterima)) }}</td>
                                 <td>{{ date('d F Y', strtotime($mutasi->tanggal_pembuat)) }}</td>
@@ -64,8 +64,10 @@
                                             $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                                         @endphp
                                         @if($mutasi->status != 'DIBATALKAN')
-                                        @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                        @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && $mutasi->produkMutasiOG->first()->jumlah_diterima == null)
                                             <a class="dropdown-item" href="{{ route('auditmutasioutlet.edit', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
+                                        @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && $mutasi->produkMutasiOG->first()->jumlah_diterima != null)
+                                            <a class="dropdown-item" href="{{ route('mutasioutlet.show', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit ACC Terima</a>
                                         @elseif($user->hasRole(['AdminGllery', 'KasirGallery', 'KasirOutlet']) && $mutasi->status != 'DIKONFIRMASI')
                                             <a class="dropdown-item" href="{{ route('auditmutasioutlet.edit', ['mutasiOG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                         @endif

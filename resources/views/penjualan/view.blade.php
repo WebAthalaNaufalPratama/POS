@@ -284,7 +284,11 @@
         <table class="tabletagihan">
                 <tr>
                     <th>Sub Total</th>
+                    @if(!empty($sub_total_retur))
+                    <td>: {{ 'Rp '. number_format($sub_total_retur, 0, ',', '.') }}</td>
+                    @else
                     <td>: {{ 'Rp '. number_format($sub_total, 0, ',', '.') }}</td>
+                    @endif
                 </tr>
                 <tr>
                     <th>Promo</th>
@@ -292,7 +296,11 @@
                 </tr>
                 <tr>
                     <th>PPN</th>
+                    @if(!empty($jumlah_ppn_retur))
+                    <td>: {{ 'Rp '. number_format($jumlah_ppn_retur, 0, ',', '.') }}</td>
+                    @else
                     <td>: {{ 'Rp '. number_format($jumlah_ppn, 0, ',', '.') }}</td>
+                    @endif
                 </tr>
                 <tr>
                     <th>Biaya Ongkir</th>
@@ -304,7 +312,11 @@
                 </tr>
                 <tr>
                     <th>Total Tagihan</th>
+                    @if(!empty($total_tagihan_retur))
+                    <td>: {{ 'Rp '. number_format($total_tagihan_retur, 0, ',', '.') }}</td>
+                    @else
                     <td>: {{ 'Rp '. number_format($total_tagihan, 0, ',', '.') }}</td>
+                    @endif
                 </tr>
                 <tr>
                     <th>Sisa Bayar</th>

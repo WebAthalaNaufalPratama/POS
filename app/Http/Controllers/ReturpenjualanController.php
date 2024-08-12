@@ -35,21 +35,16 @@ class ReturpenjualanController extends Controller
 {
     public function index(Request $req)
     {
-        // $role = Auth::user()->roles()->first();
-        // // dd($role);
-        // $rolePermissions = $role->permissions->pluck('name')->toArray();
-        // if(in_array('penjualan.index',$rolePermissions)){
-        //     dd('berhasil');
-        // }
-        // dd($rolePermissions);
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         // dd($lokasi);
-        if($lokasi->lokasi->tipe_lokasi == 2){
+        if($lokasi->lokasi->tipe_lokasi == 2 && !$user->hasRole(['Auditor', 'Finance'])){
             $query = ReturPenjualan::with('deliveryorder')->where('no_retur', 'LIKE', 'RTO%')->where('lokasi_id', $lokasi->lokasi_id)->orderBy('created_at', 'desc');
             // dd($query);
-        }elseif($lokasi->lokasi->tipe_lokasi == 1){
+        }elseif($lokasi->lokasi->tipe_lokasi == 1 && !$user->hasRole(['Auditor', 'Finance'])){
             $query = ReturPenjualan::with('deliveryorder')->where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->orderBy('created_at', 'desc');
+        }elseif($user->hasRole(['Auditor', 'Finance'])) {
+            $query = ReturPenjualan::with('deliveryorder')->where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', '!=','TUNDA')->orderBy('created_at', 'desc');
         }else{
             $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
         }
@@ -68,93 +63,138 @@ class ReturpenjualanController extends Controller
             $query->where('tanggal_retur', '<=', $req->input('dateEnd'));
         }
         $dopenjualans = $query->get();
-        // $suppliers = Supplier::all();
-        // $customers = Customer::all();
         $returs = $query->get();
         $customers = ReturPenjualan::select('customer_id')
         ->distinct()
         ->join('customers', 'retur_penjualans.customer_id', '=', 'customers.id')
         ->orderBy('customers.nama')
         ->get();
-        // dd($customers);
         $suppliers = ReturPenjualan::select('supplier_id')
         ->distinct()
         ->join('suppliers', 'retur_penjualans.supplier_id', '=', 'suppliers.id')
         ->orderBy('suppliers.nama')
         ->get();
         
-        // dd($penjualans);
-        // dd($returs);
         return view('returpenjualan.index', compact('returs', 'suppliers', 'customers'));
     }
 
     public function create($penjualan)
     {
         $penjualans = Penjualan::with('produk', 'deliveryorder')->find($penjualan);
-        // dd($penjualans);
         $user = Auth::user();
-        // dd($user);
         $karyawan = Karyawan::where('user_id', $user->id)->value('lokasi_id');
-        // dd($karyawan);
         $lokasis = Lokasi::where('id', $karyawan)->get();
         $tipe = $lokasis[0]->tipe_lokasi;
-        // dd($lokasis);
+
         $karyawans = Karyawan::all();
         $kondisis = Kondisi::all();
         $produkjuals = Produk_Terjual::all();
         $perPendapatan = [];
         $statusbayar = Pembayaran::where('invoice_penjualan_id', $penjualan)->latest()->first();
 
-        foreach ($penjualans->deliveryorder as $deliveryOrder) {
-            $selectedGFTKomponen = [];
-            
-            foreach ($deliveryOrder->produk as $produk) {
-                foreach ($produkjuals as $index => $pj) {
-                    if($pj->produk && $produk->produk->kode)
-                    {
-                        // dd($pj->produk->kode);
-                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_do ==  $deliveryOrder->no_do && $pj->jenis != 'TAMBAHAN');
-                        // dd($pj);
-                    
-                        if ($isSelectedGFT) {
-                            foreach ($pj->komponen as $komponen) {
-                                
-                                if ($pj->id == $komponen->produk_terjual_id) {
-                                    foreach ($kondisis as $kondisi) {
-                                        if ($kondisi->id == $komponen->kondisi) {
-                                            $selectedGFTKomponen[$deliveryOrder->no_do][] = [
-                                                'kode' => $komponen->kode_produk,
-                                                'nama' => $komponen->nama_produk,
-                                                'kondisi' => $kondisi->nama,
-                                                'jumlah' => $komponen->jumlah,
-                                                'produk' => $komponen->produk_terjual_id,
-                                                'do' => $deliveryOrder->no_do
-                                            ];
+        if ($penjualans->distribusi == 'Dikirim') {
+            $perPendapatan = [];
+            $groupedData = [];
+            foreach ($penjualans->deliveryorder as $deliveryOrder) {
+                $selectedGFTKomponen = []; 
+                
+                foreach ($deliveryOrder->produk as $produk) {
+                    foreach ($produkjuals as $index => $pj) {
+                        if ($pj->produk && $produk->produk->kode) {
+                            $isSelectedGFT = (
+                                $pj->produk->kode == $produk->produk->kode &&
+                                substr($pj->produk->kode, 0, 3) === 'GFT' &&
+                                $pj->no_do == $deliveryOrder->no_do &&
+                                $pj->jenis != 'TAMBAHAN'
+                            );
+                            if ($isSelectedGFT) {
+                                foreach ($pj->komponen as $komponen) {
+                                    if ($pj->id == $komponen->produk_terjual_id) {
+                                        foreach ($kondisis as $kondisi) {
+                                            if ($kondisi->id == $komponen->kondisi) {
+                                                // Check for duplicates before adding
+                                                $exists = array_filter($selectedGFTKomponen, function($item) use ($komponen) {
+                                                    return $item['id'] === $komponen->id;
+                                                });
+                                                if (empty($exists)) {
+                                                    $selectedGFTKomponen[] = [
+                                                        'id' => $komponen->id,
+                                                        'kode' => $komponen->kode_produk,
+                                                        'nama' => $komponen->nama_produk,
+                                                        'kondisi' => $kondisi->nama,
+                                                        'jumlah' => $komponen->jumlah,
+                                                        'produk' => $komponen->produk_terjual_id,
+                                                        'do' => $deliveryOrder->no_do
+                                                    ];
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
-                            // dd($selectedGFTKomponen);
                         }
                     }
-                    if (!empty($selectedGFTKomponen)) {
-                        $perPendapatan += $selectedGFTKomponen;
+                }
+                
+                if (!empty($selectedGFTKomponen)) {
+                    $groupedData[$deliveryOrder->no_do] = $selectedGFTKomponen;
+                }
+            }
+
+            foreach ($groupedData as $noDO => $items) {
+                foreach ($items as $komponen) {
+                    $produkId = $komponen['produk'];
+                    if (!isset($perPendapatan[$noDO][$produkId])) {
+                        $perPendapatan[$noDO][$produkId] = [
+                            'produk' => $produkId,
+                            'items' => []
+                        ];
+                    }
+                    $perPendapatan[$noDO][$produkId]['items'][] = $komponen;
+                }
+            }
+        }
+
+        if ($penjualans->distribusi == 'Diambil') {
+            $selectedGFTKomponen = [];
+        
+            foreach ($penjualans->produk as $produk) {
+                foreach ($produkjuals as $pj) {
+                    if ($pj->produk && $produk->produk->kode) {
+                        $isSelectedGFT = (
+                            $pj->produk->kode == $produk->produk->kode &&
+                            substr($pj->produk->kode, 0, 3) === 'GFT' &&
+                            $pj->no_invoice == $penjualans->no_invoice
+                        );
+        
+                        if ($isSelectedGFT) {
+                            foreach ($pj->komponen as $komponen) {
+                                if ($pj->id == $komponen->produk_terjual_id) {
+                                    $kondisi = $kondisis->firstWhere('id', $komponen->kondisi);
+                                    
+                                    if ($kondisi) {
+                                        $selectedGFTKomponen[] = [
+                                            'kode' => $komponen->kode_produk,
+                                            'nama' => $komponen->nama_produk,
+                                            'kondisi' => $kondisi->nama,
+                                            'jumlah' => $komponen->jumlah,
+                                            'produk' => $komponen->produk_terjual_id,
+                                            'invoice' => $produk->no_invoice
+                                        ];
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 
             }
-            
+            if (!empty($selectedGFTKomponen)) {
+                $perPendapatan[$penjualans->no_invoice] = $selectedGFTKomponen;
+            }
         }
-
-
-        // dd($perPendapatan);
-
-        // dd($perPendapatan[$deliveryOrder->no_do]);
         
         $juals = Produk_Jual::all();
-        
-        // $customers = Customer::where('id', $penjualans->id_customer)->get();
-        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         $produks = Produk_Jual::all();
         $Invoice = DeliveryOrder::where('no_do', 'LIKE', 'DOR%')->latest()->first();
         if ($Invoice != null) {
@@ -172,7 +212,6 @@ class ReturpenjualanController extends Controller
         }
         $suppliers = Supplier::all();
         $dopenjualans = DeliveryOrder::where('no_do', $penjualans->no_invoice)->get();
-        // $produkjuals = Produk_Jual::all();
         $customers = Customer::where('id', $penjualans->id_customer)->get();
         $karyawans = Karyawan::all();
         $ongkirs = Ongkir::get();
@@ -276,13 +315,6 @@ class ReturpenjualanController extends Controller
                         if (!$komponen_produk_terjual) {
                             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
                         }
-                        // $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                        // if(!$stok){
-                        //     return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory');
-                        // }elseif($stok){
-                        //     $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($data['jumlah2'][$i]));
-                        //     $stok->update();
-                        // }
                     }
                 }elseif($lokasi->tipe_lokasi == 2)
                 {
@@ -391,25 +423,10 @@ class ReturpenjualanController extends Controller
                                 }
                             }
                     }
-
-                    // Pengurangan inven outlet
-                    // if ($lokasi->tipe_lokasi == 2) {
-                    //     $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
-                    //         ->where('kode_produk', $produk_terjual->produk->kode)
-                    //         ->first();
-
-                    //     if (!$stok) {
-                    //         return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
-                    //     }
-
-                    //     $stok->jumlah -= intval($produk_terjual->jumlah);
-                    //     $stok->save();
-                    // }
                 }
             }elseif ($cekgfttrd == 'TRD') {
                 $kondisi_key = 'kondisitradproduk_' . $i;
                 $jumlah_key = 'jumlahtradproduk_' . $i;
-                // dd($data[$kondisi_key]);
 
                 if (isset($data[$kondisi_key]) && is_array($data[$kondisi_key])) {
                     for ($index = 0; $index < count($data[$kondisi_key]); $index++) {
@@ -440,34 +457,9 @@ class ReturpenjualanController extends Controller
                                     $stok->update();
                                 }
                             }
-
-                            // $stok = $lokasi->tipe_lokasi == 1
-                            //     ? InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first()
-                            //     : InventoryOutlet::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
-
-                            // if ($stok) {
-                            //     $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
-                            //     $stok->update();
-                            // }
                         }
                     }
                 }
-
-                //pengurangan inven outlet
-                // if($lokasi->tipe_lokasi == 2){
-                //     //pengurangan inven outlet
-                //     $stok = InventoryOutlet::where('lokasi_id', $lokasi->id)
-                //                         ->where('kode_produk', $produk_terjual->produk->kode)
-                //                         ->first();
-                //             // dd($stok);
-                        
-                //     if (!$stok) {
-                //         return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
-                //     }
-
-                //     $stok->jumlah = intval($stok->jumlah) - intval($produk_terjual->jumlah);
-                //     $stok->save();
-                // }
             }
         }
         return redirect(route('penjualan.index'))->with('success', 'Data tersimpan');
@@ -488,24 +480,13 @@ class ReturpenjualanController extends Controller
     {
         $penjualans = ReturPenjualan::with('produk_retur', 'deliveryorder')->find($returpenjualan);
         $returpenjualans = ReturPenjualan::with('deliveryorder')->find($returpenjualan);
-        // dd($returpenjualans);
-        // foreach($returpenjualans->deliveryorder as $delivery){
-        //     dd($delivery->penerima);
-        // }
-        // dd($returpenjualans->deliveryorder);
-        // $user = Auth::user();
         $lokasis = Lokasi::all();
         $karyawans = Karyawan::all();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_retur', $returpenjualans->no_retur)->get();
-        // dd($produks);
-        // $customers = Customer::where('id', $penjualans->id_customer)->get();
-        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         $produkjuals = Produk_Terjual::all();
         $produkreturjuals = Produk_Jual::all();
-        // dd($produkjuals);
         $suppliers = Supplier::all();
         $dopenjualans = DeliveryOrder::where('no_referensi', $returpenjualans->no_retur)->first();
-        // $produkjuals = Produk_Jual::all();
         $customers = Customer::all();
         $karyawans = Karyawan::all();
         $kondisis = Kondisi::all();
@@ -518,44 +499,39 @@ class ReturpenjualanController extends Controller
         foreach ($penjualans->produk_retur as $produk) {
             $selectedGFTKomponen = [];
             
-            // foreach ($deliveryOrder->produk as $produk) {
-                foreach ($produkjuals as $index => $pj) {
-                    // dd($produkjuals);
-                    if($pj->produk && $produk->produk->kode)
-                    {
-                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
-                    
-                    if ($isSelectedGFT) {
-                        foreach ($pj->komponen as $komponen) {
-                            if ($pj->id == $komponen->produk_terjual_id) {
-                                foreach ($kondisis as $kondisi) {
-                                    if ($kondisi->id == $komponen->kondisi) {
-                                        $selectedGFTKomponen[$produk->no_retur][] = [
-                                            'kode' => $komponen->kode_produk,
-                                            'nama' => $komponen->nama_produk,
-                                            'kondisi' => $kondisi->nama,
-                                            'jumlah' => $komponen->jumlah,
-                                            'produk' => $komponen->produk_terjual_id
-                                        ];
-                                    }
+            foreach ($produkjuals as $index => $pj) {
+                if($pj->produk && $produk->produk->kode)
+                {
+                    $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                
+                if ($isSelectedGFT) {
+                    foreach ($pj->komponen as $komponen) {
+                        if ($pj->id == $komponen->produk_terjual_id) {
+                            foreach ($kondisis as $kondisi) {
+                                if ($kondisi->id == $komponen->kondisi) {
+                                    $selectedGFTKomponen[$produk->no_retur][] = [
+                                        'kode' => $komponen->kode_produk,
+                                        'nama' => $komponen->nama_produk,
+                                        'kondisi' => $kondisi->nama,
+                                        'jumlah' => $komponen->jumlah,
+                                        'produk' => $komponen->produk_terjual_id
+                                    ];
                                 }
                             }
                         }
                     }
-                    }
-                    if (!empty($selectedGFTKomponen)) {
-                        $perPendapatan += $selectedGFTKomponen;
-                    }
                 }
-                
-            // }
-
-            
+                }
+                if (!empty($selectedGFTKomponen)) {
+                    $perPendapatan += $selectedGFTKomponen;
+                }
+            }
+   
         }
         
-        // dd($perPendapatan);
+        $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
 
-        return view('returpenjualan.show', compact('perPendapatan','ongkirs','juals','produkKomponens','produkreturjuals','penjualans','returpenjualans','suppliers','drivers','dopenjualans', 'kondisis', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals'));
+        return view('returpenjualan.show', compact('perangkai', 'perPendapatan','ongkirs','juals','produkKomponens','produkreturjuals','penjualans','returpenjualans','suppliers','drivers','dopenjualans', 'kondisis', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals'));
     }
 
     public function update(Request $req, $returpenjualan)
@@ -726,7 +702,7 @@ class ReturpenjualanController extends Controller
 
     public function audit($returpenjualan)
     {
-        $penjualans = ReturPenjualan::with('produk_retur', 'deliveryorder')->find($returpenjualan);
+        $penjualans = ReturPenjualan::with('produk_retur', 'deliveryorder')->where('id', $returpenjualan)->first();
         $returpenjualans = ReturPenjualan::with('deliveryorder')->find($returpenjualan);
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->value('lokasi_id');
@@ -735,11 +711,10 @@ class ReturpenjualanController extends Controller
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_retur', $returpenjualans->no_retur)->get();
         $produkjuals = Produk_Terjual::all();
         $produkreturjuals = Produk_Jual::all();
-        // dd($produkjuals);
         $suppliers = Supplier::all();
         $dopenjualans = DeliveryOrder::where('no_referensi', $returpenjualans->no_retur)->first();
-        // dd($dopenjualans);
-        // $produkjuals = Produk_Jual::all();
+        $penjual = Penjualan::where('no_invoice', $penjualans->no_invoice)->first();
+        $statusbayar = Pembayaran::where('invoice_penjualan_id', $penjual->id)->latest()->first();
         $customers = Customer::all();
         $karyawans = Karyawan::all();
         $kondisis = Kondisi::all();
@@ -752,9 +727,7 @@ class ReturpenjualanController extends Controller
         foreach ($penjualans->produk_retur as $produk) {
             $selectedGFTKomponen = [];
             
-            // foreach ($deliveryOrder->produk as $produk) {
                 foreach ($produkjuals as $index => $pj) {
-                    // dd($produkjuals);
                     if($pj->produk && $produk->produk->kode)
                     {
                         $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
@@ -782,12 +755,8 @@ class ReturpenjualanController extends Controller
                         $perPendapatan += $selectedGFTKomponen;
                     }
                 }
-                
-            // }
-
             
         }
-        // dd($perPendapatan);
 
         $bankpens = Rekening::get();
         $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BRP%')->latest()->first();
@@ -801,14 +770,11 @@ class ReturpenjualanController extends Controller
         }
 
         // Mengambil daftar nomor invoice dari data retur
-        $noInvoices = $penjualans->pluck('no_invoice')->toArray();
-
-        // Mengambil data penjualan yang memiliki nomor invoice yang sama dengan retur
-        $cekbayar = Penjualan::with('karyawan')->whereIn('no_invoice', $noInvoices)->first();
+        $cekbayar = Penjualan::with('karyawan')->where('no_invoice', $penjualans->no_invoice)->first();
         $pembayarans = Pembayaran::with('rekening')->where('invoice_penjualan_id', $penjualans->id)->where('no_invoice_bayar', 'LIKE', 'BRP%')->orderBy('created_at', 'desc')->get();
         
 
-        return view('returpenjualan.audit', compact('pembayarans','perPendapatan','ongkirs','juals','produkKomponens','produkreturjuals','penjualans','returpenjualans','suppliers','drivers','dopenjualans', 'kondisis', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals'));
+        return view('returpenjualan.audit', compact('statusbayar', 'cekbayar','pembayarans','perPendapatan','ongkirs','juals','produkKomponens','produkreturjuals','penjualans','returpenjualans','suppliers','drivers','dopenjualans', 'kondisis', 'karyawans', 'lokasis', 'produks', 'customers', 'produks', 'produkjuals'));
     }
 
     public function auditretur_update(Request $req)
@@ -829,7 +795,7 @@ class ReturpenjualanController extends Controller
             'kodegiftproduk_', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk',
             'jumlah', 'alasan', 'diskon', 'jenis_diskon', 'harga', 'totalharga',
             'namaproduk2', 'jumlah2', 'satuan2', 'keterangan2', 'nama_produk', 'file',
-            'kondisitradproduk_', 'jumlahtradproduk_', 'kode_produk2', 'idgiftproduk_'
+            'kondisitradproduk_', 'jumlahtradproduk_', 'kode_produk2', 'idgiftproduk_', 'kode_produk'
         ];
         
         // Filter kunci berdasarkan awalan yang ditentukan
@@ -841,7 +807,7 @@ class ReturpenjualanController extends Controller
             }
             return false;
         });
-        $merge = array_merge(['_method', '_token', 'DataTables_Table_0_length', 'nama_produk', 'penjualan', 'penerima', 'tanggal_kirim', 'driver','alamat', 'alamat_tujuan'], $keysToFilter);
+        $merge = array_merge(['_method', '_token', 'DataTables_Table_0_length', 'nama_produk', 'penjualan', 'penerima', 'tanggal_kirim', 'driver','alamat'], $keysToFilter);
         // dd($merge);
 
         $data = $req->except($merge);
@@ -910,6 +876,16 @@ class ReturpenjualanController extends Controller
             
         }
 
+        if($req->status == 'DIKONFIRMASI' && $req->komplain == 'refund' ) {
+            $invoicepnj = Penjualan::where('no_invoice', $req->no_invoice)->first();
+            $biayakirim = $req->total;
+            $totaltagihanretur = intval($invoicepnj->total_tagihan) - intval($req->total);
+            $updatepnj = Penjualan::where('no_invoice', $req->no_invoice)->update([
+                'total_tagihan_retur' => $totaltagihanretur,
+            ]);
+            
+        }
+
         //hapus komponen agar bisa di create ulang
         $produkterjualretur = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
         if($req->komplain == 'retur'){
@@ -942,7 +918,7 @@ class ReturpenjualanController extends Controller
                     'keterangan' => $req->keterangan2[$i]
                 ]);
     
-                if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data Produk Terjual Ganti');
                 if($lokasi->tipe_lokasi == 1)
                 {
                     foreach ($getProduk->komponen as $komponen ) {
@@ -958,7 +934,7 @@ class ReturpenjualanController extends Controller
                             'harga_total' => $komponen->harga_total
                         ]);
                         if (!$komponen_produk_terjual) {
-                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual Ganti');
                         }
                         // $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
                         // if(!$stok){
@@ -1018,7 +994,7 @@ class ReturpenjualanController extends Controller
             ]);
 
             if (!$produk_terjual) {
-                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data Produk Terjual Retur');
             }
 
             if($req->status == 'DIKONFIRMASI' && $req->komplain == 'diskon') {
@@ -1098,10 +1074,11 @@ class ReturpenjualanController extends Controller
                                 'harga_satuan' => 0,
                                 'harga_total' => 0
                             ]);
+                            // dd($getProdukJual->id);
 
-                            if (!$komponen_produk_terjual) {
-                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
-                            }
+                            // if (!$komponen_produk_terjual) {
+                            //     return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual Retur Gift');
+                            // }
 
                             if ($lokasi->tipe_lokasi == 1 && $req->status == 'DIKONFIRMASI' && $req->komplain != 'diskon') {
                                 $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
@@ -1154,7 +1131,7 @@ class ReturpenjualanController extends Controller
                             ]);
 
                             if (!$komponen_produk_terjual) {
-                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual Retur Trad');
                             }
 
                             if($lokasi->tipe_lokasi == 1 && $req->status == 'DIKONFIRMASI'){

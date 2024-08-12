@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required readonly>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}" {{ $mutasis->rekening_id == $rekening->id ? 'selected': ''}} >{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -81,21 +92,32 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="status">Status</label>
-                                            <select id="status" name="status" class="form-control" required disabled>
+                                            <select id="status" name="status" class="form-control" required readonly>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{ $mutasis->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{ $mutasis->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if($user->hasRole(['KasirOutlet']) && $mutasis->status != 'DIKONFIRMASI')
+                                                <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                @endif
+                                                <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                @if($user->hasRole(['KasirGallery', 'AdminGallery']) && $mutasis->status != 'DIKONFIRMASI')
+                                                <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
-                                            <label>Bukti <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                            <label>Bukti Mutasi <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                             </label>
                                             <label class="custom-file-container__custom-file">
-                                                <input type="file" id="bukti" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" required readonly>
+                                                <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="file" accept="image/*" >
                                                 <span class="custom-file-container__custom-file__custom-file-control"></span>
                                             </label>
                                             <span class="text-danger">max 2mb</span>
-                                            <img id="preview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" alt="your image" />
+                                            <div class="image-preview">
+                                                <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" />
+                                            </div>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -144,8 +166,8 @@
                                                                 Set Gift
                                                             </button>
                                                         </td>
-                                                        <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
-                                                        @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                                        <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalPerangkai">Perangkai</button></td>
+                                                        @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && $produk->no_form == null)
                                                             <td>
                                                                 <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                     Set Gift
@@ -171,7 +193,7 @@
                                 <div class="col-lg-8 col-sm-12 col-12 border radius mt-1">
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
-                                                <table class="table table-responsive border rounded">
+                                            <table class="table table-responsive border rounded">
                                                 @php
                                                         $user = Auth::user();
                                                     @endphp
@@ -188,17 +210,37 @@
                                                             
                                                             @if($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
                                                                 <td id="pembuat">{{ $mutasis->dibuat->name }}</td>
-                                                                <td id="penerima" >{{ Auth::user()->name}}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
                                                                 <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
-                                                                <td id="pemeriksa" >{{ $mutasis->dibuku->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{  $mutasis->dibuku->name ?? '-'}}</td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat->name }}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
+                                                                <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{  $mutasis->dibuku->name ?? '-'}}</td>
+                                                            @elseif($user->hasRole(['KasirGallery', 'AdminGallery', 'SuperAdmin']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat->name }}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
+                                                                <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{  $mutasis->dibuku->name ?? '-'}}</td>
                                                             @endif
                                                         </tr>
                                                         <tr>
-                                                            @if($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['KasirGallery', 'AdminGallery']))
-                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat }}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ $mutasis->tanggal_dibukukan ?? '-' }}"></td>
+                                                            @if($user->hasRole(['KasirGallery', 'AdminGallery', 'SuperAdmin']))
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
                                                             @endif
                                                         </tr>
                                                     </tbody>
@@ -220,7 +262,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" readonly>
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" value="{{$mutasis->alamat_tujuan }}" class="form-control" readonly>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -235,7 +277,7 @@
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
-                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ 'Rp '. number_format($mutasis->biaya_pengiriman, 0, ',', '.') }}" readonly required></h5>
+                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ 'Rp '. number_format($mutasis->biaya_pengiriman, 0, ',', '.') }}" required readonly></h5>
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Biaya</h4>
@@ -265,7 +307,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
             </div>
             <div class="modal-body">
-                <form id="form_perangkai" action="{{ route('formmutasi.store') }}" method="POST">
+                <form id="form_perangkai" action="{{ route('formpenjualan.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="route" value="{{ request()->route()->getName() }},penjualan,{{ request()->route()->parameter('penjualan') }}">
                     <div class="mb-3">
@@ -862,7 +904,7 @@
         var pilihan = "{{ $mutasis->pilih_pengiriman}}";
         if (pilihan === "sameday") {
             $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
+            $('#biaya_pengiriman').prop('readonly', true);
         } else if (pilihan === "exspedisi") {
             $('#inputExspedisi').show();
             $('#biaya_pengiriman').prop('readonly', true);
@@ -1054,6 +1096,11 @@
 
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(event.target.files[0]);
             if (file.size > 2 * 1024 * 1024) {
                 toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
                     closeButton: true,

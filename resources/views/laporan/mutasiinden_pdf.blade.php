@@ -134,7 +134,7 @@
                                 <td>{{ $produk->kondisi->nama?? '' }}</td>
                                 @if ($loop->first)
                                     <td rowspan="{{ $produkCount }}">{{ $mutasi->biaya_pengiriman }}</td>
-                                    <td rowspan="{{ $produkCount }}">{{ $mutasi->rekening->nama }}</td>
+                                    <td rowspan="{{ $produkCount }}">{{ $mutasi->rekening->nama ?? '' }}</td>
                                     <td rowspan="{{ $produkCount }}">{{ $mutasi->total_biaya }}</td>
                                 @endif
                             </tr>

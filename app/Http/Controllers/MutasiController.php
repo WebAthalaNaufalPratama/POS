@@ -37,8 +37,17 @@ class MutasiController extends Controller
 {
     public function index_outlet(Request $req)
     {
-        $query = Mutasi::where('no_mutasi', 'like', 'MGO%')->orderBy('created_at', 'desc');
-
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $tipe = $karyawan->lokasi->tipe_lokasi;
+        if($tipe == 1 && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::where('no_mutasi', 'like', 'MGO%')->orderBy('created_at', 'desc');
+        }else if($tipe == 2 && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::where('no_mutasi', 'like', 'MGO%')->where('status', 'DIKONFIRMASI')->orderBy('created_at', 'desc');
+        }else if($user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::where('no_mutasi', 'like', 'MGO%')->where('status', '!=', 'TUNDA')->orderBy('created_at', 'desc');
+        }
+        
         if ($req->dateStart) {
             $query->where('created_at', '>=', $req->input('dateStart'));
         }
@@ -116,7 +125,7 @@ class MutasiController extends Controller
         }
 
         $data['pembuat_id'] = Auth::user()->id;
-        $data['tanggal_pembuat'] = now();
+        $data['tanggal_pembuat'] = $req->tanggal_pembuat;
         
         $mutasi = Mutasi::create($data);
 
@@ -146,7 +155,11 @@ class MutasiController extends Controller
                     if (!$komponen_produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
             }
-            return redirect(route('mutasigalery.index'))->with('success', 'Data Berhasil Disimpan');
+        }
+        if($req->status == 'DIKONFIRMASI'){
+            return redirect(route('mutasigalery.show', ['mutasiGO' => $mutasi]))->with('success', 'Data Berhasil Disimpan, Silahkan Set Perangkai');
+        }elseif($req->status != 'DIKONFIRMASI'){
+            return redirect(route('mutasigalery.index'))->with('success', 'Berhasil menyimpan data');
         } else {
             return redirect()->back()->with('error', 'Gagal menyimpan data');
         }
@@ -191,17 +204,17 @@ class MutasiController extends Controller
         if($user->hasRole(['KasirOutlet'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'penerima_id' => $user->id,
-                'tanggal_penerima' => now(),
+                'tanggal_penerima' => $data['tanggal_penerima'],
             ]);
         }elseif($user->hasRole(['Auditor'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'dibukukan_id' => $user->id,
-                'tanggal_dibukukan' => now(),
+                'tanggal_dibukukan' => $data['tanggal_dibukukan'],
             ]);
         }elseif($user->hasRole(['Finance'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'diperiksa_id' => $user->id,
-                'tanggal_diperiksa' => now(),
+                'tanggal_diperiksa' => $data['tanggal_diperiksa'],
             ]);
         }
         
@@ -375,7 +388,17 @@ class MutasiController extends Controller
 
     public function index_outletgalery(Request $req)
     {
-        $query = Mutasi::where('no_mutasi', 'like', 'MOG%')->orderBy('created_at', 'desc');
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $tipe = $karyawan->lokasi->tipe_lokasi;
+        if($tipe == 1 && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::with('produkMutasiOutlet')->where('no_mutasi', 'like', 'MOG%')->where('status', 'DIKONFIRMASI')->orderBy('created_at', 'desc');
+        }else if($tipe == 2 && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::with('produkMutasiOutlet')->where('no_mutasi', 'like', 'MOG%')->orderBy('created_at', 'desc');
+        }else if($user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::with('produkMutasiOutlet')->where('no_mutasi', 'like', 'MOG%')->where('status', 'DIKONFIRMASI')->orderBy('created_at', 'desc');
+        }
+       
 
         if ($req->dateStart) {
             $query->where('created_at', '>=', $req->input('dateStart'));
@@ -391,18 +414,19 @@ class MutasiController extends Controller
 
     public function create_outletgalery($returpenjualan)
     {
-        $user = Auth::user()->value('id');
-        $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
+        $lksi = $lokasi->lokasi_id;
         $customers = Customer::where('lokasi_id', $lokasi)->get();
         $lokasis = Lokasi::where('id', $lokasi)->get();
         $ongkirs = Ongkir::get();
-        $karyawans = Karyawan::where('lokasi_id', $lokasi)->get();
-        $promos = Promo::where(function ($query) use ($lokasi) {
-            $query->where('lokasi_id', $lokasi)
+        $karyawans = Karyawan::where('lokasi_id', $lokasi->lokasi_id)->get();
+        $promos = Promo::where(function ($query) use ($lksi) {
+            $query->where('lokasi_id', $lksi)
                 ->orWhere('lokasi_id', 'Semua');
         })->get();
         
-        $bankpens = Rekening::get();
+        $bankpens = Rekening::all();
         $Invoice = Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->latest()->first();
         if ($Invoice != null) {
             $substring = substr($Invoice->no_mutasi, 11);
@@ -417,12 +441,12 @@ class MutasiController extends Controller
         } else {
             $cekInvoiceBayar = 0;
         }
-        $lokasipengirim = Lokasi::where('tipe_lokasi', 2)->get();
+        $lokasipengirim = Lokasi::where('id', $lokasi->lokasi_id)->get();
         $lokasipenerima = Lokasi::where('tipe_lokasi', 1)->get();
         $kondisis = Kondisi::all();
         $invoices = Penjualan::get();
 
-        $penjualans = ReturPenjualan::with('produk_retur')->find($returpenjualan);
+        $penjualans = ReturPenjualan::with('produk_retur')->where('status', 'DIKONFIRMASI')->find($returpenjualan);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_retur', $penjualans->no_retur)->where('jenis', 'LIKE', 'RETUR')->get();
         $kondisis = Kondisi::all();
         $produkjuals = Produk_Terjual::all();
@@ -463,9 +487,10 @@ class MutasiController extends Controller
             }
         }
         
-        $returpenjualans = ReturPenjualan::with('deliveryorder')->find($returpenjualan);
+        $returpenjualans = ReturPenjualan::with('deliveryorder')->where('status', 'DIKONFIRMASI')->find($returpenjualan);
+        $cekpenjualan = Penjualan::where('no_invoice', $returpenjualans->no_invoice)->first();
 
-        return view('mutasioutlet.create', compact('lokasipengirim','lokasipenerima','perPendapatan','produkjuals','penjualans','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
+        return view('mutasioutlet.create', compact('cekpenjualan','lokasipengirim','lokasipenerima','perPendapatan','produkjuals','penjualans','customers', 'lokasis', 'karyawans', 'promos', 'produks', 'ongkirs', 'bankpens', 'cekInvoice', 'kondisis', 'invoices', 'cekInvoiceBayar'));
     }
 
     public function acc_outlet($mutasi)
@@ -473,16 +498,12 @@ class MutasiController extends Controller
         $lokasis = Lokasi::all();
         $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigo', $mutasis->no_mutasi)->get();
-        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
         foreach($mutasis->produkMutasi as $produk)
         {
             $coba[] = $produk->id;
         }
 
-        // dd($coba);
-        // $produks = Produk_Jual::with('komponen.kondisi')->get();
         $kondisis = Kondisi::all();
-        // $produkjuals = Produk_Terjual::where('no_mutasigo', $mutasis->no_mutasi)->with('produk')->get();
         $produkjuals = Produk_Jual::all();
         $selectedGFTKomponen = [];        
 
@@ -524,7 +545,7 @@ class MutasiController extends Controller
 
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
         $data['pembuat_id'] = Auth::user()->id;
-        $data['tanggal_pembuat'] = now();
+        $data['tanggal_pembuat'] = $req->tanggal_pembuat;
 
         $mutasi = Mutasi::create($data);
 
@@ -724,8 +745,10 @@ class MutasiController extends Controller
 
     public function update_outletgalery(Request $req)
     {
+        // dd($req);
         $validator = Validator::make($req->all(), [
             'jumlah_diterima' => 'required',
+            'kondisiditerima' => 'required'
         ]);
 
         // dd($validator);
@@ -738,36 +761,60 @@ class MutasiController extends Controller
         if($user->hasRole(['KasirOutlet'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'penerima_id' => $user->id,
-                'tanggal_penerima' => now(),
+                'tanggal_pembuat' => $data['tanggal_pembuat']
             ]);
         }elseif($user->hasRole(['Auditor'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'dibukukan_id' => $user->id,
-                'tanggal_dibukukan' => now(),
+                'tanggal_dibukukan' => $data['tanggal_dibukukan']
             ]);
         }elseif($user->hasRole(['Finance'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'diperiksa_id' => $user->id,
-                'tanggal_diperiksa' => now(),
+                'tanggal_diperiksa' => $data['tanggal_diperiksa']
+            ]);
+        }elseif($user->hasRole(['AdminGallery', 'KasirGallery'])) {
+            $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
+                'penerima_id' => $user->id,
+                'tanggal_penerima' => $data['tanggal_penerima']
             ]);
         }
         for ($i = 0; $i < count($data['nama_produk']); $i++) {
-            $getProdukJual = Produk_Terjual::with('komponen')->where('id', $data['nama_produk'][$i])->first();
-            
-            $produkmutasi = Produk_Terjual::where('no_mutasiog', $req->no_mutasi)
+            $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasiog', $req->no_mutasi)
                                         ->where('id', $data['nama_produk'][$i])
                                         ->first();
-            // dd($produkmutasi);
+            $komponen = Komponen_Produk_Terjual::where('produk_terjual_id', $produkmutasi->id)->get();
+            if($produkmutasi->jumlah_diterima != null) {
+                foreach($produkmutasi->komponen as $kompo) {
+                    $tambahinven = InventoryGallery::where('lokasi_id', $req->penerima)
+                            ->where('kode_produk', $kompo->kode_produk)
+                            ->where('kondisi_id', $kompo->kondisi)
+                            ->first();
 
+                    if ($tambahinven) {
+                        $tambahinven->jumlah -= intval($kompo->jumlah) * intval($produkmutasi->jumlah_diterima);
+                        $tambahinven->update();
+                    }
+                    
+                }
+                       
+            }
             if ($produkmutasi) {
                 $produkmutasi->update([
                     'jumlah_diterima' => $data['jumlah_diterima'][$i],
                 ]);
+                foreach ($komponen as $index => $komponenItem) {
+                    if (isset($data['kondisiditerima'][$index])) {
+                        $komponenItem->update([
+                            'kondisi_diterima' => $data['kondisiditerima'][$index]
+                        ]);
+                    }
+                }
             } else {
                 return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
             }
 
-            $cekgfttrd = substr($getProdukJual->produk->kode, 0, 3);
+            $cekgfttrd = substr($produkmutasi->produk->kode, 0, 3);
 
             if ($cekgfttrd == 'GFT') {
                 $kode_key = 'kodegiftproduk_' . $i;
@@ -833,7 +880,7 @@ class MutasiController extends Controller
                         $kondisi = Kondisi::where('nama', $data[$kondisi_key][$index])->value('id');
                         $jumlah = $data[$jumlah_key][$index];
 
-                        foreach ($getProdukJual->komponen as $komponen) {
+                        foreach ($produkmutasi->komponen as $komponen) {
                             // if($lokasi->tipe_lokasi == 1){
                                 $stok = InventoryGallery::where('lokasi_id', $req->penerima)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $kondisi)->first();
                                 if ($stok) {
@@ -1016,7 +1063,18 @@ class MutasiController extends Controller
 
     public function index_ghgalery(Request $req)
     {
-        $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->orwhere('no_mutasi', 'like', 'MPG%')->orderBy('created_at', 'desc');
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $tipe = $karyawan->lokasi->tipe_lokasi;
+        if($user->hasRole(['Purchasing']) && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->orwhere('no_mutasi', 'like', 'MPG%')->orderBy('created_at', 'desc');
+        }else if($user->hasRole(['AdminGallery', 'KasirGallery']) && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->where('status', 'DIKONFIRMASI')->where('penerima', $karyawan->lokasi_id)->orwhere('no_mutasi', 'like', 'MPG%')->where('status', 'DIKONFIRMASI')->where('penerima', $karyawan->lokasi_id)->orderBy('created_at', 'desc');
+        }else if($user->hasRole(['Auditor', 'Finance'])) {
+            $query = Mutasi::where('no_mutasi', 'like', 'MGG%')->where('status', '!=','TUNDA')->orwhere('no_mutasi', 'like', 'MPG%')->where('status', '!=','TUNDA')->orderBy('created_at', 'desc');
+        }
+
+        
 
         if ($req->dateStart) {
             $query->where('created_at', '>=', $req->input('dateStart'));
@@ -1145,7 +1203,7 @@ class MutasiController extends Controller
         }
 
         $data['pembuat_id'] = Auth::user()->id;
-        $data['tanggal_pembuat'] = now();
+        $data['tanggal_pembuat'] = $req->tanggal_pembuat;
         
         $mutasi = Mutasi::create($data);
 
@@ -1239,17 +1297,17 @@ class MutasiController extends Controller
         if($user->hasRole(['KasirOutlet'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'penerima_id' => $user->id,
-                'tanggal_penerima' => now(),
+                'tanggal_penerima' => $req->tanggal_penerima,
             ]);
         }elseif($user->hasRole(['Auditor'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'dibukukan_id' => $user->id,
-                'tanggal_dibukukan' => now(),
+                'tanggal_dibukukan' => $req->tanggal_dibukukan,
             ]);
         }elseif($user->hasRole(['Finance'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'diperiksa_id' => $user->id,
-                'tanggal_diperiksa' => now(),
+                'tanggal_diperiksa' => $req->tanggal_diperiksa,
             ]);
         }
         for ($i = 0; $i < count($data['nama_produk']); $i++) {
@@ -1524,7 +1582,7 @@ class MutasiController extends Controller
         // dd($stok);
 
         $data['pembuat_id'] = Auth::user()->id;
-        $data['tanggal_pembuat'] = now();
+        $data['tanggal_pembuat'] = $req->tanggal_pembuat;
         
         $mutasi = Mutasi::create($data);
 
@@ -1630,20 +1688,20 @@ class MutasiController extends Controller
         $data = $req->except(['_token', '_method']);
         $lokasi = Lokasi::where('id', $req->penerima)->first();
         $user = Auth::user();
-        if($user->hasRole(['KasirOutlet'])) {
+        if($user->hasRole(['KasirOutlet', 'KasirGallery','AdminGallery'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'penerima_id' => $user->id,
-                'tanggal_penerima' => now(),
+                'tanggal_penerima' => $req->tanggal_penerima,
             ]);
         }elseif($user->hasRole(['Auditor'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'dibukukan_id' => $user->id,
-                'tanggal_dibukukan' => now(),
+                'tanggal_dibukukan' => $req->tanggal_dibukukan,
             ]);
         }elseif($user->hasRole(['Finance'])) {
             $mutasi = Mutasi::where('no_mutasi', $req->no_mutasi)->update([
                 'diperiksa_id' => $user->id,
-                'tanggal_diperiksa' => now(),
+                'tanggal_diperiksa' => $req->tanggal_diperiksa ,
             ]);
         }
         if($lokasi->tipe_lokasi == 1){
@@ -1939,7 +1997,7 @@ class MutasiController extends Controller
         // dd($req);
 
         $mutasis = $req->input('mutasiGO');
-        $data = $req->except(['_method', '_token', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO', 'nama_produk', 'kode_produk']);
+        $data = $req->except(['_method', '_token','ubahapa', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO', 'nama_produk', 'kode_produk']);
         // dd($data);
 
         if ($req->hasFile('bukti')) {
@@ -1956,21 +2014,44 @@ class MutasiController extends Controller
         $jabatanpegawai = $jabatan->jabatan;
         $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
 
-        if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
-            $data['diperiksa_id'] = Auth::user()->id;
-            $data['tanggal_diperiksa'] = now();
-        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
-            $data['dibukukan_id'] = Auth::user()->id;
-            $data['tanggal_dibukukan'] = now();
-        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
-            $data['pembuat_id'] = Auth::user()->id;
-            $data['tanggal_pembuat'] = now();
+        if($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
+            $data['diperiksa_id'] = $user->id;
+            $data['tanggal_diperiksa'] = $req->tanggal_diperiksa;
+        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
+            $data['dibukukan_id'] = $user->id;
+            $data['tanggal_dibukukan'] = $req->tanggal_dibukukan;
+        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $user->hasRole(['AdminGallery', 'KasirGallery'])){
+            $data['pembuat_id'] = $user->id;
+            $data['tanggal_pembuat'] = $req->tanggal_pembuat;
         }
 
         $update = Mutasi::where('id', $mutasis)->update($data);
 
         if($req->status == 'DIBATALKAN'){
             return redirect(route('mutasigalery.index'))->with('success', 'Berhasil Mengupdate Data');
+        }
+
+        if($user->hasRole(['Auditor', 'Finance'])) {
+            for ($i = 0; $i < count($req->nama_produk); $i++) {
+                $getProdukJual = Produk_Terjual::with('komponen')->where('id', $req->nama_produk[$i])->first();
+                if(!empty($getProdukJual)) {
+                    // $produkterjual = Produk_Terjual::where('no_mutasigo', $req->no_mutasi)->get();
+                    // foreach($produkterjual as $pj) {
+                        foreach($getProdukJual->komponen as $komponjual)
+                        {
+                            $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+                                ->where('kode_produk', $komponjual->kode_produk)
+                                ->where('kondisi_id', $komponjual->kondisi)
+                                ->first();
+                            
+                            $stok->jumlah += intval($komponjual->jumlah) * intval($getProdukJual->jumlah);
+                            $stok->update();
+                            $stok->jumlah -= intval($komponjual->jumlah) * intval($req->jumlah_dikirim[$i]);
+                            $stok->update();
+                        }
+                    // }
+                }
+            }
         }
 
         //hapus komponen agar bisa di create ulang
@@ -1994,6 +2075,7 @@ class MutasiController extends Controller
                     'no_mutasigo' => $req->no_mutasi,
                     'jumlah' => $req->jumlah_dikirim[$i],
                 ]);
+
                 if (!$produk_terjual)  return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 foreach ($getProduk->komponen as $komponen) {
                     $komponen_produk_terjual = Komponen_Produk_Terjual::create([
@@ -2032,7 +2114,6 @@ class MutasiController extends Controller
                 }
             }
         }
-        return redirect(route('mutasigalery.index'))->with('success', 'Data Berhasil Disimpan');
 
         if($req->status == 'DIKONFIRMASI'){
             return redirect(route('mutasigalery.show', ['mutasiGO' => $mutasis]))->with('success', 'Silahkan Set Komponen');
@@ -2093,11 +2174,13 @@ class MutasiController extends Controller
         $ongkirs = Ongkir::all();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
 
+
         return view('mutasioutlet.audit', compact('perPendapatan','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
     public function audit_OGUpdate(Request $req)
     {
+        // dd($req);
         $mutasis = $req->input('mutasiOG');
         $allkeys = array_keys($req->all());
         $komponens = ['_token', '_method','nama_produk', 'kodegiftproduk', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk', 'kondisitradproduk', 'jumlahtradproduk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiOG', 'kode_produk'];
@@ -2108,26 +2191,29 @@ class MutasiController extends Controller
                 }
             }
         });
+        if ($req->hasFile('bukti')) {
+            $file = $req->file('bukti');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
+            // dd($filePath);
+            $data['bukti'] = $filePath;
+        }
         $data = $req->except($filter);
-        // dd($data);
-
-        //update data ttd
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
         $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
 
-        if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
-            $data['diperiksa_id'] = Auth::user()->id;
-            $data['tanggal_diperiksa'] = now();
-        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
-            $data['dibukukan_id'] = Auth::user()->id;
-            $data['tanggal_dibukukan'] = now();
-        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
-            $data['pembuat_id'] = Auth::user()->id;
-            $data['tanggal_pembuat'] = now();
+        if($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
+            $data['dibukukan_id'] = $user->id;
+            $data['tanggal_dibukukan'] = $req->tanggal_dibukukan;
+        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
+            $data['diperiksa_id'] = $user->id;
+            $data['tanggal_diperiksa'] = $req->tanggal_diperiksa;
+        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $user->hasRole(['KasirOutlet'])){
+            $data['pembuat_id'] = $user->id;
+            $data['tanggal_pembuat'] = $req->tanggal_pembuat;
         }
-        // dd($data);
 
         $update = Mutasi::where('id', $mutasis)->update($data);
 
@@ -2288,7 +2374,7 @@ class MutasiController extends Controller
         }
 
         if($req->status == 'DIKONFIRMASI' || $req->status == 'TUNDA' || $req->status == 'DIBATALKAN'){
-            return redirect()->back()->with('success', 'Berhasil Mengupdate data');
+            return redirect(route('mutasioutlet.index'))->with('success', 'Berhasil Mengupdate data');
         }else{
             return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
@@ -2343,21 +2429,41 @@ class MutasiController extends Controller
         $jabatanpegawai = $jabatan->jabatan;
         $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
 
-        if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+        if($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
             $data['diperiksa_id'] = Auth::user()->id;
-            $data['tanggal_diperiksa'] = now();
-        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+            $data['tanggal_diperiksa'] = $req->tanggal_diperiksa;
+        }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
             $data['dibukukan_id'] = Auth::user()->id;
-            $data['tanggal_dibukukan'] = now();
-        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'admin' || $jabatanpegawai == 'kasir'){
+            $data['tanggal_dibukukan'] = $req->tanggal_dibukukan;
+        }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $user->hasRole(['Purchasing'])){
             $data['pembuat_id'] = Auth::user()->id;
-            $data['tanggal_pembuat'] = now();
+            $data['tanggal_pembuat'] = $req->tanggal_pembuat;
         }
 
         $update = Mutasi::where('id', $mutasis)->update($data);
 
         if($req->status == 'DIBATALKAN'){
             return redirect(route('mutasigalerygalery.index'))->with('success', 'Berhasil Mengupdate Data');
+        }
+
+        if($user->hasRole(['Auditor', 'Finance'])) {
+            for ($i = 0; $i < count($req->nama_produk); $i++) {
+                $getProdukJual = Produk_Terjual::with('komponen')->where('id', $req->nama_produk[$i])->first();
+                if(!empty($getProdukJual)) {
+                    foreach($getProdukJual->komponen as $komponjual)
+                    {
+                        $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+                            ->where('kode_produk', $komponjual->kode_produk)
+                            ->where('kondisi_id', $komponjual->kondisi)
+                            ->first();
+                        
+                        $stok->jumlah += intval($komponjual->jumlah) * intval($getProdukJual->jumlah);
+                        $stok->update();
+                        $stok->jumlah -= intval($komponjual->jumlah) * intval($req->jumlah_dikirim[$i]);
+                        $stok->update();
+                    }
+                }
+            }
         }
 
         //hapus komponen agar bisa di create ulang
@@ -2425,8 +2531,6 @@ class MutasiController extends Controller
         $lokasispenerima = Lokasi::where('tipe_lokasi', 3)->orwhere('tipe_lokasi', 4)->orwhere('tipe_lokasi', 1)->get();
         $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigg', $mutasis->no_mutasi)->get();
-        // dd($produks);
-        // dd($produks);
         foreach($produks as $produk)
         {
             // dd($produk);
@@ -2473,21 +2577,56 @@ class MutasiController extends Controller
          $jabatanpegawai = $jabatan->jabatan;
          $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
  
-         if($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'auditor'){
+         if($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
              $data['diperiksa_id'] = Auth::user()->id;
-             $data['tanggal_diperiksa'] = now();
-         }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $jabatanpegawai == 'finance'){
+             $data['tanggal_diperiksa'] = $req->tanggal_diperiksa;
+         }elseif($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
              $data['dibukukan_id'] = Auth::user()->id;
-             $data['tanggal_dibukukan'] = now();
-         }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $jabatanpegawai == 'purchasing' || $jabatanpegawai == 'admin'){
+             $data['tanggal_dibukukan'] = $req->tanggal_dibukukan;
+         }elseif($mutasipenjualan->status != 'DIKONFIRMASI' && $user->hasRole(['Purchasing'])){
              $data['pembuat_id'] = Auth::user()->id;
-             $data['tanggal_pembuat'] = now();
+             $data['tanggal_pembuat'] = $req->tanggal_pembuat;
          }
 
         $update = Mutasi::where('id', $mutasis)->update($data);
 
         if($req->status == 'DIBATALKAN'){
             return redirect(route('mutasighgalery.index'))->with('success', 'Berhasil Mengupdate Data');
+        }
+
+        if($user->hasRole(['Auditor', 'Finance'])) {
+            for ($i = 0; $i < count($req->nama_produk); $i++) {
+                $getProdukJual = Produk_Terjual::with('komponen')->where('id', $req->nama_produk[$i])->first();
+                if(!empty($getProdukJual)) {
+                    // $produkterjual = Produk_Terjual::where('no_mutasigo', $req->no_mutasi)->get();
+                    // foreach($produkterjual as $pj) {
+                        foreach($getProdukJual->komponen as $komponjual)
+                        {
+                            if(substr($req->no_invoice, 0,3) == 'MGG') {
+                                $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
+                                    ->where('kode_produk', $komponjual->kode_produk)
+                                    ->where('kondisi_id', $komponjual->kondisi)
+                                    ->first();
+                            
+                                $stok->jumlah += intval($komponjual->jumlah) * intval($getProdukJual->jumlah);
+                                $stok->update();
+                                $stok->jumlah -= intval($komponjual->jumlah) * intval($req->jumlah_dikirim[$i]);
+                                $stok->update();
+                            }else if(substr($req->no_invoice, 0,3) == 'MGG') {
+                                $stok = InventoryGudang::where('lokasi_id', $req->pengirim)
+                                    ->where('kode_produk', $komponjual->kode_produk)
+                                    ->where('kondisi_id', $komponjual->kondisi)
+                                    ->first();
+                            
+                                $stok->jumlah += intval($komponjual->jumlah) * intval($getProdukJual->jumlah);
+                                $stok->update();
+                                $stok->jumlah -= intval($komponjual->jumlah) * intval($req->jumlah_dikirim[$i]);
+                                $stok->update();
+                            }
+                        }
+                    // }
+                }
+            }
         }
 
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
