@@ -50,7 +50,65 @@ class KembaliSewaController extends Controller
         if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
             $query->where('status', 'DIKONFIRMASI');
         }
-        $data = $query->orderByDesc('id')->get();
+       
+        if ($req->ajax()) {
+            $start = $req->input('start');
+            $length = $req->input('length');
+            $order = $req->input('order')[0]['column'];
+            $dir = $req->input('order')[0]['dir'];
+            $columnName = $req->input('columns')[$order]['data'];
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_kembali', 'like', "%$search%")
+                    ->orWhere('no_sewa', 'like', "%$search%")
+                    ->orWhere('tanggal_kembali', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhere('tanggal_pembuat', 'like', "%$search%")
+                    ->orWhere('tanggal_penyetuju', 'like', "%$search%")
+                    ->orWhere('tanggal_pemeriksa', 'like', "%$search%")
+                    ->orWhereHas('sewa', function($c) use($search){
+                        $c->whereHas('customer', function($d) use($search){
+                            $d->where('nama', 'like', "%$search%");
+                        });
+                    })
+                    ->orWhereHas('data_driver', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $tempData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tanggal_kembali = $item->tanggal_kembali == null ? null : formatTanggal($item->tanggal_kembali);
+                $item->tanggal_pembuat = $item->tanggal_pembuat == null ? null : formatTanggal($item->tanggal_pembuat);
+                $item->tanggal_penyetuju = $item->tanggal_penyetuju == null ? null : formatTanggal($item->tanggal_penyetuju);
+                $item->tanggal_pemeriksa = $item->tanggal_pemeriksa == null ? null : formatTanggal($item->tanggal_pemeriksa);
+                $item->nama_customer = $item->sewa->customer->nama;
+                $item->nama_driver = $item->data_driver->nama;
+                $item->userRole = Auth::user()->getRoleNames()->first();
+                $item->hasKembaliSewa = KembaliSewa::where('no_sewa', $item->no_sewa)->where('status', 'DIKONFIRMASI')->exists();
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $req->input('draw'),
+                'recordsTotal' => KembaliSewa::count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
+
         $customer = Kontrak::whereHas('kembali_sewa')->select('customer_id')
         ->distinct()
         ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
@@ -67,7 +125,7 @@ class KembaliSewaController extends Controller
         })
         ->orderBy('karyawans.nama')
         ->get();
-        return view('kembali_sewa.index', compact('data', 'driver', 'customer'));
+        return view('kembali_sewa.index', compact('driver', 'customer'));
     }
 
     /**

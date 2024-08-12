@@ -33,15 +33,16 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="dataTable">
                 <thead>
                 <tr>
                     <th>No</th>
-                    <th>No Kontrak</th>
                     <th>No Invoice</th>
+                    <th>No Kontrak</th>
                     <th>Customer</th>
+                    <th>Tanggal Invoice</th>
                     <th>Jatuh Tempo</th>
-                    <th>Tagihan</th>
+                    <th>Total Tagihan</th>
                     <th>DP</th>
                     <th>Sisa Bayar</th>
                     <th>Status</th>
@@ -52,7 +53,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $item)
+                    {{-- @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_sewa }}</td>
@@ -112,7 +113,7 @@
                                 </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -217,6 +218,161 @@
             if ($('#pembayaran_preview').attr('src') === '') {
                 $('#pembayaran_preview').attr('src', defaultImg);
             }
+
+            // Start Datatable
+            const columns = [
+                { data: 'no', name: 'no', orderable: false },
+                { data: 'no_invoice', name: 'no_invoice' },
+                { data: 'no_sewa', name: 'no_sewa' },
+                { data: 'nama_customer', name: 'nama_customer', orderable: false },
+                { data: 'tanggal_invoice', name: 'tanggal_invoice' },
+                { data: 'jatuh_tempo', name: 'jatuh_tempo' },
+                { data: 'total_tagihan', name: 'total_tagihan' },
+                { data: 'dp', name: 'dp' },
+                { data: 'sisa_bayar', name: 'sisa_bayar' },
+                { 
+                    data: 'status',
+                    name: 'status',
+                    render: function(data, type, row) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `
+                            <span class="badges ${badgeClass}">
+                                ${data ?? '-'}
+                            </span>
+                        `;
+                    }
+                },
+                { data: 'tanggal_pembuat', name: 'tanggal_pembuat' },
+                { data: 'tanggal_pemeriksa', name: 'tanggal_pemeriksa' },
+                { data: 'tanggal_penyetuju', name: 'tanggal_penyetuju' },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        let actionsHtml = `
+                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                        `;
+
+                        if (userPermissions.includes('invoice_sewa.cetak') && row.tanggal_pemeriksa && row.tanggal_penyetuju) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="invoice_sewa/${row.id}/cetak" class="dropdown-item" target="_blank">
+                                        <img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        if (userPermissions.includes('do_sewa.show')) {
+                            if ((['DIKONFIRMASI', 'BATAL'].includes(row.status) && row.userRole === 'AdminGallery') ||
+                                (row.status === 'DIKONFIRMASI' && 
+                                    ((row.userRole === 'Auditor' && row.tanggal_penyetuju) || 
+                                    (row.userRole === 'Finance' && row.tanggal_pemeriksa)))) {
+                                actionsHtml += `
+                                    <li>
+                                        <a href="invoice_sewa/${row.id}/show" class="dropdown-item">
+                                            <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                        </a>
+                                    </li>
+                                `;
+                            } else {
+                                actionsHtml += `
+                                    <li>
+                                        <a href="invoice_sewa/${row.id}/show" class="dropdown-item">
+                                            <img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi
+                                        </a>
+                                    </li>
+                                `;
+                            }
+                        }
+
+                        if ((row.status === 'DIKONFIRMASI' && ['Finance', 'Auditor'].includes(row.userRole)) ||
+                            (row.status === 'TUNDA' && row.userRole === 'AdminGallery')) {
+                            if (!row.hasKembali) {
+                                actionsHtml += `
+                                    <li>
+                                        <a href="invoice_sewa/${row.id}/edit" class="dropdown-item">
+                                            <img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit
+                                        </a>
+                                    </li>
+                                `;
+                            }
+                        }
+
+                        if (row.status === 'TUNDA' && row.userRole === 'AdminGallery') {
+                            actionsHtml += `
+                                <li>
+                                    <a href="javascript:void(0);" class="dropdown-item" onclick="deleteData(${row.id})">
+                                        <img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        if (row.sisa_bayar != 0 && row.status === 'DIKONFIRMASI' && userPermissions.includes('pembayaran_sewa.store')) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="javascript:void(0);" onclick='bayar(${JSON.stringify(row)})' class="dropdown-item">
+                                        <img src="assets/img/icons/cash.svg" class="me-2" alt="img">Bayar
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        actionsHtml += `</ul>`;
+                        return actionsHtml;
+                    }
+                }
+            ];
+
+            let table = initDataTable('#dataTable', {
+                ajaxUrl: "{{ route('invoice_sewa.index') }}",
+                columns: columns,
+                order: [[1, 'asc']],
+                searching: true,
+                lengthChange: true,
+                pageLength: 10
+            }, {
+                customer: '#filterCustomer',
+                dateStart: '#filterDateStart',
+                dateEnd: '#filterDateEnd'
+            });
+
+            const handleSearch = debounce(function() {
+                table.ajax.reload();
+            }, 5000); // Adjust the debounce delay as needed
+
+            // Event listeners for search filters
+            $('#filterCustomer, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+
+            $('#filterBtn').on('click', function() {
+                table.ajax.reload();
+            });
+
+            $('#clearBtn').on('click', function() {
+                $('#filterCustomer').val('');
+                $('#filterDateStart').val('');
+                $('#filterDateEnd').val('');
+                table.ajax.reload();
+            });
+            // End Datatable
         });
         
         $('#bayar').on('change', function() {
@@ -244,60 +400,6 @@
         });
         $(document).ready(function(){
             $('#filterCustomer').select2();
-        });
-        $('#filterBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var urlString = baseUrl;
-            var first = true;
-            var symbol = '';
-
-            var customer = $('#filterCustomer').val();
-            if (customer) {
-                var filterCustomer = 'customer=' + customer;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterCustomer;
-            }
-            
-            var dateStart = $('#filterDateStart').val();
-            if (dateStart) {
-                var filterDateStart = 'dateStart=' + dateStart;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterDateStart;
-            }
-
-            var dateEnd = $('#filterDateEnd').val();
-            if (dateEnd) {
-                var filterDateEnd = 'dateEnd=' + dateEnd;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterDateEnd;
-            }
-            window.location.href = urlString;
-        });
-        $('#clearBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var url = window.location.href;
-            if(url.indexOf('?') !== -1){
-                window.location.href = baseUrl;
-            }
-            return 0;
         });
         $(document).on('input', '#nominal', function() {
             let input = $(this);
@@ -353,65 +455,65 @@
             $('#no_invoice_bayar').val(generatedInvoice);
         }
         function deleteData(id){
-        Swal.fire({
-            title: 'Batalkan kontrak?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, batalkan!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    type: "GET",
-                    url: "/invoice_sewa/"+id+"/delete",
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    success: function(response) {
-                        toastr.success(response.msg, 'Success', {
-                            closeButton: true,
-                            tapToDismiss: false,
-                            rtl: false,
-                            progressBar: true
-                        });
-        
-                        setTimeout(() => {
-                            location.reload()
-                        }, 2000);
-                    },
-                    error: function(error) {
-                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                            closeButton: true,
-                            tapToDismiss: false,
-                            rtl: false,
-                            progressBar: true
-                        });
-                    }
-                });
-            }
-        });
-    }
-    function previewImage(element, preview_id) {
-        const file = $(element)[0].files[0];
-        if (file.size > 2 * 1024 * 1024) { 
-            toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                closeButton: true,
-                tapToDismiss: false,
-                rtl: false,
-                progressBar: true
+            Swal.fire({
+                title: 'Batalkan kontrak?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, batalkan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/invoice_sewa/"+id+"/delete",
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        success: function(response) {
+                            toastr.success(response.msg, 'Success', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
+            
+                            setTimeout(() => {
+                                location.reload()
+                            }, 2000);
+                        },
+                        error: function(error) {
+                            toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
+                        }
+                    });
+                }
             });
-            $(this).val(''); 
-            return;
         }
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                $('#' + preview_id).attr('src', e.target.result);
+        function previewImage(element, preview_id) {
+            const file = $(element)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
             }
-            reader.readAsDataURL(file);
-        }
-    };
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#' + preview_id).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        };
     </script>
 @endsection

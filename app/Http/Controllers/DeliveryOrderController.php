@@ -46,27 +46,79 @@ class DeliveryOrderController extends Controller
         if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
             $query->where('status', 'DIKONFIRMASI');
         }
-        $data = $query->orderByDesc('id')->get();
         $customer = DeliveryOrder::select('customer_id')
-        ->distinct()
-        ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
-            return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
-        })
-        ->orderBy('customers.nama')
+            ->distinct()
+            ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
+            ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
+                return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
+            })
+            ->orderBy('customers.nama')
         ->get();
         $driver = DeliveryOrder::select('driver')
-        ->distinct()
-        ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
-        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
-            return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
-        })
-        ->orderBy('karyawans.nama')
+            ->distinct()
+            ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
+            ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
+                return $query->where('karyawans.lokasi_id', Auth::user()->karyawans->lokasi_id);
+            })
+            ->orderBy('karyawans.nama')
         ->get();
-        $data->map(function($kontrak){
-            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
-        });
-        return view('do_sewa.index', compact('data', 'driver', 'customer'));
+        if ($req->ajax()) {
+            $start = $req->input('start');
+            $length = $req->input('length');
+            $order = $req->input('order')[0]['column'];
+            $dir = $req->input('order')[0]['dir'];
+            $columnName = $req->input('columns')[$order]['data'];
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_do', 'like', "%$search%")
+                    ->orWhere('no_referensi', 'like', "%$search%")
+                    ->orWhere('tanggal_kirim', 'like', "%$search%")
+                    ->orWhere('pic', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhere('tanggal_pembuat', 'like', "%$search%")
+                    ->orWhere('tanggal_penyetuju', 'like', "%$search%")
+                    ->orWhere('tanggal_pemeriksa', 'like', "%$search%")
+                    ->orWhereHas('customer', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    })
+                    ->orWhereHas('data_driver', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $tempData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tanggal_kirim = $item->tanggal_kirim == null ? null : formatTanggal($item->tanggal_kirim);
+                $item->tanggal_pembuat = $item->tanggal_pembuat == null ? null : formatTanggal($item->tanggal_pembuat);
+                $item->tanggal_penyetuju = $item->tanggal_penyetuju == null ? null : formatTanggal($item->tanggal_penyetuju);
+                $item->tanggal_pemeriksa = $item->tanggal_pemeriksa == null ? null : formatTanggal($item->tanggal_pemeriksa);
+                $item->nama_customer = $item->customer->nama;
+                $item->nama_driver = $item->data_driver->nama;
+                $item->userRole = Auth::user()->getRoleNames()->first();
+                $item->hasKembaliSewa = KembaliSewa::where('no_sewa', $item->no_sewa)->where('status', 'DIKONFIRMASI')->exists();
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $req->input('draw'),
+                'recordsTotal' => DeliveryOrder::where('jenis_do', 'SEWA')->count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
+        return view('do_sewa.index', compact('driver', 'customer'));
     }
 
     /**

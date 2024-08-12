@@ -172,7 +172,7 @@ class PembayaranController extends Controller
     }          
 
     public function index_sewa(Request $req){
-        $query = Pembayaran::whereNotNull('invoice_sewa_id');
+        $query = Pembayaran::with('sewa', 'rekening')->whereNotNull('invoice_sewa_id');
         if(Auth::user()->hasRole('AdminGallery')){
             $query->whereHas('sewa', function($q) {
                 $q->whereHas('kontrak', function($p) {
@@ -189,9 +189,61 @@ class PembayaranController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
         }
-        $data = $query->orderByDesc('id')->get();
+        
+        if ($req->ajax()) {
+            $start = $req->input('start');
+            $length = $req->input('length');
+            $order = $req->input('order')[0]['column'];
+            $dir = $req->input('order')[0]['dir'];
+            $columnName = $req->input('columns')[$order]['data'];
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_invoice_bayar', 'like', "%$search%")
+                    ->orWhere('cara_bayar', 'like', "%$search%")
+                    ->orWhere('tanggal_bayar', 'like', "%$search%")
+                    ->orWhere('nominal', 'like', "%$search%")
+                    ->orWhereHas('sewa', function($c) use($search){
+                        $c->where('no_invoice', 'like', "%$search%")
+                        ->orWhere('no_sewa', 'like', "%$search%");
+                    })
+                    ->orWhereHas('rekening', function($c) use($search){
+                        $c->where('nama_akun', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $tempData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tanggal_bayar = $item->tanggal_bayar == null ? null : formatTanggal($item->tanggal_bayar);
+                $item->no_kontrak = $item->sewa->no_sewa;
+                $item->no_invoice_tagihan = $item->sewa->no_invoice;
+                $item->nominal = formatRupiah($item->nominal);
+                $item->nama_rekening = $item->rekening->nama_akun ?? '';
+                $item->userRole = Auth::user()->getRoleNames()->first();
+                $item->cara_bayar = ucfirst($item->cara_bayar);
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $req->input('draw'),
+                'recordsTotal' => Pembayaran::whereNotNull('invoice_sewa_id')->count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+        }
+
         $bankpens = Rekening::get();
-        return view('pembayaran_sewa.index', compact('data', 'bankpens'));
+        return view('pembayaran_sewa.index', compact('bankpens'));
     }
 
     public function store_sewa(Request $req) {
