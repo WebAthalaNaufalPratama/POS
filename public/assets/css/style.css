@@ -6535,6 +6535,9 @@ span.select2-container.select2-container--default.select2-container--open {
 .badges.bg-lightgrey {
     background: #637381;
 }
+.badges.bg-lightblue {
+    background: #3498db;
+}
 .add-icon span,
 .add-icon a {
     width: 40px;
