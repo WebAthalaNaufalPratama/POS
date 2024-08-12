@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew" id="dataTable">
+            <table class="table pb-5" id="dataTable">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -66,7 +66,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($kontraks as $kontrak)
+                    {{-- @foreach ($kontraks as $kontrak)
                         <tr>
                             <td>{{ $loop->iteration ?? '-' }}</td>
                             <td>{{ $kontrak->no_kontrak ?? '-' }}</td>
@@ -142,7 +142,7 @@
                                 </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -156,74 +156,186 @@
     <script>
     $(document).ready(function(){
         $('#filterCustomer, #filterSales').select2();
+
+
+        // Start Datatable
+        const columns = [
+            { data: 'no', name: 'no', orderable: false },
+            { data: 'no_kontrak', name: 'no_kontrak' },
+            { data: 'nama_customer', name: 'nama_customer', orderable: false },
+            { data: 'pic', name: 'pic', orderable: false },
+            { data: 'nama_sales', name: 'nama_sales', orderable: false },
+            { data: 'handphone', name: 'handphone' },
+            { data: 'masa_sewa', name: 'masa_sewa' },
+            { data: 'rentang_tanggal', name: 'rentang_tanggal', orderable: false },
+            { data: 'total_harga', name: 'total_harga' },
+            { 
+                data: 'status',
+                name: 'status',
+                render: function(data, type, row) {
+                    let badgeClass;
+                    switch (data) {
+                        case 'DIKONFIRMASI':
+                            badgeClass = 'bg-lightgreen';
+                            break;
+                        case 'TUNDA':
+                            badgeClass = 'bg-lightred';
+                            break;
+                        default:
+                            badgeClass = 'bg-lightgrey';
+                            break;
+                    }
+                    
+                    return `
+                        <span class="badges ${badgeClass}">
+                            ${data ?? '-'}
+                        </span>
+                    `;
+                }
+            },
+            { data: 'tanggal_pembuat', name: 'tanggal_pembuat' },
+            { data: 'tanggal_pemeriksa', name: 'tanggal_pemeriksa' },
+            { data: 'tanggal_penyetuju', name: 'tanggal_penyetuju' },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    let actionsHtml = `
+                        <td class="text-center">
+                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                    `;
+
+                    if (userPermissions.includes('kontrak.pdfKontrak') && row.tanggal_pemeriksa && row.tanggal_penyetuju) {
+                        actionsHtml += `
+                            <li>
+                                <a href="kontrak/${row.id}/pdfKontrak" target="_blank" class="dropdown-item"><img src="assets/img/icons/pdf.svg" class="me-2" alt="img">Kontrak</a>
+                            </li>
+                        `;
+                    }
+
+                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('kontrak.excelPergantian') && row.tanggal_pemeriksa && row.tanggal_penyetuju && row.hasKembaliSewa) {
+                        actionsHtml += `
+                            <li>
+                                <a href="kontrak/${row.id}/excelPergantian" class="dropdown-item"><img src="assets/img/icons/reverse-alt.svg" class="me-2" alt="img">Pergantian</a>
+                            </li>
+                        `;
+                    }
+
+                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('do_sewa.create')) {
+                        actionsHtml += `
+                            <li>
+                                <a href="do_sewa/create?kontrak=${row.id}" class="dropdown-item">
+                                    <img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order
+                                </a>
+                            </li>
+                        `;
+                    }
+
+                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('kembali_sewa.create')) {
+                        actionsHtml += `
+                            <li>
+                                <a href="kembali_sewa/create?kontrak=${row.id}" class="dropdown-item"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Kembali Sewa</a>
+                            </li>
+                        `;
+                    }
+
+                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('invoice_sewa.create')) {
+                        actionsHtml += `
+                            <li>
+                                <a href="invoice_sewa/create?kontrak=${row.id}" class="dropdown-item"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Invoice Sewa</a>
+                            </li>
+                        `;
+                    }
+
+                    if (userPermissions.includes('kontrak.show')) {
+                        if ((['DIKONFIRMASI', 'BATAL'].includes(row.status) && row.userRole === 'AdminGallery') ||
+                            (row.status === 'DIKONFIRMASI' && (row.tanggal_penyetuju || row.tanggal_pemeriksa) &&
+                            (['Auditor', 'Finance'].includes(row.userRole) && (row.tanggal_penyetuju || row.tanggal_pemeriksa)))) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="kontrak/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                </li>
+                            `;
+                        } else {
+                            if (row.status === 'TUNDA') {
+                                actionsHtml += `
+                                    <li>
+                                        <a href="kontrak/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
+                                    </li>
+                                `;
+                            }
+                        }
+                    }
+
+                    if ((row.status === 'DIKONFIRMASI' && ['Auditor', 'Finance'].includes(row.userRole) && userPermissions.includes('kontrak.edit')) ||
+                        (row.status === 'TUNDA' && row.userRole === 'AdminGallery' && userPermissions.includes('kontrak.edit'))) {
+                        if (!row.hasKembali) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="kontrak/${row.id}/edit" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                </li>
+                            `;
+                        }
+                    }
+
+                    if (row.status === 'TUNDA' && row.userRole === 'AdminGallery') {
+                        actionsHtml += `
+                            <li>
+                                <a href="#" class="dropdown-item" onclick="deleteData(${row.id})"><img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal</a>
+                            </li>
+                        `;
+                    }
+
+                    actionsHtml += `
+                            </ul>
+                        </td>
+                    `;
+
+                    return actionsHtml;
+                }
+            }
+        ];
+
+        let table = initDataTable('#dataTable', {
+            ajaxUrl: "{{ route('kontrak.index') }}",
+            columns: columns,
+            order: [[1, 'asc']],
+            searching: true,
+            lengthChange: true,
+            pageLength: 5
+        }, {
+            customer: '#filterCustomer',
+            sales: '#filterSales',
+            dateStart: '#filterDateStart',
+            dateEnd: '#filterDateEnd'
+        });
+
+        const handleSearch = debounce(function() {
+            table.ajax.reload();
+        }, 5000); // Adjust the debounce delay as needed
+
+        // Event listeners for search filters
+        $('#filterCustomer, #filterSales, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+
+        $('#filterBtn').on('click', function() {
+            table.ajax.reload();
+        });
+
+        $('#clearBtn').on('click', function() {
+            $('#filterCustomer').val('');
+            $('#filterSales').val('');
+            $('#filterDateStart').val('');
+            $('#filterDateEnd').val('');
+            table.ajax.reload();
+        });
+        // End Datatable
     });
-    $('#filterBtn').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var urlString = baseUrl;
-        var first = true;
-        var symbol = '';
 
-        var customer = $('#filterCustomer').val();
-        if (customer) {
-            var filterCustomer = 'customer=' + customer;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterCustomer;
-        }
-
-        var sales = $('#filterSales').val();
-        if (sales) {
-            var filterSales = 'sales=' + sales;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterSales;
-        }
-
-        var dateStart = $('#filterDateStart').val();
-        if (dateStart) {
-            var filterDateStart = 'dateStart=' + dateStart;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateStart;
-        }
-
-        var dateEnd = $('#filterDateEnd').val();
-        if (dateEnd) {
-            var filterDateEnd = 'dateEnd=' + dateEnd;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateEnd;
-        }
-        window.location.href = urlString;
-    });
-    $('#clearBtn').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var url = window.location.href;
-        if(url.indexOf('?') !== -1){
-            window.location.href = baseUrl;
-        }
-        return 0;
-    });
     function deleteData(id){
         Swal.fire({
             title: 'Batalkan kontrak?',
@@ -265,5 +377,6 @@
             }
         });
     }
+
     </script>
 @endsection

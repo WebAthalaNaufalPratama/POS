@@ -33,7 +33,7 @@ class KontrakController extends Controller
      */
     public function index(Request $req)
     {
-        $query = Kontrak::with('customer', 'invoice');
+        $query = Kontrak::with('customer', 'invoice', 'kembali_sewa');
         if(Auth::user()->hasRole('AdminGallery')){
             $query->where('lokasi_id',Auth::user()->karyawans->lokasi_id);
         }
@@ -52,10 +52,66 @@ class KontrakController extends Controller
         if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
             $query->where('status', 'DIKONFIRMASI');
         }
-        $kontraks = $query->orderByDesc('id')->get();
-        $kontraks->map(function($kontrak){
-            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
-        });
+
+        if ($req->ajax()) {
+            $start = $req->input('start');
+            $length = $req->input('length');
+            $order = $req->input('order')[0]['column'];
+            $dir = $req->input('order')[0]['dir'];
+            $columnName = $req->input('columns')[$order]['data'];
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_kontrak', 'like', "%$search%")
+                    ->orWhere('pic', 'like', "%$search%")
+                    ->orWhere('handphone', 'like', "%$search%")
+                    ->orWhere('masa_sewa', 'like', "%$search%")
+                    ->orWhere('total_harga', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhere('tanggal_pembuat', 'like', "%$search%")
+                    ->orWhere('tanggal_penyetuju', 'like', "%$search%")
+                    ->orWhere('tanggal_pemeriksa', 'like', "%$search%")
+                    ->orWhereHas('customer', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    })
+                    ->orWhereHas('data_sales', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $kontrakData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $kontrakData->map(function($kontrak, $index) use ($currentPage, $perPage) {
+                $kontrak->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $kontrak->masa_sewa = $kontrak->masa_sewa . ' bulan';
+                $kontrak->total_harga = formatRupiah($kontrak->total_harga);
+                $kontrak->tanggal_pembuat = $kontrak->tanggal_pembuat == null ? null : formatTanggal($kontrak->tanggal_pembuat);
+                $kontrak->tanggal_penyetuju = $kontrak->tanggal_penyetuju == null ? null : formatTanggal($kontrak->tanggal_penyetuju);
+                $kontrak->tanggal_pemeriksa = $kontrak->tanggal_pemeriksa == null ? null : formatTanggal($kontrak->tanggal_pemeriksa);
+                $kontrak->nama_customer = $kontrak->customer->nama;
+                $kontrak->nama_sales = $kontrak->data_sales->nama;
+                $kontrak->rentang_tanggal = formatTanggal($kontrak->tanggal_mulai) . ' - ' . formatTanggal($kontrak->tanggal_selesai);
+                $kontrak->userRole = Auth::user()->getRoleNames()->first();
+                $kontrak->hasKembaliSewa = $kontrak->kembali_sewa->isNotEmpty();
+                return $kontrak;
+            });
+
+            return response()->json([
+                'draw' => $req->input('draw'),
+                'recordsTotal' => Kontrak::count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
 
         $customer = Kontrak::select('customer_id')
         ->distinct()
@@ -73,7 +129,7 @@ class KontrakController extends Controller
         })
         ->orderBy('karyawans.nama')
         ->get();
-        return view('kontrak.index', compact('kontraks', 'customer', 'sales'));
+        return view('kontrak.index', compact('customer', 'sales'));
     }
 
     /**
