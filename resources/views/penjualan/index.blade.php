@@ -116,13 +116,14 @@
                                             @endif
                                             <!-- && $penjualan->dibukukan_id != null && $penjualan->auditor_id != null && $penjualan->status == 'DIKONFIRMASI' -->
                                             @php
-                                                $retur = \App\Models\ReturPenjualan::where('no_invoice', $penjualan->no_invoice)->first();
+                                                $retur = \App\Models\ReturPenjualan::where('no_invoice', $penjualan->no_invoice)->where('status', 'DIKONFIRMASI')->first();
+                                                
                                             @endphp
-                                            @if(in_array('returpenjualan.create', $rolePermissions) && $penjualan->status == 'DIKONFIRMASI' && empty($retur))
+                                            @if(in_array('returpenjualan.create', $rolePermissions) && $penjualan->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance']) && !$retur)
                                                 <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('pdfinvoicepenjualan.generate', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak Invoice</a>
-                                            @if(!empty($retur) && $retur->status == 'DIKONFIRMASI')
+                                            @if(!empty($retur))
                                                 <a class="dropdown-item" href="{{ route('penjualan.view', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">View Retur</a>
                                             @endif
                                             @endif

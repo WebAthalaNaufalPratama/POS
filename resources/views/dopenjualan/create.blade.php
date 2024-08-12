@@ -603,8 +603,12 @@
 
         $(document).on('click', '#dynamic_field .btn_remove', function() {
             var button_id = $(this).attr('id');
-            $('#row' + button_id).remove();
-            updateIndicesProduk();
+            if ($('#dynamic_field tr').length <= 1) {
+                alert('Mohon Jangan Biarkan Data Delivery Order Kosong');
+            } else {
+                $('#row' + button_id).remove();
+                updateIndicesProduk();
+            }
         });
 
         $(document).on('click', '#dynamic_field_tambah .btn_remove_tambah', function() {
@@ -621,6 +625,10 @@
                 $(this).find('.btn_remove_tambah').attr('id', 'remove_tambah_' + i); // Update ID tombol penghapusan dengan benar
                 i++;
             });
+        });
+
+        $('[id^=nama_produk_]').on('mousedown click focus', function(e) {
+            e.preventDefault();
         });
 
 

@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}" {{ $mutasis->rekening_id == $rekening->id ? 'selected': ''}}>{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -81,11 +92,18 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="status">Status</label>
-                                            <select id="status" name="status" class="form-control" required>
+                                            <select id="status" name="status" class="form-control" required >
                                                 <option value="">Pilih Status</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if($user->hasRole(['KasirOutlet']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                @endif
                                                 <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                @if($user->hasRole(['KasirGallery', 'AdminGallery']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -137,7 +155,7 @@
                                                     <tr id="row{{ $i }}">
                                                         <td>
                                                             <input type="hidden" id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" value="{{ $produk->id}}">
-                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" >
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control">
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $pj)
                                                                 <option value="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>{{ $pj->nama }}</option>
@@ -193,7 +211,7 @@
                                                                 <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
                                                                 <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
                                                                 <td id="pemeriksa">{{ Auth::user()->name}}</td>
-                                                            @elseif($user->hasRole(['KasirOutlet']))
+                                                            @elseif($user->hasRole(['KasirGallery', 'AdminGallery', 'SuperAdmin']))
                                                                 <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
                                                                 <td id="penerima" >-</td>
                                                                 <td id="penyetuju" >-</td>
@@ -201,7 +219,7 @@
                                                             @endif
                                                         </tr>
                                                         <tr>
-                                                            @if($user->hasRole(['KasirOutlet']))
+                                                            @if($user->hasRole(['KasirGallery', 'AdminGallery', 'SuperAdmin']))
                                                                 <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
                                                                 <td id="tgl_penerima">-</td>
                                                                 <td id="tgl_penyetuju">-</td>
@@ -237,7 +255,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" >
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" value="{{ $mutasis->alamat_tujuan}}" class="form-control" >
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -614,7 +632,17 @@
             getDataGift(produk_id);
         });
 
-        
+        function validateNumericInput() {
+            $('#biaya_pengiriman').on('input', function() {
+                var value = $(this).val();
+                var numericValue = value.replace(/[^0-9.]/g, '');
+
+                if (numericValue !== value) {
+                    $(this).val(numericValue);
+                }
+            });
+        }
+        validateNumericInput();
 
         function getDataGift(produk_id) {
             var data = {

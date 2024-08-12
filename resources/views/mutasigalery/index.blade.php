@@ -66,9 +66,14 @@
                                     </a>
                                         <div class="dropdown-menu">
                                             @if($mutasi->status != 'DIBATALKAN')
-                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                            @php
+                                                $produkMutasi = $mutasi->produkMutasi->first();
+                                            @endphp
+                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && !empty($produkMutasi) && $produkMutasi->jumlah_diterima == null)
                                                 <a class="dropdown-item" href="{{ route('auditmutasigalery.edit', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
-                                            @elseif($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery']) && $mutasi->status != 'DIKONFIRMASI')
+                                            @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && !empty($produkMutasi) &&  $produkMutasi->jumlah_diterima != null)
+                                                <a class="dropdown-item" href="{{ route('mutasigalery.acc', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit ACC Terima</a>
+                                            @elseif($user->hasRole(['KasirGallery', 'KasirOutlet', 'AdminGallery']) && $mutasi->status != 'DIKONFIRMASI')
                                                 <a class="dropdown-item" href="{{ route('auditmutasigalery.edit', ['mutasiGO' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                             @endif
                                             @if($lokasi->lokasi->tipe_lokasi != 2)

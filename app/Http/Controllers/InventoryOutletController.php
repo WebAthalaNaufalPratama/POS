@@ -33,7 +33,7 @@ class InventoryOutletController extends Controller
         $outlets = Lokasi::where('tipe_lokasi', 2)->get();
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
-        if($user->hasRole(['KasirOutlet'])) {
+        if($user->hasRole(['KasirOutlet', 'Auditor', 'Finance'])) {
             $arraylokasi = $lokasi->lokasi_id;
             $query = InventoryOutlet::where('lokasi_id', $arraylokasi);
             if ($req->produk) {

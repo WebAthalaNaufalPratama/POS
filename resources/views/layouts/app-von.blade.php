@@ -79,7 +79,7 @@
     .calculation-header {
             font-size: 24px;
             font-weight: bold;
-            color: #4CAF50;
+            color: #000;
             margin-bottom: 10px;
             text-transform: uppercase;
             text-align: center;
@@ -315,6 +315,18 @@
             pointer-events: none;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transform: translateY(-50%);
+        }
+
+        table {
+            width: 100%;
+        }
+
+        td {
+            white-space: nowrap; /* Prevents text from wrapping */
+        }
+
+        select {
+            width: 100%; /* Makes sure the select box uses available width */
         }
   </style>
   

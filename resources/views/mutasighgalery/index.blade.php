@@ -65,15 +65,20 @@
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
                                         <div class="dropdown-menu">
-                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']))
+                                            @php
+                                                $produkMutasi = $mutasi->produkMutasiGHGallery->first();
+                                            @endphp
+                                            @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && !empty($produkMutasi) && $produkMutasi->jumlah_diterima == null)
                                                 <a class="dropdown-item" href="{{ route('auditmutasighgalery.edit', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
+                                            @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && !empty($produkMutasi) && $produkMutasi->jumlah_diterima == null)
+                                                <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit Acc Terima</a>
                                             @elseif($user->hasRole(['Purchasing']))
                                                 @if($mutasi->status != 'DIKONFIRMASI')
                                                     <a class="dropdown-item" href="{{ route('auditmutasighgalery.edit', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>
                                                 @endif
                                                 <a class="dropdown-item" href="{{ route('mutasighgalery.payment', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">pembayaran mutasi</a>
                                             @endif
-                                            @if($lokasi->lokasi_id == $mutasi->penerima && $mutasi->status == 'DIKONFIRMASI' && !$user->hasRole(['Purchasing']) || $user->hasRole(['Auditor']))
+                                            @if($lokasi->lokasi_id == $mutasi->penerima && $mutasi->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance', 'Purchasing']))
                                                 <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>
                                             @endif
                                             <a class="dropdown-item" href="{{ route('mutasighgalery.view', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>

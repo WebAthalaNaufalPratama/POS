@@ -64,7 +64,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="lokasi_id">Lokasi Pembelian</label>
-                                            <select id="lokasi_id" name="lokasi_id" class="form-control" required>
+                                            <select id="lokasi_id" name="lokasi_id" class="form-control" required readonly>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $penjualans->lokasi_id }}" data-tipe="{{ $penjualans->lokasi->tipe_lokasi}}">{{ $lokasi->nama }}</option>
                                                 @endforeach
@@ -78,14 +78,18 @@
                                                 <span class="input-group-text" id="inputGroupPrepend2">
                                                     <input type="checkbox" id="cek_point" name="btndipakai" {{ $penjualans->btndipakai == 'on' ? 'checked' : '' }}>
                                                 </span>
-                                                <input type="number" class="form-control" id="point_dipakai" name="point_dipakai" placeholder="0" value="{{ $penjualans->point_dipakai }}" aria-describedby="inputGroupPrepend2" required>
+                                                <input type="number" class="form-control" id="point_dipakai" name="point_dipakai" placeholder="0" value="{{ $penjualans->point_dipakai }}" aria-describedby="inputGroupPrepend2" required readonly>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label for="distribusi">Distribusi Produk</label>
                                             <select id="distribusi" name="distribusi" class="form-control" required>
-                                                <!-- <option value="">Pilih Distribusi Produk</option> -->
-                                                <option value="Dikirim" {{ $penjualans->distribusi == 'Dikirim' ? 'selected' : '' }}>Dikirim</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if(!$user->hasRole(['KasirOutlet']) && $penjualans->lokasi->tipe_lokasi == 1)
+                                                <option value="Dikirim">Dikirim</option>
+                                                @endif
                                                 <option value="Diambil" {{ $penjualans->distribusi == 'Diambil' ? 'selected' : '' }}>Langsung Diambil</option>
                                             </select>
                                         </div>
@@ -113,11 +117,11 @@
                                                 @php
                                                     $user = Auth::user();
                                                 @endphp
-                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
+                                                @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
                                                     <option value="TUNDA" {{$penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
                                                 @endif
                                                 <option value="DIKONFIRMASI" {{$penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
-                                                @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
+                                                @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $penjualans->status != 'DIKONFIRMASI')
                                                     <option value="DIBATALKAN" {{$penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALAKAN</option>
                                                 @endif
                                             </select>
@@ -206,7 +210,7 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control"></td>
+                                                    <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" readonly></td>
                                                 </tr>
                                                 @endif
                                                 <!-- Loop through existing products -->
@@ -246,7 +250,7 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.',)}}"></td>
+                                                    <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.',)}}" readonly></td>
                                                     @if($i == 0)
                                                         <td><button type="button" name="add" id="add" class="btn btn-success btnubah">+</button></td>
                                                     @else
@@ -300,7 +304,13 @@
                                                 <div class="form-group">
                                                     <div id="inputBuktiBayar" style="display: none;">
                                                         <label for="buktibayar">Unggah Bukti</label>
-                                                        <input type="file" class="form-control" id="bukti" name="bukti" value="{{ $pembayaran->bukti ?? '-'}}">
+                                                        @php
+                                                            $user = Auth::user();
+                                                        @endphp
+                                                        @if(!$user->hasRole(['Auditor', 'Finance']))
+                                                        <input type="file" class="form-control" id="bukti" name="bukti" value="{{  $pembayaran->bukti ?? '' }}">
+                                                        @endif
+                                                        {{  $pembayaran->bukti ?? '' }}
                                                     </div>
                                                 </div>
                                             </div>
@@ -385,14 +395,14 @@
                                                                 <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
                                                                 <td id="penyetuju" >{{ $penjualans->diperiksa->name ?? '-'}}</td>
                                                                 <td id="pemeriksa">{{ Auth::user()->name}}</td>
-                                                            @elseif($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                            @elseif($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']))
                                                                 <td id="pembuat">{{ $penjualans->dibuat[0]->name }}</td>
                                                                 <td id="penyetuju" >-</td>
                                                                 <td id="pemeriksa">-</td>
                                                             @endif
                                                         </tr>
                                                         <tr>
-                                                            @if($user->hasRole(['AdminGallery', 'KasirAdmin', 'KasirOutlet']))
+                                                            @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']))
                                                                 <td><input type="date" class="form-control" name="tanggal_dibuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
                                                                 <td id="tgl_penyetuju">-</td>
                                                                 <td id="tgl_pemeriksa">-</td>
@@ -520,7 +530,15 @@
                                                 </li>
                                                 <li>
                                                     <h4>DP</h4>
-                                                    <h5><input type="text" id="dp" name="dp" class="form-control" value="{{'Rp '. number_format($penjualans->dp, 0, ',', '.',)}}" required ></h5>
+                                                    @php
+                                                        $user = Auth::user();
+                                                    @endphp
+                                                    @if(!$user->hasRole(['Auditor', 'Finance']))
+                                                    <h5><input type="text" id="dp" name="dp" class="form-control" value="{{'Rp '. number_format($penjualans->dp, 0, ',', '.',)}}" required></h5>
+                                                    @else
+                                                    <h5>
+                                                        <input type="text" id="dp" name="dp" class="form-control" value="{{'Rp '. number_format($penjualans->dp, 0, ',', '.',)}}" required disabled></h5>
+                                                    @endif
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
@@ -1140,6 +1158,18 @@
             $('body').append(picModal);
 
             $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
+            function validateNumericInput() {
+                $('input[id^="diskon_"]').on('input', function() {
+                    var value = $(this).val();
+                    var numericValue = value.replace(/[^0-9]/g, ''); 
+
+                    if (numericValue !== value) {
+                        $(this).val(numericValue);
+                    }
+                });
+            }
+
+            validateNumericInput();
             i++
         });
 
@@ -1168,7 +1198,6 @@
         if (initialPembayaran) {
             $('#cara_bayar').val(initialPembayaran).trigger('change');
         }
-
 
         $('[id^=btnPerangkai]').click(function(e) {
             e.preventDefault();
@@ -1721,7 +1750,7 @@
                 $('#inputPembayaran').show();
                 $('#inputRekening').show();
                 $('#inputTanggalBayar').show();
-                $('#inputBuktiBayar').hide();
+                $('#inputBuktiBayar').show();
                 $('#nominal').val(formatRupiah(dpValue, 'Rp '));
             }
         };
@@ -1768,6 +1797,7 @@
 
         function checkPromo(total_transaksi, tipe_produk, produk) {
             $('#total_promo').val(0);
+            Totaltagihan()
             var data = {
                 total_transaksi: total_transaksi,
                 tipe_produk: tipe_produk,

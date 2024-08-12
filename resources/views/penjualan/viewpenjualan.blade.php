@@ -238,10 +238,10 @@
                                                         </div> -->
                                                         </td>
                                                         <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga_jual, 0, ',', '.')}}" readonly></td>
-                                                        @if($komponen->no_form == null)
+                                                        <!-- @if($komponen->no_form == null)
                                                         <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
                                                         <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
-                                                        @endif
+                                                        @endif -->
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
                                                         <!-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> -->
                                                         @php
@@ -265,8 +265,11 @@
                                         <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th>Nama</th>
-                                                    <th>Jumlah</th>
+                                                    <th>Nama Produk</th>
+                                                    <th>Nama Komponen</th>
+                                                    <th>Kondisi Komponen</th>
+                                                    <th>Jumlah Komponen</th>
+                                                    <th>Jumlah produk Jual</th>
                                                     <th>Alasan</th>
                                                     <th>Diskon</th>
                                                     <th>Harga</th>
@@ -293,8 +296,12 @@
                                                     $isTRDSelected = false; 
                                                     $selectedTRDKode = ''; 
                                                     $selectedGFTKode = ''; 
-                                                    $do = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
-                                                    $harga = \App\Models\Produk_Terjual::where('id', $do->no_invoice)->first();
+                                                    if($penjualans->distribusi == 'Diambil') {
+                                                        $harga = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
+                                                    }elseif($penjualans->distribusi == 'Dikirim'){
+                                                        $do = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
+                                                        $harga = \App\Models\Produk_Terjual::where('id', $do->no_invoice)->first();
+                                                    }
                                                 @endphp
                                                 @foreach ($produkterjuals as $index => $pj)
                                                     @php
@@ -331,43 +338,54 @@
                                                 @endforeach
                                             </select>
                                             @if($isTRDSelected)
-                                                <div class="row mt-2">
-                                                    <div class="col">
-                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
-                                                            <option value=""> Pilih Kondisi </option>
-                                                            @foreach ($kondisis as $kondisi)
-                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                    <div class="col">
-                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
-                                                    </div>
-                                                </div>
+                                                <td>Tidak Ada Komponen</td>
+                                                <td>
+                                                    <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                        <option value=""> Pilih Kondisi </option>
+                                                        @foreach ($kondisis as $kondisi)
+                                                        <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                </td>
                                             @elseif($perPendapatan)
                                                 @foreach ($perPendapatan as $noRETUR => $items)
                                                     @if($noRETUR == $produk->no_retur)
-                                                        @foreach ($items as $komponen)
+                                                    <td>
+                                                    @foreach ($items as $komponen)
                                                             <div class="row mt-2">
                                                                 <div class="col">
-                                                                    <input type="hidden" name="idgiftproduk_{{ $i }}[]" id="idgiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['id'] }}">
                                                                     <input type="hidden" name="kodegiftproduk_{{ $i }}[]" id="kodegiftproduk_{{ $i }}" class="form-control" value="{{ $komponen['kode'] }}" readonly>
                                                                     <input type="text" name="komponengiftproduk_{{ $i }}[]" id="komponengiftproduk_{{ $i }}" class="form-control komponengift-{{ $i }}" value="{{ $komponen['nama'] }}" readonly>
-                                                                    </div>
-                                                                    <div class="col">
+                                                                </div>
+                                                            </div>
+                                                    @endforeach
+                                                    </td>
+                                                    <td>
+                                                    @foreach ($items as $komponen)
+                                                            <div class="row mt-2">
+                                                                <div class="col">
                                                                     <select name="kondisigiftproduk_{{ $i }}[]" id="kondisigiftproduk_{{ $i }}" class="form-control kondisigift-{{ $i }}" readonly>
                                                                         <option value=""> Pilih Kondisi </option>
                                                                         @foreach ($kondisis as $kondisi)
-                                                                        <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : ''}} readonly>{{ $kondisi->nama }}</option>
+                                                                        <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
+                                                            </div>
+                                                    @endforeach
+                                                    </td>
+                                                    <td>
+                                                    @foreach ($items as $komponen)
+                                                            <div class="row mt-2">
                                                                 <div class="col">
-                                                                    <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required>
-                                                                    <!-- <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>    -->
+                                                                    <input type="number" name="jumlahgiftproduk_{{ $i }}[]" id="jumlahgiftproduk_{{ $i }}" class="form-control jumlahgift-{{ $i }}" data-index="{{ $i }}" value="{{ $komponen['jumlah'] }}" required readonly>
                                                                 </div>
                                                             </div>
-                                                        @endforeach
+                                                    @endforeach
+                                                    </td>
                                                     @endif
                                                 @endforeach
                                             @endif
@@ -376,17 +394,12 @@
                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control" data-index="{{ $i }}" value="{{ old('jumlah.' . $i) ?? $produk->jumlah }}" required readonly></td>
                                             <td><input type="text" name="alasan[]" id="alasan_{{ $i }}" class="form-control" value="{{ old('alasan' . $i) ?? $produk->alasan}}" required readonly></td>
                                             <td>
-                                                <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" readonly>
-                                                    <option value="0">Pilih Diskon</option>
-                                                    <option value="Nominal" {{ $produk->jenis_diskon == 'Nominal' ? 'selected' : ''}}>Nominal</option>
-                                                    <option value="persen" {{ $produk->jenis_diskon == 'persen' ? 'selected' : ''}}>Persen</option>
-                                                </select>
-                                                <div>
-                                                    <div class="input-group">
-                                                        <input type="number" name="diskon[]" id="diskon_{{ $i }}" value="{{ 'Rp '. number_format($produk->diskon, 0, ',', '.') }}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly>
-                                                        <span class="input-group-text" id="nominalInput_{{ $i }}" style="display:none;">.00</span>
-                                                        <span class="input-group-text" id="persenInput_{{ $i }}" style="display:none;">%</span>
-                                                    </div>
+                                                <div class="input-group">
+                                                    <input type="text" name="diskon[]" id="diskon_{{ $i }}" value="{{ $produk->diskon}}" class="form-control" aria-label="Recipient's username" aria-describedby="basic-addon3" readonly style="flex: 2;">
+                                                    <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" style="flex: 1;" readonly>
+                                                        <option value="persen" {{ $produk->jenis_diskon == 'persen' ? 'selected' : ''}}>%</option>
+                                                        <option value="Nominal" {{ $produk->jenis_diskon == 'Nominal' ? 'selected' : ''}}>.00</option>
+                                                    </select>
                                                 </div>
                                             </td>
 
@@ -639,7 +652,7 @@
                                     
                                     <!-- Summary Section -->
                                     <div class="col-lg-4 col-sm-12">
-                                    @if($retur->komplain == 'retur')
+                                    @if($retur->komplain == 'retur' || $retur->komplain == 'refund')
                                         <div class="total-order mt-4">
                                     @else
                                         <div class="total-order mt-4 calculation-container">
@@ -702,7 +715,7 @@
                                                         <h4>Total Tagihan Sebelum Retur</h4>
                                                         <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.')}}" readonly required></h5>
                                                     </li>
-                                                    @if($retur->komplain == 'retur')
+                                                    @if($retur->komplain == 'retur' || $retur->komplain == 'refund')
                                                     <li class="total">
                                                         <h4>Total Tagihan Retur</h4>
                                                         <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan_retur, 0, ',', '.')}}" readonly required></h5>

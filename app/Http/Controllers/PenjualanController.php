@@ -91,6 +91,8 @@ class PenjualanController extends Controller
         }
         $penjualans = $query->orderByDesc('id')->get();
 
+        // dd($retur);
+
         return view('penjualan.index', compact('customers','sales','penjualans', 'latestPayments'));
     }
 
@@ -590,60 +592,60 @@ class PenjualanController extends Controller
 
         $jumlahItem = count($req->komponen_id);
         
-        // Check stock availability and decrement stock
-        for ($i = 0; $i < $jumlahItem; $i++) {
-            $produk = Produk::findOrFail($req->komponen_id[$i]);
-            $stok = null;
+        // // Check stock availability and decrement stock
+        // for ($i = 0; $i < $jumlahItem; $i++) {
+        //     $produk = Produk::findOrFail($req->komponen_id[$i]);
+        //     $stok = null;
 
-            if ($lokasi->tipe_lokasi == 1) {
-                $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
-                                        ->where('kode_produk', $produk->kode)
-                                        ->where('kondisi_id', $req->kondisi_id[$i])
-                                        ->first();
-            } elseif ($lokasi->tipe_lokasi == 3) {
-                $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
-                                        ->where('kode_produk', $produk->kode)
-                                        ->where('kondisi_id', $req->kondisi_id[$i])
-                                        ->first();
-            }
+        //     if ($lokasi->tipe_lokasi == 1) {
+        //         $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+        //                                 ->where('kode_produk', $produk->kode)
+        //                                 ->where('kondisi_id', $req->kondisi_id[$i])
+        //                                 ->first();
+        //     } elseif ($lokasi->tipe_lokasi == 3) {
+        //         $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
+        //                                 ->where('kode_produk', $produk->kode)
+        //                                 ->where('kondisi_id', $req->kondisi_id[$i])
+        //                                 ->first();
+        //     }
 
-            if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
-                $allStockAvailable = false;
-                break;
-            }
-        }
+        //     if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
+        //         $allStockAvailable = false;
+        //         break;
+        //     }
+        // }
 
-        if (!$allStockAvailable) {
-            return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
-        }
+        // if (!$allStockAvailable) {
+        //     return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
+        // }
 
-        // Handle existing komponen produk terjual
+        // // Handle existing komponen produk terjual
         $exsist = Komponen_Produk_Terjual::where('produk_terjual_id', $req->prdTerjual_id)->get();
-        $jumlah = Produk_Terjual::where('id', $req->prdTerjual_id)->value('jumlah');
-        // dd($req->jml_produk);
+        // $jumlah = Produk_Terjual::where('id', $req->prdTerjual_id)->value('jumlah');
+        // // dd($req->jml_produk);
 
-        foreach ($exsist as $item) {
-            $produk = Produk::where('kode', $item->kode_produk)->first();
-            $stok = null;
+        // foreach ($exsist as $item) {
+        //     $produk = Produk::where('kode', $item->kode_produk)->first();
+        //     $stok = null;
 
-            if ($lokasi->tipe_lokasi == 1) {
-                $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
-                                        ->where('kode_produk', $produk->kode)
-                                        ->where('kondisi_id', $item->kondisi)
-                                        ->first();
-            } elseif ($lokasi->tipe_lokasi == 3) {
-                $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
-                                        ->where('kode_produk', $produk->kode)
-                                        ->where('kondisi_id', $item->kondisi)
-                                        ->first();
-            }
+        //     if ($lokasi->tipe_lokasi == 1) {
+        //         $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+        //                                 ->where('kode_produk', $produk->kode)
+        //                                 ->where('kondisi_id', $item->kondisi)
+        //                                 ->first();
+        //     } elseif ($lokasi->tipe_lokasi == 3) {
+        //         $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
+        //                                 ->where('kode_produk', $produk->kode)
+        //                                 ->where('kondisi_id', $item->kondisi)
+        //                                 ->first();
+        //     }
 
-            if ($stok) {
-                $stok->jumlah += intval($item->jumlah) * intval($jumlah);
-                $stok->update();
-            }
-        }
-        // dd($stok);
+        //     if ($stok) {
+        //         $stok->jumlah += intval($item->jumlah) * intval($jumlah);
+        //         $stok->update();
+        //     }
+        // }
+        // // dd($stok);
         if ($exsist) {
             $exsist->each->forceDelete();
         }
@@ -669,23 +671,23 @@ class PenjualanController extends Controller
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
 
-            $stok = null;
-            if ($lokasi->tipe_lokasi == 1) {
-                $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
-                                        ->where('kode_produk', $produk->kode)
-                                        ->where('kondisi_id', $req->kondisi_id[$i])
-                                        ->first();
-            } elseif ($lokasi->tipe_lokasi == 3) {
-                $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
-                                        ->where('kode_produk', $produk->kode)
-                                        ->where('kondisi_id', $req->kondisi_id[$i])
-                                        ->first();
-            }
+            // $stok = null;
+            // if ($lokasi->tipe_lokasi == 1) {
+            //     $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+            //                             ->where('kode_produk', $produk->kode)
+            //                             ->where('kondisi_id', $req->kondisi_id[$i])
+            //                             ->first();
+            // } elseif ($lokasi->tipe_lokasi == 3) {
+            //     $stok = InventoryGreenHouse::where('lokasi_id', $req->pengirim)
+            //                             ->where('kode_produk', $produk->kode)
+            //                             ->where('kondisi_id', $req->kondisi_id[$i])
+            //                             ->first();
+            // }
 
-            if ($stok) {
-                $stok->jumlah -= intval($req->jumlahproduk[$i]) * intval($req->jml_produk);
-                $stok->update();
-            }
+            // if ($stok) {
+            //     $stok->jumlah -= intval($req->jumlahproduk[$i]) * intval($req->jml_produk);
+            //     $stok->update();
+            // }
         }
 
         return redirect()->back()->with('success', 'Data tersimpan');
@@ -712,48 +714,48 @@ class PenjualanController extends Controller
             $jumlahItem = count($req->komponen_id);
             
             // Check stock availability and decrement stock
-            for ($i = 0; $i < $jumlahItem; $i++) {
-                $produk = Produk::findOrFail($req->komponen_id[$i]);
-                $stok = null;
+            // for ($i = 0; $i < $jumlahItem; $i++) {
+            //     $produk = Produk::findOrFail($req->komponen_id[$i]);
+            //     $stok = null;
 
-                if ($lokasi->tipe_lokasi == 1) {
-                    $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
-                                            ->where('kode_produk', $produk->kode)
-                                            ->where('kondisi_id', $req->kondisi_id[$i])
-                                            ->first();
-                }
+            //     if ($lokasi->tipe_lokasi == 1) {
+            //         $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+            //                                 ->where('kode_produk', $produk->kode)
+            //                                 ->where('kondisi_id', $req->kondisi_id[$i])
+            //                                 ->first();
+            //     }
 
-                if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
-                    $allStockAvailable = false;
-                    break;
-                }
-            }
+            //     if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
+            //         $allStockAvailable = false;
+            //         break;
+            //     }
+            // }
 
-            if (!$allStockAvailable) {
-                return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
-            }
+            // if (!$allStockAvailable) {
+            //     return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory atau stok tidak mencukupi');
+            // }
 
             // Handle existing komponen produk terjual
             $exsist = Komponen_Produk_Terjual::where('produk_terjual_id', $req->prdTerjual_id)->get();
-            $jumlah = Produk_Terjual::where('id', $req->prdTerjual_id)->value('jumlah');
+            // $jumlah = Produk_Terjual::where('id', $req->prdTerjual_id)->value('jumlah');
             // dd($req->jml_produk);
 
-            foreach ($exsist as $item) {
-                $produk = Produk::where('kode', $item->kode_produk)->first();
-                $stok = null;
+            // foreach ($exsist as $item) {
+            //     $produk = Produk::where('kode', $item->kode_produk)->first();
+            //     $stok = null;
 
-                if ($lokasi->tipe_lokasi == 1) {
-                    $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
-                                            ->where('kode_produk', $produk->kode)
-                                            ->where('kondisi_id', $item->kondisi)
-                                            ->first();
-                }
+            //     if ($lokasi->tipe_lokasi == 1) {
+            //         $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+            //                                 ->where('kode_produk', $produk->kode)
+            //                                 ->where('kondisi_id', $item->kondisi)
+            //                                 ->first();
+            //     }
 
-                if ($stok) {
-                    $stok->jumlah += intval($item->jumlah) * intval($jumlah);
-                    $stok->update();
-                }
-            }
+            //     if ($stok) {
+            //         $stok->jumlah += intval($item->jumlah) * intval($jumlah);
+            //         $stok->update();
+            //     }
+            // }
             // dd($stok);
             if ($exsist) {
                 $exsist->each->forceDelete();
@@ -780,18 +782,18 @@ class PenjualanController extends Controller
                     return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
 
-                $stok = null;
-                if ($lokasi->tipe_lokasi == 1) {
-                    $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
-                                            ->where('kode_produk', $produk->kode)
-                                            ->where('kondisi_id', $req->kondisi_id[$i])
-                                            ->first();
-                }
+                // $stok = null;
+                // if ($lokasi->tipe_lokasi == 1) {
+                //     $stok = InventoryGallery::where('lokasi_id', $req->pengirim)
+                //                             ->where('kode_produk', $produk->kode)
+                //                             ->where('kondisi_id', $req->kondisi_id[$i])
+                //                             ->first();
+                // }
 
-                if ($stok) {
-                    $stok->jumlah -= intval($req->jumlahproduk[$i]) * intval($req->jml_produk);
-                    $stok->update();
-                }
+                // if ($stok) {
+                //     $stok->jumlah -= intval($req->jumlahproduk[$i]) * intval($req->jml_produk);
+                //     $stok->update();
+                // }
             }
 
             return redirect()->back()->with('success', 'Data tersimpan');
@@ -884,6 +886,7 @@ class PenjualanController extends Controller
             $ceklokasi = $lokasi->tipe_lokasi;
         }
         $pembayaran = Pembayaran::where('invoice_penjualan_id', $penjualans->id)->first();
+        // dd($pembayaran);
         return view('penjualan.audit', compact('pembayaran','lokasigalery','produkKomponens','ceklokasi','pegawais','riwayat','customers', 'lokasis', 'karyawans', 'rekenings', 'promos', 'produks', 'ongkirs', 'bankpens', 'kondisis', 'invoices', 'penjualans', 'produkjuals', 'perangkai', 'cekInvoice', 'pembayarans'));
     }
 
@@ -903,7 +906,7 @@ class PenjualanController extends Controller
 
         if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
             ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua')) {
-            $deletepj = Produk_Terjual::with('komponen')->where('no_invoice', $penjualan->no_invoice)->get();
+            $deletepj = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualan->no_invoice)->get();
             //penambahan komponen produk terjual yang di edit
             $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
             if($lokasi->tipe_lokasi == 1) {
@@ -933,22 +936,20 @@ class PenjualanController extends Controller
             }else if($lokasi->tipe_lokasi == 2) {
                 foreach($deletepj as $deletepjList) 
                 {
-                    foreach($deletepjList->komponen as $komponen) 
-                    {
-                        $allStockAvailable = true;
+                    $allStockAvailable = true;
 
-                        $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
-                                                ->where('kode_produk', $komponen->kode_produk)
-                                                ->where('kondisi_id', $komponen->kondisi)
-                                                ->first();
-                        if (!$stok) {
-                            $allStockAvailable = false;
-                            break 2; // Keluar dari kedua loop
-                        }
-
-                        $stok->jumlah = intval($stok->jumlah) + (intval($komponen->jumlah) * intval($deletepjList->jumlah));
-                        $stok->update();
+                    $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
+                                            ->where('kode_produk', $deletepjList->produk->kode)
+                                            ->first();
+    
+                    if (!$stok) {
+                        $allStockAvailable = false;
+                        break 1;
                     }
+
+                    $stok->jumlah = intval($stok->jumlah) + intval($deletepjList->jumlah);
+                    $stok->update();
+                    
                 }
 
                 if (!$allStockAvailable) {
@@ -983,10 +984,23 @@ class PenjualanController extends Controller
                 return floatval($string);
             }
             if(!empty($data['promo_id'])) {
+                $penjualan = Penjualan::where('no_invoice', $req->no_invoice)->first();
+                $promo = Promo::where('id', $penjualan->promo_id)->first();
                 $checkpromo = Promo::where('id', $data['promo_id'])->first();
                 if ($checkpromo->diskon === 'poin') {
                     $totalPromo = extractNumber($data['total_promo']);
                     $customer = Customer::find($data['id_customer']);
+                    if($user->hasRole(['Auditor', 'Finance'])) {
+                        if($promo->diskon == 'poin') {
+                            $totalpromo = intval($promo->diskon_poin);
+                        }
+                        $currentPoints = floatval($customer->poin_loyalty);
+                        $updatedPoin = $totalpromo - $currentPoints;
+                        $customer->update([
+                            'poin_loyalty' => $updatedPoin,
+                            'status_buka' => 'TUTUP'
+                        ]);
+                    }
                 
                     if ($customer) {
                         $currentPoints = floatval($customer->poin_loyalty);
@@ -1082,18 +1096,25 @@ class PenjualanController extends Controller
             }
         }
 
-        if ($req->hasFile('bukti')) {
-            $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
-            $data['bukti'] = $filePath;
-        }
-
         // dd($cek);
-        if ($req->dp > 0) {
+        if ($req->dp > 0 && $req->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance'])) {
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
+                $data['bukti'] = $filePath;
+            }
             if ($req->sisa_bayar == 0) {
                 $data['invoice_penjualan_id'] = $penjualanId;
-                $data['no_invoice_bayar'] = 'INV' .date('Y-m-d') . 001;
+                if($lokasi->tipe_lokasi == 1) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
+                }else if($lokasi->tipe_lokasi == 2) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
+                }
                 $data['cara_bayar'] = $req->cara_bayar;
                 $data['nominal'] = $req->nominal;
                 $data['rekening_id'] = $req->rekening_id;
@@ -1106,7 +1127,15 @@ class PenjualanController extends Controller
                 $pembayaran = Pembayaran::create($data);
             } else {
                 $data['invoice_penjualan_id'] = $penjualanId;
-                $data['no_invoice_bayar'] = 'INV' .date('Ymd') . 001;
+                if($lokasi->tipe_lokasi == 1) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
+                }else if($lokasi->tipe_lokasi == 2) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
+                }
                 $data['cara_bayar'] = $req->cara_bayar;
                 $data['nominal'] = $req->nominal;
                 $data['rekening_id'] = $req->rekening_id;
@@ -1121,9 +1150,9 @@ class PenjualanController extends Controller
         }  
         
         
-        if($req->status == 'DIKONFIRMASI'){
+        if($req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi != 2){
             return redirect(route('penjualan.show', ['penjualan' => $penjualan->id]))->with('success', 'Silakan set Komponen Gift');
-        }elseif($req->status == 'DIKONFIRMASI' && $user->hasRole(['KasirOutlet'])){
+        }elseif($req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi != 1){
             return redirect(route('penjualan.index'))->with('success', 'Berhasil Mengupdate data');
         }elseif($req->status == 'TUNDA'){
             return redirect(route('penjualan.index'))->with('success', 'Berhasil Mengupdate data');
@@ -1227,16 +1256,16 @@ class PenjualanController extends Controller
         $produkterjuals = Produk_Terjual::all();
         //retur penjualan
         $perPendapatan = [];
-        $retur = ReturPenjualan::with('produk_retur', 'deliveryorder')->where('no_invoice', $penjualans->no_invoice)->get(); 
-        foreach ($retur as $returpenjualans) {
-            foreach ($returpenjualans->produk_retur as $produk) {
+        $retur = ReturPenjualan::where('no_invoice', $penjualans->no_invoice)->where('status', 'DIKONFIRMASI')->first();
+
+        if($penjualans->distribusi == 'Dikirim') {
+            foreach ($retur->produk_retur as $produk) {
                 $selectedGFTKomponen = [];
-                
-                    foreach ($produkjuals as $index => $pj) {
-                        if($pj->produk && $produk->produk->kode)
-                        {
-                            $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
-                        
+    
+                foreach ($produkterjuals as $index => $pj) {
+                    if($pj->produk && $produk->produk->kode)
+                    {
+                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
                         if ($isSelectedGFT) {
                             foreach ($pj->komponen as $komponen) {
                                 if ($pj->id == $komponen->produk_terjual_id) {
@@ -1254,17 +1283,48 @@ class PenjualanController extends Controller
                                 }
                             }
                         }
+                    }
+                    if (!empty($selectedGFTKomponen)) {
+                        $perPendapatan += $selectedGFTKomponen;
+                    }
+                } 
+            }
+        }else if($penjualans->distribusi == 'Diambil') {
+            foreach ($retur as $returpenjualans) {
+                foreach ($returpenjualans->produk_retur as $produk) {
+                    $selectedGFTKomponen = [];
+                    
+                    foreach ($produkterjuals as $index => $pj) {
+                        if($pj->produk && $produk->produk->kode)
+                        {
+                            $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                            if ($isSelectedGFT) {
+                                foreach ($pj->komponen as $komponen) {
+                                    if ($pj->id == $komponen->produk_terjual_id) {
+                                        foreach ($kondisis as $kondisi) {
+                                            if ($kondisi->id == $komponen->kondisi) {
+                                                $selectedGFTKomponen[$produk->no_retur][] = [
+                                                    'kode' => $komponen->kode_produk,
+                                                    'nama' => $komponen->nama_produk,
+                                                    'kondisi' => $kondisi->nama,
+                                                    'jumlah' => $komponen->jumlah,
+                                                    'produk' => $komponen->produk_terjual_id
+                                                ];
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                         if (!empty($selectedGFTKomponen)) {
                             $perPendapatan += $selectedGFTKomponen;
                         }
                     }
-                
+                }
             }
         }
+        // dd($perPendapatan);
         
-
-        $retur = ReturPenjualan::where('no_invoice', $penjualans->no_invoice)->first();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
         //log activity
         $riwayatPenjualan = Activity::where('subject_type', Penjualan::class)->where('subject_id', $penjualan)->orderBy('id', 'desc')->get();

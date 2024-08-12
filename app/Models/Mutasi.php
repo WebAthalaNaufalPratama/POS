@@ -27,6 +27,10 @@ class Mutasi extends Model
         return $this->hasMany(Produk_Terjual::class, 'no_mutasiog', 'no_mutasi');
     }
 
+    public function produkMutasiOG(){
+        return $this->hasMany(Produk_Terjual::class, 'no_mutasiog', 'no_mutasi');
+    }
+
     public function dibuat(){
         return $this->belongsTo(User::class, 'pembuat_id', 'id');
     }
@@ -43,7 +47,7 @@ class Mutasi extends Model
     }
 
     public function dibuku(){
-        return $this->belongsTo(User::class, 'dibuku_id', 'id');
+        return $this->belongsTo(User::class, 'dibukukan_id', 'id');
     }
 
     public function rekening() {

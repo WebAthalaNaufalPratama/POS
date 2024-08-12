@@ -381,7 +381,7 @@ class DopenjualanController extends Controller
     {
         foreach ($requiredQuantities as $key => $requiredQuantity) {
             list($kode_produk, $kondisi) = explode('_', $key);
-
+            
             $stok = $lokasi_tipe == 1 
                 ? InventoryGallery::where('lokasi_id', $lokasi_id)->where('kode_produk', $kode_produk)->where('kondisi_id', $kondisi)->first()
                 : InventoryOutlet::where('lokasi_id', $lokasi_id)->where('kode_produk', $kode_produk)->first();
@@ -531,14 +531,11 @@ class DopenjualanController extends Controller
         // dd($invoice);
         $lokasi = Lokasi::where('id', $invoice->lokasi_id)->first();
 
-        // Mendapatkan data yang ada berdasarkan id untuk nama_produk
         $exist = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
         $arrayExist = $exist->pluck('id')->toArray();
         if(!empty($req->nama_produk2)) {
-            // Mendapatkan data yang ada berdasarkan id untuk nama_produk2
             $exist2 = Produk_Terjual::whereIn('id', $req->nama_produk2)->get();
             $arrayExist2 = $exist2->pluck('id')->toArray();
-            // Menggabungkan kedua array
             $arrayCombined = array_merge($arrayExist, $arrayExist2);
         }else{
             $arrayCombined = $arrayExist;
@@ -553,17 +550,28 @@ class DopenjualanController extends Controller
         if ($dikirim->isNotEmpty()) {
             // Update data jumlah_dikirim
             foreach ($dikirim as $item) {
-                $itemKirim = $kirim->where('id', $item->no_invoice)->first();
-                $tambah = (int)$itemKirim->jumlah_dikirim + (int)$item->jumlah;
-                Produk_Terjual::where('id', $item->no_invoice)->update([
-                    'jumlah_dikirim' => $tambah 
-                ]);
+                if($item->jenis != 'TAMBAHAN') {
+                    $itemKirim = $kirim->where('id', $item->no_invoice)->first();
+                    $tambah = (int)$itemKirim->jumlah_dikirim + (int)$item->jumlah;
+                    Produk_Terjual::where('id', $item->no_invoice)->update([
+                        'jumlah_dikirim' => $tambah 
+                    ]);
+                }
+                if($user->hasRole(['Auditor', 'Finance'])) {
+                    $komponens = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->get();
+                    foreach($komponens as $komponen) {
+                        $stok = InventoryGallery::where('lokasi_id', $lokasi->id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
+                        if($stok) {
+                            $stok->jumlah += intval($komponen->jumlah) * intval($item->jumlah_dikirim);
+                            $stok->update();
+                        }
+                    }
+                    
+                }
             }
             Produk_Terjual::whereIn('id', $ceken)->forceDelete();
         }
 
-        // $cek2 = Produk_Terjual::where('no_do', $req->no_do)->get();
-        // dd($cek2);
         if($req->nama_produk){
             for ($i = 0; $i < count($req->nama_produk); $i++) {
                 $getProdukJual = Produk_Terjual::with('komponen')->where('id', $req->nama_produk[$i])->first();
@@ -710,7 +718,7 @@ class DopenjualanController extends Controller
                                 $stok->save();
                             }
                         }
-                    } elseif ($lokasi->tipe_lokasi == 2 && $invoice->distribusi == 'Dikirim' && $req->status == 'DIKONFIRMASI') {
+                    } elseif ($lokasi->tipe_lokasi == 2 && $invoice->distribusi == 'Dikirim' && $req->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance'])) {
                         foreach ($getProdukJual->komponen as $komponen) {
                             // Simpan komponen produk terjual
                             $komponen_produk_terjual = Komponen_Produk_Terjual::create([

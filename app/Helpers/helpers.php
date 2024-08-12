@@ -74,3 +74,36 @@ if (!function_exists('stringToCamelCase')) {
         return $string;
     }
 }
+
+if (!function_exists('NumberToWords')) {
+    function NumberToWords($number) {
+        $number = (int) $number;
+        $words = '';
+    
+        $units = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan'];
+        $teens = ['Sepuluh', 'Sebelas', 'Dua Belas', 'Tiga Belas', 'Empat Belas', 'Lima Belas', 'Enam Belas', 'Tujuh Belas', 'Delapan Belas', 'Sembilan Belas'];
+        $tens = ['', 'Sepuluh', 'Dua Puluh', 'Tiga Puluh', 'Empat Puluh', 'Lima Puluh', 'Enam Puluh', 'Tujuh Puluh', 'Delapan Puluh', 'Sembilan Puluh'];
+        $hundreds = ['', 'Seratus', 'Dua Ratus', 'Tiga Ratus', 'Empat Ratus', 'Lima Ratus', 'Enam Ratus', 'Tujuh Ratus', 'Delapan Ratus', 'Sembilan Ratus'];
+    
+        if ($number == 0) {
+            return 'Nol';
+        }
+    
+        if ($number < 10) {
+            $words = $units[$number];
+        } elseif ($number < 20) {
+            $words = $teens[$number - 10];
+        } elseif ($number < 100) {
+            $words = $tens[intdiv($number, 10)] . ($number % 10 != 0 ? ' ' . $units[$number % 10] : '');
+        } elseif ($number < 1000) {
+            $words = $hundreds[intdiv($number, 100)] . ($number % 100 != 0 ? ' ' . NumberToWords($number % 100) : '');
+        } elseif ($number < 1000000) {
+            $words = NumberToWords(intdiv($number, 1000)) . ' Ribu' . ($number % 1000 != 0 ? ' ' . NumberToWords($number % 1000) : '');
+        } elseif ($number < 1000000000) {
+            $words = NumberToWords(intdiv($number, 1000000)) . ' Juta' . ($number % 1000000 != 0 ? ' ' . NumberToWords($number % 1000000) : '');
+        }
+    
+        return $words;
+    }
+    
+}

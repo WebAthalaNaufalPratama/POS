@@ -110,8 +110,9 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required disabled>
                                                 <option value="">Pilih Status</option>
-                                                <option value="DRAFT" {{$penjualans->status == 'DRAFT' ? 'selected' : ''}}>DRAFT</option>
-                                                <option value="PUBLISH" {{$penjualans->status == 'PUBLISH' ? 'selected' : ''}}>PUBLISH</option>
+                                                <option value="TUNDA" {{$penjualans->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                <option value="DIKONFIRMASI" {{$penjualans->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                <option value="DIBATALKAN" {{$penjualans->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                             </select>
                                         </div>
                                     </div>
@@ -427,7 +428,13 @@
                                             <ul>
                                                 <li>
                                                     <h4>Sub Total</h4>
-                                                    <h5><input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.',)}}" readonly required disabled></h5>
+                                                    <h5>
+                                                        @if(!empty($penjualans->sub_total_retur))
+                                                        <input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total_retur, 0, ',', '.',)}}" readonly required disabled>
+                                                        @else
+                                                        <input type="text" id="sub_total" name="sub_total" class="form-control" value="{{ 'Rp '. number_format($penjualans->sub_total, 0, ',', '.',)}}" readonly required disabled>
+                                                        @endif
+                                                    </h5>
                                                 </li>
                                                 <li>
                                                     <h4>Promo</h4>
@@ -441,7 +448,7 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-3 ps-0 mb-0">
-                                                                <button id="btnCheckPromo" class="btn btn-primary w-100"><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
+                                                                <button id="btnCheckPromo" class="btn btn-primary w-100" disabled><i class="fa fa-search" data-bs-toggle="tooltip"></i></button>
                                                             </div>
                                                         </div>
                                                         <input type="text" class="form-control" required name="total_promo" id="total_promo" value="{{ 'Rp '. number_format($penjualans->total_promo, 0, ',', '.',) }}" readonly readonly>
@@ -453,7 +460,13 @@
                                                             <option value="exclude" {{ $penjualans->jenis_ppn = 'exclude' ? 'selected' : ''}}> PPN EXCLUDE</option>
                                                             <option value="include" {{ $penjualans->jenis_ppn = 'include' ? 'selected' : ''}}> PPN INCLUDE</option>
                                                         </select></h4>
-                                                    <h5><input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.',)}}" required disabled></h5>
+                                                    <h5>
+                                                        @if(!empty($penjualans->jumlah_ppn_retur))
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn_retur, 0, ',', '.',)}}" readonly required disabled>
+                                                        @else
+                                                        <input type="text" id="jumlah_ppn" name="jumlah_ppn" class="form-control" value="{{ 'Rp '. number_format($penjualans->jumlah_ppn, 0, ',', '.',)}}" required disabled>
+                                                        @endif
+                                                    </h5>
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir</h4>
@@ -465,7 +478,13 @@
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Tagihan</h4>
-                                                    <h5><input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.',)}}" readonly required disabled></h5>
+                                                    <h5>
+                                                        @if(!empty($penjualans->total_tagihan_retur))
+                                                        <input type="text" id="total_tagihan_retur" name="total_tagihan_retur" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan_retur, 0, ',', '.',)}}" readonly required disabled>
+                                                        @else
+                                                        <input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ 'Rp '. number_format($penjualans->total_tagihan, 0, ',', '.',)}}" readonly required disabled>
+                                                        @endif
+                                                    </h5>
                                                 </li>
                                                 <li>
                                                     <h4>Sisa Bayar</h4>
@@ -528,7 +547,7 @@
                                                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                                                 </a>
                                                                     <div class="dropdown-menu">
-                                                                        <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}"><img src="assets/img/icons/edit-6.svg" class="me-2" alt="img">Edit</a>
+                                                                        <a class="dropdown-item" href="{{ route('pembayaran.edit', ['pembayaran' => $pembayaran->id]) }}"><img src="/assets/img/icons/edit-6.svg" class="me-2" alt="img">Edit</a>
                                                                     </div>
                                                                 </div>
                                                             </td>
@@ -693,7 +712,7 @@
                     </div>
                     <div class="form-group">
                         <label for="nominal">Nominal</label>
-                        <input type="number" class="form-control" id="nominal" name="nominal" value="{{ $penjualans->sisa_bayar }}" placeholder="Nominal Bayar" required>
+                        <input type="text" class="form-control" id="nominal" name="nominal"  placeholder="Nominal Bayar" required>
                     </div>
 
                     <div class="form-group" id="rekening">
@@ -972,20 +991,72 @@
             }
         }
 
-        // Add change event listener
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
+        }
+        
         $('#cara_bayar').change(function() {
             togglePaymentFields();
         });
 
-        // Initial value from backend
+        togglePaymentFields();
         var initialPembayaran = "{{ $penjualans->cara_bayar }}";
 
-        // Set the initial value in the dropdown and trigger the change event
         if (initialPembayaran) {
             $('#cara_bayar').val(initialPembayaran).trigger('change');
         }
 
+        var sisabayar = parseFloat("{{ $penjualans->sisa_bayar }}");
 
+        $(document).on('input', '#nominal', function() {
+            var value = $(this).val();
+            var numericValue = value.replace(/[^0-9.,]/g, '');
+            $(this).val(numericValue);
+
+            var parts = numericValue.split(',');
+            var integerPart = parts[0].replace(/\./g, '');
+            var decimalPart = parts[1] || '';
+            
+            var numericValue = integerPart + (decimalPart ? '.' + decimalPart : '');
+            var bayar = parseFloat(numericValue); 
+            
+
+            if (isNaN(bayar)) {
+                return; 
+            }
+
+            if (bayar > sisabayar) {
+                alert('Nominal Tidak Boleh Lebih dari Total Tagihan');
+                $(this).val(formatRupiah(sisabayar));
+            } else {
+                $(this).val(formatRupiah(bayar)); 
+            }
+        });
+
+        function validateNumericInput() {
+            $('#nominal').on('input', function() {
+                var value = $(this).val();
+                var numericValue = value.replace(/[^0-9.,]/g, '');
+
+                if (numericValue !== value) {
+                    $(this).val(numericValue);
+                }
+            });
+        }
+
+        validateNumericInput();
 
         $('[id^=btnPerangkai]').click(function(e) {
             e.preventDefault();
@@ -1119,18 +1190,6 @@
             hpInput.val(hpValue);
         });
 
-        var sisaBayar = {{ $penjualans->sisa_bayar}};
-        // console.log(sisaBayar);
-
-        $('#nominal').on('input', function() {
-            var inputNominal = $(this).val();
-
-            if (parseInt(inputNominal) > sisaBayar) {
-                alert('Nominal pembayaran tidak boleh lebih dari sisa bayar!');
-                $(this).val(sisaBayar);
-            }
-        });
-
         $('#bukti_file').on('change', function() {
             const file = $(this)[0].files[0];
             if (file.size > 2 * 1024 * 1024) {
@@ -1159,7 +1218,6 @@
 
         $('#bayar').on('change', function() {
             var caraBayar = $(this).val();
-            console.log(caraBayar);
             if (caraBayar == 'cash') {
                 $('#rekening').hide();
             } else if (caraBayar == 'transfer') {
@@ -1167,6 +1225,7 @@
             }
         });
     });
+
 </script>
 
 @endsection
