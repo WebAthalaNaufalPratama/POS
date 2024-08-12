@@ -173,12 +173,13 @@
                                             <td id="pembuat">
                                                 {{-- <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}"> --}}
                                                 {{-- <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled> --}}
+                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
                                             @if($pemeriksa)
                                             <td id="pemeriksa">
-                                                <input type="hidden" name="pemeriksa" value="{{ $beli->pemeriksa ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ $pemeriksa ?? '' }} ({{ $pemeriksajbt ?? '' }})" disabled>
+                                                <input type="hidden" name="pemeriksa" value="{{ $beli->pemeriksa }}">
+                                                <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})" disabled>
                                                 {{-- <input type="text" class="form-control" value="Nama (Auditor)"  disabled> --}}
                                             </td>
                                             @else
@@ -193,8 +194,8 @@
                                         <tr>
                                             <td id="status_dibuat">
                                                 <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                    <option>Pilih Status</option>
-                                                    <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                    <option disabled>Pilih Status</option>
+                                                    <option value="TUNDA" {{ $beli->status_dibuat == 'TUNDA' || $beli->status_dibuat == null ? 'selected' : ''}}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $beli->status_dibuat == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
                                                     <option value="BATAL" {{ $beli->status_dibuat == 'BATAL' ? 'selected' : ''}}>BATAL</option>
                                                 </select>
@@ -202,7 +203,7 @@
                                             @if($pemeriksa)
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control" disabled>
-                                                    <option disabled selected>Pilih Status</option>
+                                                    <option disabled>Pilih Status</option>
                                                     <option value="TUNDA" {{ $beli->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                     <option value="DIKONFIRMASI" {{ $beli->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>
@@ -219,7 +220,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" disabled>
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}">
                                             </td>
                                             @if($pemeriksa)
                                             <td id="tgl_pemeriksa">
@@ -239,11 +240,12 @@
                                             <td id="pembuat">
                                                 {{-- <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}"> --}}
                                                 {{-- <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled> --}}
+                                                {{-- <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}"> --}}
                                                 <input type="text" class="form-control" value="{{ $pembuat  }} ({{ $pembuatjbt  }})"  disabled>
                                             </td>
                                           
                                             <td id="pemeriksa">
-                                                 <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
                                                 {{-- <input type="text" class="form-control" value="{{ $pemeriksa  }} ({{ $pemeriksajbt  }})"  disabled> --}}
                                             </td>
@@ -262,7 +264,7 @@
                                           
                                             <td id="status_diperiksa">
                                                 <select id="status_diperiksa" name="status_diperiksa" class="form-control">
-                                                    <option disabled selected>Pilih Status</option>
+                                                    <option disabled>Pilih Status</option>
                                                     {{-- <option value="TUNDA" {{ $beli->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option> --}}
                                                     <option value="DIKONFIRMASI" {{ $beli->status_diperiksa == 'DIKONFIRMASI' || $beli->status_diperiksa == null ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 </select>
@@ -271,7 +273,7 @@
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat ?? ''}}" disabled>
+                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat }}" disabled>
                                             </td>
                                          
                                             <td id="tgl_pemeriksa">

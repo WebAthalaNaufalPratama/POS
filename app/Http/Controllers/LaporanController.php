@@ -12,13 +12,23 @@ use App\Exports\PenjualanProdukExport;
 use App\Exports\PelangganExport;
 use App\Exports\DeliveryOrderExport;
 use App\Exports\TagihanPelangganExport;
+
+use App\Exports\HutangSupplierExport;
 use App\Exports\MutasiExport;
 use App\Exports\MutasiindenExport;
+use App\Exports\OmsetExport;
 use App\Exports\PenjualanExport;
 use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
+use App\Exports\PembelianExport;
+use App\Exports\PembelianIndenExport;
+use App\Exports\PromoExport;
+use App\Exports\ReturPembelianExport;
+use App\Exports\ReturPembelianIndenExport;
+use App\Exports\StokIndenExport;
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
+use App\Models\Invoicepo;
 use App\Models\InventoryInden;
 use App\Models\InvoiceSewa;
 use App\Models\KembaliSewa;
@@ -41,7 +51,11 @@ use App\Models\Mutasi;
 use App\Models\Supplier;
 use App\Models\ReturPenjualan;
 use App\Models\Mutasiindens;
+use App\Models\Pembelian;
+use App\Models\Produk;
 use App\Models\ProdukMutasiInden;
+use App\Models\Returinden;
+use App\Models\Returpembelian;
 use App\Models\TransaksiKas;
 
 class LaporanController extends Controller
@@ -70,6 +84,7 @@ class LaporanController extends Controller
         }
 
         $data = $query->get()->map(function($item) {
+            $item->total_sebelum_diskon = $item->subtotal + $item->total_promo;
             $tanggalMulai = Carbon::parse($item->tanggal_mulai);
             $tanggalSekarang = Carbon::now();
         
@@ -118,6 +133,7 @@ class LaporanController extends Controller
         }
 
         $data = $query->get()->map(function($item) {
+            $item->total_sebelum_diskon = $item->subtotal + $item->total_promo;
             $tanggalMulai = Carbon::parse($item->tanggal_mulai);
             $tanggalSekarang = Carbon::now();
         
@@ -164,6 +180,7 @@ class LaporanController extends Controller
         }
 
         $data = $query->get()->map(function($item) {
+            $item->total_sebelum_diskon = $item->subtotal + $item->total_promo;
             $tanggalMulai = Carbon::parse($item->tanggal_mulai);
             $tanggalSekarang = Carbon::now();
         
@@ -728,10 +745,11 @@ class LaporanController extends Controller
             ->unique()
             ->sort()
             ->values();
-        $saldo = 0;
+        
         if($req->gallery){
             $query->where('lokasi_penerima', $req->gallery)
             ->orWhere('lokasi_pengirim', $req->gallery);
+            $id_galleries = $req->gallery;
         } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
 
@@ -740,6 +758,7 @@ class LaporanController extends Controller
                     ->orWhereIn('lokasi_pengirim', $id_galleries);
             });
         }
+        
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -754,24 +773,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if($item->lokasi_penerima == $id_galleries) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if($item->lokasi_pengirim == $id_galleries) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -796,17 +819,18 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
         $galleries = Lokasi::where('tipe_lokasi', 1)->get();
     
-        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'));
+        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'));
     }
 
     public function kas_gallery_pdf(Request $req)
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
+
         if($req->gallery){
             $query->where('lokasi_penerima', $req->gallery)
             ->orWhere('lokasi_pengirim', $req->gallery);
+            $id_galleries = $req->gallery;
         } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
 
@@ -829,24 +853,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if($item->lokasi_penerima == $id_galleries) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if($item->lokasi_pengirim == $id_galleries) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -871,7 +899,7 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'))->setPaper('a4', 'landscape');;
+        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'))->setPaper('a4', 'landscape');;
         return $pdf->stream('kas_gallery.pdf');
     }
 
@@ -879,10 +907,11 @@ class LaporanController extends Controller
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
+
         if($req->gallery){
             $query->where('lokasi_penerima', $req->gallery)
             ->orWhere('lokasi_pengirim', $req->gallery);
+            $id_galleries = $req->gallery;
         } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
 
@@ -905,24 +934,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if($item->lokasi_penerima == $id_galleries) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if($item->lokasi_pengirim == $id_galleries) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -947,7 +980,7 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash), 'kas_gallery.xlsx');
+        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries), 'kas_gallery.xlsx');
     }
 
     public function kas_pusat_index(Request $req)
@@ -961,18 +994,19 @@ class LaporanController extends Controller
             ->unique()
             ->sort()
             ->values();
-        $saldo = 0;
-        if($req->gallery){
-            $query->where('lokasi_penerima', $req->gallery)
-            ->orWhere('lokasi_pengirim', $req->gallery);
-        } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
 
-            $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
-            });
-        }
+        // if($req->gallery){
+        //     $query->where('lokasi_penerima', $req->gallery)
+        //     ->orWhere('lokasi_pengirim', $req->gallery);
+        //     $id_galleries = $req->gallery;
+        // } else {
+        $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
+
+        $query->where(function($query) use ($id_galleries) {
+            $query->whereIn('lokasi_penerima', $id_galleries)
+                ->orWhereIn('lokasi_pengirim', $id_galleries);
+        });
+        // }
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -987,24 +1021,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if (in_array($item->lokasi_penerima, $id_galleries)) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if (in_array($item->lokasi_pengirim, $id_galleries)) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -1029,25 +1067,26 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
         $galleries = Lokasi::where('tipe_lokasi', 5)->get();
     
-        return view('laporan.kas_pusat', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'));
+        return view('laporan.kas_pusat', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'));
     }
 
     public function kas_pusat_pdf(Request $req)
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
-        if($req->gallery){
-            $query->where('lokasi_penerima', $req->gallery)
-            ->orWhere('lokasi_pengirim', $req->gallery);
-        } else {
+
+        // if($req->gallery){
+        //     $query->where('lokasi_penerima', $req->gallery)
+        //     ->orWhere('lokasi_pengirim', $req->gallery);
+        //     $id_galleries = $req->gallery;
+        // } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
 
             $query->where(function($query) use ($id_galleries) {
                 $query->whereIn('lokasi_penerima', $id_galleries)
                     ->orWhereIn('lokasi_pengirim', $id_galleries);
             });
-        }
+        // }
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -1062,24 +1101,28 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if (in_array($item->lokasi_penerima, $id_galleries)) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if (in_array($item->lokasi_pengirim, $id_galleries)) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
+                $item->nominal = ($item->nominal + $item->biaya_lain);
             }
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
@@ -1104,7 +1147,7 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        $pdf = Pdf::loadView('laporan.kas_pusat_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash'))->setPaper('a4', 'landscape');;
+        $pdf = Pdf::loadView('laporan.kas_pusat_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'))->setPaper('a4', 'landscape');;
         return $pdf->stream('kas_pusat.pdf');
     }
 
@@ -1112,18 +1155,19 @@ class LaporanController extends Controller
     {
         $query = TransaksiKas::with(['lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim'])
             ->where('status', 'DIKONFIRMASI');
-        $saldo = 0;
-        if($req->gallery){
-            $query->where('lokasi_penerima', $req->gallery)
-            ->orWhere('lokasi_pengirim', $req->gallery);
-        } else {
+
+        // if($req->gallery){
+        //     $query->where('lokasi_penerima', $req->gallery)
+        //     ->orWhere('lokasi_pengirim', $req->gallery);
+        //     $id_galleries = $req->gallery;
+        // } else {
            $id_galleries = Lokasi::where('tipe_lokasi', 5)->pluck('id')->toArray();
 
             $query->where(function($query) use ($id_galleries) {
                 $query->whereIn('lokasi_penerima', $id_galleries)
                     ->orWhereIn('lokasi_pengirim', $id_galleries);
             });
-        }
+        // }
         if($req->bulan){
             $query->whereMonth('tanggal', $req->bulan);
             $thisMonth = $req->bulan;
@@ -1138,25 +1182,29 @@ class LaporanController extends Controller
             $query->whereYear('tanggal', now()->year);
             $thisYear = now()->year;
         }
+        $startDate = $thisYear . '-' . $thisMonth . '-01';
+        $saldo = TransaksiKas::getSaldoLokasi($id_galleries, $startDate);
         $tempSaldo = $saldo;
         $saldoRekening = 0;
         $saldoCash = 0;
-        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash) {
-            if($item->lokasi_penerima != null) {
+        $data = $query->get()->map(function($item) use(&$tempSaldo, &$saldoRekening, &$saldoCash, $id_galleries) {
+            if (in_array($item->lokasi_penerima, $id_galleries)) {
                 $tempSaldo += $item->nominal;
                 if($item->metode == 'Transfer'){
                     $saldoRekening += $item->nominal;
                 } else {
                     $saldoCash += $item->nominal;
                 }
-            } else {
-                $tempSaldo -= $item->nominal;
+            } 
+            if (in_array($item->lokasi_pengirim, $id_galleries)) {
+                $tempSaldo -= ($item->nominal + $item->biaya_lain);
                 if($item->metode == 'Transfer'){
-                    $saldoRekening -= $item->nominal;
+                    $saldoRekening -= ($item->nominal + $item->biaya_lain);
                 } else {
-                    $saldoCash -= $item->nominal;
+                    $saldoCash -= ($item->nominal + $item->biaya_lain);
                 }
             }
+            $item->nominal = ($item->nominal + $item->biaya_lain);
             $item->dateNumber = Carbon::parse($item->tanggal)->format('d');
             $item->saldo = $tempSaldo;
             return $item;
@@ -1180,7 +1228,1684 @@ class LaporanController extends Controller
         $thisMonth = $bulan['' . $thisMonth . ''];
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new KasPusatExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash), 'kas_pusat.xlsx');
+        return Excel::download(new KasPusatExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries), 'kas_pusat.xlsx');
+    }
+
+    public function pembelian_index(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        $supplier = Supplier::whereHas('pembelian')->get();
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        return view('laporan.pembelian', compact('data', 'supplier', 'galleries'));
+    }
+
+    public function pembelian_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pembelian_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pembelian.pdf');
+    }
+
+    public function pembelian_excel(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PembelianExport($data), 'pembelian.xlsx');
+    }
+
+    public function pembelian_inden_index(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        $supplier = Supplier::whereHas('poinden')->get();
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        return view('laporan.pembelian_inden', compact('data', 'supplier', 'galleries'));
+    }
+
+    public function pembelian_inden_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pembelian_inden_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pembelian_inden.pdf');
+    }
+
+    public function pembelian_inden_excel(Request $req)
+    {
+        $query = Invoicepo::with(['poineden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('poinden', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PembelianIndenExport($data), 'pembelian_inden.xlsx');
+    }
+
+    public function stok_inden_index(Request $req)
+    {
+        $query = InventoryInden::with(['produk', 'supplier']);
+
+        $allData = $query->get();
+
+        $tahun = $allData->map(function($item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            return count($bulan_inden) == 2 ? $bulan_inden[1] : null;
+        })->filter()->unique();
+
+        $supplier = $allData->mapWithKeys(function($item) {
+            return [$item->supplier->id => $item->supplier->nama];
+        })->unique();
+
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->supplier);
+        }
+        if ($req->tahun) {
+            $query->where('bulan_inden', 'LIKE', '%-' . $req->input('tahun'));
+        }
+
+        $result = $query->get();
+
+        $produk = $result->mapWithKeys(function($item) {
+            return [$item->produk->kode => $item->produk->nama];
+        })->unique();
+
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $data = array_fill_keys($bulan, array_fill_keys($produk->values()->toArray(), 0));
+
+        foreach ($result as $item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            if (count($bulan_inden) == 2) {
+                $bulan_key = $bulan_inden[0];
+                
+                $bulan_key = array_search($bulan_key, $bulan);
+                if ($bulan_key !== false) {
+                    $bulan_name = $bulan[$bulan_key];
+                    
+                    $nama_produk = $item->produk->nama;
+                    if (array_key_exists($nama_produk, $data[$bulan_name])) {
+                        $data[$bulan_name][$nama_produk] += $item->jumlah;
+                    }
+                }
+            }
+        }
+
+        $total = array_fill_keys($produk->values()->toArray(), 0);
+
+        foreach ($data as $key => $value) {
+            foreach ($value as $key1 => $item1) {
+                $total[$key1] += $item1;
+            }
+        }
+
+        $totalSisaBunga = array_sum($total);
+
+        return view('laporan.stok_inden', compact('data', 'supplier', 'bulan', 'tahun', 'produk', 'total', 'totalSisaBunga'));
+    }
+
+    public function stok_inden_pdf(Request $req)
+    {
+        $query = InventoryInden::with(['produk', 'supplier']);
+
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->supplier);
+        }
+        if ($req->tahun) {
+            $query->where('bulan_inden', 'LIKE', '%-' . $req->input('tahun'));
+        }
+
+        $result = $query->get();
+
+        $produk = $result->mapWithKeys(function($item) {
+            return [$item->produk->kode => $item->produk->nama];
+        })->unique();
+
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $data = array_fill_keys($bulan, array_fill_keys($produk->values()->toArray(), 0));
+
+        foreach ($result as $item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            if (count($bulan_inden) == 2) {
+                $bulan_key = $bulan_inden[0];
+                
+                $bulan_key = array_search($bulan_key, $bulan);
+                if ($bulan_key !== false) {
+                    $bulan_name = $bulan[$bulan_key];
+                    
+                    $nama_produk = $item->produk->nama;
+                    if (array_key_exists($nama_produk, $data[$bulan_name])) {
+                        $data[$bulan_name][$nama_produk] += $item->jumlah;
+                    }
+                }
+            }
+        }
+
+        $total = array_fill_keys($produk->values()->toArray(), 0);
+
+        foreach ($data as $key => $value) {
+            foreach ($value as $key1 => $item1) {
+                $total[$key1] += $item1;
+            }
+        }
+
+        $totalSisaBunga = array_sum($total);
+
+        if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.stok_inden_pdf', compact('data', 'produk', 'total', 'totalSisaBunga'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('stok_inden.pdf');
+    }
+
+    public function stok_inden_excel(Request $req)
+    {
+        $query = InventoryInden::with(['produk', 'supplier']);
+
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->supplier);
+        }
+        if ($req->tahun) {
+            $query->where('bulan_inden', 'LIKE', '%-' . $req->input('tahun'));
+        }
+
+        $result = $query->get();
+
+        $produk = $result->mapWithKeys(function($item) {
+            return [$item->produk->kode => $item->produk->nama];
+        })->unique();
+
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $data = array_fill_keys($bulan, array_fill_keys($produk->values()->toArray(), 0));
+
+        foreach ($result as $item) {
+            $bulan_inden = explode('-', $item->bulan_inden);
+            if (count($bulan_inden) == 2) {
+                $bulan_key = $bulan_inden[0];
+                
+                $bulan_key = array_search($bulan_key, $bulan);
+                if ($bulan_key !== false) {
+                    $bulan_name = $bulan[$bulan_key];
+                    
+                    $nama_produk = $item->produk->nama;
+                    if (array_key_exists($nama_produk, $data[$bulan_name])) {
+                        $data[$bulan_name][$nama_produk] += $item->jumlah;
+                    }
+                }
+            }
+        }
+
+        $total = array_fill_keys($produk->values()->toArray(), 0);
+
+        foreach ($data as $key => $value) {
+            foreach ($value as $key1 => $item1) {
+                $total[$key1] += $item1;
+            }
+        }
+
+        $totalSisaBunga = array_sum($total);
+
+        if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new StokIndenExport($data, $produk, $total, $totalSisaBunga), 'pembelian_inden.xlsx');
+    }
+
+    public function hutang_supplier_index(Request $req)
+    {
+        $query = Invoicepo::where('status_dibuat', 'DIKONFIRMASI');
+
+        $allData = $query->get();
+
+        if ($req->supplier) {
+            $query->where(function($q) use($req) {
+                $q->whereHas('poinden', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                })
+                ->orWhereHas('pembelian', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $supplier = null;
+            $supplierName = null;
+            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier = $item->poinden->supplier->id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
+                $supplier = $item->pembelian->supplier->id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+
+            $item->supplier_nama = $supplierName;
+            return $item;
+        });
+
+        $totalTagihan = $data->sum('sisa');
+
+        $supplier = $allData->flatMap(function($item) {
+            $supplier_id = null;
+            $supplierName = null;
+        
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier_id = $item->poinden->supplier_id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier_id && $item->pembelian && $item->pembelian->supplier) {
+                $supplier_id = $item->pembelian->supplier_id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+            return $supplier_id ? [$supplier_id => $supplierName] : [];
+        })->unique();
+
+        return view('laporan.hutang_supplier', compact('data', 'supplier', 'totalTagihan'));
+    }
+
+    public function hutang_supplier_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli', 'pembelian.produkbeli'])
+            ->where('status_dibuat', 'DIKONFIRMASI');
+
+        $allData = $query->get();
+
+        if ($req->supplier) {
+            $query->where(function($q) use($req) {
+                $q->whereHas('poinden', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                })
+                ->orWhereHas('pembelian', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $supplier = null;
+            $supplierName = null;
+            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier = $item->poinden->supplier->id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
+                $supplier = $item->pembelian->supplier->id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+
+            $item->supplier_nama = $supplierName;
+            return $item;
+        });
+
+        $totalTagihan = $data->sum('sisa');
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.hutang_supplier_pdf', compact('data', 'totalTagihan'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('hutang_supplier.pdf');
+    }
+
+    public function hutang_supplier_excel(Request $req)
+    {
+        $query = Invoicepo::with(['poinden.produkbeli', 'pembelian.produkbeli'])
+            ->where('status_dibuat', 'DIKONFIRMASI');
+
+        $allData = $query->get();
+
+        if ($req->supplier) {
+            $query->where(function($q) use($req) {
+                $q->whereHas('poinden', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                })
+                ->orWhereHas('pembelian', function($q) use($req) {
+                    $q->where('supplier_id', $req->supplier);
+                });
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $supplier = null;
+            $supplierName = null;
+            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            if ($item->poinden && $item->poinden->supplier) {
+                $supplier = $item->poinden->supplier->id;
+                $supplierName = $item->poinden->supplier->nama;
+            }
+        
+            if (!$supplier && $item->pembelian && $item->pembelian->supplier) {
+                $supplier = $item->pembelian->supplier->id;
+                $supplierName = $item->pembelian->supplier->nama;
+            }
+
+            $item->supplier_nama = $supplierName;
+            return $item;
+        });
+
+        $totalTagihan = $data->sum('sisa');
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new HutangSupplierExport($data, $totalTagihan), 'hutang_supplier.xlsx');
+    }
+
+    public function retur_pembelian_index(Request $req)
+    {
+        $queryPO = Returpembelian::with('invoice.pembelian.lokasi', 'invoice.pembelian.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryPO->where('tgl_retur', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryPO->where('tgl_retur', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryPO->get()->map(function($item){
+            $item->no_po = $item->invoice->pembelian->no_po;
+            $item->supplier_nama = $item->invoice->pembelian->supplier->nama;
+            $item->gallery_nama = $item->invoice->pembelian->lokasi->nama;
+            return $item;
+        });
+
+        return view('laporan.retur_pembelian', compact('data'));
+    }
+
+    public function retur_pembelian_pdf(Request $req)
+    {
+        $queryPO = Returpembelian::with('invoice.pembelian.lokasi', 'invoice.pembelian.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryPO->where('tgl_retur', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryPO->where('tgl_retur', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryPO->get()->map(function($item){
+            $item->no_po = $item->invoice->pembelian->no_po;
+            $item->supplier_nama = $item->invoice->pembelian->supplier->nama;
+            $item->gallery_nama = $item->invoice->pembelian->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.retur_pembelian_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('retur_pembelian.pdf');
+    }
+
+    public function retur_pembelian_excel(Request $req)
+    {
+        $queryPO = Returpembelian::with('invoice.pembelian.lokasi', 'invoice.pembelian.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryPO->where('tgl_retur', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryPO->where('tgl_retur', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryPO->get()->map(function($item){
+            $item->no_po = $item->invoice->pembelian->no_po;
+            $item->supplier_nama = $item->invoice->pembelian->supplier->nama;
+            $item->gallery_nama = $item->invoice->pembelian->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new ReturPembelianExport($data), 'retur_pembelian.xlsx');
+    }
+
+    public function retur_pembelian_inden_index(Request $req)
+    {
+        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryInden->get()->map(function($item){
+            $item->no_po = $item->mutasiinden->no_mutasi;
+            $item->supplier_nama = $item->mutasiinden->supplier->nama;
+            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
+            return $item;
+        });
+
+        return view('laporan.retur_pembelian_inden', compact('data'));
+    }
+
+    public function retur_pembelian_inden_pdf(Request $req)
+    {
+        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryInden->get()->map(function($item){
+            $item->no_po = $item->mutasiinden->no_mutasi;
+            $item->supplier_nama = $item->mutasiinden->supplier->nama;
+            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.retur_pembelian_inden_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('retur_pembelian_inden.pdf');
+    }
+
+    public function retur_pembelian_inden_excel(Request $req)
+    {
+        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $queryInden->get()->map(function($item){
+            $item->no_po = $item->mutasiinden->no_mutasi;
+            $item->supplier_nama = $item->mutasiinden->supplier->nama;
+            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new ReturPembelianIndenExport($data), 'retur_pembelian_inden.xlsx');
+    }
+
+    public function mergeItems($item, $collection) {
+        $existingItem = $collection->firstWhere('no_invoice', $item->no_invoice);
+        
+        if (!$existingItem) {
+            $collection->push($item);
+        }
+    }
+
+    public function omset_index(Request $req)
+    {
+        // Eager load relationships and filter by status
+        $querySewa = InvoiceSewa::with('kontrak.customer', 'kontrak.lokasi', 'data_sales', 'pembayaran', 'produk.produk')
+            ->where('status', 'DIKONFIRMASI');
+        $queryPenjualan = Penjualan::with('customer', 'lokasi', 'karyawan', 'pembayaran', 'produk.produk', 'ongkir')
+            ->where('status', 'DIKONFIRMASI');
+
+
+        if ($req->tipe_penjualan === 'Tradisional') {
+            $querySewa->whereRaw('1 = 0');
+        } elseif ($req->tipe_penjualan === 'Sewa') {
+            $queryPenjualan->whereRaw('1 = 0');
+        }
+
+        // Retrieve data
+        $allDataSewa = $querySewa->get();
+        $allDataPenjualan = $queryPenjualan->get();
+
+        // Extract unique product names
+        $produkSewa = collect();
+        $produkPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkSewa->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+        
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkPenjualan->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+
+        $produkSewa = $produkSewa->unique();
+        $produkPenjualan = $produkPenjualan->unique();
+
+        $combinedProduk = $produkSewa->concat($produkPenjualan);
+
+        $produk = $combinedProduk->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $produk = $produk->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Extract unique sales names
+        $salesSewa = collect();
+        $salesPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->data_sales) && isset($item->data_sales->id) && isset($item->data_sales->nama)) {
+                $salesSewa->put($item->data_sales->id, $item->data_sales->nama);
+            }
+        }
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->karyawan) && isset($item->karyawan->id) && isset($item->karyawan->nama)) {
+                $salesPenjualan->put($item->karyawan->id, $item->karyawan->nama);
+            }
+        }
+
+        $salesSewa = $salesSewa->unique();
+        $salesPenjualan = $salesPenjualan->unique();
+        
+        $combinedSales = $salesSewa->concat($salesPenjualan);
+
+        $sales = $combinedSales->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $sales = $sales->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Apply filters based on request
+        if ($req->tanggal_invoice) {
+            $querySewa->whereDate('tanggal_invoice', $req->tanggal_invoice);
+            $queryPenjualan->whereDate('tanggal_invoice', $req->tanggal_invoice);
+        }
+        if ($req->tanggal_pembayaran) {
+            $querySewa->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+            $queryPenjualan->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+        }
+        if ($req->produk) {
+            $querySewa->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+            $queryPenjualan->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+        }
+        if ($req->sales) {
+            $querySewa->where('sales', $req->input('sales'));
+            $queryPenjualan->where('employee_id', $req->input('sales'));
+        }
+        if ($req->status == 'Sudah Dibayar') {
+            $querySewa->whereHas('pembayaran');
+            $queryPenjualan->whereHas('pembayaran');
+        } elseif ($req->status == 'Belum Dibayar') {
+            $querySewa->whereDoesntHave('pembayaran');
+            $queryPenjualan->whereDoesntHave('pembayaran');
+        }
+
+        // Map data and format fields
+        $dataSewa = $querySewa->get()->map(function($item) {
+            $item->nama_sales = $item->data_sales->nama;
+            $item->nama_customer = $item->kontrak->customer->nama;
+            $item->jumlah = formatRupiah(($item->subtotal + $item->total_promo));
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->ppn_nominal);
+            $item->pph_nominal = formatRupiah($item->pph_nominal);
+            $item->ongkir_nominal = formatRupiah($item->ongkir_nominal);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $dataPenjualan = $queryPenjualan->get()->map(function($item) {
+            $item->nama_sales = $item->karyawan->nama;
+            $item->nama_customer = $item->customer->nama;
+            $item->jumlah = formatRupiah($item->sub_total);
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->jumlah_ppn);
+            $item->pph_nominal = formatRupiah(0);
+            $item->ongkir_nominal = formatRupiah($item->biaya_ongkir);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $data = collect();
+
+        // Add items from $dataSewa
+        $dataSewa->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        // Add items from $dataPenjualan
+        $dataPenjualan->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+        
+        return view('laporan.omset', compact('data', 'sales', 'produk'));
+    }
+
+    public function omset_pdf(Request $req)
+    {
+        // Eager load relationships and filter by status
+        $querySewa = InvoiceSewa::with('kontrak.customer', 'kontrak.lokasi', 'data_sales', 'pembayaran', 'produk.produk')
+            ->where('status', 'DIKONFIRMASI');
+        $queryPenjualan = Penjualan::with('customer', 'lokasi', 'karyawan', 'pembayaran', 'produk.produk', 'ongkir')
+            ->where('status', 'DIKONFIRMASI');
+
+
+        if ($req->tipe_penjualan === 'Tradisional') {
+            $querySewa->whereRaw('1 = 0');
+        } elseif ($req->tipe_penjualan === 'Sewa') {
+            $queryPenjualan->whereRaw('1 = 0');
+        }
+
+        // Retrieve data
+        $allDataSewa = $querySewa->get();
+        $allDataPenjualan = $queryPenjualan->get();
+
+        // Extract unique product names
+        $produkSewa = collect();
+        $produkPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkSewa->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+        
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkPenjualan->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+
+        $produkSewa = $produkSewa->unique();
+        $produkPenjualan = $produkPenjualan->unique();
+
+        $combinedProduk = $produkSewa->concat($produkPenjualan);
+
+        $produk = $combinedProduk->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $produk = $produk->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Extract unique sales names
+        $salesSewa = collect();
+        $salesPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->data_sales) && isset($item->data_sales->id) && isset($item->data_sales->nama)) {
+                $salesSewa->put($item->data_sales->id, $item->data_sales->nama);
+            }
+        }
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->karyawan) && isset($item->karyawan->id) && isset($item->karyawan->nama)) {
+                $salesPenjualan->put($item->karyawan->id, $item->karyawan->nama);
+            }
+        }
+
+        $salesSewa = $salesSewa->unique();
+        $salesPenjualan = $salesPenjualan->unique();
+        
+        $combinedSales = $salesSewa->concat($salesPenjualan);
+
+        $sales = $combinedSales->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $sales = $sales->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Apply filters based on request
+        if ($req->tanggal_invoice) {
+            $querySewa->whereDate('tanggal_invoice', $req->tanggal_invoice);
+            $queryPenjualan->whereDate('tanggal_invoice', $req->tanggal_invoice);
+        }
+        if ($req->tanggal_pembayaran) {
+            $querySewa->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+            $queryPenjualan->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+        }
+        if ($req->produk) {
+            $querySewa->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+            $queryPenjualan->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+        }
+        if ($req->sales) {
+            $querySewa->where('sales', $req->input('sales'));
+            $queryPenjualan->where('employee_id', $req->input('sales'));
+        }
+        if ($req->status == 'Sudah Dibayar') {
+            $querySewa->whereHas('pembayaran');
+            $queryPenjualan->whereHas('pembayaran');
+        } elseif ($req->status == 'Belum Dibayar') {
+            $querySewa->whereDoesntHave('pembayaran');
+            $queryPenjualan->whereDoesntHave('pembayaran');
+        }
+
+        // Map data and format fields
+        $dataSewa = $querySewa->get()->map(function($item) {
+            $item->nama_sales = $item->data_sales->nama;
+            $item->nama_customer = $item->kontrak->customer->nama;
+            $item->jumlah = formatRupiah(($item->subtotal + $item->total_promo));
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->ppn_nominal);
+            $item->pph_nominal = formatRupiah($item->pph_nominal);
+            $item->ongkir_nominal = formatRupiah($item->ongkir_nominal);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $dataPenjualan = $queryPenjualan->get()->map(function($item) {
+            $item->nama_sales = $item->karyawan->nama;
+            $item->nama_customer = $item->customer->nama;
+            $item->jumlah = formatRupiah($item->sub_total);
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->jumlah_ppn);
+            $item->pph_nominal = formatRupiah(0);
+            $item->ongkir_nominal = formatRupiah($item->biaya_ongkir);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $data = collect();
+
+        // Add items from $dataSewa
+        $dataSewa->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        // Add items from $dataPenjualan
+        $dataPenjualan->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.omset_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('omset.pdf');
+    }
+
+    public function omset_excel(Request $req)
+    {
+        // Eager load relationships and filter by status
+        $querySewa = InvoiceSewa::with('kontrak.customer', 'kontrak.lokasi', 'data_sales', 'pembayaran', 'produk.produk')
+            ->where('status', 'DIKONFIRMASI');
+        $queryPenjualan = Penjualan::with('customer', 'lokasi', 'karyawan', 'pembayaran', 'produk.produk', 'ongkir')
+            ->where('status', 'DIKONFIRMASI');
+
+
+        if ($req->tipe_penjualan === 'Tradisional') {
+            $querySewa->whereRaw('1 = 0');
+        } elseif ($req->tipe_penjualan === 'Sewa') {
+            $queryPenjualan->whereRaw('1 = 0');
+        }
+
+        // Retrieve data
+        $allDataSewa = $querySewa->get();
+        $allDataPenjualan = $queryPenjualan->get();
+
+        // Extract unique product names
+        $produkSewa = collect();
+        $produkPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkSewa->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+        
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->produk) && $item->produk->isNotEmpty()) {
+                foreach ($item->produk as $produkItem) {
+                    if (isset($produkItem->produk->id) && isset($produkItem->produk->nama)) {
+                        $produkPenjualan->put($produkItem->produk->id, $produkItem->produk->nama);
+                    }
+                }
+            }
+        }
+
+        $produkSewa = $produkSewa->unique();
+        $produkPenjualan = $produkPenjualan->unique();
+
+        $combinedProduk = $produkSewa->concat($produkPenjualan);
+
+        $produk = $combinedProduk->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $produk = $produk->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Extract unique sales names
+        $salesSewa = collect();
+        $salesPenjualan = collect();
+
+        foreach ($allDataSewa as $item) {
+            if (isset($item->data_sales) && isset($item->data_sales->id) && isset($item->data_sales->nama)) {
+                $salesSewa->put($item->data_sales->id, $item->data_sales->nama);
+            }
+        }
+        foreach ($allDataPenjualan as $item) {
+            if (isset($item->karyawan) && isset($item->karyawan->id) && isset($item->karyawan->nama)) {
+                $salesPenjualan->put($item->karyawan->id, $item->karyawan->nama);
+            }
+        }
+
+        $salesSewa = $salesSewa->unique();
+        $salesPenjualan = $salesPenjualan->unique();
+        
+        $combinedSales = $salesSewa->concat($salesPenjualan);
+
+        $sales = $combinedSales->unique(function ($item, $key) {
+            return $item;
+        });
+
+        $sales = $sales->mapWithKeys(function ($item, $key) {
+            return [$key => $item];
+        });
+
+        // Apply filters based on request
+        if ($req->tanggal_invoice) {
+            $querySewa->whereDate('tanggal_invoice', $req->tanggal_invoice);
+            $queryPenjualan->whereDate('tanggal_invoice', $req->tanggal_invoice);
+        }
+        if ($req->tanggal_pembayaran) {
+            $querySewa->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+            $queryPenjualan->whereHas('pembayaran', function($q) use($req) {
+                $q->where('tanggal_bayar', $req->tanggal_pembayaran);
+            });
+        }
+        if ($req->produk) {
+            $querySewa->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+            $queryPenjualan->whereHas('produk', function($q) use($req) {
+                $q->where('produk_jual_id', $req->produk);
+            });
+        }
+        if ($req->sales) {
+            $querySewa->where('sales', $req->input('sales'));
+            $queryPenjualan->where('employee_id', $req->input('sales'));
+        }
+        if ($req->status == 'Sudah Dibayar') {
+            $querySewa->whereHas('pembayaran');
+            $queryPenjualan->whereHas('pembayaran');
+        } elseif ($req->status == 'Belum Dibayar') {
+            $querySewa->whereDoesntHave('pembayaran');
+            $queryPenjualan->whereDoesntHave('pembayaran');
+        }
+
+        // Map data and format fields
+        $dataSewa = $querySewa->get()->map(function($item) {
+            $item->nama_sales = $item->data_sales->nama;
+            $item->nama_customer = $item->kontrak->customer->nama;
+            $item->jumlah = formatRupiah(($item->subtotal + $item->total_promo));
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->ppn_nominal);
+            $item->pph_nominal = formatRupiah($item->pph_nominal);
+            $item->ongkir_nominal = formatRupiah($item->ongkir_nominal);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $dataPenjualan = $queryPenjualan->get()->map(function($item) {
+            $item->nama_sales = $item->karyawan->nama;
+            $item->nama_customer = $item->customer->nama;
+            $item->jumlah = formatRupiah($item->sub_total);
+            if ($item->pembayaran->isEmpty()) {
+                $metode = 'Belum ada pembayaran';
+            } else {
+                $metode = $item->pembayaran->pluck('cara_bayar')
+                    ->map(function($caraBayar) {
+                        return ucfirst($caraBayar);
+                    })
+                    ->unique()
+                    ->implode(', ');
+            }
+            $item->metode = $metode;
+            $item->ppn_nominal = formatRupiah($item->jumlah_ppn);
+            $item->pph_nominal = formatRupiah(0);
+            $item->ongkir_nominal = formatRupiah($item->biaya_ongkir);
+            $item->total_promo = formatRupiah($item->total_promo);
+            $item->total_tagihan = formatRupiah($item->total_tagihan);
+            return $item;
+        });
+        $data = collect();
+
+        // Add items from $dataSewa
+        $dataSewa->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        // Add items from $dataPenjualan
+        $dataPenjualan->each(function ($item) use ($data) {
+            $this->mergeItems($item, $data);
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new OmsetExport($data), 'omset.xlsx');
+    }
+
+    public function promo_index(Request $req)
+    {
+        $query = Penjualan::with('customer', 'karyawan', 'promo')
+        ->whereHas('promo')->where('status', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->total_with_diskon = $item->sub_total - $item->total_promo;
+            return $item;
+        });
+        return view('laporan.promo', compact('data'));
+    }
+
+    public function promo_pdf(Request $req)
+    {
+        $query = Penjualan::with('customer', 'karyawan', 'promo')
+        ->whereHas('promo')->where('status', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->total_with_diskon = $item->sub_total - $item->total_promo;
+            return $item;
+        });
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.promo_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('promo.pdf');
+    }
+
+    public function promo_excel(Request $req)
+    {
+        $query = Penjualan::with('customer', 'karyawan', 'promo')
+        ->whereHas('promo')->where('status', 'DIKONFIRMASI');
+
+        if ($req->dateStart) {
+            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->total_with_diskon = $item->sub_total - $item->total_promo;
+            return $item;
+        });
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PromoExport($data), 'promo.xlsx');
+    }
+
+    public function stok_gallery_index(Request $req)
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        
+        $thisLokasi = $req->gallery ?? $galleries->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $galleries->where('id', $req->gallery)->first() : $galleries->first();
+        $listDate = $this->listDatePerMonth($thisMonth, $thisYear);
+
+        // data do sewa
+        $DOSewa = DeliveryOrder::where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+            ->whereMonth('tanggal_kirim', $thisMonth)
+            ->where(function($q) use($thisLokasi){
+                $q->whereHas('kontrak', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+            });
+        })->get();
+
+        // data kembali sewa
+        $KembaliSewa = KembaliSewa::where('status', 'DIKONFIRMASI')->with('produk.komponen.produk')->whereYear('tanggal_kembali', $thisYear)
+            ->whereMonth('tanggal_kembali', $thisMonth)
+            ->where(function($q) use($thisLokasi){
+                $q->whereHas('sewa', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+            });
+        })->get();
+
+        // data do penjualan
+        $DOPenjualan = DeliveryOrder::where('status', 'DIKONFIRMASI')->where('jenis_do', 'PENJUALAN')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+            ->whereMonth('tanggal_kirim', $thisMonth)
+            ->where(function($q) use($thisLokasi){
+                $q->whereHas('penjualan', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+            });
+        })->get();
+
+        // data ambil langsung penjualan
+        $ambilLangsungPenjualan = Penjualan::where('status', 'DIKONFIRMASI')
+            ->with('produk.komponen.produk')
+            ->where('distribusi', 'Diambil')
+            ->where('lokasi_id', $thisLokasi)
+            ->whereYear('tanggal_invoice', $thisYear)
+            ->whereMonth('tanggal_invoice', $thisMonth)
+        ->get();
+
+        // data mutasi
+        $mutasi = Mutasi::where('status', 'DIKONFIRMASI')
+            ->where(function($q) use($thisLokasi) {
+                $q->where('penerima', $thisLokasi)
+                ->orWhere('pengirim', $thisLokasi);
+            })
+            ->whereYear('tanggal_kirim', $thisYear)
+            ->whereMonth('tanggal_kirim', $thisMonth)
+            ->with([
+                'produkMutasi.komponen',
+                'produkMutasiOutlet.komponen',
+                'produkMutasiGG.komponen',
+                'produkMutasiGAG.komponen'
+            ])
+        ->get();
+
+        // data pembelian
+        $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->where('lokasi_id', $thisLokasi)
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->whereNotNull('penerima')
+            ->with([
+                'produkbeli.produk'
+            ])
+        ->get();
+
+        // data retur pembelian
+        $returPembelian = Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->whereHas('invoice', function($q) use($thisLokasi){
+                $q->whereHas('pembelian', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+                });
+            })
+            ->whereYear('tgl_retur', $thisYear)
+            ->whereMonth('tgl_retur', $thisMonth)
+            ->with([
+                'produkretur.produkbeli.produk',
+                'invoice.pembelian'
+            ])
+        ->get();
+
+        // data mutasi inden
+        $mutasiInden = Mutasiindens::where('status_diterima', 'DIKONFIRMASI')
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+            ->with([
+                'produkmutasi.produk.produk'
+            ])
+        ->get();
+
+        // data return mutasi inden
+        $returMutasiInden = Returinden::where('status_dibukukan', 'DIKONFIRMASI')
+            ->whereYear('tgl_dibukukan', $thisYear)
+            ->whereMonth('tgl_dibukukan', $thisMonth)
+            ->whereHas('mutasiinden', function($q) use($thisLokasi){
+                $q->where('lokasi_id', $thisLokasi);
+            })
+            ->with([
+                'produkreturinden.produk.produk.produk'
+            ])
+        ->get();
+
+        // tahun dari data DO Sewa
+        $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+
+        // tahun dari data Kembali Sewa
+        $years = $years->merge($KembaliSewa->pluck('tanggal_kembali')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data DO Penjualan
+        $years = $years->merge($DOPenjualan->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data Ambil Langsung Penjualan
+        $years = $years->merge($ambilLangsungPenjualan->pluck('tanggal_invoice')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($mutasi->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data pembelian
+        $years = $years->merge($pembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data retur pembelian
+        $years = $years->merge($returPembelian->pluck('tgl_retur')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi inden
+        $years = $years->merge($returPembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data retur mutasi inden
+        $years = $years->merge($returMutasiInden->pluck('tgl_dibukukan')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // Ambil tahun yang unik dan urutkan
+        $tahun = $years->unique()->sort()->values();
+
+        // integrate data
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+            // Inisialisasi list data dengan saldo awal 0
+            $item->dates = collect($listDate)->mapWithKeys(function($date) {
+                return [
+                    $date => [
+                        'stok_masuk' => 0,
+                        'stok_keluar' => 0,
+                        'stok_retur' => 0,
+                        'saldo' => 0
+                    ]
+                ];
+            });
+        
+            // Fungsi untuk memperbarui stok dan saldo
+            $updateSaldo = function($date, $stokKeluar, $stokMasuk, $stokRetur) use(&$item) {
+                $current = $item->dates[$date];
+                $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
+        
+                // Jika ada tanggal sebelumnya, ambil saldo sebelumnya
+                $previousSaldo = $item->dates->has($previousDate) ? $item->dates[$previousDate]['saldo'] : 0;
+        
+                $current['stok_keluar'] += $stokKeluar;
+                $current['stok_masuk'] += $stokMasuk;
+                $current['stok_retur'] += $stokRetur;
+                $current['saldo'] = $previousSaldo + $current['stok_masuk'] - $current['stok_keluar'] + $current['stok_retur'];
+        
+                $item->dates = $item->dates->put($date, $current);
+            };
+        
+            // Proses DO Sewa
+            $DOSewa->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    if($product->no_kembali_sewa == null){
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_kirim)->format('Y-m-d');
+                                $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                            }
+                        });
+                    }
+                });
+            });
+        
+            // Proses Kembali Sewa
+            $KembaliSewa->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                        if ($komponen->kode_produk == $item->kode) {
+                            $date = Carbon::parse($order->tanggal_kembali)->format('Y-m-d');
+                            $updateSaldo($date, 0, 0, ($komponen->jumlah * $product->jumlah));
+                        }
+                    });
+                });
+            });
+        
+            // Proses DO Penjualan
+            $DOPenjualan->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                        if ($komponen->kode_produk == $item->kode) {
+                            $date = Carbon::parse($order->tanggal_kirim)->format('Y-m-d');
+                            $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                        }
+                    });
+                });
+            });
+        
+            // Proses Ambil Langsung Penjualan
+            $ambilLangsungPenjualan->each(function($order) use($item, $updateSaldo) {
+                $order->produk->each(function($product) use($item, $order, $updateSaldo) {
+                    $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                        if ($komponen->kode_produk == $item->kode) {
+                            $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                            $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                        }
+                    });
+                });
+            });
+
+            // Proses Mutasi
+            $mutasi->each(function($order) use($item, $thisLokasi, $updateSaldo) {
+                if($item->penerima == $thisLokasi){
+                    $order->produkMutasiOutlet->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                    $order->produkMutasiGG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                    $order->produkMutasiGAG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                }
+                if($item->pengirim == $thisLokasi){
+                    $order->produkMutasi->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                            }
+                        });
+                    });
+                    $order->produkMutasiGAG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_invoice)->format('Y-m-d');
+                                $updateSaldo($date, ($komponen->jumlah * $product->jumlah), 0, 0);
+                            }
+                        });
+                    });
+                }
+            });
+
+            // Proses Pembelian
+            $pembelian->each(function($order) use($item, $updateSaldo) {
+                $order->produkbeli->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_diterima)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+
+            // Proses Retur Pembelian
+            $returPembelian->each(function($order) use($item, $updateSaldo) {
+                $order->produkretur->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produkbeli->produk_id == $item->id) {
+                        $date = Carbon::parse($order->tgl_retur)->format('Y-m-d');
+                        $updateSaldo($date, $product->jumlah, 0, 0);
+                    }
+                });
+            });
+            
+            // Proses Mutasi Inden
+            $mutasiInden->each(function($order) use($item, $updateSaldo) {
+                $order->produkmutasi->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produk->produk->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_diterima)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+            
+            // Proses Retur Mutasi Inden
+            $returMutasiInden->each(function($order) use($item, $updateSaldo) {
+                $order->produkreturinden->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produk->produk->produk->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_dibukukan)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+
+            // Update saldo untuk hari-hari yang tidak ada transaksi
+            foreach ($listDate as $index => $date) {
+                if ($index > 0) {
+                    $previousDate = $listDate[$index - 1];
+                    if ($item->dates[$date]['saldo'] == 0) {
+
+                        $previousSaldo = $item->dates[$previousDate]['saldo'];
+                        $current = $item->dates[$date];
+                        $current['saldo'] = $previousSaldo;
+        
+                        $item->dates = $item->dates->put($date, $current);
+                    }
+                }
+            }
+        
+            $item->totalMasuk = $item->dates->sum('stok_masuk');
+            $item->totalKeluar = $item->dates->sum('stok_keluar');
+            $item->totalRetur = $item->dates->sum('stok_retur');
+            return $item;
+        });
+        
+        return view('laporan.stok_gallery', compact('data', 'listDate', 'bulan', 'galleries', 'lokasi', 'tahun'));
+    }
+
+    public function stok_gallery_pdf(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pembelian_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pembelian.pdf');
+    }
+
+    public function stok_gallery_excel(Request $req)
+    {
+        $query = Invoicepo::with(['pembelian.produkbeli'])->whereHas('pembelian')->where('status_dibuat', 'DIKONFIRMASI');
+
+        if ($req->supplier) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('supplier_id', $req->supplier);
+            });
+        }
+        if ($req->gallery) {
+            $query->whereHas('pembelian', function($q) use($req){
+                $q->where('lokasi_id', $req->gallery);
+            });
+        }
+        if ($req->dateStart) {
+            $query->where('tgl_inv', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tgl_inv', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get();
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PembelianExport($data), 'pembelian.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)
@@ -3164,6 +4889,22 @@ class LaporanController extends Controller
         if($produkterjual->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new MutasiindenExport($produkterjual, $mutasiindenRecords), 'mutasi.xlsx');
     }
+    public function listDatePerMonth($month = null, $year = null)
+    {
+        $month = $month ?? date('m');
+        $year = $year ?? date('Y');
+
+        $start = Carbon::create($year, $month, 1)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+
+        $dates = [];
+
+        for ($date = $start; $date->lte($end); $date->addDay()) {
+            $dates[] = $date->format('Y-m-d');
+        }
+
+        return $dates;
+    }
 
     public function tagihanpelanggan_pdf(Request $req)
     {
@@ -3208,6 +4949,6 @@ class LaporanController extends Controller
         if($produkterjual->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new TagihanPelangganExport($produkterjual, $penjualan), 'tagihan_pelanggan.xlsx');
     }
-    
+
     
 }

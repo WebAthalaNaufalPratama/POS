@@ -82,7 +82,7 @@
                                         <div class="form-group">
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control select2" required>
-                                                <option value="">Pilih Status</option>
+                                                <option disabled>Pilih Status</option>
                                                 <option value="TUNDA" {{ old('status', $beli->status_dibuat) == 'TUNDA' || old('status', $beli->status_dibuat) == '' ? 'selected' : '' }}>TUNDA</option>
                                                 <option value="DIKONFIRMASI" {{ old('status', $beli->status_dibuat) == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                 <option value="BATAL" {{ old('status', $beli->status_dibuat) == 'BATAL' ? 'selected' : '' }}>BATAL</option>
@@ -189,6 +189,7 @@
                                     <tbody>
                                         <tr>
                                             <td id="pembuat">
+                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
                                                 <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
                                             </td>
                                             <td id="penerima">

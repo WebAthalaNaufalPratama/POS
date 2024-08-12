@@ -20,6 +20,7 @@
     .form-group-retur {
     display: flex;
     align-items: center;
+    width: 50%;
     }
 
     .label-retur {
@@ -32,7 +33,7 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Retur Mutasi Inden</h3>
+            <h3 class="page-title">Create Retur Mutasi Inden</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
@@ -41,8 +42,8 @@
                     Retur Inden
                 </li>
             </ul>
-        <form action="{{ route('retur.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
+        </div>
+       
             <div class="form-group-retur">
                 <label for="no_retur" class="label-retur">Nomor Retur :</label>
                 <input type="text" class="form-control" id="no_retur" name="no_retur" value="{{ $no_retur }}" readonly>
@@ -50,7 +51,7 @@
             
         </div>
     </div>
-</div>
+
 <div class="row">
     <div class="card">
        
@@ -64,14 +65,14 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="no_mutasi">No Mutasi</label>
-                                            <input type="hidden" id="id_mutasi" name="mutasiinden_id" class="form-control" value="{{ $data->id }}" readonly>
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $data->no_mutasi }}" readonly>
                                         </div>
                                         <div class="form-group">
                                             <label for="tgl_kirim">Tanggal Kirim</label>
                                             <input type="text" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ tanggalindo($data->tgl_dikirim) }}" readonly>
-                                         </div>
-                                        
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
                                         {{-- <div class="form-group">
                                             <label for="supplier">Supplier</label>
                                             <div class="input-group">
@@ -88,8 +89,6 @@
                                                 </div>
                                             </div>
                                         </div> --}}
-                                    </div>
-                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="supplier">Supplier</label>
                                                 <input type="text" class="form-control" id="supplier" name="supplier" value="{{ $data->supplier->nama }}" readonly>
@@ -97,7 +96,6 @@
                                         <div class="form-group">
                                             <label for="penerima">Lokasi</label>
                                             <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $data->lokasi->nama }}" readonly>
-
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -105,11 +103,14 @@
                                             <label for="tgl_terima">Tanggal Diterima</label>
                                             <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ tanggalindo($data->tgl_diterima) }}" readonly>
                                          </div>
-                                        <div class="form-group">
-                                            <label for="tgl_terima">Bukti</label>
-                                                <img id="preview" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" />                                            
-                                        </div>
+                                         <div class="form-group">
+                                             <label for="tgl_terima">Bukti Mutasi</label>
+                                                 <img id="preview" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" />                                            
+                                         </div>
                                     </div>
+                                    <div class="col-md-3">
+                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -182,6 +183,10 @@
                             </div>
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
+                                    <form action="{{ route('retur.store') }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" id="id_mutasi" name="mutasiinden_id" class="form-control" value="{{ $data->id }}" readonly>
+                                        <input type="hidden" class="form-control" id="no_retur" name="no_retur" value="{{ $no_retur }}" readonly>
                                     <div class="mb-4">
                                         <h5>List Produk Komplain</h5>
                                     </div>
@@ -210,8 +215,11 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
+                                                    <td>
                                                     <input type="hidden" class="form-control" name="produk_mutasi_inden_id[]" id="produk_mutasi_inden_id_0" readonly>
-                                                    <td><input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_0" readonly></td>
+                                                    <input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_0" readonly>
+                                                    </td>
+                                                    
                                                     <td><textarea name="alasan[]" id="alasan_0" class="form-control" cols="30"></textarea></td>
                                                     <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_0"  oninput="calculateJumlahRetur(0)" value=""></td>
                                                     <td>
@@ -239,7 +247,107 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
+                                    <div class="col-lg-4 float-md-right">
+                                    <div class="form-group">
+                                        <div class="custom-file-container" data-upload-id="myFirstImage">
+                                            <label>File Retur <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image">clear</a>
+                                            </label>
+                                            <label class="custom-file-container__custom-file">
+                                                <input type="file" id="fileretur" class="custom-file-container__custom-file__custom-file-input" name="file_retur" accept="image/*" required>
+                                                <span class="custom-file-container__custom-file__custom-file-control"></span>
+                                            </label>
+                                            <span class="text-danger">max 2mb</span>
+                                            <img id="preview2" src="" alt="your image" />
+                                        </div>
+                                    </div>
+                                    </div>
+                                    <div class="col-lg-8 float-md-right">
+                                        <div class="total-order">
+                                            <ul>
+                                                <li>
+                                                    <h4>Sub Total</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" value="{{ formatRupiah2($data->subtotal) }}" readonly>
+                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Biaya Perawatan</h4>
+                                                        <h5>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span>
+                                                                <input type="text" id="biaya-rawat" name="biaya_rwt_dis" class="form-control" value="{{ formatRupiah2($data->biaya_perawatan) }}" readonly>
+                                                                <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control">
+                                                            </div>
+                                                        </h5>
+
+                                                </li>
+                                                
+                                                <li>
+                                                    <h4>Biaya Pengiriman</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="biaya_ong" name="biaya_ongkir_dis"  class="form-control" value="{{ formatRupiah2($data->biaya_pengiriman) }}" readonly>
+                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control">
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                <li class="total">
+                                                    <h4>Total Tagihan</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="total_tagihan_dis" name="total_tagihan_dis" class="form-control" value="{{ formatRupiah2($data->total_biaya) }}" readonly>
+                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan_int" class="form-control" value="{{ $data->total_biaya }}" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                @if ($data->total_biaya == $data->sisa_bayar)
+                                                <li class="total">
+                                                    <h4>Diskon</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="total_refund_dis" name="total_refund_dis" class="form-control" value="" readonly>
+                                                            <input type="hidden" id="total_refund" name="refund" class="form-control" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                <li class="total">
+                                                    <h4>Total Tagihan Akhir</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="total_tagihan_akhir_dis" name="total_tagihan_akhir_dis" class="form-control" value="" readonly>
+                                                            <input type="hidden" id="total_tagihan_akhir" name="total_akhir" class="form-control" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                @elseif($data->sisa_bayar == 0)
+                                                <li class="total">
+                                                    <h4>Refund</h4>
+                                                    <h5>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span> 
+                                                            <input type="text" id="total_refund_dis" name="total_refund_dis" class="form-control" value="" readonly>
+                                                            <input type="hidden" id="total_refund" name="refund" class="form-control" readonly>
+                                                        </div>
+                                                    </h5>
+                                                </li>
+                                                @endif
+                                                
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
+                                       
                                         <div class="page-btn">
                                            Riwayat Pembayaran
                                             {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
@@ -348,88 +456,20 @@
                                             </div>
                                         </div> --}}
                                 </div>
-                                    <div class="col-lg-5 float-md-right">
-                                        <div class="total-order">
-                                            <ul>
-                                                <li>
-                                                    <h4>Sub Total</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            
-                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" value="{{ formatRupiah2($data->subtotal) }}" readonly>
-                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" readonly>
-                                                        </div>
-                                                    </h5>
-                                                </li>
-                                                <li>
-                                                    <h4>Biaya Perawatan</h4>
-                                                        <h5>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text">Rp. </span>
-                                                                <input type="text" id="biaya-rawat" name="biaya_rwt_dis" class="form-control" value="{{ formatRupiah2($data->biaya_perawatan) }}" readonly>
-                                                                <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control">
-                                                            </div>
-                                                        </h5>
-
-                                                </li>
-                                                
-                                                <li>
-                                                    <h4>Biaya Pengiriman</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="biaya_ong" name="biaya_ongkir_dis"  class="form-control" value="{{ formatRupiah2($data->biaya_pengiriman) }}" readonly>
-                                                            <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control">
-                                                        </div>
-                                                    </h5>
-                                                </li>
-                                                <li class="total">
-                                                    <h4>Total Tagihan</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_tagihan_dis" name="total_tagihan_dis" class="form-control" value="{{ formatRupiah2($data->total_biaya) }}" readonly>
-                                                            <input type="hidden" id="total_tagihan_int" name="total_tagihan_int" class="form-control" value="{{ $data->total_biaya }}" readonly>
-                                                        </div>
-                                                    </h5>
-                                                </li>
-                                                <li class="total">
-                                                    <h4>Refund</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_refund_dis" name="total_refund_dis" class="form-control" value="" readonly>
-                                                            <input type="hidden" id="total_refund" name="refund" class="form-control" readonly>
-                                                        </div>
-                                                    </h5>
-                                                </li>
-                                                <li class="total">
-                                                    <h4>Total Tagihan Akhir</h4>
-                                                    <h5>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" id="total_tagihan_akhir_dis" name="total_tagihan_akhir_dis" class="form-control" value="" readonly>
-                                                            <input type="hidden" id="total_tagihan_akhir" name="total_akhir" class="form-control" readonly>
-                                                        </div>
-                                                    </h5>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    
                                 {{-- </div> --}}
                             </div>
                         </div>
                         <div class="row justify-content-start">
-                            <div class="col-md-12 border rounded pt-3 me-1 mt-2"> 
+                            <div class="col-md-3 border rounded pt-3 me-1 mt-2"> 
                              
                                         <table class="table table-responsive border rounded">
                                             <thead>
                                                 <tr>
                                                     <th>Dibuat</th>                                              
-                                                    <th>Diterima</th>                                              
+                                                    {{-- <th>Diterima</th>                                              
                                                     <th>Dibukukan</th>
-                                                    <th>Diperiksa</th>
+                                                    <th>Diperiksa</th> --}}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -438,62 +478,62 @@
                                                         <input type="hidden" name="pembuat_id" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
                                                     </td>
-                                                    <td id=penerima">
+                                                    {{-- <td id=penerima">
                                                         <input type="hidden" name=penerima_id" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
-                                                    <td id="pembuku">
+                                                    </td> --}}
+                                                    {{-- <td id="pembuku">
                                                         <input type="hidden" name="pembuku_id" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
-                                                    <td id="pemeriksa">
+                                                    </td> --}}
+                                                    {{-- <td id="pemeriksa">
                                                         <input type="hidden" name="pemeriksa_id" value="{{ Auth::user()->id ?? '' }}">
                                                         <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" placeholder="{{ Auth::user()->karyawans->nama ?? '' }}" disabled>
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control">
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="draft">Draft</option>
-                                                            <option value="publish" selected>Publish</option>
+                                                        <select id="status" name="status_dibuat" class="form-control select2" required>
+                                                            <option disabled>Pilih Status</option>
+                                                            <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA' || old('status') == null ? 'selected' : '' }}>TUNDA</option>
+                                                            <option value="DIKONFIRMASI" {{ (old('status_dibuat') ?? 'DIKONFIRMASI') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
                                                     </td>
-                                                    <td id="status_diterima">
+                                                    {{-- <td id="status_diterima">
                                                         <select id="status_diterima" name="status_diterima" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="pending" {{ old('status_diterima') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
                                                             <option value="acc" {{ old('status_diterima') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
                                                         </select>
-                                                    </td>
-                                                    <td id="status_dibuku">
+                                                    </td> --}}
+                                                    {{-- <td id="status_dibuku">
                                                         <select id="status_dibukukan" name="status_dibukukan" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="pending" {{ old('status_dibukukan') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
                                                             <option value="acc" {{ old('status_dibukukan') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
                                                         </select>
-                                                    </td>
-                                                    <td id="status_dibuku">
+                                                    </td> --}}
+                                                    {{-- <td id="status_dibuku">
                                                         <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="pending" {{ old('status_diperiksa') == 'pending' ? 'selected' : '' }} disabled>Pending</option>
                                                             <option value="acc" {{ old('status_diperiksa') == 'acc' ? 'selected' : '' }} disabled>Accept</option>
                                                         </select>
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                                 <tr>
                                                     <td id="tgl_dibuat">
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now()->format('Y-m-d') }}" >
                                                     </td>
-                                                    <td id="tgl_diterima">
+                                                    {{-- <td id="tgl_diterima">
                                                         <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima_ttd" value="{{ old('tgl_diterima', now()->format('Y-m-d')) }}" readonly>
-                                                    </td>
-                                                    <td id="tgl_dibuku">
+                                                    </td> --}}
+                                                    {{-- <td id="tgl_dibuku">
                                                         <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ old('tgl_dibukukan', now()->format('Y-m-d')) }}" readonly>
-                                                    </td>
-                                                    <td id="tgl_diperiksa">
+                                                    </td> --}}
+                                                    {{-- <td id="tgl_diperiksa">
                                                         <input type="date" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', now()->format('Y-m-d')) }}" readonly >
-                                                    </td>
+                                                    </td> --}}
                                                 </tr>
                                             </tbody>
                                         </table>  
@@ -521,6 +561,11 @@
 
 @section('scripts')
 <script>
+
+function clearFile(){
+            $('#file_retur').val('');
+            $('#preview2').attr('src', defaultImg);
+}
 
     document.getElementById('dynamic_field2').addEventListener('input', function(event) {
     if (event.target.matches('[id^="rawat_retur_dis_"]')) {
@@ -619,8 +664,10 @@
                     @endforeach
                 </select>
             </td>
+            <td>
             <input type="hidden" class="form-control" name="produk_mutasi_inden_id[]" id="produk_mutasi_inden_id_${counter}" readonly>
-            <td><input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_${counter}" readonly></td>
+            <input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_${counter}" readonly>
+            </td>
             <td><textarea name="alasan[]" id="alasan_${counter}" class="form-control" cols="30"></textarea></td>
             <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_${counter}" oninput="calculateJumlahRetur(${counter})"></td>
             <td>
@@ -644,6 +691,7 @@
     } else {
         alert('Tidak dapat menambah lebih banyak baris.');
     }
+    
     });
 
     // Remove baris untuk input kode inden retur
@@ -658,6 +706,8 @@
     });
 
     $(document).ready(function() {
+
+
         $(document).on('input', '.qty_retur', function() {
             var qtyRetur = parseInt($(this).val(), 10); // Ambil nilai qty_retur dari input
             var produkId = $(this).data('produk-id'); // Ambil nilai produk-id dari atribut data
@@ -683,6 +733,31 @@
                 $(this).val(qtyTrm);
             }
         });
+
+        if ($('#preview2').attr('src') === '') {
+                $('#preview2').attr('src', defaultImg);
+            }
+
+            $('#fileretur').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#preview2').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
     });
 </script>
  @endsection

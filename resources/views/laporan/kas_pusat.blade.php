@@ -77,11 +77,11 @@
                                 <td></td>
                                 <td class="text-center">{{ $item->dateNumber }}</td>
                                 <td>{{ $item->keterangan }}</td>
-                                @if($item->lokasi_penerima != null)
+                                @if(in_array($item->lokasi_penerima, $id_galleries))
                                     <td>{{$item->lok_penerima->operasional->nama }}</td>
                                     <td>{{ formatRupiah($item->nominal) }}</td>
                                     <td></td>
-                                @elseif($item->lokasi_pengirim != null)
+                                @elseif(in_array($item->lokasi_pengirim, $id_galleries))
                                     <td>{{$item->lok_pengirim->operasional->nama }}</td>
                                     <td></td>
                                     <td>{{ formatRupiah($item->nominal) }}</td>

@@ -264,22 +264,18 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
-                                                    <h4>Total Diskon</h4>
-                                                    <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span>
-                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
-                                                        </div>
-                                                    </h5>
-                                                </li>
+                                                
                                                 <li>
                                                     <h4>PPN</h4>
                                                     <h5 class="col-lg-5">
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{formatRupiah2($inv_po->ppn) }}" readonly>
-                                                        </div>
+                                                            <div class="input-group">
+                                                                <input type="text" id="persen_ppn" name="persen_ppn" class="form-control" value="{{ $inv_po->persen_ppn ?? 0}}" oninput="calculatePPN(this), validatePersen(this)" readonly>
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Rp. </span>
+                                                                <input type="text" id="nominal_ppn" name="nominal_ppn" class="form-control" value="{{ formatRupiah2($inv_po->ppn)  }}" readonly>
+                                                            </div>
                                                     </h5>
                                                 </li>
                                                 {{-- <li>
@@ -298,6 +294,15 @@ Carbon::setLocale('id');
                                                             <span class="input-group-text">Rp. </span>
                                                             <input type="text" id="total_tagihan" name="total_tagihan" class="form-control" value="{{ formatRupiah2($inv_po->total_tagihan) }}" readonly required>
                                                         </div>    
+                                                    </h5>
+                                                </li>
+                                                <li>
+                                                    <h4>Total Diskon</h4>
+                                                    <h5 class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">Rp. </span>
+                                                            <input type="text" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)" placeholder="contoh : 2000" value="{{ $totalDis }}" readonly>
+                                                        </div>
                                                     </h5>
                                                 </li>
                                                 <li>
@@ -331,46 +336,47 @@ Carbon::setLocale('id');
                          <div class="row justify-content-start">
                             <div class="col-md-6 border rounded pt-3 me-1 mt-2">
                              
-                                        <table class="table table-responsive border rounded">
-                                            <thead>
-                                                <tr>
-                                                    <th>Dibuat</th>                                              
-                                                    <th>Dibukukan</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td id="pembuat">
-                                                        <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
-                                                    </td>
-                                                    <td id="pembuku">
-                                                        <input type="text" class="form-control" value="{{ $pembuku }} ({{ $pembukujbt }})"  disabled>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" required readonly>
-                                                           <option value="draft" {{ $inv_po->status_dibuat == 'draft' ? 'selected' : '' }}>Draft</option>
-                                                           <option value="publish" {{ $inv_po->status_dibuat == 'publish' ? 'selected' : '' }}>Publish</option>
-                                                       </select>
-                                                       </td>
-                                                       <td id="status_diterima">
-                                                           <select id="status_dibukukan" name="status_dibukukan" class="form-control" required>
-                                                               <option value="pending" {{ $inv_po->status_dibuku == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                               <option value="acc" {{ ($inv_po->status_dibuku == 'acc') || ($inv_po->status_dibuku == null ) ? 'selected' : '' }}>Accept</option>
-                                                           </select>
-                                                       </td>
-                                                </tr>
-                                                <tr>
-                                                    <td id="tgl_dibuat">
-                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
-                                                    </td>
-                                                    <td id="tgl_dibuku">
-                                                        <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ now()->format('Y-m-d')}}">
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>  
+                                <table class="table table-responsive border rounded">
+                                    <thead>
+                                        <tr>
+                                            <th>Dibuat</th>                                              
+                                            <th>Dibukukan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td id="pembuat">
+                                                <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
+                                            </td>
+                                            <td id="pembuku"> 
+                                                <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                <input type="text" class="form-control" value="{{ Auth::user()->karyawans->nama ?? '' }} ({{ Auth::user()->karyawans->jabatan ?? '' }})" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td id="status_dibuat">
+                                                <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}" readonly>
+                                            </td>
+                                            <td id="status_dibuku">
+                                                <select id="status" name="status_dibuku" class="form-control select2">
+                                                    <option disabled>Pilih Status</option>
+                                                    <option value="MENUNGGU PEMBAYARAN" {{ $inv_po->status_dibuku == 'MENUNGGU PEMBAYARAN' || $inv_po->status_dibuku == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
+                                                    @if( $inv_po->sisa == 0 || ($inv_po->sisa == 0 && $inv_po->retur->sisa == 0))
+                                                    <option value="DIKONFIRMASI" {{ $inv_po->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                    @endif
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td id="tgl_dibuat">
+                                                <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggalindo($inv_po->tgl_dibuat)}}" disabled>
+                                            </td>
+                                            <td id="tgl_dibuku">
+                                                <input type="date" class="form-control" id="tgl_dibuku" name="tgl_dibukukan" value="{{ $inv_po->tgl_dibukukan }}">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>  
                                         <br>                                 
                                </div>
                          </div>
@@ -421,13 +427,13 @@ Carbon::setLocale('id');
                 
             </div>
             <div class="mb-3">
-              <label for="nominal" class="form-label">Nominal</label>
-              <div class="input-group">
-                <span class="input-group-text">Rp. </span>
-                <input type="text" class="form-control"  id="nominal">
+                <label for="nominal" class="form-label">Nominal</label>
+                <div class="input-group">
+                  <span class="input-group-text">Rp. </span>
+                  <input type="text" class="form-control"  id="nominal" value="">
+                </div>
+                <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
               </div>
-              <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
-            </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
               <input type="file" class="form-control" id="bukti" name="bukti">
@@ -457,16 +463,19 @@ Carbon::setLocale('id');
         }
     
 
-    // Event listener to format input value
-    // document.getElementById('rupiah').addEventListener('keyup', function(e) {
-    //     var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
-    //     this.value = formatRupiah(rupiah);
-    // });
-
-
     function unformatRupiah(formattedValue) {
         return formattedValue.replace(/\./g, '');
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+         // Initialize input field with formatted value
+         var nominalInput = document.getElementById('nominal');
+         var nominalInput2 = document.getElementById('nominal2');
+            var initialNominalValue = '{{ $inv_po->sisa }}';
+            nominalInput.value = formatRupiah(initialNominalValue);
+            nominalInput2.value = unformatRupiah(initialNominalValue);
+
+            
 
     document.getElementById('nominal').addEventListener('keyup', function(e) {
         var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
@@ -475,108 +484,7 @@ Carbon::setLocale('id');
         // Set nilai ke input hidden
         document.getElementById('nominal2').value = unformatRupiah(this.value);
     });
-
-    // $(document).ready(function() {
-    //     $("#metode").select2({
-    //     dropdownParent: $("#myModalbayar")
-    //     });
-
-    //      $('#jenis_ppn').change(function() {
-    //         var selectedOption = $(this).val();
-    //         if (selectedOption === 'exclude') {
-    //             $('#persen_ppn').prop('readonly', false);
-    //         } else {
-    //             $('#persen_ppn').prop('readonly', true);
-    //             $('#persen_ppn').val(''); // Set nilai input menjadi string kosong
-    //         }
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     });
-
-    //     // Fungsi untuk menghitung total tagihan
-    //     function calculateTotalAll() {
-    //         var subTotal = 0;
-    //         var diskonTotal = parseFloat($('#diskon_total').val()) || 0;
-    //         var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
-    //         var persenPpn = parseFloat($('#persen_ppn').val()) || 0;
-
-    //         // Menghitung sub total
-    //         $('input[name^="jumlah"]').each(function() {
-    //             subTotal += parseFloat($(this).val()) || 0;
-    //         });
-
-    //         // Menghitung PPN berdasarkan jenis_ppn
-    //         var ppn = 0;
-    //         var jenisPpn = $('#jenis_ppn').val();
-    //         if (jenisPpn === 'exclude') {
-    //             ppn = (subTotal - diskonTotal) * persenPpn / 100;
-    //         }
-
-    //         // Menghitung total tagihan
-    //         var totalTagihan = subTotal - diskonTotal + ppn + biayaOngkir;
-
-    //         // Memperbarui nilai total tagihan
-    //         $('#sub_total').val(subTotal.toFixed(2));
-    //         $('#total_tagihan').val(totalTagihan.toFixed(2));
-    //     }
-
-    //     // Panggil fungsi calculateTotal ketika ada perubahan pada input jumlah atau diskon
-    //     $('input[name^="jumlah"], #diskon_total, #biaya_ongkir, #persen_ppn').on('input', function() {
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     });
-
-    //     // Fungsi untuk menghitung total harga per baris
-    //     function calculateTotal(index) {
-    //         var qtytrm = parseFloat($('#qtytrm_' + index).val()) || 0;
-    //         var harga = parseFloat($('#harga_' + index).val()) || 0;
-    //         var diskon = parseFloat($('#diskon_' + index).val()) || 0;
-    //         var jumlah = qtytrm * harga - diskon;
-
-    //         $('#jumlah_' + index).val(jumlah.toFixed(2));
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     }
-
-    //     // Panggil fungsi calculateTotal ketika ada perubahan pada input harga atau diskon per baris
-    //     $('input[name^="harga"], input[name^="diskon"]').on('input', function() {
-    //         var index = $(this).attr('id').split('_')[1];
-    //         calculateTotal(index);
-    //     });
-    // });
-
-
-
-
-//     function formatRupiah(angka) {
-//     var reverse = angka.toString().split('').reverse().join('');
-//     var ribuan = reverse.match(/\d{1,3}/g);
-//     ribuan = ribuan.join('.').split('').reverse().join('');
-//     return ribuan;
-// }
-
-// function unformatRupiah(formattedValue) {
-//     return formattedValue.replace(/\./g, '');
-// }
-
-// document.getElementById('nominal').addEventListener('input', function(e) {
-//     var nominalField = this;
-//     var cursorPosition = nominalField.selectionStart;
-
-//     // Remove non-numeric characters
-//     var unformattedValue = unformatRupiah(nominalField.value);
-
-//     // Format the value
-//     var formattedValue = formatRupiah(unformattedValue);
-//     nominalField.value = formattedValue;
-
-//     // Set the integer value to hidden input
-//     document.getElementById('nominal2').value = unformattedValue;
-
-//     // Adjust cursor position
-//     cursorPosition = cursorPosition - (nominalField.value.length - formattedValue.length);
-//     setTimeout(function() {
-//         nominalField.setSelectionRange(cursorPosition, cursorPosition);
-//     }, 0);
-// });
-
+    });
 </script>
 
 

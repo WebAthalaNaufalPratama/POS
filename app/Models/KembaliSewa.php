@@ -27,7 +27,7 @@ class KembaliSewa extends Model
     ];
 
     public function data_driver(){
-        return $this->belongsTo(User::class, 'driver', 'id');
+        return $this->belongsTo(Karyawan::class, 'driver', 'id');
     }
 
     public function data_pembuat(){

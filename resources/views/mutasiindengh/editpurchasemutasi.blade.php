@@ -22,13 +22,13 @@
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
-            <h3 class="page-title">Mutasi Inden ke Galery/GreenHouse</h3>
+            <h3 class="page-title">Edit Mutasi Inden ke Galery/GreenHouse (Purchasing)</h3>
             <ul class="breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    Inden Ke GreenHouse
+                    Inden ke {{ $data->lokasi->nama }}
                 </li>
             </ul>
         </div>
@@ -54,8 +54,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="tgl_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" 
-                                            value="{{ $data->tgl_dikirim }}">
+                                            <input type="date" class="form-control" id="tgl_kirim" name="tgl_dikirim" value="{{ $data->tgl_dikirim }}" required>
                                          </div>
                                         
                                         {{-- <div class="form-group">
@@ -112,10 +111,8 @@
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <img id="preview" />
+                                                <img id="preview" src="{{ old('bukti', ($data->bukti ? '/storage/' . $data->bukti : '')) }}" alt="your image" />
                                             </div>
-
-                                            
                                         </div>
                                     </div>
                                 </div>
@@ -139,11 +136,11 @@
                                                     <th>Kondisi</th>
                                                     <th>Biaya Perawatan</th>
                                                     <th>Total Biaya Perawatan</th>
-                                                    {{-- <th></th> --}}
+                                                    <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
-                                                @if(count($data->produkmutasi) == 0)
+                                                {{-- @if(count($data->produkmutasi) == 0)
                                                 <tr>
                                                     <td>
                                                         <select class="form-control" id="bulan_inden_0" name="bulan_inden[]">
@@ -155,7 +152,7 @@
                                                             <option value="">Pilih Kode Inden</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_10" readonly></td>
+                                                    <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_0" readonly></td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" required></td>
                                                     <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td>
@@ -169,27 +166,27 @@
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control form-control-banyak" oninput="calculateTotal(0)">
+                                                            <input type="text" name="rawat2[]" id="rawat2_0" class="form-control-banyak" oninput="calculateTotal(0)">
                                                             <input type="hidden" name="rawat[]" id="rawat_0" class="form-control" oninput="calculateTotal(0)">
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" name="jumlah_display[]" id="jumlah_0" class="form-control form-control-banyak" oninput="calculateTotal(0)" readonly></td>
+                                                            <input type="text" name="jumlah_display[]" id="jumlah_0" class="form-control-banyak" oninput="calculateTotal(0)" readonly></td>
                                                             <input type="hidden" name="jumlah[]" id="jumlahint_0" class="form-control" oninput="calculateTotal(0)"></td>
                                                         </div>
                                                     </td>
-                                                    {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
+                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                 </tr>
-                                                @else
+                                                @else --}}
                                                 @php
                                                     $i = 0;
                                                 @endphp
                                                 @foreach ($data->produkmutasi as $index => $produk)
                                                     <tr>
                                                         <td>
-                                                            <input type="hidden" class="form-control" name="id[]" id="id_{{ $index }}" value="{{ $produk->id }}" readonly>
+                                                            <input type="hidden" class="form-control" name="id[]" id="id_{{ $i }}" value="{{ $produk->id }}" readonly>
                                                             <select class="form-control" id="bulan_inden_{{ $i }}" name="bulan_inden[]">
                                                                 <option value="">Pilih Bulan Inden</option>
                                                             </select>
@@ -199,9 +196,11 @@
                                                                 <option value="">Pilih Kode Inden</option>
                                                             </select>
                                                         </td>
-                                                        <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_{{ $i }}" value="{{ $produk->produk->produk->nama }}" readonly></td>
-                                                        <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $produk->jml_dikirim ?? 0 }}" onchange="calculateTotal(0)" required></td>
-                                                        <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal(0)" readonly></td>
+                                                        <td><input type="hidden" class="form-control" name="idinven[]" id="idinven_{{ $i }}" value="{{ $produk->inventoryinden_id }}" readonly>
+                                                            <input type="text" class="form-control" name="kategori1[]" id="kategori1_{{ $i }}" value="{{ $produk->produk->produk->nama }}" readonly>
+                                                            <input type="hidden" class="form-control" name="kode[]" id="kode_{{ $i }}" value="{{ $produk->produk->produk->kode }}" readonly></td>
+                                                        <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $produk->jml_dikirim ?? 0 }}" oninput="validateQty({{ $i }})" data-jumlah="{{ $produk->produk->jumlah }}" required></td>
+                                                        <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal({{ $i }})" readonly></td>
                                                         <td>
                                                             <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
                                                                 <option value="">Pilih Kondisi</option>
@@ -213,15 +212,15 @@
                                                         <td>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text" name="rawat2[]" id="rawat2_{{ $i }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control form-control-banyak" oninput="calculateTotal(0)">
-                                                                <input type="hidden" name="rawat[]" id="rawat_{{ $i }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control" oninput="calculateTotal(0)">
+                                                                <input type="text" name="rawat2[]" id="rawat2_{{ $i }}" value="{{$produk->biaya_rawat ? formatRupiah2($produk->biaya_rawat) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $i }})">
+                                                                <input type="hidden" name="rawat[]" id="rawat_{{ $i }}" value="{{ $produk->biaya_rawat ?? 0 }}" class="form-control" oninput="calculateTotal({{ $i }})">
                                                             </div>
                                                         </td>
                                                         <td>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
-                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $i }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control form-control-banyak" oninput="calculateTotal(0)" readonly></td>
-                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $i }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control" oninput="calculateTotal(0)"></td>
+                                                                <input type="text" name="jumlah_display[]" id="jumlah_{{ $i }}" value="{{ $produk->totalharga ? formatRupiah2($produk->totalharga) : 0 }}" class="form-control-banyak" oninput="calculateTotal({{ $i }})" readonly></td>
+                                                                <input type="hidden" name="jumlah[]" id="jumlahint_{{ $i }}" value="{{ $produk->totalharga ?? 0 }}" class="form-control" oninput="calculateTotal({{ $i }})"></td>
                                                             </div>
                                                         </td>
                                                         {{-- @if($i == 0)
@@ -234,7 +233,7 @@
                                                         $i++;
                                                     @endphp
                                                 @endforeach
-                                                @endif
+                                                {{-- @endif --}}
                                             </tbody>
                                         </table>
                                     </div>
@@ -276,7 +275,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" value="{{ $data->subtotal ?? 0 }}" onchange="calculateTotal(0)" readonly>
+                                                            <input type="text" id="sub_total" name="sub_total_dis" class="form-control" value="{{ $data->subtotal ? formatRupiah2($data->subtotal) : 0 }}" onchange="calculateTotal(0)" readonly>
                                                             <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" value="{{ $data->subtotal ?? 0 }}" onchange="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
@@ -286,7 +285,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis" class="form-control" value="{{ $data->biaya_perawatan ?? 0 }}" oninput="calculateTotal(0)">
+                                                            <input type="text" id="biaya_rwt2" name="biaya_rwt_dis" class="form-control" value="{{ $data->biaya_perawatan ? formatrupiah2($data->biaya_perawatan): 0 }}" oninput="calculateTotal(0)">
                                                             <input type="hidden" id="biaya_rwt" name="biaya_rwt" class="form-control" value="{{ $data->biaya_perawatan ?? 0 }}" oninput="calculateTotal(0)">
                                                         </div>
                                                     </h5>
@@ -296,7 +295,7 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis" class="form-control" value="{{ $data->biaya_pengiriman ?? 0 }}" oninput="calculateTotal(0)" required>
+                                                            <input type="text" id="biaya_ongkir2" name="biaya_ongkir_dis" class="form-control" value="{{ $data->biaya_pengiriman ? formatRupiah2($data->biaya_pengiriman) : 0 }}" oninput="calculateTotal(0)" required>
                                                             <input type="hidden" id="biaya_ongkir" name="biaya_ongkir" class="form-control" value="{{ $data->biaya_pengiriman ?? 0 }}" oninput="calculateTotal(0)" required>
                                                         </div>
                                                     </h5>
@@ -306,12 +305,12 @@
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span>
-                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" value="{{ $data->total_biaya ?? 0 }}" class="form-control" readonly>
+                                                            <input type="text" id="total_tagihan" name="total_tagihan_dis" value="{{ $data->total_biaya ? formatRupiah2($data->total_biaya): 0 }}" class="form-control" readonly>
                                                             <input type="hidden" id="total_tagihan_int" name="total_tagihan" value="{{ $data->total_biaya ?? 0 }}" class="form-control" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
-                                                <li>
+                                                {{-- <li>
                                                     <h4>Sisa Tagihan</h4>
                                                     <h5>
                                                         <div class="input-group">
@@ -319,7 +318,7 @@
                                                             <input type="text" id="sisa_bayar" name="sisa_bayar" class="form-control" readonly>
                                                         </div>
                                                     </h5>
-                                                </li>
+                                                </li> --}}
                                             </ul>
                                         </div>
                                     </div>
@@ -513,6 +512,7 @@ document.querySelectorAll('input[id^="rawat2_"], input[id^="biaya_rwt2"], input[
 });
 
 function calculateTotal(index) {
+    
     var qtyKirimElem = document.getElementById('qtykrm_' + index);
     var rawatElem = document.getElementById('rawat2_' + index);
 
@@ -552,13 +552,36 @@ function calculateTotalAll() {
 
 }
 
+function validateQty(index) {
+            let qtyKrm = parseFloat($(`#qtykrm_${index}`).val());
+            let jumlah = parseFloat($(`#qtykrm_${index}`).data('jumlah')); // Ambil jumlah dari atribut data
+
+            console.log('Validating quantity:', qtyKrm, 'against:', jumlah); // Debug log
+
+            if (qtyKrm < 0) {
+                $(`#qtykrm_${index}`).val(0);
+            } else if (qtyKrm > jumlah) {
+                $(`#qtykrm_${index}`).val(jumlah);
+            }
+            calculateTotal(index);
+    } 
 
     $(document).ready(function() {
 
         $('.select2').select2();
+
+        $(document).on('input change', 'input[name="qtykrm[]"]', function () {
+        let index = $(this).attr('id').split('_')[1];
+        validateQty(index);
+        });
+
         var t = $('#supplier').val()
         populateBulan(t)
-        bindSelectEvents(0);
+        for (let index = 0; index < $('[id^=bulan_inden_]').length; index++) {
+                  
+            bindSelectEvents(index);
+        }
+
 
             if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
@@ -592,46 +615,55 @@ function calculateTotalAll() {
 
     $('#add').click(function() {
         var newRow = `
-            <tr id="row${i}">
-                <td>
-                    <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
-                        <option value="">Pilih Bulan Inden</option>
-                        ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
-                    </select>
-                </td>
-                <td>
-                    <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
-                        <option value="">Pilih Kode Inden</option>
-                    </select>
-                </td>
-                <td><input type="text" class="form-control" name="kategori1[]" id="kategori1_${i}" readonly></td>
-                <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" onchange="calculateTotal(${i})"></td>
-                <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly></td>
-                <td>
-                    <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
-                        <option value="">Pilih Kondisi</option>
-                        @foreach ($kondisis as $kondisi)
-                         <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp. </span>
-                        <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control" oninput="calculateTotal(${i})">
-                        <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control">
-                    </div>
-                </td>
-                <td>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp. </span>
-                        <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control" readonly>
-                        <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" readonly>
-                    </div>
-                </td>
-                <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
-            </tr>
-        `;
+        <tr id="row${i}">
+            <td>
+                <input type="hidden" class="form-control" name="id[]" id="id_${i}" readonly>
+                <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
+                    <option value="">Pilih Bulan Inden</option>
+                    ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
+                </select>
+            </td>
+            <td>
+                <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
+                    <option value="">Pilih Kode Inden</option>
+                </select>
+            </td>
+            <td>
+                <input type="hidden" class="form-control" name="idinven[]" id="idinven_${i}" readonly>
+                <input type="text" class="form-control" name="kategori1[]" id="kategori1_${i}" readonly>
+                <input type="hidden" class="form-control" name="kode[]" id="kode_${i}" readonly>
+            </td>
+            <td>
+                <input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" oninput="validateQty(${i})" required>
+            </td>
+            <td>
+                <input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly>
+            </td>
+            <td>
+                <select id="kondisi_${i}" name="kondisi[]" class="form-control" onchange="showInputType(${i})" readonly>
+                    <option value="">Pilih Kondisi</option>
+                    @foreach ($kondisis as $kondisi)
+                        <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">Rp. </span> 
+                    <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control-banyak" oninput="calculateTotal(${i})">
+                    <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" oninput="calculateTotal(${i})">
+                </div>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">Rp. </span> 
+                    <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control-banyak" oninput="calculateTotal(${i})" readonly>
+                    <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" oninput="calculateTotal(${i})">
+                </div>
+            </td>
+            <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
+        </tr>
+    `;
 
         $('#dynamic_field').append(newRow);
         // bindSelectEvents(i);
@@ -688,6 +720,15 @@ function bindSelectEvents(index) {
         kodeIndenDropdown.empty();
         kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
 
+        $('#kategori1_' + index).val('');
+        $('#idinven_' + index).val('');
+        $('#qtykrm_'+ index ).val('');
+
+        $('#rawat_'+ index ).val('');
+        $('#rawat2_'+ index ).val('');
+        $('#jumlah_'+ index ).val('');
+        $('#jumlahint_'+ index ).val('');
+
         if (bulanInden) {
             $.ajax({
                 url: `/get-kode-inden/${bulanInden}/${supplierId}`,
@@ -712,15 +753,27 @@ function bindSelectEvents(index) {
         const supplierId = $('#supplier').val();
         const bulanInden = $('#bulan_inden_' + index).val();
         const kodeInden = $(this).val();
-        const kategoriInput = $('#kategori1_' + index); 
+        const kategoriInput = $('#kategori1_' + index);
+        const jumlahkirimInput = $('#qtykrm_' + index); 
+        const inventoryinden_id = $('#idinven_' + index); 
+          
+        $('#rawat_'+ index ).val('');
+        $('#rawat2_'+ index ).val('');
+        $('#jumlah_'+ index ).val('');
+        $('#jumlahint_'+ index ).val('');
 
         if (kodeInden) {
             $.ajax({
                 url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
                 type: 'GET',
-                success: function(kategori) {
-                    kategoriInput.val(kategori);
+                success: function(response) {
+                    kategoriInput.val(response.kategori);
+                    jumlahkirimInput.val(response.jumlah);
+                    inventoryinden_id.val(response.idinven);
+                    jumlahkirimInput.data('jumlah', response.jumlah); // Simpan jumlah dalam atribut data
+                    console.log('Jumlah saved in data attribute:', response.jumlah); 
                 },
+              
                 error: function() {
                     alert('Gagal mengambil data kategori');
                 }
@@ -742,6 +795,13 @@ $('#supplier').change(function() {
         $(this).empty();
         $(this).append('<option value="">Pilih Kode Inden</option>');
     });
+    $('input[name="idinven[]"]').val('');
+    $('input[name="kategori1[]"]').val('');
+    $('input[name="qtykrm[]"]').val('');
+    $('input[name="rawat[]"]').val('');
+    $('input[name="rawat2[]"]').val('');
+    $('input[name="jumlah[]"]').val('');
+    $('input[name="jumlah_display[]"]').val('');
     
 
     if (supplierId) {
@@ -773,30 +833,45 @@ $(document).on('change', 'select[id^="bulan_inden_"]', function(){
     var bulanInden = $(this).val();
     var supplier_id = $('#supplier').val();
     var id_row = $(this).attr('id').split('_')[2];
+   
+
     console.log(bulanInden, supplier_id, id_row)
     populateKodeInden(bulanInden, supplier_id, id_row);
+
 });
 
 $(document).on('change', 'select[id^="kode_inden_"]', function() {
-        var id_row = $(this).attr('id').split('_')[2];
-        var supplierId = $('#supplier').val();
-        var bulanInden = $('#bulan_inden_' + id_row).val();
-        var kodeInden = $(this).val();
-        var kategoriInput = $('#kategori1_' + id_row); 
+    var id_row = $(this).attr('id').split('_')[2];
+    var supplierId = $('#supplier').val();
+    var bulanInden = $('#bulan_inden_' + id_row).val();
+    var kodeInden = $(this).val();
+    var kategoriInput = $('#kategori1_' + id_row);
+    var jumlahkirimInput = $('#qtykrm_' + id_row);  
+    var inventoryinden_id = $('#idinven_' + id_row);
 
-        if (kodeInden) {
-            $.ajax({
-                url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
-                type: 'GET',
-                success: function(kategori) {
-                    kategoriInput.val(kategori);
-                },
-                error: function() {
-                    alert('Gagal mengambil data kategori');
-                }
-            });
-        }
-    });
+    $('#rawat_' + id_row).val('');
+    $('#rawat2_' + id_row).val('');
+    $('#jumlah_' + id_row).val('');
+    $('#jumlahint_' + id_row).val('');
+
+    if (kodeInden) {
+        $.ajax({
+            url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
+            type: 'GET',
+            success: function(response) {
+                kategoriInput.val(response.kategori);
+                jumlahkirimInput.val(response.jumlah);
+                inventoryinden_id.val(response.idinven);
+                jumlahkirimInput.data('jumlah', response.jumlah); // Simpan jumlah dalam atribut data
+                console.log('Jumlah saved in data attribute:', response.jumlah); 
+            },
+            error: function() {
+                alert('Gagal mengambil data kategori');
+            }
+        });
+    }
+});
+
 
     function clearFile(){
         $('#bukti').val('');
@@ -860,5 +935,7 @@ $(document).on('change', 'select[id^="kode_inden_"]', function() {
                 }
             });
     }
+
+    
 </script>
 @endsection

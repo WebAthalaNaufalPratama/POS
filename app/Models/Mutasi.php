@@ -27,8 +27,12 @@ class Mutasi extends Model
         return $this->hasMany(Produk_Terjual::class, 'no_mutasiog', 'no_mutasi');
     }
 
-    public function produkMutasiOG(){
-        return $this->hasMany(Produk_Terjual::class, 'no_mutasiog', 'no_mutasi');
+    public function produkMutasiGG(){
+        return $this->hasMany(Produk_Terjual::class, 'no_mutasigg', 'no_mutasi');
+    }
+
+    public function produkMutasiGAG(){
+        return $this->hasMany(Produk_Terjual::class, 'no_mutasigag', 'no_mutasi');
     }
 
     public function dibuat(){

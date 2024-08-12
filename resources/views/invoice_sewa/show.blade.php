@@ -254,9 +254,9 @@
                                     <tbody>
                                         <tr>
                                             <td id="sales">{{ $data->data_sales->nama }}</td>
-                                            <td id="pembuat">{{ $data->data_pembuat->nama ?? '-' }}</td>
-                                            <td id="penyetuju">{{ $kontraks->data_penyetuju->name ?? (Auth::user()->hasRole('Auditor') ? Auth::user()->name : '') }}</td>
-                                            <td id="pemeriksa">{{ $kontraks->data_pemeriksa->name ?? (Auth::user()->hasRole('Finance') ? Auth::user()->name : '') }}</td>
+                                            <td id="pembuat">{{ $data->data_pembuat->name ?? '-' }}</td>
+                                            <td id="penyetuju">{{ $data->data_penyetuju->name ?? (Auth::user()->hasRole('Auditor') ? Auth::user()->name : '') }}</td>
+                                            <td id="pemeriksa">{{ $data->data_pemeriksa->name ?? (Auth::user()->hasRole('Finance') ? Auth::user()->name : '') }}</td>
                                         </tr>
                                         <tr>
                                             <td style="width: 25%;">{{ isset($data->tanggal_sales) ? formatTanggal($data->tanggal_sales) : '-' }}</td>
@@ -444,7 +444,7 @@
                         <div class="page-title">
                             <h4 class="card-title">Pembayaran</h4>
                         </div>
-                        @if(in_array('pembayaran_sewa.store', $thisUserPermissions))
+                        @if(in_array('pembayaran_sewa.store', $thisUserPermissions) && $data->status == 'DIKONFIRMASI')
                         <div class="page-btn">
                             <a href="javascript:void(0);" onclick="bayar({{ $data }})" class="btn btn-added">Tambah Pembayaran</a>
                         </div>
@@ -519,7 +519,7 @@
 </div>
 
 <div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Form Pembayaran</h5>
@@ -531,63 +531,69 @@
                 @csrf
                 <div class="modal-body">
                     <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Kontrak</label>
-                            <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Nomor Kontrak</label>
+                                    <input type="text" class="form-control" id="no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Nomor Invoice</label>
+                                    <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="{{ $invoice_bayar }}" required readonly>
+                                    <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Total Tagihan</label>
+                                    <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Sisa Tagihan</label>
+                                    <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="bayar">Cara Bayar</label>
+                                    <select class="form-control" id="bayar" name="cara_bayar" required>
+                                        <option value="">Pilih Cara Bayar</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="transfer">Transfer</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-12" id="div_rekening" style="display: none">
+                                    <label for="bankpenerima">Rekening Vonflorist</label>
+                                    <select class="form-control" id="rekening_id" name="rekening_id" required>
+                                        <option value="">Pilih Rekening Von</option>
+                                        @foreach ($bankpens as $bankpen)
+                                        <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="nominal">Nominal</label>
+                                    <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="tanggalbayar">Tanggal</label>
+                                    <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
-                            <input type="hidden" id="invoice_sewa_id" name="invoice_sewa_id" value="">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Total Tagihan</label>
-                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Sisa Tagihan</label>
-                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="bayar">Cara Bayar</label>
-                            <select class="form-control" id="bayar" name="cara_bayar" required>
-                                <option value="">Pilih Cara Bayar</option>
-                                <option value="cash">Cash</option>
-                                <option value="transfer">Transfer</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-6" id="div_rekening" style="display: none">
-                            <label for="bankpenerima">Rekening Vonflorist</label>
-                            <select class="form-control" id="rekening_id" name="rekening_id" required>
-                                <option value="">Pilih Rekening Von</option>
-                                @foreach ($bankpens as $bankpen)
-                                <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="nominal">Nominal</label>
-                            <input type="text" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="tanggalbayar">Tanggal</label>
-                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-12">
-                            <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" required>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="buktibayar">Unggah Bukti</label>
+                                    <input type="file" class="form-control" id="bukti" name="bukti" required onchange="previewImage(this, 'add_preview')" accept="image/*">
+                                    <img class="mt-2" src="" alt="" id="add_preview" style="width: 100%;height:auto;">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="modal-footer justify-content-center">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
@@ -597,7 +603,7 @@
     </div>
 </div>
 <div class="modal fade" id="modalEditBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Edit Form Pembayaran</h5>
@@ -610,61 +616,67 @@
                 @method('patch')
                 <div class="modal-body">
                     <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Kontrak</label>
-                            <input type="text" class="form-control" id="edit_no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Nomor Kontrak</label>
+                                    <input type="text" class="form-control" id="edit_no_kontrak" name="no_kontrak" placeholder="Nomor Kontrak" required readonly>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Nomor Invoice</label>
+                                    <input type="text" class="form-control" id="edit_no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
+                                    <input type="hidden" id="edit_invoice_sewa_id" name="invoice_sewa_id" value="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Total Tagihan</label>
+                                    <input type="text" class="form-control" id="edit_total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="no_invoice">Sisa Tagihan</label>
+                                    <input type="text" class="form-control" id="edit_sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="bayar">Cara Bayar</label>
+                                    <select class="form-control" id="edit_bayar" name="cara_bayar" required>
+                                        <option value="">Pilih Cara Bayar</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="transfer">Transfer</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-12" id="edit_rekening" style="display: none">
+                                    <label for="bankpenerima">Rekening Vonflorist</label>
+                                    <select class="form-control" id="edit_rekening_id" name="rekening_id" required>
+                                        <option value="">Pilih Rekening Von</option>
+                                        @foreach ($bankpens as $bankpen)
+                                        <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="nominal">Nominal</label>
+                                    <input type="text" class="form-control" id="edit_nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
+                                </div>
+                                <div class="form-group col-sm-12">
+                                    <label for="tanggalbayar">Tanggal</label>
+                                    <input type="date" class="form-control" id="edit_tanggal_bayar" name="tanggal_bayar" value="" required>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="edit_no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="" required readonly>
-                            <input type="hidden" id="edit_invoice_sewa_id" name="invoice_sewa_id" value="">
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="form-group col-sm-12">
+                                    <label for="buktibayar">Unggah Bukti</label>
+                                    <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*" onchange="previewImage(this, 'edit_preview')">
+                                </div>
+                                <img id="edit_preview" src="" alt="your image" style="max-width: 100%"/>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Total Tagihan</label>
-                            <input type="text" class="form-control" id="edit_total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Sisa Tagihan</label>
-                            <input type="text" class="form-control" id="edit_sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="bayar">Cara Bayar</label>
-                            <select class="form-control" id="edit_bayar" name="cara_bayar" required>
-                                <option value="">Pilih Cara Bayar</option>
-                                <option value="cash">Cash</option>
-                                <option value="transfer">Transfer</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-6" id="edit_rekening" style="display: none">
-                            <label for="bankpenerima">Rekening Vonflorist</label>
-                            <select class="form-control" id="edit_rekening_id" name="rekening_id" required>
-                                <option value="">Pilih Rekening Von</option>
-                                @foreach ($bankpens as $bankpen)
-                                <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="nominal">Nominal</label>
-                            <input type="text" class="form-control" id="edit_nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="tanggalbayar">Tanggal</label>
-                            <input type="date" class="form-control" id="edit_tanggal_bayar" name="tanggal_bayar" value="" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-12">
-                            <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="edit_bukti" name="bukti">
-                        </div>
-                        <img id="edit_preview" src="" alt="your image" style="max-width: 100%"/>
                     </div>
                 </div>
 
@@ -700,6 +712,12 @@
         var cekInvoiceNumbers = "{{ $invoice_bayar }}";
         var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;
         $(document).ready(function(){
+            if ($('#add_preview').attr('src') === '') {
+                $('#add_preview').attr('src', defaultImg);
+            }
+            if ($('#edit_preview').attr('src') === '') {
+                $('#edit_preview').attr('src', defaultImg);
+            }
             multiply($('#jumlah_0'))
             $('[id^=produk], #sales_id, #ongkir_id, #rekening, #rekening_id, #bayar').select2();
             var i = '{{ count($data->kontrak->produk) }}';
@@ -945,6 +963,9 @@
                 $('#rekening_id').attr('disabled', true);
                 $('#bukti').attr('disabled', true);
             }
+            if ($('#add_preview').attr('src') === '') {
+                $('#add_preview').attr('src', defaultImg);
+            }
         });
         $('#edit_bayar').on('change', function() {
             var caraBayar = $(this).val();
@@ -1042,6 +1063,46 @@
                     $('#editForm').submit();
                 }
             });
+        });
+        $('#bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#add_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        $('#edit_bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
         });
         function multiply(element) {
             let input = $(element);
@@ -1157,7 +1218,7 @@
             var harga_total = parseInt(subtotal) + parseInt(ppn_nominal) + parseInt(pph_nominal) + parseInt(ongkir_nominal);
             $('#total_harga').val(formatNumber(harga_total));
             var dp = parseInt(cleanNumber($('#dp').val()));
-            $('#sisa_bayar').val(formatNumber(harga_total - dp));
+            // $('#sisa_bayar').val(formatNumber(harga_total - dp));
         }
         function update_pajak(subtotal){
             var ppn_persen = $('#ppn_persen').val() || 0;
@@ -1184,18 +1245,7 @@
                 dropdownParent: $("#modalBayar")
             });
             $('#modalBayar').modal('show');
-            generateInvoice();
-        }
-        function generateInvoice() {
-            var invoicePrefix = "BYR";
-            var currentDate = new Date();
-            var year = currentDate.getFullYear();
-            var month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            var day = currentDate.getDate().toString().padStart(2, '0');
-            var formattedNextInvoiceNumber = nextInvoiceNumber.toString().padStart(3, '0');
-
-            var generatedInvoice = invoicePrefix + year + month + day + formattedNextInvoiceNumber;
-            $('#no_invoice_bayar').val(generatedInvoice);
+            $('#bayar').trigger('change');
         }
         function bukti(src){
             var baseUrl = window.location.origin;
@@ -1233,6 +1283,7 @@
                             dropdownParent: $("#modalEditBayar")
                         });
                         $('#modalEditBayar').modal('show');
+                        $('#edit_bayar').trigger('change');
                     },
                     error: function(error) {
                         toastr.error(JSON.parse(error.responseText).msg, 'Error', {

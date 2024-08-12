@@ -59,8 +59,8 @@
                                                 <label>Status</label>
                                                 <select id="status" name="status" class="form-control" required>
                                                     <option value="TUNDA" {{ old('status') == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                    <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                    <option value="BATAL"  {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                    {{-- <option value="DIKONFIRMASI" {{ old('status') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                    <option value="BATAL"  {{ old('status') == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
                                                 </select>
                                             </div>
                                         </div>

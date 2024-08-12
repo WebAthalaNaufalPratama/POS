@@ -137,6 +137,7 @@ class PembelianController extends Controller
         
         $rawOrderBy = "CONCAT(RIGHT(bulan_inden, 4), '-', $caseStatement)";
         
+        
         $query2 = ModelsPoinden::query();
         
         if (Auth::user()->hasRole(['Auditor', 'Finance'])) {
@@ -250,10 +251,15 @@ class PembelianController extends Controller
         }
         $invoices = $query->get();
 
-        $query2 = Invoicepo::with('pembelian')->whereNotNull('poinden_id')
-            ->orderBy('tgl_inv', 'desc');
+        $query2 = Invoicepo::with('pembelian')->whereNotNull('poinden_id')->orderBy('tgl_inv', 'desc');
+
+        $query2->when(Auth::user()->hasRole('Finance'), function ($q) {
+                $q->where('status_dibuat', 'DIKONFIRMASI');
+                //   ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+
         if ($req->supplierInd) {
-            $query->whereHas('pembelian', function($q) use($req){
+            $query2->whereHas('pembelian', function($q) use($req){
                 $q->where('supplier_id', $req->input('supplier'));
             });
         }
@@ -777,9 +783,9 @@ class PembelianController extends Controller
     
             $inv->pembuat = $request->pembuat;
             $inv->status_dibuat = $request->status_dibuat;
+            $inv->tgl_dibuat = $request->tgl_dibuat;
             $inv->pembuku = $request->pembuku ?? null;
             $inv->status_dibuku = $request->status_dibuku ?? null;
-            $inv->tgl_dibuat = $request->tgl_dibuat;
             $inv->tgl_dibukukan = $request->tgl_dibukukan ?? null;
     
             $subtot = $inv->subtotal = $request->sub_total;
@@ -857,9 +863,9 @@ class PembelianController extends Controller
     
             $inv->pembuat = $request->pembuat;
             $inv->status_dibuat = $request->status_dibuat;
+            $inv->tgl_dibuat = $request->tgl_dibuat;
             $inv->pembuku = $request->pembuku;
             $inv->status_dibuku = $request->status_dibuku;
-            $inv->tgl_dibuat = $request->tgl_dibuat;
             $inv->tgl_dibukukan = $request->tgl_dibukukan;
     
             $subtot = $inv->subtotal = $request->sub_total;
@@ -1068,7 +1074,7 @@ class PembelianController extends Controller
         // }
 
             // return redirect('returbeli.show',)->withInput()->with('success', 'Berhasil Menyimpan Data');
-            return redirect(route('returbeli.show', ['retur_id' => $save->id]))->with('success', 'Berhasil Menyimpan Data');
+            return redirect(route('returbeli.index', ['retur_id' => $save->id]))->with('success', 'Berhasil Menyimpan Data');
 
         }
     }
@@ -1957,7 +1963,9 @@ class PembelianController extends Controller
                 // $pembelian->supplier_id = $request->id_supplier;
                 $pembelian->bulan_inden = $request->bulan_inden;
                 $pembelian->supplier_id = $request->id_supplier;
+                $pembelian->pembuat = Auth::user()->id;
                 $pembelian->status_dibuat = $request->status_dibuat;
+                $pembelian->tgl_dibuat = $request->tgl_dibuat;
 
                 // $pembelian->pemeriksa = $request->pemeriksa;
                 // $pembelian->status_diperiksa = $request->status_diperiksa;
@@ -2179,13 +2187,15 @@ class PembelianController extends Controller
 
         if ($pembelian->tgl_diterima == null && in_array($pembelian->lokasi->tipe_lokasi, [3, 4])) {      
             $pembelian->tgl_diterima = $request->tgl_diterima;
+            
             $pembelian->pemeriksa = $request->pemeriksa;
             $pembelian->status_diperiksa = $request->status;
             $pembelian->tgl_diperiksa= $request->tgl_diperiksa;
-            // $pembelian->penerima = '-';
-            $pembelian->status_diterima = '-';
-            // $pembelian->tgl_diterima_ttd= '-';
-            $check1 = $pembelian->save(); 
+
+            $pembelian->penerima = $request->pemeriksa;;
+            $pembelian->status_diterima = $request->status;
+            $pembelian->tgl_diterima_ttd= $request->tgl_diperiksa;
+            $check1 = $pembelian->save();
 
             $produkIds = $request->id;
             $kode = $request->kode;
@@ -2363,12 +2373,12 @@ class PembelianController extends Controller
         $pembelian->lokasi_id = $request->id_lokasi;
         $pembelian->tgl_kirim = $request->tgl_kirim;
         $pembelian->tgl_diterima = $request->tgl_diterima ?? null;
-        $pembelian->tgl_dibuat = $request->tgl_dibuat;
         $pembelian->no_do_suplier = $request->no_do;
-
+        
         // Khusus purchasing
-        // $pembelian->pembuat = $request->pembuat; // ID pengguna yang membuat pembelian
+        $pembelian->pembuat = Auth::user()->id; // ID pengguna yang membuat pembelian
         $pembelian->status_dibuat = $request->status;
+        $pembelian->tgl_dibuat = $request->tgl_dibuat;
 
         if ($request->status == "BATAL") {
             $pembelian->status_diterima = "BATAL";
@@ -2444,9 +2454,9 @@ class PembelianController extends Controller
             return redirect()->back()->withInput()->with('fail', 'Tagihan belum Lunas');
 
         } elseif ($getInvoice->sisa == 0) {
+            $getInvoice->pembuku = Auth::user()->id;
             $getInvoice->status_dibuku = $data['status_dibuku'];
             $getInvoice->tgl_dibukukan = $data['tgl_dibukukan'];
-            $getInvoice->pembuku = Auth::user()->id;
             $check = $getInvoice->update();
         }
         
@@ -2491,7 +2501,7 @@ class PembelianController extends Controller
         $no_inv = $inv->no_inv = $request->no_inv;
 
         if($user->hasRole(['Purchasing'])){
-
+        $inv->pembuat = Auth::user()->id;
         $inv->status_dibuat = $request->status_dibuat;
         $inv->tgl_dibuat = $request->tgl_dibuat;
 
@@ -2515,8 +2525,8 @@ class PembelianController extends Controller
 
         if($user->hasRole(['Finance'])){
             $inv->pembuku = $request->pembuku;
-            $inv->tgl_dibukukan = $request->tgl_dibukukan;
             $inv->status_dibuku = $request->status_dibuku;
+            $inv->tgl_dibukukan = $request->tgl_dibukukan;
         }
 
         $check1 = $inv->update();
@@ -2589,25 +2599,27 @@ class PembelianController extends Controller
                         'poinden_id' => $request->id_po,
                         'tgl_inv' => $request->tgl_inv,
                         'no_inv' => $request->no_inv,
-                        'pembuat' => $request->pembuat,
+                        'pembuat' => Auth::user()->id,
                         'status_dibuat' => $request->status_dibuat,
                         'tgl_dibuat' => $request->tgl_dibuat,
                         'subtotal' => $request->sub_total,
                         'ppn' => $request->persen_ppn === null ? 0 : ($request->persen_ppn / 100 * $request->sub_total),
+                        'persen_ppn' => $request->persen_ppn === null ? 0 : $request->persen_ppn,
                         'total_tagihan' => $request->total_tagihan,
                         'dp' => 0,
                         'sisa' => $request->total_tagihan,
                     ];
-                }elseif($user->hasRole(['Auditor'])){
+                }elseif($user->hasRole(['Finance'])){
                     $invData = [
                         'poinden_id' => $request->id_po,
                         'tgl_inv' => $request->tgl_inv,
                         'no_inv' => $request->no_inv,
-                        'pembuku' => $request->pembuku,
+                        'pembuku' =>  Auth::user()->id,
                         'status_dibuku' => $request->status_dibuku,
-                        'tgl_dibukukan' => $request->tanggal_dibukukan,
+                        'tgl_dibukukan' => $request->tgl_dibuku,
                         'subtotal' => $request->sub_total,
                         'ppn' => $request->persen_ppn === null ? 0 : ($request->persen_ppn / 100 * $request->sub_total),
+                        'persen_ppn' => $request->persen_ppn === null ? 0 : $request->persen_ppn,
                         'total_tagihan' => $request->total_tagihan,
                         'dp' => 0,
                         'sisa' => $request->total_tagihan,
@@ -2653,7 +2665,7 @@ class PembelianController extends Controller
         }
     }
 
-    public function update_retur_finance (Request $request, Pembelian $pembelian, $idretur)
+    public function update_retur_finance (Request $request, Pembelian $pembelian, $idretur) // gak kepake DIKONFIRMASI sekalian di invoice
     {
         // dd($request);
 
@@ -2677,15 +2689,11 @@ class PembelianController extends Controller
                 return redirect()->back()->withInput()->with('fail', 'Refund belum Lunas');
     
             } elseif ($getretur->sisa == 0) {
+                $getretur->pembuku = Auth::user()->id;
                 $getretur->status_dibuku = $data['status_dibuku'];
                 $getretur->tgl_dibuku = $data['tgl_dibuku'];
-                $getretur->pembuku = Auth::user()->id;
                 $check = $getretur->update();
             }
-        
-
-       
-        
 
         if ($check) {         
             return redirect(route('returbeli.show', ['retur_id' =>  $getretur->id]))->with('success', 'Berhasil Menyimpan Data');
@@ -2706,7 +2714,7 @@ class PembelianController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
 
-        $data = $request->except(['_token', '_method', 'file', 'supplier_id', 'lokasi_id', 'tanggal_po', 'tanggal_invoice', 'no_po', 'no_invoice', 'kode_produk', 'nama_produk', 'alasan', 'jumlah', 'diskon', 'harga_satuan', 'harga_total', 'DataTables_Table_0_length', 'biaya_pengiriman', 'total_harga']);
+        $data = $request->except(['_token', '_method', 'file', 'supplier_id', 'lokasi_id', 'tanggal_po', 'tanggal_invoice', 'no_po', 'no_invoice', 'kode_produk', 'nama_produk', 'alasan', 'jumlah', 'diskon', 'harga_satuan', 'harga_total', 'DataTables_Table_0_length','biaya_pengiriman','total_harga']);
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -2720,8 +2728,13 @@ class PembelianController extends Controller
         }else{
             $data['sisa'] = 0;
         }
-        
+
+        if($request->komplain == "Refund" || $request->komplain == "Retur" ){
         $data['ongkir'] = $request->biaya_pengiriman ?? 0;
+        }elseif($request->komplain == "Diskon"){
+        $data['ongkir'] = 0;
+        }
+
         // $data['total'] = $request->total_harga;
         $jenis = $data['komplain'];
         
@@ -2729,50 +2742,56 @@ class PembelianController extends Controller
 
         // $data['sisa'] = $request->subtotal;
         // $save = ReturPembelian::create($data);
-       
+        $returpem = ReturPembelian::where('id', $retur)->first();
+        $komponen = ProdukRetur::where('returpembelian_id', $returpem->id)->get();
+        if($komponen) {
+            $komponen->each->forceDelete();
+        }
 
         if ($save) {        
 
             for ($i = 0; $i < count($request->nama_produk); $i++) {
-                $returpem = ReturPembelian::where('id', $retur)->first();
+            
+                $diskon = 0;
+
+                if ($request->komplain == "Refund" || $request->komplain == "Retur") {
+                    $diskon = 0;
+                } elseif ($request->komplain == "Diskon") {
+                    $diskon = $request->diskon[$i];
+                }
+
                 $produkReturBeli = [
                     'returpembelian_id' => $returpem->id,
                     'produkbeli_id' => $request->nama_produk[$i],
                     'alasan' => $request->alasan[$i],
                     'jumlah' => $request->jumlah[$i],
                     'harga' => $request->harga_satuan[$i],
-                    'diskon' => $request->diskon[$i] ?? 0,
+                    'diskon' => $diskon,
                     'totharga' => $request->harga_total[$i]
                 ];
 
-                $produkret = Produkretur::where('returpembelian_id', $returpem->id)->where('produkbeli_id', $request->nama_produk[$i])->first();
-                if(!empty($produkret)) {
-                    $produk_retur = Produkretur::where('returpembelian_id', $returpem->id)->where('produkbeli_id', $request->nama_produk[$i])->update($produkReturBeli);
-                }elseif(empty($produkret)){
+                // $produkret = Produkretur::where('returpembelian_id', $returpem->id)->where('produkbeli_id', $request->nama_produk[$i])->first();
+                // if(!empty($produkret)) {
+                //     $produk_retur = Produkretur::where('returpembelian_id', $returpem->id)->where('produkbeli_id', $request->nama_produk[$i])->update($produkReturBeli);
+                // }elseif(empty($produkret)){
                     $produk_retur = Produkretur::create($produkReturBeli);
-                }
+                // }
                 
-                if($request->status_dibuat == "DIKONFIRMASI"){
+                if($request->status_dibuku == "DIKONFIRMASI"){
 
                     $getProdukBeli = Produkbeli::where('id', $request->nama_produk[$i])->first();
                     if($jenis == 'Retur' || 'Refund'){
                         if ($getProdukBeli->pembelian->lokasi->tipe_lokasi == 1 ) {
                             $getInven = InventoryGallery::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
-                            $getInven->jumlah += $produkret->jumlah;
-                            $getInven->update();
                             $getInven->jumlah -=  $request->jumlah[$i];
                             $getInven->update();
                         }elseif($getProdukBeli->pembelian->lokasi->tipe_lokasi == 3 ){
                             $getInven = InventoryGreenHouse::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
-                            $getInven->jumlah += $produkret->jumlah;
-                            $getInven->update();
                             $getInven->jumlah -=  $request->jumlah[$i];
                             $getInven->update();
                         
                         }elseif($getProdukBeli->pembelian->lokasi->tipe_lokasi == 4 ){
                             $getInven = InventoryGudang::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
-                            $getInven->jumlah += $produkret->jumlah;
-                            $getInven->update();
                             $getInven->jumlah -=  $request->jumlah[$i];
                             $getInven->update();
                         }
@@ -2795,10 +2814,11 @@ class PembelianController extends Controller
 
             }
             
-            if($request->status_dibuat == "DIKONFIRMASI"){
+            if($request->status_dibuku == "DIKONFIRMASI"){
 
             $getInvoice = Invoicepo::find($request->invoicepo_id);
-            $getppn = $getInvoice->persen_pp ?? 0;
+            $getppn = $getInvoice->persen_ppn ?? 0;
+            $persen = $getppn / 100;
             $newSubtotal = $getInvoice->subtotal;
             $getretur = Returpembelian::where('id',$retur)->first();
             // $getProdukbeli = Produkbeli::where('pembelian_id',  $getInvoice->pembelian_id)->get();
@@ -2807,15 +2827,16 @@ class PembelianController extends Controller
             if ($jenis == 'Retur') {
                 $subretur = $newSubtotal - $getretur->subtotal;
                 $getInvoice->subtotal = $subretur;
-                $getInvoice->ppn = ($getppn / 100) * $subretur;
-                $getInvoice->total_tagihan = $subretur + $getInvoice->biaya_kirim + ($getInvoice->ppn) + $getretur->ongkir;
+                $getInvoice->ppn = $persen * $subretur;
+                $getInvoice->total_tagihan = $persen * $subretur + $subretur + $getInvoice->biaya_kirim + $getretur->ongkir;
                 $getInvoice->sisa = $getInvoice->total_tagihan;
                 $check = $getInvoice->update();
             } elseif ($jenis == 'Refund') {
                 $subrefund = $newSubtotal - $getretur->subtotal;
                 $getInvoice->subtotal = $subrefund;
-                $getInvoice->ppn = ($getppn / 100) * $subrefund;
-                $getInvoice->total_tagihan = $subrefund + $getInvoice->biaya_kirim + ($getInvoice->ppn) + $getretur->ongkir;
+                // $getInvoice->ppn = $persen * $subrefund;
+                // $getInvoice->total_tagihan = $persen * $subrefund + $subrefund + $getInvoice->biaya_kirim + $getretur->ongkir;
+                $getInvoice->total_tagihan =  $subrefund + $getInvoice->biaya_kirim +  $getInvoice->ppn  + $getretur->ongkir;
                 $getInvoice->sisa = $getretur->ongkir;
             
                 try {
@@ -2835,8 +2856,8 @@ class PembelianController extends Controller
                     $newSubtotal -= ($produkretur->jumlah * $produkretur->diskon);
                 }
                 $getInvoice->subtotal = $newSubtotal;
-                $getInvoice->ppn = ($getppn / 100) * $newSubtotal;
-                $getInvoice->total_tagihan = $newSubtotal + $getInvoice->biaya_kirim + ($getInvoice->ppn);
+                $getInvoice->ppn =  $persen * $newSubtotal;
+                $getInvoice->total_tagihan = $persen * $newSubtotal + $newSubtotal + $getInvoice->biaya_kirim;
                 $getInvoice->sisa = $getInvoice->total_tagihan;
                 $check = $getInvoice->update();
             }
@@ -2846,7 +2867,7 @@ class PembelianController extends Controller
         }
 
             // return redirect('returbeli.show',)->withInput()->with('success', 'Berhasil Menyimpan Data');
-            return redirect(route('returbeli.edit', ['retur_id' => $returpem->id]))->with('success', 'Berhasil Menyimpan Data');
+            return redirect(route('returbeli.index', ['retur_id' => $returpem->id]))->with('success', 'Berhasil Menyimpan Data');
 
         }
     }

@@ -126,11 +126,11 @@
                     <td></td>
                     <td class="text-center">{{ $item->dateNumber }}</td>
                     <td>{{ $item->keterangan }}</td>
-                    @if($item->lokasi_penerima != null)
+                    @if($item->lokasi_penerima == $id_galleries)
                         <td>{{$item->lok_penerima->operasional->nama }}</td>
                         <td>{{ formatRupiah($item->nominal) }}</td>
                         <td></td>
-                    @elseif($item->lokasi_pengirim != null)
+                    @elseif($item->lokasi_pengirim == $id_galleries)
                         <td>{{$item->lok_pengirim->operasional->nama }}</td>
                         <td></td>
                         <td>{{ formatRupiah($item->nominal) }}</td>
@@ -145,11 +145,11 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="6" class="text-end">Saldo Rekening</td>
+                    <td colspan="7" class="text-end">Saldo Rekening</td>
                     <td>{{ formatRupiah($saldoRekening) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="6" class="text-end">Saldo Cash</td>
+                    <td colspan="7" class="text-end">Saldo Cash</td>
                     <td>{{ formatRupiah($saldoCash) }}</td>
                 </tr>
             </tfoot>

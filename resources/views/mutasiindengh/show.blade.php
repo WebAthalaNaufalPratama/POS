@@ -2,6 +2,9 @@
 @extends('layouts.app-von')
 
 @section('content')
+@php
+$user = Auth::user();
+@endphp
 <style>
     
     .form-control {
@@ -28,7 +31,7 @@
                     <a href="{{route('mutasiindengh.index')}}">Mutasi</a>
                 </li>
                 <li class="breadcrumb-item active">
-                    Inden Ke Gallery/GreenHouse
+                    Inden ke {{ $data->lokasi->nama }}
                 </li>
             </ul>
         </div>
@@ -81,13 +84,12 @@
                                         <div class="form-group">
                                             <label for="penerima">Lokasi</label>
                                             <input type="text" class="form-control" id="lokasi" name="lokasi" value="{{ $data->lokasi->nama }}" readonly>
-
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label for="tgl_terima">Tanggal Diterima</label>
-                                            <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ tanggalindo($data->tgl_diterima) }}" readonly>
+                                            <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{$data->tgl_diterima ? tanggalindo($data->tgl_diterima) : "-" }}" readonly>
                                          </div>
                                         <div class="form-group">
                                             <label for="tgl_terima">Bukti</label>
@@ -113,9 +115,11 @@
                                                     <th>QTY Kirim</th>
                                                     <th>QTY Terima</th>
                                                     <th>Kondisi</th>
+                                                    @if($user->hasRole(['Purchasing','Finance']) && !$data->returinden)  
                                                     <th>Biaya Perawatan</th>
                                                     <th>Total Biaya Perawatan</th>
-                                                    <th></th>
+                                                 
+                                                    @endif
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
@@ -143,6 +147,7 @@
                                                             @endforeach
                                                         </select> --}}
                                                     </td>
+                                                    @if($user->hasRole(['Purchasing','Finance']) && (!$data->returinden || ($data->returinden && $data->returinden->status_dibuat == "BATAL")))   
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
@@ -157,6 +162,7 @@
                                                             <input type="hidden" name="jumlah[]" id="jumlahint_{{ $index }}" class="form-control">
                                                         </div>
                                                     </td>
+                                                    @endif
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -165,13 +171,17 @@
                                 </div>
                             </div>
                         </div>
+                        @if($user->hasRole(['Purchasing','Finance']) && !$data->returinden || ($data->returinden && $data->returinden->status_dibuat == "BATAL"))   
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
                                         <div class="page-btn">
-                                           
+                                            @if (Auth::user()->hasRole('Finance'))    
                                             <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
+                                            @else
+                                            Riwayat Pembayaran
+                                            @endif
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table datanew">
@@ -277,6 +287,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    
                                     <div class="col-lg-5 float-md-right">
                                         <div class="total-order">
                                             <ul>
@@ -287,7 +298,7 @@
                                                             <span class="input-group-text">Rp. </span> 
                                                             
                                                             <input type="text" id="sub_total" name="sub_total_dis" class="form-control" onchange="calculateTotal(0)" value="{{ formatRupiah2($data->subtotal) }}" readonly>
-                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)"   readonly>
+                                                            <input type="hidden" id="sub_total_int" name="sub_total" class="form-control" onchange="calculateTotal(0)" readonly>
                                                         </div>
                                                     </h5>
                                                 </li>
@@ -338,6 +349,10 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
+                        <form action="{{ route('mutasiindengh.updatePembuku', $data->id ) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('patch')
                          <div class="row justify-content-start">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2"> 
                              
@@ -346,8 +361,8 @@
                                                 <tr>
                                                     <th>Dibuat</th>                                              
                                                     <th>Diterima</th>                                              
-                                                    <th>Dibukukan</th>
                                                     <th>Diperiksa</th>
+                                                    <th>Dibukukan</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -358,49 +373,84 @@
                                                     </td>
                                                     <td id="penerima">
                                                         <input type="hidden" name="penerima" value="{{ Auth::user()->id ?? '' }}">
+                                                        @if($penerima)
                                                         <input type="text" class="form-control" value="{{ $penerima ?? '' }} ({{ $jabatanterima ?? '' }})" readonly>
-                                                    </td>
-                                                    <td id="pembuku">
-                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
-                                                        <input type="text" class="form-control" value="{{ $pembuku ?? '' }} ({{ $jabatanbuku ?? '' }})" readonly>
+                                                        @else
+                                                        <input type="text" class="form-control" value="Nama (Admin Gallery)" readonly>
+                                                        @endif
                                                     </td>
                                                     <td id="pemeriksa">
                                                         <input type="hidden" name="pemeriksa" value="{{ Auth::user()->id ?? '' }}">
+                                                        @if($pemeriksa)
                                                         <input type="text" class="form-control" value="{{ $pemeriksa ?? '' }} ({{ $jabatanperiksa ?? '' }})" readonly>
+                                                        @else
+                                                        <input type="text" class="form-control" value="Nama (Auditor)" readonly>
+                                                        @endif
                                                     </td>
+                                                    <td id="pembuku">
+                                                    @if(Auth::user()->hasRole('Finance') && ($data->status_dibukukan == null || $data->status_dibukukan == "MENUNGGU PEMBAYARAN"))
+
+                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                        <input type="text" class="form-control" value="{{  Auth::user()->karyawans->nama }} ({{  Auth::user()->karyawans->jabatan }})" readonly>
+                                                    
+                                                    @elseif(Auth::user()->hasRole('Finance') && $data->status_dibukukan == "DIKONFIRMASI")
+                                                        <input type="text" class="form-control" value="{{ $pembuku ?? '' }} ({{ $jabatanbuku ?? '' }})" readonly>
+                                                    @else
+                                                        <input type="hidden" name="pembuku" value="{{ Auth::user()->id ?? '' }}">
+                                                        @if($pembuku)
+                                                        <input type="text" class="form-control" value="{{ $pembuku ?? '' }} ({{ $jabatanbuku ?? '' }})" readonly>
+                                                        @else
+                                                        <input type="text" class="form-control" value="Nama (Finance)" readonly>
+                                                        @endif
+                                                    @endif
+                                                    </td>
+
                                                 </tr>
                                                 <tr>
                                                     <td id="status_dibuat">
-                                                        <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
+                                                        <input type="text" class="form-control" value="{{ $data->status_dibuat }}" readonly>
+
+                                                        {{-- <select id="status_dibuat" name="status_dibuat" class="form-control" readonly>
                                                             <option selected disabled>Pilih Status</option>
                                                             <option value="TUNDA" disabled {{ $data->status_dibuat == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" disabled {{ $data->status_dibuat == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             <option value="BATAL" disabled {{ $data->status_dibuat == 'BATAL' ? 'selected' : '' }}>BATAL</option>
-                                                        </select>
+                                                        </select> --}}
                                                     </td>
                                                     <td id="status_diterima">
-                                                        <select id="status_diterima" name="status_diterima" class="form-control" readonly>
+                                                        <input type="text" class="form-control" value="{{ $data->status_diterima ?? '-'}}" readonly>
+
+                                                        {{-- <select id="status_diterima" name="status_diterima" class="form-control" readonly>
                                                             <option selected disabled>Pilih Status</option>
                                                             <option value="TUNDA" disabled {{ $data->status_diterima == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" disabled {{ $data->status_diterima == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             <option value="BATAL" disabled {{ $data->status_diterima == 'BATAL' ? 'selected' : '' }}>BATAL</option>
-                                                        </select>
-                                                    </td>
-                                                    <td id="status_dibuku">
-                                                        <select id="status_dibukukan" name="status_dibuku" class="form-control" readonly>
-                                                            <option disabled selected>Pilih Status</option>
-                                                            <option value="TUNDA" disabled {{ $data->status_dibuku == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                            <option value="DIKONFIRMASI" disabled {{ $data->status_dibuku == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                            <option value="BATAL" disabled {{ $data->status_dibuku == 'BATAL' ? 'selected' : '' }}>BATAL</option>
-                                                        </select>
+                                                        </select> --}}
                                                     </td>
                                                     <td id="status_diperiksa">
-                                                        <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
+                                                        <input type="text" class="form-control" value="{{ $data->status_diperiksa ?? '-'}}" readonly>
+                                                        
+                                                        {{-- <select id="status_diperiksa" name="status_diperiksa" class="form-control" readonly>
                                                             <option disabled selected>Pilih Status</option>
                                                             <option value="TUNDA" disabled {{ $data->status_diperiksa == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" disabled {{ $data->status_diperiksa == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                             <option value="BATAL" disabled {{ $data->status_diperiksa == 'BATAL' ? 'selected' : '' }}>BATAL</option>
-                                                        </select>
+                                                        </select> --}}
+                                                    </td>
+                                                    <td id="status_dibukukan">
+                                                    @if(Auth::user()->hasRole('Finance') && $data->status_dibukukan == "MENUNGGU PEMBAYARAN")
+                                                    <select id="status_dibukukan" name="status_dibukukan" class="form-control">
+                                                        <option disabled>Pilih Status</option>
+                                                        <option value="MENUNGGU PEMBAYARAN" {{ $data->status_dibukukan == 'MENUNGGU PEMBAYARAN' ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
+                                                        @if( ($data->returinden ==null && $data->sisa_bayar == 0) || ($data->returinden && $data->returinden->status_dibuat == "BATAL" && $data->sisa_bayar == 0) || ($data->returinden !== null && $data->sisa_bayar == 0 && $data->returinden->sisa_refund == 0 && $data->returinden->status_dibukukan == "DIKONFIRMASI" &&  $data->returinden->status_dibuat == "DIKONFIRMASI"))
+                                                        <option value="DIKONFIRMASI" {{ $data->status_dibukukan == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                        @endif
+                                                    </select>
+                                                    @elseif(Auth::user()->hasRole('Finance') && $data->status_dibukukan == "DIKONFIRMASI")
+                                                        <input type="text" class="form-control" value="{{ $data->status_dibukukan ?? '-'}}" readonly>
+                                                    @else
+                                                        <input type="text" class="form-control" value="{{ $data->status_dibukukan ?? '-'}}" readonly>
+                                                    @endif
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -410,11 +460,17 @@
                                                     <td id="tgl_diterima">
                                                         <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $data->tgl_diterima_ttd ? tanggalindo($data->tgl_diterima_ttd) : '-' }}" readonly>
                                                     </td>
-                                                    <td id="tgl_dibuku">
-                                                        <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ $data->tgl_dibukukan ? tanggalindo($data->tgl_dibukukan) : '-' }}"  readonly>
-                                                    </td>
                                                     <td id="tgl_diperiksa">
                                                         <input type="text" class="form-control" id="tgl_diperiksa" name="tgl_diperiksa" value="{{ $data->tgl_diperiksa ? tanggalindo($data->tgl_diperiksa) : '-' }}"  readonly>
+                                                    </td>
+                                                    <td id="tgl_dibukukan">
+                                                    @if(Auth::user()->hasRole('Finance') && ($data->status_dibukukan == null || $data->status_dibukukan == "MENUNGGU PEMBAYARAN"))
+                                                    <input type="date" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ now()->format('Y-m-d')  }}">
+                                                    @elseif(Auth::user()->hasRole('Finance') && $data->status_dibukukan == "DIKONFIRMASI")
+                                                    <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ $data->tgl_dibukukan ? tanggalindo($data->tgl_dibukukan) : '-' }}"  readonly>
+                                                    @else
+                                                    <input type="text" class="form-control" id="tgl_dibukukan" name="tgl_dibukukan" value="{{ $data->tgl_dibukukan ? tanggalindo($data->tgl_dibukukan) : '-' }}"  readonly>
+                                                    @endif
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -424,7 +480,9 @@
                          </div>
 
                         <div class="text-end mt-3">
-                            {{-- <button class="btn btn-primary" type="submit">Submit</button> --}}
+                            @if(Auth::user()->hasRole('Finance') && $data->status_dibukukan == "MENUNGGU PEMBAYARAN") 
+                            <button class="btn btn-primary" type="submit">Submit</button>
+                            @endif
                             <a href="{{ route('mutasiindengh.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
@@ -469,9 +527,9 @@
                 <label for="nominal" class="form-label">Nominal</label>
                 <div class="input-group">
                   <span class="input-group-text">Rp. </span>
-                  <input type="text" class="form-control"  id="nominal">
+                  <input type="text" class="form-control"  id="nominal" value="{{ formatRupiah2($data->sisa_bayar) }}">
                 </div>
-                <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
+                <input type="text" class="form-control"  id="nominal2" name="nominal" value="{{ $data->sisa_bayar }}" hidden>
               </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>

@@ -14,8 +14,9 @@ class KasGalleryExport implements FromView
     protected $totalSaldo;
     protected $saldoRekening;
     protected $saldoCash;
+    protected $id_galleries;
 
-    public function __construct($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash)
+    public function __construct($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries)
     {
         $this->data = $data;
         $this->thisMonth = $thisMonth;
@@ -24,6 +25,7 @@ class KasGalleryExport implements FromView
         $this->totalSaldo = $totalSaldo;
         $this->saldoRekening = $saldoRekening;
         $this->saldoCash = $saldoCash;
+        $this->id_galleries = $id_galleries;
     }
 
     public function view(): View
@@ -36,6 +38,7 @@ class KasGalleryExport implements FromView
             'totalSaldo' => $this->totalSaldo,
             'saldoRekening' => $this->saldoRekening,
             'saldoCash' => $this->saldoCash,
+            'id_galleries' => $this->id_galleries,
         ]);
     }
 }

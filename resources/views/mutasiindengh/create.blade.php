@@ -52,8 +52,8 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $no_mutasi }}" readonly>
                                         </div>
                                         <div class="form-group">
-                                            <label for="tgl_kirim">Tanggal Kirim</label>
-                                            <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" 
+                                            <label for="tgl_dikirim">Tanggal Kirim</label>
+                                            <input type="date" class="form-control" id="tgl_kirim" name="tgl_dikirim" 
                                             value="{{ now()->format('Y-m-d') }}" 
                                             min="{{ now()->format('Y-m-d') }}" 
                                             max="{{ now()->addYear()->format('Y-m-d') }}">
@@ -146,17 +146,18 @@
                                             <tbody id="dynamic_field">
                                                 <tr>   
                                                     <td>
-                                                        <select class="form-control" id="bulan_inden_0" name="bulan_inden[]">
+                                                        <select class="form-controlv select2" id="bulan_inden_0" name="bulan_inden[]" required>
                                                             <option value="">Pilih Bulan Inden</option>
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select class="form-control" id="kode_inden_0" name="kode_inden[]">
+                                                        <select class="form-control select2" id="kode_inden_0" name="kode_inden[]" required>
                                                             <option value="">Pilih Kode Inden</option>
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" class="form-control" name="kategori[]" id="kategori_0" readonly></td>
-                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" required></td>
+                                                    <td><input type="hidden" class="form-control" name="idinven[]" id="idinven_0" value="" readonly>
+                                                        <input type="text" class="form-control" name="kategori[]" id="kategori_0" readonly required></td>
+                                                    <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" oninput="validateQty(0)" required></td>
                                                     <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td>
                                                         <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
@@ -308,10 +309,9 @@
                                             <tr>
                                                 <td id="status_dibuat">
                                                     <select id="status_dibuat" name="status_dibuat" class="form-control" required>
-                                                        <option>Pilih Status</option>
-                                                        <option value="TUNDA">TUNDA</option>
-                                                        <option value="DIKONFIRMASI">DIKONFIRMASI</option>
-                                                        <option value="BATAL">BATAL</option>
+                                                        <option disabled>Pilih Status</option>
+                                                        <option value="TUNDA" {{ old('status_dibuat') == 'TUNDA'  ? 'selected' : '' }}>TUNDA</option>
+                                                        <option value="DIKONFIRMASI" {{ old('status_dibuat') == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                     </select>
                                                 </td>
                                                 {{-- <td id="status_diterima">
@@ -356,8 +356,6 @@
                                 <br>                                 
                             </div>
                         </div>
-                        
-
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="{{ route('mutasiindengh.index') }}" class="btn btn-secondary" type="button">Back</a>
@@ -478,6 +476,8 @@ function calculateTotal(index) {
     }
 }
 
+
+
 function calculateTotalAll() { 
     var subTotal = 0;
     var biaya_ongkir = parseFloat(unformatRupiah(document.getElementById('biaya_ongkir2').value)) || 0;
@@ -502,10 +502,32 @@ function calculateTotalAll() {
 }
 
 
+function validateQty(index) {
+    let qtyKrm = parseFloat($(`#qtykrm_${index}`).val());
+    let jumlah = parseFloat($(`#qtykrm_${index}`).data('jumlah')); // Ambil jumlah dari atribut data
+
+    console.log('Validating quantity:', qtyKrm, 'against:', jumlah); // Debug log
+
+    if (qtyKrm < 0) {
+        $(`#qtykrm_${index}`).val(0);
+    } else if (qtyKrm > jumlah) {
+        $(`#qtykrm_${index}`).val(jumlah);
+    }
+
+    calculateTotal(index);
+}
+
+
     $(document).ready(function() {
 
-        
-        $('.select2').select2();
+    $('.select2').select2();
+
+
+    $(document).on('input change', 'input[name="qtykrm[]"]', function () {
+        let index = $(this).attr('id').split('_')[1];
+        validateQty(index);
+    });
+
 
         bindSelectEvents(0);
 
@@ -545,18 +567,19 @@ function calculateTotalAll() {
         var newRow = `
             <tr id="row${i}">
                 <td>
-                    <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
+                    <select class="form-control select2" id="bulan_inden_${i}" name="bulan_inden[]">
                         <option value="">Pilih Bulan Inden</option>
                         ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
                     </select>
                 </td>
                 <td>
-                    <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
+                    <select class="form-control select2" id="kode_inden_${i}" name="kode_inden[]">
                         <option value="">Pilih Kode Inden</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
-                <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" onchange="calculateTotal(${i})"></td>
+                <td><input type="hidden" class="form-control" name="idinven[]" id="idinven_${i}" value="" readonly>
+                    <input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
+                <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control"  oninput="validateQty(${i})"></td>
                 <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly></td>
                 <td>
                     <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
@@ -586,6 +609,8 @@ function calculateTotalAll() {
 
         $('#dynamic_field').append(newRow);
         bindSelectEvents(i);
+
+        $('.select2').select2();
 
         // Bind event untuk input yang baru ditambahkan
         document.getElementById(`rawat2_${i}`).addEventListener('focus', function() {
@@ -634,7 +659,17 @@ function bindSelectEvents(index) {
         const supplierId = $('#supplier').val();
         const bulanInden = $(this).val();
         const kodeIndenDropdown = $('#kode_inden_' + index);
+        const kategoriInput = $('#kategori_' + index); 
+        const jumlahkirimInput = $('#qtykrm_' + index); 
+        $('#kategori_' + index).val('');
+        $('#idinven_' + index).val('');
+        $('#qtykrm_'+ index ).val('');
 
+        $('#rawat_'+ index ).val('');
+        $('#rawat2_'+ index ).val('');
+        $('#jumlah_'+ index ).val('');
+        $('#jumlahint_'+ index ).val('');
+      
         kodeIndenDropdown.empty();
         kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
 
@@ -658,25 +693,39 @@ function bindSelectEvents(index) {
         }
     });
 
-    $('#kode_inden_' + index).change(function() {
+        $('#kode_inden_' + index).change(function() {
         const supplierId = $('#supplier').val();
         const bulanInden = $('#bulan_inden_' + index).val();
         const kodeInden = $(this).val();
         const kategoriInput = $('#kategori_' + index); 
+        const jumlahkirimInput = $('#qtykrm_' + index); 
+        const inventoryinden_id = $('#idinven_' + index); 
+        
+        $('#rawat_'+ index ).val('');
+        $('#rawat2_'+ index ).val('');
+        $('#jumlah_'+ index ).val('');
+        $('#jumlahint_'+ index ).val('');
 
         if (kodeInden) {
             $.ajax({
                 url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
                 type: 'GET',
-                success: function(kategori) {
-                    kategoriInput.val(kategori);
+                success: function(response) {
+                    kategoriInput.val(response.kategori);
+                    jumlahkirimInput.val(response.jumlah);
+                    inventoryinden_id.val(response.idinven);
+                    jumlahkirimInput.data('jumlah', response.jumlah); // Simpan jumlah dalam atribut data
+                    console.log('Jumlah saved in data attribute:', response.jumlah); 
+
                 },
                 error: function() {
                     alert('Gagal mengambil data kategori');
                 }
             });
         }
+        
     });
+
 }
 
 
@@ -692,7 +741,16 @@ $('#supplier').change(function() {
         $(this).empty();
         $(this).append('<option value="">Pilih Kode Inden</option>');
     });
+        // Kosongkan kategori dan qtykrm
+    $('input[name="idinven[]"]').val('');
+    $('input[name="kategori[]"]').val('');
+    $('input[name="qtykrm[]"]').val('');
+    $('input[name="rawat[]"]').val('');
+    $('input[name="rawat2[]"]').val('');
+    $('input[name="jumlah[]"]').val('');
+    $('input[name="jumlah_display[]"]').val('');
     
+    calculateTotal();
 
     if (supplierId) {
         // Ambil data bulan inden dari server
@@ -722,9 +780,6 @@ $('#supplier').change(function() {
        
     });
    
-
-
-
         function clearFile(){
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);

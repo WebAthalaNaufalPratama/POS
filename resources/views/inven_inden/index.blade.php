@@ -36,7 +36,7 @@
                     <select id="filterPeriode" name="filterPeriode" class="form-control" title="Periode">
                         <option value="">Pilih Periode</option>
                         @foreach ($periodes as $item)
-                            <option value="{{ $item->id }}" {{ $item->id == request()->input('periode') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                            <option value="{{ $item->bulan_inden }}" {{ $item->bulan_inden == request()->input('periode') ? 'selected' : '' }}>{{ $item->bulan_inden }}</option>
                         @endforeach
                     </select>
                 </div>
