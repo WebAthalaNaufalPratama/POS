@@ -13,7 +13,7 @@
                         $user = Auth::user();
                         $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                     @endphp
-                    @if($lokasi->lokasi->tipe_lokasi != 1)
+                    @if($lokasi->lokasi->tipe_lokasi != 1 && !$user->hasRole(['Auditor', 'Finance']))
                     <div class="page-btn">
                         <a href="{{ route('mutasighgalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
                     </div>
@@ -66,11 +66,11 @@
                                     </a>
                                         <div class="dropdown-menu">
                                             @php
-                                                $produkMutasi = $mutasi->produkMutasiGHGallery->first();
+                                                $produkMutasi = $mutasi->produkMutasiGG->first();
                                             @endphp
                                             @if($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && !empty($produkMutasi) && $produkMutasi->jumlah_diterima == null)
                                                 <a class="dropdown-item" href="{{ route('auditmutasighgalery.edit', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>
-                                            @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && !empty($produkMutasi) && $produkMutasi->jumlah_diterima == null)
+                                            @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && !empty($produkMutasi) && $produkMutasi->jumlah_diterima != null)
                                                 <a class="dropdown-item" href="{{ route('mutasighgalery.show', ['mutasiGG' => $mutasi->id]) }}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit Acc Terima</a>
                                             @elseif($user->hasRole(['Purchasing']))
                                                 @if($mutasi->status != 'DIKONFIRMASI')
