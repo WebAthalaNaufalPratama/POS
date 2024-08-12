@@ -26,6 +26,7 @@ use App\Exports\PromoExport;
 use App\Exports\ReturPembelianExport;
 use App\Exports\ReturPembelianIndenExport;
 use App\Exports\StokGalleryExport;
+use App\Exports\StokPusatExport;
 use App\Exports\StokIndenExport;
 use App\Models\Customer;
 use App\Models\DeliveryOrder;
@@ -5502,6 +5503,257 @@ class LaporanController extends Controller
         });
         
         return view('laporan.stok_pusat', compact('data', 'listDate', 'bulan', 'greenhouse', 'lokasi', 'tahun'));
+    }
+
+    public function stok_pusat_excel(Request $req) 
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $greenhouse = Lokasi::where('tipe_lokasi', [3, 4])->get();
+        
+        $thisLokasi = $req->gallery ?? $greenhouse->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $greenhouse->where('id', $req->gallery)->first() : $greenhouse->first();
+        $listDate = $this->listDatePerMonth($thisMonth, $thisYear);
+
+        // data mutasi
+        $mutasi = Mutasi::where('status', 'DIKONFIRMASI')
+            ->where(function($q) use($thisLokasi) {
+                $q->where('penerima', $thisLokasi)
+                ->orWhere('pengirim', $thisLokasi);
+            })
+            ->whereYear('tanggal_kirim', $thisYear)
+            ->whereMonth('tanggal_kirim', $thisMonth)
+            ->with([
+                'produkMutasi.komponen',
+                'produkMutasiOutlet.komponen',
+                'produkMutasiGG.komponen',
+                'produkMutasiGAG.komponen'
+            ])
+        ->get();
+
+        // data pembelian
+        $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->where('lokasi_id', $thisLokasi)
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->whereNotNull('penerima')
+            ->with([
+                'produkbeli.produk'
+            ])
+        ->get();
+
+        // data retur pembelian
+        $returPembelian = Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->whereHas('invoice', function($q) use($thisLokasi){
+                $q->whereHas('pembelian', function($r) use($thisLokasi){
+                    $r->where('lokasi_id', $thisLokasi);
+                });
+            })
+            ->whereYear('tgl_retur', $thisYear)
+            ->whereMonth('tgl_retur', $thisMonth)
+            ->with([
+                'produkretur.produkbeli.produk',
+                'invoice.pembelian'
+            ])
+        ->get();
+
+        // data mutasi inden
+        $mutasiInden = Mutasiindens::where('status_diterima', 'DIKONFIRMASI')
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+            ->with([
+                'produkmutasi.produk.produk'
+            ])
+        ->get();
+
+        // data return mutasi inden
+        $returMutasiInden = Returinden::where('status_dibukukan', 'DIKONFIRMASI')
+            ->whereYear('tgl_dibukukan', $thisYear)
+            ->whereMonth('tgl_dibukukan', $thisMonth)
+            ->whereHas('mutasiinden', function($q) use($thisLokasi){
+                $q->where('lokasi_id', $thisLokasi);
+            })
+            ->with([
+                'produkreturinden.produk.produk.produk'
+            ])
+        ->get();
+
+        // tahun dari data mutasi
+        $years = $mutasi->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+
+        // tahun dari data pembelian
+        $years = $years->merge($pembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data retur pembelian
+        $years = $years->merge($returPembelian->pluck('tgl_retur')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi inden
+        $years = $years->merge($returPembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data retur mutasi inden
+        $years = $years->merge($returMutasiInden->pluck('tgl_dibukukan')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // Ambil tahun yang unik dan urutkan
+        $tahun = $years->unique()->sort()->values();
+
+        // integrate data
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+            // Inisialisasi list data dengan saldo awal 0
+            $item->dates = collect($listDate)->mapWithKeys(function($date) {
+                return [
+                    $date => [
+                        'stok_masuk' => 0,
+                        'stok_keluar' => 0,
+                        'stok_retur' => 0,
+                        'saldo' => 0
+                    ]
+                ];
+            });
+    
+            // dd($listDate);
+            // Fungsi untuk memperbarui stok dan saldo
+            $updateSaldo = function($date, $stokKeluar, $stokMasuk, $stokRetur) use(&$item) {
+                // dd($item);
+                // dd($date);
+                $current = $item->dates[$date];
+                $previousDate = Carbon::parse($date)->subDay()->format('Y-m-d');
+        
+                // Jika ada tanggal sebelumnya, ambil saldo sebelumnya
+                $previousSaldo = $item->dates->has($previousDate) ? $item->dates[$previousDate]['saldo'] : 0;
+        
+                $current['stok_keluar'] += $stokKeluar;
+                $current['stok_masuk'] += $stokMasuk;
+                $current['stok_retur'] += $stokRetur;
+                $current['saldo'] = $previousSaldo + $current['stok_masuk'] - $current['stok_keluar'] + $current['stok_retur'];
+        
+                $item->dates = $item->dates->put($date, $current);
+            };
+
+            // Proses Mutasi
+            $mutasi->each(function($order) use($item, $thisLokasi, $updateSaldo) {
+                if($order->penerima == $thisLokasi){
+                    $order->produkMutasiGG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_kirim)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                                
+                            }
+                        });
+                    });
+                    $order->produkMutasiGAG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_kirim)->format('Y-m-d');
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                }
+                if($order->pengirim == $thisLokasi){
+                    $order->produkMutasiGG->each(function($product) use($item, $order, $updateSaldo) {
+                        $product->komponen->each(function($komponen) use($item, $order, $product, $updateSaldo) {
+                            if ($komponen->kode_produk == $item->kode) {
+                                $date = Carbon::parse($order->tanggal_kirim)->format('Y-m-d');
+                                
+                                $updateSaldo($date, 0, ($komponen->jumlah * $product->jumlah), 0);
+                            }
+                        });
+                    });
+                }
+            });
+
+            // Proses Pembelian
+            $pembelian->each(function($order) use($item, $updateSaldo) {
+                $order->produkbeli->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_diterima)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+
+            // Proses Retur Pembelian
+            $returPembelian->each(function($order) use($item, $updateSaldo) {
+                $order->produkretur->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produkbeli->produk_id == $item->id) {
+                        $date = Carbon::parse($order->tgl_retur)->format('Y-m-d');
+                        $updateSaldo($date, $product->jumlah, 0, 0);
+                    }
+                });
+            });
+            
+            // Proses Mutasi Inden
+            $mutasiInden->each(function($order) use($item, $updateSaldo) {
+                $order->produkmutasi->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produk->produk->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_diterima)->format('Y-m-d');
+                        $updateSaldo($date, 0, $product->jml_diterima, 0);
+                    }
+                });
+            });
+            
+            // Proses Retur Mutasi Inden
+            $returMutasiInden->each(function($order) use($item, $updateSaldo) {
+                $order->produkreturinden->each(function($product) use($item, $order, $updateSaldo) {
+                    if ($product->produk->produk->produk->id == $item->id) {
+                        $date = Carbon::parse($order->tgl_dibukukan)->format('Y-m-d');
+                        $updateSaldo($date, $product->jml_diterima, 0, 0);
+                    }
+                });
+            });
+
+            // Validasi saldo
+            foreach ($listDate as $index => $date) {
+                if ($index > 0) {
+                    $previousDate = $listDate[$index - 1];
+                    $current = $item->dates[$date];
+                    $previousSaldo = $item->dates[$previousDate]['saldo'];
+            
+                    $current['saldo'] = $previousSaldo + $current['stok_masuk'] - $current['stok_keluar'] + $current['stok_retur'];
+            
+                    $item->dates = $item->dates->put($date, $current);
+                    $item->dates = $item->dates->put($date, $current);
+                    $item->dates = $item->dates->put($date, $current);
+                }
+            }
+            
+        
+            $item->totalMasuk = $item->dates->sum('stok_masuk');
+            $item->totalKeluar = $item->dates->sum('stok_keluar');
+            $item->totalRetur = $item->dates->sum('stok_retur');
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new StokPusatExport($data, $listDate, $lokasi), 'stok_pusat.xlsx');
     }
 
     
