@@ -65,9 +65,9 @@
                         <h4>Laporan Stok Gallery</h4>
                     </div>
                     <div class="page-btn">
-                        <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
+                        {{-- <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
                             <img src="/assets/img/icons/pdf.svg" alt="PDF" style="height: 1rem;"/> PDF
-                        </button>
+                        </button> --}}
                         <button class="btn btn-outline-success" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="excel()">
                             <img src="/assets/img/icons/excel.svg" alt="EXCEL" style="height: 1rem;"/> EXCEL
                         </button>
@@ -116,7 +116,7 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center sticky-col first-col" colspan="2">{{ ucfirst($lokasi->nama) }}</th>
-                                        <th class="text-center sticky-col second-col" colspan="2">{{ \Carbon\Carbon::parse($listDate[0])->format('F') }}</th>
+                                        <th class="text-center sticky-col second-col" colspan="2">{{ \Carbon\Carbon::parse($listDate[0])->locale('id')->translatedFormat('F') }}</th>
                                     </tr>
                                     <tr>
                                         <th class="text-center align-middle sticky-col first-col" style="width: 5%">No</th>
@@ -242,37 +242,37 @@
                 return 0;
             });
         });
-        function pdf(){
-            var filterGallery = $('#filterGallery').val();
-            var filterBulan = $('#filterBulan').val();
-            var filterTahun = $('#filterTahun').val();
+        // function pdf(){
+        //     var filterGallery = $('#filterGallery').val();
+        //     var filterBulan = $('#filterBulan').val();
+        //     var filterTahun = $('#filterTahun').val();
 
-            var desc = 'Cetak laporan tanpa filter';
-            if(filterGallery || filterBulan || filterTahun){
-                desc = 'cetak laporan dengan filter';
-            }
+        //     var desc = 'Cetak laporan tanpa filter';
+        //     if(filterGallery || filterBulan || filterTahun){
+        //         desc = 'cetak laporan dengan filter';
+        //     }
             
-            Swal.fire({
-                title: 'Cetak PDF?',
-                text: desc,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Cetak',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    var url = "{{ route('laporan.stok_gallery-pdf') }}" + '?' + $.param({
-                        gallery: filterGallery,
-                        bulan: filterBulan,
-                        tahun: filterTahun,
-                    });
+        //     Swal.fire({
+        //         title: 'Cetak PDF?',
+        //         text: desc,
+        //         icon: 'warning',
+        //         showCancelButton: true,
+        //         confirmButtonColor: '#3085d6',
+        //         cancelButtonColor: '#d33',
+        //         confirmButtonText: 'Cetak',
+        //         cancelButtonText: 'Batal'
+        //     }).then((result) => {
+        //         if (result.isConfirmed) {
+        //             var url = "{{ route('laporan.stok_gallery-pdf') }}" + '?' + $.param({
+        //                 gallery: filterGallery,
+        //                 bulan: filterBulan,
+        //                 tahun: filterTahun,
+        //             });
                     
-                    window.open(url, '_blank');
-                }
-            });
-        }
+        //             window.open(url, '_blank');
+        //         }
+        //     });
+        // }
         function excel(){
             var filterGallery = $('#filterGallery').val();
             var filterBulan = $('#filterBulan').val();
