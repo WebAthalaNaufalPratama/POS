@@ -717,8 +717,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/stok_gallery', 'LaporanController@stok_gallery_index')->name('laporan.stok_gallery');
             Route::get('/stok_gallery-pdf', 'LaporanController@stok_gallery_pdf')->name('laporan.stok_gallery-pdf');
             Route::get('/stok_gallery-excel', 'LaporanController@stok_gallery_excel')->name('laporan.stok_gallery-excel');
-
-
+            Route::get('/stok_pusat', 'LaporanController@stok_pusat_index')->name('laporan.stok_pusat');
+            Route::get('/stok_pusat-pdf', 'LaporanController@stok_pusat_pdf')->name('laporan.stok_pusat-pdf');
+            Route::get('/stok_pusat-excel', 'LaporanController@stok_pusat_excel')->name('laporan.stok_pusat-excel');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

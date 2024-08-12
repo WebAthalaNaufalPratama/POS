@@ -210,6 +210,7 @@
                         <li><a href="{{ route('laporan.omset') }}" class="{{ request()->is('laporan/omset*') ? 'active' : '' }}">Omset</a></li>
                         <li><a href="{{ route('laporan.promo') }}" class="{{ request()->is('laporan/promo*') ? 'active' : '' }}">Promo</a></li>
                         <li><a href="{{ route('laporan.stok_gallery') }}" class="{{ request()->is('laporan/stok_gallery*') ? 'active' : '' }}">Stok Gallery</a></li>
+                        <li><a href="{{ route('laporan.stok_pusat') }}" class="{{ request()->is('laporan/stok_pusat*') ? 'active' : '' }}">Stok Pusat</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
