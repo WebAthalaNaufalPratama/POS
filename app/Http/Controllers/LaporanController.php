@@ -17,6 +17,7 @@ use App\Exports\HutangSupplierExport;
 use App\Exports\MutasiExport;
 use App\Exports\MutasiindenExport;
 use App\Exports\OmsetExport;
+use App\Exports\PemakaianSendiriExport;
 use App\Exports\PenjualanExport;
 use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
@@ -53,6 +54,7 @@ use App\Models\Mutasi;
 use App\Models\Supplier;
 use App\Models\ReturPenjualan;
 use App\Models\Mutasiindens;
+use App\Models\PemakaianSendiri;
 use App\Models\Pembelian;
 use App\Models\Produk;
 use App\Models\ProdukMutasiInden;
@@ -3211,6 +3213,96 @@ class LaporanController extends Controller
 
         if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new StokGalleryExport($data, $listDate, $lokasi), 'stok_gallery.xlsx');
+    }
+    
+    public function pemakaian_sendiri_index(Request $req)
+    {
+        $query = PemakaianSendiri::with('lokasi', 'produk', 'kondisi', 'karyawan');
+
+        if($req->gallery){
+            $query->where('lokasi_id', $req->gallery);
+        }
+        if ($req->produk) {
+            $query->where('produk_id', $req->produk);
+        }
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->gallery_nama = $item->lokasi->nama;
+            $item->jumlah_baik = $item->kondisi_id == 1 ? $item->jumlah : 0;
+            $item->jumlah_afkir = $item->kondisi_id == 2 ? $item->jumlah : 0;
+            $item->jumlah_bonggol = $item->kondisi_id == 3 ? $item->jumlah : 0;
+            return $item;
+        });
+
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        $produk = Produk::all();
+
+        return view('laporan.pemakaian_sendiri', compact('data', 'galleries', 'produk'));
+    }
+
+    public function pemakaian_sendiri_pdf(Request $req)
+    {
+        $query = PemakaianSendiri::with('lokasi', 'produk', 'kondisi', 'karyawan');
+
+        if($req->gallery){
+            $query->where('lokasi_id', $req->gallery);
+        }
+        if ($req->produk) {
+            $query->where('produk_id', $req->produk);
+        }
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->gallery_nama = $item->lokasi->nama;
+            $item->jumlah_baik = $item->kondisi_id == 1 ? $item->jumlah : 0;
+            $item->jumlah_afkir = $item->kondisi_id == 2 ? $item->jumlah : 0;
+            $item->jumlah_bonggol = $item->kondisi_id == 3 ? $item->jumlah : 0;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pemakaian_sendiri_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pemakaian_sendiri.pdf');
+    }
+
+    public function pemakaian_sendiri_excel(Request $req)
+    {
+        $query = PemakaianSendiri::with('lokasi', 'produk', 'kondisi', 'karyawan');
+
+        if($req->gallery){
+            $query->where('lokasi_id', $req->gallery);
+        }
+        if ($req->produk) {
+            $query->where('produk_id', $req->produk);
+        }
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->gallery_nama = $item->lokasi->nama;
+            $item->jumlah_baik = $item->kondisi_id == 1 ? $item->jumlah : 0;
+            $item->jumlah_afkir = $item->kondisi_id == 2 ? $item->jumlah : 0;
+            $item->jumlah_bonggol = $item->kondisi_id == 3 ? $item->jumlah : 0;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PemakaianSendiriExport($data), 'pemakaian_sendiri.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)

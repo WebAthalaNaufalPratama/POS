@@ -720,6 +720,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/stok_pusat', 'LaporanController@stok_pusat_index')->name('laporan.stok_pusat');
             Route::get('/stok_pusat-pdf', 'LaporanController@stok_pusat_pdf')->name('laporan.stok_pusat-pdf');
             Route::get('/stok_pusat-excel', 'LaporanController@stok_pusat_excel')->name('laporan.stok_pusat-excel');
+            Route::get('/pemakaian_sendiri', 'LaporanController@pemakaian_sendiri_index')->name('laporan.pemakaian_sendiri');
+            Route::get('/pemakaian_sendiri-pdf', 'LaporanController@pemakaian_sendiri_pdf')->name('laporan.pemakaian_sendiri-pdf');
+            Route::get('/pemakaian_sendiri-excel', 'LaporanController@pemakaian_sendiri_excel')->name('laporan.pemakaian_sendiri-excel');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
