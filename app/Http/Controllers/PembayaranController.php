@@ -616,7 +616,11 @@ class PembayaranController extends Controller
     }
 
     public function index_po(Request $req){
-        $query = Pembayaran::whereNotNull('invoice_purchase_id');
+        $query = Pembayaran::where(function($query) {
+            $query->where('no_invoice_bayar', 'LIKE', '%BYPO%')
+                  ->orWhere('no_invoice_bayar', 'LIKE', '%BYMI%');
+        });
+
         if ($req->metode_keluar) {
             $query->where('cara_bayar', $req->input('metode_keluar'));
         }
@@ -628,7 +632,11 @@ class PembayaranController extends Controller
         }
         $data = $query->orderByDesc('id')->get();
 
-        $query2 = Pembayaran::where('no_invoice_bayar', 'LIKE', '%Refundpo%');
+        $query2 = Pembayaran::where(function($query2) {
+            $query2->where('no_invoice_bayar', 'LIKE', '%Refundpo%')
+                  ->orWhere('no_invoice_bayar', 'LIKE', '%RefundInden%');
+        });
+
         if ($req->metode_masuk) {
             $query2->where('cara_bayar', $req->input('metode_masuk'));
         }

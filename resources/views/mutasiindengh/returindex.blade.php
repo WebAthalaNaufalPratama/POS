@@ -100,7 +100,7 @@
                                         <span class="badges bg-lightred">TUNDA</span>
                                     @elseif ($retur->status_dibukukan == 'DIKONFIRMASI')
                                         <span class="badges bg-lightgreen">DIKONFIRMASI</span>
-                                    @elseif ($retur->status_dibukukan == 'MENUNGGU PEMBAYARAN' && $retur->sisa_refund !== 0 && $retur->mutasiinden->sisa_bayar !== 0 && $retur->tipe_komplain == "Refund") 
+                                    @elseif ($retur->status_dibukukan == 'MENUNGGU PEMBAYARAN' && $retur->sisa_refund !== 0 && $retur->mutasiinden->sisa_bayar == 0 && $retur->tipe_komplain == "Refund") 
                                         <span class="badges bg-lightyellow">MENUNGGU PEMBAYARAN</span>
                                     @elseif ($retur->status_dibukukan == 'MENUNGGU PEMBAYARAN' && $retur->sisa_refund == 0 && $retur->mutasiinden->sisa_bayar !== 0 && $retur->tipe_komplain == "Diskon") 
                                         <span class="badges bg-lightyellow">MENUNGGU PEMBAYARAN</span>
@@ -129,15 +129,19 @@
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('edit.retur', ['idretur' => $retur->id]) }}"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain</a>
                                             </li>
-                                        @elseif($retur->status_dibukukan == "MENUNGGU PEMBAYARAN" && $retur->sisa_Refund == 0 && $retur->mutasiinden->sisa_bayar == 0)  
+                                        @endif
+                                        @if($retur->status_dibukukan == "MENUNGGU PEMBAYARAN" && ($retur->sisa_refund !== 0 || $retur->mutasiinden->sisa_bayar !== 0))
+                                        <li>
+                                             <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar</a>
+                                         </li>
+                                        @endif
+                                        @if($retur->status_dibukukan == "MENUNGGU PEMBAYARAN" && ($retur->sisa_refund == 0 && $retur->mutasiinden->sisa_bayar == 0)) 
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi</a>
                                             </li>
-                                        @elseif($retur->status_dibukukan == "MENUNGGU PEMBAYARAN" && ($retur->sisa_Refund !== 0 || $retur->mutasiinden->sisa_bayar !== 0))  
-                                            <li>
-                                                 <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar</a>
-                                             </li>
-                                        @elseif($retur->status_dibukukan == "DIKONFIRMASI" )  
+                                        @endif
+                                       
+                                        @if($retur->status_dibukukan == "DIKONFIRMASI" )  
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $retur->mutasiinden->id ]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur</a>
                                             </li>
