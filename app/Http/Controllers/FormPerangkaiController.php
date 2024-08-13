@@ -66,6 +66,11 @@ class FormPerangkaiController extends Controller
                     ->orWhereHas('produk_terjual', function($c) use($search){
                         $c->where('no_sewa', 'like', "%$search%");
                     })
+                    ->orWhereHas('produk_terjual', function($c) use($search){
+                        $c->whereHas('produk', function($d) use($search){
+                            $d->where('nama', 'like', "%$search%");
+                        });
+                    })
                     ->orWhereHas('perangkai', function($c) use($search){
                         $c->where('nama', 'like', "%$search%");
                     });
@@ -82,7 +87,8 @@ class FormPerangkaiController extends Controller
             $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
                 $item->tanggal = $item->tanggal == null ? null : formatTanggal($item->tanggal);
-                $item->no_kontrak = $item->produk_terjual->first()->no_sewa;
+                $item->no_kontrak = $item->produk_terjual->no_sewa;
+                $item->nama_produk = $item->produk_terjual->produk->nama;
                 $item->nama_perangkai = $item->perangkai->nama;
                 $item->userRole = Auth::user()->getRoleNames()->first();
                 return $item;

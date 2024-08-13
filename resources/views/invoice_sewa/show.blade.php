@@ -464,7 +464,7 @@
                             <th>No Invoice Pembayaran</th>
                             <th>Nominal</th>
                             <th>Tanggal Bayar</th>
-                            <th>Metode</th>
+                            <th class="text-center">Metode</th>
                             <th>Rekening</th>
                             <th class="text-center">Status</th>
                             <th>Aksi</th>
@@ -480,7 +480,13 @@
                                 <td>{{ $item->no_invoice_bayar }}</td>
                                 <td>{{ formatRupiah($item->nominal) }}</td>
                                 <td>{{ formatTanggal($item->tanggal_bayar) }}</td>
-                                <td>{{ $item->cara_bayar }}</td>
+                                <td class="text-center">
+                                    @if ($item->cara_bayar == 'cash')
+                                        <span class="badges bg-lightgreen">{{ ucfirst($item->cara_bayar) }}</span>
+                                    @elseif ($item->cara_bayar == 'transfer')
+                                    <span class="badges bg-lightblue">{{ ucfirst($item->cara_bayar) }}</span>
+                                    @endif
+                                </td>
                                 <td>{{ $item->cara_bayar == 'transfer' ? $item->rekening->nama_akun : '-' }}</td>
                                 <td class="text-center">
                                     @if ($item->status_bayar == 'LUNAS')
@@ -700,7 +706,6 @@
         </div>
         <div class="modal-footer justify-content-center">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            <button type="submit" class="btn btn-primary">Simpan</button>
         </div>
       </div>
     </div>

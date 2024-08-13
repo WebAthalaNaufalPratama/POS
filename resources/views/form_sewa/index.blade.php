@@ -39,10 +39,10 @@
                     <th>No</th>
                     <th>No From</th>
                     <th>No Kontrak</th>
-                    {{-- <th>Produk</th> --}}
+                    <th>Produk</th>
                     <th>Perangkai</th>
                     <th>Tanggal Dirangkai</th>
-                    <th>Aksi</th>
+                    <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -88,6 +88,7 @@
             { data: 'no', name: 'no', orderable: false },
             { data: 'no_form', name: 'no_form' },
             { data: 'no_kontrak', name: 'no_kontrak' },
+            { data: 'nama_produk', name: 'nama_produk' },
             { data: 'nama_perangkai', name: 'nama_perangkai' },
             { data: 'tanggal', name: 'tanggal' },
             {
@@ -97,7 +98,7 @@
                 searchable: false,
                 render: function(data, type, row) {
                     return `
-                    <td class="text-center">
+                    <div class="text-center">
                         <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                             <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                         </a>
@@ -109,7 +110,7 @@
                                 <a href="form/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                             </li>
                         </ul>
-                    </td>
+                    </div>
                     `;
                 }
             }

@@ -16,7 +16,9 @@ use App\Models\Returinden;
 use App\Models\Returpembelian;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Facades\Image;
 
 class PembayaranController extends Controller
 {
@@ -272,20 +274,41 @@ class PembayaranController extends Controller
         try {
             // Update sisa invoice
             $totalPembayaran = Pembayaran::where('invoice_sewa_id', $data['invoice_sewa_id'])->sum('nominal');
-            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->total_tagihan) - intval($totalPembayaran) - intval($data['nominal']);
+            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->total_tagihan) - intval($invoice_tagihan->dp) - intval($totalPembayaran) - intval($data['nominal']);
     
             if (!$invoice_tagihan->save()) {
                 DB::rollBack();
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
     
-            // Store file
+            // store file
             if ($req->hasFile('bukti')) {
+                // Simpan file baru
                 $file = $req->file('bukti');
                 $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $filePath = 'bukti_pembayaran_sewa/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                // if (!empty($pembayaran->bukti)) {
+                //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                //     if (File::exists($oldFilePath)) {
+                //         File::delete($oldFilePath);
+                //     }
+                // }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
+
             $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
             $data['status_bayar'] = $new_invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
     
@@ -339,12 +362,32 @@ class PembayaranController extends Controller
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
     
-            // Store file
+            // store file
             if ($req->hasFile('bukti')) {
+                // Simpan file baru
                 $file = $req->file('bukti');
                 $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $filePath = 'bukti_pembayaran_sewa/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                if (!empty($pembayaran->bukti)) {
+                    $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                    if (File::exists($oldFilePath)) {
+                        File::delete($oldFilePath);
+                    }
+                }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
     
             $data['status_bayar'] = $invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
@@ -368,7 +411,7 @@ class PembayaranController extends Controller
         $validator = Validator::make($req->all(), [
             'invoice_purchase_id' => 'required',
             'no_invoice_bayar' => 'required',
-            'id_po' => 'required',
+            'id_po' => 'requred',
             'type' => 'required',
             'tanggal_bayar' => 'required',
             'nominal' => 'required',

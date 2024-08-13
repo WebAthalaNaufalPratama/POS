@@ -13,8 +13,10 @@ use App\Models\Produk_Terjual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
+use Intervention\Image\Facades\Image;
 
 class DeliveryOrderController extends Controller
 {
@@ -196,13 +198,6 @@ class DeliveryOrderController extends Controller
         $data['tanggal_pembuat'] = now();
         $data['pembuat'] = Auth::user()->id;
 
-        if ($req->hasFile('file')) {
-            $file = $req->file('file');
-            $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_do_sewa', $fileName, 'public');
-            $data['file'] = $filePath;
-        }
-
         DB::beginTransaction();
         try {
             // Check produk and quantity from sewa
@@ -210,6 +205,34 @@ class DeliveryOrderController extends Controller
             $produkSewa = $kontrak->produk()->whereHas('produk', function ($q) {
                 $q->whereColumn('jumlah_dikirim', '<', 'jumlah')->orWhereNull('jumlah_dikirim');
             })->get();
+
+            // store file
+            if ($req->hasFile('file')) {
+                // Simpan file baru
+                $file = $req->file('file');
+                $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = 'bukti_do_sewa/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                // if (!empty($pembayaran->bukti)) {
+                //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                //     if (File::exists($oldFilePath)) {
+                //         File::delete($oldFilePath);
+                //     }
+                // }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['file'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
+            }
 
             // Cek input dengan sewa
             foreach ($produkSewa as $item) {
@@ -497,12 +520,34 @@ class DeliveryOrderController extends Controller
             // Start DB transaction
             DB::beginTransaction();
             try {
+                $deliveryOrder = DeliveryOrder::find($deliveryOrder);
                 $data = $req->except(['_token', '_method']);
+                // store file
                 if ($req->hasFile('file')) {
+                    // Simpan file baru
                     $file = $req->file('file');
                     $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                    $filePath = $file->storeAs('bukti_do_sewa', $fileName, 'public');
-                    $data['file'] = $filePath;
+                    $filePath = 'bukti_do_sewa/' . $fileName;
+                
+                    // Optimize dan simpan file baru
+                    Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                        ->save(storage_path('app/public/' . $filePath));
+                
+                    // Hapus file lama
+                    if (!empty($deliveryOrder->file)) {
+                        $oldFilePath = storage_path('app/public/' . $deliveryOrder->file);
+                        if (File::exists($oldFilePath)) {
+                            File::delete($oldFilePath);
+                        }
+                    }
+                
+                    // Verifikasi penyimpanan file baru
+                    if (File::exists(storage_path('app/public/' . $filePath))) {
+                        $data['file'] = $filePath;
+                    } else {
+                        DB::rollBack();
+                        return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                    }
                 }
 
                 // Check produk and quantity from sewa
@@ -547,7 +592,6 @@ class DeliveryOrderController extends Controller
                 }
 
                 // Save data do
-                $deliveryOrder = DeliveryOrder::find($deliveryOrder);
                 $deliveryOrder->update($data);
 
                 $data_do = DeliveryOrder::find($deliveryOrder->id);
