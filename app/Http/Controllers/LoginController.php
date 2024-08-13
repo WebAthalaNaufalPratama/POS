@@ -38,7 +38,7 @@ class LoginController extends Controller
         endif;
 
         $user = Auth::getProvider()->retrieveByCredentials($credentials);
-        if($user->getRoleNames()->first() != 'SuperAdmin' && $user->doesntHave('karyawans')){
+        if ($user->getRoleNames()->first() !== 'SuperAdmin' && $user->karyawans()->doesntExist()) {
             return redirect()->back()->with('fail', 'Data pengguna belum dikonfigurasi dengan karyawan');
         }
         Auth::login($user, $request->get('remember'));
