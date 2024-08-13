@@ -33,20 +33,20 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="dataTable">
                 <thead>
                 <tr>
                     <th>No</th>
                     <th>No From</th>
                     <th>No Kontrak</th>
-                    <th>Produk</th>
+                    {{-- <th>Produk</th> --}}
                     <th>Perangkai</th>
                     <th>Tanggal Dirangkai</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $item)
+                    {{-- @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_form ?? '-' }}</td>
@@ -68,7 +68,7 @@
                                 </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -82,42 +82,70 @@
     <script>
     $(document).ready(function(){
         $('#filterPerangkai').select2();
-    });
-    $('#filterBtn').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var urlString = baseUrl;
-        var first = true;
-        var symbol = '&';
 
-        var perangkai = $('#filterPerangkai').val();
-        if (perangkai) {
-            var filterPerangkai = 'perangkai=' + perangkai;
-            urlString += symbol;
-            urlString += filterPerangkai;
-        }
+        // Start Datatable
+        const columns = [
+            { data: 'no', name: 'no', orderable: false },
+            { data: 'no_form', name: 'no_form' },
+            { data: 'no_kontrak', name: 'no_kontrak' },
+            { data: 'nama_perangkai', name: 'nama_perangkai' },
+            { data: 'tanggal', name: 'tanggal' },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    return `
+                    <td class="text-center">
+                        <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="form/${row.id}/cetak" target="_blank" class="dropdown-item"><img src="assets/img/icons/download.svg" class="me-2" alt="img">Cetak</a>
+                            </li>
+                            <li>
+                                <a href="form/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                            </li>
+                        </ul>
+                    </td>
+                    `;
+                }
+            }
+        ];
 
-        var dateStart = $('#filterDateStart').val();
-        if (dateStart) {
-            var filterDateStart = 'dateStart=' + dateStart;
-            urlString += symbol;
-            urlString += filterDateStart;
-        }
+        let table = initDataTable('#dataTable', {
+            ajaxUrl: "{{ route('form.index') }}",
+            columns: columns,
+            order: [[1, 'asc']],
+            searching: true,
+            lengthChange: true,
+            pageLength: 10
+        }, {
+            perangkai: '#filterPerangkai',
+            dateStart: '#filterDateStart',
+            dateEnd: '#filterDateEnd'
+        });
 
-        var dateEnd = $('#filterDateEnd').val();
-        if (dateEnd) {
-            var filterDateEnd = 'dateEnd=' + dateEnd;
-            urlString += symbol;
-            urlString += filterDateEnd;
-        }
-        window.location.href = urlString;
-    });
-    $('#clearBtn').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var url = window.location.href;
-        if(url.indexOf('?') !== 0){
-            window.location.href = baseUrl;
-        }
-        return 0;
+        const handleSearch = debounce(function() {
+            table.ajax.reload();
+        }, 5000); // Adjust the debounce delay as needed
+
+        // Event listeners for search filters
+        $('#filterPerangkai, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+
+        $('#filterBtn').on('click', function() {
+            table.ajax.reload();
+        });
+
+        $('#clearBtn').on('click', function() {
+            $('#filterPerangkai').val('');
+            $('#filterDateStart').val('');
+            $('#filterDateEnd').val('');
+            table.ajax.reload();
+        });
+        // End Datatable
     });
     function deleteData(id){
         $.ajax({
