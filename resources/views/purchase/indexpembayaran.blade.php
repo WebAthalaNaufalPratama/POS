@@ -43,8 +43,8 @@
                 <thead>
                 <tr>
                     <th>No</th>
-                    <th>No PO</th>
-                    <th>No Invoice Purchase</th>
+                    <th>No PO/Mutasi Inden</th>
+                    {{-- <th>No Invoice Purchase</th> --}}
                     <th>No Invoice Pembayaran</th>
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
@@ -61,11 +61,11 @@
                             <td>
                                 @if ($item->po)
                                     {{ $item->po->pembelian ? $item->po->pembelian->no_po : ($item->po->poinden ? $item->po->poinden->no_po : '') }}
-                                @else
-                                    -
+                                @elseif($item->mutasiinden)
+                                    {{ $item->mutasiinden->no_mutasi ?? '' }}
                                 @endif
                             </td>
-                            <td>{{ $item->po ? $item->po->no_inv : '-' }}</td>
+                            {{-- <td>{{ $item->po ? $item->po->no_inv : '-' }}</td> --}}
                             <td>{{ $item->no_invoice_bayar }}</td>
                             <td>{{ formatRupiah($item->nominal) }}</td>
                             <td>{{ tanggalindo($item->tanggal_bayar) }}</td>
@@ -131,8 +131,8 @@
                 <thead>
                 <tr>
                     <th>No</th>
-                    <th>No PO</th>
-                    <th>No Invoice Purchase</th>
+                    <th>No Retur/No Retur Inden</th>
+                    {{-- <th>No Invoice Purchase</th> --}}
                     <th>No Invoice Pembayaran</th>
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
@@ -147,13 +147,19 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                @if ($item->retur && $item->retur->invoice)
+                                {{-- @if ($item->retur && $item->retur->invoice)
                                     {{ $item->retur->invoice->pembelian ? $item->retur->invoice->pembelian->no_po : ($item->retur->invoice->poinden ? $item->retur->invoice->poinden->no_po : '') }}
                                 @else
-                                    -
+                                    
+                                @endif --}}
+
+                                @if ($item->retur)
+                                    {{ $item->retur->no_retur }}
+                                @elseif($item->returinden)
+                                    {{ $item->returinden->no_retur}}
                                 @endif
                             </td>
-                            <td>{{ $item->retur && $item->retur->invoice ? $item->retur->invoice->no_inv : '-' }}</td>
+                            {{-- <td>{{ $item->retur && $item->retur->invoice ? $item->retur->invoice->no_inv : '-' }}</td> --}}
                             <td>{{ $item->no_invoice_bayar }}</td>
                             <td>{{ formatRupiah($item->nominal) }}</td>
                             <td>{{ tanggalindo($item->tanggal_bayar) }}</td>

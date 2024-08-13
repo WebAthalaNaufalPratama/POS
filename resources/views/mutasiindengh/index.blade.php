@@ -177,6 +177,14 @@
                                                     <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
                                                 </a>
                                             </li>
+                                            @if ($mutasi->returinden && $mutasi->returinden->status_dibuat !== "BATAL")
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('show.returinden', ['mutasiIG' => $mutasi->id]) }}">
+                                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur
+                                                </a>
+                                            </li>
+                                                
+                                            @endif
                                             @endif
                                 
                                             @if (($mutasi->sisa_bayar == $mutasi->total_biaya || $mutasi->sisa_bayar == 0) && $mutasi->status_dibukukan == "MENUNGGU PEMBAYARAN" && !$mutasi->returinden)
@@ -207,19 +215,19 @@
                                                     </a>
                                                 </li>
                                             @endif
-                                            @if ($mutasi->status_dibukukan == "MENUNGGU PEMBAYARAN" && $mutasi->sisa_bayar !== 0 && !$mutasi->returinden)
+                                            @if ($mutasi->status_dibukukan == "MENUNGGU PEMBAYARAN" && $mutasi->sisa_bayar !== 0 && (!$mutasi->returinden || ($mutasi->returinden && $mutasi->returinden->status_dibukukan == "BATAL")))
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}">
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi
                                                 </a>
                                             </li>
-                                            @elseif ($mutasi->status_dibukukan == "MENUNGGU PEMBAYARAN" && $mutasi->sisa_bayar == 0 && (!$mutasi->returinden || ($mutasi->returinden && $mutasi->returinden->status_dibuat == "BATAL")) )
+                                            @elseif ($mutasi->status_dibukukan == "MENUNGGU PEMBAYARAN" && $mutasi->sisa_bayar == 0 && (!$mutasi->returinden || ($mutasi->returinden && $mutasi->returinden->status_dibukukan == "BATAL")))
                                                 <li>
                                                     <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}">
                                                         <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi
                                                     </a>
                                                 </li>
-                                            @elseif ($mutasi->status_dibukukan == "DIKONFIRMASI" && $mutasi->sisa_bayar == 0 && !$mutasi->returinden)
+                                            @elseif (($mutasi->status_dibukukan == "DIKONFIRMASI" && $mutasi->sisa_bayar == 0 && !$mutasi->returinden) || ($mutasi->returinden && $mutasi->returinden->status_dibukukan == "BATAL"))
                                                 <li>
                                                     <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}">
                                                         <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
@@ -279,6 +287,12 @@
                                                     <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima
                                                 </a>
                                             </li>
+                                        @elseif(Auth::user()->hasRole('AdminGallery') && $mutasi->status_diterima == "DIKONFIRMASI")
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}">
+                                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
+                                                </a>
+                                            </li>
                                         @endif
                                 
                                         {{-- Actions for Auditor --}}
@@ -286,6 +300,12 @@
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}">
                                                     <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Periksa
+                                                </a>
+                                            </li>
+                                        @elseif (Auth::user()->hasRole('Auditor') && $mutasi->status_diperiksa == "DIKONFIRMASI")
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('mutasiindengh.show', ['mutasiIG' => $mutasi->id]) }}">
+                                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
                                                 </a>
                                             </li>
                                         @endif
