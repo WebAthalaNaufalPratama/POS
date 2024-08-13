@@ -38,7 +38,14 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="pengirim">Nama Pengirim</label>
-                                            <select id="pengirim" name="pengirim" class="form-control" required >
+                                            @php
+                                                $user = Auth::user();
+                                            @endphp
+                                            @if($user->hasRole(['Auditor', 'Finance']))
+                                            <select id="pengirim" name="pengirim" class="form-control" required readonly>
+                                            @else
+                                            <select id="pengirim" name="pengirim" class="form-control" required>
+                                            @endif
                                                 <option value="">Pilih Nama Pengirim</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" data-tipe-lokasi="{{ $lokasi->tipe_lokasi }}" {{ $lokasi->id == $mutasis->pengirim ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -69,7 +76,7 @@
                                             <select id="rekening_id" name="rekening_id" class="form-control" required>
                                                 <option value="">Pilih Rekening</option>
                                                 @foreach ($bankpens as $rekening)
-                                                <option value="{{ $rekening->id }}">{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                <option value="{{ $rekening->id }}" {{ $rekening->id == $mutasis->rekening_id ? 'selected':''}}>{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -157,10 +164,6 @@
                                                             </td>
                                                             @if($i == 0)
                                                                 <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                                            @else
-                                                            <td>
-                                                                <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
-                                                            </td>
                                                             @endif
                                                         </tr>
                                                     @endforeach
@@ -448,7 +451,7 @@
             fetchProducts(tipeLokasi, 0);
         });
 
-        var i = 1;
+        var i = "{{ count($produks) }}";
         $('#add').click(function() {
             var newRow = `<tr id="row${i}">
                             <td>
@@ -586,12 +589,11 @@
             }
         });
 
-        $('input[id^="jumlah_diterima_"]').on('input', function() {
+        $('input[id^="jumlah_dikirim"]').on('input', function() {
             var inputDiterima = $(this).val();
-            var jumlahkirim = parseFloat($(this).closest('tr').find('input[name^="jumlah_dikirim"]').val());
 
-            if (parseFloat(inputDiterima) > jumlahkirim || inputDiterima < 0) {
-                alert('Jumlah Diterima tidak boleh lebih dari Jumlah yang dikirim atau kurang dari 0!');
+            if (inputDiterima < 0) {
+                alert('Jumlah Dikirim tidak boleh kurang dari 0!');
                 $(this).val(jumlahkirim);
             }
         });

@@ -32,22 +32,22 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="dataTable">
                 <thead>
                 <tr>
                     <th>No</th>
-                    <th>No Kontrak</th>
-                    <th>No Invoice Tagihan</th>
                     <th>No Invoice Pembayaran</th>
+                    <th>No Invoice Tagihan</th>
+                    <th>No Kontrak</th>
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
-                    <th>Metode</th>
+                    <th class="text-center">Metode</th>
                     <th>Rekening</th>
-                    <th>Aksi</th>
+                    <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $item)
+                    {{-- @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->sewa->no_sewa }}</td>
@@ -71,7 +71,7 @@
                                 </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -173,6 +173,108 @@
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
             $('#rekening_id, #bayar, #filterMetode').select2();
+
+            // Start Datatable
+            const columns = [
+                { data: 'no', name: 'no', orderable: false },
+                { data: 'no_invoice_bayar', name: 'no_invoice_bayar' },
+                { data: 'no_invoice_tagihan', name: 'no_invoice_tagihan' },
+                { data: 'no_kontrak', name: 'no_kontrak' },
+                { data: 'nominal', name: 'nominal' },
+                { data: 'tanggal_bayar', name: 'tanggal_bayar' },
+                { 
+                    data: 'cara_bayar',
+                    name: 'cara_bayar',
+                    render: function(data, type, row) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'Cash':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'Transfer':
+                                badgeClass = 'bg-lightblue';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<div class="text-center">
+                            <span class="badges ${badgeClass}">
+                                ${data ?? '-'}
+                            </span></div>
+                        `;
+                    }
+                },
+                { data: 'nama_rekening', name: 'nama_rekening' },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        let actionsHtml = `
+                        <div class="text-center">
+                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                        `;
+
+                        actionsHtml += `
+                            <li>
+                                <a href="invoice_sewa/${row.sewa.id}/show" class="dropdown-item">
+                                    <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Invoice
+                                </a>
+                            </li>
+                        `;
+
+                        actionsHtml += `
+                            <li>
+                                <a href="javascript:void(0);" onclick="editbayar(${row.id})" class="dropdown-item">
+                                    <img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit
+                                </a>
+                            </li>
+                        `;
+
+                        actionsHtml += `</ul></div>`;
+
+                        return actionsHtml;
+                    }
+                }
+            ];
+
+            let table = initDataTable('#dataTable', {
+                ajaxUrl: "{{ route('pembayaran_sewa.index') }}",
+                columns: columns,
+                order: [[1, 'asc']],
+                searching: true,
+                lengthChange: true,
+                pageLength: 10
+            }, {
+                metode: '#filterMetode',
+                dateStart: '#filterDateStart',
+                dateEnd: '#filterDateEnd'
+            });
+
+            const handleSearch = debounce(function() {
+                table.ajax.reload();
+            }, 5000); // Adjust the debounce delay as needed
+
+            // Event listeners for search filters
+            $('#filterMetode, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+
+            $('#filterBtn').on('click', function() {
+                table.ajax.reload();
+            });
+
+            $('#clearBtn').on('click', function() {
+                $('#filterMetode').val('');
+                $('#filterDateStart').val('');
+                $('#filterDateEnd').val('');
+                table.ajax.reload();
+            });
+            // End Datatable
         });
 
         $('#bayar').on('change', function() {
@@ -219,60 +321,6 @@
             });
 
             return true;
-        });
-        $('#filterBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var urlString = baseUrl;
-            var first = true;
-            var symbol = '';
-
-            var metode = $('#filterMetode').val();
-            if (metode) {
-                var filterMetode = 'metode=' + metode;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterMetode;
-            }
-
-            var dateStart = $('#filterDateStart').val();
-            if (dateStart) {
-                var filterDateStart = 'dateStart=' + dateStart;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterDateStart;
-            }
-
-            var dateEnd = $('#filterDateEnd').val();
-            if (dateEnd) {
-                var filterDateEnd = 'dateEnd=' + dateEnd;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterDateEnd;
-            }
-            window.location.href = urlString;
-        });
-        $('#clearBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var url = window.location.href;
-            if(url.indexOf('?') !== -1){
-                window.location.href = baseUrl;
-            }
-            return 0;
         });
         $('#bukti').on('change', function() {
             const file = $(this)[0].files[0];

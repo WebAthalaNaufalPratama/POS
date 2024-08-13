@@ -34,11 +34,13 @@ class LoginController extends Controller
 
         if(!Auth::validate($credentials)):
             return redirect()->to('login')
-                ->withErrors(trans('auth.failed'));
+                ->with('fail', 'Gagal login');
         endif;
 
         $user = Auth::getProvider()->retrieveByCredentials($credentials);
-
+        if ($user->getRoleNames()->first() !== 'SuperAdmin' && $user->karyawans()->doesntExist()) {
+            return redirect()->back()->with('fail', 'Data pengguna belum dikonfigurasi dengan karyawan');
+        }
         Auth::login($user, $request->get('remember'));
 
         if($request->get('remember')):

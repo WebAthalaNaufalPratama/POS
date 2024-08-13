@@ -41,7 +41,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="dataTable">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -54,11 +54,11 @@
                     <th>Tanggal Dibuat</th>
                     <th>Tanggal Pemeriksa</th>
                     <th>Tanggal Pembuku</th>
-                    <th>Aksi</th>
+                    <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $item)
+                    {{-- @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_kembali ?? '' }}</td>
@@ -106,7 +106,7 @@
                                 </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -120,73 +120,148 @@
     <script>
     $(document).ready(function(){
         $('#filterCustomer, #filterDriver').select2();
-    });
-    $('#filterBtn').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var urlString = baseUrl;
-        var first = true;
-        var symbol = '';
 
-        var customer = $('#filterCustomer').val();
-        if (customer) {
-            var filterCustomer = 'customer=' + customer;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterCustomer;
-        }
-        
-        var driver = $('#filterDriver').val();
-        if (driver) {
-            var filterDriver = 'driver=' + driver;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDriver;
-        }
+        // Start Datatable
+        const columns = [
+            { data: 'no', name: 'no', orderable: false },
+            { data: 'no_kembali', name: 'no_kembali' },
+            { data: 'no_sewa', name: 'no_sewa' },
+            { data: 'nama_customer', name: 'nama_customer', orderable: false },
+            { data: 'nama_driver', name: 'nama_driver', orderable: false },
+            { data: 'tanggal_kembali', name: 'tanggal_kembali' },
+            { 
+                data: 'status',
+                name: 'status',
+                render: function(data, type, row) {
+                    let badgeClass;
+                    switch (data) {
+                        case 'DIKONFIRMASI':
+                            badgeClass = 'bg-lightgreen';
+                            break;
+                        case 'TUNDA':
+                            badgeClass = 'bg-lightred';
+                            break;
+                        default:
+                            badgeClass = 'bg-lightgrey';
+                            break;
+                    }
+                    
+                    return `
+                        <span class="badges ${badgeClass}">
+                            ${data ?? '-'}
+                        </span>
+                    `;
+                }
+            },
+            { data: 'tanggal_pembuat', name: 'tanggal_pembuat' },
+            { data: 'tanggal_pemeriksa', name: 'tanggal_pemeriksa' },
+            { data: 'tanggal_penyetuju', name: 'tanggal_penyetuju' },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    let actionsHtml = `
+                    <div class="text-center">
+                        <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                    `;
 
-        var dateStart = $('#filterDateStart').val();
-        if (dateStart) {
-            var filterDateStart = 'dateStart=' + dateStart;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateStart;
-        }
+                    if (userPermissions.includes('kembali_sewa.show')) {
+                        if ((['DIKONFIRMASI', 'BATAL'].includes(row.status) && row.userRole === 'AdminGallery') ||
+                            (row.status === 'DIKONFIRMASI' && (row.userRole === 'Auditor' && row.tanggal_penyetuju || row.userRole === 'Finance' && row.tanggal_pemeriksa))) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="kembali_sewa/${row.id}/show" class="dropdown-item">
+                                        <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                    </a>
+                                </li>
+                            `;
+                        } else if (row.userRole === 'SuperAdmin') {
+                            actionsHtml += `
+                                <li>
+                                    <a href="kembali_sewa/${row.id}/show" class="dropdown-item">
+                                        <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                    </a>
+                                </li>
+                            `;
+                        } else {
+                            actionsHtml += `
+                                <li>
+                                    <a href="kembali_sewa/${row.id}/show" class="dropdown-item">
+                                        <img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi
+                                    </a>
+                                </li>
+                            `;
+                        }
+                    }
 
-        var dateEnd = $('#filterDateEnd').val();
-        if (dateEnd) {
-            var filterDateEnd = 'dateEnd=' + dateEnd;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
+                    if ((row.status === 'DIKONFIRMASI' && ['Auditor', 'Finance'].includes(row.userRole) && userPermissions.includes('kembali_sewa.edit')) ||
+                        (row.status === 'TUNDA' && row.userRole === 'AdminGallery' && userPermissions.includes('kembali_sewa.edit'))) {
+                        if (!row.hasKembali) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="kembali_sewa/${row.id}/edit" class="dropdown-item">
+                                        <img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit
+                                    </a>
+                                </li>
+                            `;
+                        }
+                    }
+
+                    if (row.status === 'TUNDA' && row.userRole === 'AdminGallery') {
+                        actionsHtml += `
+                            <li>
+                                <a href="#" class="dropdown-item" onclick="deleteData(${row.id})">
+                                    <img src="assets/img/icons/closes.svg" class="me-2" alt="img">Batal
+                                </a>
+                            </li>
+                        `;
+                    }
+
+                    actionsHtml += `</ul></div>`;
+
+                    return actionsHtml;
+                }
             }
-            urlString += symbol;
-            urlString += filterDateEnd;
-        }
-        window.location.href = urlString;
-    });
-    $('#clearBtn').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var url = window.location.href;
-        if(url.indexOf('?') !== -1){
-            window.location.href = baseUrl;
-        }
-        return 0;
+        ];
+
+        let table = initDataTable('#dataTable', {
+            ajaxUrl: "{{ route('kembali_sewa.index') }}",
+            columns: columns,
+            order: [[1, 'asc']],
+            searching: true,
+            lengthChange: true,
+            pageLength: 10
+        }, {
+            customer: '#filterCustomer',
+            driver: '#filterDriver',
+            dateStart: '#filterDateStart',
+            dateEnd: '#filterDateEnd'
+        });
+
+        const handleSearch = debounce(function() {
+            table.ajax.reload();
+        }, 5000); // Adjust the debounce delay as needed
+
+        // Event listeners for search filters
+        $('#filterCustomer, #filterDriver, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+
+        $('#filterBtn').on('click', function() {
+            table.ajax.reload();
+        });
+
+        $('#clearBtn').on('click', function() {
+            $('#filterCustomer').val('');
+            $('#filterDriver').val('');
+            $('#filterDateStart').val('');
+            $('#filterDateEnd').val('');
+            table.ajax.reload();
+        });
+        // End Datatable
     });
     function deleteData(id){
         Swal.fire({

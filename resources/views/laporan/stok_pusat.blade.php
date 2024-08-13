@@ -62,7 +62,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Laporan Stok Gallery</h4>
+                        <h4>Laporan Stok Pusat</h4>
                     </div>
                     <div class="page-btn">
                         {{-- <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
@@ -80,8 +80,8 @@
                         <div class="row">
                             <div class="col-lg col-sm-6 col-12">
                                 <select id="filterGallery" name="filterGallery" class="form-control" title="Gallery">
-                                    <option value="">Pilih Gallery</option>
-                                    @foreach ($galleries as $item)
+                                    <option value="">Pilih Lokasi</option>
+                                    @foreach ($greenhouse as $item)
                                         <option value="{{ $item->id }}" {{ $item->id == request()->input('gallery') ? 'selected' : '' }}>{{ $item->nama }}</option>
                                     @endforeach
                                 </select>
@@ -103,8 +103,8 @@
                                 </select>
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.stok_gallery') }}" class="btn btn-info">Filter</a>
-                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.stok_gallery') }}" class="btn btn-warning">Clear</a>
+                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.stok_pusat') }}" class="btn btn-info">Filter</a>
+                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.stok_pusat') }}" class="btn btn-warning">Clear</a>
                             </div>
                         </div>
                     </row>
@@ -263,7 +263,7 @@
         //         cancelButtonText: 'Batal'
         //     }).then((result) => {
         //         if (result.isConfirmed) {
-        //             var url = "{{ route('laporan.stok_gallery-pdf') }}" + '?' + $.param({
+        //             var url = "{{ route('laporan.stok_pusat-pdf') }}" + '?' + $.param({
         //                 gallery: filterGallery,
         //                 bulan: filterBulan,
         //                 tahun: filterTahun,
@@ -294,7 +294,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.stok_gallery-excel') }}" + '?' + $.param({
+                    var url = "{{ route('laporan.stok_pusat-excel') }}" + '?' + $.param({
                         gallery: filterGallery,
                         bulan: filterBulan,
                         tahun: filterTahun,

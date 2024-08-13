@@ -100,7 +100,7 @@ class KontrakController extends Controller
                 $kontrak->nama_sales = $kontrak->data_sales->nama;
                 $kontrak->rentang_tanggal = formatTanggal($kontrak->tanggal_mulai) . ' - ' . formatTanggal($kontrak->tanggal_selesai);
                 $kontrak->userRole = Auth::user()->getRoleNames()->first();
-                $kontrak->hasKembaliSewa = $kontrak->kembali_sewa->isNotEmpty();
+                $kontrak->hasKembaliSewa = KembaliSewa::where('no_sewa', $kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
                 return $kontrak;
             });
 

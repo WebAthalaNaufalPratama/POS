@@ -118,7 +118,7 @@
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
                                                         <th>Jumlah Diterima</th>
-                                                        <th></th>
+                                                        <th>Kondisi Diterima</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
@@ -145,6 +145,16 @@
                                                         <td>
                                                             <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
                                                         </td>
+                                                        <td>
+                                                            <select id="kondisi_diterima_{{ $i }}" name="kondisi_diterima[]" class="form-control">
+                                                                <option value="">Pilih Kondisi</option>
+                                                                @foreach ($kondisis as $kondisi)
+                                                                <option value="{{ $kondisi->id }}"  {{ $kondisi->id == $produk->komponen[0]->kondisi_diterima ? 'selected' : '' }}>
+                                                                    {{ $kondisi->nama }}
+                                                                </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -164,7 +174,7 @@
                                     <div class="col-lg-8 col-sm-12 col-12 border radius mt-1">
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
-                                                <table class="table table-responsive border rounded">
+                                            <table class="table table-responsive border rounded">
                                                 @php
                                                         $user = Auth::user();
                                                     @endphp
@@ -181,17 +191,37 @@
                                                             
                                                             @if($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
                                                                 <td id="pembuat">{{ $mutasis->dibuat->name }}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
+                                                                <td id="penyetuju" >{{ Auth::user()->name}}</td>
+                                                                <td id="pemeriksa">{{  $mutasis->dibuku->name ?? '-'}}</td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat->name }}</td>
+                                                                <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
+                                                                <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{  Auth::user()->name}}</td>
+                                                            @elseif($user->hasRole(['KasirGallery', 'AdminGallery', 'SuperAdmin', 'KasirOutlet', 'Purchasing']))
+                                                                <td id="pembuat">{{ $mutasis->dibuat->name }}</td>
                                                                 <td id="penerima" >{{ Auth::user()->name}}</td>
                                                                 <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
-                                                                <td id="pemeriksa" >{{ $mutasis->dibuku->name ?? '-'}}</td>
+                                                                <td id="pemeriksa">{{  $mutasis->dibuku->name ?? '-'}}</td>
                                                             @endif
                                                         </tr>
                                                         <tr>
-                                                            @if($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['KasirGallery', 'AdminGallery']))
-                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat }}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly></td>
-                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan" value="{{ $mutasis->tanggal_dibukukan ?? '-' }}"></td>
+                                                            @if($user->hasRole(['KasirGallery', 'AdminGallery', 'SuperAdmin', 'KasirOutlet', 'Purchasing']))
+                                                                <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ \Carbon\Carbon::now()->format('Y-m-d')}}" ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ $mutasis->tanggal_dibukukan ?? '-' }}" readonly></td></td>
+                                                            @elseif($mutasis->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
+                                                            <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_penerima"  value="{{ $mutasis->tanggal_penerima ?? '-' }}" readonly></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_diperiksa" value="{{ $mutasis->tanggal_diperiksa ?? '-'}}" readonly ></td>
+                                                                <td><input type="date" class="form-control" name="tanggal_dibukukan"  value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td></td>
                                                             @endif
                                                         </tr>
                                                     </tbody>

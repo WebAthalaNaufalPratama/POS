@@ -51,7 +51,7 @@
                                             <label for="penerima">Nama Penerima</label>
                                             <select id="penerima" name="penerima" class="form-control" required >
                                                 <option value="">Pilih Nama Penerima</option>
-                                                @foreach ($lokasis as $lokasi)
+                                                @foreach ($lokasispenerima as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->penerima ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
                                                 @endforeach
                                             </select>
@@ -61,6 +61,17 @@
                                         <div class="form-group">
                                             <label for="no_mutasi">No Mutasi</label>
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" >
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}" {{ $rekening->id == $mutasis->rekening_id ? 'selected':''}}>{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -149,16 +160,9 @@
                                                         <td>
                                                             <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" >
                                                         </td>
-                                                        <!-- <td>
-                                                            <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
-                                                        </td> -->
-                                                        <td>
-                                                        @if ($i == 0)
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
-                                                        @else
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        @if($i == 0)
+                                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
                                                         @endif
-                                                    </td>
                                                     </tr>
                                                     @php
                                                     $i++;
@@ -178,8 +182,8 @@
                                 <div class="col-lg-8 col-sm-12 col-12 border radius mt-1">
                                         <div class="row mt-4">
                                             <div class="col-lg-12">
-                                                <table class="table table-responsive border rounded">
-                                                @php
+                                            <table class="table table-responsive border rounded">
+                                                    @php
                                                         $user = Auth::user();
                                                     @endphp
                                                     <thead>
@@ -203,7 +207,7 @@
                                                                 <td id="penerima" >{{ $mutasis->diterima->name ?? '-'}}</td>
                                                                 <td id="penyetuju" >{{ $mutasis->diperiksa->name ?? '-'}}</td>
                                                                 <td id="pemeriksa">{{ Auth::user()->name}}</td>
-                                                            @elseif($user->hasRole(['KasirOutlet']))
+                                                            @elseif($user->hasRole(['Purchasing', 'SuperAdmin']))
                                                                 <td id="pembuat">{{ $mutasis->dibuat ? $mutasis->dibuat->name : '-' }}</td>
                                                                 <td id="penerima" >-</td>
                                                                 <td id="penyetuju" >-</td>
@@ -211,7 +215,7 @@
                                                             @endif
                                                         </tr>
                                                         <tr>
-                                                            @if($user->hasRole(['KasirOutlet']))
+                                                            @if($user->hasRole(['Purchasing', 'SuperAdmin']))
                                                                 <td><input type="date" class="form-control" name="tanggal_pembuat"  value="{{ $mutasis->tanggal_pembuat ? $mutasis->tanggal_pembuat : '-' }}"></td>
                                                                 <td id="tgl_penerima">-</td>
                                                                 <td id="tgl_penyetuju">-</td>
@@ -480,39 +484,20 @@
 <script>
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     $(document).ready(function() {
-        var i = 1;
+        var i = "{{count($produks)}}";
         $('#add').click(function() {
             var newRow = `<tr class="tr_clone" id="row${i}">
                             <td>
-                                <select id="nama_produk_${i}" name="nama_produk[]" class="form-control select2">
+                                <select id="kode_produk_${i}" name="kode_produk[]" class="form-control select2">
                                     <option value="">Pilih Produk</option>
-                                    @foreach ($produks as $index => $produk)
-                                        <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-kode="{{ $produk->kode }}" data-tipe="{{ $produk->tipe }}" data-deskripsi="{{ $produk->deskripsi }}" data-tipe_produk="{{ $produk->tipe_produk }}">
-                                            @if (substr($produk->kode, 0, 3) === 'TRD') 
-                                                {{ $produk->nama }}
-                                                @foreach ($produk->komponen as $komponen)
-                                                    @if ($komponen->kondisi)
-                                                        @foreach($kondisis as $kondisi)
-                                                            @if($kondisi->id == $komponen->kondisi)
-                                                                - {{ $kondisi->nama }}
-                                                                @php
-                                                                    $found = true;
-                                                                    break;
-                                                                @endphp
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
-                                                    @if ($found) @break @endif
-                                                @endforeach
-                                            @elseif (substr($produk->kode, 0, 3) === 'GFT')
-                                                {{ $produk->nama }}
-                                            @endif
-                                        </option>
+                                    @foreach ($produkjuals as $pj)
+                                    <option value="{{ $pj->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
+                                        {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </td>
                             <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)"></td>
-                            <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
                             <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
                         </tr>`;
 
@@ -685,15 +670,11 @@
 
         });
 
-        
-        
-
-        $('input[id^="jumlah_diterima_"]').on('input', function() {
+        $('input[id^="jumlah_dikirim"]').on('input', function() {
             var inputDiterima = $(this).val();
-            var jumlahkirim = parseFloat($(this).closest('tr').find('input[name^="jumlah_dikirim"]').val());
 
-            if (parseFloat(inputDiterima) > jumlahkirim || inputDiterima < 0) {
-                alert('Jumlah Diterima tidak boleh lebih dari Jumlah yang dikirim atau kurang dari 0!');
+            if (inputDiterima < 0) {
+                alert('Jumlah Dikirim tidak boleh kurang dari 0!');
                 $(this).val(jumlahkirim);
             }
         });

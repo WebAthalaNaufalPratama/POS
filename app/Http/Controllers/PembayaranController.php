@@ -16,7 +16,9 @@ use App\Models\Returinden;
 use App\Models\Returpembelian;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Facades\Image;
 
 class PembayaranController extends Controller
 {
@@ -172,7 +174,7 @@ class PembayaranController extends Controller
     }          
 
     public function index_sewa(Request $req){
-        $query = Pembayaran::whereNotNull('invoice_sewa_id');
+        $query = Pembayaran::with('sewa', 'rekening')->whereNotNull('invoice_sewa_id');
         if(Auth::user()->hasRole('AdminGallery')){
             $query->whereHas('sewa', function($q) {
                 $q->whereHas('kontrak', function($p) {
@@ -189,9 +191,61 @@ class PembayaranController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
         }
-        $data = $query->orderByDesc('id')->get();
+        
+        if ($req->ajax()) {
+            $start = $req->input('start');
+            $length = $req->input('length');
+            $order = $req->input('order')[0]['column'];
+            $dir = $req->input('order')[0]['dir'];
+            $columnName = $req->input('columns')[$order]['data'];
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_invoice_bayar', 'like', "%$search%")
+                    ->orWhere('cara_bayar', 'like', "%$search%")
+                    ->orWhere('tanggal_bayar', 'like', "%$search%")
+                    ->orWhere('nominal', 'like', "%$search%")
+                    ->orWhereHas('sewa', function($c) use($search){
+                        $c->where('no_invoice', 'like', "%$search%")
+                        ->orWhere('no_sewa', 'like', "%$search%");
+                    })
+                    ->orWhereHas('rekening', function($c) use($search){
+                        $c->where('nama_akun', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $tempData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tanggal_bayar = $item->tanggal_bayar == null ? null : formatTanggal($item->tanggal_bayar);
+                $item->no_kontrak = $item->sewa->no_sewa;
+                $item->no_invoice_tagihan = $item->sewa->no_invoice;
+                $item->nominal = formatRupiah($item->nominal);
+                $item->nama_rekening = $item->rekening->nama_akun ?? '';
+                $item->userRole = Auth::user()->getRoleNames()->first();
+                $item->cara_bayar = ucfirst($item->cara_bayar);
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $req->input('draw'),
+                'recordsTotal' => Pembayaran::whereNotNull('invoice_sewa_id')->count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+        }
+
         $bankpens = Rekening::get();
-        return view('pembayaran_sewa.index', compact('data', 'bankpens'));
+        return view('pembayaran_sewa.index', compact('bankpens'));
     }
 
     public function store_sewa(Request $req) {
@@ -220,20 +274,41 @@ class PembayaranController extends Controller
         try {
             // Update sisa invoice
             $totalPembayaran = Pembayaran::where('invoice_sewa_id', $data['invoice_sewa_id'])->sum('nominal');
-            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->total_tagihan) - intval($totalPembayaran) - intval($data['nominal']);
+            $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->total_tagihan) - intval($invoice_tagihan->dp) - intval($totalPembayaran) - intval($data['nominal']);
     
             if (!$invoice_tagihan->save()) {
                 DB::rollBack();
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
     
-            // Store file
+            // store file
             if ($req->hasFile('bukti')) {
+                // Simpan file baru
                 $file = $req->file('bukti');
                 $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $filePath = 'bukti_pembayaran_sewa/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                // if (!empty($pembayaran->bukti)) {
+                //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                //     if (File::exists($oldFilePath)) {
+                //         File::delete($oldFilePath);
+                //     }
+                // }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
+
             $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
             $data['status_bayar'] = $new_invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
     
@@ -287,12 +362,32 @@ class PembayaranController extends Controller
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
     
-            // Store file
+            // store file
             if ($req->hasFile('bukti')) {
+                // Simpan file baru
                 $file = $req->file('bukti');
                 $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_sewa', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $filePath = 'bukti_pembayaran_sewa/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                if (!empty($pembayaran->bukti)) {
+                    $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                    if (File::exists($oldFilePath)) {
+                        File::delete($oldFilePath);
+                    }
+                }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
     
             $data['status_bayar'] = $invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
@@ -316,7 +411,7 @@ class PembayaranController extends Controller
         $validator = Validator::make($req->all(), [
             'invoice_purchase_id' => 'required',
             'no_invoice_bayar' => 'required',
-            'id_po' => 'required',
+            'id_po' => 'requred',
             'type' => 'required',
             'tanggal_bayar' => 'required',
             'nominal' => 'required',

@@ -28,7 +28,7 @@ class InvoiceSewaController extends Controller
      */
     public function index(Request $req)
     {
-        $query = InvoiceSewa::query();
+        $query = InvoiceSewa::with('kontrak');
         if(Auth::user()->hasRole('AdminGallery')){
             $query->whereHas('kontrak', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
@@ -40,22 +40,88 @@ class InvoiceSewaController extends Controller
             });
         }
         if ($req->dateStart) {
-            $query->where('jatuh_tempo', '>=', $req->input('dateStart'));
+            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
         }
         if ($req->dateEnd) {
-            $query->where('jatuh_tempo', '<=', $req->input('dateEnd'));
+            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
         }
         if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Auditor')){
             $query->where('status', 'DIKONFIRMASI');
         }
-        $data = $query->orderByDesc('id')->get();
+               
+        if ($req->ajax()) {
+            $start = $req->input('start');
+            $length = $req->input('length');
+            $order = $req->input('order')[0]['column'];
+            $dir = $req->input('order')[0]['dir'];
+            $columnName = $req->input('columns')[$order]['data'];
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_invoice', 'like', "%$search%")
+                    ->orWhere('no_sewa', 'like', "%$search%")
+                    ->orWhere('jatuh_tempo', 'like', "%$search%")
+                    ->orWhere('tanggal_invoice', 'like', "%$search%")
+                    ->orWhere('total_tagihan', 'like', "%$search%")
+                    ->orWhere('dp', 'like', "%$search%")
+                    ->orWhere('sisa_bayar', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhere('tanggal_pembuat', 'like', "%$search%")
+                    ->orWhere('tanggal_penyetuju', 'like', "%$search%")
+                    ->orWhere('tanggal_pemeriksa', 'like', "%$search%")
+                    ->orWhereHas('kontrak', function($c) use($search){
+                        $c->whereHas('customer', function($d) use($search){
+                            $d->where('nama', 'like', "%$search%");
+                        });
+                    })
+                    ->orWhereHas('data_sales', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $tempData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tanggal_invoice = $item->tanggal_invoice == null ? null : formatTanggal($item->tanggal_invoice);
+                $item->jatuh_tempo = $item->jatuh_tempo == null ? null : formatTanggal($item->jatuh_tempo);
+                $item->tanggal_pembuat = $item->tanggal_pembuat == null ? null : formatTanggal($item->tanggal_pembuat);
+                $item->tanggal_penyetuju = $item->tanggal_penyetuju == null ? null : formatTanggal($item->tanggal_penyetuju);
+                $item->tanggal_pemeriksa = $item->tanggal_pemeriksa == null ? null : formatTanggal($item->tanggal_pemeriksa);
+                $item->total_tagihan = $item->total_tagihan == null ? null : formatRupiah($item->total_tagihan);
+                $item->dp = $item->dp == null ? null : formatRupiah($item->dp);
+                $item->isLunas = $item->sisa_bayar == 0 ? true : false;
+                $item->sisa_bayar = $item->sisa_bayar == null ? null : formatRupiah($item->sisa_bayar);
+                $item->nama_customer = $item->kontrak->customer->nama;
+                $item->userRole = Auth::user()->getRoleNames()->first();
+                $item->hasKembaliSewa = KembaliSewa::where('no_sewa', $item->no_sewa)->where('status', 'DIKONFIRMASI')->exists();
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $req->input('draw'),
+                'recordsTotal' => InvoiceSewa::count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
+
         $customer = Kontrak::whereHas('invoice')->select('customer_id')
-        ->distinct()
-        ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
-        ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
-            return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
-        })
-        ->orderBy('customers.nama')
+            ->distinct()
+            ->join('customers', 'kontraks.customer_id', '=', 'customers.id')
+            ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
+                return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
+            })
+            ->orderBy('customers.nama')
         ->get();
         $Invoice = Pembayaran::latest()->first();
         if ($Invoice != null) {
@@ -64,11 +130,8 @@ class InvoiceSewaController extends Controller
         } else {
             $invoice_bayar = 0;
         }
-        $data->map(function($kontrak){
-            $kontrak->hasKembali = KembaliSewa::where('no_sewa', $kontrak->kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
-        });
         $bankpens = Rekening::get();
-        return view('invoice_sewa.index', compact('data', 'invoice_bayar', 'bankpens', 'customer'));
+        return view('invoice_sewa.index', compact('invoice_bayar', 'bankpens', 'customer'));
     }
 
     /**

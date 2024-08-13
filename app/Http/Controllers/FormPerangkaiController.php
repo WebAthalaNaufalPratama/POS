@@ -40,9 +40,6 @@ class FormPerangkaiController extends Controller
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
         }
-        if($req->jenis_rangkaian){
-            $query->where('jenis_rangkaian', $req->jenis_rangkaian);
-        }
         if ($req->perangkai) {
             $query->where('perangkai_id', $req->input('perangkai'));
         }
@@ -52,8 +49,60 @@ class FormPerangkaiController extends Controller
         if ($req->dateEnd) {
             $query->where('tanggal', '<=', $req->input('dateEnd'));
         }
-        $data = $query->orderByDesc('id')->get();
-        return view('form_sewa.index', compact('data', 'perangkai'));
+
+        if ($req->ajax()) {
+            $start = $req->input('start');
+            $length = $req->input('length');
+            $order = $req->input('order')[0]['column'];
+            $dir = $req->input('order')[0]['dir'];
+            $columnName = $req->input('columns')[$order]['data'];
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('no_form', 'like', "%$search%")
+                    ->orWhere('tanggal', 'like', "%$search%")
+                    ->orWhereHas('produk_terjual', function($c) use($search){
+                        $c->where('no_sewa', 'like', "%$search%");
+                    })
+                    ->orWhereHas('produk_terjual', function($c) use($search){
+                        $c->whereHas('produk', function($d) use($search){
+                            $d->where('nama', 'like', "%$search%");
+                        });
+                    })
+                    ->orWhereHas('perangkai', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $tempData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tanggal = $item->tanggal == null ? null : formatTanggal($item->tanggal);
+                $item->no_kontrak = $item->produk_terjual->no_sewa;
+                $item->nama_produk = $item->produk_terjual->produk->nama;
+                $item->nama_perangkai = $item->perangkai->nama;
+                $item->userRole = Auth::user()->getRoleNames()->first();
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $req->input('draw'),
+                'recordsTotal' => FormPerangkai::where('jenis_rangkaian', 'Sewa')->count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
+        return view('form_sewa.index', compact('perangkai'));
     }
 
     /**
