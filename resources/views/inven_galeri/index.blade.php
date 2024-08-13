@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="inventory">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -64,7 +64,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $item)
+                    {{-- @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->kode_produk ?? '-' }}</td>
@@ -89,7 +89,7 @@
                                 </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -153,13 +153,14 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="pemakaian_sendiri">
                 <thead>
                 <tr>
                     <th>No</th>
                     @if(!Auth::user()->hasRole('AdminGallery'))
                     <th>Lokasi</th>
                     @endif
+                    <th>Id</th>
                     <th>Nama Produk</th>
                     <th>Kondisi</th>
                     <th>Pemakai</th>
@@ -169,7 +170,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($pemakaian_sendiri as $item)
+                    {{-- @foreach ($pemakaian_sendiri as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             @if(!Auth::user()->hasRole('AdminGallery'))
@@ -182,7 +183,7 @@
                             <td>{{ $item->jumlah ?? '-' }}</td>
                             <td>{{ $item->alasan ?? '-' }}</td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -252,7 +253,7 @@
         </div>
         <div class="modal-body">
             <div class="table-responsive">
-                <table class="table datanew">
+                <table class="table" id="log">
                     <thead>
                         <tr>
                             <th>No</th>
@@ -267,7 +268,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($mergedCollection as $key => $item)
+                        {{-- @foreach ($mergedCollection as $key => $item)
                             <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item['Waktu'] }}</td>
@@ -279,7 +280,7 @@
                                 <td>{{ $item['Masuk'] }}</td>
                                 <td>{{ $item['Keluar'] }}</td>
                             </tr>
-                        @endforeach
+                        @endforeach --}}
                     </tbody>
                 </table>                
             </div>
@@ -340,140 +341,153 @@
                 multiply($('#harga_satuan_0'))
                 multiply($('#jumlah_0'))
             });
-        });
-        $('#filterBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var urlString = baseUrl;
-            var first = true;
-            var symbol = '';
 
-            var Produk = $('#filterProduk').val();
-            if (Produk) {
-                var filterProduk = 'produk=' + Produk;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
+            // Start Datatable Inventory
+            const columns = [
+                { data: 'no', name: 'no', orderable: false },
+                { data: 'kode_produk', name: 'kode_produk' },
+                { data: 'produk.nama', name: 'produk.nama', orderable: false },
+                { data: 'kondisi.nama', name: 'kondisi.nama', orderable: false },
+                @if(!Auth::user()->hasRole('AdminGallery'))
+                { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
+                @endif
+                { data: 'jumlah', name: 'jumlah' },
+                { data: 'min_stok', name: 'min_stok' },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        return `
+                            <div class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="inven_galeri/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                    </li>
+                                    <li>
+                                        <a href="inven_galeri/${row.id}/edit" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        `;
+                    }
                 }
-                urlString += symbol;
-                urlString += filterProduk;
-            }
+            ];
 
-            var Kondisi = $('#filterKondisi').val();
-            if (Kondisi) {
-                var filterKondisi = 'kondisi=' + Kondisi;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterKondisi;
-            }
+            let table = initDataTable('#inventory', {
+                ajaxUrl: "{{ route('inven_galeri.index') }}",
+                columns: columns,
+                order: [[1, 'asc']],
+                searching: true,
+                lengthChange: true,
+                pageLength: 5
+            }, {
+                produk: '#filterProduk',
+                kondisi: '#filterKondisi',
+                gallery: '#filterGallery',
+                dateStart: '#filterDateStart',
+                dateEnd: '#filterDateEnd'
+            }, 'inventory'); 
 
-            var Gallery = $('#filterGallery').val();
-            if (Gallery) {
-                var filterGallery = 'gallery=' + Gallery;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterGallery;
-            }
+            const handleSearch = debounce(function() {
+                table.ajax.reload();
+            }, 5000); // Adjust the debounce delay as needed
 
-            window.location.href = urlString;
-        });
-        $('#clearBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var url = window.location.href;
-            if(url.indexOf('?') !== -1){
-                window.location.href = baseUrl;
-            }
-            return 0;
-        });
-        $('#filterBtn2').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var urlString = baseUrl;
-            var first = true;
-            var symbol = '';
+            // Event listeners for search filters
+            $('#filterProduk, #filterKondisi, #filterGallery, #filterDateStart, #filterDateEnd').on('input', handleSearch);
 
-            var Produk = $('#filterProduk2').val();
-            if (Produk) {
-                var filterProduk = 'produk2=' + Produk;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterProduk;
-            }
-            var Kondisi = $('#filterKondisi2').val();
-            if (Kondisi) {
-                var filterKondisi = 'kondisi2=' + Kondisi;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterKondisi;
-            }
+            $('#filterBtn').on('click', function() {
+                table.ajax.reload();
+            });
 
-            var Gallery = $('#filterGallery2').val();
-            if (Gallery) {
-                var filterGallery = 'gallery2=' + Gallery;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterGallery;
-            }
+            $('#clearBtn').on('click', function() {
+                $('#filterProduk').val('').trigger('change');
+                $('#filterKondisi').val('').trigger('change');
+                $('#filterGallery').val('').trigger('change');
+                $('#filterDateStart').val('');
+                $('#filterDateEnd').val('');
+                table.ajax.reload();
+            });
+            // End Datatable Inventory
 
-            var dateStart = $('#filterDateStart2').val();
-            if (dateStart) {
-                var filterDateStart = 'dateStart2=' + dateStart;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterDateStart;
-            }
+            // Start Datatable Pemakaian Sendiri
+            const columns2 = [
+                { data: 'no', name: 'no', orderable: false },
+                { data: 'id', name: 'id', visible: false },
+                @if(!Auth::user()->hasRole('AdminGallery'))
+                { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
+                @endif
+                { data: 'nama_produk', name: 'nama_produk', orderable: false },
+                { data: 'nama_kondisi', name: 'nama_kondisi', orderable: false },
+                { data: 'nama_karyawan', name: 'nama_karyawan', orderable: false },
+                { data: 'tanggal', name: 'tanggal', orderable: false },
+                { data: 'jumlah', name: 'jumlah' },
+                { data: 'alasan', name: 'alasan' },
+            ];
 
-            var dateEnd = $('#filterDateEnd2').val();
-            if (dateEnd) {
-                var filterDateEnd = 'dateEnd2=' + dateEnd;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterDateEnd;
-            }
-            window.location.href = urlString;
-        });
-        $('#clearBtn2').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var url = window.location.href;
-            if(url.indexOf('?') !== -1){
-                window.location.href = baseUrl;
-            }
-            return 0;
-        });
+            let table2 = initDataTable('#pemakaian_sendiri', {
+                ajaxUrl: "{{ route('inven_galeri.index') }}",
+                columns: columns2,
+                order: [[1, 'asc']],
+                searching: true,
+                lengthChange: true,
+                pageLength: 5
+            }, {
+                produk2: '#filterProduk2',
+                kondisi2: '#filterKondisi2',
+                gallery2: '#filterGallery2',
+                dateStart2: '#filterDateStart2',
+                dateEnd2: '#filterDateEnd2'
+            }, 'pemakaian_sendiri'); 
+
+            const handleSearch2 = debounce(function() {
+                table2.ajax.reload();
+            }, 5000); // Adjust the debounce delay as needed
+
+            // Event listeners for search filters
+            $('#filterProduk2, #filterKondisi2, #filterGallery2, #filterDateStart2, #filterDateEnd2').on('input', handleSearch2);
+
+            $('#filterBtn2').on('click', function() {
+                table2.ajax.reload();
+            });
+
+            $('#clearBtn2').on('click', function() {
+                $('#filterProduk2').val('').trigger('change');
+                $('#filterKondisi2').val('').trigger('change');
+                $('#filterGallery2').val('').trigger('change');
+                $('#filterDateStart2').val('');
+                $('#filterDateEnd2').val('');
+                table2.ajax.reload();
+            });
+            // End Datatable Pemakaian Sendiri
+
+            // Start Datatable Log
+            const columns3 = [
+                { data: 'no', name: 'no', orderable: false },
+                { data: 'Waktu', name: 'Waktu' },
+                { data: 'Pengubah', name: 'Pengubah', orderable: false },
+                { data: 'No Referensi', name: 'No Referensi', orderable: false },
+                { data: 'Nama Produk Jual', name: 'Nama Produk Jual', orderable: false },
+                { data: 'Nama Komponen', name: 'Nama Komponen', orderable: false },
+                { data: 'Kondisi', name: 'Kondisi' },
+                { data: 'Masuk', name: 'Masuk' },
+                { data: 'Keluar', name: 'Keluar' },
+            ];
+
+            let table3 = initDataTable('#log', {
+                ajaxUrl: "{{ route('inven_galeri.index') }}",
+                columns: columns3,
+                order: [[1, 'asc']],
+                searching: true,
+                lengthChange: true,
+                pageLength: 5
+            }, {
+            }, 'log'); 
+            // End Datatable Log
+        });   
     </script>
 @endsection
