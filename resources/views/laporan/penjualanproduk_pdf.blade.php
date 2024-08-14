@@ -100,9 +100,11 @@
                     @php
                         $pojuCollection = collect($pojuList);
                         $matchingPoju = $pojuCollection->firstWhere('id', $pj->produk_jual_id);
+                        $penjualan = \App\Models\Penjualan::firstWhere('no_invoice', $pj->no_invoice);
                     @endphp
                     <tr>
                         <td>{{ $loop->iteration }}</td>
+                        <td>{{ $penjualan->lokasi->nama }}</td>
                         <td>{{ $matchingPoju ? $matchingPoju->nama : 'N/A' }}</td>
                         <td>{{ $matchingPoju ? $matchingPoju->tipe->nama : 'N/A' }}</td>
                         <td>{{ $pj->jumlah }}</td>

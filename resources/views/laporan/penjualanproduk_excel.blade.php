@@ -98,9 +98,11 @@
                         @php
                             $pojuCollection = collect($pojuList);
                             $matchingPoju = $pojuCollection->firstWhere('id', $pj->produk_jual_id);
+                            $penjualan = \App\Models\Penjualan::firstWhere('no_invoice', $pj->no_invoice);
                         @endphp
                         <tr>
                             <td style="border: 1px solid #000;">{{ $loop->iteration }}</td>
+                            <td style="border: 1px solid #000;">{{ $penjualan->lokasi->nama }}</td>
                             <td style="border: 1px solid #000;">{{ $matchingPoju ? $matchingPoju->nama : 'N/A' }}</td>
                             <td style="border: 1px solid #000;">{{ $matchingPoju ? $matchingPoju->tipe->nama : 'N/A' }}</td>
                             <td style="border: 1px solid #000;">{{ $pj->jumlah }}</td>

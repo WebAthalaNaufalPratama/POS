@@ -97,8 +97,13 @@
             <tbody>
                 @php $no = 1; @endphp
                 @foreach ($duit as $rekening_id => $total_nominal)
+                @php
+                    $penj = $pembayaran->firstWhere('rekening_id', $rekening_id);
+                    $lokasi = \App\Models\Penjualan::firstWhere('id', $penj->invoice_penjualan_id);
+                @endphp
                 <tr>
                     <td>{{ $no++ }}</td>
+                    <td>{{ $lokasi->lokasi->nama}}</td>
                     <td>
                             {{ $pembayaran->firstWhere('rekening_id', $rekening_id)->cara_bayar ?? 'Cash' }} @if(!empty($rekening_id))({{($pembayaran->firstWhere('rekening_id', $rekening_id)->rekening->bank)}})@endif
                     </td>
