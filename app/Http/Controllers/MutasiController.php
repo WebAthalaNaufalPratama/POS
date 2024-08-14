@@ -1128,7 +1128,7 @@ class MutasiController extends Controller
             $query->where('lokasi_id', $lokasi)
                 ->orWhere('lokasi_id', 'Semua');
         })->get();
-        $produks = InventoryGreenhouse::all();
+        $produks = InventoryGallery::all();
         // dd($produks);
         $bankpens = Rekening::get();
         $Invoice = Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->latest()->first();
@@ -1199,7 +1199,7 @@ class MutasiController extends Controller
                                     ->first();
             // dd($stok);
 
-            if (!$stok || $stok->jumlah < intval($req->jumlahproduk[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
+            if (!$stok || $stok->jumlah < intval($req->jumlah_dikirim[$i]) * intval($req->jml_produk) || $stok->jumlah < $stok->min_stok) {
                 $allStockAvailable = false;
                 break;
             }

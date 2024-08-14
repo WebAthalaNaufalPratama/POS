@@ -170,6 +170,7 @@ class InitialSeeder extends Seeder
                 'mutasiindengh.edit',
                 'mutasiindengh.update',
                 'mutasiindengh.show',
+                'auditmutasigalery'
             ];
             $admingalleryPermissionList = array_merge($basiPermissionList, $admingalleryPermissionList);
             $query = Permission::query();

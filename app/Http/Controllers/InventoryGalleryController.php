@@ -156,6 +156,7 @@ class InventoryGalleryController extends Controller
                     $item->nama_produk = $item->produk->nama;
                     $item->nama_kondisi = $item->kondisi->nama;
                     $item->nama_karyawan = $item->karyawan->nama;
+                    $item->nama_gallery = $item->lokasi->nama;
                     $item->tanggal = $item->tanggal == null ? '' : tanggalindo($item->tanggal);
                     return $item;
                 });
