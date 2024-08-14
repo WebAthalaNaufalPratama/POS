@@ -1121,28 +1121,26 @@ class MutasiController extends Controller
             $selectedGFTKomponen = [];
             
             foreach ($produkjuals as $index => $pj) {
-                // dd($produkjuals);
                 if($pj->produk && $produk->produk->kode)
                 {
                     $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_mutasiog ==  $produk->no_mutasiog && $pj->jenis != 'TAMBAHAN');
-                
-                if ($isSelectedGFT) {
-                    foreach ($pj->komponen as $komponen) {
-                        if ($pj->id == $komponen->produk_terjual_id) {
-                            foreach ($kondisis as $kondisi) {
-                                if ($kondisi->id == $komponen->kondisi) {
-                                    $selectedGFTKomponen[$komponen->produk_terjual_id][] = [
-                                        'kode' => $komponen->kode_produk,
-                                        'nama' => $komponen->nama_produk,
-                                        'kondisi' => $kondisi->nama,
-                                        'jumlah' => $komponen->jumlah,
-                                        'produk' => $komponen->produk_terjual_id,
-                                    ];
+                    if ($isSelectedGFT) {
+                        foreach ($pj->komponen as $komponen) {
+                            if ($pj->id == $komponen->produk_terjual_id) {
+                                foreach ($kondisis as $kondisi) {
+                                    if ($kondisi->id == $komponen->kondisi) {
+                                        $selectedGFTKomponen[$komponen->produk_terjual_id][] = [
+                                            'kode' => $komponen->kode_produk,
+                                            'nama' => $komponen->nama_produk,
+                                            'kondisi' => $kondisi->nama,
+                                            'jumlah' => $komponen->jumlah,
+                                            'produk' => $komponen->produk_terjual_id,
+                                        ];
+                                    }
                                 }
                             }
                         }
                     }
-                }
                 }
                 
             }
@@ -1152,171 +1150,153 @@ class MutasiController extends Controller
             }
         }
 
-        // dd($perPendapatan);
-        // dd($coba);
-        // $produks = Produk_Jual::with('komponen.kondisi')->get();
         $kondisis = Kondisi::all();
         $bankpens = Rekening::all();
         $ongkirs = Ongkir::all();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
 
-        // dd($mutasis);
         return view('mutasioutlet.view', compact('perPendapatan','produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
     public function index_ghgalery(Request $req)
-{
-    $user = Auth::user();
-    $karyawan = Karyawan::where('user_id', $user->id)->first();
-    $tipe = $karyawan->lokasi->tipe_lokasi;
+    {
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $tipe = $karyawan->lokasi->tipe_lokasi;
+        $query = Mutasi::query();
 
-    // Initialize query with the conditions based on user roles and location type
-    $query = Mutasi::query();
+        if ($user->hasRole(['Purchasing']) && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query->where(function ($q) {
+                $q->where('no_mutasi', 'like', 'MGG%')
+                ->orWhere('no_mutasi', 'like', 'MPG%');
+            })->orderBy('created_at', 'desc');
+        } elseif ($user->hasRole(['AdminGallery', 'KasirGallery']) && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query->where(function ($q) use ($karyawan) {
+                $q->where('no_mutasi', 'like', 'MGG%')
+                ->where('status', 'DIKONFIRMASI')
+                ->where('penerima', $karyawan->lokasi_id)
+                ->orWhere(function ($q) use ($karyawan) {
+                    $q->where('no_mutasi', 'like', 'MPG%')
+                    ->where('status', 'DIKONFIRMASI')
+                    ->where('penerima', $karyawan->lokasi_id);
+                });
+            })->orderBy('created_at', 'desc');
+        } elseif ($user->hasRole(['Auditor', 'Finance'])) {
+            $query->where(function ($q) {
+                $q->where('no_mutasi', 'like', 'MGG%')
+                ->where('status', '!=', 'TUNDA')
+                ->orWhere(function ($q) {
+                    $q->where('no_mutasi', 'like', 'MPG%')
+                    ->where('status', '!=', 'TUNDA');
+                });
+            })->orderBy('created_at', 'desc');
+        }
 
-    if ($user->hasRole(['Purchasing']) && !$user->hasRole(['Auditor', 'Finance'])) {
-        $query->where(function ($q) {
-            $q->where('no_mutasi', 'like', 'MGG%')
-              ->orWhere('no_mutasi', 'like', 'MPG%');
-        })->orderBy('created_at', 'desc');
-    } elseif ($user->hasRole(['AdminGallery', 'KasirGallery']) && !$user->hasRole(['Auditor', 'Finance'])) {
-        $query->where(function ($q) use ($karyawan) {
-            $q->where('no_mutasi', 'like', 'MGG%')
-              ->where('status', 'DIKONFIRMASI')
-              ->where('penerima', $karyawan->lokasi_id)
-              ->orWhere(function ($q) use ($karyawan) {
-                $q->where('no_mutasi', 'like', 'MPG%')
-                  ->where('status', 'DIKONFIRMASI')
-                  ->where('penerima', $karyawan->lokasi_id);
-              });
-        })->orderBy('created_at', 'desc');
-    } elseif ($user->hasRole(['Auditor', 'Finance'])) {
-        $query->where(function ($q) {
-            $q->where('no_mutasi', 'like', 'MGG%')
-              ->where('status', '!=', 'TUNDA')
-              ->orWhere(function ($q) {
-                $q->where('no_mutasi', 'like', 'MPG%')
-                  ->where('status', '!=', 'TUNDA');
-              });
-        })->orderBy('created_at', 'desc');
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        if ($req->ajax()) {
+            $totalRecords = $query->count();
+            $data = $query->orderByDesc('id')
+                        ->skip($req->input('start'))
+                        ->take($req->input('length'))
+                        ->get();
+
+            $data = $data->map(function ($item) {
+                $user = Auth::user();
+                $karyawan = Karyawan::where('user_id', $user->id)->first();
+                $jumlahDiterima = $item->produkMutasiGG && $item->produkMutasiGG->isNotEmpty() 
+                                ? $item->produkMutasiGG->first()->jumlah_diterima 
+                                : null;
+                return [
+                    'id' => $item->id,
+                    'no_mutasi' => $item->no_mutasi,
+                    'pengirim' => $item->lokasi->nama ?? '',
+                    'penerima' => $item->lokasi_penerima->nama ?? '',
+                    'tanggal_kirim' => date('d F Y', strtotime($item->tanggal_kirim)),
+                    'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
+                    'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
+                    'status' => $item->status,
+                    'jumlah_diterima' => $jumlahDiterima !== null ? 'true' : 'false',
+                    'lokasi' => $karyawan->lokasi_id,
+                ];
+            });
+
+            return response()->json([
+                'draw' => intval($req->input('draw')),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $data
+            ]);
+        }
+
+        return view('mutasighgalery.index');
     }
-
-    // Apply date filters
-    if ($req->dateStart) {
-        $query->where('created_at', '>=', $req->input('dateStart'));
-    }
-    if ($req->dateEnd) {
-        $query->where('created_at', '<=', $req->input('dateEnd'));
-    }
-
-    if ($req->ajax()) {
-        // Get total records before applying pagination
-        $totalRecords = $query->count();
-        
-        // Apply pagination and sorting
-        $data = $query->orderByDesc('id')
-                      ->skip($req->input('start'))
-                      ->take($req->input('length'))
-                      ->get();
-
-        // Map data to the format DataTables expects
-        $data = $data->map(function ($item) {
-            $user = Auth::user();
-            $karyawan = Karyawan::where('user_id', $user->id)->first();
-            $jumlahDiterima = $item->produkMutasiGG && $item->produkMutasiGG->isNotEmpty() 
-                            ? $item->produkMutasiGG->first()->jumlah_diterima 
-                            : null;
-            return [
-                'id' => $item->id,
-                'no_mutasi' => $item->no_mutasi,
-                'pengirim' => $item->lokasi->nama ?? '',
-                'penerima' => $item->lokasi_penerima->nama ?? '',
-                'tanggal_kirim' => date('d F Y', strtotime($item->tanggal_kirim)),
-                'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
-                'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
-                'status' => $item->status,
-                'jumlah_diterima' => $jumlahDiterima !== null ? 'true' : 'false',
-                'lokasi' => $karyawan->lokasi_id,
-            ];
-        });
-
-        return response()->json([
-            'draw' => intval($req->input('draw')),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data' => $data
-        ]);
-    }
-
-    return view('mutasighgalery.index');
-}
 
 
     public function index_galerygalery(Request $req)
-{
-    $user = Auth::user();
-    $karyawan = Karyawan::where('user_id', $user->id)->first();
-    $tipe = $karyawan->lokasi->tipe_lokasi;
+    {
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $tipe = $karyawan->lokasi->tipe_lokasi;
+        $query = Mutasi::where('no_mutasi', 'like', 'MGA%');
 
-    // Initialize query with the conditions based on user roles and location type
-    $query = Mutasi::where('no_mutasi', 'like', 'MGA%');
+        if ($user->hasRole(['Purchasing']) && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query->orderBy('created_at', 'desc');
+        } elseif ($user->hasRole(['AdminGallery', 'KasirGallery']) && !$user->hasRole(['Auditor', 'Finance'])) {
+            $query->where('status', 'DIKONFIRMASI')->where('penerima', $karyawan->lokasi_id)->orderBy('created_at', 'desc');
+        } elseif ($user->hasRole(['Auditor', 'Finance'])) {
+            $query->where('status', '!=', 'TUNDA')->orderBy('created_at', 'desc');
+        }
 
-    if ($user->hasRole(['Purchasing']) && !$user->hasRole(['Auditor', 'Finance'])) {
-        $query->orderBy('created_at', 'desc');
-    } elseif ($user->hasRole(['AdminGallery', 'KasirGallery']) && !$user->hasRole(['Auditor', 'Finance'])) {
-        $query->where('status', 'DIKONFIRMASI')->where('penerima', $karyawan->lokasi_id)->orderBy('created_at', 'desc');
-    } elseif ($user->hasRole(['Auditor', 'Finance'])) {
-        $query->where('status', '!=', 'TUNDA')->orderBy('created_at', 'desc');
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        if ($req->ajax()) {
+            $totalRecords = $query->count();
+            $data = $query->orderByDesc('id')
+                        ->skip($req->input('start'))
+                        ->take($req->input('length'))
+                        ->get();
+
+            $data = $data->map(function ($item) {
+                $user = Auth::user();
+                $karyawan = Karyawan::where('user_id', $user->id)->first();
+                $jumlahDiterima = $item->produkMutasiGAG && $item->produkMutasiGAG->isNotEmpty() 
+                                ? $item->produkMutasiGAG->first()->jumlah_diterima 
+                                : null;
+                return [
+                    'id' => $item->id,
+                    'no_mutasi' => $item->no_mutasi,
+                    'pengirim' => $item->lokasi->nama ?? '',
+                    'penerima' => $item->lokasi_penerima->nama ?? '',
+                    'tanggal_kirim' => date('d F Y', strtotime($item->tanggal_kirim)),
+                    'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
+                    'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
+                    'status' => $item->status,
+                    'jumlah_diterima' => $jumlahDiterima !== null ? 'true' : 'false',
+                    'lokasi' => $karyawan->lokasi_id,
+                ];
+            });
+
+            return response()->json([
+                'draw' => intval($req->input('draw')),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $data
+            ]);
+        }
+
+        return view('mutasigalerygalery.index');
     }
-
-    // Apply date filters
-    if ($req->dateStart) {
-        $query->where('created_at', '>=', $req->input('dateStart'));
-    }
-    if ($req->dateEnd) {
-        $query->where('created_at', '<=', $req->input('dateEnd'));
-    }
-
-    if ($req->ajax()) {
-        // Get total records before applying pagination
-        $totalRecords = $query->count();
-        
-        // Apply pagination and sorting
-        $data = $query->orderByDesc('id')
-                      ->skip($req->input('start'))
-                      ->take($req->input('length'))
-                      ->get();
-
-        // Map data to the format DataTables expects
-        $data = $data->map(function ($item) {
-            $user = Auth::user();
-            $karyawan = Karyawan::where('user_id', $user->id)->first();
-            $jumlahDiterima = $item->produkMutasiGAG && $item->produkMutasiGAG->isNotEmpty() 
-                            ? $item->produkMutasiGAG->first()->jumlah_diterima 
-                            : null;
-            return [
-                'id' => $item->id,
-                'no_mutasi' => $item->no_mutasi,
-                'pengirim' => $item->lokasi->nama ?? '',
-                'penerima' => $item->lokasi_penerima->nama ?? '',
-                'tanggal_kirim' => date('d F Y', strtotime($item->tanggal_kirim)),
-                'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
-                'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
-                'status' => $item->status,
-                'jumlah_diterima' => $jumlahDiterima !== null ? 'true' : 'false',
-                'lokasi' => $karyawan->lokasi_id,
-            ];
-        });
-
-        return response()->json([
-            'draw' => intval($req->input('draw')),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data' => $data
-        ]);
-    }
-
-    return view('mutasigalerygalery.index');
-}
 
 
     public function create_galerygalery()
@@ -1324,7 +1304,6 @@ class MutasiController extends Controller
         $roles = Auth::user()->roles()->value('name');
         $user = Auth::user()->value('id');
         $lokasi = Karyawan::where('user_id', $user)->value('lokasi_id');
-        // dd($karyawans);
         $customers = Customer::where('lokasi_id', $lokasi)->get();
         $lokasipengirim = Lokasi::where('tipe_lokasi', 1)->get();
         $lokasipenerima = Lokasi::where('tipe_lokasi', 1)->get();
@@ -1335,29 +1314,22 @@ class MutasiController extends Controller
                 ->orWhere('lokasi_id', 'Semua');
         })->get();
         $produks = InventoryGallery::all();
-        // dd($produks);
         $bankpens = Rekening::get();
         $Invoice = Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->latest()->first();
-        // dd($bankpens);
         if ($Invoice != null) {
             $substring = substr($Invoice->no_mutasi, 11);
             $cekInvoice = substr($substring, 0, 3);
-            // dd($cekInvoice);
         } else {
             $cekInvoice = 0;
         }
-        // dd($cekInvoice);
+
         $InvoiceBayar = Pembayaran::latest()->first();
-        // dd($Invoice);
         if ($InvoiceBayar != null) {
             $substringBayar = substr($InvoiceBayar->no_invoice_bayar, 11);
             $cekInvoiceBayar = substr($substringBayar, 0, 3);
-            // dd($cekInvoice);
         } else {
             $cekInvoiceBayar = 0;
         }
-            // $komponen = Kondisi::with('komponen')->get();
-            // dd($komponen);
         $kondisis = Kondisi::all();
         $invoices = Penjualan::get();
 
