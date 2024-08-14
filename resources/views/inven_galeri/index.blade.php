@@ -343,75 +343,75 @@
             });
 
             // Start Datatable Inventory
-            const columns = [
-                { data: 'no', name: 'no', orderable: false },
-                { data: 'kode_produk', name: 'kode_produk' },
-                { data: 'produk.nama', name: 'produk.nama', orderable: false },
-                { data: 'kondisi.nama', name: 'kondisi.nama', orderable: false },
-                @if(!Auth::user()->hasRole('AdminGallery'))
-                { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
-                @endif
-                { data: 'jumlah', name: 'jumlah' },
-                { data: 'min_stok', name: 'min_stok' },
-                {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false,
-                    searchable: false,
-                    render: function(data, type, row) {
-                        return `
-                            <div class="text-center">
-                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="inven_galeri/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
-                                    </li>
-                                    <li>
-                                        <a href="inven_galeri/${row.id}/edit" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        `;
+                const columns = [
+                    { data: 'no', name: 'no', orderable: false },
+                    { data: 'kode_produk', name: 'kode_produk' },
+                    { data: 'produk.nama', name: 'produk.nama', orderable: false },
+                    { data: 'kondisi.nama', name: 'kondisi.nama', orderable: false },
+                    @if(!Auth::user()->hasRole('AdminGallery'))
+                    { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
+                    @endif
+                    { data: 'jumlah', name: 'jumlah' },
+                    { data: 'min_stok', name: 'min_stok' },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="inven_galeri/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        </li>
+                                        <li>
+                                            <a href="inven_galeri/${row.id}/edit" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            `;
+                        }
                     }
-                }
-            ];
+                ];
 
-            let table = initDataTable('#inventory', {
-                ajaxUrl: "{{ route('inven_galeri.index') }}",
-                columns: columns,
-                order: [[1, 'asc']],
-                searching: true,
-                lengthChange: true,
-                pageLength: 5
-            }, {
-                produk: '#filterProduk',
-                kondisi: '#filterKondisi',
-                gallery: '#filterGallery',
-                dateStart: '#filterDateStart',
-                dateEnd: '#filterDateEnd'
-            }, 'inventory'); 
+                let table = initDataTable('#inventory', {
+                    ajaxUrl: "{{ route('inven_galeri.index') }}",
+                    columns: columns,
+                    order: [[1, 'asc']],
+                    searching: true,
+                    lengthChange: true,
+                    pageLength: 5
+                }, {
+                    produk: '#filterProduk',
+                    kondisi: '#filterKondisi',
+                    gallery: '#filterGallery',
+                    dateStart: '#filterDateStart',
+                    dateEnd: '#filterDateEnd'
+                }, 'inventory'); 
 
-            const handleSearch = debounce(function() {
-                table.ajax.reload();
-            }, 5000); // Adjust the debounce delay as needed
+                const handleSearch = debounce(function() {
+                    table.ajax.reload();
+                }, 5000); // Adjust the debounce delay as needed
 
-            // Event listeners for search filters
-            $('#filterProduk, #filterKondisi, #filterGallery, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+                // Event listeners for search filters
+                $('#filterProduk, #filterKondisi, #filterGallery, #filterDateStart, #filterDateEnd').on('input', handleSearch);
 
-            $('#filterBtn').on('click', function() {
-                table.ajax.reload();
-            });
+                $('#filterBtn').on('click', function() {
+                    table.ajax.reload();
+                });
 
-            $('#clearBtn').on('click', function() {
-                $('#filterProduk').val('').trigger('change');
-                $('#filterKondisi').val('').trigger('change');
-                $('#filterGallery').val('').trigger('change');
-                $('#filterDateStart').val('');
-                $('#filterDateEnd').val('');
-                table.ajax.reload();
-            });
+                $('#clearBtn').on('click', function() {
+                    $('#filterProduk').val('').trigger('change');
+                    $('#filterKondisi').val('').trigger('change');
+                    $('#filterGallery').val('').trigger('change');
+                    $('#filterDateStart').val('');
+                    $('#filterDateEnd').val('');
+                    table.ajax.reload();
+                });
             // End Datatable Inventory
 
             // Start Datatable Pemakaian Sendiri
@@ -419,7 +419,7 @@
                 { data: 'no', name: 'no', orderable: false },
                 { data: 'id', name: 'id', visible: false },
                 @if(!Auth::user()->hasRole('AdminGallery'))
-                { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
+                { data: 'nama_gallery', name: 'nama_gallery', orderable: false },
                 @endif
                 { data: 'nama_produk', name: 'nama_produk', orderable: false },
                 { data: 'nama_kondisi', name: 'nama_kondisi', orderable: false },

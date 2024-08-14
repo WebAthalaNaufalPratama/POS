@@ -722,6 +722,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/pemakaian_sendiri', 'LaporanController@pemakaian_sendiri_index')->name('laporan.pemakaian_sendiri');
             Route::get('/pemakaian_sendiri-pdf', 'LaporanController@pemakaian_sendiri_pdf')->name('laporan.pemakaian_sendiri-pdf');
             Route::get('/pemakaian_sendiri-excel', 'LaporanController@pemakaian_sendiri_excel')->name('laporan.pemakaian_sendiri-excel');
+            Route::get('/bunga_keluar', 'LaporanController@bunga_keluar_index')->name('laporan.bunga_keluar');
+            Route::get('/bunga_keluar-pdf', 'LaporanController@bunga_keluar_pdf')->name('laporan.bunga_keluar-pdf');
+            Route::get('/bunga_keluar-excel', 'LaporanController@bunga_keluar_excel')->name('laporan.bunga_keluar-excel');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
