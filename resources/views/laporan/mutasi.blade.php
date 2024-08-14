@@ -156,7 +156,7 @@
                                             @foreach ($data['produk_jual'] as $index => $produkJual)
                                             @foreach ($produkJual['komponen'] as $komponenIndex => $komponen)
                                             <tr>
-                                                <td>{{ $komponen['kondisi_diterima']->nama }}</td>
+                                                <td>{{ $komponen['kondisi_diterima']->nama ?? '-' }}</td>
                                             </tr>
                                             @endforeach
                                             @endforeach
