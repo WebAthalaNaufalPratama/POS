@@ -2628,6 +2628,12 @@ class LaporanController extends Controller
             ])
         ->get();
 
+        // data pemakaian sendiri
+        $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+        ->get();
+
         // tahun dari data DO Sewa
         $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
             return Carbon::parse($date)->year;
@@ -2678,11 +2684,16 @@ class LaporanController extends Controller
             return Carbon::parse($date)->year;
         }));
 
+        // tahun dari data pemakaian sendiri
+        $years = $years->merge($pemakaianSendiri->pluck('tanggal')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
         // Ambil tahun yang unik dan urutkan
         $tahun = $years->unique()->sort()->values();
 
         // integrate data
-        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden, $pemakaianSendiri){
             // Inisialisasi list data dengan saldo awal 0
             $item->dates = collect($listDate)->mapWithKeys(function($date) {
                 return [
@@ -2859,6 +2870,14 @@ class LaporanController extends Controller
                         $updateSaldo($date, $product->jml_diterima, 0, 0);
                     }
                 });
+            });
+
+            // Proses Pemakaian Sendiri
+            $pemakaianSendiri->each(function($order) use($item, $updateSaldo) {
+                if ($order->produk_id == $item->id) {
+                    $date = Carbon::parse($order->tanggal)->format('Y-m-d');
+                    $updateSaldo($date, $order->jumlah, 0, 0);
+                }
             });
 
             // Validasi saldo
@@ -3010,8 +3029,14 @@ class LaporanController extends Controller
             ])
         ->get();
 
+        // data pemakaian sendiri
+        $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+        ->get();
+
         // integrate data
-        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden, $pemakaianSendiri){
             // Inisialisasi list data dengan saldo awal 0
             $item->dates = collect($listDate)->mapWithKeys(function($date) {
                 return [
@@ -3188,6 +3213,14 @@ class LaporanController extends Controller
                         $updateSaldo($date, $product->jml_diterima, 0, 0);
                     }
                 });
+            });
+
+            // Proses Pemakaian Sendiri
+            $pemakaianSendiri->each(function($order) use($item, $updateSaldo) {
+                if ($order->produk_id == $item->id) {
+                    $date = Carbon::parse($order->tanggal)->format('Y-m-d');
+                    $updateSaldo($date, $order->jumlah, 0, 0);
+                }
             });
 
             // Validasi saldo
