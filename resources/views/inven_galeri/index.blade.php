@@ -415,78 +415,78 @@
             // End Datatable Inventory
 
             // Start Datatable Pemakaian Sendiri
-            const columns2 = [
-                { data: 'no', name: 'no', orderable: false },
-                { data: 'id', name: 'id', visible: false },
-                @if(!Auth::user()->hasRole('AdminGallery'))
-                { data: 'nama_gallery', name: 'nama_gallery', orderable: false },
-                @endif
-                { data: 'nama_produk', name: 'nama_produk', orderable: false },
-                { data: 'nama_kondisi', name: 'nama_kondisi', orderable: false },
-                { data: 'nama_karyawan', name: 'nama_karyawan', orderable: false },
-                { data: 'tanggal', name: 'tanggal', orderable: false },
-                { data: 'jumlah', name: 'jumlah' },
-                { data: 'alasan', name: 'alasan' },
-            ];
+                const columns2 = [
+                    { data: 'no', name: 'no', orderable: false },
+                    { data: 'id', name: 'id', visible: false },
+                    @if(!Auth::user()->hasRole('AdminGallery'))
+                    { data: 'nama_gallery', name: 'nama_gallery', orderable: false },
+                    @endif
+                    { data: 'nama_produk', name: 'nama_produk', orderable: false },
+                    { data: 'nama_kondisi', name: 'nama_kondisi', orderable: false },
+                    { data: 'nama_karyawan', name: 'nama_karyawan', orderable: false },
+                    { data: 'tanggal', name: 'tanggal', orderable: false },
+                    { data: 'jumlah', name: 'jumlah' },
+                    { data: 'alasan', name: 'alasan' },
+                ];
 
-            let table2 = initDataTable('#pemakaian_sendiri', {
-                ajaxUrl: "{{ route('inven_galeri.index') }}",
-                columns: columns2,
-                order: [[1, 'asc']],
-                searching: true,
-                lengthChange: true,
-                pageLength: 5
-            }, {
-                produk2: '#filterProduk2',
-                kondisi2: '#filterKondisi2',
-                gallery2: '#filterGallery2',
-                dateStart2: '#filterDateStart2',
-                dateEnd2: '#filterDateEnd2'
-            }, 'pemakaian_sendiri'); 
+                let table2 = initDataTable('#pemakaian_sendiri', {
+                    ajaxUrl: "{{ route('inven_galeri.index') }}",
+                    columns: columns2,
+                    order: [[1, 'asc']],
+                    searching: true,
+                    lengthChange: true,
+                    pageLength: 5
+                }, {
+                    produk2: '#filterProduk2',
+                    kondisi2: '#filterKondisi2',
+                    gallery2: '#filterGallery2',
+                    dateStart2: '#filterDateStart2',
+                    dateEnd2: '#filterDateEnd2'
+                }, 'pemakaian_sendiri'); 
 
-            const handleSearch2 = debounce(function() {
-                table2.ajax.reload();
-            }, 5000); // Adjust the debounce delay as needed
+                const handleSearch2 = debounce(function() {
+                    table2.ajax.reload();
+                }, 5000); // Adjust the debounce delay as needed
 
-            // Event listeners for search filters
-            $('#filterProduk2, #filterKondisi2, #filterGallery2, #filterDateStart2, #filterDateEnd2').on('input', handleSearch2);
+                // Event listeners for search filters
+                $('#filterProduk2, #filterKondisi2, #filterGallery2, #filterDateStart2, #filterDateEnd2').on('input', handleSearch2);
 
-            $('#filterBtn2').on('click', function() {
-                table2.ajax.reload();
-            });
+                $('#filterBtn2').on('click', function() {
+                    table2.ajax.reload();
+                });
 
-            $('#clearBtn2').on('click', function() {
-                $('#filterProduk2').val('').trigger('change');
-                $('#filterKondisi2').val('').trigger('change');
-                $('#filterGallery2').val('').trigger('change');
-                $('#filterDateStart2').val('');
-                $('#filterDateEnd2').val('');
-                table2.ajax.reload();
-            });
+                $('#clearBtn2').on('click', function() {
+                    $('#filterProduk2').val('').trigger('change');
+                    $('#filterKondisi2').val('').trigger('change');
+                    $('#filterGallery2').val('').trigger('change');
+                    $('#filterDateStart2').val('');
+                    $('#filterDateEnd2').val('');
+                    table2.ajax.reload();
+                });
             // End Datatable Pemakaian Sendiri
 
             // Start Datatable Log
-            const columns3 = [
-                { data: 'no', name: 'no', orderable: false },
-                { data: 'Waktu', name: 'Waktu' },
-                { data: 'Pengubah', name: 'Pengubah', orderable: false },
-                { data: 'No Referensi', name: 'No Referensi', orderable: false },
-                { data: 'Nama Produk Jual', name: 'Nama Produk Jual', orderable: false },
-                { data: 'Nama Komponen', name: 'Nama Komponen', orderable: false },
-                { data: 'Kondisi', name: 'Kondisi' },
-                { data: 'Masuk', name: 'Masuk' },
-                { data: 'Keluar', name: 'Keluar' },
-            ];
+                const columns3 = [
+                    { data: 'no', name: 'no', orderable: false },
+                    { data: 'Waktu', name: 'Waktu' },
+                    { data: 'Pengubah', name: 'Pengubah', orderable: false },
+                    { data: 'No Referensi', name: 'No Referensi', orderable: false },
+                    { data: 'Nama Produk Jual', name: 'Nama Produk Jual', orderable: false },
+                    { data: 'Nama Komponen', name: 'Nama Komponen', orderable: false },
+                    { data: 'Kondisi', name: 'Kondisi' },
+                    { data: 'Masuk', name: 'Masuk' },
+                    { data: 'Keluar', name: 'Keluar' },
+                ];
 
-            let table3 = initDataTable('#log', {
-                ajaxUrl: "{{ route('inven_galeri.index') }}",
-                columns: columns3,
-                order: [[1, 'asc']],
-                searching: true,
-                lengthChange: true,
-                pageLength: 5
-            }, {
-            }, 'log'); 
+                let table3 = initDataTable('#log', {
+                    ajaxUrl: "{{ route('inven_galeri.index') }}",
+                    columns: columns3,
+                    order: [[1, 'asc']],
+                    searching: true,
+                    lengthChange: true,
+                    pageLength: 5
+                }, {
+                }, 'log'); 
             // End Datatable Log
         });   
     </script>
