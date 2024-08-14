@@ -9,7 +9,10 @@ use App\Models\Rekening;
 use App\Models\TransaksiKas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\Facades\Image;
 
 class TransaksiKasController extends Controller
 {
@@ -21,8 +24,8 @@ class TransaksiKasController extends Controller
     public function index_pusat(Request $req)
     {
         // Define the base query for incoming and outgoing transactions
-        $queryMasuk = TransaksiKas::query();
-        $queryKeluar = TransaksiKas::query();
+        $queryMasuk = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_pengirim', 'rek_penerima');
+        $queryKeluar = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_pengirim', 'rek_penerima');
 
         // Apply filters for location and rekening if provided
         if ($req->lokasi) {
@@ -37,6 +40,128 @@ class TransaksiKasController extends Controller
             $queryMasuk->where('rekening_penerima', $req->rekening);
             $queryKeluar->where('rekening_pengirim', $req->rekening);
         }
+
+        // start datatable masuk
+            if ($req->ajax() && $req->table == 'masuk') {
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $queryMasuk->where(function($q) use ($search) {
+                        $q->where('metode', 'like', "%$search%")
+                        ->orWhere('nominal', 'like', "%$search%")
+                        ->orWhere('biaya_lain', 'like', "%$search%")
+                        ->orWhere('tanggal', 'like', "%$search%")
+                        ->orWhere('jenis', 'like', "%$search%")
+                        ->orWhere('keterangan', 'like', "%$search%")
+                        ->orWhere('status', 'like', "%$search%")
+                        ->orWhereHas('lok_penerima', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('lok_pengirim', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_pengirim', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_penerima', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        });
+                    });
+                }
+        
+                $queryMasuk->orderBy($columnName, $dir);
+                $recordsFiltered = $queryMasuk->count();
+                $tempData = $queryMasuk->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $dataMasuk = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->tanggal = tanggalindo($item->tanggal);
+                    $item->nominal = formatRupiah($item->nominal);
+                    $item->biaya_lain = formatRupiah($item->biaya_lain);
+                    $item->nama_rek_penerima = $item->rek_penerima ? $item->rek_penerima->nama_akun : '-';
+                    $item->nama_rek_pengirim = $item->rek_pengirim ? $item->rek_pengirim->nama_akun : '-';
+                    return $item;
+                });
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => TransaksiKas::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $dataMasuk,
+                ]);
+
+            }
+        // end datatable masuk
+
+        // start datatable keluar
+            if ($req->ajax() && $req->table == 'keluar') {
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $queryKeluar->where(function($q) use ($search) {
+                        $q->where('metode', 'like', "%$search%")
+                        ->orWhere('nominal', 'like', "%$search%")
+                        ->orWhere('biaya_lain', 'like', "%$search%")
+                        ->orWhere('tanggal', 'like', "%$search%")
+                        ->orWhere('jenis', 'like', "%$search%")
+                        ->orWhere('keterangan', 'like', "%$search%")
+                        ->orWhere('status', 'like', "%$search%")
+                        ->orWhereHas('lok_penerima', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('lok_pengirim', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_pengirim', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_penerima', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        });
+                    });
+                }
+        
+                $queryKeluar->orderBy($columnName, $dir);
+                $recordsFiltered = $queryKeluar->count();
+                $tempData = $queryKeluar->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $dataKeluar = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->tanggal = tanggalindo($item->tanggal);
+                    $item->nominal = formatRupiah($item->nominal);
+                    $item->biaya_lain = formatRupiah($item->biaya_lain);
+                    $item->nama_rek_penerima = $item->rek_penerima ? $item->rek_penerima->nama_akun : '-';
+                    $item->nama_rek_pengirim = $item->rek_pengirim ? $item->rek_pengirim->nama_akun : '-';
+                    return $item;
+                });
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => TransaksiKas::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $dataKeluar,
+                ]);
+
+            }
+        // end datatable keluar
 
         // Common condition for confirmed status
         $confirmedCondition = fn($q) => $q->where('status', 'DIKONFIRMASI');
@@ -70,15 +195,15 @@ class TransaksiKasController extends Controller
         $saldoCash = $saldoMasukCash - $saldoKeluarCash;
 
         // Retrieve data for view
-        $dataMasuk = $queryMasuk->get();
-        $dataKeluar = $queryKeluar->get();
+        // $dataMasuk = $queryMasuk->get();
+        // $dataKeluar = $queryKeluar->get();
 
         // Get the basic data for locations and accounts
         $rekenings = Rekening::whereHas('lokasi', fn($q) => $q->where('operasional_id', 1))->get();
         $lokasis = Lokasi::where('operasional_id', 1)->orWhere('tipe_lokasi', 1)->get();
 
         return view('kas_pusat.index', compact(
-            'dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 
+            'lokasis', 'rekenings', 
             'saldoMasuk', 'saldoKeluar', 'saldoMasukRekening', 
             'saldoKeluarRekening', 'saldoMasukCash', 'saldoKeluarCash', 
             'saldo', 'saldoRekening', 'saldoCash'
@@ -119,13 +244,34 @@ class TransaksiKasController extends Controller
         $data = $req->except(['_token', '_method']);
         $data['status'] = 'DIKONFIRMASI';
 
-        // save data
+        // store file
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['file'] = $filePath;
+            $fileName = 'kas_pusat' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_transaksi_kas/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['file'] = $filePath;
+            } else {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
+
         $check = TransaksiKas::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
         return redirect()->back()->with('success', 'Data tersimpan');
@@ -187,13 +333,32 @@ class TransaksiKasController extends Controller
             $data['rekening_pengirim'] = null;
         }
 
-        // save data
-        $data['file'] = $existingTransaksi->file;
+        // store file
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['file'] = $filePath;
+            $fileName = 'kas_pusat' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_transaksi_kas/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($existingTransaksi->file)) {
+                $oldFilePath = storage_path('app/public/' . $existingTransaksi->file);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['file'] = $filePath;
+            } else {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
         $check = TransaksiKas::find($transaksiKas)->update($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
@@ -217,8 +382,8 @@ class TransaksiKasController extends Controller
 
     public function index_gallery(Request $req)
     {
-        $queryMasuk = TransaksiKas::query();
-        $queryKeluar = TransaksiKas::query();
+        $queryMasuk = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim');
+        $queryKeluar = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim');
         $rekenings = Rekening::whereHas('lokasi', function($q){
             $q->where('tipe_lokasi', 1);
         })->get();
@@ -245,6 +410,128 @@ class TransaksiKasController extends Controller
             $queryMasuk->where('rekening_penerima', $req->rekening);
             $queryKeluar->where('rekening_pengirim', $req->rekening);
         }
+
+        // start datatable masuk
+            if ($req->ajax() && $req->table == 'masuk') {
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $queryMasuk->where(function($q) use ($search) {
+                        $q->where('metode', 'like', "%$search%")
+                        ->orWhere('nominal', 'like', "%$search%")
+                        ->orWhere('biaya_lain', 'like', "%$search%")
+                        ->orWhere('tanggal', 'like', "%$search%")
+                        ->orWhere('jenis', 'like', "%$search%")
+                        ->orWhere('keterangan', 'like', "%$search%")
+                        ->orWhere('status', 'like', "%$search%")
+                        ->orWhereHas('lok_penerima', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('lok_pengirim', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_pengirim', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_penerima', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        });
+                    });
+                }
+        
+                $queryMasuk->orderBy($columnName, $dir);
+                $recordsFiltered = $queryMasuk->count();
+                $tempData = $queryMasuk->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $dataMasuk = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->tanggal = tanggalindo($item->tanggal);
+                    $item->nominal = formatRupiah($item->nominal);
+                    $item->biaya_lain = formatRupiah($item->biaya_lain);
+                    $item->nama_rek_penerima = $item->rek_penerima ? $item->rek_penerima->nama_akun : '-';
+                    $item->nama_rek_pengirim = $item->rek_pengirim ? $item->rek_pengirim->nama_akun : '-';
+                    return $item;
+                });
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => TransaksiKas::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $dataMasuk,
+                ]);
+
+            }
+        // end datatable masuk
+
+        // start datatable keluar
+            if ($req->ajax() && $req->table == 'keluar') {
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $queryKeluar->where(function($q) use ($search) {
+                        $q->where('metode', 'like', "%$search%")
+                        ->orWhere('nominal', 'like', "%$search%")
+                        ->orWhere('biaya_lain', 'like', "%$search%")
+                        ->orWhere('tanggal', 'like', "%$search%")
+                        ->orWhere('jenis', 'like', "%$search%")
+                        ->orWhere('keterangan', 'like', "%$search%")
+                        ->orWhere('status', 'like', "%$search%")
+                        ->orWhereHas('lok_penerima', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('lok_pengirim', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_pengirim', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        })
+                        ->orWhereHas('rek_penerima', function($c) use($search){
+                            $c->where('nama_akun', 'like', "%$search%");
+                        });
+                    });
+                }
+        
+                $queryKeluar->orderBy($columnName, $dir);
+                $recordsFiltered = $queryKeluar->count();
+                $tempData = $queryKeluar->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $dataKeluar = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->tanggal = tanggalindo($item->tanggal);
+                    $item->nominal = formatRupiah($item->nominal);
+                    $item->biaya_lain = formatRupiah($item->biaya_lain);
+                    $item->nama_rek_penerima = $item->rek_penerima ? $item->rek_penerima->nama_akun : '-';
+                    $item->nama_rek_pengirim = $item->rek_pengirim ? $item->rek_pengirim->nama_akun : '-';
+                    return $item;
+                });
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => TransaksiKas::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $dataKeluar,
+                ]);
+
+            }
+        // end datatable keluar
 
         // Common condition for confirmed status
         $confirmedCondition = fn($q) => $q->where('status', 'DIKONFIRMASI');
@@ -278,11 +565,11 @@ class TransaksiKasController extends Controller
         $saldoCash = $saldoMasukCash - $saldoKeluarCash;
 
         // Retrieve data for view
-        $dataMasuk = $queryMasuk->get();
-        $dataKeluar = $queryKeluar->get();
+        // $dataMasuk = $queryMasuk->get();
+        // $dataKeluar = $queryKeluar->get();
         
         return view('kas_gallery.index', compact(
-            'dataMasuk', 'dataKeluar', 'lokasis', 'rekenings', 
+            'lokasis', 'rekenings', 
             'saldoMasuk', 'saldoKeluar', 'saldoMasukRekening', 
             'saldoKeluarRekening', 'saldoMasukCash', 'saldoKeluarCash', 
             'saldo', 'saldoRekening', 'saldoCash', 'lokasi_pengirim', 'rekeningKeluar'
@@ -326,12 +613,32 @@ class TransaksiKasController extends Controller
         }
         $data['status'] = 'DIKONFIRMASI';
 
-        // save data
+        // store file
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['file'] = $filePath;
+            $fileName = 'kas_gallery' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_transaksi_kas/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['file'] = $filePath;
+            } else {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
         $check = TransaksiKas::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
@@ -393,11 +700,32 @@ class TransaksiKasController extends Controller
 
         // save data
         $data['file'] = $existingTransaksi->file;
+        // store file
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_transaksi_kas', $fileName, 'public');
-            $data['file'] = $filePath;
+            $fileName = 'kas_gallery' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_transaksi_kas/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($existingTransaksi->file)) {
+                $oldFilePath = storage_path('app/public/' . $existingTransaksi->file);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['file'] = $filePath;
+            } else {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
         $check = TransaksiKas::find($transaksiKas)->update($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');

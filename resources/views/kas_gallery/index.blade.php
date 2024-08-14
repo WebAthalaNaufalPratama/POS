@@ -137,7 +137,7 @@
       </div>
       <div class="card-body">
           <div class="table-responsive">
-          <table class="table datanew">
+          <table class="table" id="masuk">
               <thead>
               <tr>
                   <th>No</th>
@@ -151,11 +151,10 @@
                   <th>Biaya Lainnya</th>
                   <th>Keterangan</th>
                   <th>Status</th>
-                  {{-- <th>Aksi</th> --}}
               </tr>
               </thead>
               <tbody>
-                  @foreach ($dataMasuk as $item)
+                  {{-- @foreach ($dataMasuk as $item)
                       <tr>
                           <td>{{ $loop->iteration }}</td>
                           <td>{{ $item->jenis ?? '-' }}</td>
@@ -170,18 +169,8 @@
                           <td>
                             <span class="badges {{ $item->status == 'DIKONFIRMASI' ? 'bg-lightgreen' : 'bg-lightgrey' }}">{{ $item->status ?? '-' }}</span>
                           </td>
-                          {{-- <td class="text-center">
-                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="javascript:void(0);" onclick="edit({{ $item->id }})" data-bs-toggle="modal" data-bs-target="#editkas" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                </li>
-                            </ul>
-                          </td> --}}
                       </tr>
-                  @endforeach
+                  @endforeach --}}
               </tbody>
           </table>
           </div>
@@ -204,7 +193,7 @@
       </div>
       <div class="card-body">
           <div class="table-responsive">
-          <table class="table datanew">
+          <table class="table" id="keluar">
               <thead>
               <tr>
                   <th>No</th>
@@ -220,7 +209,7 @@
               </tr>
               </thead>
               <tbody>
-                  @foreach ($dataKeluar as $item)
+                  {{-- @foreach ($dataKeluar as $item)
                       <tr>
                           <td>{{ $loop->iteration }}</td>
                           <td>{{ $item->jenis ?? '-' }}</td>
@@ -249,7 +238,7 @@
                             </ul>
                           </td>
                       </tr>
-                  @endforeach
+                  @endforeach --}}
               </tbody>
           </table>
           </div>
@@ -422,6 +411,169 @@
     <script>
     $(document).ready(function() {
         $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_status, #edit_keluar_rekening_pengirim, #keluar_metode, #edit_keluar_metode').select2()
+
+        // Start Datatable Masuk
+          const columns1 = [
+              { data: 'no', name: 'no', orderable: false },
+              { data: 'jenis', name: 'jenis' },
+              { data: 'lok_pengirim.nama', name: 'lok_pengirim.nama' },
+              { data: 'nama_rek_pengirim', name: 'nama_rek_pengirim', orderable: false },
+              { data: 'lok_penerima.nama', name: 'lok_penerima.nama', orderable: false },
+              { data: 'nama_rek_penerima', name: 'nama_rek_penerima', orderable: false },
+              { data: 'tanggal', name: 'tanggal' },
+              { data: 'nominal', name: 'nominal' },
+              { data: 'biaya_lain', name: 'biaya_lain' },
+              { data: 'keterangan', name: 'keterangan' },
+              { 
+                  data: 'status',
+                  name: 'status',
+                  render: function(data, type, row) {
+                      let badgeClass;
+                      switch (data) {
+                          case 'DIKONFIRMASI':
+                              badgeClass = 'bg-lightgreen';
+                              break;
+                          case 'TUNDA':
+                              badgeClass = 'bg-lightred';
+                              break;
+                          default:
+                              badgeClass = 'bg-lightgrey';
+                              break;
+                      }
+                      
+                      return `
+                          <span class="badges ${badgeClass}">
+                              ${data ?? '-'}
+                          </span>
+                      `;
+                  }
+              },
+          ];
+
+          let table1 = initDataTable('#masuk', {
+              ajaxUrl: "{{ route('kas_gallery.index') }}",
+              columns: columns1,
+              order: [[1, 'asc']],
+              searching: true,
+              lengthChange: true,
+              pageLength: 5
+          }, {
+            lokasi: '#filterLokasi',
+            rekening: '#filterRekening',
+          }, 'masuk'); 
+        // End Datatable Masuk
+
+        // Start Datatable Keluar
+          const columns2 = [
+              { data: 'no', name: 'no', orderable: false },
+              { data: 'jenis', name: 'jenis' },
+              { 
+                  data: 'metode',
+                  name: 'metode',
+                  render: function(data, type, row) {
+                      let badgeClass;
+                      switch (data) {
+                          case 'Cash':
+                              badgeClass = 'bg-lightgreen';
+                              break;
+                          case 'Transfer':
+                              badgeClass = 'bg-lightblue';
+                              break;
+                          default:
+                              badgeClass = 'bg-lightgrey';
+                              break;
+                      }
+                      
+                      return `<div class="text-center">
+                          <span class="badges ${badgeClass}">
+                              ${data ?? '-'}
+                          </span></div>
+                      `;
+                  }
+              },
+              { data: 'nama_rek_pengirim', name: 'nama_rek_pengirim', orderable: false },
+              { data: 'tanggal', name: 'tanggal' },
+              { data: 'nominal', name: 'nominal' },
+              { data: 'biaya_lain', name: 'biaya_lain' },
+              { data: 'keterangan', name: 'keterangan' },
+              { 
+                  data: 'status',
+                  name: 'status',
+                  render: function(data, type, row) {
+                      let badgeClass;
+                      switch (data) {
+                          case 'DIKONFIRMASI':
+                              badgeClass = 'bg-lightgreen';
+                              break;
+                          case 'TUNDA':
+                              badgeClass = 'bg-lightred';
+                              break;
+                          default:
+                              badgeClass = 'bg-lightgrey';
+                              break;
+                      }
+                      
+                      return `
+                          <span class="badges ${badgeClass}">
+                              ${data ?? '-'}
+                          </span>
+                      `;
+                  }
+              },
+              {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    let actionsHtml = `
+                        <div class="text-center">
+                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                    `;
+
+                    if (userPermissions.includes('kas_gallery.edit') && userPermissions.includes('kas_gallery.update')) {
+                        actionsHtml += `
+                            <li>
+                                <a href="javascript:void(0);" onclick="edit(${row.id})" class="dropdown-item">
+                                    <img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit
+                                </a>
+                            </li>
+                        `;
+                    }
+
+                    actionsHtml += `
+                        <li>
+                            <a href="javascript:void(0);" onclick="bukti('${row.file}')" class="dropdown-item">
+                                <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti
+                            </a>
+                        </li>
+                    `;
+
+                    actionsHtml += `
+                            </ul>
+                        </div>
+                    `;
+
+                    return actionsHtml;
+                }
+              }
+          ];
+
+          let table2 = initDataTable('#keluar', {
+              ajaxUrl: "{{ route('kas_gallery.index') }}",
+              columns: columns2,
+              order: [[1, 'asc']],
+              searching: true,
+              lengthChange: true,
+              pageLength: 5
+          }, {
+            lokasi: '#filterLokasi',
+            rekening: '#filterRekening',
+          }, 'keluar'); 
+        // End Datatable Keluar
     });
     function bukti(src){
         var baseUrl = window.location.origin;
