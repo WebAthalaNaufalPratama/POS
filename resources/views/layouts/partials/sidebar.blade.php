@@ -213,6 +213,7 @@
                         <li><a href="{{ route('laporan.stok_pusat') }}" class="{{ request()->is('laporan/stok_pusat*') ? 'active' : '' }}">Stok Pusat</a></li>
                         <li><a href="{{ route('laporan.pemakaian_sendiri') }}" class="{{ request()->is('laporan/pemakaian_sendiri*') ? 'active' : '' }}">Pemakaian Sendiri</a></li>
                         <li><a href="{{ route('laporan.bunga_keluar') }}" class="{{ request()->is('laporan/bunga_keluar*') ? 'active' : '' }}">Bunga Kelaur</a></li>
+                        <li><a href="{{ route('laporan.bunga_datang') }}" class="{{ request()->is('laporan/bunga_datang*') ? 'active' : '' }}">Bunga Datang</a></li>
                     </ul>
                 </li>
                 @if($user->hasRole(['SuperAdmin', 'Finance']))

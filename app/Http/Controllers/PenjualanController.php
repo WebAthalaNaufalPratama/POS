@@ -42,59 +42,81 @@ class PenjualanController extends Controller
     public function index(Request $req)
     {
         $user = Auth::user();
-        // dd($user);
         $lokasi = Karyawan::where('user_id', $user->id)->first();
-        // $user = Auth::user()->roles()->value('name');
-        // dd($user);
-        if($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet', 'KasirGallery', 'AdminGallery'])){
-            $query = Penjualan::with('karyawan')->where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'IPO%');
-        }elseif($lokasi->lokasi->tipe_lokasi == 1 && $user->hasRole(['KasirOutlet', 'KasirGallery', 'AdminGallery'])){
-            $query = Penjualan::with('karyawan')->where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'INV%');
-        }elseif($user->hasRole(['Finance', 'Auditor'])){
-            $query = Penjualan::with('karyawan')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI') ;
-        }else{
-            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
+
+        $query = Penjualan::with('karyawan');
+
+        if ($lokasi) {
+            if ($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet', 'KasirGallery', 'AdminGallery'])) {
+                $query->where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'IPO%');
+            } elseif ($lokasi->lokasi->tipe_lokasi == 1 && $user->hasRole(['KasirOutlet', 'KasirGallery', 'AdminGallery'])) {
+                $query->where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'INV%');
+            } elseif ($user->hasRole(['Finance', 'Auditor'])) {
+                $query->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI');
+            } else {
+                $query->whereNotNull('no_invoice');
+            }
         }
-             
-        $payments = Pembayaran::with('penjualan')->get();
+
+        // Apply filters
+        $query->when($req->customer, function ($query, $customer) {
+            $query->where('id_customer', $customer);
+        });
+        $query->when($req->sales, function ($query, $sales) {
+            $query->where('employee_id', $sales);
+        });
+        $query->when($req->metode, function ($query, $metode) {
+            $query->where('cara_bayar', $metode);
+        });
+        $query->when($req->dateStart, function ($query, $dateStart) {
+            $query->where('tanggal_invoice', '>=', $dateStart);
+        });
+        $query->when($req->dateEnd, function ($query, $dateEnd) {
+            $query->where('tanggal_invoice', '<=', $dateEnd);
+        });
+
+        if ($req->ajax()) {
+            $totalRecords = $query->count();
+            $data = $query->orderByDesc('id')
+                        ->skip($req->input('start'))
+                        ->take($req->input('length'))
+                        ->get();
+        
+            $returData = ReturPenjualan::whereIn('no_invoice', $data->pluck('no_invoice'))
+                                                    ->where('status', 'DIKONFIRMASI')
+                                                    ->get()
+                                                    ->keyBy('no_invoice');
+                                                    
+            $latestPayments = Pembayaran::with('penjualan')->get()->reduce(function ($carry, $payment) {
+                if (!isset($carry[$payment->invoice_penjualan_id]) || $payment->id > $carry[$payment->invoice_penjualan_id]->id) {
+                    $carry[$payment->invoice_penjualan_id] = $payment;
+                }
+                return $carry;
+            }, []);
+        
+            $data->map(function ($penjualan) use ($latestPayments, $returData) {
+                $penjualan->latest_payment = $latestPayments[$penjualan->id] ?? null;
+                $penjualan->retur = $returData->get($penjualan->no_invoice) ? true : false;
+                return $penjualan;
+            });
+        
+            return response()->json([
+                'draw' => intval($req->input('draw')),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $data
+            ]);
+        }
+        
+
         $sales = Karyawan::all();
         $customers = Customer::all();
 
-        $latestPayments = [];
-
-        foreach ($payments as $payment) {
-            $penjualanId = $payment->invoice_penjualan_id;
-
-            if (!isset($latestPayments[$penjualanId])) {
-                $latestPayments[$penjualanId] = $payment;
-            } else {
-                if ($payment->id > $latestPayments[$penjualanId]->id) {
-                    $latestPayments[$penjualanId] = $payment;
-                }
-            }
-        }
-        
-        if($req->customer) {
-            $query->where('id_customer', $req->input('customer'));
-        }
-        if ($req->sales) {
-            $query->where('employee_id', $req->input('sales'));
-        }
-        if ($req->metode) {
-            $query->where('cara_bayar', $req->input('metode'));
-        }
-        if ($req->dateStart) {
-            $query->where('tanggal_invoice', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tanggal_invoice', '<=', $req->input('dateEnd'));
-        }
-        $penjualans = $query->orderByDesc('id')->get();
-
-        // dd($retur);
-
-        return view('penjualan.index', compact('customers','sales','penjualans', 'latestPayments'));
+        return view('penjualan.index', compact('customers', 'sales'));
     }
+
+
+
 
     public function create()
     {

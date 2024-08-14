@@ -32,49 +32,78 @@ use PDF;
 class DopenjualanController extends Controller
 {
     public function index(Request $req)
-    {
-        $user = Auth::user();
-        $lokasi = Karyawan::where('user_id', $user->id)->first();
-        $userroles = Auth::user()->roles()->value('name');
-        // dd($user);
-        if($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet'])){
-            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->orderBy('created_at', 'desc');
-        }elseif($lokasi->lokasi->tipe_lokasi == 1 && $user->hasRole([ 'KasirGallery', 'AdminGallery'])){
-            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->orderBy('created_at', 'desc');
-        }elseif($user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1){
-            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DOP%')->where('status', 'DIKONFIRMASI')->orWhere('status', 'DIBATALKAN')->orderBy('created_at', 'desc');
-        }elseif($user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2){
-            $query = DeliveryOrder::where('lokasi_pengirim', $lokasi->lokasi_id)->where('jenis_do', 'PENJUALAN')->where('no_do', 'LIKE', 'DVO%')->where('status', 'DIKONFIRMASI')->orWhere('status', 'DIBATALKAN')->orderBy('created_at', 'desc');
-        }else{
-            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
-        }
+{
+    $user = Auth::user();
+    $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-        if ($req->customer) {
-            $query->where('customer_id', $req->input('customer'));
+    $query = DeliveryOrder::with('customer', 'data_driver')->where('jenis_do', 'PENJUALAN')->where('lokasi_pengirim', $lokasi->lokasi_id);
+
+    if ($lokasi) {
+        if ($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet'])) {
+            $query->where('no_do', 'LIKE', 'DVO%');
+        } elseif ($lokasi->lokasi->tipe_lokasi == 1 && $user->hasRole(['KasirGallery', 'AdminGallery'])) {
+            $query->where('no_do', 'LIKE', 'DOP%');
+        } elseif ($user->hasRole(['Finance', 'Auditor'])) {
+            $query->where('no_do', 'LIKE', $lokasi->lokasi->tipe_lokasi == 1 ? 'DOP%' : 'DVO%')
+                  ->whereIn('status', ['DIKONFIRMASI', 'DIBATALKAN']);
         }
-        if ($req->driver) {
-            $query->where('driver', $req->input('driver'));
-        }
-        if ($req->dateStart) {
-            $query->where('tanggal_kirim', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
-        }
-        $dopenjualans = $query->get();
-        $customer = DeliveryOrder::select('customer_id')
-        ->distinct()
-        ->join('customers', 'delivery_orders.customer_id', '=', 'customers.id')
-        ->orderBy('customers.nama')
-        ->get();
-        $driver = DeliveryOrder::select('driver')
-        ->distinct()
-        ->join('karyawans', 'delivery_orders.driver', '=', 'karyawans.id')
-        ->orderBy('karyawans.nama')
-        ->get();
-        
-        return view('dopenjualan.index', compact('dopenjualans', 'customer', 'driver'));
     }
+
+    // Apply filters
+    if ($req->customer) {
+        $query->where('customer_id', $req->input('customer'));
+    }
+    if ($req->driver) {
+        $query->where('driver', $req->input('driver'));
+    }
+    if ($req->dateStart) {
+        $query->where('tanggal_kirim', '>=', $req->input('dateStart'));
+    }
+    if ($req->dateEnd) {
+        $query->where('tanggal_kirim', '<=', $req->input('dateEnd'));
+    }
+
+    if ($req->ajax()) {
+        $totalRecords = $query->count();
+        
+        $orderColumn = $req->input('order.0.column');
+        $orderDir = $req->input('order.0.dir');
+        
+        // Map DataTables column index to database column name
+        $columns = [
+            0 => 'id',
+            1 => 'no_do',
+            2 => 'no_invoice',
+            3 => 'nama_customer',
+            4 => 'tanggal_kirim',
+            5 => 'status',
+            6 => 'nama_driver',
+            7 => 'aksi'
+        ];
+
+        $orderByColumn = isset($columns[$orderColumn]) ? $columns[$orderColumn] : 'id';
+
+        $data = $query->orderByDesc('id')
+                      ->skip($req->input('start'))
+                      ->take($req->input('length'))
+                      ->get();
+
+        return response()->json([
+            'draw' => intval($req->input('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalRecords,
+            'data' => $data
+        ]);
+    }
+
+    // Load data for filters and non-AJAX view
+    $customers = Customer::orderBy('nama')->get();
+    $drivers = Karyawan::where('jabatan', 'driver')->orderBy('nama')->get();
+
+    return view('dopenjualan.index', compact('customers', 'drivers'));
+}
+
+
 
     public function create($penjualan)
     {
