@@ -93,13 +93,14 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Kas Gallery</h2>
     </div>
     <div class="content">
         <table>
             <thead>
                 <tr>
                     <th class="d-none"></th>
+                    <th class="align-middle">Gallery</th>
                     <th class="align-middle">Periode</th>
                     <th class="align-middle text-center">Tanggal</th>
                     <th class="align-middle">Keterangan</th>
@@ -112,6 +113,7 @@
             <tbody>
                 <tr>
                     <td class="d-none">0</td>
+                    <td>{{ $namaGallery }}</td>
                     <td>{{ $thisMonth }} {{ $thisYear }}</td>
                     <td class="text-center">01</td>
                     <td>Saldo</td>
@@ -145,11 +147,11 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="7" class="text-end">Saldo Rekening</td>
+                    <td colspan="8" class="text-end">Saldo Rekening</td>
                     <td>{{ formatRupiah($saldoRekening) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="7" class="text-end">Saldo Cash</td>
+                    <td colspan="8" class="text-end">Saldo Cash</td>
                     <td>{{ formatRupiah($saldoCash) }}</td>
                 </tr>
             </tfoot>

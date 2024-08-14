@@ -59,6 +59,7 @@
                         <thead>
                             <tr>
                                 <th class="d-none"></th>
+                                <th class="align-middle">Gallery</th>
                                 <th class="align-middle">Periode</th>
                                 <th class="align-middle text-center">Tanggal</th>
                                 <th class="align-middle">Keterangan</th>
@@ -71,6 +72,7 @@
                         <tbody>
                             <tr>
                                 <td class="d-none">0</td>
+                                <td>{{ $namaGallery }}</td>
                                 <td>{{ $thisMonth }} {{ $thisYear }}</td>
                                 <td class="text-center">01</td>
                                 <td>Saldo</td>
@@ -82,6 +84,7 @@
                             @foreach ($data as $index => $item)
                             <tr>
                                 <td class="d-none">{{ $index + 1 }}</td>
+                                <td></td>
                                 <td></td>
                                 <td class="text-center">{{ $item->dateNumber }}</td>
                                 <td>{{ $item->keterangan }}</td>
@@ -104,11 +107,11 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="6" class="text-end">Saldo Rekening</td>
+                                <td colspan="7" class="text-end">Saldo Rekening</td>
                                 <td>{{ formatRupiah($saldoRekening) }}</td>
                             </tr>
                             <tr>
-                                <td colspan="6" class="text-end">Saldo Cash</td>
+                                <td colspan="7" class="text-end">Saldo Cash</td>
                                 <td>{{ formatRupiah($saldoCash) }}</td>
                             </tr>
                         </tfoot>

@@ -73,6 +73,7 @@
                         <thead>
                             <tr>
                                 <th rowspan="2" class="align-middle">No</th>
+                                <th rowspan="2" class="align-middle">Gallery</th>
                                 <th rowspan="2" class="align-middle">Customer</th>
                                 <th rowspan="2" class="align-middle">Masa Sewa</th>
                                 <th colspan="2" class="text-center">Tanggal Kontrak</th>
@@ -96,6 +97,7 @@
                             @foreach ($data as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item->lokasi->nama }}</td>
                                 <td>{{ $item->customer->nama }}</td>
                                 <td>{{ $item->masa_sewa }} bulan</td>
                                 <td>{{ tanggalindo($item->tanggal_mulai) }}</td>

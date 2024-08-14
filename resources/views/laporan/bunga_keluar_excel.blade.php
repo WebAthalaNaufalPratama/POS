@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Tagihan Sewa</title>
+    <title>Laporan Bunga Keluar</title>
     <style>
         @page {
             size: A4 landscape;
@@ -81,7 +81,7 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Bunga Keluar</h2>
     </div>
     <div class="content">
         <table class="table datanew" id="dataTable">

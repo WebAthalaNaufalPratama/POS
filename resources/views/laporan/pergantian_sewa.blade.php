@@ -67,6 +67,7 @@
                         <thead>
                             <tr>
                                 <th rowspan="2" class="align-middle">No</th>
+                                <th rowspan="2" class="align-middle">Gallery</th>
                                 <th rowspan="2" class="align-middle">Customer</th>
                                 <th rowspan="1" colspan="2" class="align-middle text-center">Produk Sewa</th>
                                 <th rowspan="2" class="align-middle text-center">Jumlah Pengiriman</th>
@@ -81,6 +82,7 @@
                             @foreach ($data as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item['gallery'] }}</td>
                                 <td>{{ $item['nama_customer'] }}</td>
                                 <td class="text-center">
                                     <ul>
