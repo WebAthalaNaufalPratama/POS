@@ -13,11 +13,12 @@
         </div>
         <div class="card-body">
         <div class="row ps-2 pe-2">
+                <input type="hidden" class="form-control" name="filterJenisRangkaian" id="filterJenisRangkaian" value="{{ request()->input('jenis_rangkaian') }}">
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterPerangkai" name="filterPerangkai" class="form-control" title="Perangkai">
                         <option value="">Pilih Perangkai</option>
                         @foreach ($perangkai as $item)
-                            <option value="{{ $item->perangkai->id }}" {{ $item->perangkai->id == request()->input('perangkai') ? 'selected' : '' }}>{{ $item->perangkai->nama }}</option>
+                            <option value="{{ $item->id }}" {{ $item->id == request()->input('perangkai') ? 'selected' : '' }}>{{ $item->nama }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -28,25 +29,30 @@
                     <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
-                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('formpenjualan.index', ['penjualan' => 'Penjualan']) }}" class="btn btn-info">Filter</a>
-                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('formpenjualan.index', ['penjualan' => 'Penjualan']) }}" class="btn btn-warning">Clear</a>
+                    @if(request()->query('jenis_rangkaian') == 'Penjualan')
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="btn btn-warning">Clear</a>
+                    @elseif(request()->query('jenis_rangkaian') == 'MUTASIGO')
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'MUTASIGO']) }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'MUTASIGO']) }}" class="btn btn-warning">Clear</a>
+                    @endif
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table pb-5" id="formPerangkaiTable">
                 <thead>
                 <tr>
                     <th>No</th>
                     <th>No From</th>
                     <th>No Invoice</th>
-                    <th>Produk</th>
+                    <th>Jenis Rangkaian</th>
                     <th>Perangkai</th>
                     <th>Tanggal Dirangkai</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $item)
+                    {{-- @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $item->no_form ?? '-' }}</td>
@@ -76,7 +82,7 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -120,7 +126,80 @@
 <script>
     $(document).ready(function(){
         $('#filterPerangkai').select2();
+
+        window.routes = {
+            formMutasiCetak: "{{ route('formmutasigalery.cetak', ['mutasiGO' => '__ID__']) }}",
+            formPenjualanShow: "{{ route('formpenjualan.show', ['formpenjualan' => '__ID__']) }}",
+            formPenjualanCetak: "{{ route('formpenjualan.cetak', ['formpenjualan' => '__ID__']) }}"
+        };
+
+        $('#formPerangkaiTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("formpenjualan.index") }}',
+                type: 'GET',
+                data: function (d) {
+                    d.jenis_rangkaian = $('#filterJenisRangkaian').val();
+                    d.perangkai = $('#filterPerangkai').val();
+                    d.dateStart = $('#filterDateStart').val();
+                    d.dateEnd = $('#filterDateEnd').val();
+                },
+                dataSrc: function (json) {
+                    console.log("Received Data:", json); // Log received data
+                    return json.data;
+                }
+            },
+            columns: [
+                { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
+                    return meta.row + 1;
+                }},
+                { data: 'no_form', name: 'no_form' },
+                { data: 'tanggal', name: 'tanggal' },
+                { data: 'jenis_rangkaian', name: 'jenis_rangkaian' },
+                { data: 'perangkai.nama', name: 'perangkai.nama' },
+                { data: 'tanggal', name: 'tanggal' },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        const userRoles = @json(Auth::user()->roles->pluck('name')->toArray()); // Get user roles
+                        const jenisRangkaian = row.jenis_rangkaian; // Get jenis_rangkaian from the row
+                        let dropdownHtml = `
+                            <div class="dropdown">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown-menu">`;
+
+                        if (jenisRangkaian === 'Penjualan') {
+                            dropdownHtml += `
+                                <a class="dropdown-item" href="${window.routes.formPenjualanShow.replace('__ID__', row.id)}">
+                                    <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                </a>
+                                <a href="${window.routes.formPenjualanCetak.replace('__ID__', row.id)}" class="dropdown-item">
+                                    <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak
+                                </a>`;
+                        } else if (jenisRangkaian === 'MUTASIGO') {
+                            dropdownHtml += `
+                                <a class="dropdown-item" href="${window.routes.formMutasiCetak.replace('__ID__', row.id)}">
+                                    <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                </a>
+                                <a href="${window.routes.formMutasiCetak.replace('__ID__', row.id)}" class="dropdown-item">
+                                    <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak
+                                </a>`;
+                        }
+
+                        dropdownHtml += `</div></div>`;
+                        return dropdownHtml;
+                    }
+                }
+            ]
+        });
     });
+
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');
         var urlString = baseUrl;

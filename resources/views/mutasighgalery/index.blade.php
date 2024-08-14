@@ -29,12 +29,12 @@
                     <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
-                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('mutasigalery.index') }}" class="btn btn-info">Filter</a>
-                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('mutasigalery.index') }}" class="btn btn-warning">Clear</a>
+                    <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('mutasighgalery.index') }}" class="btn btn-info">Filter</a>
+                    <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('mutasighgalery.index') }}" class="btn btn-warning">Clear</a>
                 </div>
             </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table pb-5" id="mutasiTable">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -49,7 +49,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($mutasis as $mutasi)
+                            {{-- @foreach ($mutasis as $mutasi)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $mutasi->no_mutasi }}</td>
@@ -86,7 +86,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -128,6 +128,106 @@
 <script>
     $(document).ready(function(){
         $('#filterCustomer, #filterDriver').select2();
+
+        // Define route templates
+        window.routes = {
+            auditmutasighgaleryEdit: "{{ route('auditmutasighgalery.edit', ['mutasiGG' => '__ID__']) }}",
+            mutasiGGalleryShow: "{{ route('mutasighgalery.show', ['mutasiGG' => '__ID__']) }}",
+            mutasiGGalleryPayment: "{{ route('mutasighgalery.payment', ['mutasiGG' => '__ID__']) }}",
+            mutasiGGalleryView: "{{ route('mutasighgalery.view', ['mutasiGG' => '__ID__']) }}"
+        };
+
+        // Initialize DataTable
+        $('#mutasiTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('mutasighgalery.index') }}",
+                data: function (d) {
+                    d.dateStart = $('#filterDateStart').val();
+                    d.dateEnd = $('#filterDateEnd').val();
+                },
+            },
+            columns: [ 
+                { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
+                    return meta.row + 1;
+                }},
+                { data: 'no_mutasi', name: 'no_mutasi' },
+                { data: 'pengirim', name: 'pengirim' },
+                { data: 'penerima', name: 'penerima' },
+                { data: 'tanggal_kirim', name: 'tanggal_kirim' },
+                { data: 'tanggal_diterima', name: 'tanggal_diterima' },
+                { data: 'tanggal_dibuat', name: 'tanggal_dibuat' },
+                {
+                    data: 'status',
+                    name: 'status',
+                    render: function (data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        const isJumlahDiterima = row.jumlah_diterima === true || row.jumlah_diterima === 'true';
+                        const userRoles = @json(Auth::user()->roles->pluck('name')->toArray());
+                        const mutasiStatus = row.status; // Adjust this if necessary
+
+                        // Construct the dropdown HTML
+                        let dropdownHtml = `
+                            <div class="dropdown">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown-menu">`;
+
+                        // Add permission-based actions
+                        if (userRoles.includes('Auditor') || userRoles.includes('Finance') || userRoles.includes('SuperAdmin')) {
+                            if (isJumlahDiterima) {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasighgaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>`;
+                            } else {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGGalleryShow.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit Acc Terima</a>`;
+                            }
+                        }
+
+                        if (userRoles.includes('Purchasing') && mutasiStatus !== 'DIBATALKAN') {
+                            if (mutasiStatus !== 'DIKONFIRMASI') {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasighgaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>`;
+                            }
+                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGGalleryPayment.replace('__ID__', row.id)}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>`;
+                        }
+
+                        if (row.lokasi === row.penerima && userRoles.includes('KasirGallery') || userRoles.includes('AdminGallery')) {
+                            if (mutasiStatus === 'DIKONFIRMASI') {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGGalleryShow.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>`;
+                            }
+                        }
+
+                        dropdownHtml += `
+                            <a class="dropdown-item" href="${window.routes.mutasiGGalleryView.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
+                            </div>
+                        </div>`;
+
+                        return dropdownHtml;
+                    }
+                }
+            ]
+        });
+
     });
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');

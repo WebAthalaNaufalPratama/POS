@@ -12,6 +12,7 @@ use App\Exports\PenjualanProdukExport;
 use App\Exports\PelangganExport;
 use App\Exports\DeliveryOrderExport;
 use App\Exports\TagihanPelangganExport;
+use App\Exports\BungaDatangExport;
 
 use App\Exports\HutangSupplierExport;
 use App\Exports\MutasiExport;
@@ -5756,5 +5757,147 @@ class LaporanController extends Controller
         return Excel::download(new StokPusatExport($data, $listDate, $lokasi), 'stok_pusat.xlsx');
     }
 
-    
+    // Controller
+    public function bunga_datang_index(Request $req) 
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $greenhouse = Lokasi::where('tipe_lokasi', [1, 3, 4])->get();
+        
+        $thisLokasi = $req->gallery ?? $greenhouse->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $greenhouse->where('id', $req->gallery)->first() : $greenhouse->first();
+        $listDate = $this->listDatePerMonth($thisMonth, $thisYear);
+
+        $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->whereNotNull('penerima')
+            ->with('produkbeli.produk')
+            ->get();
+
+        $supplierIds = $pembelian->pluck('supplier_id')->unique();
+        $lokasiIds = $pembelian->pluck('lokasi_id')->unique();
+
+        $suppliers = Supplier::whereIn('id', $supplierIds)->get();
+        $lokasi = Lokasi::whereIn('id', $lokasiIds)->get();
+
+        // Initialize an empty collection for grouped data
+        $groupedData = collect();
+
+        // Group by lokasi and supplier
+        $pembelian->groupBy('lokasi_id')->each(function($byLokasi) use (&$groupedData, $suppliers) {
+            $byLokasi->groupBy('supplier_id')->each(function($bySupplier, $supplierId) use (&$groupedData, $suppliers) {
+                $supplier = $suppliers->find($supplierId);
+                $lokasiName = $bySupplier->first()->lokasi->nama;
+                $supplierData = $bySupplier->reduce(function($carry, $order) {
+                    return $carry + $order->produkbeli->sum('jml_diterima');
+                }, 0);
+
+                $groupedData->push([
+                    'lokasi_id' => $bySupplier->first()->lokasi_id,
+                    'lokasi_name' => $lokasiName,
+                    'supplier_id' => $supplierId,
+                    'supplier_name' => $supplier->nama,
+                    'total_masuk' => $supplierData
+                ]);
+            });
+        });
+
+        // Define $tahun variable
+        $years = $pembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+        $tahun = $years->unique()->sort()->values();
+
+        return view('laporan.bunga_datang', compact('groupedData', 'listDate', 'bulan', 'greenhouse', 'lokasi', 'tahun'));
+    }
+
+    public function bunga_datang_excel(Request $req) 
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $greenhouse = Lokasi::where('tipe_lokasi', [1, 3, 4])->get();
+        
+        $thisLokasi = $req->gallery ?? $greenhouse->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $greenhouse->where('id', $req->gallery)->first() : $greenhouse->first();
+        $listDate = $this->listDatePerMonth($thisMonth, $thisYear);
+
+        $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->whereNotNull('penerima')
+            ->with('produkbeli.produk')
+            ->get();
+
+        $supplierIds = $pembelian->pluck('supplier_id')->unique();
+        $lokasiIds = $pembelian->pluck('lokasi_id')->unique();
+
+        $suppliers = Supplier::whereIn('id', $supplierIds)->get();
+        $lokasi = Lokasi::whereIn('id', $lokasiIds)->get();
+
+        // Initialize an empty collection for grouped data
+        $groupedData = collect();
+
+        // Group by lokasi and supplier
+        $pembelian->groupBy('lokasi_id')->each(function($byLokasi) use (&$groupedData, $suppliers) {
+            $byLokasi->groupBy('supplier_id')->each(function($bySupplier, $supplierId) use (&$groupedData, $suppliers) {
+                $supplier = $suppliers->find($supplierId);
+                $lokasiName = $bySupplier->first()->lokasi->nama;
+                $supplierData = $bySupplier->reduce(function($carry, $order) {
+                    return $carry + $order->produkbeli->sum('jml_diterima');
+                }, 0);
+
+                $groupedData->push([
+                    'lokasi_id' => $bySupplier->first()->lokasi_id,
+                    'lokasi_name' => $lokasiName,
+                    'supplier_id' => $supplierId,
+                    'supplier_name' => $supplier->nama,
+                    'total_masuk' => $supplierData
+                ]);
+            });
+        });
+
+        // Define $tahun variable
+        $years = $pembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+        $tahun = $years->unique()->sort()->values();
+
+        if($groupedData->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new BungaDatangExport($groupedData, $listDate, $lokasi), 'bunga_datang.xlsx');
+    }
+  
 }
+                                                                                           

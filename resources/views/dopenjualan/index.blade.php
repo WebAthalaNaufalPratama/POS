@@ -16,16 +16,16 @@
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterCustomer" name="filterCustomer" class="form-control" title="Customer">
                         <option value="">Pilih Customer</option>
-                        @foreach ($customer as $item)
-                            <option value="{{ $item->customer->id }}" {{ $item->customer->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->customer->nama }}</option>
+                        @foreach ($customers as $item)
+                            <option value="{{ $item->id }}" {{ $item->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->nama }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterDriver" name="filterDriver" class="form-control" title="driver">
                         <option value="">Pilih driver</option>
-                        @foreach ($driver as $item)
-                            <option value="{{ $item->data_driver->id }}" {{ $item->data_driver->id == request()->input('driver') ? 'selected' : '' }}>{{ $item->data_driver->nama }}</option>
+                        @foreach ($drivers as $item)
+                            <option value="{{ $item->id }}" {{ $item->id == request()->input('driver') ? 'selected' : '' }}>{{ $item->nama }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -41,7 +41,7 @@
                 </div>
             </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table pb-5" id="formDopenjualanTable">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -55,7 +55,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($dopenjualans as $dopenjualan)
+                            {{-- @foreach ($dopenjualans as $dopenjualan)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $dopenjualan->no_do }}</td>
@@ -90,7 +90,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -130,9 +130,112 @@
     }
 </script>
 <script>
-    $(document).ready(function(){
+    $(document).ready(function() {
+        // Initialize Select2 for filters
         $('#filterCustomer, #filterDriver').select2();
+
+        // Define routes with proper ID replacement
+        window.routes = {
+            auditDoPenjualanEdit: "{{ route('auditdopenjualan.edit', ['dopenjualan' => '__ID__']) }}",
+            auditDoPenjualanShow: "{{ route('dopenjualan.show', ['dopenjualan' => '__ID__']) }}",
+            pdfDoPenjualan: "{{ route('pdfdopenjualan.generate', ['dopenjualan' => '__ID__']) }}",
+        };
+
+        // Initialize DataTable
+        $('#formDopenjualanTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("dopenjualan.index") }}',
+                type: 'GET',
+                data: function(d) {
+                    d.customer = $('#filterCustomer').val();
+                    d.driver = $('#filterDriver').val();
+                    d.dateStart = $('#filterDateStart').val();
+                    d.dateEnd = $('#filterDateEnd').val();
+                },
+                dataSrc: function(json) {
+                    console.log("Received Data:", json); 
+                    return json.data;
+                }
+            },
+            columns: [
+                { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
+                    return meta.row + 1;
+                }},
+                { data: 'no_do', name: 'no_do' },
+                { data: 'no_referensi', name: 'no_referensi' },
+                { data: 'customer.nama', name: 'customer.nama' },
+                { data: 'tanggal_kirim', name: 'tanggal_kirim' },
+                {
+                    data: 'status',
+                    name: 'status',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                { data: 'data_driver.nama', name: 'data_driver.nama' },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        // Get user roles from server-side rendering
+                        const userRoles = @json(Auth::user()->roles->pluck('name')->toArray());
+                        
+                        let dropdownHtml = `
+                            <div class="dropdown">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown-menu">`;
+
+                        if (row.status !== 'DIBATALKAN') {
+                            if (userRoles.includes('Auditor') || userRoles.includes('Finance') || userRoles.includes('SuperAdmin')) {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditDoPenjualanEdit.replace('__ID__', row.id)}">
+                                                    <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit
+                                                </a>`;
+                            } else if ((userRoles.includes('AdminGallery') || userRoles.includes('KasirGallery') || userRoles.includes('KasirOutlet')) && row.status !== 'DIKONFIRMASI') {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditDoPenjualanEdit.replace('__ID__', row.id)}">
+                                                    <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit
+                                                </a>`;
+                            }
+
+                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditDoPenjualanShow.replace('__ID__', row.id)}">
+                                                <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show
+                                            </a>`;
+
+                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.pdfDoPenjualan.replace('__ID__', row.id)}">
+                                                <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak DO
+                                            </a>`;
+                        } else {
+                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditDoPenjualanShow.replace('__ID__', row.id)}">
+                                                <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show
+                                            </a>`;
+                        }
+
+                        dropdownHtml += `</div></div>`;
+                        return dropdownHtml;
+                    }
+                }
+            ]
+        });
     });
+
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');
         var urlString = baseUrl;

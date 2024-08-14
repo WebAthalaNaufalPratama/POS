@@ -355,61 +355,81 @@ class FormPerangkaiController extends Controller
 
     public function penjualan_index(Request $req)
     {
-        // $query = FormPerangkai::whereHas('produk_terjual');
-        // if($req->jenis_rangkaian){
-        //     $data = $query->where('jenis_rangkaian', $req->jenis_rangkaian)->orderBy('created_at', 'desc')->get();
-        //     // dd($query->get());
-        // } else {
-        //     $data = $query->get();
-        // }
-
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
-        // dd($lokasi);
-        if($req->jenis_rangkaian == 'Penjualan')
-        {
-            if($lokasi->lokasi->tipe_lokasi == 1){
-                $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)->get();
-                $penjualanIds = $penjualan->pluck('no_invoice')->toArray();
-                $pj = Produk_Terjual::whereIn('no_invoice', $penjualanIds)->get();
-                $no_form = $pj->pluck('no_form')->toArray();
-                // dd($pj);
-                $query = FormPerangkai::whereHas('produk_terjual')->whereIn('no_form', $no_form);
-            }else{
-                $query = FormPerangkai::whereHas('produk_terjual');
+        $query = FormPerangkai::with('perangkai');
+
+        // Handle the different types of 'jenis_rangkaian'
+        if ($req->jenis_rangkaian) {
+            if ($req->jenis_rangkaian == 'Penjualan') {
+                if ($lokasi->lokasi->tipe_lokasi == 1) {
+                    $penjualan = Penjualan::where('lokasi_id', $lokasi->lokasi_id)
+                                        ->pluck('no_invoice')
+                                        ->filter() 
+                                        ->toArray();
+                    $pj = Produk_Terjual::whereIn('no_invoice', $penjualan)
+                                        ->pluck('no_form')
+                                        ->filter() 
+                                        ->toArray();
+                    $query->whereIn('no_form', $pj);
+                }
+                $query->where('jenis_rangkaian', 'Penjualan');
+            } elseif ($req->jenis_rangkaian == 'MUTASIGO') {
+                $penjualan = Mutasi::where('pengirim', $lokasi->lokasi_id)
+                                ->pluck('no_mutasi')
+                                ->filter() 
+                                ->toArray();
+                $pj = Produk_Terjual::whereNotNull('no_form')
+                                    ->whereIn('no_mutasigo', $penjualan)
+                                    ->pluck('no_form')
+                                    ->filter() 
+                                    ->toArray();
+                $query->whereIn('no_form', $pj);
+                $query->where('jenis_rangkaian', 'MUTASIGO');
             }
-        }elseif($req->jenis_rangkaian == 'MUTASIGO')
-        {
-            $penjualan = Mutasi::where('pengirim', $lokasi->lokasi_id)->get();
-            $penjualanIds = $penjualan->pluck('no_mutasi')->toArray();
-            $pj = Produk_Terjual::whereNotNull('no_form')->whereIn('no_mutasigo', $penjualanIds)->get();
-            $no_form = $pj->pluck('no_form')->toArray();
-            $query = FormPerangkai::whereHas('produk_terjual')->whereIn('no_form', $no_form);
         }
 
-        $jenis = $req->jenis_rangkaian;
 
-        $perangkai = FormPerangkai::select('perangkai_id')
-        ->distinct()
-        ->join('karyawans', 'form_perangkais.perangkai_id', '=', 'karyawans.id')
-        ->orderBy('karyawans.nama')
-        ->get();
-        // $query = FormPerangkai::whereHas('produk_terjual');
-        if($req->jenis_rangkaian){
-            $query->where('jenis_rangkaian', $req->jenis_rangkaian);
+        $query->when($req->perangkai, function ($query, $perangkai) {
+            $query->where('perangkai_id', $perangkai);
+        });
+        $query->when($req->dateStart, function ($query, $dateStart) {
+            $query->where('tanggal', '>=', $dateStart);
+        });
+        $query->when($req->dateEnd, function ($query, $dateEnd) {
+            $query->where('tanggal', '<=', $dateEnd);
+        });
+
+
+        if ($req->ajax()) {
+            $orderColumn = $req->input('columns.' . $req->input('order.0.column') . '.data');
+            $orderDirection = $req->input('order.0.dir');
+
+            $totalRecords = $query->count();
+            $data = $query->orderByDesc('id')
+                        ->skip($req->input('start'))
+                        ->take($req->input('length'))
+                        ->get();
+
+            return response()->json([
+                'draw' => intval($req->input('draw')),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $data
+            ]);
         }
-        if ($req->perangkai) {
-            $query->where('perangkai_id', $req->input('perangkai'));
-        }
-        if ($req->dateStart) {
-            $query->where('tanggal', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tanggal', '<=', $req->input('dateEnd'));
-        }
-        $data = $query->get()->unique('no_form');
-        return view('form_jual.index', compact('jenis', 'data', 'perangkai'));
+
+        $perangkai = Karyawan::select('id', 'nama')->where('jabatan', 'Perangkai')->orderBy('nama')->get();
+
+        return view('form_jual.index', compact('perangkai'));
     }
+
+
+
+
+
+
+
 
     public function penjualan_show($formpenjualan)
     {
