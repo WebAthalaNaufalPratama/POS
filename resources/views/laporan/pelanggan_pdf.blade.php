@@ -81,7 +81,7 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <h2>Laporan Tagihan Pelanggan</h2>
+        <h2>Laporan Pelanggan</h2>
     </div>
     <div class="content">
     <div class="table-responsive">

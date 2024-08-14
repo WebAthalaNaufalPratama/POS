@@ -478,6 +478,7 @@ class LaporanController extends Controller
             $produk_list = array_values($productMap);
     
             $data[$item->no_kontrak] = [
+                'gallery' => $item->lokasi->nama,
                 'nama_customer' => $item->customer->nama,
                 'produk_list' => $produk_list,
             ];
@@ -598,6 +599,7 @@ class LaporanController extends Controller
             $produk_list = array_values($productMap);
     
             $data[$item->no_kontrak] = [
+                'gallery' => $item->lokasi->nama,
                 'nama_customer' => $item->customer->nama,
                 'produk_list' => $produk_list,
             ];
@@ -717,6 +719,7 @@ class LaporanController extends Controller
             $produk_list = array_values($productMap);
     
             $data[$item->no_kontrak] = [
+                'gallery' => $item->lokasi->nama,
                 'nama_customer' => $item->customer->nama,
                 'produk_list' => $produk_list,
             ];
@@ -757,11 +760,11 @@ class LaporanController extends Controller
             ->orWhere('lokasi_pengirim', $req->gallery);
             $id_galleries = $req->gallery;
         } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
+           $id_galleries = Lokasi::where('tipe_lokasi', 1)->first()->id;
 
             $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
+                $query->where('lokasi_penerima', $id_galleries)
+                    ->orWhere('lokasi_pengirim', $id_galleries);
             });
         }
         
@@ -824,8 +827,10 @@ class LaporanController extends Controller
         ];
         $thisMonth = $bulan['' . $thisMonth . ''];
         $galleries = Lokasi::where('tipe_lokasi', 1)->get();
-    
-        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'));
+        $namaGallery = $galleries->filter(function($q) use($id_galleries){
+            return $q->id == $id_galleries;
+        })->first()->nama;
+        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries', 'namaGallery'));
     }
 
     public function kas_gallery_pdf(Request $req)
@@ -838,11 +843,11 @@ class LaporanController extends Controller
             ->orWhere('lokasi_pengirim', $req->gallery);
             $id_galleries = $req->gallery;
         } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
+           $id_galleries = Lokasi::where('tipe_lokasi', 1)->first()->id;
 
             $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
+                $query->where('lokasi_penerima', $id_galleries)
+                    ->orWhere('lokasi_pengirim', $id_galleries);
             });
         }
         if($req->bulan){
@@ -903,9 +908,10 @@ class LaporanController extends Controller
             '12' => 'Desember',
         ];
         $thisMonth = $bulan['' . $thisMonth . ''];
+        $namaGallery = Lokasi::find($id_galleries)->nama;
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'))->setPaper('a4', 'landscape');;
+        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries', 'namaGallery'))->setPaper('a4', 'landscape');;
         return $pdf->stream('kas_gallery.pdf');
     }
 
@@ -919,11 +925,11 @@ class LaporanController extends Controller
             ->orWhere('lokasi_pengirim', $req->gallery);
             $id_galleries = $req->gallery;
         } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
+           $id_galleries = Lokasi::where('tipe_lokasi', 1)->first()->id;
 
             $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
+                $query->where('lokasi_penerima', $id_galleries)
+                    ->orWhere('lokasi_pengirim', $id_galleries);
             });
         }
         if($req->bulan){
@@ -984,9 +990,10 @@ class LaporanController extends Controller
             '12' => 'Desember',
         ];
         $thisMonth = $bulan['' . $thisMonth . ''];
-
+        $namaGallery = Lokasi::find($id_galleries)->nama;
+        
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries), 'kas_gallery.xlsx');
+        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries, $namaGallery), 'kas_gallery.xlsx');
     }
 
     public function kas_pusat_index(Request $req)
@@ -2629,6 +2636,12 @@ class LaporanController extends Controller
             ])
         ->get();
 
+        // data pemakaian sendiri
+        $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+        ->get();
+
         // tahun dari data DO Sewa
         $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
             return Carbon::parse($date)->year;
@@ -2679,11 +2692,16 @@ class LaporanController extends Controller
             return Carbon::parse($date)->year;
         }));
 
+        // tahun dari data pemakaian sendiri
+        $years = $years->merge($pemakaianSendiri->pluck('tanggal')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
         // Ambil tahun yang unik dan urutkan
         $tahun = $years->unique()->sort()->values();
 
         // integrate data
-        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden, $pemakaianSendiri){
             // Inisialisasi list data dengan saldo awal 0
             $item->dates = collect($listDate)->mapWithKeys(function($date) {
                 return [
@@ -2860,6 +2878,14 @@ class LaporanController extends Controller
                         $updateSaldo($date, $product->jml_diterima, 0, 0);
                     }
                 });
+            });
+
+            // Proses Pemakaian Sendiri
+            $pemakaianSendiri->each(function($order) use($item, $updateSaldo) {
+                if ($order->produk_id == $item->id) {
+                    $date = Carbon::parse($order->tanggal)->format('Y-m-d');
+                    $updateSaldo($date, $order->jumlah, 0, 0);
+                }
             });
 
             // Validasi saldo
@@ -3011,8 +3037,14 @@ class LaporanController extends Controller
             ])
         ->get();
 
+        // data pemakaian sendiri
+        $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+        ->get();
+
         // integrate data
-        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden, $pemakaianSendiri){
             // Inisialisasi list data dengan saldo awal 0
             $item->dates = collect($listDate)->mapWithKeys(function($date) {
                 return [
@@ -3189,6 +3221,14 @@ class LaporanController extends Controller
                         $updateSaldo($date, $product->jml_diterima, 0, 0);
                     }
                 });
+            });
+
+            // Proses Pemakaian Sendiri
+            $pemakaianSendiri->each(function($order) use($item, $updateSaldo) {
+                if ($order->produk_id == $item->id) {
+                    $date = Carbon::parse($order->tanggal)->format('Y-m-d');
+                    $updateSaldo($date, $order->jumlah, 0, 0);
+                }
             });
 
             // Validasi saldo

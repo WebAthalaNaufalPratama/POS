@@ -70,13 +70,14 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Kontrak</h2>
     </div>
     <div class="content">
         <table>
             <thead>
                 <tr>
                     <th rowspan="2">No</th>
+                    <th rowspan="2">Gallery</th>
                     <th rowspan="2">Customer</th>
                     <th rowspan="2">Masa Sewa</th>
                     <th colspan="2">Tanggal Kontrak</th>
@@ -108,6 +109,7 @@
                     <tr>
                         @if ($index === 0)
                             <td rowspan="{{ $rowCount }}">{{ $outerIndex + 1 }}</td>
+                            <td rowspan="{{ $rowCount }}">{{ $item->lokasi->nama }}</td>
                             <td rowspan="{{ $rowCount }}">{{ $item->customer->nama }}</td>
                             <td rowspan="{{ $rowCount }}">{{ $item->masa_sewa }} bulan</td>
                             <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tanggal_mulai) }}</td>

@@ -87,13 +87,14 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Tagihan Sewa</h2>
     </div>
     <div class="content">
         <table>
             <thead>
                 <tr>
                     <th class="align-middle">No</th>
+                    <th class="align-middle">Gallery</th>
                     <th class="align-middle">No Kontrak</th>
                     <th class="align-middle">No Invoice</th>
                     <th class="align-middle">Customer</th>
@@ -107,6 +108,7 @@
                 @foreach ($data as $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
+                    <td>{{ $item->kontrak->lokasi->nama }}</td>
                     <td>{{ $item->no_sewa }}</td>
                     <td>{{ $item->no_invoice }}</td>
                     <td>{{ $item->kontrak->customer->nama }}</td>

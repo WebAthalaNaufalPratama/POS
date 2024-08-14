@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Tagihan Sewa</title>
+    <title>Laporan Pergantian Sewa</title>
     <style>
         @page {
             size: A4 landscape;
@@ -97,13 +97,14 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Pergantian Sewa</h2>
     </div>
     <div class="content">
         <table>
             <thead>
                 <tr>
                     <th rowspan="2" class="align-middle">No</th>
+                    <th rowspan="2" class="align-middle">Gallery</th>
                     <th rowspan="2" class="align-middle">Customer</th>
                     <th rowspan="1" colspan="2" class="align-middle text-center">Produk Sewa</th>
                     <th rowspan="2" class="align-middle text-center">Jumlah Pengiriman</th>
@@ -123,6 +124,7 @@
                     <tr>
                         @if ($index === 0)
                             <td rowspan="{{ $produkListCount }}">{{ $loop->iteration }}</td>
+                            <td rowspan="{{ $produkListCount }}">{{ $item['gallery'] }}</td>
                             <td rowspan="{{ $produkListCount }}">{{ $item['nama_customer'] }}</td>
                         @endif
                         <td class="text-center">{{ $detail['jumlah_sewa'] }}</td>
