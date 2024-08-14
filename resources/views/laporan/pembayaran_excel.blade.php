@@ -80,8 +80,13 @@
                 <tbody>
                     @php $no = 1; @endphp
                     @foreach ($duit as $rekening_id => $total_nominal)
+                    @php
+                        $penj = $pembayaran->firstWhere('rekening_id', $rekening_id);
+                        $lokasi = \App\Models\Penjualan::firstWhere('id', $penj->invoice_penjualan_id);
+                    @endphp
                     <tr>
                         <td style="border: 1px solid #000;">{{ $no++ }}</td>
+                        <td style="border: 1px solid #000;">{{ $lokasi->lokasi->nama}}</td>
                         <td style="border: 1px solid #000;">
                             {{ $pembayaran->firstWhere('rekening_id', $rekening_id)->cara_bayar ?? 'Cash' }} 
                             @if(!empty($rekening_id)) 
