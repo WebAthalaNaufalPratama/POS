@@ -1013,7 +1013,7 @@ class MutasiindensController extends Controller
             }
 
            if($mutasi->sisa_bayar == $mutasi->total_biaya){
-                $returinden->total_akhir = $request->total_akhir;
+                $returinden->total_akhir = $mutasi->total_biaya - $request->refund;
                 $returinden->tipe_komplain = "Diskon";
                 $returinden->sisa_refund = 0;
                 $returinden->save();
@@ -1275,7 +1275,7 @@ class MutasiindensController extends Controller
                         'mutasiinden_id' => $request->mutasiinden_id,
                         'refund' => $request->refund,
                         'sisa_refund' => 0,
-                        'total_akhir' => $request->total_akhir,
+                        'total_akhir' => $mutasi->sisa_bayar - $request->refund,
                         'pembuat_id' => $request->pembuat_id,
                         'status_dibuat' => $request->status_dibuat,
                         'tgl_dibuat' => $request->tgl_dibuat,
@@ -1302,7 +1302,7 @@ class MutasiindensController extends Controller
                         'mutasiinden_id' => $request->mutasiinden_id,
                         'refund' => $request->refund,
                         'sisa_refund' => 0,
-                        'total_akhir' => $request->total_akhir,
+                        'total_akhir' => $mutasi->sisa_bayar - $request->refund,
                         'pembuku_id' => $request->pembuku_id,
                         'status_dibukukan' => $request->status_dibukukan,
                         'tgl_dibukukan' => $request->tgl_dibukukan,

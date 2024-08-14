@@ -49,7 +49,7 @@
                     <th>Tanggal Dibuat</th>
                     <th>Tanggal Diperiksa</th>
                     <th>Tanggal Dibukukan</th>
-                    <th>Aksi</th>
+                    <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -264,6 +264,7 @@
                     searchable: false,
                     render: function(data, type, row) {
                         let actionsHtml = `
+                        <div class="text-center">
                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
@@ -326,7 +327,7 @@
                             `;
                         }
 
-                        if (row.sisa_bayar != 0 && row.status === 'DIKONFIRMASI' && userPermissions.includes('pembayaran_sewa.store')) {
+                        if (!row.isLunas && row.status === 'DIKONFIRMASI' && userPermissions.includes('pembayaran_sewa.store')) {
                             actionsHtml += `
                                 <li>
                                     <a href="javascript:void(0);" onclick='bayar(${JSON.stringify(row)})' class="dropdown-item">
@@ -336,7 +337,7 @@
                             `;
                         }
 
-                        actionsHtml += `</ul>`;
+                        actionsHtml += `</ul></div>`;
                         return actionsHtml;
                     }
                 }

@@ -41,9 +41,9 @@
                     <th>No Kontrak</th>
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
-                    <th>Metode</th>
+                    <th class="text-center">Metode</th>
                     <th>Rekening</th>
-                    <th>Aksi</th>
+                    <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -199,10 +199,10 @@
                                 break;
                         }
                         
-                        return `
+                        return `<div class="text-center">
                             <span class="badges ${badgeClass}">
                                 ${data ?? '-'}
-                            </span>
+                            </span></div>
                         `;
                     }
                 },
@@ -214,6 +214,7 @@
                     searchable: false,
                     render: function(data, type, row) {
                         let actionsHtml = `
+                        <div class="text-center">
                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                             </a>
@@ -236,7 +237,7 @@
                             </li>
                         `;
 
-                        actionsHtml += `</ul>`;
+                        actionsHtml += `</ul></div>`;
 
                         return actionsHtml;
                     }

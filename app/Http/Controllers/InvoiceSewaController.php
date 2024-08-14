@@ -96,6 +96,10 @@ class InvoiceSewaController extends Controller
                 $item->tanggal_pembuat = $item->tanggal_pembuat == null ? null : formatTanggal($item->tanggal_pembuat);
                 $item->tanggal_penyetuju = $item->tanggal_penyetuju == null ? null : formatTanggal($item->tanggal_penyetuju);
                 $item->tanggal_pemeriksa = $item->tanggal_pemeriksa == null ? null : formatTanggal($item->tanggal_pemeriksa);
+                $item->total_tagihan = $item->total_tagihan == null ? null : formatRupiah($item->total_tagihan);
+                $item->dp = $item->dp == null ? null : formatRupiah($item->dp);
+                $item->isLunas = $item->sisa_bayar == 0 ? true : false;
+                $item->sisa_bayar = $item->sisa_bayar == null ? null : formatRupiah($item->sisa_bayar);
                 $item->nama_customer = $item->kontrak->customer->nama;
                 $item->userRole = Auth::user()->getRoleNames()->first();
                 $item->hasKembaliSewa = KembaliSewa::where('no_sewa', $item->no_sewa)->where('status', 'DIKONFIRMASI')->exists();

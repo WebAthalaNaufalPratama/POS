@@ -405,6 +405,7 @@
                                                         </div>
                                                     </h5>
                                                 </li>
+                                                {{-- @if($data->sisa_bayar == 0) --}}
                                                 <li class="total">
                                                     <h4>Total Tagihan Akhir</h4>
                                                     <h5>
@@ -415,6 +416,7 @@
                                                         </div>
                                                     </h5>
                                                 </li>
+                                                {{-- @endif --}}
                                                 @elseif($dataretur->tipe_komplain == "Refund")
                                                 <li class="total">
                                                     <h4>Refund</h4>
@@ -577,7 +579,9 @@
                          </div>
 
                         <div class="text-end mt-3">
+                            {{-- @if($dataretur->sisa_refund == 0 && $data->sisa_bayar == 0) --}}
                             <button class="btn btn-primary" type="submit">Submit</button>
+                            {{-- @endif --}}
                             <a href="{{ route('mutasiindengh.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>

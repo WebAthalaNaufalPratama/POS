@@ -136,7 +136,7 @@
                                                         <select id="nama_produk_0" name="nama_produk[]" class="form-control">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
+                                                            <option value="{{ $produk->id }}" data-lokasi_id="{{ $produk->lokasi_id }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
                                                                 {{ $produk->produk->nama}} - {{ $produk->kondisi->nama}}
                                                             </option>
                                                             @endforeach
@@ -422,6 +422,20 @@
 
             $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
             i++
+        });
+
+        $(document).on('change', '#pengirim', function() {
+            var lokasiPengirimId = $(this).val();
+
+            $('[id^=nama_produk_] option').each(function() {
+                var lokasiId = $(this).data('lokasi_id');
+                
+                if (lokasiId != lokasiPengirimId) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            });
         });
 
         $(document).on('click', '.btn_remove', function() {

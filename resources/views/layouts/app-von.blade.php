@@ -782,7 +782,7 @@
         });
       });
 
-      function initDataTable(selector, options = {}, filters = {}) {
+      function initDataTable(selector, options = {}, filters = {}, tableType = '') {
           let defaultOptions = {
               processing: true,
               serverSide: true,
@@ -790,6 +790,10 @@
                   url: options.ajaxUrl,
                   type: "GET",
                   data: function(d) {
+                      // table type
+                      if (tableType) {
+                          d.table = tableType;
+                      }
                       // filter
                       $.each(filters, function(key, value) {
                           d[key] = $(value).val();

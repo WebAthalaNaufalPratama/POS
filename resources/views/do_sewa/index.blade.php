@@ -55,7 +55,7 @@
                     <th>Tanggal Dibuat</th>
                     <th>Tanggal Pemeriksa</th>
                     <th>Tanggal Pembuku</th>
-                    <th>Aksi</th>
+                    <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -166,6 +166,7 @@
                 searchable: false,
                 render: function(data, type, row) {
                     let actionsHtml = `
+                    <div class="text-center">
                         <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                             <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                         </a>
@@ -224,7 +225,7 @@
                         `;
                     }
 
-                    actionsHtml += `</ul>`;
+                    actionsHtml += `</ul></div>`;
 
                     return actionsHtml;
                 }

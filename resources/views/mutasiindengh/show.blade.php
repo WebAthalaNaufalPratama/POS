@@ -115,7 +115,7 @@ $user = Auth::user();
                                                     <th>QTY Kirim</th>
                                                     <th>QTY Terima</th>
                                                     <th>Kondisi</th>
-                                                    @if($user->hasRole(['Purchasing','Finance']) && !$data->returinden)  
+                                                    @if($user->hasRole(['Purchasing','Finance']) && (!$data->returinden || ($data->returinden && $data->returinden->status_dibuat == "BATAL")) )  
                                                     <th>Biaya Perawatan</th>
                                                     <th>Total Biaya Perawatan</th>
                                                  

@@ -49,12 +49,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
          * Logout Routes
          * 
          */
-        Route::get('/get-bulan-inden/{supplier_id}', 'MutasiindensController@getBulanInden')->name('getBulan'); 
-        Route::get('/get-kode-inden/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkodeInden')->name('getKode');
-        Route::get('/get-kategori-inden/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriInden')->name('getKategori');
-        Route::get('/get-kategori-inden-edit/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriIndenEdit')->name('getKategoriEdit');
+        Route::get('/get-bulan-inden/{supplier_id}', 'MutasiindensController@getBulanInden')->name('getBulan'); //pur
+        Route::get('/get-kode-inden/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkodeInden')->name('getKode'); //pur
+        Route::get('/get-kategori-inden/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriInden')->name('getKategori'); //pur
+        Route::get('/get-kategori-inden-edit/{kode_inden}/{bulan_inden}/{supplier_id}', 'MutasiindensController@getkategoriIndenEdit')->name('getKategoriEdit'); //pur
 
-        Route::get('/logout', 'LogoutController@perform')->name('logout.perform');
+        Route::get('/logout', 'LogoutController@perform')->name('logout.perform'); //pur
         Route::get('checkPromo', 'PromoController@checkPromo')->name('checkPromo');
         Route::get('getPromo', 'PromoController@getPromo')->name('getPromo');
         Route::get('getProdukTerjual', 'ProdukTerjualController@getProdukTerjual')->name('getProdukTerjual');
@@ -64,7 +64,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
 
         Route::group(['prefix' => 'dashboard'], function() {
-            Route::get('/', 'DashboardController@index')->name('dashboard.index');
+            Route::get('/', 'DashboardController@index')->name('dashboard.index'); //pur
             Route::post('/postauditor', 'DashboardController@update_auditor')->name('auditor.update');
             Route::post('/bukakuncistore', 'DashboardController@bukakunci')->name('bukakunci.store');
             Route::get('/top-products', 'DashboardController@getTopProducts')->name('getTopProduk');
@@ -286,59 +286,58 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'purchase'], function() {
             //akses purchase
-            Route::get('/pembelian', 'PembelianController@index')->name('pembelian.index');
-            Route::get('/pembelian/create', 'PembelianController@create')->name('pembelian.create');
-            Route::post('/store_po', 'PembelianController@store_po')->name('pembelianpo.store');
-            Route::get('/pembelian/{datapo}/editpurchase_po', 'PembelianController@po_editpurchase')->name('pembelian.editpurchase');
-            Route::post('/{datapo}/update_po_purchase', 'PembelianController@po_update_purchase')->name('pembelian.updatepurchase');
-            Route::get('/pembelian/{datapo}/show', 'PembelianController@show')->name('pembelian.show');
-            Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');
+            Route::get('/pembelian', 'PembelianController@index')->name('pembelian.index'); //pur,adm, fin, aud
+            Route::get('/pembelian/create', 'PembelianController@create')->name('pembelian.create'); //pur
+            Route::post('/store_po', 'PembelianController@store_po')->name('pembelianpo.store'); //pur
+            Route::get('/pembelian/{datapo}/editpurchase_po', 'PembelianController@po_editpurchase')->name('pembelian.editpurchase'); //pur
+            Route::post('/{datapo}/update_po_purchase', 'PembelianController@po_update_purchase')->name('pembelian.updatepurchase'); //pur
+            Route::get('/pembelian/{datapo}/show', 'PembelianController@show')->name('pembelian.show');  //pur,adm, fin, aud
+            Route::patch('/{datapo}/update', 'PembelianController@gambarpo_update')->name('gambarpo.update');  //pur,adm, fin, aud
 
             //akses admin
-            Route::get('/pembelian/{datapo}/edit_po', 'PembelianController@po_edit')->name('pembelian.edit');
-            Route::post('/{datapo}/update_po', 'PembelianController@po_update')->name('pembelian.update');
+            Route::get('/pembelian/{datapo}/edit_po', 'PembelianController@po_edit')->name('pembelian.edit'); //adm
+            Route::post('/{datapo}/update_po', 'PembelianController@po_update')->name('pembelian.update'); //adm
 
             //audit
-            Route::get('/pembelian/{datapo}/edit_po_audit', 'PembelianController@po_edit_audit')->name('pembelian.editaudit');
-            Route::post('/{datapo}/update_po_audit', 'PembelianController@po_update_audit')->name('pembelian.updateaudit');
+            Route::get('/pembelian/{datapo}/edit_po_audit', 'PembelianController@po_edit_audit')->name('pembelian.editaudit'); //aud
+            Route::post('/{datapo}/update_po_audit', 'PembelianController@po_update_audit')->name('pembelian.updateaudit'); //aud
 
 
             //PURCHASE
-            Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index');
-            Route::get('/invoice/{type}/{datapo}/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create');
-            Route::post('/store_inv', 'PembelianController@storeinvoice')->name('invoicepo.store');
+            Route::get('/invoice', 'PembelianController@invoice')->name('invoicebeli.index'); //pur, fin
+            Route::get('/invoice/{type}/{datapo}/createinv', 'PembelianController@createinvoice')->name('invoicebiasa.create'); //pur
+            Route::post('/store_inv', 'PembelianController@storeinvoice')->name('invoicepo.store'); //pur
             //purchase dan finance halaman untuk edit invoice
-            Route::get('/invoice/{datapo}/edit_inv_nominal', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit');
-            Route::put('/update/{idinv}/nominal', 'PembelianController@update_purchase_invoice')->name('invoice_purchase.update');        
+            Route::get('/invoice/{datapo}/edit_inv_nominal', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit'); //pur, fin
+            Route::put('/update/{idinv}/nominal', 'PembelianController@update_purchase_invoice')->name('invoice_purchase.update'); //pur, fin
 
 
             //inden
-            Route::get('/invoice/{datapo}/editinvoice', 'PembelianController@editinvoice')->name('editinvoice.edit');
-            Route::patch('/{datapo}/editinvoiceupdate', 'PembelianController@editinvoiceupdate')->name('editinvoice.update');
-            //purchase
-            Route::get('/invoice/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit');
-            Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update');
-            Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show');
+            Route::get('/invoice/{datapo}/editinvoice', 'PembelianController@editinvoice')->name('editinvoice.edit'); //pur, fin
+            Route::patch('/{datapo}/editinvoiceupdate', 'PembelianController@editinvoiceupdate')->name('editinvoice.update'); //pur, fin
+            //pembelian
+            Route::get('/invoice/{datapo}/edit', 'PembelianController@edit_invoice')->name('invoice.edit'); //fin
+            Route::put('/update/{idinv}', 'PembelianController@update_invoice')->name('invoice.update'); //fin
+            Route::get('/invoice/{datapo}/show', 'PembelianController@show_invoice')->name('invoice.show'); //pur, fin
 
-                   
-            Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create');
-            Route::post('/storeinden', 'PembelianController@store_inden')->name('inden.store');
+            Route::get('/pembelian/createinden', 'PembelianController@createinden')->name('pembelianinden.create'); //pur
+            Route::post('/storeinden', 'PembelianController@store_inden')->name('inden.store'); //pur
             // Route::get('/createinvinden', 'PembelianController@createinvoiceinden')->name('invoiceinden.create');
 
-            Route::get('/retur', 'PembelianController@index_retur')->name('returbeli.index');
-            Route::get('/retur/create', 'PembelianController@create_retur')->name('returbeli.create');
-            Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store');
+            Route::get('/retur', 'PembelianController@index_retur')->name('returbeli.index'); //pur, fin
+            Route::get('/retur/create', 'PembelianController@create_retur')->name('returbeli.create'); //pur
+            Route::post('/retur/store', 'PembelianController@store_retur')->name('returbeli.store'); //pur
 
-            Route::put('/retur/{idretur}/update', 'PembelianController@update_retur_finance')->name('returfinance.update');
-            Route::patch('/returbeli/{retur_id}/update', 'PembelianController@update_retur_purchase')->name('retur_purchase.update');
+            Route::put('/retur/{idretur}/update', 'PembelianController@update_retur_finance')->name('returfinance.update'); //fin
+            Route::patch('/returbeli/{retur_id}/update', 'PembelianController@update_retur_purchase')->name('retur_purchase.update'); //pur
             
-            Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index');
-            Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store');
-            Route::post('/refund/store', 'PembayaranController@bayar_refund')->name('bayarrefund.store');
-            Route::post('/refundinden/store', 'PembayaranController@refundInden')->name('refundinden.store');
+            Route::get('/pembayaran', 'PembayaranController@index_po')->name('pembayaranbeli.index'); //pur, fin
+            Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store'); //fin
+            Route::post('/refund/store', 'PembayaranController@bayar_refund')->name('bayarrefund.store'); //fin
+            Route::post('/refundinden/store', 'PembayaranController@refundInden')->name('refundinden.store'); //fin
 
-             Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show'); 
-             Route::get('/returbeli/{retur_id}/edit', 'PembelianController@edit_returpo')->name('returbeli.edit');
+             Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show');  //fin , pur
+             Route::get('/returbeli/{retur_id}/edit', 'PembelianController@edit_returpo')->name('returbeli.edit'); //pur, fin
 
         });
 
@@ -375,8 +374,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{pembayaran}/edit', 'PembayaranController@edit')->name('pembayaran.edit');
             Route::patch('/{pembayaran}/update', 'PembayaranController@update')->name('pembayaran.update');
             Route::get('/{pembayaran}/delete', 'PembayaranController@destroy')->name('pembayaran.destroy');
-            Route::post('/store_invpo', 'PembayaranController@store_bayar_po')->name('bayarpo.store');
-            Route::post('/store_mutasiinden', 'PembayaranController@store_bayar_mutasi')->name('pembayaranmutasi.store');
+            Route::post('/store_invpo', 'PembayaranController@store_bayar_po')->name('bayarpo.store'); //fin
+            Route::post('/store_mutasiinden', 'PembayaranController@store_bayar_mutasi')->name('pembayaranmutasi.store'); //fin
         });
 
         Route::group(['prefix' => 'form'], function() {
@@ -428,7 +427,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
 
         Route::group(['prefix' => 'inven_galeri'], function() {
-            Route::get('/', 'InventoryGalleryController@index')->name('inven_galeri.index');
+            Route::get('/', 'InventoryGalleryController@index')->name('inven_galeri.index'); //all
             Route::get('/create', 'InventoryGalleryController@create')->name('inven_galeri.create');
             Route::post('/store', 'InventoryGalleryController@store')->name('inven_galeri.store');
             Route::get('/{inven_galeri}/show', 'InventoryGalleryController@show')->name('inven_galeri.show');
@@ -469,11 +468,11 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
 
         Route::group(['prefix' => 'pembayaran_sewa'], function() {
             Route::get('/', 'PembayaranController@index_sewa')->name('pembayaran_sewa.index');
-            Route::get('/create', 'PembayaranController@create_sewa')->name('pembayaran_sewa.create');
             Route::post('/store', 'PembayaranController@store_sewa')->name('pembayaran_sewa.store');
+            Route::patch('/{pembayaran_sewa}/update', 'PembayaranController@update_sewa')->name('pembayaran_sewa.update');
             Route::get('/{pembayaran_sewa}/show', 'PembayaranController@show_sewa')->name('pembayaran_sewa.show');
             Route::get('/{pembayaran_sewa}/edit', 'PembayaranController@edit_sewa')->name('pembayaran_sewa.edit');
-            Route::patch('/{pembayaran_sewa}/update', 'PembayaranController@update_sewa')->name('pembayaran_sewa.update');
+            Route::get('/create', 'PembayaranController@create_sewa')->name('pembayaran_sewa.create');
             Route::get('/{pembayaran_sewa}/delete', 'PembayaranController@destroy_sewa')->name('pembayaran_sewa.destroy');
         });
         Route::group(['prefix' => 'inven_outlet'], function() {
@@ -720,6 +719,12 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/stok_pusat', 'LaporanController@stok_pusat_index')->name('laporan.stok_pusat');
             Route::get('/stok_pusat-pdf', 'LaporanController@stok_pusat_pdf')->name('laporan.stok_pusat-pdf');
             Route::get('/stok_pusat-excel', 'LaporanController@stok_pusat_excel')->name('laporan.stok_pusat-excel');
+            Route::get('/pemakaian_sendiri', 'LaporanController@pemakaian_sendiri_index')->name('laporan.pemakaian_sendiri');
+            Route::get('/pemakaian_sendiri-pdf', 'LaporanController@pemakaian_sendiri_pdf')->name('laporan.pemakaian_sendiri-pdf');
+            Route::get('/pemakaian_sendiri-excel', 'LaporanController@pemakaian_sendiri_excel')->name('laporan.pemakaian_sendiri-excel');
+            Route::get('/bunga_keluar', 'LaporanController@bunga_keluar_index')->name('laporan.bunga_keluar');
+            Route::get('/bunga_keluar-pdf', 'LaporanController@bunga_keluar_pdf')->name('laporan.bunga_keluar-pdf');
+            Route::get('/bunga_keluar-excel', 'LaporanController@bunga_keluar_excel')->name('laporan.bunga_keluar-excel');
             Route::get('/bunga_datang', 'LaporanController@bunga_datang_index')->name('laporan.bunga_datang');
             Route::get('/bunga_datang-pdf', 'LaporanController@bunga_datang_pdf')->name('laporan.bunga_datang-pdf');
             Route::get('/bunga_datang-excel', 'LaporanController@bunga_datang_excel')->name('laporan.bunga_datang-excel');

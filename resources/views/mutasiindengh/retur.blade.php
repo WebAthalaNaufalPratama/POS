@@ -567,6 +567,8 @@ function clearFile(){
             $('#preview2').attr('src', defaultImg);
 }
 
+
+
     document.getElementById('dynamic_field2').addEventListener('input', function(event) {
     if (event.target.matches('[id^="rawat_retur_dis_"]')) {
         var index = event.target.id.split('_').pop(); // Ambil indeks dari id input
@@ -623,7 +625,8 @@ function clearFile(){
         document.getElementById(`jumlah_retur_${index}`).value = jumlahRetur;
         document.getElementById(`jumlah_retur_dis_${index}`).value = formatRupiah(jumlahRetur);
 
-        calculateTotal(); // Hitung total refund dan total tagihan akhir
+        calculateTotal();
+       // Hitung total refund dan total tagihan akhir
     }
 
     // Hitung Total Refund dan Total Tagihan Akhir
@@ -635,6 +638,11 @@ function clearFile(){
         });
 
         const totalTagihan = parseFloat(document.getElementById('total_tagihan_int').value) || 0;
+       // Panggil fungsi validateDiscount untuk memastikan total refund tidak melebihi total tagihan
+       if (totalRefund > totalTagihan) {
+        totalRefund = totalTagihan;
+        }
+
         const totalTagihanAkhir = totalTagihan - totalRefund;
 
         // Update nilai total refund dan total tagihan akhir
@@ -644,6 +652,7 @@ function clearFile(){
         document.getElementById('total_tagihan_akhir_dis').value = formatRupiah(totalTagihanAkhir); 
     }
 
+ 
 
 
   // Tambah baris untuk input kode inden retur
