@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Retur Pembelian</title>
+    <title>Laporan Retur Pembelian Inden</title>
     <style>
         @page {
             size: A4 landscape;
@@ -97,53 +97,57 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        {{-- <p>Alamat : {{ Auth::user()->karyawans->lokasi->alamat }}</p> --}}
+        <h2>Laporan Retur Inden</h2>
     </div>
     <div class="content">
         <table>
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>No PO</th>
+                    <th>Tanggal Komplain</th>
                     <th>No Retur</th>
-                    <th>Tanggal Retur</th>
-                    <th>Barang</th>
+                    <th>No Mutasi</th>
+                    <th>Tipe Komplain</th>
+                    <th>Alasan</th>
+                    <th>Kode Inden</th>
+                    <th>Nama Produk</th>
                     <th>Harga</th>
                     <th>QTY</th>
-                    <th>Komplain</th>
-                    <th>Total Diskon</th>
-                    <th>Penanganan Komplain</th>
+                    <th>Total</th>
                     <th>Supplier</th>
-                    <th>Gallery</th>
+                    <th>Tujuan</th>
+                    
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $index1 => $item)
+                @foreach ($returs as $index1 => $item)
                     @php
                         $rowCount = 0;
-                        $produkretur = [];
+                        $produkreturinden = [];
             
-                        $produkretur = $item->produkretur;
-                        $rowCount = count($produkretur);
+                        $produkreturinden = $item->produkreturinden;
+                        $rowCount = count($produkreturinden);
                     @endphp
                     
-                    @foreach ($produkretur as $index => $produkreturItem)
+                    @foreach ($produkreturinden as $index => $produkreturItem)
                         <tr>
                             @if ($index === 0)
                                 <td rowspan="{{ $rowCount }}">{{ $index1 + 1 }}</td>
-                                <td rowspan="{{ $rowCount }}">{{ $item->no_po }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->tgl_dibuat }}</td>
                                 <td rowspan="{{ $rowCount }}">{{ $item->no_retur }}</td>
-                                <td rowspan="{{ $rowCount }}">{{ $item->tgl_retur }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->mutasiinden->no_mutasi }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->tipe_komplain }}</td>
                             @endif
-                            <td>{{ $produkreturItem->produkbeli->produk->nama }}</td>
-                            <td>{{ $produkreturItem->harga }}</td>
-                            <td>{{ $produkreturItem->jumlah }}</td>
                             <td>{{ $produkreturItem->alasan }}</td>
-                            <td>{{ $produkreturItem->diskon *  $produkreturItem->jumlah }}</td>
+                            <td>{{ $produkreturItem->produk->produk->kode_produk_inden }}</td>
+                            <td>{{ $produkreturItem->produk->produk->produk->nama}}</td>
+                            <td>{{ formatRupiah($produkreturItem->harga_satuan)}}</td>
+                            <td>{{ $produkreturItem->jml_diretur }}</td>
                             @if ($index === 0)
-                                <td rowspan="{{ $rowCount }}">{{ $item->komplain }}</td>
-                                <td rowspan="{{ $rowCount }}">{{ $item->supplier_nama }}</td>
-                                <td rowspan="{{ $rowCount }}">{{ $item->gallery_nama }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->refund) }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->mutasiinden->supplier->nama }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->mutasiinden->lokasi->nama }}</td>
                             @endif
                         </tr>
                     @endforeach

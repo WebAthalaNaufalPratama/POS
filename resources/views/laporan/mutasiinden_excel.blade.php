@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-    <h1>Laporan Pelanggan</h1>
+    <h1>Laporan Mutasi Inden</h1>
         <table class="table datanew">
         <thead>
             <tr>

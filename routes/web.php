@@ -486,7 +486,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         });
 
         Route::group(['prefix' => 'mutasiGO'], function() {
-            Route::get('/', 'MutasiController@index_outlet')->name('mutasigalery.index');
+            Route::get('/', 'MutasiController@index_outlet')->name('mutasigalery.index'); //admin
             Route::get('/create', 'MutasiController@create_outlet')->name('mutasigalery.create');
             Route::post('/store', 'MutasiController@store_outlet')->name('mutasigalery.store');
             Route::get('/{mutasiGO}/show', 'MutasiController@show_outlet')->name('mutasigalery.show');
@@ -502,7 +502,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGO}/cetakmutasigalery', 'FormPerangkaiController@cetak_mutasigalery')->name('formmutasigalery.cetak');
         });
 
-        Route::group(['prefix' => 'mutasiOG'], function() {
+        Route::group(['prefix' => 'mutasiOG'], function() { //adm
             Route::get('/', 'MutasiController@index_outletgalery')->name('mutasioutlet.index');
             Route::get('{returpenjualan}/create', 'MutasiController@create_outletgalery')->name('mutasioutlet.create');
             Route::post('/store', 'MutasiController@store_outletgalery')->name('mutasioutlet.store');
@@ -536,7 +536,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kas_gallery}/delete', 'TransaksiKasController@destroy_gallery')->name('kas_gallery.destroy');
         });
         
-        Route::group(['prefix' => 'mutasiGG'], function() {
+        Route::group(['prefix' => 'mutasiGG'], function() { //pur, fin, adm, aud
             Route::get('/', 'MutasiController@index_ghgalery')->name('mutasighgalery.index');
             Route::get('/create', 'MutasiController@create_ghgalery')->name('mutasighgalery.create');
             Route::post('/store', 'MutasiController@store_ghgalery')->name('mutasighgalery.store');
@@ -551,7 +551,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/get-products-by-lokasi',  'MutasiController@getProductsByLokasi')->name('getProductsByLokasi');
         });
 
-        Route::group(['prefix' => 'inven_greenhouse'], function() {
+        Route::group(['prefix' => 'inven_greenhouse'], function() { //pur, fin, aud
             Route::get('/', 'InventoryGreenhouseController@index')->name('inven_greenhouse.index');
             Route::get('/create', 'InventoryGreenhouseController@create')->name('inven_greenhouse.create');
             Route::post('/store', 'InventoryGreenhouseController@store')->name('inven_greenhouse.store');
@@ -565,35 +565,35 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         
         //inden ke galery
         //inden ke greenhouse
-        Route::group(['prefix' => 'mutasiIG'], function() {
+        Route::group(['prefix' => 'mutasiIG'], function() {  //pur, fin, adm, aud
             Route::get('/', 'MutasiindensController@index_indengh')->name('mutasiindengh.index');
-            Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create');
-            Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');
-            Route::get('/{mutasiIG}/editpurchase', 'MutasiindensController@editpurchase_indengh')->name('mutasiindengh.editpurchase');
-            Route::get('/{mutasiIG}/editfinance', 'MutasiindensController@editfinance_indengh')->name('mutasiindengh.editfinance');
-            Route::get('/{mutasiIG}/show', 'MutasiindensController@show_indengh')->name('mutasiindengh.show');
-            Route::post('/store/retur', 'MutasiindensController@store_retur')->name('retur.store');
-            Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store');
-            Route::patch('/{mutasiIG}/update', 'MutasiindensController@update_indengh')->name('mutasiindengh.update');
-            Route::patch('/mutasiindengh/{mutasiIG}/update-pembuku', 'MutasiindensController@updatePembuku')->name('mutasiindengh.updatePembuku');
+            Route::get('/create', 'MutasiindensController@create_indengh')->name('mutasiindengh.create'); //pur
+            Route::get('/{mutasiIG}/edit', 'MutasiindensController@edit_indengh')->name('mutasiindengh.edit');  //fin
+            Route::get('/{mutasiIG}/editpurchase', 'MutasiindensController@editpurchase_indengh')->name('mutasiindengh.editpurchase'); //pur
+            Route::get('/{mutasiIG}/editfinance', 'MutasiindensController@editfinance_indengh')->name('mutasiindengh.editfinance'); //fin
+            Route::get('/{mutasiIG}/show', 'MutasiindensController@show_indengh')->name('mutasiindengh.show'); //all
+            Route::post('/store/retur', 'MutasiindensController@store_retur')->name('retur.store'); //pur
+            Route::post('/store', 'MutasiindensController@store_indengh')->name('mutasiindengh.store'); //pur
+            Route::patch('/{mutasiIG}/update', 'MutasiindensController@update_indengh')->name('mutasiindengh.update'); //pur, fin
+            Route::patch('/mutasiindengh/{mutasiIG}/update-pembuku', 'MutasiindensController@updatePembuku')->name('mutasiindengh.updatePembuku'); //fin
 
             // Route::patch('/{mutasiIG}/update_gambar', 'MutasiindensController@updategambar_indengh')->name('gambarinden.update');
             Route::get('/{mutasiIG}/delete', 'MutasiindensController@destroy_indengh')->name('mutasiindengh.destroy');
             
         });
         
-        Route::group(['prefix' => 'returinden'], function() {
-            Route::patch('/{idretur}/update-pembuku', 'MutasiindensController@updatePembukuRetur')->name('returinden.updatePembuku');
-            Route::get('/{mutasiIG}/create/retur', 'MutasiindensController@create_retur')->name('create.retur');
-            Route::get('/{idretur}/retur/edit', 'MutasiindensController@edit_retur')->name('edit.retur');
-            Route::patch('/{idretur}/update', 'MutasiindensController@update_retur')->name('returinden.update');
-            Route::get('/', 'MutasiindensController@index_returinden')->name('returinden.index');
-            Route::get('/{mutasiIG}/show', 'MutasiindensController@show_returinden')->name('show.returinden');
+        Route::group(['prefix' => 'returinden'], function() {  //fin, pur
+            Route::patch('/{idretur}/update-pembuku', 'MutasiindensController@updatePembukuRetur')->name('returinden.updatePembuku'); //fin
+            Route::get('/{mutasiIG}/create/retur', 'MutasiindensController@create_retur')->name('create.retur'); //pur
+            Route::get('/{idretur}/retur/edit', 'MutasiindensController@edit_retur')->name('edit.retur'); //pur, fin
+            Route::patch('/{idretur}/update', 'MutasiindensController@update_retur')->name('returinden.update'); //pur,fin
+            Route::get('/', 'MutasiindensController@index_returinden')->name('returinden.index'); //all
+            Route::get('/{mutasiIG}/show', 'MutasiindensController@show_returinden')->name('show.returinden'); //all
 
 
         });
 
-        Route::group(['prefix' => 'inven_inden'], function() {
+        Route::group(['prefix' => 'inven_inden'], function() { //pur, fin, aud
             Route::get('/', 'InventoryIndenController@index')->name('inven_inden.index');
             Route::get('/create', 'InventoryIndenController@create')->name('inven_inden.create');
             Route::post('/store', 'InventoryIndenController@store')->name('inven_inden.store');
@@ -603,7 +603,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{inven_inden}/delete', 'InventoryIndenController@destroy')->name('inven_inden.destroy');
         });
 
-        Route::group(['prefix' => 'inven_gudang'], function() {
+        Route::group(['prefix' => 'inven_gudang'], function() { //pur, fin, aud
             Route::get('/', 'InventoryGudangController@index')->name('inven_gudang.index');
             Route::get('/create', 'InventoryGudangController@create')->name('inven_gudang.create');
             Route::post('/store', 'InventoryGudangController@store')->name('inven_gudang.store');
@@ -617,9 +617,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         //endpurchase
 
 
-        Route::group(['prefix' => 'mutasiGAG'], function() {
+        Route::group(['prefix' => 'mutasiGAG'], function() { //pur, aud, adm, fin
             Route::get('/', 'MutasiController@index_galerygalery')->name('mutasigalerygalery.index');
-            Route::get('/create', 'MutasiController@create_galerygalery')->name('mutasigalerygalery.create');
+            Route::get('/create', 'MutasiController@create_galerygalery')->name('mutasigalerygalery.create'); 
             Route::post('/store', 'MutasiController@store_galerygalery')->name('mutasigalerygalery.store');
             Route::get('/{mutasiGAG}/show', 'MutasiController@show_galerygalery')->name('mutasigalerygalery.show');
             Route::get('/{mutasiGAG}/edit', 'MutasiController@edit_galerygalery')->name('mutasigalerygalery.edit');
@@ -674,51 +674,51 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/penjualan', 'LaporanController@penjualan_index')->name('laporan.penjualan');
             Route::get('/penjualan-pdf', 'LaporanController@penjualan_pdf')->name('laporan.penjualan-pdf');
             Route::get('/penjualan-excel', 'LaporanController@penjualan_excel')->name('laporan.penjualan-excel');
-            Route::get('/mutasi', 'LaporanController@mutasi_index')->name('laporan.mutasi');
-            Route::get('/mutasi-pdf', 'LaporanController@mutasi_pdf')->name('laporan.mutasi-pdf');
-            Route::get('/mutasi-excel', 'LaporanController@mutasi_excel')->name('laporan.mutasi-excel');
+            Route::get('/mutasi', 'LaporanController@mutasi_index')->name('laporan.mutasi'); //pur
+            Route::get('/mutasi-pdf', 'LaporanController@mutasi_pdf')->name('laporan.mutasi-pdf'); //pur
+            Route::get('/mutasi-excel', 'LaporanController@mutasi_excel')->name('laporan.mutasi-excel'); //pur
             Route::get('/promo', 'LaporanController@promo_index')->name('laporan.promo');
             Route::get('/promo-pdf', 'LaporanController@promo_pdf')->name('laporan.promo-pdf');
             Route::get('/promo-excel', 'LaporanController@promo_excel')->name('laporan.promo-excel');
-            Route::get('/mutasiinden', 'LaporanController@mutasiinden_index')->name('laporan.mutasiinden');
-            Route::get('/mutasiinden-pdf', 'LaporanController@mutasiinden_pdf')->name('laporan.mutasiinden-pdf');
-            Route::get('/mutasiinden-excel', 'LaporanController@mutasiinden_excel')->name('laporan.mutasiinden-excel');
+            Route::get('/mutasiinden', 'LaporanController@mutasiinden_index')->name('laporan.mutasiinden'); //pur, fin, aud
+            Route::get('/mutasiinden-pdf', 'LaporanController@mutasiinden_pdf')->name('laporan.mutasiinden-pdf'); //pur
+            Route::get('/mutasiinden-excel', 'LaporanController@mutasiinden_excel')->name('laporan.mutasiinden-excel'); //pur
             Route::get('/kas_pusat', 'LaporanController@kas_pusat_index')->name('laporan.kas_pusat');
             Route::get('/kas_pusat-pdf', 'LaporanController@kas_pusat_pdf')->name('laporan.kas_pusat-pdf');
             Route::get('/kas_pusat-excel', 'LaporanController@kas_pusat_excel')->name('laporan.kas_pusat-excel');
             Route::get('/kas_gallery', 'LaporanController@kas_gallery_index')->name('laporan.kas_gallery');
             Route::get('/kas_gallery-pdf', 'LaporanController@kas_gallery_pdf')->name('laporan.kas_gallery-pdf');
             Route::get('/kas_gallery-excel', 'LaporanController@kas_gallery_excel')->name('laporan.kas_gallery-excel');
-            Route::get('/pembelian', 'LaporanController@pembelian_index')->name('laporan.pembelian');
-            Route::get('/pembelian-pdf', 'LaporanController@pembelian_pdf')->name('laporan.pembelian-pdf');
-            Route::get('/pembelian-excel', 'LaporanController@pembelian_excel')->name('laporan.pembelian-excel');
-            Route::get('/pembelian_inden', 'LaporanController@pembelian_inden_index')->name('laporan.pembelian_inden');
-            Route::get('/pembelian_inden-pdf', 'LaporanController@pembelian_inden_pdf')->name('laporan.pembelian_inden-pdf');
-            Route::get('/pembelian_inden-excel', 'LaporanController@pembelian_inden_excel')->name('laporan.pembelian_inden-excel');
-            Route::get('/stok_inden', 'LaporanController@stok_inden_index')->name('laporan.stok_inden');
-            Route::get('/stok_inden-pdf', 'LaporanController@stok_inden_pdf')->name('laporan.stok_inden-pdf');
-            Route::get('/stok_inden-excel', 'LaporanController@stok_inden_excel')->name('laporan.stok_inden-excel');
-            Route::get('/hutang_supplier', 'LaporanController@hutang_supplier_index')->name('laporan.hutang_supplier');
-            Route::get('/hutang_supplier-pdf', 'LaporanController@hutang_supplier_pdf')->name('laporan.hutang_supplier-pdf');
-            Route::get('/hutang_supplier-excel', 'LaporanController@hutang_supplier_excel')->name('laporan.hutang_supplier-excel');
-            Route::get('/retur_pembelian', 'LaporanController@retur_pembelian_index')->name('laporan.retur_pembelian');
-            Route::get('/retur_pembelian-pdf', 'LaporanController@retur_pembelian_pdf')->name('laporan.retur_pembelian-pdf');
-            Route::get('/retur_pembelian-excel', 'LaporanController@retur_pembelian_excel')->name('laporan.retur_pembelian-excel');
-            Route::get('/retur_pembelian_inden', 'LaporanController@retur_pembelian_inden_index')->name('laporan.retur_pembelian_inden');
-            Route::get('/retur_pembelian_inden-pdf', 'LaporanController@retur_pembelian_inden_pdf')->name('laporan.retur_pembelian_inden-pdf');
-            Route::get('/retur_pembelian_inden-excel', 'LaporanController@retur_pembelian_inden_excel')->name('laporan.retur_pembelian_inden-excel');
+            Route::get('/pembelian', 'LaporanController@pembelian_index')->name('laporan.pembelian'); //pur, fin, aud
+            Route::get('/pembelian-pdf', 'LaporanController@pembelian_pdf')->name('laporan.pembelian-pdf'); //pur
+            Route::get('/pembelian-excel', 'LaporanController@pembelian_excel')->name('laporan.pembelian-excel'); //pur
+            Route::get('/pembelian_inden', 'LaporanController@pembelian_inden_index')->name('laporan.pembelian_inden'); //pur
+            Route::get('/pembelian_inden-pdf', 'LaporanController@pembelian_inden_pdf')->name('laporan.pembelian_inden-pdf'); //pur
+            Route::get('/pembelian_inden-excel', 'LaporanController@pembelian_inden_excel')->name('laporan.pembelian_inden-excel'); //pur
+            Route::get('/stok_inden', 'LaporanController@stok_inden_index')->name('laporan.stok_inden'); //pur
+            Route::get('/stok_inden-pdf', 'LaporanController@stok_inden_pdf')->name('laporan.stok_inden-pdf'); //pur
+            Route::get('/stok_inden-excel', 'LaporanController@stok_inden_excel')->name('laporan.stok_inden-excel'); //pur
+            Route::get('/hutang_supplier', 'LaporanController@hutang_supplier_index')->name('laporan.hutang_supplier'); //pur
+            Route::get('/hutang_supplier-pdf', 'LaporanController@hutang_supplier_pdf')->name('laporan.hutang_supplier-pdf'); //pur
+            Route::get('/hutang_supplier-excel', 'LaporanController@hutang_supplier_excel')->name('laporan.hutang_supplier-excel'); //pur
+            Route::get('/retur_pembelian', 'LaporanController@retur_pembelian_index')->name('laporan.retur_pembelian'); //pur
+            Route::get('/retur_pembelian-pdf', 'LaporanController@retur_pembelian_pdf')->name('laporan.retur_pembelian-pdf'); //pur
+            Route::get('/retur_pembelian-excel', 'LaporanController@retur_pembelian_excel')->name('laporan.retur_pembelian-excel'); //pur
+            Route::get('/retur_pembelian_inden', 'LaporanController@retur_pembelian_inden_index')->name('laporan.retur_pembelian_inden'); //pur
+            Route::get('/retur_pembelian_inden-pdf', 'LaporanController@retur_pembelian_inden_pdf')->name('laporan.retur_pembelian_inden-pdf'); //pur
+            Route::get('/retur_pembelian_inden-excel', 'LaporanController@retur_pembelian_inden_excel')->name('laporan.retur_pembelian_inden-excel'); //pur
             Route::get('/omset', 'LaporanController@omset_index')->name('laporan.omset');
             Route::get('/omset-pdf', 'LaporanController@omset_pdf')->name('laporan.omset-pdf');
             Route::get('/omset-excel', 'LaporanController@omset_excel')->name('laporan.omset-excel');
             Route::get('/promo', 'LaporanController@promo_index')->name('laporan.promo');
             Route::get('/promo-pdf', 'LaporanController@promo_pdf')->name('laporan.promo-pdf');
             Route::get('/promo-excel', 'LaporanController@promo_excel')->name('laporan.promo-excel');
-            Route::get('/stok_gallery', 'LaporanController@stok_gallery_index')->name('laporan.stok_gallery');
-            Route::get('/stok_gallery-pdf', 'LaporanController@stok_gallery_pdf')->name('laporan.stok_gallery-pdf');
-            Route::get('/stok_gallery-excel', 'LaporanController@stok_gallery_excel')->name('laporan.stok_gallery-excel');
-            Route::get('/stok_pusat', 'LaporanController@stok_pusat_index')->name('laporan.stok_pusat');
-            Route::get('/stok_pusat-pdf', 'LaporanController@stok_pusat_pdf')->name('laporan.stok_pusat-pdf');
-            Route::get('/stok_pusat-excel', 'LaporanController@stok_pusat_excel')->name('laporan.stok_pusat-excel');
+            Route::get('/stok_gallery', 'LaporanController@stok_gallery_index')->name('laporan.stok_gallery'); //pur
+            Route::get('/stok_gallery-pdf', 'LaporanController@stok_gallery_pdf')->name('laporan.stok_gallery-pdf'); //pur
+            Route::get('/stok_gallery-excel', 'LaporanController@stok_gallery_excel')->name('laporan.stok_gallery-excel'); //pur
+            Route::get('/stok_pusat', 'LaporanController@stok_pusat_index')->name('laporan.stok_pusat'); //pur
+            Route::get('/stok_pusat-pdf', 'LaporanController@stok_pusat_pdf')->name('laporan.stok_pusat-pdf'); //pur
+            Route::get('/stok_pusat-excel', 'LaporanController@stok_pusat_excel')->name('laporan.stok_pusat-excel'); //pur
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');
