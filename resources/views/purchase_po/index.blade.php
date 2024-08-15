@@ -425,10 +425,22 @@
             const columns = [
                 { data: 'no', name: 'no', orderable: false },
                 { data: 'no_po', name: 'no_po' },
-                { data: 'supplier_nama', name: 'supplier_nama' },
-                { data: 'lokasi_nama', name: 'lokasi_nama' },
-                { data: 'tgl_kirim_format', name: 'tgl_kirim_format' },
-                { data: 'tgl_diterima_format', name: 'tgl_diterima_format' },
+                { data: 'supplier_nama', name: 'supplier_nama', orderable: false },
+                { data: 'lokasi_nama', name: 'lokasi_nama', orderable: false },
+                { 
+                    data: 'tgl_kirim',
+                    name: 'tgl_kirim',
+                    render: function(data, type, row) {
+                        return row.tgl_kirim_format;
+                    }  
+                },
+                { 
+                    data: 'tgl_diterima', 
+                    name: 'tgl_diterima',
+                    render: function(data, type, row) {
+                        return row.tgl_diterima_format;
+                    }  
+                },
                 { data: 'no_do_suplier', name: 'no_do_suplier' },
                 { 
                     data: 'status_dibuat', 
@@ -467,7 +479,7 @@
                     }
                 },
                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
-                { data: 'status_pembayaran', name: 'status_pembayaran' },
+                { data: 'status_pembayaran', name: 'status_pembayaran', orderable: false },
                 @endif
                 { data: 'no_retur', name: 'no_retur' },
                 {
@@ -588,8 +600,14 @@
             const columns2 = [
                 { data: 'no', name: 'no', orderable: false },
                 { data: 'no_po', name: 'no_po' },
-                { data: 'tgl_dibuat_format', name: 'tgl_dibuat_format' },
-                { data: 'supplier_nama', name: 'supplier_nama' },
+                { 
+                    data: 'tgl_dibuat', 
+                    name: 'tgl_dibuat', 
+                    render: function(data, type, row) {
+                        return row.tgl_dibuat_format;
+                    }  
+                },
+                { data: 'supplier_nama', name: 'supplier_nama', orderable: false },
                 { data: 'bulan_inden', name: 'bulan_inden' },
                 { 
                     data: 'status_dibuat', 
@@ -616,7 +634,7 @@
                     }
                 },
                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
-                { data: 'status_pembayaran', name: 'status_pembayaran' },
+                { data: 'status_pembayaran', name: 'status_pembayaran', orderable: false },
                 @endif
                 {
                     data: 'action',

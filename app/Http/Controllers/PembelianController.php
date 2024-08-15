@@ -159,7 +159,6 @@ class PembelianController extends Controller
                     'recordsFiltered' => $recordsFiltered,
                     'data' => $data,
                 ]);
-
             }
         // end datatable PO
 
@@ -323,76 +322,266 @@ class PembelianController extends Controller
 
     public function invoice(Request $req)
     {
+        $pembelian = Pembelian::get();
+        $dataretur = Returpembelian::get();
+        // START datatable po
+            if ($req->ajax() && $req->table == 'po') {
                 // Query untuk invoices tanpa poinden_id
-        $query = Invoicepo::with('pembelian')->whereNull('poinden_id')->orderBy('created_at', 'desc');
+                $query = Invoicepo::with('pembelian.supplier', 'pembelian.lokasi')->whereNull('poinden_id')->orderBy('created_at', 'desc');
 
-        // Filter untuk user dengan role Finance
-        $query->when(Auth::user()->hasRole('Finance'), function ($q) {
-            $q->where('status_dibuat', 'DIKONFIRMASI');
-            //   ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        });
-
-        if ($req->supplier) {
-            $query->whereHas('pembelian', function($q) use($req){
-                $q->where('supplier_id', $req->input('supplier'));
-            });
-        }
-        if ($req->gallery) {
-            $query->whereHas('pembelian', function($q) use($req){
-                $q->where('lokasi_id', $req->input('gallery'));
-            });
-        }
-        if ($req->status) {
-            if ($req->status == 'Lunas') {
-                $query->whereHas('pembelian.invoice', function($q) {
-                    $q->where('sisa', 0);
+                // Filter untuk user dengan role Finance
+                $query->when(Auth::user()->hasRole('Finance'), function ($q) {
+                    $q->where('status_dibuat', 'DIKONFIRMASI');
+                    //   ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
                 });
-            } else {
-                $query->whereDoesntHave('pembelian.invoice')
-                        ->orWhereHas('pembelian.invoice', function($q) {
-                            $q->where('sisa', '!=', 0);
+
+                if ($req->supplier) {
+                    $query->whereHas('pembelian', function($q) use($req){
+                        $q->where('supplier_id', $req->input('supplier'));
+                    });
+                }
+                if ($req->gallery) {
+                    $query->whereHas('pembelian', function($q) use($req){
+                        $q->where('lokasi_id', $req->input('gallery'));
+                    });
+                }
+                if ($req->status) {
+                    if ($req->status == 'Lunas') {
+                        $query->whereHas('pembelian.invoice', function($q) {
+                            $q->where('sisa', 0);
                         });
-            }
-        }        
-        if ($req->dateStart) {
-            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
-        }
-        $invoices = $query->get();
+                    } else {
+                        $query->whereDoesntHave('pembelian.invoice')
+                                ->orWhereHas('pembelian.invoice', function($q) {
+                                    $q->where('sisa', '!=', 0);
+                                });
+                    }
+                }        
+                if ($req->dateStart) {
+                    $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+                }
+                if ($req->dateEnd) {
+                    $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+                }
 
-        $query2 = Invoicepo::with('pembelian')->whereNotNull('poinden_id')->orderBy('tgl_inv', 'desc');
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
 
-        $query2->when(Auth::user()->hasRole('Finance'), function ($q) {
-                $q->where('status_dibuat', 'DIKONFIRMASI');
-                //   ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        });
+                $query->orderBy($columnName, $dir);
+                $recordsFiltered = $query->count();
+                $tempData = $query->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $data = $tempData->map(function($item, $index) use ($currentPage, $perPage, $pembelian, $dataretur) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->supplier_nama = $item->pembelian->supplier->nama ?? '-';
+                    $item->lokasi_nama = $item->pembelian->lokasi->nama ?? '-';
+                    $item->userRole = Auth::user()->getRoleNames()->first();
+                    $item->tgl_inv_format = tanggalindo($item->tgl_inv);
+                    $item->sisa_format = formatRupiah($item->sisa);
+                    $item->total_tagihan_format = formatRupiah($item->total_tagihan);
+                    if($item->sisa == 0){
+                        $item->status = '<span class="badges bg-lightgreen">Lunas</span>';
+                    } elseif($item->sisa != 0 && $item->status_dibuat != 'BATAL'){
+                        $item->status = '<span class="badges bg-lightred">Belum Lunas</span>';
+                    } elseif($item->status_dibuat == 'BATAL') {
+                        $item->status = '<span class="badges bg-lightgrey">BATAL</span>';
+                    } else {
+                        $item->status = '-';
+                    }
+                    if($item->status_dibuat == 'TUNDA' || $item->status_dibuat == null){
+                        $item->status_dibuat_format = '<span class="badges bg-lightred">TUNDA</span>';
+                    } else if($item->status_dibuat == 'DIKONFIRMASI') {
+                        $item->status_dibuat_format = '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                    } else if($item->status_dibuat == 'BATAL') {
+                        $item->status_dibuat_format = '<span class="badges bg-lightgrey">BATAL</span>';
+                    } else {
+                        $item->status_dibuat_format = '-';
+                    }
+                    if($item->status_dibuku == 'TUNDA' || $item->status_dibuku == null){
+                    $item->status_dibuku_format = '<span class="badges bg-lightred">TUNDA</span>';
+                    } else if($item->status_dibuku == 'DIKONFIRMASI') {
+                    $item->status_dibuku_format = '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                    } else if($item->status_dibuku == 'MENUNGGU PEMBAYARAN' && $item->sisa != 0) {
+                    $item->status_dibuku_format = '<span class="badges bg-lightyellow">MENUNGGU PEMBAYARAN</span>';
+                    } else if($item->status_dibuku == 'MENUNGGU PEMBAYARAN' && $item->sisa == 0) {
+                    $item->status_dibuku_format = '<span class="badges bg-lightyellow">MENUNGGU KONFIRMASI</span>';
+                    } else {
+                    $item->status_dibuku_format = '-';
+                    }
+                    $item->no_po = $item->pembelian->no_po;
+                    $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $item->id);
+                    $pembelianRetur = $pembelian->firstWhere('no_retur', $item->retur->no_retur ?? null);
+                    
+                    $item->invoiceRetur = $invoiceRetur;
+                    $item->pembelianRetur = $pembelianRetur;
+                    $item->komplain_format = '-';
 
-        if ($req->supplierInd) {
-            $query2->whereHas('pembelian', function($q) use($req){
-                $q->where('supplier_id', $req->input('supplier'));
-            });
-        }
-        if ($req->statusInd) {
-            if ($req->statusInd == 'Lunas') {
-                $query2->whereHas('poinden.invoice', function($q) {
-                    $q->where('sisa', 0);
+                    if ($invoiceRetur && isset($item->retur) && $item->retur->status_dibuat !== "BATAL" && $item->retur->status_dibuku !== "BATAL") {
+                        $item->komplain_format = $item->retur->komplain;
+
+                        if ($item->retur->komplain == "Refund") {
+                            $item->komplain_format .= $item->retur->sisa == 0 ? ' | Lunas' : ' | Belum Lunas';
+                        }
+
+                        if ($item->retur->komplain == "Retur") {
+                            if (!$pembelianRetur && $item->retur->status_dibuku == "DIKONFIRMASI") {
+                                $item->komplain_format .= ' | PO retur belum dibuat';
+                            } elseif ($pembelianRetur) {
+                                $item->komplain_format .= ' | ' . $pembelianRetur->no_po;
+                            }
+                        }
+
+                        if ($item->retur->status_dibuku == null || $item->retur->status_dibuku == "TUNDA") {
+                            $item->komplain_format .= ' | Belum Dikonfirmasi';
+                        }
+                    } elseif ($invoiceRetur && isset($item->retur) && ($item->retur->status_dibuat == "BATAL" || $item->retur->status_dibuku == "BATAL")) {
+                        $item->komplain_format = 'Komplain Batal';
+                    }
+                    return $item;
                 });
-            } else {
-                $query2->whereDoesntHave('poinden.invoice')
-                        ->orWhereHas('poinden.invoice', function($q) {
-                            $q->where('sisa', '!=', 0);
-                        });
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $data = $data->filter(function($item) use ($search) {
+                        return stripos($item->no_inv, $search) !== false
+                            || stripos($item->tgl_inv_format, $search) !== false
+                            || stripos($item->status, $search) !== false
+                            || stripos($item->status_dibuat_format, $search) !== false
+                            || stripos($item->status_dibuku_format, $search) !== false
+                            || stripos($item->supplier_nama, $search) !== false
+                            || stripos($item->sisa_format, $search) !== false
+                            || stripos($item->no_po, $search) !== false
+                            || stripos($item->lokasi_nama, $search) !== false;
+                    });
+                }
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => Invoicepo::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $data,
+                ]);
             }
-        }        
-        if ($req->dateStartInd) {
-            $query2->where('tgl_dibuat', '>=', $req->input('dateStartInd'));
-        }
-        if ($req->dateEndInd) {
-            $query2->where('tgl_dibuat', '<=', $req->input('dateEndInd'));
-        }
-        $invoiceinden = $query2->get();
+        // END datatable po
+
+        // START dattable inden
+            if ($req->ajax() && $req->table == 'inden') {
+                $query2 = Invoicepo::with('poinden.supplier')->whereNotNull('poinden_id')->orderBy('tgl_inv', 'desc');
+
+                $query2->when(Auth::user()->hasRole('Finance'), function ($q) {
+                        $q->where('status_dibuat', 'DIKONFIRMASI');
+                        //   ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+                });
+
+                if ($req->supplierInd) {
+                    $query2->whereHas('poinden', function($q) use($req){
+                        $q->where('supplier_id', $req->input('supplier'));
+                    });
+                }
+                if ($req->statusInd) {
+                    if ($req->statusInd == 'Lunas') {
+                        $query2->whereHas('poinden.invoice', function($q) {
+                            $q->where('sisa', 0);
+                        });
+                    } else {
+                        $query2->whereDoesntHave('poinden.invoice')
+                                ->orWhereHas('poinden.invoice', function($q) {
+                                    $q->where('sisa', '!=', 0);
+                                });
+                    }
+                }        
+                if ($req->dateStartInd) {
+                    $query2->where('tgl_dibuat', '>=', $req->input('dateStartInd'));
+                }
+                if ($req->dateEndInd) {
+                    $query2->where('tgl_dibuat', '<=', $req->input('dateEndInd'));
+                }
+
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                $query2->orderBy($columnName, $dir);
+                $recordsFiltered = $query2->count();
+                $tempData = $query2->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->supplier_nama = $item->poinden->supplier->nama ?? '-';
+                    $item->userRole = Auth::user()->getRoleNames()->first();
+                    $item->tgl_inv_format = tanggalindo($item->tgl_inv);
+                    $item->sisa_format = formatRupiah($item->sisa);
+                    $item->total_tagihan_format = formatRupiah($item->total_tagihan);
+                    if($item->sisa == 0){
+                        $item->status = '<span class="badges bg-lightgreen">Lunas</span>';
+                    } elseif($item->sisa != 0 && $item->status_dibuat != 'BATAL'){
+                        $item->status = '<span class="badges bg-lightred">Belum Lunas</span>';
+                    } elseif($item->status_dibuat == 'BATAL') {
+                        $item->status = '<span class="badges bg-lightgrey">BATAL</span>';
+                    } else {
+                        $item->status = '-';
+                    }
+                    if($item->status_dibuat == 'TUNDA' || $item->status_dibuat == null){
+                        $item->status_dibuat_format = '<span class="badges bg-lightred">TUNDA</span>';
+                    } else if($item->status_dibuat == 'DIKONFIRMASI') {
+                        $item->status_dibuat_format = '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                    } else if($item->status_dibuat == 'BATAL') {
+                        $item->status_dibuat_format = '<span class="badges bg-lightgrey">BATAL</span>';
+                    } else {
+                        $item->status_dibuat_format = '-';
+                    }
+                    if($item->status_dibuku == 'TUNDA' || $item->status_dibuku == null){
+                    $item->status_dibuku_format = '<span class="badges bg-lightred">TUNDA</span>';
+                    } else if($item->status_dibuku == 'DIKONFIRMASI') {
+                    $item->status_dibuku_format = '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                    } else if($item->status_dibuku == 'MENUNGGU PEMBAYARAN' && $item->sisa != 0) {
+                    $item->status_dibuku_format = '<span class="badges bg-lightyellow">MENUNGGU PEMBAYARAN</span>';
+                    } else if($item->status_dibuku == 'MENUNGGU PEMBAYARAN' && $item->sisa == 0) {
+                    $item->status_dibuku_format = '<span class="badges bg-lightyellow">MENUNGGU KONFIRMASI</span>';
+                    } else {
+                    $item->status_dibuku_format = '-';
+                    }
+                    $item->no_po = $item->poinden->no_po;
+                    $item->bulan_inden = $item->poinden->bulan_inden;
+                    return $item;
+                });
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $data = $data->filter(function($item) use ($search) {
+                        return stripos($item->no_inv, $search) !== false
+                            || stripos($item->tgl_inv_format, $search) !== false
+                            || stripos($item->status, $search) !== false
+                            || stripos($item->bulan_inden, $search) !== false
+                            || stripos($item->status_dibuat_format, $search) !== false
+                            || stripos($item->status_dibuku_format, $search) !== false
+                            || stripos($item->supplier_nama, $search) !== false
+                            || stripos($item->sisa_format, $search) !== false
+                            || stripos($item->no_po, $search) !== false;
+                    });
+                }
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => Invoicepo::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $data,
+                ]);
+            }
+        // END datatble inden
 
         $supplierTrd = Invoicepo::select('suppliers.id', 'suppliers.nama')
         ->distinct()
@@ -423,11 +612,9 @@ class PembelianController extends Controller
             $invoice_bayar = 0;
         }
         $bankpens = Rekening::get();
-        $pembelian = Pembelian::get();
-        $dataretur = Returpembelian::get();
         $no_invpo = $this->generatebayarPONumber();
 
-        return view('purchase_inv.indexinvoice', compact('pembelian','invoices','no_invpo','dataretur','invoiceinden', 'supplierTrd', 'supplierInd', 'galleryTrd', 'bankpens', 'invoice_bayar'));
+        return view('purchase_inv.indexinvoice', compact('pembelian','no_invpo','dataretur', 'supplierTrd', 'supplierInd', 'galleryTrd', 'bankpens', 'invoice_bayar'));
 
     }
 
