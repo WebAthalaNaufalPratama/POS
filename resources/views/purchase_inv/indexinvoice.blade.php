@@ -43,7 +43,7 @@ $user = Auth::user();
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
-                            <option disabled>Pilih Status</option>
+                            <option>Pilih Status</option>
                             <option value="Lunas" {{ request()->input('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                         </select>
@@ -54,7 +54,7 @@ $user = Auth::user();
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table" id="po">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -73,7 +73,7 @@ $user = Auth::user();
                             </tr>
                         </thead>
                          <tbody>
-                            @foreach ($invoices as $inv)
+                            {{-- @foreach ($invoices as $inv)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $inv->no_inv }}</td>
@@ -160,16 +160,6 @@ $user = Auth::user();
                                         
                                        
                                         @if($invoiceRetur && $invoiceRetur->status_dibuat == "DIKONFIRMASI" && $inv->sisa !== 0 )
-                                        {{-- <li>
-                                            <a href="{{ route('invoice.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
-                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item">
-                                                <img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar
-                                            </a>
-                                        </li> --}}
                                  
                                         @elseif(($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan) && !$invoiceRetur && ($inv->status_dibuku !== "TUNDA" || $inv->status_dibuku !== null) && $inv->status_dibuat == "DIKONFIRMASI" && $inv->status_dibuku == "MENUNGGU PEMBAYARAN" )
                                             @if(Auth::user()->hasRole('Purchasing'))
@@ -210,11 +200,6 @@ $user = Auth::user();
                                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
                                                 </a>
                                             </li>
-                                            {{-- <li>
-                                                <a href="javascript:void(0);" onclick="bayar({{ $inv }})" class="dropdown-item">
-                                                    <img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar
-                                                </a>
-                                            </li> --}}
                                             @elseif ($inv->status_dibuku == "TUNDA" || $inv->status_dibuku == null )
                                             <li>
                                                 <a href="{{ route('invoicepurchase.edit', ['datapo' => $inv->pembelian->id, 'type' => 'pembelian', 'id' => $inv->id]) }}" class="dropdown-item">
@@ -233,18 +218,10 @@ $user = Auth::user();
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
                                             </a>
                                         </li>
-
-                                        {{-- @if ($inv->sisa == 0 || $inv->sisa == $inv->total_tagihan)
-                                        <li>
-                                            <a href="{{ route('returbeli.create', ['invoice' => $inv->id]) }}" class="dropdown-item"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
-                                        </li>
-                                        @endif --}}
-                                        
-                                        
                                     </ul>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -283,18 +260,18 @@ $user = Auth::user();
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatusInd" name="filterStatusInd" class="form-control" title="Status">
-                            <option disabled>Pilih Status</option>
+                            <option value="">Pilih Status</option>
                             <option value="Lunas" {{ request()->input('statusInd') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('statusInd') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                         </select>
                     </div>
                     <div class="col-sm-2">
-                        <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('invoicebeli.index') }}" class="btn btn-info">Filter</a>
-                        <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('invoicebeli.index') }}" class="btn btn-warning">Clear</a>
+                        <a href="javascript:void(0);" id="filterBtnInd" data-base-url="{{ route('invoicebeli.index') }}" class="btn btn-info">Filter</a>
+                        <a href="javascript:void(0);" id="clearBtnInd" data-base-url="{{ route('invoicebeli.index') }}" class="btn btn-warning">Clear</a>
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table" id="inden">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -313,7 +290,7 @@ $user = Auth::user();
                             </tr>
                         </thead>
                          <tbody>
-                            @foreach ($invoiceinden as $inv)
+                            {{-- @foreach ($invoiceinden as $inv)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $inv->no_inv }}</td>
@@ -355,38 +332,6 @@ $user = Auth::user();
                                         <span class="badges bg-lightyellow">MENUNGGU KONFIRMASI</span>
                                     @endif
                                 </td>
-                                
-                                {{-- <td>
-                                    @php
-                                        $invoiceRetur = $dataretur->firstWhere('invoicepo_id', $inv->id);
-                                        $pembelianRetur = $pembelian->firstWhere('no_retur', $inv->retur->no_retur ?? null);
-                                    @endphp
-                                
-                                    @if ($invoiceRetur && isset($inv->retur) && $inv->retur->status_dibuat !== "BATAL" && $inv->retur->status_dibuku !== "BATAL" )
-                                        {{ $inv->retur->komplain }}  
-                                        @if ($inv->retur->komplain == "Refund")
-                                            @if ($inv->retur->sisa == 0 )
-                                                | Lunas
-                                            @else
-                                                | Belum Lunas
-                                            @endif
-                                        @endif
-                                        @if ($inv->retur->komplain == "Retur")
-                                            @if (!$pembelianRetur && $inv->retur->status_dibuku == "DIKONFIRMASI")
-                                                | PO retur belum dibuat
-                                            @elseif($pembelianRetur)
-                                                | {{$pembelianRetur->no_po }}
-                                            @endif
-                                        @endif
-                                        @if($inv->retur->status_dibuku == null || $inv->retur->status_dibuku == "TUNDA")
-                                        | Belum Dikonfirmasi
-                                        @endif
-                                    @elseif($invoiceRetur && isset($inv->retur) && ($inv->retur->status_dibuat == "BATAL" || $inv->retur->status_dibuku == "BATAL"))
-                                        Komplain Batal
-                                    @endif
-                                </td> --}}
-
-
                                 <td class="text-center">
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -399,9 +344,6 @@ $user = Auth::user();
                                         @if($user->hasRole(['Purchasing']))
                                             @if($inv->status_dibuat == "TUNDA")
                                             <li>
-                                                {{-- <a href="{{ route('invoice.edit',['datapo' => $inv->poinden->id, 'type' => 'poinden', 'id' => $inv->id]) }}" class="dropdown-item">
-                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Ubah Invoice
-                                                </a> --}}
                                                 <a href="{{ route('editinvoice.edit', ['datapo' => $inv->poinden->id, 'type' => 'poinden']) }}" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Invoice</a>
                                             </li>
                                             @endif
@@ -431,22 +373,16 @@ $user = Auth::user();
                                             </li>
                                             @endif
                                             @endif
-                                        
-                                            
                                         @endif
                                         <li>
                                             <a href="{{ route('invoice.show',['datapo' => $inv->poinden->id, 'type' => 'poinden', 'id' => $inv->id]) }}" class="dropdown-item">
                                                 <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
                                             </a>
                                         </li>
-                                    
-                                        {{-- <li>
-                                            <a href="javascript:void(0);" onclick="bayar2({{ $inv }})" class="dropdown-item"><img src="/assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>
-                                        </li> --}}
                                     </ul>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -542,139 +478,341 @@ $user = Auth::user();
     $(document).ready(function(){
         $('[id^=filterSupplier], [id^=filterGallery], [id^=filterStatus]').select2();
     });
-    $('[id^=filterBtn]').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var urlString = baseUrl;
-        var first = true;
-        var symbol = '';
+    // Start Datatable PO
+        const columns = [
+            { data: 'no', name: 'no', orderable: false },
+            { data: 'no_inv', name: 'no_inv' },
+            { 
+                data: 'tgl_inv', 
+                name: 'tgl_inv', 
+                render: function(data, type, row) {
+                    return row.tgl_inv_format;
+                } 
+            },
+            { data: 'no_po', name: 'no_po', orderable: false  },
+            { data: 'supplier_nama', name: 'supplier_nama', orderable: false  },
+            { data: 'lokasi_nama', name: 'lokasi_nama', orderable: false  },
+            { 
+                data: 'status', 
+                name: 'status',
+                render: function(data, type, row) {
+                    return data;
+                }, 
+                orderable: false 
+            },
+            { 
+                data: 'total_tagihan', 
+                name: 'total_tagihan', 
+                render: function(data, type, row) {
+                    return row.total_tagihan_format;
+                } 
+            },
+            { 
+                data: 'sisa', 
+                name: 'sisa',
+                render: function(data, type, row) {
+                    return row.sisa_format;
+                }  
+            },
+            { 
+                data: 'status_dibuat', 
+                name: 'status_dibuat',
+                render: function(data, type, row) {
+                    return row.status_dibuat_format;
+                } 
+            },
+            { 
+                data: 'status_dibuku', 
+                name: 'status_dibuku',
+                render: function(data, type, row) {
+                    return row.status_dibuku_format;
+                } 
+            },
+            {data: 'komplain_format', name: 'komplain_format', orderable: false},
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    let actionsHtml = `
+                        <div class="text-center">
+                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                    `;
 
-        var supplier = $('#filterSupplier').val();
-        if (supplier) {
-            var filtersupplier = 'supplier=' + supplier;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
+                    // Detail PO for roles: Purchasing, Auditor, Finance, AdminGallery
+                    if (['Purchasing', 'Auditor', 'Finance', 'AdminGallery'].includes(row.userRole)) {
+                        actionsHtml += `
+                            <li>
+                                <a href="invoice/${row.pembelian_id}/show?type=pembelian&id=${row.id}" class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail
+                                </a>
+                            </li>
+                        `;
+                    }
+
+                    // Komplain for Purchasing role if conditions met
+                    if (row.userRole === 'Purchasing' &&
+                        ((row.invoiceRetur && row.invoiceRetur.status_dibuat === 'DIKONFIRMASI' && row.sisa !== 0) ||
+                        (row.sisa === 0 || row.sisa === row.total_tagihan) && !row.invoiceRetur &&
+                        (row.status_dibuku !== "TUNDA" && row.status_dibuku !== null) &&
+                        row.status_dibuat === "DIKONFIRMASI" &&
+                        row.status_dibuku === "MENUNGGU PEMBAYARAN")) {
+                        actionsHtml += `
+                            <li>
+                                <a href="retur/create?invoice=${row.id}" class="dropdown-item">
+                                    <img src="/assets/img/icons/return1.svg" class="me-2" alt="img"> Komplain
+                                </a>
+                            </li>
+                        `;
+                    }
+
+                    // Edit Invoice for Purchasing if status_dibuat is TUNDA
+                    if (row.userRole === 'Purchasing' && row.status_dibuat == 'TUNDA') {
+                        actionsHtml += `
+                            <li>
+                                <a href="invoice/${row.pembelian_id}/edit_inv_nominal?type=pembelian&id=${row.id}" class="dropdown-item">
+                                    <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
+                                </a>
+                            </li>
+                        `;
+                    }
+
+                    // Konfirmasi for Finance if conditions met
+                    if (row.userRole === 'Finance' && row.sisa === 0) {
+                        if ((!row.invoiceRetur && row.status_dibuku === "MENUNGGU PEMBAYARAN") ||
+                            (row.invoiceRetur && (row.invoiceRetur.status_dibuat === "BATAL" || row.invoiceRetur.status_dibuku === "BATAL") &&
+                            row.status_dibuku === "MENUNGGU PEMBAYARAN") ||
+                            (row.invoiceRetur && row.invoiceRetur.sisa === 0 && row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.invoiceRetur.status_dibuat !== "BATAL")) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="invoice/${row.pembelian_id}/edit?type=pembelian&id=${row.id}" class="dropdown-item">
+                                        <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
+                                    </a>
+                                </li>
+                            `;
+                        }
+                    } else if (row.userRole === 'Finance') {
+                        if (!row.invoiceRetur || (row.invoiceRetur && row.invoiceRetur.status_dibuku === "DIKONFIRMASI")) {
+                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN") {
+                                actionsHtml += `
+                                    <li>
+                                        <a href="invoice/${row.pembelian_id}/edit?type=pembelian&id=${row.id}" class="dropdown-item">
+                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
+                                        </a>
+                                    </li>
+                                `;
+                            } else if (row.status_dibuku === "TUNDA" || row.status_dibuku === null) {
+                                actionsHtml += `
+                                    <li>
+                                        <a href="invoice/${row.pembelian_id}/edit_inv_nominal?type=pembelian&id=${row.id}" class="dropdown-item">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
+                                        </a>
+                                    </li>
+                                `;
+                            }
+                        }
+                    }
+
+                    actionsHtml += `
+                            </ul>
+                        </div>
+                    `;
+
+                    return actionsHtml;
+                }
             }
-            urlString += symbol;
-            urlString += filtersupplier;
-        }
+        ];
 
-        var gallery = $('#filterGallery').val();
-        if (gallery) {
-            var filtergallery = 'gallery=' + gallery;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
+        let table = initDataTable('#po', {
+            ajaxUrl: "{{ route('invoicebeli.index') }}",
+            columns: columns,
+            order: [[1, 'asc']],
+            searching: true,
+            lengthChange: true,
+            pageLength: 5
+        }, {
+            supplier: '#filterSupplier',
+            gallery: '#filterGallery',
+            status: '#filterStatus',
+            dateStart: '#filterDateStart',
+            dateEnd: '#filterDateEnd'
+        }, 'po');
+
+        const handleSearch = debounce(function() {
+            table.ajax.reload();
+        }, 5000); // Adjust the debounce delay as needed
+
+        $('#filterSupplier, #filterGallery, #filterStatus, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+
+        $('#filterBtn').on('click', function() {
+            table.ajax.reload();
+        });
+
+        $('#clearBtn').on('click', function() {
+            $('#filterSupplier').val('').trigger('change');
+            $('#filterGallery').val('').trigger('change');
+            $('#filterStatus').val('').trigger('change');
+            $('#filterDateStart').val('');
+            $('#filterDateEnd').val('');
+            table.ajax.reload();
+        });
+    // End Datatble PO
+
+    // Start Datatable INDEN
+        const columns2 = [
+            { data: 'no', name: 'no', orderable: false },
+            { data: 'no_inv', name: 'no_inv' },
+            { data: 'no_po', name: 'no_po', orderable: false },
+            { data: 'supplier_nama', name: 'supplier_nama', orderable: false },
+            { data: 'bulan_inden', name: 'bulan_inden', orderable: false },
+            { 
+                data: 'tgl_inv',
+                name: 'tgl_inv',
+                render: function (data, type, row) {
+                    return row.tgl_inv_format;
+                }
+            },
+            { 
+                data: 'status', 
+                name: 'status',
+                render: function(data, type, row) {
+                    return data;
+                }, 
+                orderable: false
+            },
+            { 
+                data: 'total_tagihan', 
+                name: 'total_tagihan', 
+                render: function (data, type, row) {
+                    return row.total_tagihan_format;
+                } 
+            },
+            { 
+                data: 'sisa', 
+                name: 'sisa',
+                render: function(data, type, row) {
+                    return row.sisa_format;
+                }  
+            },
+            { 
+                data: 'status_dibuat', 
+                name: 'status_dibuat',
+                render: function(data, type, row) {
+                    return row.status_dibuat_format;
+                }
+            },
+            { 
+                data: 'status_dibuku', 
+                name: 'status_dibuku',
+                render: function(data, type, row) {
+                    return row.status_dibuku_format;
+                }
+            },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+                    var html = `<div class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">`;
+
+                    var userRole = row.userRole; // Asumsi bahwa userRole sudah ada di dalam data row
+
+                    // Role 'Purchasing'
+                    if (userRole === 'Purchasing') {
+                        if (row.status_dibuat === 'TUNDA') {
+                            html += `<li>
+                                        <a href="invoice/${row.poinden_id}/editinvoice?type=poinden&id=${row.id}" class="dropdown-item">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Invoice
+                                        </a>
+                                    </li>`;
+                        }
+                    }
+
+                    // Role 'Finance'
+                    if (userRole === 'Finance') {
+                        if (row.status_dibuku === 'TUNDA' || row.status_dibuku === null) {
+                            html += `<li>
+                                        <a href="invoice/${row.poinden_id}/editinvoice?type=poinden&id=${row.id}" class="dropdown-item">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Invoice
+                                        </a>
+                                    </li>`;
+                        }
+
+                        if (row.sisa !== 0 && row.status_dibuku === 'MENUNGGU PEMBAYARAN') {
+                            html += `<li>
+                                        <a href="invoice/${row.poinden_id}/edit?type=poinden&id=${row.id}" class="dropdown-item">
+                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Pembayaran Invoice
+                                        </a>
+                                    </li>`;
+                        }
+
+                        if (row.sisa === 0) {
+                            if ((!row.invoiceRetur && row.status_dibuku === 'MENUNGGU PEMBAYARAN') ||
+                                (row.invoiceRetur && (row.invoiceRetur.status_dibuat === 'BATAL' || row.invoiceRetur.status_dibuku === 'BATAL') && row.status_dibuku === 'MENUNGGU PEMBAYARAN') ||
+                                (row.invoiceRetur && row.invoiceRetur.sisa === 0 && row.status_dibuku === 'MENUNGGU PEMBAYARAN' && row.invoiceRetur.status_dibuat !== 'BATAL')) {
+                                html += `<li>
+                                            <a href="invoice/${row.poinden_id}/edit?type=poinden&id=${row.id}" class="dropdown-item">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi
+                                            </a>
+                                        </li>`;
+                            }
+                        }
+                    }
+
+                    // Detail
+                    html += `<li>
+                                <a href="invoice/${row.poinden_id}/show?type=poinden&id=${row.id}" class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail
+                                </a>
+                            </li>
+                            </ul></div>`;
+
+                    return html;
+                }
             }
-            urlString += symbol;
-            urlString += filtergallery;
-        }
+        ];
 
-        var status = $('#filterStatus').val();
-        if (status) {
-            var filterstatus = 'status=' + status;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterstatus;
-        }
+        let table2 = initDataTable('#inden', {
+            ajaxUrl: "{{ route('invoicebeli.index') }}",
+            columns: columns2,
+            order: [[1, 'asc']],
+            searching: true,
+            lengthChange: true,
+            pageLength: 5
+        }, {
+            supplierInd: '#filterSupplierInd',
+            statusInd: '#filterStatusInd',
+            dateStartInd: '#filterDateStartInd',
+            dateEndInd: '#filterDateEndInd'
+        }, 'inden');
 
-        var dateStart = $('#filterDateStart').val();
-        if (dateStart) {
-            var filterDateStart = 'dateStart=' + dateStart;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateStart;
-        }
+        const handleSearch2 = debounce(function() {
+            table2.ajax.reload();
+        }, 5000); // Adjust the debounce delay as needed
 
-        var dateEnd = $('#filterDateEnd').val();
-        if (dateEnd) {
-            var filterDateEnd = 'dateEnd=' + dateEnd;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateEnd;
-        }
+        $('#filterSupplierInd, #filterStatusInd, #filterDateStartInd, #filterDateEndInd').on('input', handleSearch2);
 
+        $('#filterBtnInd').on('click', function() {
+            table2.ajax.reload();
+        });
 
-        var supplier = $('#filterSupplierInd').val();
-        if (supplier) {
-            var filtersupplier = 'supplierInd=' + supplier;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filtersupplier;
-        }
-
-        var status = $('#filterStatusInd').val();
-        if (status) {
-            var filterstatus = 'statusInd=' + status;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterstatus;
-        }
-
-        var dateStart = $('#filterDateStartInd').val();
-        if (dateStart) {
-            var filterDateStart = 'dateStartInd=' + dateStart;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateStart;
-        }
-
-        var dateEnd = $('#filterDateEndInd').val();
-        if (dateEnd) {
-            var filterDateEnd = 'dateEndInd=' + dateEnd;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateEnd;
-        }
-        window.location.href = urlString;
-    });
-    $('[id^=clearBtn]').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var url = window.location.href;
-        if(url.indexOf('?') !== -1){
-            window.location.href = baseUrl;
-        }
-        return 0;
-    });
+        $('#clearBtnInd').on('click', function() {
+            $('#filterSupplierInd').val('').trigger('change');
+            $('#filterStatusInd').val('').trigger('change');
+            $('#filterDateStartInd').val('');
+            $('#filterDateEndInd').val('');
+            table2.ajax.reload();
+        });
+    // End Datatble PO
     $('#bayar').on('change', function() {
         var caraBayar = $(this).val();
         if (caraBayar == 'transfer') {
