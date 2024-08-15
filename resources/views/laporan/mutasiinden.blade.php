@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Laporan Retur Penjualan</h4>
+                        <h4>Laporan Mutasi Inden</h4>
                     </div>
                     <div class="page-btn">
                         <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
@@ -48,7 +48,7 @@
 
                             <div class="col-lg col-sm-6 col-12">
                                 <select id="filterBulan" name="filterBulan" class="form-control" title="Bulan">
-                                    <option value="">Pilih Bulan</option>
+                                    <option value="">Pilih Bulan Inden</option>
                                     @foreach ($inventorys as $item)
                                         <option value="{{ $item->id }}" {{ $item->id == request()->input('bulan') ? 'selected' : '' }}>{{ $item->bulan_inden }}</option>
                                     @endforeach
@@ -71,7 +71,7 @@
                                 <th>Nama Penerima</th>
                                 <th>Tanggal Pengiriman</th>
                                 <th>Tanggal Diterima</th>
-                                <th>Bulan</th>
+                                <th>Bulan Inden</th>
                                 <th>Kategori</th>
                                 <th>Jumlah Pengiriman</th>
                                 <th>Biaya Perawatan</th>
@@ -79,9 +79,12 @@
                                 <th>Jumlah Diterima</th>
                                 <th>Kondisi Diterima</th>
                                 <th>Biaya Pengiriman</th>
-                                <th>Rekening Bank</th>
+                                <th>Biaya Perawatan</th>
                                 <th>Total Biaya</th>
-                                <th>Aksi</th>
+                                <th>Komplain</th>
+                                <th>Jumlah Komplain</th>
+                                <th>Status Pembayaran</th>
+                               
                             </tr>
                         </thead>
                         <tbody>
@@ -92,8 +95,8 @@
                                 <td>{{ $mutasi->no_mutasi }}</td>
                                 <td>{{ $mutasi->supplier->nama }}</td>
                                 <td>{{ $mutasi->lokasi->nama }}</td>
-                                <td>{{ $mutasi->tgl_dikirim }}</td>
-                                <td>{{ $mutasi->tgl_diterima ?? '-' }}</td>
+                                <td>{{ tanggalindo($mutasi->tgl_dikirim) }}</td>
+                                <td>{{ $mutasi->tgl_diterima ? tanggalindo($mutasi->tgl_diterima) : '-' }}</td>
 
                                 @php
                                     $produkMutasi = $produkterjual->where('mutasiinden_id', $mutasi->id);
@@ -112,7 +115,7 @@
                                     <table>
                                         @foreach ($produkMutasi as $index => $produk)
                                         <tr>
-                                            <td>{{ $produk->produk->kode_produk }}</td>
+                                            <td>{{ $produk->produk->produk->nama }}</td>
                                         </tr>
                                         @endforeach
                                     </table>
@@ -130,7 +133,7 @@
                                     <table>
                                         @foreach ($produkMutasi as $index => $produk)
                                         <tr>
-                                            <td>{{ $produk->biaya_rawat }}</td>
+                                            <td>{{ formatRupiah($produk->biaya_rawat) }}</td>
                                         </tr>
                                         @endforeach
                                     </table>
@@ -139,7 +142,7 @@
                                     <table>
                                         @foreach ($produkMutasi as $index => $produk)
                                         <tr>
-                                            <td>{{ $produk->totalharga }}</td>
+                                            <td>{{ formatRupiah($produk->totalharga) }}</td>
                                         </tr>
                                         @endforeach
                                     </table>
@@ -162,16 +165,21 @@
                                         @endforeach
                                     </table>
                                 </td>
-                                <td>{{ $mutasi->biaya_pengiriman }}</td>
-                                <td>{{ $mutasi->rekening_id }}</td>
-                                <td>{{ $mutasi->total_biaya }}</td>
-                                <td>
-                                    <div class="dropdown">
-                                        <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                    </div>
-                                </td>
+                                <td>{{ FormatRupiah($mutasi->biaya_pengiriman) }}</td>
+                                <td>{{ FormatRupiah($mutasi->biaya_perawatan) }}</td>
+                                <td>{{ formatRupiah($mutasi->total_biaya) }}</td>
+                                <td>{{ $mutasi->returinden ? $mutasi->returinden->tipe_komplain : '-' }}</td>
+                                <td>{{ $mutasi->returinden ? formatRupiah($mutasi->returinden->refund ): '-' }}</td>
+                               <td>
+                            
+                                @if (($mutasi->returinden && $mutasi->returinden->status_dibuat !=="BATAL" && $mutasi->sisa_bayar == 0 && $mutasi->returinden->sisa_refund == 0) || (!$mutasi->returinden || $mutasi->returinden->status_dibuat =="BATAL" && $mutasi->sisa_bayar == 0))
+                                    Lunas
+                                @else
+                                    Belum Lunas
+                                @endif
+
+                              
+                               </td>
                             </tr>
                             @endforeach
                         </tbody>

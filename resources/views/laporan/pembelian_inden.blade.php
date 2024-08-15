@@ -61,7 +61,7 @@
                                 <th class="align-middle">Tanggal</th>
                                 <th class="align-middle">List Barang</th>
                                 <th class="align-middle">Harga</th>
-                                <th class="align-middle">Gallery</th>
+                                {{-- <th class="align-middle">Gallery</th> --}}
                                 <th class="align-middle">Supplier</th>
                                 <th class="align-middle">QTY</th>
                                 <th class="align-middle">Harga Total</th>
@@ -91,13 +91,13 @@
                                         @endforeach
                                     </table>
                                 </td>
-                                <td>{{ $item->poinden->lokasi->nama }}</td>
+                                {{-- <td>{{ $item->poinden->lokasi->nama }}</td> --}}
                                 <td>{{ $item->poinden->supplier->nama }}</td>
                                 <td>
                                     <table>
                                         @foreach ($item->poinden->produkbeli as $produk)
                                             <tr>
-                                                <td>{{ $produk->jml_dikirim }}</td>
+                                                <td>{{ $produk->jumlahInden }}</td>
                                             </tr>
                                         @endforeach
                                     </table>

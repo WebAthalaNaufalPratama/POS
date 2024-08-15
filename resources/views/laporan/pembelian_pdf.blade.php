@@ -49,39 +49,13 @@
         th {
             background-color: #f2f2f2;
         }
-        th[rowspan="2"] {
-            vertical-align: middle;
-        }
-        th[colspan="2"] {
-            text-align: center;
-        }
-        td {
-            vertical-align: top;
-        }
-        table td table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table td table th, 
-        table td table td {
-            border: none;
-            padding: 4px;
-        }
-        thead {
-            display: table-header-group;
-        }
-        tfoot {
-            display: table-row-group;
-        }
         tr {
             page-break-inside: avoid;
         }
         .align-middle {
             vertical-align: middle;
         }
-        .text-center {
-            text-align: center;
-        }
+        
     </style>
 </head>
 <body>
@@ -96,38 +70,35 @@
                     <th class="align-middle">No</th>
                     <th class="align-middle">No Invoice</th>
                     <th class="align-middle">Tanggal</th>
-                    <th class="align-middle">List Barang</th>
-                    <th class="align-middle">Harga</th>
                     <th class="align-middle">Gallery</th>
                     <th class="align-middle">Supplier</th>
+                    <th class="align-middle">List Barang</th>
+                    <th class="align-middle">Harga</th>
                     <th class="align-middle">QTY</th>
                     <th class="align-middle">Harga Total</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $item)
+                @foreach ($data as $index1 => $item)
                     @php
                         $rowCount = count($item->pembelian->produkbeli);
                     @endphp
-                    <tr>
-                        <td rowspan="{{ $rowCount }}">{{ $loop->iteration }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ $item->no_inv }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tgl_inv) }}</td>
-                        <td>{{ $item->pembelian->produkbeli[0]->produk->nama }}</td>
-                        <td>{{ formatRupiah($item->pembelian->produkbeli[0]->harga) }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ $item->pembelian->lokasi->nama }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ $item->pembelian->supplier->nama }}</td>
-                        <td>{{ $item->pembelian->produkbeli[0]->jml_dikirim }}</td>
-                        <td>{{ formatRupiah($item->pembelian->produkbeli[0]->totalharga) }}</td>
-                    </tr>
-                    @for ($i = 1; $i < $rowCount; $i++)
+                    
+                    @foreach ($item->pembelian->produkbeli as $index => $produkItem)
                         <tr>
-                            <td>{{ $item->pembelian->produkbeli[$i]->produk->nama }}</td>
-                            <td>{{ formatRupiah($item->pembelian->produkbeli[$i]->harga) }}</td>
-                            <td>{{ $item->pembelian->produkbeli[$i]->jml_dikirim }}</td>
-                            <td>{{ formatRupiah($item->pembelian->produkbeli[$i]->totalharga) }}</td>
+                            @if ($index === 0)
+                                <td rowspan="{{ $rowCount }}">{{ $index1 + 1 }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->no_inv }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tgl_inv) }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->pembelian->lokasi->nama }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->pembelian->supplier->nama }}</td>
+                            @endif
+                            <td>{{ $produkItem->produk->nama }}</td>
+                            <td>{{ formatRupiah($produkItem->harga) }}</td>
+                            <td>{{ $produkItem->jml_dikirim }}</td>
+                            <td>{{ formatRupiah($produkItem->totalharga) }}</td>
                         </tr>
-                    @endfor
+                    @endforeach
                 @endforeach
             </tbody>
         </table>

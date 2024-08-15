@@ -48,7 +48,7 @@
                     @if(Auth::user()->hasRole('Purchasing'))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
-                            <option disabled>Pilih Status</option>
+                            <option>Pilih Status</option>
                             <option value="Lunas" {{ request()->input('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                             <option value="Belum Ada Tagihan" {{ request()->input('status') == 'Belum Ada Tagihan' ? 'selected' : '' }}>Belum Ada Tagihan</option>
@@ -63,7 +63,7 @@
                 </div>
                 
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table" id="po">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -73,15 +73,9 @@
                                 <th>Tanggal Kirim</th>
                                 <th>Tanggal Terima</th>
                                 <th>No DO Supplier</th>
-                                {{-- @if($user->hasRole(['Purchasing','Finance'])) --}}
                                 <th>Status Dibuat</th>
-                                {{-- @endif --}}
-                                {{-- @if($user->hasRole(['AdminGallery','Finance'])) --}}
                                 <th>Status Diterima</th>
-                                {{-- @endif --}}
-                                {{-- @if($user->hasRole(['Auditor','Finance'])) --}}
                                 <th>Status Diperiksa</th>
-                                {{-- @endif --}}
                                 @if($user->hasRole(['Purchasing','Finance']))
                                 <th>Status Pembayaran</th>
                                 @endif
@@ -90,7 +84,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($datapos as $datapo)
+                            {{-- @foreach ($datapos as $datapo)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $datapo->no_po }}</td>
@@ -124,9 +118,9 @@
                                         {{$datapo->status_diterima  }}
                                         @endif
 
-                                    @else 
+                                    @else  --}}
                                     {{-- mengikuti auditor --}}
-                                        @if($datapo->status_diperiksa == 'BATAL')
+                                        {{-- @if($datapo->status_diperiksa == 'BATAL')
                                             <span class="badges bg-lightgrey">BATAL</span>
                                         @elseif($datapo->status_diperiksa == 'TUNDA' || $datapo->status_diperiksa == null)
                                             <span class="badges bg-lightred">TUNDA</span>
@@ -170,8 +164,8 @@
                                         -
                                     @endif
                                 </td>
-                                @php
-                                    // Filter invoice dengan status yang bukan Batal
+                                @php --}}
+                                    {{-- // Filter invoice dengan status yang bukan Batal
                                     $invoiceItems = $datainv->where('pembelian_id', $datapo->id)
                                                             ->where('status_dibuat', '!=', 'BATAL');
                                                                     // Filter invoice dengan status Batal
@@ -207,38 +201,6 @@
                                                 @endif
                                             @endif
                         
-                                            @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
-                                                @foreach ($invoiceItems as $invoice)
-                                                    @if($invoice->sisa == 0 && ($invoice->status_dibuku == null || $invoice->status_dibuku == 'TUNDA'))
-                                                        {{-- @if(Auth::user()->hasRole(['Finance']))
-                                                            <li>
-                                                                <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
-                                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Konfirmasi
-                                                                </a>
-                                                            </li>
-                                                        @endif --}}
-                                                    @endif
-                                                    @if ($invoice->sisa != 0 && $invoice->status_dibuat == 'DIKONFIRMASI' && ($invoice->status_dibuku == 'TUNDA' || $invoice->status_dibuku === null) && ($invoice->retur && $invoice->retur->status_dibuku == "DIKONFIRMASI"))
-                                                        {{-- @if(Auth::user()->hasRole(['Finance']))
-                                                            <li>
-                                                                <a href="{{ route('invoice.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
-                                                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Pembayaran Invoice
-                                                                </a>
-                                                            </li>
-                                                        @endif --}}
-                                                    @elseif($invoice->status_dibuat == 'TUNDA')
-                                                        {{-- @if(Auth::user()->hasRole(['Purchasing']))
-                                                            <li>
-                                                                <a href="{{ route('invoicepurchase.edit', ['datapo' => $datapo->id, 'type' => 'pembelian', 'id' => $invoice->id]) }}" class="dropdown-item">
-                                                                    <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Invoice
-                                                                </a>
-                                                            </li>
-                                                        @endif --}}
-                                                    @endif
-                                                                                                 
-                                                @endforeach
-                                            @endif
-                        
                                             @if(Auth::user()->hasRole(['Auditor']))
                                                 @if ($datapo->status_diperiksa == "TUNDA" || $datapo->status_diperiksa == null)
                                                     <li>
@@ -262,7 +224,7 @@
                                     </td>
                                 @endif
                             </tr>
-                        @endforeach
+                        @endforeach --}}
                         
                         </tbody>
                     </table>
@@ -308,7 +270,7 @@
                     @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatusInd" name="filterStatusInd" class="form-control" title="Status">
-                            <option disabled>Pilih Status</option>
+                            <option>Pilih Status</option>
                             <option value="Lunas" {{ request()->input('statusind') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('statusind') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                             <option value="Belum Ada Tagihan" {{ request()->input('statusind') == 'Belum Ada Tagihan' ? 'selected' : '' }}>Belum Ada Tagihan</option>
@@ -317,12 +279,12 @@
                     </div>
                     @endif
                     <div class="col-sm-2">
-                        <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('pembelian.index') }}" class="btn btn-info">Filter</a>
-                        <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('pembelian.index') }}" class="btn btn-warning">Clear</a>
+                        <a href="javascript:void(0);" id="filterBtnInd" data-base-url="{{ route('pembelian.index') }}" class="btn btn-info">Filter</a>
+                        <a href="javascript:void(0);" id="clearBtnInd" data-base-url="{{ route('pembelian.index') }}" class="btn btn-warning">Clear</a>
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table" id="inden">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -339,7 +301,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($datainden as $inden)
+                            {{-- @foreach ($datainden as $inden)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $inden->no_po }}</td>
@@ -390,7 +352,7 @@
                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                     </a>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu"> --}}
 
                                 {{-- @if ($inden->status_diperiksa == "DIKONFIRMASI")
                                     @if(Auth::user()->hasRole(['Finance']))
@@ -410,7 +372,7 @@
                                     @endif
                                 @endif --}}
 
-                                @if ($inden->status_diperiksa == "DIKONFIRMASI")
+                                {{-- @if ($inden->status_diperiksa == "DIKONFIRMASI")
                                     @if(Auth::user()->hasRole(['Purchasing']))
                                         <li>
                                             <a href="{{ route('invoicebiasa.create', ['type' => 'poinden', 'datapo' => $inden->id]) }}" class="dropdown-item"><img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
@@ -441,7 +403,7 @@
                                     </ul>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -458,140 +420,436 @@
 <script>
     $(document).ready(function(){
         $('[id^=filterSupplier], [id^=filterGallery], [id^=filterStatus]').select2();
+
+        // Start Datatable PO
+            const columns = [
+                { data: 'no', name: 'no', orderable: false },
+                { data: 'no_po', name: 'no_po' },
+                { data: 'supplier_nama', name: 'supplier_nama' },
+                { data: 'lokasi_nama', name: 'lokasi_nama' },
+                { data: 'tgl_kirim_format', name: 'tgl_kirim_format' },
+                { data: 'tgl_diterima_format', name: 'tgl_diterima_format' },
+                { data: 'no_do_suplier', name: 'no_do_suplier' },
+                { 
+                    data: 'status_dibuat', 
+                    name: 'status_dibuat',
+                    render: function(data) {
+                        switch (data) {
+                            case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
+                            case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
+                            case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                            default: return '-';
+                        }
+                    }
+                },
+                { 
+                    data: 'status_diterima', 
+                    name: 'status_diterima',
+                    render: function(data) {
+                        switch (data) {
+                            case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
+                            case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
+                            case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                            default: return '-';
+                        }
+                    }
+                },
+                { 
+                    data: 'status_diperiksa', 
+                    name: 'status_diperiksa',
+                    render: function(data) {
+                        switch (data) {
+                            case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
+                            case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
+                            case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                            default: return '<span class="badges bg-lightred">TUNDA</span>';
+                        }
+                    }
+                },
+                @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
+                { data: 'status_pembayaran', name: 'status_pembayaran' },
+                @endif
+                { data: 'no_retur', name: 'no_retur' },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        let actionsHtml = `
+                            <div class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                        `;
+
+                        // Detail PO for roles: Purchasing, Auditor, Finance, AdminGallery
+                        if (['Purchasing', 'Auditor', 'Finance', 'AdminGallery'].includes(row.userRole)) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="pembelian/${row.id}/show?type=pembelian" class="dropdown-item">
+                                        <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail PO
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        // Edit PO for Purchasing if status_dibuat is TUNDA
+                        if (row.userRole === 'Purchasing' && row.status_dibuat === 'TUNDA') {
+                            actionsHtml += `
+                                <li>
+                                    <a href="pembelian/${row.id}/editpurchase_po?type=pembelian" class="dropdown-item">
+                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit PO
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        // Create Invoice for Purchasing when invoice is BATAL or status_diperiksa is DIKONFIRMASI
+                        if (row.userRole === 'Purchasing' && ((row.invoice && row.invoice.status_dibuat === 'BATAL') || (!row.invoice && row.status_diperiksa === 'DIKONFIRMASI'))) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="invoice/pembelian/${row.id}/createinv" class="dropdown-item">
+                                        <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        // Periksa for Auditor when status_diperiksa is TUNDA or null
+                        if (row.userRole === 'Auditor' && (row.status_diperiksa === 'TUNDA' || row.status_diperiksa === null)) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="pembelian/${row.id}/edit_po_audit?type=pembelian" class="dropdown-item">
+                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Periksa
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        // Acc Terima for AdminGallery when status_dibuat is DIKONFIRMASI and status_diterima is null
+                        if (row.userRole === 'AdminGallery' && row.status_dibuat === 'DIKONFIRMASI' && row.status_diterima === null) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="pembelian/${row.id}/edit_po?type=pembelian" class="dropdown-item">
+                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Acc Terima
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        actionsHtml += `
+                                </ul>
+                            </div>
+                        `;
+
+                        return actionsHtml;
+                    }
+                }
+            ];
+
+            let table = initDataTable('#po', {
+                ajaxUrl: "{{ route('pembelian.index') }}",
+                columns: columns,
+                order: [[1, 'asc']],
+                searching: true,
+                lengthChange: true,
+                pageLength: 5
+            }, {
+                supplier: '#filterSupplier',
+                gallery: '#filterGallery',
+                status: '#filterStatus',
+                dateStart: '#filterDateStart',
+                dateEnd: '#filterDateEnd'
+            }, 'po');
+
+            const handleSearch = debounce(function() {
+                table.ajax.reload();
+            }, 5000); // Adjust the debounce delay as needed
+
+            $('#filterSupplier, #filterGallery, #filterStatus, #filterDateStart, #filterDateEnd').on('input', handleSearch);
+
+            $('#filterBtn').on('click', function() {
+                table.ajax.reload();
+            });
+
+            $('#clearBtn').on('click', function() {
+                $('#filterSupplier').val('');
+                $('#filterGallery').val('');
+                $('#filterStatus').val('');
+                $('#filterDateStart').val('');
+                $('#filterDateEnd').val('');
+                table.ajax.reload();
+            });
+        // End Datatble PO
+
+        // Start Datatable INDEN
+            const columns2 = [
+                { data: 'no', name: 'no', orderable: false },
+                { data: 'no_po', name: 'no_po' },
+                { data: 'tgl_dibuat_format', name: 'tgl_dibuat_format' },
+                { data: 'supplier_nama', name: 'supplier_nama' },
+                { data: 'bulan_inden', name: 'bulan_inden' },
+                { 
+                    data: 'status_dibuat', 
+                    name: 'status_dibuat',
+                    render: function(data) {
+                        switch (data) {
+                            case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
+                            case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
+                            case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                            default: return '-';
+                        }
+                    }
+                },
+                { 
+                    data: 'status_diperiksa', 
+                    name: 'status_diperiksa',
+                    render: function(data) {
+                        switch (data) {
+                            case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
+                            case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
+                            case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
+                            default: return '<span class="badges bg-lightred">TUNDA</span>';;
+                        }
+                    }
+                },
+                @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
+                { data: 'status_pembayaran', name: 'status_pembayaran' },
+                @endif
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        let actionsHtml = `
+                            <div class="text-center">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                        `;
+
+                        // Detail PO
+                        actionsHtml += `
+                            <li>
+                                <a href="pembelian/${row.id}/show?type=poinden" class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail PO
+                                </a>
+                            </li>
+                        `;
+
+                        // Edit PO for Purchasing if status_dibuat is TUNDA
+                        if (row.userRole === 'Purchasing' && (row.status_dibuat === 'TUNDA' || row.status_dibuat === null)) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="pembelian/${row.id}/edit_po?type=poinden" class="dropdown-item">
+                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit PO
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        // Create Invoice for Purchasing
+                        if (row.userRole === 'Purchasing' && ((row.invoice && row.invoice.status_dibuat === 'BATAL') || (!row.invoice && row.status_diperiksa === 'DIKONFIRMASI'))) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="invoice/poinden/${row.id}/createinv" class="dropdown-item">
+                                        <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img"> Create Invoice
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        // Auditor Periksa
+                        if (row.userRole === 'Auditor' && (row.status_diperiksa === 'TUNDA' || row.status_diperiksa === null)) {
+                            actionsHtml += `
+                                <li>
+                                    <a href="pembelian/${row.id}/edit_po?type=poinden" class="dropdown-item">
+                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Periksa
+                                    </a>
+                                </li>
+                            `;
+                        }
+
+                        actionsHtml += `
+                                </ul>
+                            </div>
+                        `;
+
+                        return actionsHtml;
+                    }
+                }
+            ];
+
+            let table2 = initDataTable('#inden', {
+                ajaxUrl: "{{ route('pembelian.index') }}",
+                columns: columns2,
+                order: [[1, 'asc']],
+                searching: true,
+                lengthChange: true,
+                pageLength: 5
+            }, {
+                supplierInd: '#filterSupplierInd',
+                statusInd: '#filterStatusInd',
+                dateStartInd: '#filterDateStartInd',
+                dateEndInd: '#filterDateEndInd'
+            }, 'inden');
+
+            const handleSearch2 = debounce(function() {
+                table2.ajax.reload();
+            }, 5000); // Adjust the debounce delay as needed
+
+            $('#filterSupplierInd, #filterStatusInd, #filterDateStartInd, #filterDateEndInd').on('input', handleSearch2);
+
+            $('#filterBtnInd').on('click', function() {
+                table2.ajax.reload();
+            });
+
+            $('#clearBtnInd').on('click', function() {
+                $('#filterSupplierInd').val('');
+                $('#filterStatusInd').val('');
+                $('#filterDateStartInd').val('');
+                $('#filterDateEndInd').val('');
+                table2.ajax.reload();
+            });
+        // End Datatble INDEN
     });
-    $('[id^=filterBtn]').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var urlString = baseUrl;
-        var first = true;
-        var symbol = '';
+    // $('[id^=filterBtn]').click(function(){
+    //     var baseUrl = $(this).data('base-url');
+    //     var urlString = baseUrl;
+    //     var first = true;
+    //     var symbol = '';
 
-        var supplier = $('#filterSupplier').val();
-        if (supplier) {
-            var filtersupplier = 'supplier=' + supplier;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filtersupplier;
-        }
+    //     var supplier = $('#filterSupplier').val();
+    //     if (supplier) {
+    //         var filtersupplier = 'supplier=' + supplier;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filtersupplier;
+    //     }
 
-        var gallery = $('#filterGallery').val();
-        if (gallery) {
-            var filtergallery = 'gallery=' + gallery;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filtergallery;
-        }
+    //     var gallery = $('#filterGallery').val();
+    //     if (gallery) {
+    //         var filtergallery = 'gallery=' + gallery;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filtergallery;
+    //     }
 
-        var status = $('#filterStatus').val();
-        if (status) {
-            var filterstatus = 'status=' + status;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterstatus;
-        }
+    //     var status = $('#filterStatus').val();
+    //     if (status) {
+    //         var filterstatus = 'status=' + status;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filterstatus;
+    //     }
 
-        var dateStart = $('#filterDateStart').val();
-        if (dateStart) {
-            var filterDateStart = 'dateStart=' + dateStart;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateStart;
-        }
+    //     var dateStart = $('#filterDateStart').val();
+    //     if (dateStart) {
+    //         var filterDateStart = 'dateStart=' + dateStart;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filterDateStart;
+    //     }
 
-        var dateEnd = $('#filterDateEnd').val();
-        if (dateEnd) {
-            var filterDateEnd = 'dateEnd=' + dateEnd;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateEnd;
-        }
+    //     var dateEnd = $('#filterDateEnd').val();
+    //     if (dateEnd) {
+    //         var filterDateEnd = 'dateEnd=' + dateEnd;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filterDateEnd;
+    //     }
 
 
-        var supplier = $('#filterSupplierInd').val();
-        if (supplier) {
-            var filtersupplier = 'supplierInd=' + supplier;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filtersupplier;
-        }
+    //     var supplier = $('#filterSupplierInd').val();
+    //     if (supplier) {
+    //         var filtersupplier = 'supplierInd=' + supplier;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filtersupplier;
+    //     }
 
-        var status = $('#filterStatusInd').val();
-        if (status) {
-            var filterstatus = 'statusInd=' + status;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterstatus;
-        }
+    //     var status = $('#filterStatusInd').val();
+    //     if (status) {
+    //         var filterstatus = 'statusInd=' + status;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filterstatus;
+    //     }
 
-        var dateStart = $('#filterDateStartInd').val();
-        if (dateStart) {
-            var filterDateStart = 'dateStartInd=' + dateStart;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateStart;
-        }
+    //     var dateStart = $('#filterDateStartInd').val();
+    //     if (dateStart) {
+    //         var filterDateStart = 'dateStartInd=' + dateStart;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filterDateStart;
+    //     }
 
-        var dateEnd = $('#filterDateEndInd').val();
-        if (dateEnd) {
-            var filterDateEnd = 'dateEndInd=' + dateEnd;
-            if (first == true) {
-                symbol = '?';
-                first = false;
-            } else {
-                symbol = '&';
-            }
-            urlString += symbol;
-            urlString += filterDateEnd;
-        }
-        window.location.href = urlString;
-    });
-    $('[id^=clearBtn]').click(function(){
-        var baseUrl = $(this).data('base-url');
-        var url = window.location.href;
-        if(url.indexOf('?') !== -1){
-            window.location.href = baseUrl;
-        }
-        return 0;
-    });
+    //     var dateEnd = $('#filterDateEndInd').val();
+    //     if (dateEnd) {
+    //         var filterDateEnd = 'dateEndInd=' + dateEnd;
+    //         if (first == true) {
+    //             symbol = '?';
+    //             first = false;
+    //         } else {
+    //             symbol = '&';
+    //         }
+    //         urlString += symbol;
+    //         urlString += filterDateEnd;
+    //     }
+    //     window.location.href = urlString;
+    // });
+    // $('[id^=clearBtn]').click(function(){
+    //     var baseUrl = $(this).data('base-url');
+    //     var url = window.location.href;
+    //     if(url.indexOf('?') !== -1){
+    //         window.location.href = baseUrl;
+    //     }
+    //     return 0;
+    // });
     function deleteData(id) {
         $.ajax({
             type: "GET",

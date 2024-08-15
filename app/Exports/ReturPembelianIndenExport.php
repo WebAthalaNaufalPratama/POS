@@ -7,17 +7,17 @@ use Maatwebsite\Excel\Concerns\FromView;
 
 class ReturPembelianIndenExport implements FromView
 {
-    protected $data;
+    protected $returs;
 
-    public function __construct($data)
+    public function __construct($returs)
     {
-        $this->data = $data;
+        $this->returs = $returs;
     }
 
     public function view(): View
     {
         return view('laporan.retur_pembelian_inden_excel', [
-            'data' => $this->data
+            'returs' => $this->returs
         ]);
     }
 }

@@ -7,13 +7,13 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Mutasi GreenHouse Ke Galery</h4>
+                        <h4>Mutasi GreenHouse/Gudang</h4>
                     </div>
                     @php
                         $user = Auth::user();
                         $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                     @endphp
-                    @if($user->hasRole(['Purchasing']) && !$user->hasRole(['Auditor', 'Finance']))
+                    @if($user->hasRole(['Purchasing']))
                     <div class="page-btn">
                         <a href="{{ route('mutasighgalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
                     </div>

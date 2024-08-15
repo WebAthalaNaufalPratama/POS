@@ -41,85 +41,81 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>No PO</th>
+                                <th>Tanggal Komplain</th>
                                 <th>No Retur</th>
-                                <th>Tanggal Retur</th>
-                                <th>Barang</th>
+                                <th>No Mutasi</th>
+                                <th>Tipe Komplain</th>
+                                <th>Alasan</th>
+                                <th>Kode Inden</th>
+                                <th>Nama Produk</th>
                                 <th>Harga</th>
                                 <th>QTY</th>
-                                <th>Komplain</th>
-                                <th>Total Diskon</th>
-                                <th>Penanganan Komplain</th>
+                                <th>Total</th>
                                 <th>Supplier</th>
-                                <th>Gallery</th>
+                                <th>Tujuan</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($data as $item)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item->no_po }}</td>
-                                    <td>{{ $item->no_retur }}</td>
-                                    <td>{{ $item->tgl_retur }}</td>
-                                    <td>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tbody>
-                                                @foreach ($item->produkretur as $produkretur)
-                                                    <tr>
-                                                        <td>{{ $produkretur->produkbeli->produk->nama }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tbody>
-                                                @foreach ($item->produkretur as $produkretur)
-                                                    <tr>
-                                                        <td>{{ $produkretur->harga }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tbody>
-                                                @foreach ($item->produkretur as $produkretur)
-                                                    <tr>
-                                                        <td>{{ $produkretur->jumlah }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tbody>
-                                                @foreach ($item->produkretur as $produkretur)
-                                                    <tr>
-                                                        <td>{{ $produkretur->alasan }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tbody>
-                                                @foreach ($item->produkretur as $produkretur)
-                                                    <tr>
-                                                        <td>{{ $produkretur->diskon }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td>{{ $item->komplain }}</td>
-                                    <td>{{ $item->supplier_nama }}</td>
-                                    <td>{{ $item->gallery_nama }}</td>
-                                </tr>
+                            @foreach ($returs as $retur)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ tanggalindo($retur->tgl_dibuat) }}</td>
+                                <td>{{ $retur->no_retur }}</td>
+                                <td>{{ $retur->mutasiinden->no_mutasi}}</td>
+                                <td>{{ $retur->tipe_komplain}}
+                                    {{-- @if ( $retur->tipe_komplain == "Refund" && $retur->sisa_refund == 0)
+                                        | Lunas
+                                    @elseif( $retur->tipe_komplain == "Refund" && $retur->sisa_refund !== 0)
+                                        | Belum Lunas
+                                    @endif
+                                    @if ( $retur->tipe_komplain == "Diskon" && $retur->mutasiinden->sisa_bayar == 0)
+                                        | Lunas
+                                    @elseif( $retur->tipe_komplain == "Diskon" && $retur->mutasiinden->sisa_bayar !== 0)
+                                        | Belum Lunas
+                                    @endif --}}
+
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->alasan }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->produk->produk->kode_produk_inden }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->produk->produk->produk->nama }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ formatRupiah($produkretur->harga_satuan) }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->jml_diretur }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>{{ formatRupiah($retur->refund) }}</td>
+                                <td>{{ $retur->mutasiinden->supplier->nama }}</td>
+                                <td>{{ $retur->mutasiinden->lokasi->nama }}</td>
+                               
+                               
+                            </tr>
                             @endforeach
                         </tbody>
                     </table>
