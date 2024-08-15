@@ -10,7 +10,7 @@
                         <h4>Invoice Penjualan</h4>
                     </div>
                     <div class="page-btn">
-                        @php
+                       {{-- @php
                             $roles = Auth::user()->roles()->get();
                             $user = Auth::user();
                             $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
@@ -22,8 +22,8 @@
                                     $rolePermissions = $roles->flatMap->permissions->pluck('name')->toArray();
                                 }
                             }
-                        @endphp
-                        @if(in_array('penjualan.create', $rolePermissions))
+                        @endphp --}}
+                        @if(in_array('penjualan.create', $thisUserPermissions))
                             <a href="{{ route('penjualan.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Penjualan</a>
                         @endif
                     </div>
@@ -59,7 +59,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table id="penjualanTable" class="table pb-5">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -75,7 +75,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($penjualans as $penjualan)
+                            {{-- @foreach ($penjualans as $penjualan)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $penjualan->no_invoice }}</td>
@@ -117,7 +117,7 @@
                                             <!-- && $penjualan->dibukukan_id != null && $penjualan->auditor_id != null && $penjualan->status == 'DIKONFIRMASI' -->
                                             @php
                                                 $retur = \App\Models\ReturPenjualan::where('no_invoice', $penjualan->no_invoice)->where('status', 'DIKONFIRMASI')->first();
-                                                
+                            
                                             @endphp
                                             @if(in_array('returpenjualan.create', $rolePermissions) && $penjualan->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance']) && !$retur)
                                                 <a class="dropdown-item" href="{{ route('returpenjualan.create', ['penjualan' => $penjualan->id]) }}"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur</a>
@@ -137,7 +137,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -177,8 +177,159 @@
     }
 </script>
 <script>
-    $(document).ready(function(){
-        $('#rekening_id, #bayar, #filterMetode, #filterSales').select2();
+    const rolePermissions = window.rolePermissions || [];
+    $(document).ready(function() {
+        if ($.fn.DataTable.isDataTable('#penjualanTable')) {
+            $('#penjualanTable').DataTable().destroy();
+        }
+
+        window.routes = {
+            auditPenjualanEdit: "{{ route('auditpenjualan.edit', ['penjualan' => '__ID__']) }}",
+            dopenjualanCreate: "{{ route('dopenjualan.create', ['penjualan' => '__ID__']) }}",
+            returPenjualanCreate: "{{ route('returpenjualan.create', ['penjualan' => '__ID__']) }}",
+            pdfInvoicePenjualanGenerate: "{{ route('pdfinvoicepenjualan.generate', ['penjualan' => '__ID__']) }}",
+            penjualanView: "{{ route('penjualan.view', ['penjualan' => '__ID__']) }}",
+            auditPenjualanShow: "{{ route('auditpenjualan.show', ['penjualan' => '__ID__']) }}",
+            penjualanPayment: "{{ route('penjualan.payment', ['penjualan' => '__ID__']) }}"
+        };
+
+        $('#penjualanTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("penjualan.index") }}',
+                data: function (d) {
+                    d.customer = $('#filterCustomer').val();
+                    d.sales = $('#filterSales').val();
+                    d.dateStart = $('#filterDateStart').val();
+                    d.dateEnd = $('#filterDateEnd').val();
+                },
+                // dataSrc: function (json) {
+                //     console.log("Received Data:", json); // Log received data
+                //     return json.data;
+                // }
+            },
+            columns: [
+                { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
+                    return meta.row + 1;
+                }},
+                { data: 'no_invoice', name: 'no_invoice' },
+                { data: 'karyawan.nama', name: 'karyawan.nama' },
+                { data: 'tanggal_invoice', name: 'tanggal_invoice' },
+                { data: 'jatuh_tempo', name: 'jatuh_tempo' },
+                {
+                    data: 'latest_payment.status_bayar',
+                    name: 'latest_payment.status_bayar',
+                    render: function (data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'LUNAS':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'BELUM LUNAS':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+
+                        return `<span class="badges ${badgeClass}">${data || 'Belum Ada Pembayaran'}</span>`;
+                    }
+                },
+                { data: 'total_tagihan', name: 'total_tagihan' },
+                { data: 'sisa_bayar', name: 'sisa_bayar' },
+                {
+                    data: 'status',
+                    name: 'status',
+                    render: function (data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        const isRetur = row.retur === true || row.retur === 'true';
+                        var dropdownHtml = `
+                            <div class="dropdown">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown-menu">`;
+
+                        var userHasRole = @json(Auth::user()->roles->pluck('name')->toArray());
+
+                        if (row.status !== 'DIBATALKAN') {
+                            if (userHasRole.includes('Auditor') || userHasRole.includes('Finance') || userHasRole.includes('SuperAdmin')) {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditPenjualanEdit.replace('__ID__', row.id)}">
+                                                    <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit
+                                                </a>`;
+                            } else if ((userHasRole.includes('AdminGallery') || userHasRole.includes('KasirGallery') || userHasRole.includes('KasirOutlet')) && row.status !== 'DIKONFIRMASI') {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditPenjualanEdit.replace('__ID__', row.id)}">
+                                                    <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit
+                                                </a>`;
+                            }
+
+                            if (row.status === 'DIKONFIRMASI') {
+                                if (row.lokasi && row.lokasi.lokasi && row.lokasi.lokasi.tipe_lokasi !== 2 && userPermissions.includes('penjualan.show')) {
+                                    dropdownHtml += `<a class="dropdown-item" href="${window.routes.penjualanShow.replace('__ID__', row.id)}">
+                                                        <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Perangkai
+                                                    </a>`;
+                                }
+
+                                if (userPermissions.includes('penjualan.payment')) {
+                                    dropdownHtml += `<a class="dropdown-item" href="${window.routes.penjualanPayment.replace('__ID__', row.id)}">
+                                                        <img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Pembayaran
+                                                    </a>`;
+                                }
+                                if (row.distribusi === 'Dikirim' && userPermissions.includes('dopenjualan.create')) {
+                                    dropdownHtml += `<a class="dropdown-item" href="${window.routes.dopenjualanCreate.replace('__ID__', row.id)}">
+                                                        <img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order
+                                                    </a>`;
+                                }
+                                if (userPermissions.includes('returpenjualan.create') && !userHasRole.includes('Auditor') && !userHasRole.includes('Finance') && row.status == 'DIKONFIRMASI' && !isRetur) {
+                                    dropdownHtml += `<a class="dropdown-item" href="${window.routes.returPenjualanCreate.replace('__ID__', row.id)}">
+                                                        <img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur
+                                                    </a>`;
+                                }
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.pdfInvoicePenjualanGenerate.replace('__ID__', row.id)}">
+                                                    <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak Invoice
+                                                </a>`;
+                                if (isRetur) {
+                                    dropdownHtml += `<a class="dropdown-item" href="${window.routes.penjualanView.replace('__ID__', row.id)}">
+                                                    <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">View Retur
+                                                </a>`;
+                                }
+                            }
+                        } else {
+                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditPenjualanShow.replace('__ID__', row.id)}">
+                                                <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Show
+                                            </a>`;
+                        }
+
+                        dropdownHtml += `</div></div>`;
+                        return dropdownHtml;
+                    }
+                }
+            ]
+        });
+
     });
 
     $('#bayar').on('change', function() {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Retur Pembelian</title>
+    <title>Laporan Stok Gallery</title>
     <style>
         @page {
             size: A4 landscape;
@@ -28,13 +28,9 @@
             justify-content: center;
             background-color: #fff;
         }
-        .header {
-            color: #000000;
+        .header h1, .header p {
             margin: 0;
             text-align: center;
-        }
-        .page-break {
-            page-break-before: always;
         }
         table {
             width: 100%;
@@ -82,71 +78,66 @@
         .text-center {
             text-align: center;
         }
-        ul {
-            list-style-type: none; 
-            padding: 0;
-            margin: 0;
-        }
-
-        li {
-            margin: 0;
-            padding: 0;
-        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <h2>Laporan Retur Pembelian</h2>
+        <h2>Laporan Bunga Datang</h2>
     </div>
     <div class="content">
-        <table>
+        <table class="table" id="datanew">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>No PO</th>
-                    <th>No Retur</th>
-                    <th>Tanggal Retur</th>
-                    <th>Barang</th>
-                    <th>Harga</th>
-                    <th>QTY</th>
-                    <th>Komplain</th>
-                    <th>Total Diskon</th>
-                    <th>Penanganan Komplain</th>
-                    <th>Supplier</th>
-                    <th>Gallery</th>
+                    <th class="text-center" >Bulan</th>
+                    <th class="text-center" >Lokasi</th>
+                    <th class="text-center" >Supplier</th>
+                    <th class="text-center" >Total</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $item)
-                    @php
-                        $rowCount = 0;
-                        $produkretur = [];
-            
-                        $produkretur = $item->produkretur;
-                        $rowCount = count($produkretur);
-                    @endphp
+            <!-- @php
+                $previousNoDo = '';
+            @endphp -->
+                @foreach ($groupedData->groupBy('lokasi_id') as $lokasiId => $items)
+                    @foreach ($items as $item)
                     
-                    @foreach ($produkretur as $index => $produkreturItem)
                         <tr>
-                            @if ($index === 0)
-                                <td rowspan="{{ $rowCount }}">{{ $loop->iteration }}</td>
-                                <td rowspan="{{ $rowCount }}">{{ $item->no_po }}</td>
-                                <td rowspan="{{ $rowCount }}">{{ $item->no_retur }}</td>
-                                <td rowspan="{{ $rowCount }}">{{ $item->tgl_retur }}</td>
+                        @if($loop->first)
+                            {{-- @if( \Carbon\Carbon::parse($listDate[0])->locale('id')->translatedFormat('F') != $previousNoDo) --}}
+                                <td class="text-center" rowspan="{{ $items->count() }}">{{ \Carbon\Carbon::parse($listDate[0])->locale('id')->translatedFormat('F') }}</td>
                             @endif
-                            <td>{{ $produkreturItem->produkbeli->produk->nama }}</td>
-                            <td>{{ $produkreturItem->harga }}</td>
-                            <td>{{ $produkreturItem->jumlah }}</td>
-                            <td>{{ $produkreturItem->alasan }}</td>
-                            <td>{{ $produkreturItem->diskon *  $produkreturItem->jumlah }}</td>
-                            @if ($index === 0)
-                                <td>{{ $item->komplain }}</td>
-                                <td>{{ $item->supplier_nama }}</td>
-                                <td>{{ $item->gallery_nama }}</td>
-                            @endif
+                            <td class="text-center" rowspan="{{  $items->count() }}">{{ $item['lokasi_name'] }}</td>
+                            <td>{{ $item['supplier_name'] }}</td>
+                            <td>{{ $item['total_masuk'] }}</td>
                         </tr>
+                    @php
+                        $previousNoDo = \Carbon\Carbon::parse($listDate[0])->locale('id')->translatedFormat('F');
+                    @endphp
                     @endforeach
+                @endforeach
+            </tbody>
+            <tbody style="border-top: 2px solid #000;">
+                @foreach ($groupedData->groupBy('lokasi_id') as $lokasiId => $items)
+                @foreach ($items as $item)
+                @if ($loop->first)
+                    <tr>
+                    @if( 1 != $previousNoDo)
+                            <td rowspan="{{ count($item) }}" colspan="2">Total Kedatangan</td>
+                    @endif
+                        <td>{{ $item['supplier_name'] }}</td>
+                        <td>{{ $items->sum('total_masuk') }}</td>
+                    </tr>
+                @else
+                    <tr>
+                        <td>{{ $item['supplier_name'] }}</td>
+                        <td>{{ $items->sum('total_masuk') }}</td>
+                    </tr>
+                @endif
+                @php
+                    $previousNoDo = 1;
+                @endphp
+                @endforeach
                 @endforeach
             </tbody>
         </table>

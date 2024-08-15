@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BungaKeluarExport;
 use App\Exports\DOSewaExport;
 use App\Exports\KasGalleryExport;
 use App\Exports\KasPusatExport;
@@ -12,11 +13,13 @@ use App\Exports\PenjualanProdukExport;
 use App\Exports\PelangganExport;
 use App\Exports\DeliveryOrderExport;
 use App\Exports\TagihanPelangganExport;
+use App\Exports\BungaDatangExport;
 
 use App\Exports\HutangSupplierExport;
 use App\Exports\MutasiExport;
 use App\Exports\MutasiindenExport;
 use App\Exports\OmsetExport;
+use App\Exports\PemakaianSendiriExport;
 use App\Exports\PenjualanExport;
 use App\Exports\ReturPenjualanExport;
 use App\Exports\PembayaranExport;
@@ -53,6 +56,7 @@ use App\Models\Mutasi;
 use App\Models\Supplier;
 use App\Models\ReturPenjualan;
 use App\Models\Mutasiindens;
+use App\Models\PemakaianSendiri;
 use App\Models\Pembelian;
 use App\Models\Produk;
 use App\Models\ProdukMutasiInden;
@@ -474,6 +478,7 @@ class LaporanController extends Controller
             $produk_list = array_values($productMap);
     
             $data[$item->no_kontrak] = [
+                'gallery' => $item->lokasi->nama,
                 'nama_customer' => $item->customer->nama,
                 'produk_list' => $produk_list,
             ];
@@ -594,6 +599,7 @@ class LaporanController extends Controller
             $produk_list = array_values($productMap);
     
             $data[$item->no_kontrak] = [
+                'gallery' => $item->lokasi->nama,
                 'nama_customer' => $item->customer->nama,
                 'produk_list' => $produk_list,
             ];
@@ -713,6 +719,7 @@ class LaporanController extends Controller
             $produk_list = array_values($productMap);
     
             $data[$item->no_kontrak] = [
+                'gallery' => $item->lokasi->nama,
                 'nama_customer' => $item->customer->nama,
                 'produk_list' => $produk_list,
             ];
@@ -753,11 +760,11 @@ class LaporanController extends Controller
             ->orWhere('lokasi_pengirim', $req->gallery);
             $id_galleries = $req->gallery;
         } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
+           $id_galleries = Lokasi::where('tipe_lokasi', 1)->first()->id;
 
             $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
+                $query->where('lokasi_penerima', $id_galleries)
+                    ->orWhere('lokasi_pengirim', $id_galleries);
             });
         }
         
@@ -820,8 +827,10 @@ class LaporanController extends Controller
         ];
         $thisMonth = $bulan['' . $thisMonth . ''];
         $galleries = Lokasi::where('tipe_lokasi', 1)->get();
-    
-        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'));
+        $namaGallery = $galleries->filter(function($q) use($id_galleries){
+            return $q->id == $id_galleries;
+        })->first()->nama;
+        return view('laporan.kas_gallery', compact('data', 'galleries', 'bulan', 'tahun', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries', 'namaGallery'));
     }
 
     public function kas_gallery_pdf(Request $req)
@@ -834,11 +843,11 @@ class LaporanController extends Controller
             ->orWhere('lokasi_pengirim', $req->gallery);
             $id_galleries = $req->gallery;
         } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
+           $id_galleries = Lokasi::where('tipe_lokasi', 1)->first()->id;
 
             $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
+                $query->where('lokasi_penerima', $id_galleries)
+                    ->orWhere('lokasi_pengirim', $id_galleries);
             });
         }
         if($req->bulan){
@@ -899,9 +908,10 @@ class LaporanController extends Controller
             '12' => 'Desember',
         ];
         $thisMonth = $bulan['' . $thisMonth . ''];
+        $namaGallery = Lokasi::find($id_galleries)->nama;
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries'))->setPaper('a4', 'landscape');;
+        $pdf = Pdf::loadView('laporan.kas_gallery_pdf', compact('data', 'thisMonth', 'thisYear', 'saldo', 'totalSaldo', 'saldoRekening', 'saldoCash', 'id_galleries', 'namaGallery'))->setPaper('a4', 'landscape');;
         return $pdf->stream('kas_gallery.pdf');
     }
 
@@ -915,11 +925,11 @@ class LaporanController extends Controller
             ->orWhere('lokasi_pengirim', $req->gallery);
             $id_galleries = $req->gallery;
         } else {
-           $id_galleries = Lokasi::where('tipe_lokasi', 1)->pluck('id')->toArray();
+           $id_galleries = Lokasi::where('tipe_lokasi', 1)->first()->id;
 
             $query->where(function($query) use ($id_galleries) {
-                $query->whereIn('lokasi_penerima', $id_galleries)
-                    ->orWhereIn('lokasi_pengirim', $id_galleries);
+                $query->where('lokasi_penerima', $id_galleries)
+                    ->orWhere('lokasi_pengirim', $id_galleries);
             });
         }
         if($req->bulan){
@@ -980,9 +990,10 @@ class LaporanController extends Controller
             '12' => 'Desember',
         ];
         $thisMonth = $bulan['' . $thisMonth . ''];
-
+        $namaGallery = Lokasi::find($id_galleries)->nama;
+        
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries), 'kas_gallery.xlsx');
+        return Excel::download(new KasGalleryExport($data, $thisMonth, $thisYear, $saldo, $totalSaldo, $saldoRekening, $saldoCash, $id_galleries, $namaGallery), 'kas_gallery.xlsx');
     }
 
     public function kas_pusat_index(Request $req)
@@ -2634,6 +2645,12 @@ class LaporanController extends Controller
             ])
         ->get();
 
+        // data pemakaian sendiri
+        $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+        ->get();
+
         // tahun dari data DO Sewa
         $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
             return Carbon::parse($date)->year;
@@ -2684,11 +2701,16 @@ class LaporanController extends Controller
             return Carbon::parse($date)->year;
         }));
 
+        // tahun dari data pemakaian sendiri
+        $years = $years->merge($pemakaianSendiri->pluck('tanggal')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
         // Ambil tahun yang unik dan urutkan
         $tahun = $years->unique()->sort()->values();
 
         // integrate data
-        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden, $pemakaianSendiri){
             // Inisialisasi list data dengan saldo awal 0
             $item->dates = collect($listDate)->mapWithKeys(function($date) {
                 return [
@@ -2865,6 +2887,14 @@ class LaporanController extends Controller
                         $updateSaldo($date, $product->jml_diterima, 0, 0);
                     }
                 });
+            });
+
+            // Proses Pemakaian Sendiri
+            $pemakaianSendiri->each(function($order) use($item, $updateSaldo) {
+                if ($order->produk_id == $item->id) {
+                    $date = Carbon::parse($order->tanggal)->format('Y-m-d');
+                    $updateSaldo($date, $order->jumlah, 0, 0);
+                }
             });
 
             // Validasi saldo
@@ -3016,8 +3046,14 @@ class LaporanController extends Controller
             ])
         ->get();
 
+        // data pemakaian sendiri
+        $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+        ->get();
+
         // integrate data
-        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden){
+        $data = Produk::all()->map(function($item) use($listDate, $thisLokasi, $DOSewa, $KembaliSewa, $DOPenjualan, $ambilLangsungPenjualan, $returPenjualan, $mutasi, $pembelian, $returPembelian, $mutasiInden, $returMutasiInden, $pemakaianSendiri){
             // Inisialisasi list data dengan saldo awal 0
             $item->dates = collect($listDate)->mapWithKeys(function($date) {
                 return [
@@ -3196,6 +3232,14 @@ class LaporanController extends Controller
                 });
             });
 
+            // Proses Pemakaian Sendiri
+            $pemakaianSendiri->each(function($order) use($item, $updateSaldo) {
+                if ($order->produk_id == $item->id) {
+                    $date = Carbon::parse($order->tanggal)->format('Y-m-d');
+                    $updateSaldo($date, $order->jumlah, 0, 0);
+                }
+            });
+
             // Validasi saldo
             foreach ($listDate as $index => $date) {
                 if ($index > 0) {
@@ -3220,6 +3264,860 @@ class LaporanController extends Controller
 
         if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
         return Excel::download(new StokGalleryExport($data, $listDate, $lokasi), 'stok_gallery.xlsx');
+    }
+    
+    public function pemakaian_sendiri_index(Request $req)
+    {
+        $query = PemakaianSendiri::with('lokasi', 'produk', 'kondisi', 'karyawan');
+
+        if($req->gallery){
+            $query->where('lokasi_id', $req->gallery);
+        }
+        if ($req->produk) {
+            $query->where('produk_id', $req->produk);
+        }
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->gallery_nama = $item->lokasi->nama;
+            $item->jumlah_baik = $item->kondisi_id == 1 ? $item->jumlah : 0;
+            $item->jumlah_afkir = $item->kondisi_id == 2 ? $item->jumlah : 0;
+            $item->jumlah_bonggol = $item->kondisi_id == 3 ? $item->jumlah : 0;
+            return $item;
+        });
+
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        $produk = Produk::all();
+
+        return view('laporan.pemakaian_sendiri', compact('data', 'galleries', 'produk'));
+    }
+
+    public function pemakaian_sendiri_pdf(Request $req)
+    {
+        $query = PemakaianSendiri::with('lokasi', 'produk', 'kondisi', 'karyawan');
+
+        if($req->gallery){
+            $query->where('lokasi_id', $req->gallery);
+        }
+        if ($req->produk) {
+            $query->where('produk_id', $req->produk);
+        }
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->gallery_nama = $item->lokasi->nama;
+            $item->jumlah_baik = $item->kondisi_id == 1 ? $item->jumlah : 0;
+            $item->jumlah_afkir = $item->kondisi_id == 2 ? $item->jumlah : 0;
+            $item->jumlah_bonggol = $item->kondisi_id == 3 ? $item->jumlah : 0;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.pemakaian_sendiri_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('pemakaian_sendiri.pdf');
+    }
+
+    public function pemakaian_sendiri_excel(Request $req)
+    {
+        $query = PemakaianSendiri::with('lokasi', 'produk', 'kondisi', 'karyawan');
+
+        if($req->gallery){
+            $query->where('lokasi_id', $req->gallery);
+        }
+        if ($req->produk) {
+            $query->where('produk_id', $req->produk);
+        }
+        if ($req->dateStart) {
+            $query->where('created_at', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('created_at', '<=', $req->input('dateEnd'));
+        }
+
+        $data = $query->get()->map(function($item){
+            $item->gallery_nama = $item->lokasi->nama;
+            $item->jumlah_baik = $item->kondisi_id == 1 ? $item->jumlah : 0;
+            $item->jumlah_afkir = $item->kondisi_id == 2 ? $item->jumlah : 0;
+            $item->jumlah_bonggol = $item->kondisi_id == 3 ? $item->jumlah : 0;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new PemakaianSendiriExport($data), 'pemakaian_sendiri.xlsx');
+    }
+    
+    public function bunga_keluar_index(Request $req)
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        
+        $thisLokasi = $req->gallery ?? $galleries->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $galleries->where('id', $req->gallery)->first() : $galleries->first();
+        $produks = Produk::all();
+        $list = $produks->mapWithKeys(function($item){
+            return [
+                $item->kode => [
+                    'nama' => $item->nama,
+                    'baik' => 0,
+                    'afkir' => 0,
+                    'bonggol' => 0,
+                    'total' => 0
+                ]
+            ];
+        });
+
+        // start do sewa
+            $DOSewa = DeliveryOrder::where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->where(function($q) use($thisLokasi){
+                    $q->whereHas('kontrak', function($r) use($thisLokasi){
+                        $r->where('lokasi_id', $thisLokasi);
+                });
+            })->get();
+
+            foreach ($DOSewa as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end do sewa
+
+        // start do penjualan
+            $DOPenjualan = DeliveryOrder::where('status', 'DIKONFIRMASI')->where('jenis_do', 'PENJUALAN')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->where(function($q) use($thisLokasi){
+                    $q->whereHas('penjualan', function($r) use($thisLokasi){
+                        $r->where('lokasi_id', $thisLokasi);
+                });
+            })->get();
+
+            foreach ($DOPenjualan as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end do penjualan
+
+        // start ambil langsung penjualan
+            $ambilLangsungPenjualan = Penjualan::where('status', 'DIKONFIRMASI')
+                ->with('produk.komponen.produk')
+                ->where('distribusi', 'Diambil')
+                ->where('lokasi_id', $thisLokasi)
+                ->whereYear('tanggal_invoice', $thisYear)
+                ->whereMonth('tanggal_invoice', $thisMonth)
+            ->get();
+
+            foreach ($ambilLangsungPenjualan as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end ambil langsung penjualan
+
+        // start mutasi keluar
+            $mutasi = Mutasi::where('status', 'DIKONFIRMASI')
+                ->where(function($q) use($thisLokasi) {
+                    $q->where('pengirim', $thisLokasi);
+                })
+                ->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->with([
+                    'produkMutasi.komponen',
+                    'produkMutasiGAG.komponen',
+                ])
+            ->get();
+
+            foreach ($mutasi as $barang) {
+                if($barang->produkMutasi){
+                    foreach ($barang->produkMutasi as $produkTerjual) {
+                        foreach ($produkTerjual->komponen as $komponen) {
+                            if(isset($list[$komponen->kode_produk])) {
+                                $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                                $item = $list[$komponen->kode_produk];
+                                if ($komponen->kondisi == 1) {
+                                    $item['baik'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 2) {
+                                    $item['afkir'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 3) {
+                                    $item['bonggol'] += $jumlah;
+                                }
+                                $item['total'] += $jumlah;
+    
+                                $list[$komponen->kode_produk] = $item;
+                            }
+                        }
+                    }
+                }
+                if($barang->produkMutasiGAG){
+                    foreach ($barang->produkMutasiGAG as $produkTerjual) {
+                        foreach ($produkTerjual->komponen as $komponen) {
+                            if(isset($list[$komponen->kode_produk])) {
+                                $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                                $item = $list[$komponen->kode_produk];
+                                if ($komponen->kondisi == 1) {
+                                    $item['baik'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 2) {
+                                    $item['afkir'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 3) {
+                                    $item['bonggol'] += $jumlah;
+                                }
+                                $item['total'] += $jumlah;
+    
+                                $list[$komponen->kode_produk] = $item;
+                            }
+                        }
+                    }
+                }
+            }
+        // end mutasi keluar
+
+        // start pemakaian sendiri
+            $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+            ->get();
+
+            foreach ($pemakaianSendiri as $produk) {
+                if(isset($list[$produk->produk->kode])) {
+                    $jumlah = $produk->jumlah ?? 0;
+                    $item = $list[$produk->produk->kode];
+                    if ($produk->kondisi_id == 1) {
+                        $item['baik'] += $jumlah;
+                    }
+                    if ($produk->kondisi_id == 2) {
+                        $item['afkir'] += $jumlah;
+                    }
+                    if ($produk->kondisi_id == 3) {
+                        $item['bonggol'] += $jumlah;
+                    }
+                    $item['total'] += $jumlah;
+
+                    $list[$produk->produk->kode] = $item;
+                }
+            }
+        // end pemakaian sendiri
+
+        // tahun dari data DO Sewa
+        $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+
+        // tahun dari data DO Penjualan
+        $years = $years->merge($DOPenjualan->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data Ambil Langsung Penjualan
+        $years = $years->merge($ambilLangsungPenjualan->pluck('tanggal_invoice')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($mutasi->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($pemakaianSendiri->pluck('tanggal')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // Ambil tahun yang unik dan urutkan
+        $tahun = $years->unique()->sort()->values();
+        $periode = $bulan[$thisMonth] . ' ' . $thisYear;
+        return view('laporan.bunga_keluar', compact('list', 'bulan', 'tahun', 'galleries', 'periode'));
+    }
+
+    public function bunga_keluar_pdf(Request $req)
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        
+        $thisLokasi = $req->gallery ?? $galleries->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $galleries->where('id', $req->gallery)->first() : $galleries->first();
+        $produks = Produk::all();
+        $list = $produks->mapWithKeys(function($item){
+            return [
+                $item->kode => [
+                    'nama' => $item->nama,
+                    'baik' => 0,
+                    'afkir' => 0,
+                    'bonggol' => 0,
+                    'total' => 0
+                ]
+            ];
+        });
+
+        // start do sewa
+            $DOSewa = DeliveryOrder::where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->where(function($q) use($thisLokasi){
+                    $q->whereHas('kontrak', function($r) use($thisLokasi){
+                        $r->where('lokasi_id', $thisLokasi);
+                });
+            })->get();
+
+            foreach ($DOSewa as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end do sewa
+
+        // start do penjualan
+            $DOPenjualan = DeliveryOrder::where('status', 'DIKONFIRMASI')->where('jenis_do', 'PENJUALAN')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->where(function($q) use($thisLokasi){
+                    $q->whereHas('penjualan', function($r) use($thisLokasi){
+                        $r->where('lokasi_id', $thisLokasi);
+                });
+            })->get();
+
+            foreach ($DOPenjualan as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end do penjualan
+
+        // start ambil langsung penjualan
+            $ambilLangsungPenjualan = Penjualan::where('status', 'DIKONFIRMASI')
+                ->with('produk.komponen.produk')
+                ->where('distribusi', 'Diambil')
+                ->where('lokasi_id', $thisLokasi)
+                ->whereYear('tanggal_invoice', $thisYear)
+                ->whereMonth('tanggal_invoice', $thisMonth)
+            ->get();
+
+            foreach ($ambilLangsungPenjualan as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end ambil langsung penjualan
+
+        // start mutasi keluar
+            $mutasi = Mutasi::where('status', 'DIKONFIRMASI')
+                ->where(function($q) use($thisLokasi) {
+                    $q->where('pengirim', $thisLokasi);
+                })
+                ->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->with([
+                    'produkMutasi.komponen',
+                    'produkMutasiGAG.komponen',
+                ])
+            ->get();
+
+            foreach ($mutasi as $barang) {
+                if($barang->produkMutasi){
+                    foreach ($barang->produkMutasi as $produkTerjual) {
+                        foreach ($produkTerjual->komponen as $komponen) {
+                            if(isset($list[$komponen->kode_produk])) {
+                                $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                                $item = $list[$komponen->kode_produk];
+                                if ($komponen->kondisi == 1) {
+                                    $item['baik'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 2) {
+                                    $item['afkir'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 3) {
+                                    $item['bonggol'] += $jumlah;
+                                }
+                                $item['total'] += $jumlah;
+    
+                                $list[$komponen->kode_produk] = $item;
+                            }
+                        }
+                    }
+                }
+                if($barang->produkMutasiGAG){
+                    foreach ($barang->produkMutasiGAG as $produkTerjual) {
+                        foreach ($produkTerjual->komponen as $komponen) {
+                            if(isset($list[$komponen->kode_produk])) {
+                                $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                                $item = $list[$komponen->kode_produk];
+                                if ($komponen->kondisi == 1) {
+                                    $item['baik'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 2) {
+                                    $item['afkir'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 3) {
+                                    $item['bonggol'] += $jumlah;
+                                }
+                                $item['total'] += $jumlah;
+    
+                                $list[$komponen->kode_produk] = $item;
+                            }
+                        }
+                    }
+                }
+            }
+        // end mutasi keluar
+
+        // start pemakaian sendiri
+            $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+            ->get();
+
+            foreach ($pemakaianSendiri as $produk) {
+                if(isset($list[$produk->produk->kode])) {
+                    $jumlah = $produk->jumlah ?? 0;
+                    $item = $list[$produk->produk->kode];
+                    if ($produk->kondisi_id == 1) {
+                        $item['baik'] += $jumlah;
+                    }
+                    if ($produk->kondisi_id == 2) {
+                        $item['afkir'] += $jumlah;
+                    }
+                    if ($produk->kondisi_id == 3) {
+                        $item['bonggol'] += $jumlah;
+                    }
+                    $item['total'] += $jumlah;
+
+                    $list[$produk->produk->kode] = $item;
+                }
+            }
+        // end pemakaian sendiri
+
+        // tahun dari data DO Sewa
+        $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+
+        // tahun dari data DO Penjualan
+        $years = $years->merge($DOPenjualan->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data Ambil Langsung Penjualan
+        $years = $years->merge($ambilLangsungPenjualan->pluck('tanggal_invoice')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($mutasi->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($pemakaianSendiri->pluck('tanggal')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // Ambil tahun yang unik dan urutkan
+        $tahun = $years->unique()->sort()->values();
+        $periode = $bulan[$thisMonth] . ' ' . $thisYear;
+
+        if(empty($list)) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.bunga_keluar_pdf', compact('list', 'periode'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('bunga_keluar.pdf');
+    }
+
+    public function bunga_keluar_excel(Request $req)
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        
+        $thisLokasi = $req->gallery ?? $galleries->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $galleries->where('id', $req->gallery)->first() : $galleries->first();
+        $produks = Produk::all();
+        $list = $produks->mapWithKeys(function($item){
+            return [
+                $item->kode => [
+                    'nama' => $item->nama,
+                    'baik' => 0,
+                    'afkir' => 0,
+                    'bonggol' => 0,
+                    'total' => 0
+                ]
+            ];
+        });
+
+        // start do sewa
+            $DOSewa = DeliveryOrder::where('jenis_do', 'SEWA')->where('status', 'DIKONFIRMASI')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->where(function($q) use($thisLokasi){
+                    $q->whereHas('kontrak', function($r) use($thisLokasi){
+                        $r->where('lokasi_id', $thisLokasi);
+                });
+            })->get();
+
+            foreach ($DOSewa as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end do sewa
+
+        // start do penjualan
+            $DOPenjualan = DeliveryOrder::where('status', 'DIKONFIRMASI')->where('jenis_do', 'PENJUALAN')->with('produk.komponen.produk')->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->where(function($q) use($thisLokasi){
+                    $q->whereHas('penjualan', function($r) use($thisLokasi){
+                        $r->where('lokasi_id', $thisLokasi);
+                });
+            })->get();
+
+            foreach ($DOPenjualan as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end do penjualan
+
+        // start ambil langsung penjualan
+            $ambilLangsungPenjualan = Penjualan::where('status', 'DIKONFIRMASI')
+                ->with('produk.komponen.produk')
+                ->where('distribusi', 'Diambil')
+                ->where('lokasi_id', $thisLokasi)
+                ->whereYear('tanggal_invoice', $thisYear)
+                ->whereMonth('tanggal_invoice', $thisMonth)
+            ->get();
+
+            foreach ($ambilLangsungPenjualan as $barang) {
+                foreach ($barang->produk as $produkTerjual) {
+                    foreach ($produkTerjual->komponen as $komponen) {
+                        if(isset($list[$komponen->kode_produk])) {
+                            $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                            $item = $list[$komponen->kode_produk];
+                            if ($komponen->kondisi == 1) {
+                                $item['baik'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 2) {
+                                $item['afkir'] += $jumlah;
+                            }
+                            if ($komponen->kondisi == 3) {
+                                $item['bonggol'] += $jumlah;
+                            }
+                            $item['total'] += $jumlah;
+
+                            $list[$komponen->kode_produk] = $item;
+                        }
+                    }
+                }
+            }
+        // end ambil langsung penjualan
+
+        // start mutasi keluar
+            $mutasi = Mutasi::where('status', 'DIKONFIRMASI')
+                ->where(function($q) use($thisLokasi) {
+                    $q->where('pengirim', $thisLokasi);
+                })
+                ->whereYear('tanggal_kirim', $thisYear)
+                ->whereMonth('tanggal_kirim', $thisMonth)
+                ->with([
+                    'produkMutasi.komponen',
+                    'produkMutasiGAG.komponen',
+                ])
+            ->get();
+
+            foreach ($mutasi as $barang) {
+                if($barang->produkMutasi){
+                    foreach ($barang->produkMutasi as $produkTerjual) {
+                        foreach ($produkTerjual->komponen as $komponen) {
+                            if(isset($list[$komponen->kode_produk])) {
+                                $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                                $item = $list[$komponen->kode_produk];
+                                if ($komponen->kondisi == 1) {
+                                    $item['baik'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 2) {
+                                    $item['afkir'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 3) {
+                                    $item['bonggol'] += $jumlah;
+                                }
+                                $item['total'] += $jumlah;
+    
+                                $list[$komponen->kode_produk] = $item;
+                            }
+                        }
+                    }
+                }
+                if($barang->produkMutasiGAG){
+                    foreach ($barang->produkMutasiGAG as $produkTerjual) {
+                        foreach ($produkTerjual->komponen as $komponen) {
+                            if(isset($list[$komponen->kode_produk])) {
+                                $jumlah = ($produkTerjual->jumlah * $komponen->jumlah) ?? 0;
+                                $item = $list[$komponen->kode_produk];
+                                if ($komponen->kondisi == 1) {
+                                    $item['baik'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 2) {
+                                    $item['afkir'] += $jumlah;
+                                }
+                                if ($komponen->kondisi == 3) {
+                                    $item['bonggol'] += $jumlah;
+                                }
+                                $item['total'] += $jumlah;
+    
+                                $list[$komponen->kode_produk] = $item;
+                            }
+                        }
+                    }
+                }
+            }
+        // end mutasi keluar
+
+        // start pemakaian sendiri
+            $pemakaianSendiri = PemakaianSendiri::whereYear('tanggal', $thisYear)
+            ->whereMonth('tanggal', $thisMonth)
+            ->where('lokasi_id', $thisLokasi)
+            ->get();
+
+            foreach ($pemakaianSendiri as $produk) {
+                if(isset($list[$produk->produk->kode])) {
+                    $jumlah = $produk->jumlah ?? 0;
+                    $item = $list[$produk->produk->kode];
+                    if ($produk->kondisi_id == 1) {
+                        $item['baik'] += $jumlah;
+                    }
+                    if ($produk->kondisi_id == 2) {
+                        $item['afkir'] += $jumlah;
+                    }
+                    if ($produk->kondisi_id == 3) {
+                        $item['bonggol'] += $jumlah;
+                    }
+                    $item['total'] += $jumlah;
+
+                    $list[$produk->produk->kode] = $item;
+                }
+            }
+        // end pemakaian sendiri
+
+        // tahun dari data DO Sewa
+        $years = $DOSewa->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+
+        // tahun dari data DO Penjualan
+        $years = $years->merge($DOPenjualan->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data Ambil Langsung Penjualan
+        $years = $years->merge($ambilLangsungPenjualan->pluck('tanggal_invoice')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($mutasi->pluck('tanggal_kirim')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // tahun dari data mutasi
+        $years = $years->merge($pemakaianSendiri->pluck('tanggal')->map(function($date) {
+            return Carbon::parse($date)->year;
+        }));
+
+        // Ambil tahun yang unik dan urutkan
+        $tahun = $years->unique()->sort()->values();
+        $periode = $bulan[$thisMonth] . ' ' . $thisYear;
+
+        if(empty($list)) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new BungaKeluarExport($list, $periode), 'bunga_keluar.xlsx');
     }
 
     public function penjualanproduk_index(Request $req)
@@ -5765,5 +6663,147 @@ class LaporanController extends Controller
         return Excel::download(new StokPusatExport($data, $listDate, $lokasi), 'stok_pusat.xlsx');
     }
 
-    
+    // Controller
+    public function bunga_datang_index(Request $req) 
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $greenhouse = Lokasi::where('tipe_lokasi', [1, 3, 4])->get();
+        
+        $thisLokasi = $req->gallery ?? $greenhouse->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $greenhouse->where('id', $req->gallery)->first() : $greenhouse->first();
+        $listDate = $this->listDatePerMonth($thisMonth, $thisYear);
+
+        $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->whereNotNull('penerima')
+            ->with('produkbeli.produk')
+            ->get();
+
+        $supplierIds = $pembelian->pluck('supplier_id')->unique();
+        $lokasiIds = $pembelian->pluck('lokasi_id')->unique();
+
+        $suppliers = Supplier::whereIn('id', $supplierIds)->get();
+        $lokasi = Lokasi::whereIn('id', $lokasiIds)->get();
+
+        // Initialize an empty collection for grouped data
+        $groupedData = collect();
+
+        // Group by lokasi and supplier
+        $pembelian->groupBy('lokasi_id')->each(function($byLokasi) use (&$groupedData, $suppliers) {
+            $byLokasi->groupBy('supplier_id')->each(function($bySupplier, $supplierId) use (&$groupedData, $suppliers) {
+                $supplier = $suppliers->find($supplierId);
+                $lokasiName = $bySupplier->first()->lokasi->nama;
+                $supplierData = $bySupplier->reduce(function($carry, $order) {
+                    return $carry + $order->produkbeli->sum('jml_diterima');
+                }, 0);
+
+                $groupedData->push([
+                    'lokasi_id' => $bySupplier->first()->lokasi_id,
+                    'lokasi_name' => $lokasiName,
+                    'supplier_id' => $supplierId,
+                    'supplier_name' => $supplier->nama,
+                    'total_masuk' => $supplierData
+                ]);
+            });
+        });
+
+        // Define $tahun variable
+        $years = $pembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+        $tahun = $years->unique()->sort()->values();
+
+        return view('laporan.bunga_datang', compact('groupedData', 'listDate', 'bulan', 'greenhouse', 'lokasi', 'tahun'));
+    }
+
+    public function bunga_datang_excel(Request $req) 
+    {
+        $bulan = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        $greenhouse = Lokasi::where('tipe_lokasi', [1, 3, 4])->get();
+        
+        $thisLokasi = $req->gallery ?? $greenhouse->first()->id;
+        $thisMonth = $req->bulan ?? sprintf('%02d', now()->month);
+        $thisYear = $req->tahun ?? now()->year;
+
+        $lokasi = $req->gallery ? $greenhouse->where('id', $req->gallery)->first() : $greenhouse->first();
+        $listDate = $this->listDatePerMonth($thisMonth, $thisYear);
+
+        $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+            ->whereYear('tgl_diterima', $thisYear)
+            ->whereMonth('tgl_diterima', $thisMonth)
+            ->whereNotNull('penerima')
+            ->with('produkbeli.produk')
+            ->get();
+
+        $supplierIds = $pembelian->pluck('supplier_id')->unique();
+        $lokasiIds = $pembelian->pluck('lokasi_id')->unique();
+
+        $suppliers = Supplier::whereIn('id', $supplierIds)->get();
+        $lokasi = Lokasi::whereIn('id', $lokasiIds)->get();
+
+        // Initialize an empty collection for grouped data
+        $groupedData = collect();
+
+        // Group by lokasi and supplier
+        $pembelian->groupBy('lokasi_id')->each(function($byLokasi) use (&$groupedData, $suppliers) {
+            $byLokasi->groupBy('supplier_id')->each(function($bySupplier, $supplierId) use (&$groupedData, $suppliers) {
+                $supplier = $suppliers->find($supplierId);
+                $lokasiName = $bySupplier->first()->lokasi->nama;
+                $supplierData = $bySupplier->reduce(function($carry, $order) {
+                    return $carry + $order->produkbeli->sum('jml_diterima');
+                }, 0);
+
+                $groupedData->push([
+                    'lokasi_id' => $bySupplier->first()->lokasi_id,
+                    'lokasi_name' => $lokasiName,
+                    'supplier_id' => $supplierId,
+                    'supplier_name' => $supplier->nama,
+                    'total_masuk' => $supplierData
+                ]);
+            });
+        });
+
+        // Define $tahun variable
+        $years = $pembelian->pluck('tgl_diterima')->map(function($date) {
+            return Carbon::parse($date)->year;
+        });
+        $tahun = $years->unique()->sort()->values();
+
+        if($groupedData->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new BungaDatangExport($groupedData, $listDate, $lokasi), 'bunga_datang.xlsx');
+    }
+  
 }
+                                                                                           

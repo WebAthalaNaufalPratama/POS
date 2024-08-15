@@ -55,7 +55,7 @@
                             </tr>
                         </thead>
                         <tbody> 
-                            @foreach ($dataretur as $data)
+                            {{-- @foreach ($dataretur as $data)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $data->no_retur }}</td>
@@ -166,7 +166,7 @@
                                     </ul>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -179,6 +179,35 @@
     <script>
         $(document).ready(function(){
         $('#filterSupplier, #filterGallery, #filterStatus').select2();
+
+        $('#returTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("retur.index") }}', // Update this URL to match your route
+                type: 'GET',
+                data: function (d) {
+                    d.gallery = $('input[name=gallery]').val();
+                    d.dateStart = $('input[name=dateStart]').val();
+                    d.dateEnd = $('input[name=dateEnd]').val();
+                }
+            },
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+                { data: 'no_retur', name: 'no_retur' },
+                { data: 'tgl_retur', name: 'tgl_retur' },
+                { data: 'supplier_name', name: 'supplier_name' },
+                { data: 'lokasi_name', name: 'lokasi_name' },
+                { data: 'produk', name: 'produk' },
+                { data: 'alasan', name: 'alasan' },
+                { data: 'jumlah', name: 'jumlah' },
+                { data: 'komplain', name: 'komplain' },
+                { data: 'subtotal', name: 'subtotal' },
+                { data: 'status_dibuat', name: 'status_dibuat' },
+                { data: 'status_dibuku', name: 'status_dibuku' },
+                { data: 'actions', name: 'actions', orderable: false, searchable: false }
+            ]
+        });
     });
     $('[id^=filterBtn]').click(function(){
         var baseUrl = $(this).data('base-url');

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Tagihan Sewa</title>
+    <title>Laporan Bunga Keluar</title>
     <style>
         @page {
             size: A4 landscape;
@@ -87,35 +87,38 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <h2>Laporan Tagihan Sewa</h2>
+        <h2>Laporan Bunga Keluar</h2>
     </div>
     <div class="content">
-        <table>
+        <table class="table datanew" id="dataTable">
             <thead>
                 <tr>
-                    <th class="align-middle">No</th>
-                    <th class="align-middle">Gallery</th>
-                    <th class="align-middle">No Kontrak</th>
-                    <th class="align-middle">No Invoice</th>
-                    <th class="align-middle">Customer</th>
-                    <th class="align-middle">Tanggal Invoice</th>
-                    <th class="align-middle">Total Nilai</th>
-                    <th class="align-middle">Terbayar</th>
-                    <th class="align-middle">Sisa Pembayaran</th>
+                    <th rowspan="2" class="align-middle">No</th>
+                    <th rowspan="2" class="align-middle">Bulan</th>
+                    <th rowspan="2" class="align-middle">Produk</th>
+                    <th colspan="3" class="text-center align-middle">Kondisi</th>
+                    <th rowspan="2" class="text-center align-middle">Total Keluar</th>
+                </tr>
+                <tr>
+                    <th class="text-center align-middle">Bagus</th>
+                    <th class="text-center align-middle">Afkir</th>
+                    <th class="text-center align-middle">Bonggol</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $item)
+                @foreach ($list as $index => $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->kontrak->lokasi->nama }}</td>
-                    <td>{{ $item->no_sewa }}</td>
-                    <td>{{ $item->no_invoice }}</td>
-                    <td>{{ $item->kontrak->customer->nama }}</td>
-                    <td>{{ tanggalindo($item->tanggal_invoice) }}</td>
-                    <td>{{ formatRupiah($item->total_tagihan) }}</td>
-                    <td>{{ formatRupiah($item->terbayar) }}</td>
-                    <td>{{ formatRupiah($item->sisa_bayar) }}</td>
+                    @if($loop->first)
+                    <td>{{ $periode }}</td>
+                    @else
+                    <td></td>
+                    @endif
+                    <td>{{ $item['nama'] }}</td>
+                    <td class="text-center">{{ $item['baik'] }}</td>
+                    <td class="text-center">{{ $item['afkir'] }}</td>
+                    <td class="text-center">{{ $item['bonggol'] }}</td>
+                    <td class="text-center">{{ $item['total'] }}</td>
                 </tr>
                 @endforeach
             </tbody>

@@ -147,6 +147,8 @@ class InitialSeeder extends Seeder
                 'aset',
                 'promo',
                 'penjualan',
+                'auditdopenjualan',
+                'pdfdopenjualan.generate',
                 'dopenjualan',
                 'pembayaran',
                 'komponenpenjualan.store',
@@ -170,6 +172,20 @@ class InitialSeeder extends Seeder
                 'mutasiindengh.edit',
                 'mutasiindengh.update',
                 'mutasiindengh.show',
+                'auditmutasigalery',
+                'laporan.stok_gallery',
+                'laporan.mutasi',
+                'laporan.bunga_datang',
+                'laporan.bunga_keluar',
+                'laporan.penjualan',
+                'laporan.pembayaran',
+                'laporan.pelanggan',
+                'laporan.dopenjualan',
+                'laporan.kas_gallery',
+                'laporan.kontrak',
+                'laporan.tagihan_sewa',
+                'laporan.pergantian_sewa',
+                'laporan.do_sewa'
             ];
             $admingalleryPermissionList = array_merge($basiPermissionList, $admingalleryPermissionList);
             $query = Permission::query();
@@ -225,8 +241,7 @@ class InitialSeeder extends Seeder
                 'laporan.retur_pembelian_inden',
                 'laporan.stok_gallery',
                 'laporan.stok_pusat',
-
-               
+              
             ];
             $purchasingPermissionList = array_merge($basiPermissionList, $purchasingPermissionList);
             $query = Permission::query();
@@ -254,7 +269,9 @@ class InitialSeeder extends Seeder
                 'auditmutasigalery',
                 'auditmutasioutlet',
                 'formpenjualan.cetak',
-                'formmutasigalery.cetak'
+                'formmutasigalery.cetak',
+                'laporan.pelanggan',
+                'laporan.penjualan',
             ];
             $kasrigalleryPermissionList = array_merge($basiPermissionList, $kasrigalleryPermissionList);
             $query = Permission::query();
@@ -285,7 +302,13 @@ class InitialSeeder extends Seeder
                 'auditmutasigalery',
                 'auditmutasioutlet',
                 'formpenjualan.cetak',
-                'formmutasigalery.cetak'
+                'formmutasigalery.cetak',
+                'laporan.penjualan',
+                'laporan.pembayaran',
+                'laporan.pelanggan',
+                'laporan.barang_keluar',
+                'laporan.dopenjualan',
+                'laporan.mutasi'
             ];
             $kasiroutletPermissionList = array_merge($basiPermissionList, $kasiroutletPermissionList);
             $query = Permission::query();
@@ -430,7 +453,28 @@ class InitialSeeder extends Seeder
                 'bukakunci.store',
                 'auditpenjualan',
                 'auditor',
-                'laporan'
+                'laporan.penjualan',
+                'laporan.pembayaran',
+                'laporan.pelanggan',
+                'laporan.pembelian',
+                'laporan.hutang_supplier',
+                'laporan.returpenjualan',
+                'laporan.retur_pembelian',
+                'laporan.retur_pembelian_inden',
+                'laporan.omset',
+                'laporan.promo',
+                'laporan.kas_pusat',
+                'laporan.kas_gallery',
+                'laporan.mutasiinden',
+                'laporan.dopenjualan',
+                'laporan.penjualanproduk',
+                'laporan.omset',
+                'laporan.stok_inden',
+                'laporan.stok_pusat',
+                'laporan.stok_gallery',
+                'laporan.pemakaian_sendiri',
+                'laporan.bunga_keluar',
+                'laporan.bunga_datang',
             ];
         
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
@@ -559,6 +603,28 @@ class InitialSeeder extends Seeder
                 'pembelian.edit',
                 'pembelian.update',
                 'auditpenjualan',
+                'laporan.penjualan',
+                'laporan.pembayaran',
+                'laporan.pelanggan',
+                'laporan.pembelian',
+                'laporan.hutang_supplier',
+                'laporan.returpenjualan',
+                'laporan.retur_pembelian',
+                'laporan.retur_pembelian_inden',
+                'laporan.omset',
+                'laporan.promo',
+                'laporan.kas_pusat',
+                'laporan.kas_gallery',
+                'laporan.mutasiinden',
+                'laporan.dopenjualan',
+                'laporan.penjualanproduk',
+                'laporan.omset',
+                'laporan.stok_inden',
+                'laporan.stok_pusat',
+                'laporan.stok_gallery',
+                'laporan.pemakaian_sendiri',
+                'laporan.bunga_keluar',
+                'laporan.bunga_datang',
             ];
             $auditorPermissionList = array_merge($basiPermissionList, $auditorPermissionList);
             $query = Permission::query();

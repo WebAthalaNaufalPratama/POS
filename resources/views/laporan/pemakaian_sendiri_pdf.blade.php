@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Penjualan Produk</title>
+    <title>Laporan Pemakaian Sendiri</title>
     <style>
         @page {
             size: A4 portrait;
@@ -27,7 +27,10 @@
             align-items: center;
             justify-content: center;
             background-color: #fff;
+        }
+        .header {
             color: #000000;
+            margin: 0;
             text-align: center;
         }
         .page-break {
@@ -45,7 +48,6 @@
         }
         th {
             background-color: #f2f2f2;
-            font-weight: bold;
         }
         th[rowspan="2"] {
             vertical-align: middle;
@@ -74,44 +76,54 @@
         tr {
             page-break-inside: avoid;
         }
+        .align-middle {
+            vertical-align: middle;
+        }
+        .text-center {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <h2>Laporan Penjualan Produk</h2>
+        <h2>Laporan Pemakaian Sendiri</h2>
     </div>
     <div class="content">
-        <div class="table-responsive">
-            <table class="table datanew">
-                <thead>
-                    <tr>
-                        <th style="border: 1px solid #000;">No</th>
-                        <th style="border: 1px solid #000;">Nama Produk</th>
-                        <th style="border: 1px solid #000;">Group</th>
-                        <th style="border: 1px solid #000;">Jumlah</th>
-                        <th style="border: 1px solid #000;">Sub Total (Sebelum promo)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($produkterjual as $index => $pj)
-                        @php
-                            $pojuCollection = collect($pojuList);
-                            $matchingPoju = $pojuCollection->firstWhere('id', $pj->produk_jual_id);
-                            $penjualan = \App\Models\Penjualan::firstWhere('no_invoice', $pj->no_invoice);
-                        @endphp
-                        <tr>
-                            <td style="border: 1px solid #000;">{{ $loop->iteration }}</td>
-                            <td style="border: 1px solid #000;">{{ $penjualan->lokasi->nama }}</td>
-                            <td style="border: 1px solid #000;">{{ $matchingPoju ? $matchingPoju->nama : 'N/A' }}</td>
-                            <td style="border: 1px solid #000;">{{ $matchingPoju ? $matchingPoju->tipe->nama : 'N/A' }}</td>
-                            <td style="border: 1px solid #000;">{{ $pj->jumlah }}</td>
-                            <td style="border: 1px solid #000;">{{ number_format($pj->harga_jual, 0, ',', '.') }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+        <table class="table datanew" id="dataTable">
+            <thead>
+                <tr>
+                    <th class="align-middle" rowspan="2">No</th>
+                    <th class="align-middle" rowspan="2">Gallery</th>
+                    <th class="align-middle" rowspan="2">Produk</th>
+                    <th class="align-middle" rowspan="2">Tanggal</th>
+                    <th class="align-middle text-center" rowspan="2">Jumlah</th>
+                    <th class="align-middle text-center" colspan="3">Kondisi</th>
+                    <th class="align-middle" rowspan="2">Keterangan</th>
+                </tr>
+                <tr>
+                    <th class="text-center">Baik</th>
+                    <th class="text-center">Afkir</th>
+                    <th class="text-center">Bonggol</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($data as $item)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $item->gallery_nama }}</td>
+                    <td>{{ $item->produk->nama }}</td>
+                    <td>{{ tanggalindo($item->tanggal) }}</td>
+                    <td class="text-center">{{ $item->jumlah }}</td>
+                    <td class="text-center">{{ $item->jumlah_baik }}</td>
+                    <td class="text-center">{{ $item->jumlah_afkir }}</td>
+                    <td class="text-center">{{ $item->jumlah_bonggol }}</td>
+                    <td>{{ $item->alasan }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

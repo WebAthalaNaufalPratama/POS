@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Pembayaran</title>
+    <title>Laporan Pemakaian Sendiri</title>
     <style>
         @page {
             size: A4 portrait;
@@ -64,43 +64,39 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <h2>Laporan Pembayaran</h2>
+        <h2>Laporan Pemakaian Sendiri</h2>
     </div>
     <div class="content">
         <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table datanew" id="dataTable">
                 <thead>
                     <tr>
-                        <th style="border: 1px solid #000;">No</th>
-                        <th style="border: 1px solid #000;">Cara Pembayaran</th>
-                        <th style="border: 1px solid #000;">Nama Akun</th>
-                        <th style="border: 1px solid #000;">Jumlah Transaksi</th>
+                        <th class="align-middle" rowspan="2">No</th>
+                        <th class="align-middle" rowspan="2">Gallery</th>
+                        <th class="align-middle" rowspan="2">Produk</th>
+                        <th class="align-middle" rowspan="2">Tanggal</th>
+                        <th class="align-middle text-center" rowspan="2">Jumlah</th>
+                        <th class="align-middle text-center" colspan="3">Kondisi</th>
+                        <th class="align-middle" rowspan="2">Keterangan</th>
+                    </tr>
+                    <tr>
+                        <th class="text-center">Baik</th>
+                        <th class="text-center">Afkir</th>
+                        <th class="text-center">Bonggol</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @php $no = 1; @endphp
-                    @foreach ($duit as $rekening_id => $total_nominal)
-                    @php
-                        $penj = $pembayaran->firstWhere('rekening_id', $rekening_id);
-                        $lokasi = \App\Models\Penjualan::firstWhere('id', $penj->invoice_penjualan_id);
-                    @endphp
+                    @foreach ($data as $item)
                     <tr>
-                        <td style="border: 1px solid #000;">{{ $no++ }}</td>
-                        <td style="border: 1px solid #000;">{{ $lokasi->lokasi->nama}}</td>
-                        <td style="border: 1px solid #000;">
-                            {{ $pembayaran->firstWhere('rekening_id', $rekening_id)->cara_bayar ?? 'Cash' }} 
-                            @if(!empty($rekening_id)) 
-                                ({{ $pembayaran->firstWhere('rekening_id', $rekening_id)->rekening->bank }})
-                            @endif
-                        </td>
-                        <td style="border: 1px solid #000;">
-                            @if(!empty($rekening_id))
-                                {{ $pembayaran->firstWhere('rekening_id', $rekening_id)->rekening->nama_akun ?? 'Unknown' }}
-                            @else
-                                Pembayaran Cash
-                            @endif
-                        </td>
-                        <td style="border: 1px solid #000;">{{ 'Rp ' . number_format($total_nominal, 2) }}</td>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $item->gallery_nama }}</td>
+                        <td>{{ $item->produk->nama }}</td>
+                        <td>{{ tanggalindo($item->tanggal) }}</td>
+                        <td class="text-center">{{ $item->jumlah }}</td>
+                        <td class="text-center">{{ $item->jumlah_baik }}</td>
+                        <td class="text-center">{{ $item->jumlah_afkir }}</td>
+                        <td class="text-center">{{ $item->jumlah_bonggol }}</td>
+                        <td>{{ $item->alasan }}</td>
                     </tr>
                     @endforeach
                 </tbody>

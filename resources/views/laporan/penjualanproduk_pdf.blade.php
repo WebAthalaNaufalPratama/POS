@@ -81,7 +81,7 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Penjualan Produk</h2>
     </div>
     <div class="content">
     <div class="table-responsive">
@@ -100,9 +100,11 @@
                     @php
                         $pojuCollection = collect($pojuList);
                         $matchingPoju = $pojuCollection->firstWhere('id', $pj->produk_jual_id);
+                        $penjualan = \App\Models\Penjualan::firstWhere('no_invoice', $pj->no_invoice);
                     @endphp
                     <tr>
                         <td>{{ $loop->iteration }}</td>
+                        <td>{{ $penjualan->lokasi->nama }}</td>
                         <td>{{ $matchingPoju ? $matchingPoju->nama : 'N/A' }}</td>
                         <td>{{ $matchingPoju ? $matchingPoju->tipe->nama : 'N/A' }}</td>
                         <td>{{ $pj->jumlah }}</td>

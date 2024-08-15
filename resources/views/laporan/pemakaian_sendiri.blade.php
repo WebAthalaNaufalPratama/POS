@@ -7,7 +7,7 @@
             <div class="card-header">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Laporan Pergantian Sewa</h4>
+                        <h4>Laporan Pemakaian Sendiri</h4>
                     </div>
                     <div class="page-btn">
                         <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
@@ -24,10 +24,10 @@
                     <row class="col-lg-12 col-sm-12">
                         <div class="row">
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterCustomer" name="filterCustomer" class="form-control" title="Customer">
-                                    <option value="">Pilih Customer</option>
-                                    @foreach ($customer as $item)
-                                        <option value="{{ $item->id }}" {{ $item->id == request()->input('customer') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                <select id="filterProduk" name="filterProduk" class="form-control" title="Produk">
+                                    <option value="">Pilih Produk</option>
+                                    @foreach ($produk as $item)
+                                        <option value="{{ $item->id }}" {{ $item->id == request()->input('produk') ? 'selected' : '' }}>{{ $item->nama }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -40,24 +40,14 @@
                                 </select>
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterBulan" name="filterBulan" class="form-control" title="Gallery">
-                                    <option value="">Pilih Bulan</option>
-                                    @foreach ($bulan as $key => $value)
-                                        <option value="{{ $key }}" {{ $key == request()->input('bulan') ? 'selected' : '' }}>{{ $value }}</option>
-                                    @endforeach
-                                </select>
+                                <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Awal Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <select id="filterTahun" name="filterTahun" class="form-control" title="Gallery">
-                                    <option value="">Pilih Tahun</option>
-                                    @foreach ($tahun as $item)
-                                        <option value="{{ $item }}" {{ $item == request()->input('tahun') ? 'selected' : '' }}>{{ $item }}</option>
-                                    @endforeach
-                                </select>
+                                <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Akhir Sewa">
                             </div>
                             <div class="col-lg col-sm-6 col-12">
-                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.pergantian_sewa') }}" class="btn btn-info">Filter</a>
-                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.pergantian_sewa') }}" class="btn btn-warning">Clear</a>
+                                <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('laporan.pemakaian_sendiri') }}" class="btn btn-info">Filter</a>
+                                <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('laporan.pemakaian_sendiri') }}" class="btn btn-warning">Clear</a>
                             </div>
                         </div>
                     </row>
@@ -66,52 +56,32 @@
                     <table class="table datanew" id="dataTable">
                         <thead>
                             <tr>
-                                <th rowspan="2" class="align-middle">No</th>
-                                <th rowspan="2" class="align-middle">Gallery</th>
-                                <th rowspan="2" class="align-middle">Customer</th>
-                                <th rowspan="1" colspan="2" class="align-middle text-center">Produk Sewa</th>
-                                <th rowspan="2" class="align-middle text-center">Jumlah Pengiriman</th>
-                                <th rowspan="2" class="align-middle text-center">Jumlah Kembali</th>
+                                <th class="align-middle" rowspan="2">No</th>
+                                <th class="align-middle" rowspan="2">Gallery</th>
+                                <th class="align-middle" rowspan="2">Produk</th>
+                                <th class="align-middle" rowspan="2">Tanggal</th>
+                                <th class="align-middle text-center" rowspan="2">Jumlah</th>
+                                <th class="align-middle text-center" colspan="3">Kondisi</th>
+                                <th class="align-middle" rowspan="2">Keterangan</th>
                             </tr>
                             <tr>
-                                <th rowspan="1" class="text-center">Jumlah</th>
-                                <th rowspan="1" class="text-center">Nama</th>
+                                <th class="text-center">Baik</th>
+                                <th class="text-center">Afkir</th>
+                                <th class="text-center">Bonggol</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($data as $item)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item['gallery'] }}</td>
-                                <td>{{ $item['nama_customer'] }}</td>
-                                <td class="text-center">
-                                    <ul>
-                                    @foreach ($item['produk_list'] as $detail)
-                                        <li>{{ $detail['jumlah_sewa'] }}</li>
-                                    @endforeach
-                                    </ul>
-                                </td>
-                                <td class="text-center">
-                                    <ul>
-                                    @foreach ($item['produk_list'] as $detail)
-                                        <li>{{ $detail['nama_produk'] }}</li>
-                                    @endforeach
-                                    </ul>
-                                </td>
-                                <td class="text-center">
-                                    <ul>
-                                    @foreach ($item['produk_list'] as $detail)
-                                        <li>{{ $detail['jumlah_dikirim'] }}</li>
-                                    @endforeach
-                                    </ul>
-                                </td>
-                                <td class="text-center">
-                                    <ul>
-                                    @foreach ($item['produk_list'] as $detail)
-                                        <li>{{ $detail['jumlah_kembali'] }}</li>
-                                    @endforeach
-                                    </ul>
-                                </td>
+                                <td>{{ $item->gallery_nama }}</td>
+                                <td>{{ $item->produk->nama }}</td>
+                                <td>{{ tanggalindo($item->tanggal) }}</td>
+                                <td class="text-center">{{ $item->jumlah }}</td>
+                                <td class="text-center">{{ $item->jumlah_baik }}</td>
+                                <td class="text-center">{{ $item->jumlah_afkir }}</td>
+                                <td class="text-center">{{ $item->jumlah_bonggol }}</td>
+                                <td>{{ $item->alasan }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -134,9 +104,9 @@
                 var first = true;
                 var symbol = '';
 
-                var customer = $('#filterCustomer').val();
-                if (customer) {
-                    var filterCustomer = 'customer=' + customer;
+                var Produk = $('#filterProduk').val();
+                if (Produk) {
+                    var filterProduk = 'produk=' + Produk;
                     if (first == true) {
                         symbol = '?';
                         first = false;
@@ -144,7 +114,7 @@
                         symbol = '&';
                     }
                     urlString += symbol;
-                    urlString += filterCustomer;
+                    urlString += filterProduk;
                 }
 
                 var Gallery = $('#filterGallery').val();
@@ -160,9 +130,9 @@
                     urlString += filterGallery;
                 }
 
-                var bulan = $('#filterBulan').val();
-                if (bulan) {
-                    var filterBulan = 'bulan=' + bulan;
+                var dateStart = $('#filterDateStart').val();
+                if (dateStart) {
+                    var filterDateStart = 'dateStart=' + dateStart;
                     if (first == true) {
                         symbol = '?';
                         first = false;
@@ -170,12 +140,12 @@
                         symbol = '&';
                     }
                     urlString += symbol;
-                    urlString += filterBulan;
+                    urlString += filterDateStart;
                 }
 
-                var tahun = $('#filterTahun').val();
-                if (tahun) {
-                    var filterTahun = 'tahun=' + tahun;
+                var dateEnd = $('#filterDateEnd').val();
+                if (dateEnd) {
+                    var filterDateEnd = 'dateEnd=' + dateEnd;
                     if (first == true) {
                         symbol = '?';
                         first = false;
@@ -183,7 +153,7 @@
                         symbol = '&';
                     }
                     urlString += symbol;
-                    urlString += filterTahun;
+                    urlString += filterDateEnd;
                 }
                 window.location.href = urlString;
             });
@@ -197,13 +167,13 @@
             });
         });
         function pdf(){
-            var filterCustomer = $('#filterCustomer').val();
+            var filterProduk = $('#filterProduk').val();
             var filterGallery = $('#filterGallery').val();
-            var filterBulan = $('#filterBulan').val();
-            var filterTahun = $('#filterTahun').val();
+            var filterDateStart = $('#filterDateStart').val();
+            var filterDateEnd = $('#filterDateEnd').val();
 
             var desc = 'Cetak laporan tanpa filter';
-            if(filterCustomer || filterGallery || filterBulan || filterTahun){
+            if(filterProduk || filterGallery || filterDateStart || filterDateEnd){
                 desc = 'cetak laporan dengan filter';
             }
             
@@ -218,11 +188,11 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.pergantian_sewa-pdf') }}" + '?' + $.param({
-                        customer: filterCustomer,
+                    var url = "{{ route('laporan.pemakaian_sendiri-pdf') }}" + '?' + $.param({
+                        Produk: filterProduk,
                         gallery: filterGallery,
-                        bulan: filterBulan,
-                        tahun: filterTahun,
+                        dateStart: filterDateStart,
+                        dateEnd: filterDateEnd,
                     });
                     
                     window.open(url, '_blank');
@@ -230,13 +200,13 @@
             });
         }
         function excel(){
-            var filterCustomer = $('#filterCustomer').val();
+            var filterProduk = $('#filterProduk').val();
             var filterGallery = $('#filterGallery').val();
-            var filterBulan = $('#filterBulan').val();
-            var filterTahun = $('#filterTahun').val();
+            var filterDateStart = $('#filterDateStart').val();
+            var filterDateEnd = $('#filterDateEnd').val();
 
             var desc = 'Cetak laporan tanpa filter';
-            if(filterCustomer || filterGallery || filterBulan || filterTahun){
+            if(filterProduk || filterGallery || filterDateStart || filterDateEnd){
                 desc = 'cetak laporan dengan filter';
             }
             
@@ -251,11 +221,11 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    var url = "{{ route('laporan.pergantian_sewa-excel') }}" + '?' + $.param({
-                        customer: filterCustomer,
+                    var url = "{{ route('laporan.pemakaian_sendiri-excel') }}" + '?' + $.param({
+                        Produk: filterProduk,
                         gallery: filterGallery,
-                        bulan: filterBulan,
-                        tahun: filterTahun,
+                        dateStart: filterDateStart,
+                        dateEnd: filterDateEnd,
                     });
                     
                     window.location.href = url;

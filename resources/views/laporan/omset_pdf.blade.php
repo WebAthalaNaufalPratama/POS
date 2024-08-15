@@ -96,7 +96,7 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Omset</h2>
     </div>
     <div class="content">
         <table class="table datanew" id="dataTable">

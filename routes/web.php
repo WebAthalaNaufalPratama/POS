@@ -713,12 +713,21 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/promo', 'LaporanController@promo_index')->name('laporan.promo');
             Route::get('/promo-pdf', 'LaporanController@promo_pdf')->name('laporan.promo-pdf');
             Route::get('/promo-excel', 'LaporanController@promo_excel')->name('laporan.promo-excel');
-            Route::get('/stok_gallery', 'LaporanController@stok_gallery_index')->name('laporan.stok_gallery'); //pur
-            Route::get('/stok_gallery-pdf', 'LaporanController@stok_gallery_pdf')->name('laporan.stok_gallery-pdf'); //pur
-            Route::get('/stok_gallery-excel', 'LaporanController@stok_gallery_excel')->name('laporan.stok_gallery-excel'); //pur
-            Route::get('/stok_pusat', 'LaporanController@stok_pusat_index')->name('laporan.stok_pusat'); //pur
-            Route::get('/stok_pusat-pdf', 'LaporanController@stok_pusat_pdf')->name('laporan.stok_pusat-pdf'); //pur
-            Route::get('/stok_pusat-excel', 'LaporanController@stok_pusat_excel')->name('laporan.stok_pusat-excel'); //pur
+            Route::get('/stok_gallery', 'LaporanController@stok_gallery_index')->name('laporan.stok_gallery');
+            Route::get('/stok_gallery-pdf', 'LaporanController@stok_gallery_pdf')->name('laporan.stok_gallery-pdf');
+            Route::get('/stok_gallery-excel', 'LaporanController@stok_gallery_excel')->name('laporan.stok_gallery-excel');
+            Route::get('/stok_pusat', 'LaporanController@stok_pusat_index')->name('laporan.stok_pusat');
+            Route::get('/stok_pusat-pdf', 'LaporanController@stok_pusat_pdf')->name('laporan.stok_pusat-pdf');
+            Route::get('/stok_pusat-excel', 'LaporanController@stok_pusat_excel')->name('laporan.stok_pusat-excel');
+            Route::get('/pemakaian_sendiri', 'LaporanController@pemakaian_sendiri_index')->name('laporan.pemakaian_sendiri');
+            Route::get('/pemakaian_sendiri-pdf', 'LaporanController@pemakaian_sendiri_pdf')->name('laporan.pemakaian_sendiri-pdf');
+            Route::get('/pemakaian_sendiri-excel', 'LaporanController@pemakaian_sendiri_excel')->name('laporan.pemakaian_sendiri-excel');
+            Route::get('/bunga_keluar', 'LaporanController@bunga_keluar_index')->name('laporan.bunga_keluar');
+            Route::get('/bunga_keluar-pdf', 'LaporanController@bunga_keluar_pdf')->name('laporan.bunga_keluar-pdf');
+            Route::get('/bunga_keluar-excel', 'LaporanController@bunga_keluar_excel')->name('laporan.bunga_keluar-excel');
+            Route::get('/bunga_datang', 'LaporanController@bunga_datang_index')->name('laporan.bunga_datang');
+            Route::get('/bunga_datang-pdf', 'LaporanController@bunga_datang_pdf')->name('laporan.bunga_datang-pdf');
+            Route::get('/bunga_datang-excel', 'LaporanController@bunga_datang_excel')->name('laporan.bunga_datang-excel');
         });
 
         Route::get('posts/{post}/log', 'PostController@log')->name('posts.log');

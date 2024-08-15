@@ -80,86 +80,102 @@
     </style>
 </head>
 <body>
-    <table>
-        <thead>
-            <tr>
-                <th rowspan="2">No DO</th>
-                <th rowspan="2">Lokasi Pengirim</th>
-                <th rowspan="2">Customer</th>
-                <th rowspan="2">Penerima</th>
-                <th rowspan="2">Tanggal Kirim</th>
-                <th rowspan="2">Tanggal Invoice</th>
-                <th colspan="4">Produk Jual</th>
-                <th colspan="5">Komponen</th>
-            </tr>
-            <tr class="group-header">
-                <th>Nama Produk Jual</th>
-                <th>Jumlah Produk Jual</th>
-                <th>Unit Satuan</th>
-                <th>Keterangan</th>
-                <th>Nama Produk</th>
-                <th>Jumlah</th>
-                <th>Baik</th>
-                <th>Afkir</th>
-                <th>Bonggol</th>
-            </tr>
-            
-        </thead>
-        <tbody>
-        @php
-            $previousNoDo = '';
-        @endphp
-        @foreach($combinedData as $data)
-            @php
-                $produkCount = $data['produk_jual']->count();
-            @endphp
-            @foreach($data['produk_jual'] as $produk)
+    <div class="header">
+        <h1>VONFLORIST</h1>
+        <h2>Laporan Delivery Order Penjualan</h2>
+    </div>
+    <div class="content">
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2">No DO</th>
+                    <th rowspan="2">Lokasi Pengirim</th>
+                    <th rowspan="2">Customer</th>
+                    <th rowspan="2">Penerima</th>
+                    <th rowspan="2">Tanggal Kirim</th>
+                    <th rowspan="2">Tanggal Invoice</th>
+                    <th colspan="4">Produk Jual</th>
+                    <th colspan="5">Komponen</th>
+                </tr>
+                <tr class="group-header">
+                    <th>Nama Produk Jual</th>
+                    <th>Jumlah Produk Jual</th>
+                    <th>Unit Satuan</th>
+                    <th>Keterangan</th>
+                    <th>Nama Produk</th>
+                    <th>Jumlah</th>
+                    <th>Baik</th>
+                    <th>Afkir</th>
+                    <th>Bonggol</th>
+                </tr>
+                
+            </thead>
+            <tbody>
                 @php
-                    $komponenCount = $produk['komponen']->count();
+                    $previousNoDo = '';
                 @endphp
-                @foreach($produk['komponen'] as $komponen)
-                    @if($loop->first)
-                        <tr>
-                            @if($data['no_do']!= $previousNoDo)
-                                <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['no_do'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['lokasi_pengirim'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['customer']->nama }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['penerima'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['tanggal_kirim'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['tanggal_invoice']?? '-' }}</td>
-                            @endif
-                            <td rowspan="{{ $komponenCount }}">{{ $produk['nama_produkjual'] }}</td>
-                            <td rowspan="{{ $komponenCount }}">{{ $produk['jumlahprodukjual'] }}</td>
-                            <td rowspan="{{ $komponenCount }}">{{ $produk['unitsatuan'] }}</td>
-                            <td rowspan="{{ $komponenCount }}">{{ $produk['keterangan'] }}</td>
-                            <td>{{ $komponen['nama_produk'] }}</td>
-                            <td>{{ $komponen['jumlah'] }}</td>
-                            <td>{{ $komponen['kondisibaik'] }}</td>
-                            <td>{{ $komponen['kondisiafkir'] }}</td>
-                            <td>{{ $komponen['kondisibonggol'] }}</td>
-                        </tr>
-                    @else
-                        <tr>
-                            <td style="border-right: 1px solid #000; border-top: none;"></td>
-                            <td style="border-right: 1px solid #000; border-top: none;"></td>
-                            <td style="border-right: 1px solid #000; border-top: none;"></td>
-                            <td style="border-right: 1px solid #000; border-top: none;"></td>
-                            <td style="border-right: 1px solid #000; border-top: none;"></td>
-                            <td style="border-right: 1px solid #000; border-top: none;"></td>
-                            <td>{{ $komponen['nama_produk'] }}</td>
-                            <td>{{ $komponen['jumlah'] }}</td>
-                            <td>{{ $komponen['kondisibaik'] }}</td>
-                            <td>{{ $komponen['kondisiafkir'] }}</td>
-                            <td>{{ $komponen['kondisibonggol'] }}</td>
-                        </tr>
-                    @endif
+                @foreach($combinedData as $data)
                     @php
-                        $previousNoDo = $data['no_do'];
+                        $produkCount = $data['produk_jual']->count();
+                        $firstProdukJual = $data['produk_jual']->first();
+                        $isGFTInFirstProdukJual = substr($firstProdukJual['kodeprod'], 0, 3) === 'GFT';
                     @endphp
+                    @foreach($data['produk_jual'] as $produk)
+                        @php
+                            $komponenCount = $produk['komponen']->count();
+                        @endphp
+                        @foreach($produk['komponen'] as $komponen)
+                            @if($loop->first)
+                                <tr>
+                                    @if($data['no_do']!= $previousNoDo)
+                                        <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['no_do'] }}</td>
+                                        <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['lokasi_pengirim'] }}</td>
+                                        <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['customer']->nama }}</td>
+                                        <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['penerima'] }}</td>
+                                        <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['tanggal_kirim'] }}</td>
+                                        <td rowspan="{{ $produkCount * $komponenCount }}" style="border-bottom: none;">{{ $data['tanggal_invoice']?? '-' }}</td>
+                                    @endif
+                                    <td rowspan="{{ $komponenCount }}">{{ $produk['nama_produkjual'] }}</td>
+                                    <td rowspan="{{ $komponenCount }}">{{ $produk['jumlahprodukjual'] }}</td>
+                                    <td rowspan="{{ $komponenCount }}">{{ $produk['unitsatuan'] }}</td>
+                                    <td rowspan="{{ $komponenCount }}">{{ $produk['keterangan'] }}</td>
+                                    <td>{{ $komponen['nama_produk'] }}</td>
+                                    <td>{{ $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisibaik'] }}</td>
+                                    <td>{{ $komponen['kondisiafkir'] }}</td>
+                                    <td>{{ $komponen['kondisibonggol'] }}</td>
+                                </tr>
+                            @else
+                                <tr>
+                                @if($isGFTInFirstProdukJual)
+                                    <td>{{ $komponen['nama_produk'] }}</td>
+                                    <td>{{ $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisibaik'] }}</td>
+                                    <td>{{ $komponen['kondisiafkir'] }}</td>
+                                    <td>{{ $komponen['kondisibonggol'] }}</td>
+                                @else
+                                    <td style="border-right: 1px solid #000; border-top: none;"></td>
+                                    <td style="border-right: 1px solid #000; border-top: none;"></td>
+                                    <td style="border-right: 1px solid #000; border-top: none;"></td>
+                                    <td style="border-right: 1px solid #000; border-top: none;"></td>
+                                    <td style="border-right: 1px solid #000; border-top: none;"></td>
+                                    <td style="border-right: 1px solid #000; border-top: none;"></td>
+                                    <td>{{ $komponen['nama_produk'] }}</td>
+                                    <td>{{ $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisibaik'] }}</td>
+                                    <td>{{ $komponen['kondisiafkir'] }}</td>
+                                    <td>{{ $komponen['kondisibonggol'] }}</td>
+                                @endif
+                                </tr>
+                            @endif
+                            @php
+                                $previousNoDo = $data['no_do'];
+                            @endphp
+                        @endforeach
+                    @endforeach
                 @endforeach
-            @endforeach
-        @endforeach
-    </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

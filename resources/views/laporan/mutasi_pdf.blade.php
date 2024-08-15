@@ -81,7 +81,7 @@
 <body>
     <div class="header">
         <h1>VONFLORIST</h1>
-        <p>Alamat Perusahaan</p>
+        <h2>Laporan Mutasi</h2>
     </div>
     <div class="content">
     <div class="table-responsive">
@@ -121,12 +121,12 @@
                     @if($loop->first)
                         <tr>
                             @if($data['no_mutasi'] != $previousNoDo)
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $no++ }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['no_mutasi'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['lokasi_pengirim'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['lokasi_penerima'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['tanggal_pengiriman'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['tanggal_diterima'] }}</td>
+                                <td rowspan="{{ $produkCount  }}">{{ $no++ }}</td>
+                                <td rowspan="{{ $produkCount  }}">{{ $data['no_mutasi'] }}</td>
+                                <td rowspan="{{ $produkCount  }}">{{ $data['lokasi_pengirim'] }}</td>
+                                <td rowspan="{{ $produkCount  }}">{{ $data['lokasi_penerima'] }}</td>
+                                <td rowspan="{{ $produkCount  }}">{{ $data['tanggal_pengiriman'] }}</td>
+                                <td rowspan="{{ $produkCount  }}">{{ $data['tanggal_diterima'] }}</td>
                             @endif
                             <td>
                                 @if(substr($data['no_mutasi'], 0, 3) != 'MGO')
@@ -150,15 +150,15 @@
                             </td>
                             <td>
                                 @if(substr($data['no_mutasi'], 0, 3) != 'MGO')
-                                    {{ $komponen['kondisi_diterima']->nama }}
+                                    {{ $komponen['kondisi_diterima']->nama ?? '-' }}
                                 @else
                                     Tidak Ada Kondisi
                                 @endif
                             </td>
                             @if($data['no_mutasi'] != $previousNoDo)
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ number_format($data['biaya_pengiriman'], 0, ',', '.') }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['rekening'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ number_format($data['total_biaya'], 0, ',', '.') }}</td>
+                                <td rowspan="{{ $produkCount }}">{{ number_format($data['biaya_pengiriman'], 0, ',', '.') }}</td>
+                                <td rowspan="{{ $produkCount }}">{{ $data['rekening'] }}</td>
+                                <td rowspan="{{ $produkCount }}">{{ number_format($data['total_biaya'], 0, ',', '.') }}</td>
                             @endif
                             @php
                                 $previousNoDo = $data['no_mutasi'];
