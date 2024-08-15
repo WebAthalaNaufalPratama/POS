@@ -254,7 +254,7 @@
                                                     @if($i == 0)
                                                         <td><button type="button" name="add" id="add" class="btn btnubah"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></button></td>
                                                     @else
-                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove btnubah">x</button></td>
+                                                        <td><button type="button" name="remove" id="{{ $i }}" class="btn btn_remove btnubah"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                                                     @endif
                                                     @php $i++; @endphp
                                                 </tr>
@@ -1083,7 +1083,7 @@
                     </div>
                 </td>
                 <td><input type="text" name="harga_total[]" id="harga_total_${i}" class="form-control" readonly></td>
-                <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
+                <td><button type="button" name="remove" id="${i}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
             </tr>`;
 
             $('#dynamic_field').append(newRow);

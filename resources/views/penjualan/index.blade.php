@@ -184,7 +184,7 @@
         }
 
         window.routes = {
-            auditPenjualanEdit: "{{ route('penjualan.edit', ['penjualan' => '__ID__']) }}",
+            auditPenjualanEdit: "{{ route('auditpenjualan.edit', ['penjualan' => '__ID__']) }}",
             dopenjualanCreate: "{{ route('dopenjualan.create', ['penjualan' => '__ID__']) }}",
             returPenjualanCreate: "{{ route('returpenjualan.create', ['penjualan' => '__ID__']) }}",
             pdfInvoicePenjualanGenerate: "{{ route('pdfinvoicepenjualan.generate', ['penjualan' => '__ID__']) }}",

@@ -164,9 +164,9 @@
                                                         </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
                                                         @if($i == 0)
-                                                            <td><button type="button" name="add" id="add" class="btn btn-success btnubah">+</button></td>
+                                                            <td><button type="button" name="add" id="add" class="btn btnubah"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></button></td>
                                                         @else
-                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove btnubah">x</button></td>
+                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger  btnubah"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                                                         @endif
                                                     </tr>
                                                     @php

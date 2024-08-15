@@ -336,9 +336,9 @@
                                                     <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" required></td>
                                                     <td>
                                                         @if ($i == 0)
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @else
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -459,9 +459,9 @@
                                                     <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" required></td>
                                                     <td>
                                                         @if ($i == 0)
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @else
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -662,7 +662,7 @@
                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
                 '<td><input type="text" name="unit_satuan[]" id="unit_satuan_' + i + '" class="form-control" required></td>' +
                 '<td><input type="text" name="keterangan[]" id="keterangan_' + i + '" class="form-control" required></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
             $('#dynamic_field').append(newRow);
 
@@ -731,7 +731,7 @@
                 '<td><input type="number" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
                 '<td><input type="text" name="satuan2[]" id="satuan2_' + i + '" class="form-control"></td>' +
                 '<td><input type="text" name="keterangan2[]" id="keterangan2_' + i + '" class="form-control"></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
 
             $('#dynamic_field_tambah').append(newrowtambah);
