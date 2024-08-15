@@ -220,6 +220,7 @@ class InitialSeeder extends Seeder
                 'show.returinden',
                 'inven_inden',
                 'inven_gudang',
+                'inven_galeri',
                 'mutasigalerygalery',
                 'laporan.pembelian',
                 'laporan.pembelian_inden',

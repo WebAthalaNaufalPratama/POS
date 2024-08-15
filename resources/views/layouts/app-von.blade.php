@@ -398,7 +398,7 @@
                     $user = Auth::user();                    
                     $lokasis = \App\Models\Lokasi::all();
                   @endphp
-                  @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance', 'Purchasing']))
+                  @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance']))
                   <div class="form-group">
                       <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
                           <option value="">Pilih Lokasi</option>
