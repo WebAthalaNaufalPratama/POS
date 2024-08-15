@@ -30,9 +30,9 @@
                 </div>
             </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table id="mutasiInden" class="table pb-5">
                         <thead>
-                            <tr>
+                            <tr> 
                                 <th>No</th>
                                 <th>No Mutasi</th>
                                 <th>Supplier</th>
@@ -44,18 +44,18 @@
                                 <th>Status diterima</th>
                                 <th>Status diperiksa</th>
                                 <th>Status dibuku</th>
-                                @if (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchasing'))
+                                {{-- @if (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchasing')) --}}
                                 <th>Tagihan</th>
                                 <th>Sisa Tagihan</th>
                                 <th>Status Pembayaran</th>
                                 <th>Komplain</th>
                                 <th>Status Komplain</th>
-                                @endif
+                                {{-- @endif --}}
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($mutasis as $mutasi)
+                            {{-- @foreach ($mutasis as $mutasi)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $mutasi->no_mutasi }}</td>
@@ -63,7 +63,7 @@
                                 <td>{{ $mutasi->lokasi->nama }}</td>
                                 <td>{{ tanggalindo($mutasi->tgl_dikirim) }}</td>
                                 <td>{{ $mutasi->tgl_diterima ? tanggalindo($mutasi->tgl_diterima) : '-'}}</td>
-                                {{-- @if(Auth::user()->hasRole('Purchasing')) --}}
+                                 <!-- @if(Auth::user()->hasRole('Purchasing'))  -->
                                 <td>
                                     @if ($mutasi->status_dibuat == 'TUNDA' || $mutasi->status_dibuat == null)
                                         <span class="badges bg-lightred">TUNDA</span>
@@ -87,7 +87,7 @@
                                         @endif
 
                                     @else 
-                                    {{-- mengikuti auditor --}}
+                                    <!--  mengikuti auditor  -->
                                         @if($mutasi->status_diperiksa == 'BATAL')
                                             <span class="badges bg-lightgrey">BATAL</span>
                                         @elseif($mutasi->status_diperiksa == 'TUNDA' || $mutasi->status_diperiksa == null)
@@ -163,7 +163,7 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                 
-                                        {{-- Actions for Purchasing --}}
+                                         <!-- Actions for Purchasing  -->
                                         @if (Auth::user()->hasRole('Purchasing'))
                                             @if ($mutasi->status_dibuat == "TUNDA")
                                                 <li>
@@ -206,7 +206,7 @@
                                            
                                         @endif
                                 
-                                        {{-- Actions for Finance --}}
+                                         <!-- Actions for Finance  -->
                                         @if (Auth::user()->hasRole('Finance'))
                                             @if ($mutasi->status_dibukukan == "TUNDA" || is_null($mutasi->status_dibukukan))
                                                 <li>
@@ -280,7 +280,7 @@
                                             
                                         @endif
                                 
-                                        {{-- Actions for AdminGallery --}}
+                                         <!-- Actions for AdminGallery  -->
                                         @if (Auth::user()->hasRole('AdminGallery') && is_null($mutasi->status_diterima))
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}">
@@ -295,7 +295,7 @@
                                             </li>
                                         @endif
                                 
-                                        {{-- Actions for Auditor --}}
+                                         <!-- Actions for Auditor  -->
                                         @if (Auth::user()->hasRole('Auditor') && is_null($mutasi->status_diperiksa))
                                             <li>
                                                 <a class="dropdown-item" href="{{ route('mutasiindengh.edit', ['mutasiIG' => $mutasi->id]) }}">
@@ -314,7 +314,7 @@
                                 
                                 
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -326,6 +326,265 @@
 
 @section('scripts')
 <script>
+    $(document).ready(function() {
+
+        window.routes = {
+            editPurchase: "{{ route('mutasiindengh.editpurchase', ['mutasiIG' => '__ID__']) }}",
+            showMutasi: "{{ route('mutasiindengh.show', ['mutasiIG' => '__ID__']) }}",
+            createRetur: "{{ route('create.retur', ['mutasiIG' => '__ID__']) }}",
+            editRetur: "{{ route('edit.retur', ['idretur' => '__ID__']) }}",
+            showRetur: "{{ route('show.returinden', ['mutasiIG' => '__ID__']) }}",
+            editFinance: "{{ route('mutasiindengh.editfinance', ['mutasiIG' => '__ID__']) }}",
+            confirmPayment: "{{ route('mutasiindengh.show', ['mutasiIG' => '__ID__']) }}",
+            confirmRetur: "{{ route('show.returinden', ['mutasiIG' => '__ID__']) }}",
+            editMutasi: "{{ route('mutasiindengh.edit', ['mutasiIG' => '__ID__']) }}"
+        };
+        
+        $('#mutasiInden').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("mutasiindengh.index") }}',
+                type: 'GET',
+                data: function (d) {
+                    d.gallery = $('#filterGallery').val();
+                    d.dateStart = $('#filterDateStart').val();
+                    d.dateEnd = $('#filterDateEnd').val();
+                },
+                dataSrc: function(json) {
+                        console.log("Received Data:", json); 
+                        return json.data;
+                    }
+            },
+            columns: [
+                { data: 'id', name: 'id' },
+                { data: 'no_mutasi', name: 'no_mutasi' },
+                { data: 'supplier', name: 'supplier' },
+                { data: 'penerima', name: 'penerima' },
+                { data: 'tgl_kirim', name: 'tgl_kirim' },
+                { data: 'tgl_diterima', name: 'tgl_diterima' },
+                {
+                    data: 'status_dibuat',
+                    name: 'status_dibuat',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'status_diterima',
+                    name: 'status_diterima',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'status_diperiksa',
+                    name: 'status_diperiksa',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                { data: 'status_dibuku', name: 'status_dibuku' },
+                { data: 'tagihan', name: 'tagihan' },
+                { data: 'sisa_tagihan', name: 'sisa_tagihan' },
+                {
+                    data: 'status_pembayaran',
+                    name: 'status_pembayaran',
+                    render: function(data, type, row) {
+                        // Assume `status_dibukukan` is also available in the row data
+                        let statusDibukukan = row.status_dibukukan;
+                        let sisaBayar = row.sisa_bayar;
+
+                        let statusHtml = '';
+
+                        if (statusDibukukan !== 'BATAL') {
+                            if (sisaBayar == 0 && sisaBayar !== null) {
+                                statusHtml = '<span class="badges bg-lightgreen">Lunas</span>';
+                            } else {
+                                statusHtml = '<span class="badges bg-lightred">Belum Lunas</span>';
+                            }
+                        } else {
+                            statusHtml = '<span class="badges bg-lightgrey">BATAL</span>';
+                        }
+
+                        return statusHtml;
+                    }
+                },
+                { data: 'komplain', name: 'komplain' },
+                { data: 'status_komplain', name: 'status_komplain' },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        const userRoles = @json(Auth::user()->roles->pluck('name')->toArray());
+
+                        let dropdownHtml = `
+                            <div class="dropdown">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown-menu">`;
+
+                        // Actions for Purchasing role
+                        if (userRoles.includes('Purchasing')) {
+                            if (row.status_dibuat === "TUNDA") {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.editPurchase.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit
+                                        </a>
+                                    </li>`;
+                            } else {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
+                                        </a>
+                                    </li>`;
+                                if (row.returinden && row.returinden.status_dibuat !== "BATAL") {
+                                    dropdownHtml += `
+                                        <li>
+                                            <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
+                                                <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur
+                                            </a>
+                                        </li>`;
+                                }
+                            }
+                            if ((row.sisa_bayar === row.total_biaya || row.sisa_bayar === 0) && row.status_dibukukan === "MENUNGGU PEMBAYARAN" && !row.returinden) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.createRetur.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain
+                                        </a>
+                                    </li>`;
+                            }
+                            if (row.returinden && (row.returinden.status_dibuat === "DIKONFIRMASI" && (row.returinden.status_dibukukan === "TUNDA" || row.returinden.status_dibukukan === null))) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain
+                                        </a>
+                                    </li>`;
+                            }
+                        }
+
+                        // Actions for Finance role
+                        if (userRoles.includes('Finance')) {
+                            if (row.status_dibukukan === "TUNDA" || row.status_dibukukan === null) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.editFinance.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Harga
+                                        </a>
+                                    </li>`;
+                            }
+                            if (row.status_dibukukan === "MENUNGGU PEMBAYARAN" && row.sisa_bayar !== 0 && (!row.returinden || (row.returinden && row.returinden.status_dibukukan === "BATAL"))) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.confirmPayment.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi
+                                        </a>
+                                    </li>`;
+                            } else if (row.status_dibukukan === "MENUNGGU PEMBAYARAN" && row.sisa_bayar === 0 && (!row.returinden || (row.returinden && row.returinden.status_dibukukan === "BATAL"))) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.confirmPayment.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi
+                                        </a>
+                                    </li>`;
+                            } else if ((row.status_dibukukan === "DIKONFIRMASI" && row.sisa_bayar === 0 && !row.returinden) || (row.returinden && row.returinden.status_dibukukan === "BATAL")) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
+                                        </a>
+                                    </li>`;
+                            }
+                            if (row.returinden) {
+                                if ((row.returinden.status_dibukukan === "TUNDA" || row.returinden.status_dibukukan === null) && row.returinden.status_dibuat === "DIKONFIRMASI") {
+                                    dropdownHtml += `
+                                        <li>
+                                            <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
+                                                <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain
+                                            </a>
+                                        </li>`;
+                                }
+                                if (row.returinden.status_dibukukan === "MENUNGGU PEMBAYARAN" && (row.returinden.sisa_refund !== 0 || row.sisa_bayar !== 0)) {
+                                    dropdownHtml += `
+                                        <li>
+                                            <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi/Input Refund
+                                            </a>
+                                        </li>`;
+                                } else if (row.returinden.status_dibukukan === "MENUNGGU PEMBAYARAN" && row.returinden.sisa_refund === 0 && row.sisa_bayar === 0) {
+                                    dropdownHtml += `
+                                        <li>
+                                            <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi Retur
+                                            </a>
+                                        </li>`;
+                                } else if (row.status_dibukukan === "MENUNGGU PEMBAYARAN" && row.returinden.status_dibukukan === "DIKONFIRMASI") {
+                                    dropdownHtml += `
+                                        <li>
+                                            <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
+                                                <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi Retur
+                                            </a>
+                                        </li>`;
+                                }
+                            }
+                        }
+
+                        dropdownHtml += `
+                                </div>
+                            </div>`;
+
+                        return dropdownHtml;
+                    }
+                }
+            ]
+        });
+    });
     function deleteData(id) {
         $.ajax({
             type: "GET",
@@ -354,9 +613,6 @@
     }
 </script>
 <script>
-    $(document).ready(function(){
-        $('#filterCustomer, #filterDriver').select2();
-    });
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');
         var urlString = baseUrl;

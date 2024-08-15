@@ -27,7 +27,6 @@ class Returpembelian extends Model
         'tgl_dibuat',
         'tgl_dibuku',
     ];
-
     
     public function pembuat(){
         return $this->belongsTo(User::class, 'pembuat', 'id');

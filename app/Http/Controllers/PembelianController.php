@@ -432,43 +432,100 @@ class PembelianController extends Controller
     }
 
     public function index_retur(Request $req)
-    {
-        $query = Returpembelian::orderBy('created_at', 'desc');
-        $query->when(Auth::user()->hasRole('Finance'), function ($q) {
-            $q->where('status_dibuat', 'DIKONFIRMASI');
-            //   ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+{
+    // Initialize the query
+    $query = Returpembelian::query()
+        ->with(['invoice.pembelian.lokasi', 'invoice.pembelian.supplier', 'produkretur.produkbeli.produk']) 
+        ->orderBy('created_at', 'desc');
+
+    // Apply role-based filters
+    if (Auth::user()->hasRole('Finance')) {
+        $query->where('status_dibuat', 'DIKONFIRMASI');
+    }
+
+    // Apply additional filters based on request parameters
+    if ($req->gallery) {
+        $query->whereHas('invoice', function($r) use ($req) {
+            $r->whereHas('pembelian', function($q) use ($req) {
+                $q->where('lokasi_id', $req->input('gallery'));
+            });
+        });
+    }
+
+    if ($req->dateStart) {
+        $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+    }
+    if ($req->dateEnd) {
+        $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+    }
+
+    // Check for AJAX request
+    if ($req->ajax()) {
+        // Get total records count
+        $totalRecords = $query->count();
+
+        // Apply pagination
+        $data = $query->skip($req->input('start'))
+                      ->take($req->input('length'))
+                      ->get();
+
+        // Transform data for DataTables
+        $data = $data->map(function ($item) {
+            $tglRetur = $item->tgl_retur;
+            if (is_string($tglRetur)) {
+                $tglRetur = \Carbon\Carbon::parse($tglRetur);
+            }
+           
+            $namaproduk = $item->produkretur->map(function ($produkretur) {
+                return $produkretur->produkbeli->produk->nama ?? 'N/A';
+            })->join('<br>');
+
+            $alasan = $item->produkretur->map(function ($produkretur) {
+                return $produkretur->alasan ?? 'N/A';
+            })->join('<br>');
+
+            $jumlah = $item->produkretur->map(function ($produkretur) {
+                return $produkretur->jumlah ?? 'N/A';
+            })->join('<br>');
+
+            return [
+                'id' => $item->id,
+                'no_retur' => $item->no_retur,
+                'tgl_retur' => isset($tglRetur) ? $tglRetur->format('Y-m-d') : 'N/A',
+                'supplier_name' => $item->invoice->pembelian->supplier->nama ?? 'N/A',
+                'lokasi_name' => $item->invoice->pembelian->lokasi->nama ?? 'N/A',
+                'produk' => $namaproduk,
+                'alasan' => $alasan,
+                'jumlah' => $jumlah,
+                'komplain' => $item->komplain,
+                'subtotal' => $item->subtotal,
+                'status_dibuat' => $item->status_dibuat,
+                'status_dibuku' => $item->status_dibuku,
+            ];
         });
 
-        if ($req->gallery) {
-            $query->whereHas('invoice', function($r) use($req){
-                $r->whereHas('pembelian', function($q) use($req){
-                    $q->where('lokasi_id', $req->input('gallery'));
-                });
-            });
-        }
+        return response()->json([
+            'draw' => intval($req->input('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalRecords,
+            'data' => $data
+        ]);
+    }
 
-        
-        if ($req->dateStart) {
-            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
-        }
-        $dataretur = $query->get();
-        $datainv = Invoicepo::get();
-
-        $gallery = Returpembelian::select('lokasis.id', 'lokasis.nama')
+    // Fetch additional data for the view
+    $gallery = Returpembelian::select('lokasis.id', 'lokasis.nama')
         ->distinct()
         ->join('invoicepo', 'returpembelians.invoicepo_id', '=', 'invoicepo.id')
         ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
         ->join('lokasis', 'pembelians.lokasi_id', '=', 'lokasis.id')
         ->orderBy('lokasis.nama')
         ->get();
-        $pembelian = Pembelian::get();
-        // $databayars = Pembayaran::where('invoice_purchase_id', $id_inv)->where('status_bayar','LUNAS')->get();
+    $pembelian = Pembelian::all();
+    $datainv = Invoicepo::all();
 
-        return view('purchase_retur.returindex',compact('pembelian','dataretur','datainv', 'gallery'));
-    }
+    return view('purchase_retur.returindex', compact('pembelian', 'datainv', 'gallery'));
+}
+
 
 
     /**
