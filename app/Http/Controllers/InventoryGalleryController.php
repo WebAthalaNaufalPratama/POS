@@ -33,6 +33,8 @@ class InventoryGalleryController extends Controller
         })->orderBy('kode_produk')->orderBy('kondisi_id')->get();
         $namaproduks = InventoryGallery::with('produk')->get()->unique('kode_produk');
         $kondisis = Kondisi::all();
+        $user = Auth::user();
+        
         $galleries = Lokasi::where('tipe_lokasi', 1)->get();
         $karyawans = Karyawan::when(Auth::user()->karyawans, function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
@@ -43,9 +45,14 @@ class InventoryGalleryController extends Controller
 
         // start datatable inventory
             if ($req->ajax() && $req->table == 'inventory') {
-                $query = InventoryGallery::with('produk', 'gallery', 'kondisi')->orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->karyawans, function ($q) {
-                    return $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-                });
+                if($user->hasRole(['Purchasing', 'Auditor', 'Finance'])) {
+                    $query = InventoryGallery::with('produk', 'gallery', 'kondisi')->orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc');
+                }else{
+                    $query = InventoryGallery::with('produk', 'gallery', 'kondisi')->orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->karyawans, function ($q) {
+                        return $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+                    });
+                }
+                
                 if ($req->produk) {
                     $query->where('kode_produk', $req->input('produk'));
                 }
