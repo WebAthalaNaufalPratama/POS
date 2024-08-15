@@ -59,10 +59,11 @@
                                 <th class="align-middle">No</th>
                                 <th class="align-middle">No Invoice</th>
                                 <th class="align-middle">Tanggal</th>
-                                <th class="align-middle">List Barang</th>
-                                <th class="align-middle">Harga</th>
                                 <th class="align-middle">Gallery</th>
                                 <th class="align-middle">Supplier</th>
+                                <th class="align-middle">List Barang</th>
+                                <th class="align-middle">Harga</th>
+                                <th class="align-middle">Diskon</th>
                                 <th class="align-middle">QTY</th>
                                 <th class="align-middle">Harga Total</th>
                             </tr>
@@ -73,6 +74,8 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->no_inv }}</td>
                                 <td>{{ tanggalindo($item->tgl_inv) }}</td>
+                                <td>{{ $item->pembelian->lokasi->nama }}</td>
+                                <td>{{ $item->pembelian->supplier->nama }}</td>
                                 <td>
                                     <table>
                                         @foreach ($item->pembelian->produkbeli as $produk)
@@ -91,13 +94,21 @@
                                         @endforeach
                                     </table>
                                 </td>
-                                <td>{{ $item->pembelian->lokasi->nama }}</td>
-                                <td>{{ $item->pembelian->supplier->nama }}</td>
                                 <td>
                                     <table>
                                         @foreach ($item->pembelian->produkbeli as $produk)
                                             <tr>
-                                                <td>{{ $produk->jml_dikirim }}</td>
+                                                <td>{{ formatRupiah($produk->diskon) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </table>
+                                </td>
+                               
+                                <td>
+                                    <table>
+                                        @foreach ($item->pembelian->produkbeli as $produk)
+                                            <tr>
+                                                <td>{{ $produk->jml_diterima }}</td>
                                             </tr>
                                         @endforeach
                                     </table>
@@ -106,7 +117,7 @@
                                     <table>
                                         @foreach ($item->pembelian->produkbeli as $produk)
                                             <tr>
-                                                <td>{{ formatRupiah($produk->totalharga) }}</td>
+                                                <td>{{ formatRupiah(($produk->harga - $produk->diskon) * $produk->jml_diterima )}}</td>
                                             </tr>
                                         @endforeach
                                     </table>

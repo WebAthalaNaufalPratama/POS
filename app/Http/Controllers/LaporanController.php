@@ -1267,7 +1267,7 @@ class LaporanController extends Controller
 
         $data = $query->get();
         $supplier = Supplier::whereHas('pembelian')->get();
-        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        $galleries = Lokasi::whereIn('tipe_lokasi', [1,3,4])->get();
         return view('laporan.pembelian', compact('data', 'supplier', 'galleries'));
     }
 
@@ -1347,7 +1347,7 @@ class LaporanController extends Controller
 
         $data = $query->get();
         $supplier = Supplier::whereHas('poinden')->get();
-        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        $galleries = Lokasi::whereIn('tipe_lokasi', [1,3,4])->get();
         return view('laporan.pembelian_inden', compact('data', 'supplier', 'galleries'));
     }
 
@@ -1837,68 +1837,77 @@ class LaporanController extends Controller
 
     public function retur_pembelian_inden_index(Request $req)
     {
-        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+        $query = Returinden::query();
+    
+
+        $query->when(Auth::user()->hasRole('Purchasing'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+            // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+    
+    
+        $query->orderBy('tgl_dibuat', 'desc');
 
         if ($req->dateStart) {
-            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
         }
         if ($req->dateEnd) {
-            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
         }
-
-        $data = $queryInden->get()->map(function($item){
-            $item->no_po = $item->mutasiinden->no_mutasi;
-            $item->supplier_nama = $item->mutasiinden->supplier->nama;
-            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
-            return $item;
-        });
-
-        return view('laporan.retur_pembelian_inden', compact('data'));
+        $returs = $query->get();
+        
+        return view('laporan.retur_pembelian_inden', compact('returs'));
     }
 
     public function retur_pembelian_inden_pdf(Request $req)
     {
-        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+        $query = Returinden::query();
+    
+
+        $query->when(Auth::user()->hasRole('Purchasing'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+            // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+    
+    
+        $query->orderBy('tgl_dibuat', 'desc');
 
         if ($req->dateStart) {
-            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
         }
         if ($req->dateEnd) {
-            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
         }
+        $returs = $query->get();
 
-        $data = $queryInden->get()->map(function($item){
-            $item->no_po = $item->mutasiinden->no_mutasi;
-            $item->supplier_nama = $item->mutasiinden->supplier->nama;
-            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
-            return $item;
-        });
-
-        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
-        $pdf = Pdf::loadView('laporan.retur_pembelian_inden_pdf', compact('data'))->setPaper('a4', 'landscape');;
+        if($returs->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('laporan.retur_pembelian_inden_pdf', compact('returs'))->setPaper('a4', 'landscape');;
         return $pdf->stream('retur_pembelian_inden.pdf');
     }
 
     public function retur_pembelian_inden_excel(Request $req)
     {
-        $queryInden = Returinden::with('mutasiinden.lokasi', 'mutasiinden.supplier')->where('status_dibuat', 'DIKONFIRMASI');
+        $query = Returinden::query();
+    
+
+        $query->when(Auth::user()->hasRole('Purchasing'), function($q){
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+            // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+        });
+    
+    
+        $query->orderBy('tgl_dibuat', 'desc');
 
         if ($req->dateStart) {
-            $queryInden->where('created_at', '>=', $req->input('dateStart'));
+            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
         }
         if ($req->dateEnd) {
-            $queryInden->where('created_at', '<=', $req->input('dateEnd'));
+            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
         }
+        $returs = $query->get();
 
-        $data = $queryInden->get()->map(function($item){
-            $item->no_po = $item->mutasiinden->no_mutasi;
-            $item->supplier_nama = $item->mutasiinden->supplier->nama;
-            $item->gallery_nama = $item->mutasiinden->lokasi->nama;
-            return $item;
-        });
-
-        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new ReturPembelianIndenExport($data), 'retur_pembelian_inden.xlsx');
+        if($returs->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new ReturPembelianIndenExport($returs), 'retur_pembelian_inden.xlsx');
     }
 
     public function mergeItems($item, $collection) {
@@ -5919,7 +5928,7 @@ class LaporanController extends Controller
             return view('laporan.mutasiinden', [
                 'produkterjual' => collect(),
                 'mutasiinden' => collect(),
-                'suppliers' => Supplier::all(),
+                'suppliers' => Supplier::where('tipe_supplier', 'inden')->get(),
                 'galleries' => Lokasi::where('tipe_lokasi', 1)->get(),
                 'inventorys' => InventoryInden::all()
             ]);
@@ -5963,7 +5972,7 @@ class LaporanController extends Controller
             $produkterjual = $produkterjual->merge($produkmutasiinden);
         }
         
-        $suppliers = Supplier::all();
+        $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
         $galleries = Lokasi::where('tipe_lokasi', 1)->get();
         $inventorys = InventoryInden::all();
 

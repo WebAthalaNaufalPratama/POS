@@ -24,40 +24,87 @@ class PembayaranController extends Controller
 {
 
     public function index(Request $req)
-    {
-        $user = Auth::user();
-        $lokasi = Karyawan::where('user_id', $user->id)->first();
-        $userroles = Auth::user()->roles()->value('name');
-        // dd($user);
-        if($lokasi->lokasi->tipe_lokasi == 2){
-            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'IPO%')->where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $penjualan->pluck('id')->toArray();
-            // dd($penjualanIds);
-            $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BOT%');
-        }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
-            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $penjualan->pluck('id')->toArray();
-            // dd($penjualan);
-            $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BYR%');
-            // dd($query);
-        }else{
-            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
-        }
+{
+    $user = Auth::user();
+    $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-        if ($req->metode) {
-            $query->where('cara_bayar', $req->input('metode'));
-        }
-        if ($req->dateStart) {
-            $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
-        }
-        $data = $query->orderByDesc('id')->get();
-        // $data = Pembayaran::with('rekening')->orderBy('created_at', 'desc')->get();
-
-        return view('pembayaran.index', compact('data'));
+    // Determine the query based on the location type
+    if ($lokasi->lokasi->tipe_lokasi == 2) {
+        $penjualanIds = Penjualan::where('no_invoice', 'LIKE', 'IPO%')
+                                 ->where('lokasi_id', $lokasi->lokasi_id)
+                                 ->pluck('id')
+                                 ->toArray();
+        $query = Pembayaran::whereNotNull('invoice_penjualan_id')
+                           ->whereIn('invoice_penjualan_id', $penjualanIds)
+                           ->where('no_invoice_bayar', 'LIKE', 'BOT%');
+    } elseif ($lokasi->lokasi->tipe_lokasi == 1) {
+        $penjualanIds = Penjualan::where('no_invoice', 'LIKE', 'INV%')
+                                 ->where('lokasi_id', $lokasi->lokasi_id)
+                                 ->pluck('id')
+                                 ->toArray();
+        $query = Pembayaran::whereNotNull('invoice_penjualan_id')
+                           ->whereIn('invoice_penjualan_id', $penjualanIds)
+                           ->where('no_invoice_bayar', 'LIKE', 'BYR%');
+    } else {
+        $query = Pembayaran::query(); // Change to Pembayaran to match the default case
     }
+
+    // Apply additional filters based on request parameters
+    if ($req->metode) {
+        $query->where('cara_bayar', $req->input('metode'));
+    }
+    if ($req->dateStart) {
+        $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
+    }
+    if ($req->dateEnd) {
+        $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
+    }
+
+    if ($req->ajax()) {
+        // Handle sorting
+        $orderColumn = $req->input('columns.' . $req->input('order.0.column') . '.data');
+        $orderDirection = $req->input('order.0.dir');
+
+        $totalRecords = $query->count();
+
+        // Apply sorting
+        $query->orderBy($orderColumn, $orderDirection);
+
+        // Apply pagination
+        $data = $query->skip($req->input('start'))
+                      ->take($req->input('length'))
+                      ->get();
+
+            $data = $data->map(function ($item) {
+            $nominal = str_replace('.', '', $item->nominal); // Remove thousands separator
+            $nominal = str_replace(',', '.', $nominal); // Replace decimal comma with dot
+
+            return [
+                'id' => $item->id,
+                'no_invoice_bayar' => $item->no_invoice_bayar,
+                'cara_bayar' => $item->cara_bayar,
+                'nominal' => $nominal, 
+                'rekening' => $item->rekening ? $item->rekening->bank : 'Pembayaran Cash',
+                'tanggal_bayar' => $item->tanggal_bayar ? \Carbon\Carbon::parse($item->tanggal_bayar)->format('d F Y') : '',
+                'status_bayar' => $item->status_bayar,
+                'action' => '<a href="' . route('pembayaran.edit', ['pembayaran' => $item->id]) . '" class="btn btn-sm btn-primary">Edit</a>'
+            ];
+        });
+                    
+                    
+
+        return response()->json([
+            'draw' => intval($req->input('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalRecords, // Adjust if using a filter
+            'data' => $data
+        ]);
+    }
+
+    return view('pembayaran.index');
+}
+
+
 
     public function edit($pembayaran)
     {

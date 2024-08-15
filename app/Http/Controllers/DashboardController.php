@@ -195,7 +195,7 @@ class DashboardController extends Controller
             $hitungkeluar = 0;
             foreach($produkmutasi as $keluar) {
                 $brgkeluar = $keluar->jml_diterima;
-                $hitungkeluar += $brgmasuk;
+                $hitungkeluar += $brgkeluar;
             }
 
             $penjualanbaru = $hitungmasuk;

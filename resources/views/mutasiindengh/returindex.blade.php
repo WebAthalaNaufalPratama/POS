@@ -36,10 +36,14 @@
                                 <th>No Retur</th>
                                 <th>No Mutasi</th>
                                 <th>Tipe Komplain</th>
+                                <th>Alasan</th>
                                 <th>Kode Inden</th>
                                 <th>Nama Produk</th>
+                                <th>Harga</th>
                                 <th>QTY</th>
-                                <th>Tanggal Kirim</th>
+                                <th>Total</th>
+                                <th>Supplier</th>
+                                <th>Tujuan</th>
                                 <th>Status dibuat</th>
                                 <th>Status dibuku</th>
                                 <th>Aksi</th>
@@ -53,12 +57,21 @@
                                 <td>{{ $retur->no_retur }}</td>
                                 <td>{{ $retur->mutasiinden->no_mutasi}}</td>
                                 <td>{{ $retur->tipe_komplain}}
-                                    @if ( $retur->tipe_komplain == "Refund" && $retur->sisa_refund == 0)
-                                        | Lunas
-                                    @elseif( $retur->tipe_komplain == "Refund" && $retur->sisa_refund !== 0)
-                                        | Belum Lunas
+                                    @if($retur->status_dibuat !== "BATAL")
+                                        @if ( $retur->tipe_komplain == "Refund" && $retur->sisa_refund == 0)
+                                            | Lunas
+                                        @elseif( $retur->tipe_komplain == "Refund" && $retur->sisa_refund !== 0)
+                                            | Belum Lunas
+                                        @endif
                                     @endif
 
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ $produkretur->alasan }}</li>
+                                        @endforeach
+                                    </ul>
                                 </td>
                                 <td>
                                     <ul>
@@ -77,11 +90,20 @@
                                 <td>
                                     <ul>
                                         @foreach($retur->produkreturinden as $produkretur)
+                                            <li>{{ formatRupiah($produkretur->harga_satuan) }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        @foreach($retur->produkreturinden as $produkretur)
                                             <li>{{ $produkretur->jml_diretur }}</li>
                                         @endforeach
                                     </ul>
                                 </td>
-                                <td>{{ tanggalindo($retur->mutasiinden->tgl_dikirim) }}</td>
+                                <td>{{ formatRupiah($retur->refund) }}</td>
+                                <td>{{ $retur->mutasiinden->supplier->nama }}</td>
+                                <td>{{ $retur->mutasiinden->lokasi->nama }}</td>
                                 <td>
 
                                 @if ($retur->status_dibuat == 'TUNDA' || $retur->status_dibuat == null)
