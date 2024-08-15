@@ -163,7 +163,7 @@
                                                                 <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}">
                                                             </td>
                                                             @if($i == 0)
-                                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                                <td><button type="button" name="add" id="add" class="btn"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></button></td>
                                                             @endif
                                                         </tr>
                                                     @endforeach
@@ -460,7 +460,7 @@
                                 </select>
                             </td>
                             <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" class="form-control"></td>
-                            <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
+                            <td><button type="button" name="remove" id="${i}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                         </tr>`;
 
             $('#dynamic_field').append(newRow);

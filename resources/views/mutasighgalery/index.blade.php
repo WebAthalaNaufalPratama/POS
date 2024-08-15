@@ -13,7 +13,7 @@
                         $user = Auth::user();
                         $lokasi = \App\Models\Karyawan::where('user_id', $user->id)->first();
                     @endphp
-                    @if($lokasi->lokasi->tipe_lokasi != 1 && !$user->hasRole(['Auditor', 'Finance']))
+                    @if($user->hasRole(['Purchasing']) && !$user->hasRole(['Auditor', 'Finance']))
                     <div class="page-btn">
                         <a href="{{ route('mutasighgalery.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Mutasi</a>
                     </div>

@@ -184,38 +184,122 @@
                     </ul>
                 </li>
                 @endrole
+                @if(
+                    in_array('laporan.kontrak', $rolePermissions) ||
+                    in_array('laporan.tagihan_sewa', $rolePermissions) ||
+                    in_array('laporan.do_sewa', $rolePermissions) ||
+                    in_array('laporan.pergantian_sewa', $rolePermissions) ||
+                    in_array('laporan.penjualanproduk', $rolePermissions) ||
+                    in_array('laporan.pelanggan', $rolePermissions) ||
+                    in_array('laporan.pembayaran', $rolePermissions) ||
+                    in_array('laporan.dopenjualan', $rolePermissions) ||
+                    in_array('laporan.returpenjualan', $rolePermissions) ||
+                    in_array('laporan.penjualan', $rolePermissions) ||
+                    in_array('laporan.mutasi', $rolePermissions) ||
+                    in_array('laporan.mutasiinden', $rolePermissions) ||
+                    in_array('laporan.kas_pusat', $rolePermissions) ||
+                    in_array('laporan.kas_gallery', $rolePermissions) ||
+                    in_array('laporan.pembelian', $rolePermissions) ||
+                    in_array('laporan.pembelian_inden', $rolePermissions) ||
+                    in_array('laporan.stok_inden', $rolePermissions) ||
+                    in_array('laporan.hutang_supplier', $rolePermissions) ||
+                    in_array('laporan.retur_pembelian', $rolePermissions) ||
+                    in_array('laporan.retur_pembelian_inden', $rolePermissions) ||
+                    in_array('laporan.omset', $rolePermissions) ||
+                    in_array('laporan.promo', $rolePermissions) ||
+                    in_array('laporan.stok_gallery', $rolePermissions) ||
+                    in_array('laporan.stok_pusat', $rolePermissions) ||
+                    in_array('laporan.pemakaian_sendiri', $rolePermissions) ||
+                    in_array('laporan.bunga_keluar', $rolePermissions) ||
+                    in_array('laporan.bunga_datang', $rolePermissions)
+                )
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/purchase1.svg" alt="img"><span> Laporan</span> <span class="menu-arrow"></span></a>
                     <ul>
+                    @if(in_array('laporan.kontrak', $rolePermissions))
                         <li><a href="{{ route('laporan.kontrak') }}" class="{{ request()->is('laporan/kontrak') ? 'active' : '' }}">Kontrak </a></li>
+                    @endif
+                    @if(in_array('laporan.tagihan_sewa', $rolePermissions))
                         <li><a href="{{ route('laporan.tagihan_sewa') }}" class="{{ request()->is('laporan/tagihan_sewa') ? 'active' : '' }}">Tagihan Sewa </a></li>
+                    @endif
+                    @if(in_array('laporan.do_sewa', $rolePermissions))
                         <li><a href="{{ route('laporan.do_sewa') }}" class="{{ request()->is('laporan/do_sewa') ? 'active' : '' }}">Delivery Order Sewa </a></li>
+                    @endif
+                    @if(in_array('laporan.pergantian_sewa', $rolePermissions))
                         <li><a href="{{ route('laporan.pergantian_sewa') }}" class="{{ request()->is('laporan/pergantian_sewa') ? 'active' : '' }}">Pergantian Sewa </a></li>
+                    @endif
+                    @if(in_array('laporan.penjualanproduk', $rolePermissions))
                         <li><a href="{{ route('laporan.penjualanproduk') }}" class="{{ request()->is('laporan/penjualanproduk*') ? 'active' : '' }}">Penjualan Produk </a></li>
+                    @endif
+                    @if(in_array('laporan.pelanggan', $rolePermissions))
                         <li><a href="{{ route('laporan.pelanggan') }}" class="{{ request()->is('laporan/pelanggan*') ? 'active' : '' }}">Pelanggan</a></li>
+                    @endif
+                    @if(in_array('laporan.pembayaran', $rolePermissions))
                         <li><a href="{{ route('laporan.pembayaran') }}" class="{{ request()->is('laporan/pembayaran*') ? 'active' : '' }}">Pembayaran</a></li>
+                    @endif
+                    @if(in_array('laporan.dopenjualan', $rolePermissions))
                         <li><a href="{{ route('laporan.dopenjualan') }}" class="{{ request()->is('laporan/dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
+                    @endif
+                    @if(in_array('laporan.returpenjualan', $rolePermissions))
                         <li><a href="{{ route('laporan.returpenjualan') }}" class="{{ request()->is('laporan/returpenjualan*') ? 'active' : '' }}">Retur Penjualan</a></li>
+                    @endif
+                    @if(in_array('laporan.penjualan', $rolePermissions))
                         <li><a href="{{ route('laporan.penjualan') }}" class="{{ request()->is('laporan/penjualan') ? 'active' : '' }}">Penjualan</a></li>
+                    @endif
+                    @if(in_array('laporan.mutasi', $rolePermissions))
                         <li><a href="{{ route('laporan.mutasi') }}" class="{{ request()->is('laporan/mutasi') ? 'active' : '' }}">Mutasi</a></li>
+                    @endif
+                    @if(in_array('laporan.mutasiinden', $rolePermissions))
                         <li><a href="{{ route('laporan.mutasiinden') }}" class="{{ request()->is('laporan/mutasiinden*') ? 'active' : '' }}">Mutasi Inden</a></li>
+                    @endif
+                    @if(in_array('laporan.kas_pusat', $rolePermissions))
                         <li><a href="{{ route('laporan.kas_pusat') }}" class="{{ request()->is('laporan/kas_pusat*') ? 'active' : '' }}">Kas Pusat</a></li>
+                    @endif
+                    @if(in_array('laporan.kas_gallery', $rolePermissions))
                         <li><a href="{{ route('laporan.kas_gallery') }}" class="{{ request()->is('laporan/kas_gallery*') ? 'active' : '' }}">Kas Gallery</a></li>
+                    @endif
+                    @if(in_array('laporan.pembelian', $rolePermissions))
                         <li><a href="{{ route('laporan.pembelian') }}" class="{{ request()->is('laporan/pembelian') ? 'active' : '' }}">Pembelian</a></li>
+                    @endif
+                    @if(in_array('laporan.pembelian_inden', $rolePermissions))
                         <li><a href="{{ route('laporan.pembelian_inden') }}" class="{{ request()->is('laporan/pembelian_inden*') ? 'active' : '' }}">Pembelian Inden</a></li>
+                    @endif
+                    @if(in_array('laporan.stok_inden', $rolePermissions))
                         <li><a href="{{ route('laporan.stok_inden') }}" class="{{ request()->is('laporan/stok_inden*') ? 'active' : '' }}">Stok Inden</a></li>
+                    @endif
+                    @if(in_array('laporan.hutang_supplier', $rolePermissions))
                         <li><a href="{{ route('laporan.hutang_supplier') }}" class="{{ request()->is('laporan/hutang_supplier*') ? 'active' : '' }}">Hutang Supplier</a></li>
+                    @endif
+                    @if(in_array('laporan.retur_pembelian', $rolePermissions))
                         <li><a href="{{ route('laporan.retur_pembelian') }}" class="{{ request()->is('laporan/retur_pembelian') ? 'active' : '' }}">Retur Pembelian</a></li>
+                    @endif
+                    @if(in_array('laporan.retur_pembelian_inden', $rolePermissions))
                         <li><a href="{{ route('laporan.retur_pembelian_inden') }}" class="{{ request()->is('laporan/retur_pembelian_inden*') ? 'active' : '' }}">Retur Pembelian Inden</a></li>
+                    @endif
+                    @if(in_array('laporan.omset', $rolePermissions))
                         <li><a href="{{ route('laporan.omset') }}" class="{{ request()->is('laporan/omset*') ? 'active' : '' }}">Omset</a></li>
+                    @endif
+                    @if(in_array('laporan.promo', $rolePermissions))
                         <li><a href="{{ route('laporan.promo') }}" class="{{ request()->is('laporan/promo*') ? 'active' : '' }}">Promo</a></li>
+                    @endif
+                    @if(in_array('laporan.stok_gallery', $rolePermissions))
                         <li><a href="{{ route('laporan.stok_gallery') }}" class="{{ request()->is('laporan/stok_gallery*') ? 'active' : '' }}">Stok Gallery</a></li>
+                    @endif
+                    @if(in_array('laporan.stok_pusat', $rolePermissions))
                         <li><a href="{{ route('laporan.stok_pusat') }}" class="{{ request()->is('laporan/stok_pusat*') ? 'active' : '' }}">Stok Pusat</a></li>
+                    @endif
+                    @if(in_array('laporan.pemakaian_sendiri', $rolePermissions))
                         <li><a href="{{ route('laporan.pemakaian_sendiri') }}" class="{{ request()->is('laporan/pemakaian_sendiri*') ? 'active' : '' }}">Pemakaian Sendiri</a></li>
+                    @endif
+                    @if(in_array('laporan.bunga_keluar', $rolePermissions))
                         <li><a href="{{ route('laporan.bunga_keluar') }}" class="{{ request()->is('laporan/bunga_keluar*') ? 'active' : '' }}">Bunga Kelaur</a></li>
+                    @endif
+                    @if(in_array('laporan.bunga_datang', $rolePermissions))
                         <li><a href="{{ route('laporan.bunga_datang') }}" class="{{ request()->is('laporan/bunga_datang*') ? 'active' : '' }}">Bunga Datang</a></li>
+                    @endif
                     </ul>
                 </li>
+                @endif
                 @if($user->hasRole(['SuperAdmin', 'Finance']))
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="/assets/img/icons/users1.svg" alt="img"><span> Users</span> <span class="menu-arrow"></span></a>

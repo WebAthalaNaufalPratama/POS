@@ -117,6 +117,8 @@
                 @foreach($combinedData as $data)
                     @php
                         $produkCount = $data['produk_jual']->count();
+                        $firstProdukJual = $data['produk_jual']->first();
+                        $isGFTInFirstProdukJual = substr($firstProdukJual['kodeprod'], 0, 3) === 'GFT';
                     @endphp
                     @foreach($data['produk_jual'] as $produk)
                         @php
@@ -145,6 +147,13 @@
                                 </tr>
                             @else
                                 <tr>
+                                @if($isGFTInFirstProdukJual)
+                                    <td>{{ $komponen['nama_produk'] }}</td>
+                                    <td>{{ $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisibaik'] }}</td>
+                                    <td>{{ $komponen['kondisiafkir'] }}</td>
+                                    <td>{{ $komponen['kondisibonggol'] }}</td>
+                                @else
                                     <td style="border-right: 1px solid #000; border-top: none;"></td>
                                     <td style="border-right: 1px solid #000; border-top: none;"></td>
                                     <td style="border-right: 1px solid #000; border-top: none;"></td>
@@ -156,6 +165,7 @@
                                     <td>{{ $komponen['kondisibaik'] }}</td>
                                     <td>{{ $komponen['kondisiafkir'] }}</td>
                                     <td>{{ $komponen['kondisibonggol'] }}</td>
+                                @endif
                                 </tr>
                             @endif
                             @php

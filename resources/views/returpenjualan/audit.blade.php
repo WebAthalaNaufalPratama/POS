@@ -358,7 +358,7 @@
                                                     $user = Auth::user();
                                                 @endphp
                                                 @if($user->hasRole(['KasirGallery', 'KasirOutlet', 'AdminGallery']))
-                                                <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove">x</button>
+                                                <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                 @endif
                                             </td>
 
@@ -448,7 +448,7 @@
                                                                 $user = Auth::user();
                                                             @endphp
                                                             @if($user->hasRole(['KasirGallery', 'KasirOutlet', 'AdminGallery']))
-                                                            <button type="button" name="remove" id="{{ $i }}" class="btn btn-danger btn_remove_ganti">x</button>
+                                                            <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove_ganti"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                             @endif
                                                         </td>
                                                     </tr>
@@ -724,7 +724,7 @@
                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
                 '<td><input type="text" name="unit_satuan[]" id="unit_satuan_' + i + '" class="form-control" required></td>' +
                 '<td><input type="text" name="keterangan[]" id="keterangan_' + i + '" class="form-control" required></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
             $('#dynamic_field').append(newRow);
 
