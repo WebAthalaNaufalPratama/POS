@@ -20,12 +20,28 @@ use Illuminate\Support\Facades\Validator;
 
 class InventoryGreenhouseController extends Controller
 {
-    public function index()
+    public function index(Request $req)
     {
-        $data = InventoryGreenHouse::all();
-        $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'DIKONFIRMASI')->get();
+        $greenhouses = Lokasi::where('tipe_lokasi', 3)->get();
+        $kondisis = Kondisi::all();
+        $namaproduks = InventoryGreenHouse::with('produk')->get()->unique('kode_produk');
+        
+        $query = InventoryGreenHouse::query();
+        if ($req->produk) {
+            $query->where('kode_produk', $req->input('produk'));
+        }
+        if ($req->kondisi) {
+            $query->where('kondisi_id', $req->input('kondisi'));
+        }
+        if ($req->gallery) {
+            $query->where('lokasi_id', $req->input('greenhouse'));
+        }
+        $data = $query->get();
         $lokasi = Lokasi::where('tipe_lokasi', 3)->get();
-        $arraylokasi = $lokasi->pluck('id')->toArray();
+
+        $arraylokasi = $greenhouses->pluck('id')->toArray();
+        $mutasigg = Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'DIKONFIRMASI')->get();
+
         $mutasimasukgg = Mutasi::where(function ($query) {
             $query->where('no_mutasi', 'LIKE', 'MPG%');
         })
@@ -104,7 +120,7 @@ class InventoryGreenhouseController extends Controller
     
         $riwayat = $riwayat->sortByDesc('id')->values();
         // dd($riwayat);
-        return view('inven_greenhouse.index', compact('data', 'riwayat'));
+        return view('inven_greenhouse.index', compact('data', 'riwayat', 'greenhouses', 'kondisis', 'namaproduks'));
     }
 
     public function create()

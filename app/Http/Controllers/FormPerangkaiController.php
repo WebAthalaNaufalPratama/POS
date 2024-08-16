@@ -57,26 +57,6 @@ class FormPerangkaiController extends Controller
             $dir = $req->input('order')[0]['dir'];
             $columnName = $req->input('columns')[$order]['data'];
 
-            // search
-            $search = $req->input('search.value');
-            if (!empty($search)) {
-                $query->where(function($q) use ($search) {
-                    $q->where('no_form', 'like', "%$search%")
-                    ->orWhere('tanggal', 'like', "%$search%")
-                    ->orWhereHas('produk_terjual', function($c) use($search){
-                        $c->where('no_sewa', 'like', "%$search%");
-                    })
-                    ->orWhereHas('produk_terjual', function($c) use($search){
-                        $c->whereHas('produk', function($d) use($search){
-                            $d->where('nama', 'like', "%$search%");
-                        });
-                    })
-                    ->orWhereHas('perangkai', function($c) use($search){
-                        $c->where('nama', 'like', "%$search%");
-                    });
-                });
-            }
-    
             $query->orderBy($columnName, $dir);
             $recordsFiltered = $query->count();
             $tempData = $query->offset($start)->limit($length)->get();
@@ -86,13 +66,26 @@ class FormPerangkaiController extends Controller
         
             $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
-                $item->tanggal = $item->tanggal == null ? null : formatTanggal($item->tanggal);
+                $item->tanggal_format = $item->tanggal == null ? null : tanggalindo($item->tanggal);
                 $item->no_kontrak = $item->produk_terjual->no_sewa;
                 $item->nama_produk = $item->produk_terjual->produk->nama;
                 $item->nama_perangkai = $item->perangkai->nama;
                 $item->userRole = Auth::user()->getRoleNames()->first();
                 return $item;
             });
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $data = $data->filter(function($item) use ($search) {
+                    return stripos($item->no_form, $search) !== false
+                        || stripos($item->tanggal_format, $search) !== false
+                        || stripos($item->nominal_format, $search) !== false
+                        || stripos($item->no_kontrak, $search) !== false
+                        || stripos($item->nama_produk, $search) !== false
+                        || stripos($item->nama_perangkai, $search) !== false;
+                });
+            }
 
             return response()->json([
                 'draw' => $req->input('draw'),

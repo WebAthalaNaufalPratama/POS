@@ -96,38 +96,58 @@
                     <th class="align-middle">No</th>
                     <th class="align-middle">No Invoice</th>
                     <th class="align-middle">Tanggal</th>
-                    <th class="align-middle">List Barang</th>
-                    <th class="align-middle">Harga</th>
                     <th class="align-middle">Gallery</th>
                     <th class="align-middle">Supplier</th>
+                    <th class="align-middle">List Barang</th>
+                    <th class="align-middle">Harga</th>
+                    <th class="align-middle">Diskon</th>
                     <th class="align-middle">QTY</th>
                     <th class="align-middle">Harga Total</th>
+                    <th class="align-middle">PPN</th>
+                    <th class="align-middle">Ongkir</th>
+                    <th class="align-middle">Komplain</th>
+                    <th class="align-middle">Nominal Komplain</th>
+                    <th class="align-middle">Ongkir Komplain</th>
+                    <th class="align-middle">Total Akhir</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $item)
+                @foreach ($data as $index1 => $item)
                     @php
                         $rowCount = count($item->pembelian->produkbeli);
                     @endphp
-                    <tr>
-                        <td rowspan="{{ $rowCount }}">{{ $loop->iteration }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ $item->no_inv }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tgl_inv) }}</td>
-                        <td>{{ $item->pembelian->produkbeli[0]->produk->nama }}</td>
-                        <td>{{ formatRupiah($item->pembelian->produkbeli[0]->harga) }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ $item->pembelian->lokasi->nama }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ $item->pembelian->supplier->nama }}</td>
-                        <td>{{ $item->pembelian->produkbeli[0]->jml_dikirim }}</td>
-                        <td>{{ formatRupiah($item->pembelian->produkbeli[0]->totalharga) }}</td>
-                    </tr>
-                    @for ($i = 1; $i < $rowCount; $i++)
+                    
+                    @foreach ($item->pembelian->produkbeli as $index => $produkItem)
                         <tr>
-                            <td>{{ $item->pembelian->produkbeli[$i]->produk->nama }}</td>
-                            <td>{{ formatRupiah($item->pembelian->produkbeli[$i]->harga) }}</td>
-                            <td>{{ $item->pembelian->produkbeli[$i]->jml_dikirim }}</td>
-                            <td>{{ formatRupiah($item->pembelian->produkbeli[$i]->totalharga) }}</td>
+                            @if ($index === 0)
+                                <td rowspan="{{ $rowCount }}">{{ $index1 + 1 }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->no_inv }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tgl_inv) }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->pembelian->lokasi->nama }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->pembelian->supplier->nama }}</td>
+                            @endif
+                            <td>{{ $produkItem->produk->nama }}</td>
+                            <td>{{ formatRupiah($produkItem->harga) }}</td>
+                            <td>{{ formatRupiah($produkItem->diskon) }}</td>
+                            <td>{{ $produkItem->jml_diterima }}</td>
+                            <td>{{ formatRupiah(($produkItem->harga - $produkItem->diskon) * $produkItem->jml_diterima )}}</td>
+                            @if ($index === 0)
+                                <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->ppn) }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->biaya_kirim) }}</td>
+                                @if ($item->retur && $item->retur->status_dibuat == "DIKONFIRMASI")
+                                    <td rowspan="{{ $rowCount }}">{{ $item->retur->komplain }}</td>
+                                    <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->retur->subtotal) }}</td>
+                                    <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->retur->ongkir) }}</td>
+                                @else
+                                    <td rowspan="{{ $rowCount }}">-</td>
+                                    <td rowspan="{{ $rowCount }}">-</td>
+                                    <td rowspan="{{ $rowCount }}">-</td>
+                                @endif
+
+                                <td rowspan="{{ $rowCount }}">{{ formatRupiah($item->total_tagihan) }}</td>
+                            @endif
                         </tr>
-                    @endfor
+                    @endforeach
                 @endforeach
             </tbody>
         </table>

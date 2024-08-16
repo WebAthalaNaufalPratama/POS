@@ -258,8 +258,8 @@
         });
 
         $('#clearBtn').on('click', function() {
-            $('#filterCustomer').val('');
-            $('#filterDriver').val('');
+            $('#filterCustomer').val('').trigger('change');
+            $('#filterDriver').val('').trigger('change');
             $('#filterDateStart').val('');
             $('#filterDateEnd').val('');
             table.ajax.reload();
