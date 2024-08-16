@@ -458,7 +458,7 @@ class PembayaranController extends Controller
         $validator = Validator::make($req->all(), [
             'invoice_purchase_id' => 'required',
             'no_invoice_bayar' => 'required',
-            'id_po' => 'requred',
+            'id_po' => 'required',
             'type' => 'required',
             'tanggal_bayar' => 'required',
             'nominal' => 'required',
@@ -663,22 +663,75 @@ class PembayaranController extends Controller
     }
 
     public function index_po(Request $req){
-        $query = Pembayaran::where(function($query) {
-            $query->where('no_invoice_bayar', 'LIKE', '%BYPO%')
-                  ->orWhere('no_invoice_bayar', 'LIKE', '%BYMI%');
-        });
+        // start datatable keluar
+            if ($req->ajax() && $req->table == 'keluar') {
+                $query = Pembayaran::where(function($query) {
+                    $query->where('no_invoice_bayar', 'LIKE', '%BYPO%')
+                        ->orWhere('no_invoice_bayar', 'LIKE', '%BYMI%');
+                });
 
-        if ($req->metode_keluar) {
-            $query->where('cara_bayar', $req->input('metode_keluar'));
-        }
-        if ($req->dateStart) {
-            $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
-        }
-        $data = $query->orderByDesc('id')->get();
+                if ($req->metode_keluar) {
+                    $query->where('cara_bayar', $req->input('metode_keluar'));
+                }
+                if ($req->dateStart) {
+                    $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
+                }
+                if ($req->dateEnd) {
+                    $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
+                }
 
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                $query->orderBy($columnName, $dir);
+                $recordsFiltered = $query->count();
+                $tempData = $query->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->userRole = Auth::user()->getRoleNames()->first();
+                    $item->tanggal_bayar_format = tanggalindo($item->tanggal_bayar);
+                    $item->nominal_format = formatRupiah($item->nominal);
+                    if ($item->po){
+                        $item->no_referensi = $item->po->pembelian ? $item->po->pembelian->no_po : ($item->po->poinden ? $item->po->poinden->no_po : '');
+                    } elseif($item->mutasiinden){
+                        $item->no_referensi = $item->mutasiinden->no_mutasi ?? '';
+                    } else {
+                        $item->no_referensi = '-';
+                    }
+                    $item->nomor_rekening = $item->rekening->nama_akun ?? '-';
+                    return $item;
+                });
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $data = $data->filter(function($item) use ($search) {
+                        return stripos($item->no_inv, $search) !== false
+                            || stripos($item->tanggal_bayar_format, $search) !== false
+                            || stripos($item->nominal_format, $search) !== false
+                            || stripos($item->no_referensi, $search) !== false
+                            || stripos($item->sisa_format, $search) !== false
+                            || stripos($item->cara_bayar, $search) !== false
+                            || stripos($item->status_bayar, $search) !== false
+                            || stripos($item->nomor_rekening, $search) !== false;
+                    });
+                }
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => Invoicepo::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $data,
+                ]);
+            }
+        //  end datatable keluar
         $query2 = Pembayaran::where(function($query2) {
             $query2->where('no_invoice_bayar', 'LIKE', '%Refundpo%')
                   ->orWhere('no_invoice_bayar', 'LIKE', '%RefundInden%');
@@ -695,7 +748,7 @@ class PembayaranController extends Controller
         }
         $data2 = $query2->orderByDesc('id')->get();
         // dd($data, $data2); // Tambahkan ini untuk debug
-        return view('purchase.indexpembayaran', compact('data', 'data2'));
+        return view('purchase.indexpembayaran', compact('data2'));
     }
 
     public function store_po(Request $req){
