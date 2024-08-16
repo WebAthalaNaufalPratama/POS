@@ -275,8 +275,12 @@ class InitialSeeder extends Seeder
                 'auditmutasioutlet',
                 'formpenjualan.cetak',
                 'formmutasigalery.cetak',
-                'laporan.pelanggan',
                 'laporan.penjualan',
+                'laporan.pembayaran',
+                'laporan.pelanggan',
+                'laporan.barang_keluar',
+                'laporan.dopenjualan',
+                'laporan.mutasi'
             ];
             $kasrigalleryPermissionList = array_merge($basiPermissionList, $kasrigalleryPermissionList);
             $query = Permission::query();
@@ -311,9 +315,6 @@ class InitialSeeder extends Seeder
                 'laporan.penjualan',
                 'laporan.pembayaran',
                 'laporan.pelanggan',
-                'laporan.barang_keluar',
-                'laporan.dopenjualan',
-                'laporan.mutasi'
             ];
             $kasiroutletPermissionList = array_merge($basiPermissionList, $kasiroutletPermissionList);
             $query = Permission::query();
