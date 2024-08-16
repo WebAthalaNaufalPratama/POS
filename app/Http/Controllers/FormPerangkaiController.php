@@ -466,13 +466,6 @@ class FormPerangkaiController extends Controller
         return view('form_jual.index', compact('perangkai'));
     }
 
-
-
-
-
-
-
-
     public function penjualan_show($formpenjualan)
     {
         $data = FormPerangkai::with('produk_terjual')->find($formpenjualan);
