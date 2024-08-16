@@ -124,39 +124,31 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="masuk">
                 <thead>
                 <tr>
                     <th>No</th>
+                    <th>Id</th>
                     <th>No Retur/No Retur Inden</th>
-                    {{-- <th>No Invoice Purchase</th> --}}
                     <th>No Invoice Pembayaran</th>
                     <th>Nominal</th>
                     <th>Tanggal Bayar</th>
                     <th>Metode</th>
                     <th>Rekening</th>
                     <th class="text-center">Status</th>
-                    {{-- <th>Aksi</th> --}}
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data2 as $item)
+                    {{-- @foreach ($data2 as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                {{-- @if ($item->retur && $item->retur->invoice)
-                                    {{ $item->retur->invoice->pembelian ? $item->retur->invoice->pembelian->no_po : ($item->retur->invoice->poinden ? $item->retur->invoice->poinden->no_po : '') }}
-                                @else
-                                    
-                                @endif --}}
-
                                 @if ($item->retur)
                                     {{ $item->retur->no_retur }}
                                 @elseif($item->returinden)
                                     {{ $item->returinden->no_retur}}
                                 @endif
                             </td>
-                            {{-- <td>{{ $item->retur && $item->retur->invoice ? $item->retur->invoice->no_inv : '-' }}</td> --}}
                             <td>{{ $item->no_invoice_bayar }}</td>
                             <td>{{ formatRupiah($item->nominal) }}</td>
                             <td>{{ tanggalindo($item->tanggal_bayar) }}</td>
@@ -170,11 +162,8 @@
                                 @endif
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
-                
-                
-                
             </table>
             </div>
         </div>
@@ -253,7 +242,74 @@
                     $('#filterDateEnd').val('');
                     table.ajax.reload();
                 });
-            // End Datatble PO
+            // End Datatble keluar
+
+            // Start Datatable masuk
+                const columns2 = [
+                    { data: 'no', name: 'no', orderable: false },
+                    { data: 'id', name: 'id', visible: false },
+                    { data: 'no_referensi', name: 'no_referensi', orderable: false },
+                    { data: 'no_invoice_bayar', name: 'no_invoice_bayar' },
+                    { 
+                        data: 'nominal', 
+                        name: 'nominal', 
+                        render: function(data, type, row) {
+                            return row.nominal_format;
+                        } 
+                    },
+                    { 
+                        data: 'tanggal_bayar', 
+                        name: 'tanggal_bayar', 
+                        render: function(data, type, row) {
+                            return row.tanggal_bayar_format;
+                        } 
+                    },
+                    { data: 'cara_bayar', name: 'cara_bayar' },
+                    { data: 'nomor_rekening', name: 'nomor_rekening', orderable: false  },
+                    { 
+                        data: 'status_bayar', 
+                        name: 'status_bayar',
+                        render: function(data, type, row) {
+                            if (row.status_bayar == 'LUNAS'){
+                                return `<span class="badges bg-lightgreen">${row.status_bayar}</span>`;
+                            }
+                            else {
+                                return `<span class="badges bg-lightgrey">${row.status_bayar}</span>`;
+                            }
+                        }
+                    },
+                ];
+
+                let table2 = initDataTable('#masuk', {
+                    ajaxUrl: "{{ route('pembayaranbeli.index') }}",
+                    columns: columns2,
+                    order: [[1, 'asc']],
+                    searching: true,
+                    lengthChange: true,
+                    pageLength: 5
+                }, {
+                    metode_masuk: '#filterMetodemasuk',
+                    dateStart2: '#filterDateStart2',
+                    dateEnd2: '#filterDateEnd2'
+                }, 'masuk');
+
+                const handleSearch2 = debounce(function() {
+                    table2.ajax.reload();
+                }, 5000); // Adjust the debounce delay as needed
+
+                $('#filterMetodemasuk, #filterDateStart2, #filterDateEnd2').on('input', handleSearch2);
+
+                $('#filterBtn2').on('click', function() {
+                    table2.ajax.reload();
+                });
+
+                $('#clearBtn2').on('click', function() {
+                    $('#filterMetodemasuk').val('').trigger('change');
+                    $('#filterDateStart2').val('');
+                    $('#filterDateEnd2').val('');
+                    table2.ajax.reload();
+                });
+            // End Datatble masuk
         });
 
         $('#bayar').on('change', function() {
@@ -276,99 +332,6 @@
                 $(this).val(sisaTagihan);
             }
         });
-        // $('#filterBtn, #filterBtn2').click(function(){
-        //     var baseUrl = $(this).data('base-url');
-        //     var urlString = baseUrl;
-        //     var first = true;
-        //     var symbol = '';
-
-        //     var metode = $('#filterMetodekeluar').val();
-        //     if (metode) {
-        //         var filterMetode = 'metode_keluar=' + metode;
-        //         if (first == true) {
-        //             symbol = '?';
-        //             first = false;
-        //         } else {
-        //             symbol = '&';
-        //         }
-        //         urlString += symbol;
-        //         urlString += filterMetode;
-        //     }
-
-        //     var dateStart = $('#filterDateStart').val();
-        //     if (dateStart) {
-        //         var filterDateStart = 'dateStart=' + dateStart;
-        //         if (first == true) {
-        //             symbol = '?';
-        //             first = false;
-        //         } else {
-        //             symbol = '&';
-        //         }
-        //         urlString += symbol;
-        //         urlString += filterDateStart;
-        //     }
-
-        //     var dateEnd = $('#filterDateEnd').val();
-        //     if (dateEnd) {
-        //         var filterDateEnd = 'dateEnd=' + dateEnd;
-        //         if (first == true) {
-        //             symbol = '?';
-        //             first = false;
-        //         } else {
-        //             symbol = '&';
-        //         }
-        //         urlString += symbol;
-        //         urlString += filterDateEnd;
-        //     }
-
-        //     var metode2 = $('#filterMetodemasuk').val();
-        //     if (metode2) {
-        //         var filterMetode2 = 'metode_masuk=' + metode2;
-        //         if (first == true) {
-        //             symbol = '?';
-        //             first = false;
-        //         } else {
-        //             symbol = '&';
-        //         }
-        //         urlString += symbol;
-        //         urlString += filterMetode2;
-        //     }
-
-        //     var dateStart2 = $('#filterDateStart2').val();
-        //     if (dateStart2) {
-        //         var filterDateStart2 = 'dateStart2=' + dateStart2;
-        //         if (first == true) {
-        //             symbol = '?';
-        //             first = false;
-        //         } else {
-        //             symbol = '&';
-        //         }
-        //         urlString += symbol;
-        //         urlString += filterDateStart2;
-        //     }
-
-        //     var dateEnd2 = $('#filterDateEnd2').val();
-        //     if (dateEnd2) {
-        //         var filterDateEnd2 = 'dateEnd2=' + dateEnd2;
-        //         if (first == true) {
-        //             symbol = '?';
-        //             first = false;
-        //         } else {
-        //             symbol = '&';
-        //         }
-        //         urlString += symbol;
-        //         urlString += filterDateEnd2;
-        //     }
-        //     window.location.href = urlString;
-        // });
-        // $('#clearBtn, #clearBtn2').click(function(){
-        //     var baseUrl = $(this).data('base-url');
-        //     var url = window.location.href;
-        //     if(url.indexOf('?') !== -1){
-        //         window.location.href = baseUrl;
-        //     }
-        //     return 0;
-        // });
         
         function bayar(invoice){
             console.log(invoice)

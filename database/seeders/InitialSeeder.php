@@ -477,6 +477,7 @@ class InitialSeeder extends Seeder
                 'laporan.pemakaian_sendiri',
                 'laporan.bunga_keluar',
                 'laporan.bunga_datang',
+                'retur_purchase.update',
             ];
         
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
