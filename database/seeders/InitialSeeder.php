@@ -355,6 +355,7 @@ class InitialSeeder extends Seeder
                 'form.edit',
                 'form.store',
                 'form.cetak',
+                'gambarpo.update',
                 'formpenjualan.index',
                 'formpenjualan.show',
                 'formpenjualan.update',
