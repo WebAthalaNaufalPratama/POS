@@ -2798,12 +2798,12 @@ class PembelianController extends Controller
 
         $getInvoice = Invoicepo::find($idinv);
 
-        if ($getInvoice->sisa !== 0)  {
+        if ($getInvoice->sisa != 0)  {
             return redirect()->back()->withInput()->with('fail', 'Tagihan belum Lunas');
 
         } elseif ($getInvoice->sisa == 0) {
             $getInvoice->pembuku = Auth::user()->id;
-            $getInvoice->status_dibuku = $data['status_dibuku'];
+            $getInvoice->status_dibuku = $data['status_ dibuku'];
             $getInvoice->tgl_dibukukan = $data['tgl_dibukukan'];
             $check = $getInvoice->update();
         }
