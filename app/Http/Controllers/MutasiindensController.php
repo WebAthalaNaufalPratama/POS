@@ -194,19 +194,19 @@ class MutasiindensController extends Controller
             
                 return [
                     'id' => $item->id,
-                    'no_mutasi' => $item->no_mutasi ?? 'N/A',
-                    'supplier' => $item->supplier->nama ?? 'N/A',
-                    'penerima' => $item->lokasi->nama ?? 'N/A',
+                    'no_mutasi' => $item->no_mutasi ?? '-',
+                    'supplier' => $item->supplier->nama ?? '-',
+                    'penerima' => $item->lokasi->nama ?? '-',
                     'tgl_kirim' => $formattedTglKirim,
                     'tgl_diterima' => $formattedTglDiterima,
-                    'status_dibuat' => $item->status_dibuat ?? 'N/A',
-                    'status_diterima' => $item->status_diterima ?? 'N/A',
-                    'status_diperiksa' => $item->status_diperiksa ?? 'N/A',
-                    'status_dibuku' => $item->status_dibukukan ?? 'N/A',
-                    'tagihan' => $item->total_biaya ?? 'N/A',
-                    'sisa_tagihan' => $item->sisa_bayar ?? 'N/A',
+                    'status_dibuat' => $item->status_dibuat ?? 'TUNDA',
+                    'status_diterima' => $item->status_diterima,
+                    'status_diperiksa' => $item->status_diperiksa,
+                    'status_dibuku' => $item->status_dibukukan ?? 'TUNDA',
+                    'tagihan' => $item->total_biaya ?? '-',
+                    'sisa_tagihan' => $item->sisa_bayar ?? '-',
                     'komplain' => $komplain,
-                    'status_komplain' => $statusKomplain ?? 'N/A',
+                    'status_komplain' => $statusKomplain ?? '-',
                     'returinden' => $item->returinden,
                 ];
             });
@@ -1268,8 +1268,8 @@ private function formatDate($date)
                     'total' => formatRupiah(floatval($item->refund)) ?? 'N/A',
                     'supplier' => $item->mutasiinden->supplier->nama ?? 'N/A',
                     'tujuan' => $item->mutasiinden->lokasi->nama ?? 'N/A',
-                    'status_dibuat' => $item->status_dibuat ?? 'N/A',
-                    'status_dibuku' => $item->status_dibukukan ?? 'N/A',
+                    'status_dibuat' => $item->status_dibuat ?? 'TUNDA',
+                    'status_dibuku' => $item->status_dibukukan ?? 'TUNDA',
                     'mutasiinden' => $item->mutasiinden,
                 ];
             });
