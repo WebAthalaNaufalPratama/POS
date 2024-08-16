@@ -40,6 +40,7 @@ class RekeningController extends Controller
             'nomor_rekening' => 'required|numeric|digits_between:10,16',
             'nama_akun' => 'required',
             'lokasi_id' => 'required|exists:lokasis,id',
+            'saldo_awal' => 'nullable'
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -90,6 +91,7 @@ class RekeningController extends Controller
             'nomor_rekening' => 'required|numeric|digits_between:10,16',
             'nama_akun' => 'required',
             'lokasi_id' => 'required|exists:lokasis,id',
+            'saldo_awal' => 'nullable'
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
