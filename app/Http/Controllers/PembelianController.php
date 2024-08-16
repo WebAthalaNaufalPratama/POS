@@ -2798,7 +2798,7 @@ class PembelianController extends Controller
 
         $getInvoice = Invoicepo::find($idinv);
 
-        if ($getInvoice->sisa !== 0)  {
+        if ($getInvoice->sisa != 0)  {
             return redirect()->back()->withInput()->with('fail', 'Tagihan belum Lunas');
 
         } elseif ($getInvoice->sisa == 0) {
