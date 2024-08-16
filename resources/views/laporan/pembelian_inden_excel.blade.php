@@ -96,9 +96,11 @@
                     <th class="align-middle">No</th>
                     <th class="align-middle">No Invoice</th>
                     <th class="align-middle">Tanggal</th>
+                    <th class="align-middle">Bulan Inden</th>
                     <th class="align-middle">List Barang</th>
                     <th class="align-middle">Harga</th>
-                    <th class="align-middle">Gallery</th>
+                    <th class="align-middle">Diskon</th>
+                    {{-- <th class="align-middle">Gallery</th> --}}
                     <th class="align-middle">Supplier</th>
                     <th class="align-middle">QTY</th>
                     <th class="align-middle">Harga Total</th>
@@ -113,18 +115,20 @@
                         <td rowspan="{{ $rowCount }}">{{ $loop->iteration }}</td>
                         <td rowspan="{{ $rowCount }}">{{ $item->no_inv }}</td>
                         <td rowspan="{{ $rowCount }}">{{ tanggalindo($item->tgl_inv) }}</td>
+                        <td rowspan="{{ $rowCount }}">{{ $item->poinden->bulan_inden}}</td>
                         <td>{{ $item->poinden->produkbeli[0]->produk->nama }}</td>
                         <td>{{ formatRupiah($item->poinden->produkbeli[0]->harga) }}</td>
-                        <td rowspan="{{ $rowCount }}">{{ $item->poinden->lokasi->nama }}</td>
+                        <td>{{ formatRupiah($item->poinden->produkbeli[0]->diskon) }}</td>
                         <td rowspan="{{ $rowCount }}">{{ $item->poinden->supplier->nama }}</td>
-                        <td>{{ $item->poinden->produkbeli[0]->jml_dikirim }}</td>
+                        <td>{{ $item->poinden->produkbeli[0]->jumlahInden }}</td>
                         <td>{{ formatRupiah($item->poinden->produkbeli[0]->totalharga) }}</td>
                     </tr>
                     @for ($i = 1; $i < $rowCount; $i++)
                         <tr>
                             <td>{{ $item->poinden->produkbeli[$i]->produk->nama }}</td>
                             <td>{{ formatRupiah($item->poinden->produkbeli[$i]->harga) }}</td>
-                            <td>{{ $item->poinden->produkbeli[$i]->jml_dikirim }}</td>
+                            <td>{{ formatRupiah($item->poinden->produkbeli[$i]->diskon) }}</td>
+                            <td>{{ $item->poinden->produkbeli[$i]->jumlahInden }}</td>
                             <td>{{ formatRupiah($item->poinden->produkbeli[$i]->totalharga) }}</td>
                         </tr>
                     @endfor

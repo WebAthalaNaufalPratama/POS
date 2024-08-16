@@ -141,9 +141,9 @@
                             <td>{{ $produkreturItem->alasan }}</td>
                             <td>{{ $produkreturItem->diskon *  $produkreturItem->jumlah }}</td>
                             @if ($index === 0)
-                                <td>{{ $item->komplain }}</td>
-                                <td>{{ $item->supplier_nama }}</td>
-                                <td>{{ $item->gallery_nama }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->komplain }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->supplier_nama }}</td>
+                                <td rowspan="{{ $rowCount }}">{{ $item->gallery_nama }}</td>
                             @endif
                         </tr>
                     @endforeach

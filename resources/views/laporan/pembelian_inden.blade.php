@@ -31,14 +31,14 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-lg col-sm-6 col-12">
+                            {{-- <div class="col-lg col-sm-6 col-12">
                                 <select id="filterGallery" name="filterGallery" class="form-control" title="Gallery">
                                     <option value="">Pilih Gallery</option>
                                     @foreach ($galleries as $item)
                                         <option value="{{ $item->id }}" {{ $item->id == request()->input('gallery') ? 'selected' : '' }}>{{ $item->nama }}</option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> --}}
                             <div class="col-lg col-sm-6 col-12">
                                 <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Awal Sewa">
                             </div>
@@ -59,8 +59,10 @@
                                 <th class="align-middle">No</th>
                                 <th class="align-middle">No Invoice</th>
                                 <th class="align-middle">Tanggal</th>
+                                <th class="align-middle">Bulan Inden</th>
                                 <th class="align-middle">List Barang</th>
                                 <th class="align-middle">Harga</th>
+                                <th class="align-middle">Diskon</th>
                                 {{-- <th class="align-middle">Gallery</th> --}}
                                 <th class="align-middle">Supplier</th>
                                 <th class="align-middle">QTY</th>
@@ -73,6 +75,8 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->no_inv }}</td>
                                 <td>{{ tanggalindo($item->tgl_inv) }}</td>
+                                <td>{{ $item->poinden->bulan_inden }}</td>
+                                
                                 <td>
                                     <table>
                                         @foreach ($item->poinden->produkbeli as $produk)
@@ -87,6 +91,15 @@
                                         @foreach ($item->poinden->produkbeli as $produk)
                                             <tr>
                                                 <td>{{ formatRupiah($produk->harga) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </table>
+                                </td>
+                                <td>
+                                    <table>
+                                        @foreach ($item->poinden->produkbeli as $produk)
+                                            <tr>
+                                                <td>{{ formatRupiah($produk->diskon) }}</td>
                                             </tr>
                                         @endforeach
                                     </table>

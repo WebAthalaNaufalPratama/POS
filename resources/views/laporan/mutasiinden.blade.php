@@ -81,8 +81,10 @@
                                 <th>Biaya Pengiriman</th>
                                 <th>Biaya Perawatan</th>
                                 <th>Total Biaya</th>
+                                <th>Sisa Tagihan</th>
                                 <th>Komplain</th>
-                                <th>Jumlah Komplain</th>
+                                <th>Refund/Diskon</th>
+                                <th>Sisa Refund</th>
                                 <th>Status Pembayaran</th>
                                
                             </tr>
@@ -168,17 +170,24 @@
                                 <td>{{ FormatRupiah($mutasi->biaya_pengiriman) }}</td>
                                 <td>{{ FormatRupiah($mutasi->biaya_perawatan) }}</td>
                                 <td>{{ formatRupiah($mutasi->total_biaya) }}</td>
+                                <td>{{ formatRupiah($mutasi->sisa_bayar) }}</td>
+                                @if ($mutasi->returinden && $mutasi->returinden->status_dibuat == "DIKONFIRMASI")
+                                    
                                 <td>{{ $mutasi->returinden ? $mutasi->returinden->tipe_komplain : '-' }}</td>
                                 <td>{{ $mutasi->returinden ? formatRupiah($mutasi->returinden->refund ): '-' }}</td>
+                                <td>{{ $mutasi->returinden ? formatRupiah($mutasi->returinden->sisa_refund): '-' }}</td>
+                                @else
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                    
+                                @endif
                                <td>
-                            
-                                @if (($mutasi->returinden && $mutasi->returinden->status_dibuat !=="BATAL" && $mutasi->sisa_bayar == 0 && $mutasi->returinden->sisa_refund == 0) || (!$mutasi->returinden || $mutasi->returinden->status_dibuat =="BATAL" && $mutasi->sisa_bayar == 0))
+                                @if (($mutasi->returinden && $mutasi->returinden->status_dibuat == "DIKONFIRMASI" && $mutasi->sisa_bayar == 0 && $mutasi->returinden->sisa_refund == 0) || (!$mutasi->returinden || $mutasi->returinden->status_dibuat =="BATAL" && $mutasi->sisa_bayar == 0))
                                     Lunas
                                 @else
                                     Belum Lunas
                                 @endif
-
-                              
                                </td>
                             </tr>
                             @endforeach

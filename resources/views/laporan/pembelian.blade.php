@@ -66,6 +66,12 @@
                                 <th class="align-middle">Diskon</th>
                                 <th class="align-middle">QTY</th>
                                 <th class="align-middle">Harga Total</th>
+                                <th class="align-middle">PPN</th>
+                                <th class="align-middle">Ongkir</th>
+                                <th class="align-middle">Komplain</th>
+                                <th class="align-middle">Nominal Komplain</th>
+                                <th class="align-middle">Ongkir Komplain</th>
+                                <th class="align-middle">Total Akhir</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -122,6 +128,19 @@
                                         @endforeach
                                     </table>
                                 </td>
+                                <td>{{ formatRupiah($item->ppn) }}</td>
+                                <td>{{ formatRupiah($item->biaya_kirim) }}</td>
+                                @if ($item->retur && $item->retur->status_dibuat == "DIKONFIRMASI")
+                                <td>{{ $item->retur->komplain }}</td>
+                                <td>{{ formatRupiah($item->retur->subtotal) }}</td>
+                                <td>{{ formatRupiah($item->retur->ongkir) }}</td>
+                                @else
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                @endif
+                                <td>{{ formatRupiah($item->total_tagihan) }}</td>
+
                             </tr>
                             @endforeach
                         </tbody>

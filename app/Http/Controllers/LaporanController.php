@@ -1380,7 +1380,7 @@ class LaporanController extends Controller
 
     public function pembelian_inden_excel(Request $req)
     {
-        $query = Invoicepo::with(['poineden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
+        $query = Invoicepo::with(['poinden.produkbeli'])->whereHas('poinden')->where('status_dibuat', 'DIKONFIRMASI');
 
         if ($req->supplier) {
             $query->whereHas('poinden', function($q) use($req){
@@ -1607,7 +1607,7 @@ class LaporanController extends Controller
         $totalSisaBunga = array_sum($total);
 
         if(empty($data)) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new StokIndenExport($data, $produk, $total, $totalSisaBunga), 'pembelian_inden.xlsx');
+        return Excel::download(new StokIndenExport($data, $produk, $total, $totalSisaBunga), 'stok_inden.xlsx');
     }
 
     public function hutang_supplier_index(Request $req)
@@ -1636,7 +1636,7 @@ class LaporanController extends Controller
         $data = $query->get()->map(function($item){
             $supplier = null;
             $supplierName = null;
-            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            $item->terbayar = $item->total_tagihan - $item->sisa;
             if ($item->poinden && $item->poinden->supplier) {
                 $supplier = $item->poinden->supplier->id;
                 $supplierName = $item->poinden->supplier->nama;
@@ -1699,7 +1699,7 @@ class LaporanController extends Controller
         $data = $query->get()->map(function($item){
             $supplier = null;
             $supplierName = null;
-            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            $item->terbayar = $item->total_tagihan - $item->sisa;
             if ($item->poinden && $item->poinden->supplier) {
                 $supplier = $item->poinden->supplier->id;
                 $supplierName = $item->poinden->supplier->nama;
@@ -1748,7 +1748,7 @@ class LaporanController extends Controller
         $data = $query->get()->map(function($item){
             $supplier = null;
             $supplierName = null;
-            $item->terbayar = $item->total_tagihan - $item->dp - $item->sisa;
+            $item->terbayar = $item->total_tagihan - $item->sisa;
             if ($item->poinden && $item->poinden->supplier) {
                 $supplier = $item->poinden->supplier->id;
                 $supplierName = $item->poinden->supplier->nama;
@@ -4655,9 +4655,6 @@ class LaporanController extends Controller
         return view('laporan.dopenjualan', compact('combinedData', 'galleries', 'customers'));
     }
 
-
-
-
     public function dopenjualan_pdf(Request $req)
     {
         // Query DeliveryOrder with filters
@@ -4897,8 +4894,6 @@ class LaporanController extends Controller
         return view('laporan.returpenjualan', compact('returpenjualan', 'produkterjual', 'penjualan','galleries', 'customers', 'supplier'));
     }
 
-
-
     public function returpenjualan_pdf(Request $req)
     {
         $query = ReturPenjualan::where('status', 'DIKONFIRMASI')
@@ -5098,8 +5093,6 @@ class LaporanController extends Controller
 
         return view('laporan.penjualan', compact('combinedData', 'galleries', 'customers', 'sales'));
     }
-
-
 
     public function penjualan_pdf(Request $req)
     {
@@ -5929,23 +5922,23 @@ class LaporanController extends Controller
                 'produkterjual' => collect(),
                 'mutasiinden' => collect(),
                 'suppliers' => Supplier::where('tipe_supplier', 'inden')->get(),
-                'galleries' => Lokasi::where('tipe_lokasi', 1)->get(),
+                'galleries' => Lokasi::whereIn('tipe_lokasi', [1,3,4])->get(),
                 'inventorys' => InventoryInden::all()
             ]);
         }
 
         $mutasiindenQuery = Mutasiindens::whereNotNull('pembuat_id')
-            ->whereNotNull('pembuku_id')
-            ->whereNotNull('penerima_id')
-            ->whereNotNull('pemeriksa_id')
+            // ->whereNotNull('pembuku_id')
+            // ->whereNotNull('penerima_id')
+            // ->whereNotNull('pemeriksa_id')
             ->whereNotNull('tgl_dibuat')
-            ->whereNotNull('tgl_dibukukan')
-            ->whereNotNull('tgl_diterima_ttd')
-            ->whereNotNull('tgl_diperiksa')
-            ->where('status_dibuat', 'DIKONFIRMASI')
-            ->where('status_diterima', 'DIKONFIRMASI')
-            ->where('status_dibukukan', 'DIKONFIRMASI')
-            ->where('status_diperiksa', 'DIKONFIRMASI');
+            // ->whereNotNull('tgl_dibukukan')
+            // ->whereNotNull('tgl_diterima_ttd')
+            // ->whereNotNull('tgl_diperiksa')
+            ->where('status_dibuat', 'DIKONFIRMASI');
+            // ->where('status_diterima', 'DIKONFIRMASI')
+            // ->where('status_dibukukan', 'DIKONFIRMASI')
+            // ->where('status_diperiksa', 'DIKONFIRMASI');
 
         if ($req->pengirim) {
             $mutasiindenQuery->where('supplier_id', $req->pengirim);
@@ -5973,7 +5966,7 @@ class LaporanController extends Controller
         }
         
         $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
-        $galleries = Lokasi::where('tipe_lokasi', 1)->get();
+        $galleries = Lokasi::whereIn('tipe_lokasi', [1,3,4])->get();
         $inventorys = InventoryInden::all();
 
         return view('laporan.mutasiinden', compact('produkterjual', 'mutasiinden', 'suppliers', 'galleries', 'inventorys'));
@@ -5995,23 +5988,23 @@ class LaporanController extends Controller
                 'produkterjual' => collect(),
                 'mutasiinden' => collect(),
                 'suppliers' => Supplier::all(),
-                'galleries' => Lokasi::where('tipe_lokasi', 1)->get(),
+                'galleries' => Lokasi::whereIn('tipe_lokasi', [1,3,4])->get(),
                 'inventorys' => InventoryInden::all()
             ]);
         }
 
         $mutasiinden = Mutasiindens::whereNotNull('pembuat_id')
-            ->whereNotNull('pembuku_id')
-            ->whereNotNull('penerima_id')
-            ->whereNotNull('pemeriksa_id')
+            // ->whereNotNull('pembuku_id')
+            // ->whereNotNull('penerima_id')
+            // ->whereNotNull('pemeriksa_id')
             ->whereNotNull('tgl_dibuat')
-            ->whereNotNull('tgl_dibukukan')
-            ->whereNotNull('tgl_diterima_ttd')
-            ->whereNotNull('tgl_diperiksa')
-            ->where('status_dibuat', 'DIKONFIRMASI')
-            ->where('status_diterima', 'DIKONFIRMASI')
-            ->where('status_dibukukan', 'DIKONFIRMASI')
-            ->where('status_diperiksa', 'DIKONFIRMASI');
+            // ->whereNotNull('tgl_dibukukan')
+            // ->whereNotNull('tgl_diterima_ttd')
+            // ->whereNotNull('tgl_diperiksa')
+            ->where('status_dibuat', 'DIKONFIRMASI');
+            // ->where('status_diterima', 'DIKONFIRMASI')
+            // ->where('status_dibukukan', 'DIKONFIRMASI')
+            // ->where('status_diperiksa', 'DIKONFIRMASI');
 
         if ($req->pengirim) {
             $mutasiinden->where('supplier_id', $req->pengirim);
@@ -6057,23 +6050,23 @@ class LaporanController extends Controller
                 'produkterjual' => collect(),
                 'mutasiinden' => collect(),
                 'suppliers' => Supplier::all(),
-                'galleries' => Lokasi::where('tipe_lokasi', 1)->get(),
+                'galleries' => Lokasi::whereIn('tipe_lokasi', [1,3,4])->get(),
                 'inventorys' => InventoryInden::all()
             ]);
         }
 
         $mutasiinden = Mutasiindens::whereNotNull('pembuat_id')
-            ->whereNotNull('pembuku_id')
-            ->whereNotNull('penerima_id')
-            ->whereNotNull('pemeriksa_id')
+            // ->whereNotNull('pembuku_id')
+            // ->whereNotNull('penerima_id')
+            // ->whereNotNull('pemeriksa_id')
             ->whereNotNull('tgl_dibuat')
-            ->whereNotNull('tgl_dibukukan')
-            ->whereNotNull('tgl_diterima_ttd')
-            ->whereNotNull('tgl_diperiksa')
-            ->where('status_dibuat', 'DIKONFIRMASI')
-            ->where('status_diterima', 'DIKONFIRMASI')
-            ->where('status_dibukukan', 'DIKONFIRMASI')
-            ->where('status_diperiksa', 'DIKONFIRMASI');
+            // ->whereNotNull('tgl_dibukukan')
+            // ->whereNotNull('tgl_diterima_ttd')
+            // ->whereNotNull('tgl_diperiksa')
+            ->where('status_dibuat', 'DIKONFIRMASI');
+            // ->where('status_diterima', 'DIKONFIRMASI')
+            // ->where('status_dibukukan', 'DIKONFIRMASI')
+            // ->where('status_diperiksa', 'DIKONFIRMASI');
 
         if ($req->pengirim) {
             $mutasiinden->where('supplier_id', $req->pengirim);
@@ -6099,7 +6092,7 @@ class LaporanController extends Controller
         })->flatten();
 
         if($produkterjual->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
-        return Excel::download(new MutasiindenExport($produkterjual, $mutasiindenRecords), 'mutasi.xlsx');
+        return Excel::download(new MutasiindenExport($produkterjual, $mutasiindenRecords), 'mutasiinden.xlsx');
     }
     public function listDatePerMonth($month = null, $year = null)
     {

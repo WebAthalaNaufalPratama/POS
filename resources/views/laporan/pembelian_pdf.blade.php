@@ -74,6 +74,7 @@
                     <th class="align-middle">Supplier</th>
                     <th class="align-middle">List Barang</th>
                     <th class="align-middle">Harga</th>
+                    <th class="align-middle">Diskon</th>
                     <th class="align-middle">QTY</th>
                     <th class="align-middle">Harga Total</th>
                 </tr>
@@ -95,8 +96,9 @@
                             @endif
                             <td>{{ $produkItem->produk->nama }}</td>
                             <td>{{ formatRupiah($produkItem->harga) }}</td>
-                            <td>{{ $produkItem->jml_dikirim }}</td>
-                            <td>{{ formatRupiah($produkItem->totalharga) }}</td>
+                            <td>{{ formatRupiah($produkItem->diskon) }}</td>
+                            <td>{{ $produkItem->jml_diterima }}</td>
+                            <td>{{ formatRupiah(($produkItem->harga - $produkItem->diskon) * $produkItem->jml_diterima )}}</td>
                         </tr>
                     @endforeach
                 @endforeach
