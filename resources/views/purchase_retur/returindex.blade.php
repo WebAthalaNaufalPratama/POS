@@ -271,11 +271,13 @@
 
                         // Generate action links based on roles and status
                         if (userRoles.includes('Finance')) {
-                            dropdownHtml += `
+                            if(row.status_dibuku === 'DIKONFIRMASI') {
+                                dropdownHtml += `
                                 <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">
                                     ${row.komplain === 'Refund' && row.sisa !== 0 ? 'Input Refund' : 'Detail Retur'}
                                 </a>`;
+                            }
                             
                             if (row.status_dibuat === 'DIKONFIRMASI' && (row.status_dibuku === 'TUNDA' || row.status_dibuku === null || row.status_dibuku === 'BATAL')) {
                                 dropdownHtml += `
@@ -299,11 +301,13 @@
                             }
                         }
 
-                        // Common action for all users
                         dropdownHtml += `
-                            <a href="${window.routes.InvoiceShow.replace('__ID__', row.invoice_pembelian_id, 'type', 'pembelian', 'id' , row.invoice_id)}" class="dropdown-item">
-                                <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Invoice
-                            </a>`;
+                                <a href="${window.routes.InvoiceShow
+                                    .replace('__IDINVOICEBELI__', row.invoice.pembelian_id)
+                                    .replace('__IDINVOICE__', row.invoice.id)}" 
+                                class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Invoice
+                                </a>`;
 
                         dropdownHtml += `</div></div>`;
                         

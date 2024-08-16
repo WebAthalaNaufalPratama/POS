@@ -112,7 +112,7 @@ class MutasiindensController extends Controller
     public function index_indengh(Request $req)
     {
         if ($req->ajax()) {
-            $query = Mutasiindens::query();
+            $query = Mutasiindens::with('returinden');
 
             $query->when(Auth::user()->hasRole('AdminGallery'), function($q) {
                 $q->where('status_dibuat', 'DIKONFIRMASI')
@@ -207,6 +207,7 @@ class MutasiindensController extends Controller
                     'sisa_tagihan' => $item->sisa_bayar ?? 'N/A',
                     'komplain' => $komplain,
                     'status_komplain' => $statusKomplain ?? 'N/A',
+                    'returinden' => $item->returinden,
                 ];
             });
                             
@@ -1182,106 +1183,107 @@ private function formatDate($date)
 
     
     public function index_returinden(Request $req)
-{
-    if ($req->ajax()) {
-        $query = Returinden::with('mutasiinden');
+    {
+        if ($req->ajax()) {
+            $query = Returinden::with('mutasiinden');
 
-        $query->when(Auth::user()->hasRole('Finance'), function($q){
-            $q->where('status_dibuat', 'DIKONFIRMASI');
-            // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        });
+            $query->when(Auth::user()->hasRole('Finance'), function($q){
+                $q->where('status_dibuat', 'DIKONFIRMASI');
+                // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            });
 
-        if ($req->filled('dateStart')) {
-            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
-        }
-        if ($req->filled('dateEnd')) {
-            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
-        }
-
-        // DataTables column sorting
-        $columns = [
-            0 => 'id',
-            1 => 'tgl_dibuat',
-            2 => 'no_retur',
-            3 => 'no_mutasi',
-            4 => 'tipe_komplain',
-            5 => 'alasan',
-            6 => 'kode_inden',
-            7 => 'nama_produk',
-            8 => 'harga',
-            9 => 'qty',
-            10 => 'total',
-            11 => 'supplier',
-            12 => 'tujuan',
-            13 => 'status_dibuat',
-            14 => 'status_dibuku'
-        ];
-
-        $orderColumnIndex = $req->input('order.0.column');
-        $orderDirection = $req->input('order.0.dir', 'asc');
-        $orderColumn = $columns[$orderColumnIndex] ?? 'id';
-
-        $query->orderBy($orderColumn, $orderDirection);
-
-        $totalRecords = $query->count();
-        $returs = $query->skip($req->input('start', 0))
-                        ->take($req->input('length', 10))
-                        ->get();
-
-        $data = $returs->map(function($item) {
-            $tipeKomplainFormatted = 'N/A';
-            if ($item->status_dibuat !== "BATAL") {
-                if ($item->tipe_komplain == "Refund") {
-                    $tipeKomplainFormatted = $item->sisa_refund == 0 ? '| Lunas' : '| Belum Lunas';
-                }
+            if ($req->filled('dateStart')) {
+                $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
             }
-            $alasanList = $item->produkreturinden->map(function($produkretur) {
-                return $produkretur->alasan;
-            })->implode('</li><li>');
-            $kode_inden = $item->produkreturinden->map(function($produkretur) {
-                return $produkretur->produk->produk->kode_produk_inden;
-            })->implode('</li><li>');
-            $nama_produk = $item->produkreturinden->map(function($produkretur) {
-                return $produkretur->produk->produk->produk->nama;
-            })->implode('</li><li>');
-            $harga = $item->produkreturinden->map(function($produkretur) {
-                return $produkretur->harga_satuan;
-            })->implode('</li><li>');
-            $qty = $item->produkreturinden->map(function($produkretur) {
-                return $produkretur->jml_diretur;
-            })->implode('</li><li>');
-            $formattedHarga = $harga;
-            
+            if ($req->filled('dateEnd')) {
+                $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+            }
 
-            return [
-                'id' => $item->id,
-                'tgl_komplain' => $this->formatDate($item->tgl_dibuat),
-                'no_retur' => $item->no_retur ?? 'N/A',
-                'no_mutasi' => $item->mutasiinden->no_mutasi ?? 'N/A',
-                'tipe_komplain' => $tipeKomplainFormatted ?? 'N/A',
-                'alasan' => $alasanList ?? 'N/A',
-                'kode_inden' => $kode_inden ?? 'N/A',
-                'nama_produk' => $nama_produk ?? 'N/A',
-                'harga' => formatRupiah(floatval($formattedHarga)) ?? 'N/A',
-                'qty' => $qty ?? 'N/A',
-                'total' => formatRupiah(floatval($item->refund)) ?? 'N/A',
-                'supplier' => $item->mutasiinden->supplier->nama ?? 'N/A',
-                'tujuan' => $item->mutasiinden->lokasi->nama ?? 'N/A',
-                'status_dibuat' => $item->status_dibuat ?? 'N/A',
-                'status_dibuku' => $item->status_dibukukan ?? 'N/A',
+            // DataTables column sorting
+            $columns = [
+                0 => 'id',
+                1 => 'tgl_dibuat',
+                2 => 'no_retur',
+                3 => 'no_mutasi',
+                4 => 'tipe_komplain',
+                5 => 'alasan',
+                6 => 'kode_inden',
+                7 => 'nama_produk',
+                8 => 'harga',
+                9 => 'qty',
+                10 => 'total',
+                11 => 'supplier',
+                12 => 'tujuan',
+                13 => 'status_dibuat',
+                14 => 'status_dibuku'
             ];
-        });
 
-        return response()->json([
-            'draw' => (int) $req->input('draw'),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data' => $data
-        ]);
+            $orderColumnIndex = $req->input('order.0.column');
+            $orderDirection = $req->input('order.0.dir', 'asc');
+            $orderColumn = $columns[$orderColumnIndex] ?? 'id';
+
+            $query->orderBy($orderColumn, $orderDirection);
+
+            $totalRecords = $query->count();
+            $returs = $query->skip($req->input('start', 0))
+                            ->take($req->input('length', 10))
+                            ->get();
+
+            $data = $returs->map(function($item) {
+                $tipeKomplainFormatted = 'N/A';
+                if ($item->status_dibuat !== "BATAL") {
+                    if ($item->tipe_komplain == "Refund") {
+                        $tipeKomplainFormatted = $item->sisa_refund == 0 ? '| Lunas' : '| Belum Lunas';
+                    }
+                }
+                $alasanList = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->alasan;
+                })->implode('</li><li>');
+                $kode_inden = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->produk->produk->kode_produk_inden;
+                })->implode('</li><li>');
+                $nama_produk = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->produk->produk->produk->nama;
+                })->implode('</li><li>');
+                $harga = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->harga_satuan;
+                })->implode('</li><li>');
+                $qty = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->jml_diretur;
+                })->implode('</li><li>');
+                $formattedHarga = $harga;
+                
+
+                return [
+                    'id' => $item->id,
+                    'tgl_komplain' => $this->formatDate($item->tgl_dibuat),
+                    'no_retur' => $item->no_retur ?? 'N/A',
+                    'no_mutasi' => $item->mutasiinden->no_mutasi ?? 'N/A',
+                    'tipe_komplain' => $tipeKomplainFormatted ?? 'N/A',
+                    'alasan' => $alasanList ?? 'N/A',
+                    'kode_inden' => $kode_inden ?? 'N/A',
+                    'nama_produk' => $nama_produk ?? 'N/A',
+                    'harga' => formatRupiah(floatval($formattedHarga)) ?? 'N/A',
+                    'qty' => $qty ?? 'N/A',
+                    'total' => formatRupiah(floatval($item->refund)) ?? 'N/A',
+                    'supplier' => $item->mutasiinden->supplier->nama ?? 'N/A',
+                    'tujuan' => $item->mutasiinden->lokasi->nama ?? 'N/A',
+                    'status_dibuat' => $item->status_dibuat ?? 'N/A',
+                    'status_dibuku' => $item->status_dibukukan ?? 'N/A',
+                    'mutasiinden' => $item->mutasiinden,
+                ];
+            });
+
+            return response()->json([
+                'draw' => (int) $req->input('draw'),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $data
+            ]);
+        }
+
+        return view('mutasiindengh.returindex');
     }
-
-    return view('mutasiindengh.returindex');
-}
 
 
     public function show_returinden($mutasiIG)
