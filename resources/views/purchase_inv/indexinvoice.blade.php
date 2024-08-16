@@ -43,7 +43,7 @@ $user = Auth::user();
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterStatus" name="filterStatus" class="form-control" title="Status">
-                            <option>Pilih Status</option>
+                            <option value="">Pilih Status</option>
                             <option value="Lunas" {{ request()->input('status') == 'Lunas' ? 'selected' : '' }}>Lunas</option>
                             <option value="Belum Lunas" {{ request()->input('status') == 'Belum Lunas' ? 'selected' : '' }}>Belum Lunas</option>
                         </select>

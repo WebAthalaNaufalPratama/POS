@@ -506,7 +506,7 @@ Carbon::setLocale('id');
             </div>
             <div class="mb-3">
               <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
+              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*" required>
             </div>
             
             <div class="modal-footer">
