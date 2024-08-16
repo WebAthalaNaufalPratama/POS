@@ -214,7 +214,6 @@ class InitialSeeder extends Seeder
                 'pembayaranbeli.index',
                 'retur_purchase.update',
                 'supplier',
-                'edit.retur',
                 'mutasighgalery',
                 'mutasigalerygalery',
                 'mutasiindengh',
@@ -484,6 +483,7 @@ class InitialSeeder extends Seeder
                 'laporan.bunga_keluar',
                 'laporan.bunga_datang',
                 'retur_purchase.update',
+                'edit.retur',
             ];
         
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
