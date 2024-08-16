@@ -466,6 +466,42 @@
                                 </a>
                                 <div class="dropdown-menu">`;
 
+                        if (userRoles.includes('AdminGallery')) {
+                            if (row.status_diterima === null) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.editMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Acc Terima
+                                        </a>
+                                    </li>`;
+                            } else if (row.status_diterima === "DIKONFIRMASI") {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
+                                        </a>
+                                    </li>`;
+                            }
+                        }
+
+                        // Actions for Auditor role
+                        if (userRoles.includes('Auditor')) {
+                            if (row.status_diperiksa === null) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.editMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Periksa
+                                        </a>
+                                    </li>`;
+                            } else if (row.status_diperiksa === "DIKONFIRMASI") {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
+                                        </a>
+                                    </li>`;
+                            }
+                        }
                         // Actions for Purchasing role
                         if (userRoles.includes('Purchasing')) {
                             if (row.status_dibuat === "TUNDA") {
@@ -576,7 +612,7 @@
                             }
                         }
                         if (row.returinden) {
-                            
+
                             dropdownHtml += `
                                             <li>
                                                 <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
