@@ -502,6 +502,7 @@
                                     </li>`;
                             }
                         }
+                        
                         // Actions for Purchasing role
                         if (userRoles.includes('Purchasing')) {
                             if (row.status_dibuat === "TUNDA") {
