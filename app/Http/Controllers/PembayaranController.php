@@ -273,15 +273,30 @@ class PembayaranController extends Controller
         
             $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
-                $item->tanggal_bayar = $item->tanggal_bayar == null ? null : formatTanggal($item->tanggal_bayar);
+                $item->tanggal_bayar_format = $item->tanggal_bayar == null ? null : formatTanggal($item->tanggal_bayar);
                 $item->no_kontrak = $item->sewa->no_sewa;
                 $item->no_invoice_tagihan = $item->sewa->no_invoice;
-                $item->nominal = formatRupiah($item->nominal);
-                $item->nama_rekening = $item->rekening->nama_akun ?? '';
+                $item->nominal_format = formatRupiah($item->nominal);
+                $item->nama_rekening = $item->rekening->nama_akun ?? '-';
                 $item->userRole = Auth::user()->getRoleNames()->first();
                 $item->cara_bayar = ucfirst($item->cara_bayar);
                 return $item;
             });
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $data = $data->filter(function($item) use ($search) {
+                    return stripos($item->no_invoice_bayar, $search) !== false
+                        || stripos($item->cara_bayar, $search) !== false
+                        || stripos($item->tanggal_bayar, $search) !== false
+                        || stripos($item->nominal, $search) !== false
+                        || stripos($item->no_kontrak, $search) !== false
+                        || stripos($item->no_invoice_tagihan, $search) !== false
+                        || stripos($item->nama_rekening, $search) !== false
+                        || stripos($item->nama_perangkai, $search) !== false;
+                });
+            }
 
             return response()->json([
                 'draw' => $req->input('draw'),

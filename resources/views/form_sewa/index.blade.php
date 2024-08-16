@@ -87,10 +87,16 @@
         const columns = [
             { data: 'no', name: 'no', orderable: false },
             { data: 'no_form', name: 'no_form' },
-            { data: 'no_kontrak', name: 'no_kontrak' },
-            { data: 'nama_produk', name: 'nama_produk' },
-            { data: 'nama_perangkai', name: 'nama_perangkai' },
-            { data: 'tanggal', name: 'tanggal' },
+            { data: 'no_kontrak', name: 'no_kontrak', orderable: false },
+            { data: 'nama_produk', name: 'nama_produk', orderable: false },
+            { data: 'nama_perangkai', name: 'nama_perangkai', orderable: false },
+            { 
+                data: 'tanggal', 
+                name: 'tanggal', 
+                render: function(data, type, row) {
+                    return row.tanggal_format;
+                } 
+            },
             {
                 data: 'action',
                 name: 'action',
@@ -141,7 +147,7 @@
         });
 
         $('#clearBtn').on('click', function() {
-            $('#filterPerangkai').val('');
+            $('#filterPerangkai').val('').trigger('change');
             $('#filterDateStart').val('');
             $('#filterDateEnd').val('');
             table.ajax.reload();

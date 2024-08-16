@@ -35,7 +35,7 @@ class InvoiceSewaController extends Controller
             });
         }
         if ($req->customer) {
-            $query->whereHas('sewa',function($q) use($req){
+            $query->whereHas('kontrak',function($q) use($req){
                 $q->where('customer_id', $req->input('customer'));
             });
         }
