@@ -432,7 +432,7 @@
                     render: function(data, type, row) {
                         // Assume `status_dibukukan` is also available in the row data
                         let statusDibukukan = row.status_dibuku;
-                        let sisaBayar = row.sisa_bayar;
+                        let sisaBayar = row.sisa_tagihan;
 
                         let statusHtml = '';
 
