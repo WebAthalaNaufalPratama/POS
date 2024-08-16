@@ -23,7 +23,7 @@ class Poinden extends Model
         'status_dibuat',
         'status_diperiksa',
     ];
-    public function supplier (){
+    public function supplier(){
         return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
     public function pembuat(){
@@ -32,10 +32,10 @@ class Poinden extends Model
     public function pemeriksa(){
         return $this->belongsTo(User::class, 'pemeriksa', 'id');
     }
-    public function produkbeli (){
-        return $this->hasMany(produkbeli::class);
+    public function produkbeli(){
+        return $this->hasMany(Produkbeli::class);
     }
-    public function invoice (){
+    public function invoice(){
         return $this->hasOne(Invoicepo::class);
     }
 
