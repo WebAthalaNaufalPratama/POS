@@ -2803,7 +2803,7 @@ class PembelianController extends Controller
 
         } elseif ($getInvoice->sisa == 0) {
             $getInvoice->pembuku = Auth::user()->id;
-            $getInvoice->status_dibuku = $data['status_ dibuku'];
+            $getInvoice->status_dibuku = $data['status_dibuku'];
             $getInvoice->tgl_dibukukan = $data['tgl_dibukukan'];
             $check = $getInvoice->update();
         }
