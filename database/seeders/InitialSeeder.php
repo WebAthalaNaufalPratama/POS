@@ -348,6 +348,7 @@ class InitialSeeder extends Seeder
                 'auditdopenjualan.edit',
                 'auditdopenjualan.update',
                 'pembayaran.index',
+                'returinden.update',
                 'pembayaran.show',
                 'pembayaran.edit',
                 'pembayaran.update',
