@@ -178,10 +178,22 @@
             const columns = [
                 { data: 'no', name: 'no', orderable: false },
                 { data: 'no_invoice_bayar', name: 'no_invoice_bayar' },
-                { data: 'no_invoice_tagihan', name: 'no_invoice_tagihan' },
-                { data: 'no_kontrak', name: 'no_kontrak' },
-                { data: 'nominal', name: 'nominal' },
-                { data: 'tanggal_bayar', name: 'tanggal_bayar' },
+                { data: 'no_invoice_tagihan', name: 'no_invoice_tagihan', orderable: false },
+                { data: 'no_kontrak', name: 'no_kontrak', orderable: false },
+                { 
+                    data: 'nominal', 
+                    name: 'nominal', 
+                    render: function(data, type, row) {
+                        return row.nominal_format;
+                    } 
+                },
+                { 
+                    data: 'tanggal_bayar', 
+                    name: 'tanggal_bayar', 
+                    render: function(data, type, row) {
+                        return row.tanggal_bayar_format;
+                    } 
+                },
                 { 
                     data: 'cara_bayar',
                     name: 'cara_bayar',
@@ -206,7 +218,7 @@
                         `;
                     }
                 },
-                { data: 'nama_rekening', name: 'nama_rekening' },
+                { data: 'nama_rekening', name: 'nama_rekening', orderable: false },
                 {
                     data: 'action',
                     name: 'action',
@@ -269,7 +281,7 @@
             });
 
             $('#clearBtn').on('click', function() {
-                $('#filterMetode').val('');
+                $('#filterMetode').val('').trigger('change');
                 $('#filterDateStart').val('');
                 $('#filterDateEnd').val('');
                 table.ajax.reload();

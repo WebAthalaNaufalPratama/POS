@@ -368,7 +368,7 @@
             });
 
             $('#clearBtn').on('click', function() {
-                $('#filterCustomer').val('');
+                $('#filterCustomer').val('').trigger('change');
                 $('#filterDateStart').val('');
                 $('#filterDateEnd').val('');
                 table.ajax.reload();

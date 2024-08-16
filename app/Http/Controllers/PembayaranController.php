@@ -24,40 +24,87 @@ class PembayaranController extends Controller
 {
 
     public function index(Request $req)
-    {
-        $user = Auth::user();
-        $lokasi = Karyawan::where('user_id', $user->id)->first();
-        $userroles = Auth::user()->roles()->value('name');
-        // dd($user);
-        if($lokasi->lokasi->tipe_lokasi == 2){
-            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'IPO%')->where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $penjualan->pluck('id')->toArray();
-            // dd($penjualanIds);
-            $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BOT%');
-        }elseif($lokasi->lokasi->tipe_lokasi == 1 ){
-            $penjualan = Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('lokasi_id', $lokasi->lokasi_id)->get();
-            $penjualanIds = $penjualan->pluck('id')->toArray();
-            // dd($penjualan);
-            $query = Pembayaran::whereNotNull('invoice_penjualan_id')->whereIn('invoice_penjualan_id', $penjualanIds)->where('no_invoice_bayar', 'LIKE', 'BYR%');
-            // dd($query);
-        }else{
-            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
-        }
+{
+    $user = Auth::user();
+    $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-        if ($req->metode) {
-            $query->where('cara_bayar', $req->input('metode'));
-        }
-        if ($req->dateStart) {
-            $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
-        }
-        $data = $query->orderByDesc('id')->get();
-        // $data = Pembayaran::with('rekening')->orderBy('created_at', 'desc')->get();
-
-        return view('pembayaran.index', compact('data'));
+    // Determine the query based on the location type
+    if ($lokasi->lokasi->tipe_lokasi == 2) {
+        $penjualanIds = Penjualan::where('no_invoice', 'LIKE', 'IPO%')
+                                 ->where('lokasi_id', $lokasi->lokasi_id)
+                                 ->pluck('id')
+                                 ->toArray();
+        $query = Pembayaran::whereNotNull('invoice_penjualan_id')
+                           ->whereIn('invoice_penjualan_id', $penjualanIds)
+                           ->where('no_invoice_bayar', 'LIKE', 'BOT%');
+    } elseif ($lokasi->lokasi->tipe_lokasi == 1) {
+        $penjualanIds = Penjualan::where('no_invoice', 'LIKE', 'INV%')
+                                 ->where('lokasi_id', $lokasi->lokasi_id)
+                                 ->pluck('id')
+                                 ->toArray();
+        $query = Pembayaran::whereNotNull('invoice_penjualan_id')
+                           ->whereIn('invoice_penjualan_id', $penjualanIds)
+                           ->where('no_invoice_bayar', 'LIKE', 'BYR%');
+    } else {
+        $query = Pembayaran::query(); // Change to Pembayaran to match the default case
     }
+
+    // Apply additional filters based on request parameters
+    if ($req->metode) {
+        $query->where('cara_bayar', $req->input('metode'));
+    }
+    if ($req->dateStart) {
+        $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
+    }
+    if ($req->dateEnd) {
+        $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
+    }
+
+    if ($req->ajax()) {
+        // Handle sorting
+        $orderColumn = $req->input('columns.' . $req->input('order.0.column') . '.data');
+        $orderDirection = $req->input('order.0.dir');
+
+        $totalRecords = $query->count();
+
+        // Apply sorting
+        $query->orderBy($orderColumn, $orderDirection);
+
+        // Apply pagination
+        $data = $query->skip($req->input('start'))
+                      ->take($req->input('length'))
+                      ->get();
+
+            $data = $data->map(function ($item) {
+            $nominal = str_replace('.', '', $item->nominal); // Remove thousands separator
+            $nominal = str_replace(',', '.', $nominal); // Replace decimal comma with dot
+
+            return [
+                'id' => $item->id,
+                'no_invoice_bayar' => $item->no_invoice_bayar,
+                'cara_bayar' => $item->cara_bayar,
+                'nominal' => $nominal, 
+                'rekening' => $item->rekening ? $item->rekening->bank : 'Pembayaran Cash',
+                'tanggal_bayar' => $item->tanggal_bayar ? \Carbon\Carbon::parse($item->tanggal_bayar)->format('d F Y') : '',
+                'status_bayar' => $item->status_bayar,
+                'action' => '<a href="' . route('pembayaran.edit', ['pembayaran' => $item->id]) . '" class="btn btn-sm btn-primary">Edit</a>'
+            ];
+        });
+                    
+                    
+
+        return response()->json([
+            'draw' => intval($req->input('draw')),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalRecords, // Adjust if using a filter
+            'data' => $data
+        ]);
+    }
+
+    return view('pembayaran.index');
+}
+
+
 
     public function edit($pembayaran)
     {
@@ -226,15 +273,30 @@ class PembayaranController extends Controller
         
             $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
-                $item->tanggal_bayar = $item->tanggal_bayar == null ? null : formatTanggal($item->tanggal_bayar);
+                $item->tanggal_bayar_format = $item->tanggal_bayar == null ? null : formatTanggal($item->tanggal_bayar);
                 $item->no_kontrak = $item->sewa->no_sewa;
                 $item->no_invoice_tagihan = $item->sewa->no_invoice;
-                $item->nominal = formatRupiah($item->nominal);
-                $item->nama_rekening = $item->rekening->nama_akun ?? '';
+                $item->nominal_format = formatRupiah($item->nominal);
+                $item->nama_rekening = $item->rekening->nama_akun ?? '-';
                 $item->userRole = Auth::user()->getRoleNames()->first();
                 $item->cara_bayar = ucfirst($item->cara_bayar);
                 return $item;
             });
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $data = $data->filter(function($item) use ($search) {
+                    return stripos($item->no_invoice_bayar, $search) !== false
+                        || stripos($item->cara_bayar, $search) !== false
+                        || stripos($item->tanggal_bayar, $search) !== false
+                        || stripos($item->nominal, $search) !== false
+                        || stripos($item->no_kontrak, $search) !== false
+                        || stripos($item->no_invoice_tagihan, $search) !== false
+                        || stripos($item->nama_rekening, $search) !== false
+                        || stripos($item->nama_perangkai, $search) !== false;
+                });
+            }
 
             return response()->json([
                 'draw' => $req->input('draw'),
@@ -411,7 +473,7 @@ class PembayaranController extends Controller
         $validator = Validator::make($req->all(), [
             'invoice_purchase_id' => 'required',
             'no_invoice_bayar' => 'required',
-            'id_po' => 'requred',
+            'id_po' => 'required',
             'type' => 'required',
             'tanggal_bayar' => 'required',
             'nominal' => 'required',
@@ -616,39 +678,148 @@ class PembayaranController extends Controller
     }
 
     public function index_po(Request $req){
-        $query = Pembayaran::where(function($query) {
-            $query->where('no_invoice_bayar', 'LIKE', '%BYPO%')
-                  ->orWhere('no_invoice_bayar', 'LIKE', '%BYMI%');
-        });
+        // start datatable keluar
+            if ($req->ajax() && $req->table == 'keluar') {
+                $query = Pembayaran::where(function($query) {
+                    $query->where('no_invoice_bayar', 'LIKE', '%BYPO%')
+                        ->orWhere('no_invoice_bayar', 'LIKE', '%BYMI%');
+                });
 
-        if ($req->metode_keluar) {
-            $query->where('cara_bayar', $req->input('metode_keluar'));
-        }
-        if ($req->dateStart) {
-            $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
-        }
-        if ($req->dateEnd) {
-            $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
-        }
-        $data = $query->orderByDesc('id')->get();
+                if ($req->metode_keluar) {
+                    $query->where('cara_bayar', $req->input('metode_keluar'));
+                }
+                if ($req->dateStart) {
+                    $query->where('tanggal_bayar', '>=', $req->input('dateStart'));
+                }
+                if ($req->dateEnd) {
+                    $query->where('tanggal_bayar', '<=', $req->input('dateEnd'));
+                }
 
-        $query2 = Pembayaran::where(function($query2) {
-            $query2->where('no_invoice_bayar', 'LIKE', '%Refundpo%')
-                  ->orWhere('no_invoice_bayar', 'LIKE', '%RefundInden%');
-        });
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
 
-        if ($req->metode_masuk) {
-            $query2->where('cara_bayar', $req->input('metode_masuk'));
-        }
-        if ($req->dateStart2) {
-            $query2->where('tanggal_bayar', '>=', $req->input('dateStart2'));
-        }
-        if ($req->dateEnd2) {
-            $query2->where('tanggal_bayar', '<=', $req->input('dateEnd2'));
-        }
-        $data2 = $query2->orderByDesc('id')->get();
+                $query->orderBy($columnName, $dir);
+                $recordsFiltered = $query->count();
+                $tempData = $query->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->userRole = Auth::user()->getRoleNames()->first();
+                    $item->tanggal_bayar_format = tanggalindo($item->tanggal_bayar);
+                    $item->nominal_format = formatRupiah($item->nominal);
+                    if ($item->po){
+                        $item->no_referensi = $item->po->pembelian ? $item->po->pembelian->no_po : ($item->po->poinden ? $item->po->poinden->no_po : '');
+                    } elseif($item->mutasiinden){
+                        $item->no_referensi = $item->mutasiinden->no_mutasi ?? '';
+                    } else {
+                        $item->no_referensi = '-';
+                    }
+                    $item->nomor_rekening = $item->rekening->nama_akun ?? '-';
+                    return $item;
+                });
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $data = $data->filter(function($item) use ($search) {
+                        return stripos($item->no_inv, $search) !== false
+                            || stripos($item->tanggal_bayar_format, $search) !== false
+                            || stripos($item->nominal_format, $search) !== false
+                            || stripos($item->no_referensi, $search) !== false
+                            || stripos($item->sisa_format, $search) !== false
+                            || stripos($item->cara_bayar, $search) !== false
+                            || stripos($item->status_bayar, $search) !== false
+                            || stripos($item->nomor_rekening, $search) !== false;
+                    });
+                }
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => Pembayaran::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $data,
+                ]);
+            }
+        //  end datatable keluar
+
+        // start datatable masuk
+            if ($req->ajax() && $req->table == 'masuk') {
+                $query2 = Pembayaran::where(function($query2) {
+                    $query2->where('no_invoice_bayar', 'LIKE', '%Refundpo%')
+                        ->orWhere('no_invoice_bayar', 'LIKE', '%RefundInden%');
+                });
+
+                if ($req->metode_masuk) {
+                    $query2->where('cara_bayar', $req->input('metode_masuk'));
+                }
+                if ($req->dateStart2) {
+                    $query2->where('tanggal_bayar', '>=', $req->input('dateStart2'));
+                }
+                if ($req->dateEnd2) {
+                    $query2->where('tanggal_bayar', '<=', $req->input('dateEnd2'));
+                }
+
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                $query2->orderBy($columnName, $dir);
+                $recordsFiltered = $query2->count();
+                $tempData = $query2->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->userRole = Auth::user()->getRoleNames()->first();
+                    $item->tanggal_bayar_format = tanggalindo($item->tanggal_bayar);
+                    $item->nominal_format = formatRupiah($item->nominal);
+                    if ($item->retur){
+                        $item->no_referensi = $item->retur->no_retur;
+
+                    } elseif($item->returinden) {
+                        $item->no_referensi = $item->returinden->no_retur;
+                    } else {
+                        $item->no_referensi = '-';
+                    }
+                    $item->nomor_rekening = $item->rekening->nama_akun ?? '-';
+                    return $item;
+                });
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $data = $data->filter(function($item) use ($search) {
+                        return stripos($item->no_inv, $search) !== false
+                            || stripos($item->tanggal_bayar_format, $search) !== false
+                            || stripos($item->nominal_format, $search) !== false
+                            || stripos($item->no_referensi, $search) !== false
+                            || stripos($item->sisa_format, $search) !== false
+                            || stripos($item->cara_bayar, $search) !== false
+                            || stripos($item->status_bayar, $search) !== false
+                            || stripos($item->nomor_rekening, $search) !== false;
+                    });
+                }
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => Pembayaran::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $data,
+                ]);
+            }
+        // end datatable masuk
         // dd($data, $data2); // Tambahkan ini untuk debug
-        return view('purchase.indexpembayaran', compact('data', 'data2'));
+        return view('purchase.indexpembayaran');
     }
 
     public function store_po(Request $req){

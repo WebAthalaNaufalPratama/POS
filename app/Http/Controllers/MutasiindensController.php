@@ -111,50 +111,139 @@ class MutasiindensController extends Controller
 
     public function index_indengh(Request $req)
     {
-        $query = Mutasiindens::query();
+        if ($req->ajax()) {
+            $query = Mutasiindens::with('returinden');
 
-  
-        $query->when(Auth::user()->hasRole('AdminGallery'), function($q){
-            $q->where('status_dibuat', 'DIKONFIRMASI')
-            ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        });
-
-        $query->when(Auth::user()->hasRole('Finance'), function($q){
-            $q->where('status_diperiksa', 'DIKONFIRMASI');
-            // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        });
-    
-    
-        $query->when(Auth::user()->hasRole('Auditor'), function($q){
-            $q->where('status_dibuat', 'DIKONFIRMASI')
-            ->where(function($query) {
-                $query->where('status_diterima', 'DIKONFIRMASI')
-                ->orWhere('status_diterima', '-')
-                        ->orWhere(function($subQuery) {
-                            $subQuery->whereNull('status_diterima')
-                                    ->whereHas('lokasi.tipe', function($lokasiQuery) {
-                                        $lokasiQuery->whereIn('tipe_lokasi', [3, 4]);
-                                    });
-                        });
+            $query->when(Auth::user()->hasRole('AdminGallery'), function($q) {
+                $q->where('status_dibuat', 'DIKONFIRMASI')
+                ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
-        });
-    
-        $query->orderBy('created_at', 'desc');
-  
-        // if(Auth::user()->hasRole(['Auditor', 'AdminGallery'])){
-        //     $query->where('status_dibuat', 'DIKONFIRMASI');
-        // }
 
-        if ($req->dateStart) {
-            $query->where('tgl_dikirim', '>=', $req->input('dateStart'));
+            $query->when(Auth::user()->hasRole('Finance'), function($q) {
+                $q->where('status_diperiksa', 'DIKONFIRMASI');
+            });
+
+            $query->when(Auth::user()->hasRole('Auditor'), function($q) {
+                $q->where('status_dibuat', 'DIKONFIRMASI')
+                ->where(function($query) {
+                    $query->where('status_diterima', 'DIKONFIRMASI')
+                            ->orWhere('status_diterima', '-')
+                            ->orWhere(function($subQuery) {
+                                $subQuery->whereNull('status_diterima')
+                                        ->whereHas('lokasi.tipe', function($lokasiQuery) {
+                                            $lokasiQuery->whereIn('tipe_lokasi', [3, 4]);
+                                        });
+                            });
+                });
+            });
+
+            if ($req->filled('dateStart')) {
+                $query->where('tgl_dikirim', '>=', $req->input('dateStart'));
+            }
+            if ($req->filled('dateEnd')) {
+                $query->where('tgl_dikirim', '<=', $req->input('dateEnd'));
+            }
+
+            $columns = [
+                0 => 'id',
+                1 => 'no_mutasi',
+                2 => 'supplier',
+                3 => 'penerima',
+                4 => 'tgl_dikirim',
+                5 => 'tgl_diterima',
+                6 => 'status_dibuat',
+                7 => 'status_diterima',
+                8 => 'status_diperiksa',
+                9 => 'status_dibuku',
+                10 => 'tagihan',
+                11 => 'sisa_tagihan',
+                12 => 'status_pembayaran',
+                13 => 'komplain',
+                14 => 'status_komplain'
+            ];
+
+            $orderColumnIndex = $req->input('order.0.column');
+            $orderDirection = $req->input('order.0.dir', 'asc');
+            $orderColumn = $columns[$orderColumnIndex] ?? 'id';
+
+            $query->orderBy($orderColumn, $orderDirection);
+
+            $totalRecords = $query->count();
+            $mutasis = $query->skip($req->input('start', 0))
+                            ->take($req->input('length', 10))
+                            ->get();
+
+            $data = $mutasis->map(function($item) {
+                $formattedTglKirim = $this->formatDate($item->tgl_dikirim);
+                $formattedTglDiterima = $this->formatDate($item->tgl_diterima);
+            
+                $komplain = '-';
+                if ($item->returinden !== null && $item->returinden->status_dibuat !== 'BATAL') {
+                    $komplain = $item->returinden->tipe_komplain . ' : ' . formatRupiah($item->returinden->refund);
+                }
+                $statusKomplain = '-';
+                if ($item->returinden !== null) {
+                    if ($item->returinden->status_dibuat === null || $item->returinden->status_dibuat === "TUNDA") {
+                        $statusKomplain = 'Menunggu Konfirmasi Purchase';
+                    } elseif ($item->returinden->status_dibukukan === null || $item->returinden->status_dibukukan === "TUNDA") {
+                        $statusKomplain = 'Menunggu Konfirmasi Finance';
+                    } elseif ($item->returinden->status_dibukukan === "DIKONFIRMASI" || $item->returinden->status_dibukukan === "MENUNGGU PEMBAYARAN") {
+                        $statusKomplain = $item->returinden->status_dibukukan;
+                    }
+                }
+            
+                return [
+                    'id' => $item->id,
+                    'no_mutasi' => $item->no_mutasi ?? 'N/A',
+                    'supplier' => $item->supplier->nama ?? 'N/A',
+                    'penerima' => $item->lokasi->nama ?? 'N/A',
+                    'tgl_kirim' => $formattedTglKirim,
+                    'tgl_diterima' => $formattedTglDiterima,
+                    'status_dibuat' => $item->status_dibuat ?? 'N/A',
+                    'status_diterima' => $item->status_diterima ?? 'N/A',
+                    'status_diperiksa' => $item->status_diperiksa ?? 'N/A',
+                    'status_dibuku' => $item->status_dibukukan ?? 'N/A',
+                    'tagihan' => $item->total_biaya ?? 'N/A',
+                    'sisa_tagihan' => $item->sisa_bayar ?? 'N/A',
+                    'komplain' => $komplain,
+                    'status_komplain' => $statusKomplain ?? 'N/A',
+                    'returinden' => $item->returinden,
+                ];
+            });
+                            
+
+            return response()->json([
+                'draw' => (int) $req->input('draw'),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords, 
+                'data' => $data
+            ]);
         }
-        if ($req->dateEnd) {
-            $query->where('tgl_dikirim', '<=', $req->input('dateEnd'));
-        }
+
+        $query = Mutasiindens::query();
         $mutasis = $query->get();
 
         return view('mutasiindengh.index', compact('mutasis'));
-    } 
+    }
+
+private function formatDate($date)
+{
+    // Check if $date is not null and is a valid Carbon instance
+    if ($date && $date instanceof \Carbon\Carbon) {
+        return $date->format('d F Y');
+    }
+
+    // Handle the case where $date is a string or null
+    try {
+        $carbonDate = \Carbon\Carbon::parse($date);
+        return $carbonDate->format('d F Y');
+    } catch (\Exception $e) {
+        return 'N/A';
+    }
+}
+
+
+ 
 
     /**
      * Show the form for creating a new resource.
@@ -1095,27 +1184,107 @@ class MutasiindensController extends Controller
     
     public function index_returinden(Request $req)
     {
-        $query = Returinden::query();
-    
+        if ($req->ajax()) {
+            $query = Returinden::with('mutasiinden');
 
-        $query->when(Auth::user()->hasRole('Finance'), function($q){
-            $q->where('status_dibuat', 'DIKONFIRMASI');
-            // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
-        });
-    
-    
-        $query->orderBy('tgl_dibuat', 'desc');
+            $query->when(Auth::user()->hasRole('Finance'), function($q){
+                $q->where('status_dibuat', 'DIKONFIRMASI');
+                // ->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+            });
 
-        if ($req->dateStart) {
-            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+            if ($req->filled('dateStart')) {
+                $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+            }
+            if ($req->filled('dateEnd')) {
+                $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+            }
+
+            // DataTables column sorting
+            $columns = [
+                0 => 'id',
+                1 => 'tgl_dibuat',
+                2 => 'no_retur',
+                3 => 'no_mutasi',
+                4 => 'tipe_komplain',
+                5 => 'alasan',
+                6 => 'kode_inden',
+                7 => 'nama_produk',
+                8 => 'harga',
+                9 => 'qty',
+                10 => 'total',
+                11 => 'supplier',
+                12 => 'tujuan',
+                13 => 'status_dibuat',
+                14 => 'status_dibuku'
+            ];
+
+            $orderColumnIndex = $req->input('order.0.column');
+            $orderDirection = $req->input('order.0.dir', 'asc');
+            $orderColumn = $columns[$orderColumnIndex] ?? 'id';
+
+            $query->orderBy($orderColumn, $orderDirection);
+
+            $totalRecords = $query->count();
+            $returs = $query->skip($req->input('start', 0))
+                            ->take($req->input('length', 10))
+                            ->get();
+
+            $data = $returs->map(function($item) {
+                $tipeKomplainFormatted = 'N/A';
+                if ($item->status_dibuat !== "BATAL") {
+                    if ($item->tipe_komplain == "Refund") {
+                        $tipeKomplainFormatted = $item->sisa_refund == 0 ? '| Lunas' : '| Belum Lunas';
+                    }
+                }
+                $alasanList = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->alasan;
+                })->implode('</li><li>');
+                $kode_inden = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->produk->produk->kode_produk_inden;
+                })->implode('</li><li>');
+                $nama_produk = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->produk->produk->produk->nama;
+                })->implode('</li><li>');
+                $harga = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->harga_satuan;
+                })->implode('</li><li>');
+                $qty = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->jml_diretur;
+                })->implode('</li><li>');
+                $formattedHarga = $harga;
+                
+
+                return [
+                    'id' => $item->id,
+                    'tgl_komplain' => $this->formatDate($item->tgl_dibuat),
+                    'no_retur' => $item->no_retur ?? 'N/A',
+                    'no_mutasi' => $item->mutasiinden->no_mutasi ?? 'N/A',
+                    'tipe_komplain' => $tipeKomplainFormatted ?? 'N/A',
+                    'alasan' => $alasanList ?? 'N/A',
+                    'kode_inden' => $kode_inden ?? 'N/A',
+                    'nama_produk' => $nama_produk ?? 'N/A',
+                    'harga' => formatRupiah(floatval($formattedHarga)) ?? 'N/A',
+                    'qty' => $qty ?? 'N/A',
+                    'total' => formatRupiah(floatval($item->refund)) ?? 'N/A',
+                    'supplier' => $item->mutasiinden->supplier->nama ?? 'N/A',
+                    'tujuan' => $item->mutasiinden->lokasi->nama ?? 'N/A',
+                    'status_dibuat' => $item->status_dibuat ?? 'N/A',
+                    'status_dibuku' => $item->status_dibukukan ?? 'N/A',
+                    'mutasiinden' => $item->mutasiinden,
+                ];
+            });
+
+            return response()->json([
+                'draw' => (int) $req->input('draw'),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $data
+            ]);
         }
-        if ($req->dateEnd) {
-            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
-        }
-        $returs = $query->get();
 
-        return view('mutasiindengh.returindex', compact('returs'));
-    } 
+        return view('mutasiindengh.returindex');
+    }
+
 
     public function show_returinden($mutasiIG)
     { 

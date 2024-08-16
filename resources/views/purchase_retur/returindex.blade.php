@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table pb-5" id="returTable">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -180,20 +180,30 @@
         $(document).ready(function(){
         $('#filterSupplier, #filterGallery, #filterStatus').select2();
 
+        window.routes = {
+            ReturBeliShow: "{{ route('returbeli.show', ['retur_id' => '__ID__']) }}",
+            ReturBeliEdit: "{{ route('returbeli.edit', ['retur_id' => '__ID__']) }}",
+            InvoiceShow: "{{ route('invoice.show', ['datapo' => '__IDINVOICEBELI__', 'type' => 'pembelian', 'id' => '__IDINVOICE__']) }}",
+        };
+
         $('#returTable').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url: '{{ route("retur.index") }}', // Update this URL to match your route
+                url: '{{ route("returbeli.index") }}', // Update this URL to match your route
                 type: 'GET',
                 data: function (d) {
-                    d.gallery = $('input[name=gallery]').val();
-                    d.dateStart = $('input[name=dateStart]').val();
-                    d.dateEnd = $('input[name=dateEnd]').val();
-                }
+                    d.gallery = $('#filterGallery').val();
+                    d.dateStart = $('#filterDateStart').val();
+                    d.dateEnd = $('#filterDateEnd').val();
+                },
+                dataSrc: function(json) {
+                        console.log("Received Data:", json); 
+                        return json.data;
+                    }
             },
             columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex' },
+                { data: 'id', name: 'id' },
                 { data: 'no_retur', name: 'no_retur' },
                 { data: 'tgl_retur', name: 'tgl_retur' },
                 { data: 'supplier_name', name: 'supplier_name' },
@@ -203,12 +213,111 @@
                 { data: 'jumlah', name: 'jumlah' },
                 { data: 'komplain', name: 'komplain' },
                 { data: 'subtotal', name: 'subtotal' },
-                { data: 'status_dibuat', name: 'status_dibuat' },
-                { data: 'status_dibuku', name: 'status_dibuku' },
-                { data: 'actions', name: 'actions', orderable: false, searchable: false }
+                {
+                    data: 'status_dibuat',
+                    name: 'status_dibuat',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'status_dibuku',
+                    name: 'status_dibuku',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        // Convert user roles to JavaScript array
+                        const userRoles = @json(Auth::user()->roles->pluck('name')->toArray());
+                        
+                        let dropdownHtml = `
+                            <div class="dropdown">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown-menu">`;
+
+                        // Generate action links based on roles and status
+                        if (userRoles.includes('Finance')) {
+                            if(row.status_dibuku === 'DIKONFIRMASI') {
+                                dropdownHtml += `
+                                <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
+                                    <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">
+                                    ${row.komplain === 'Refund' && row.sisa !== 0 ? 'Input Refund' : 'Detail Retur'}
+                                </a>`;
+                            }
+                            
+                            if (row.status_dibuat === 'DIKONFIRMASI' && (row.status_dibuku === 'TUNDA' || row.status_dibuku === null || row.status_dibuku === 'BATAL')) {
+                                dropdownHtml += `
+                                    <a href="${window.routes.ReturBeliEdit.replace('__ID__', row.id)}" class="dropdown-item">
+                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur
+                                    </a>`;
+                            }
+                        }
+
+                        if (userRoles.includes('Purchasing')) {
+                            dropdownHtml += `
+                                <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur
+                                </a>`;
+                            
+                            if (row.status_dibuat === 'TUNDA' || row.status_dibuat === 'BATAL') {
+                                dropdownHtml += `
+                                    <a href="${window.routes.ReturBeliEdit.replace('__ID__', row.id)}" class="dropdown-item">
+                                        <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur
+                                    </a>`;
+                            }
+                        }
+
+                        dropdownHtml += `
+                                <a href="${window.routes.InvoiceShow
+                                    .replace('__IDINVOICEBELI__', row.invoice.pembelian_id)
+                                    .replace('__IDINVOICE__', row.invoice.id)}" 
+                                class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Invoice
+                                </a>`;
+
+                        dropdownHtml += `</div></div>`;
+                        
+                        return dropdownHtml;
+                    }
+                }
             ]
         });
     });
+
     $('[id^=filterBtn]').click(function(){
         var baseUrl = $(this).data('base-url');
         var urlString = baseUrl;

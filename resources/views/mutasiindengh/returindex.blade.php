@@ -28,7 +28,7 @@
                 </div>
             </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table class="table pb-5" id="mutasiReturInden">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -50,7 +50,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($returs as $retur)
+                            {{-- @foreach ($returs as $retur)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ tanggalindo($retur->tgl_dibuat) }}</td>
@@ -171,7 +171,7 @@
                                         @endrole
                                         
                                         
-                                        {{-- <li>
+                                         <!-- <li>
 
                                             @if ($mutasi->returinden !== null)
                                             <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Lihat Komplain</a>
@@ -179,11 +179,11 @@
                                             @else              
                                             <a class="dropdown-item" href="{{ route('create.retur', ['mutasiIG' => $mutasi->id]) }}"><img src="/assets/img/icons/return1.svg" class="me-2" alt="img">Komplain</a>
                                             @endif
-                                        </li> --}}
+                                        </li>  -->
                                     </ul>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -225,6 +225,164 @@
 <script>
     $(document).ready(function(){
         $('#filterCustomer, #filterDriver').select2();
+
+        window.routes = {
+            editRetur: "{{ route('edit.retur', ['idretur' => '__ID__']) }}",
+            showRetur: "{{ route('show.returinden', ['mutasiIG' => '__ID__']) }}",
+        };
+
+        $('#mutasiReturInden').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route("returinden.index") }}',
+                type: 'GET',
+                data: function (d) {
+                    d.gallery = $('#filterGallery').val();
+                    d.dateStart = $('#filterDateStart').val();
+                    d.dateEnd = $('#filterDateEnd').val();
+                },
+                dataSrc: function(json) {
+                        console.log("Received Data:", json); 
+                        return json.data;
+                    }
+            },
+            columns: [
+                { data: 'id', name: 'id', orderable: false, searchable: false },
+                { data: 'tgl_komplain', name: 'tgl_dibuat' },
+                { data: 'no_retur', name: 'no_retur' },
+                { data: 'no_mutasi', name: 'no_mutasi' },
+                { data: 'tipe_komplain', name: 'tipe_komplain' },
+                { data: 'alasan', name: 'alasan' },
+                { data: 'kode_inden', name: 'kode_inden' },
+                { data: 'nama_produk', name: 'nama_produk' },
+                { data: 'harga', name: 'harga' },
+                { data: 'qty', name: 'qty' },
+                { data: 'total', name: 'total' },
+                { data: 'supplier', name: 'supplier' },
+                { data: 'tujuan', name: 'tujuan' },
+                {
+                    data: 'status_dibuat',
+                    name: 'status_dibuat',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'status_dibuku',
+                    name: 'status_dibuku',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'aksi',
+                    name: 'aksi',
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        const userRoles = @json(Auth::user()->roles->pluck('name')->toArray());
+                        let dropdownHtml = `
+                            <div class="dropdown">
+                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown-menu">`;
+
+                        if (userRoles.includes('Purchasing')) {
+                            if (row.status_dibuat === "TUNDA") {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain
+                                        </a>
+                                    </li>`;
+                            } else {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden_id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur
+                                        </a>
+                                    </li>`;
+                            }
+                        }
+
+                   
+                        if (userRoles.includes('Finance')) {
+                            if (row.status_dibukukan === "TUNDA" || row.status_dibukukan === null) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain
+                                        </a>
+                                    </li>`;
+                            }
+
+                            if (row.status_dibukukan === "MENUNGGU PEMBAYARAN" && (row.sisa_refund !== 0 || row.mutasiinden.sisa_bayar !== 0)) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.bayarRetur.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar
+                                        </a>
+                                    </li>`;
+                            }
+
+                            if (row.status_dibukukan === "MENUNGGU PEMBAYARAN" && (row.sisa_refund === 0 && row.mutasiinden.sisa_bayar === 0)) {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.konfirmasiRetur.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi
+                                        </a>
+                                    </li>`;
+                            }
+
+                            if (row.status_dibukukan === "DIKONFIRMASI") {
+                                dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden_id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur
+                                        </a>
+                                    </li>`;
+                            }
+                        }
+
+                        dropdownHtml += `
+                                </div>
+                            </div>`;
+
+                        return dropdownHtml;
+                    }
+                }
+
+
+            ]
+        });
     });
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');

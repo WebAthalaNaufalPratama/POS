@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table datanew">
+                    <table id="pembayaran-table" class="table pb-5">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -46,7 +46,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($data as $pembayaran)
+                            {{-- @foreach ($data as $pembayaran)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $pembayaran->no_invoice_bayar }}</td>
@@ -71,7 +71,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @endforeach --}}
                         </tbody>
                     </table>
                 </div>
@@ -113,6 +113,44 @@
 <script>
     $(document).ready(function(){
         $('#rekening_id, #bayar, #filterMetode').select2();
+
+        $('#pembayaran-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ route('pembayaran.index') }}',
+                type: 'GET',
+                data: function(d) {
+                    d.metode = $('select[name="metode"]').val(); // Assuming you have a select for filtering by metode
+                    d.dateStart = $('input[name="dateStart"]').val(); // Assuming you have inputs for dateStart
+                    d.dateEnd = $('input[name="dateEnd"]').val(); // Assuming you have inputs for dateEnd
+                }
+            },
+            columns: [
+                { data: 'id', name: 'id', orderable: false, searchable: false },
+                { data: 'no_invoice_bayar', name: 'no_invoice_bayar' },
+                { data: 'cara_bayar', name: 'cara_bayar' },
+                { data: 'nominal', name: 'nominal' },
+                { data: 'rekening', name: 'rekening' },
+                { data: 'tanggal_bayar', name: 'tanggal_bayar' },
+                { data: 'status_bayar', name: 'status_bayar' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
+            ],
+            columnDefs: [
+                {
+                    targets: 0,
+                    render: function(data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                },
+                {
+                    targets: 3,
+                    render: function(data, type, row) {
+                        return Number(data).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
+                    }
+                }
+            ]
+        });
     });
 
     $('#bayar').on('change', function() {

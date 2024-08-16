@@ -30,7 +30,7 @@
                     <select id="filterSales" name="filterSales" class="form-control" title="Sales">
                         <option value="">Pilih Sales</option>
                         @foreach ($sales as $item)
-                            <option value="{{ $item->data_sales->id }}" {{ $item->data_sales->id == request()->input('sales') ? 'selected' : '' }}>{{ $item->data_sales->name }}</option>
+                            <option value="{{ $item->data_sales->id }}" {{ $item->data_sales->id == request()->input('sales') ? 'selected' : '' }}>{{ $item->data_sales->nama }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -327,8 +327,8 @@
         });
 
         $('#clearBtn').on('click', function() {
-            $('#filterCustomer').val('');
-            $('#filterSales').val('');
+            $('#filterCustomer').val('').trigger('change');
+            $('#filterSales').val('').trigger('change');
             $('#filterDateStart').val('');
             $('#filterDateEnd').val('');
             table.ajax.reload();
