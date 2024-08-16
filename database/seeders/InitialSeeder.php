@@ -214,6 +214,7 @@ class InitialSeeder extends Seeder
                 'pembayaranbeli.index',
                 'retur_purchase.update',
                 'supplier',
+                'edit.retur',
                 'mutasighgalery',
                 'mutasigalerygalery',
                 'mutasiindengh',
