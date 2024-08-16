@@ -572,8 +572,16 @@
                                             </a>
                                         </li>`;
                                 }
+                                
                             }
                         }
+
+                        dropdownHtml += `
+                                        <li>
+                                            <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
+                                                <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain
+                                            </a>
+                                        </li>`;
 
                         dropdownHtml += `
                                 </div>
