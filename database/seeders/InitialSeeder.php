@@ -218,6 +218,8 @@ class InitialSeeder extends Seeder
                 'mutasigalerygalery',
                 'mutasiindengh',
                 'getProductsByLokasi',
+                'auditmutasighgalery.update',
+                'auditmutasighgalery.edit',
                 'retur',
                 'create.retur',
                 'edit.retur',

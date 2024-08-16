@@ -264,11 +264,11 @@
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir (Rp)</h4>
-                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value=""  required></h5>
+                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $mutasis->biaya_pengiriman ?? '-'}}"  required></h5>
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Biaya (Rp)</h4>
-                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value=""  required readonly></h5>
+                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ $mutasis->total_biaya ?? '-'}}"  required readonly></h5>
                                                 </li>
                                             </ul>
                                         </div>
