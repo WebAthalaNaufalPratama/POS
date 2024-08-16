@@ -163,6 +163,7 @@
                                                     <thead>
                                                         <tr>
                                                             <th>Pembuat</th>
+                                                            <th>Penerima</th>
                                                             <th>Penyetuju</th>
                                                             <th>Pemeriksa</th>
                                                         </tr>
@@ -170,11 +171,13 @@
                                                     <tbody>
                                                         <tr>
                                                             <td id="pembuat">{{ Auth::user()->name }}</td>
+                                                            <td id="penerima"></td>
                                                             <td id="penyetuju">-</td>
                                                             <td id="pemeriksa">-</td>
                                                         </tr>
                                                         <tr>
-                                                            <td id="tgl_pembuat" style="width: 25%;">{{ date('d-m-Y') }}</td>
+                                                            <td id="tgl_pembuat"><input type="date" class="form-control" name="tanggal_pembuat" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"></td>
+                                                            <td id="tgl_penerima" style="width: 25%;">-</td>
                                                             <td id="tgl_penyetuju" style="width: 25%;">-</td>
                                                             <td id="tgl_pemeriksa" style="width: 25%;">-</td>
                                                         </tr>

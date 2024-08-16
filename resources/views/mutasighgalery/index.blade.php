@@ -207,8 +207,9 @@
                         if (userRoles.includes('Purchasing') && mutasiStatus !== 'DIBATALKAN') {
                             if (mutasiStatus !== 'DIKONFIRMASI') {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasighgaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>`;
+                            }else{
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGGalleryPayment.replace('__ID__', row.id)}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>`;
                             }
-                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGGalleryPayment.replace('__ID__', row.id)}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>`;
                         }
 
                         if (row.lokasi === row.penerima && userRoles.includes('KasirGallery') || userRoles.includes('AdminGallery')) {
@@ -216,11 +217,14 @@
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGGalleryShow.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>`;
                             }
                         }
+                        if(mutasiStatus !== 'TUNDA') {
+                            dropdownHtml += `
+                                    <a class="dropdown-item" href="${window.routes.mutasiGGalleryView.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
+                                    </div>
+                                </div>`;
+                        }
 
-                        dropdownHtml += `
-                            <a class="dropdown-item" href="${window.routes.mutasiGGalleryView.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
-                            </div>
-                        </div>`;
+                        
 
                         return dropdownHtml;
                     }
