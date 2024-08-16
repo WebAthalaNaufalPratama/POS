@@ -335,7 +335,7 @@
 
                    
                         if (userRoles.includes('Finance')) {
-                            if (row.status_dibukukan === "TUNDA" || row.status_dibukukan === null) {
+                            if (row.status_dibuku === "TUNDA" || row.status_dibuku === null) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.id)}">
@@ -344,7 +344,7 @@
                                     </li>`;
                             }
 
-                            if (row.status_dibukukan === "MENUNGGU PEMBAYARAN" && (row.sisa_refund !== 0 || row.mutasiinden.sisa_bayar !== 0)) {
+                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && (row.sisa_refund !== 0 || row.mutasiinden.sisa_bayar !== 0)) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.bayarRetur.replace('__ID__', row.id)}">
@@ -353,7 +353,7 @@
                                     </li>`;
                             }
 
-                            if (row.status_dibukukan === "MENUNGGU PEMBAYARAN" && (row.sisa_refund === 0 && row.mutasiinden.sisa_bayar === 0)) {
+                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && (row.sisa_refund === 0 && row.mutasiinden.sisa_bayar === 0)) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.konfirmasiRetur.replace('__ID__', row.id)}">
@@ -362,7 +362,7 @@
                                     </li>`;
                             }
 
-                            if (row.status_dibukukan === "DIKONFIRMASI") {
+                            if (row.status_dibuku === "DIKONFIRMASI") {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden.id)}">
