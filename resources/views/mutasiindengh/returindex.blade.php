@@ -326,7 +326,7 @@
                             } else {
                                 dropdownHtml += `
                                     <li>
-                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden_id)}">
+                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden.id)}">
                                             <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur
                                         </a>
                                     </li>`;
@@ -365,7 +365,7 @@
                             if (row.status_dibukukan === "DIKONFIRMASI") {
                                 dropdownHtml += `
                                     <li>
-                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden_id)}">
+                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden.id)}">
                                             <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur
                                         </a>
                                     </li>`;
