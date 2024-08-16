@@ -555,12 +555,12 @@ $user = Auth::user();
                     }
 
                     // Komplain for Purchasing role if conditions met
-                    if (row.userRole === 'Purchasing' &&
-                        ((row.invoiceRetur && row.invoiceRetur.status_dibuat === 'DIKONFIRMASI' && row.sisa !== 0) ||
-                        (row.sisa === 0 || row.sisa === row.total_tagihan) && !row.invoiceRetur &&
-                        (row.status_dibuku !== "TUNDA" && row.status_dibuku !== null) &&
-                        row.status_dibuat === "DIKONFIRMASI" &&
-                        row.status_dibuku === "MENUNGGU PEMBAYARAN")) {
+                    if (row.userRole == 'Purchasing' &&
+                        ((row.invoiceRetur && row.invoiceRetur.status_dibuat == 'DIKONFIRMASI' && row.sisa != 0) ||
+                        (row.sisa == 0 || row.sisa === row.total_tagihan) && !row.invoiceRetur &&
+                        (row.status_dibuku != "TUNDA" && row.status_dibuku != null) &&
+                        row.status_dibuat == "DIKONFIRMASI" &&
+                        row.status_dibuku == "MENUNGGU PEMBAYARAN")) {
                         actionsHtml += `
                             <li>
                                 <a href="retur/create?invoice=${row.id}" class="dropdown-item">
@@ -571,7 +571,7 @@ $user = Auth::user();
                     }
 
                     // Edit Invoice for Purchasing if status_dibuat is TUNDA
-                    if (row.userRole === 'Purchasing' && row.status_dibuat == 'TUNDA') {
+                    if (row.userRole == 'Purchasing' && row.status_dibuat == 'TUNDA') {
                         actionsHtml += `
                             <li>
                                 <a href="invoice/${row.pembelian_id}/edit_inv_nominal?type=pembelian&id=${row.id}" class="dropdown-item">
@@ -582,11 +582,11 @@ $user = Auth::user();
                     }
 
                     // Konfirmasi for Finance if conditions met
-                    if (row.userRole === 'Finance' && row.sisa === 0) {
-                        if ((!row.invoiceRetur && row.status_dibuku === "MENUNGGU PEMBAYARAN") ||
-                            (row.invoiceRetur && (row.invoiceRetur.status_dibuat === "BATAL" || row.invoiceRetur.status_dibuku === "BATAL") &&
-                            row.status_dibuku === "MENUNGGU PEMBAYARAN") ||
-                            (row.invoiceRetur && row.invoiceRetur.sisa === 0 && row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.invoiceRetur.status_dibuat !== "BATAL")) {
+                    if (row.userRole == 'Finance' && row.sisa == 0) {
+                        if ((!row.invoiceRetur && row.status_dibuku == "MENUNGGU PEMBAYARAN") ||
+                            (row.invoiceRetur && (row.invoiceRetur.status_dibuat == "BATAL" || row.invoiceRetur.status_dibuku == "BATAL") &&
+                            row.status_dibuku == "MENUNGGU PEMBAYARAN") ||
+                            (row.invoiceRetur && row.invoiceRetur.sisa == 0 && row.status_dibuku == "MENUNGGU PEMBAYARAN" && row.invoiceRetur.status_dibuat != "BATAL")) {
                             actionsHtml += `
                                 <li>
                                     <a href="invoice/${row.pembelian_id}/edit?type=pembelian&id=${row.id}" class="dropdown-item">
@@ -595,9 +595,9 @@ $user = Auth::user();
                                 </li>
                             `;
                         }
-                    } else if (row.userRole === 'Finance') {
-                        if (!row.invoiceRetur || (row.invoiceRetur && row.invoiceRetur.status_dibuku === "DIKONFIRMASI")) {
-                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN") {
+                    } else if (row.userRole == 'Finance') {
+                        if (!row.invoiceRetur || (row.invoiceRetur && row.invoiceRetur.status_dibuku == "DIKONFIRMASI")) {
+                            if (row.status_dibuku == "MENUNGGU PEMBAYARAN") {
                                 actionsHtml += `
                                     <li>
                                         <a href="invoice/${row.pembelian_id}/edit?type=pembelian&id=${row.id}" class="dropdown-item">
@@ -605,7 +605,7 @@ $user = Auth::user();
                                         </a>
                                     </li>
                                 `;
-                            } else if (row.status_dibuku === "TUNDA" || row.status_dibuku === null) {
+                            } else if (row.status_dibuku == "TUNDA" || row.status_dibuku == null) {
                                 actionsHtml += `
                                     <li>
                                         <a href="invoice/${row.pembelian_id}/edit_inv_nominal?type=pembelian&id=${row.id}" class="dropdown-item">
