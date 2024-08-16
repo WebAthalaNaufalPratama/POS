@@ -16,7 +16,7 @@ class KaryawanController extends Controller
         $karyawans = Karyawan::all();
         $lokasis = Lokasi::all();
         $jabatans = Jabatan::all();
-        $users = User::where('name', '!=', 'admin')->doesntHave('karyawans')->get();
+        $users = User::where('name', '!=', 'superadmin')->get();
         return view('karyawan.index', compact('karyawans', 'lokasis', 'jabatans', 'users'));
     }
 
@@ -45,9 +45,18 @@ class KaryawanController extends Controller
             'lokasi_id' => 'required|exists:lokasis,id',
             'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
+            'user_id' => 'nullable|exists:users,id'
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+        if (!empty($req->user_id)) {
+            $existingKaryawan = Karyawan::where('user_id', $req->user_id)->first();
+            if ($existingKaryawan) {
+                return redirect()->back()->withInput()->with('fail', 'User sudah digunakan');
+            }
+        }
+
         $data = $req->except(['_token', '_method']);
         $data['user_id'] = $data['user_id'] ?? 0;
 
@@ -97,9 +106,18 @@ class KaryawanController extends Controller
             'lokasi_id' => 'required|exists:lokasis,id',
             'handphone' => 'required|numeric|digits_between:11,13',
             'alamat' => 'required',
+            'user_id' => 'nullable|exists:users,id'
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+        if (!empty($req->user_id)) {
+            $existingKaryawan = Karyawan::where('user_id', $req->user_id)->first();
+            if ($existingKaryawan) {
+                return redirect()->back()->withInput()->with('fail', 'User sudah digunakan');
+            }
+        }
+
         $data = $req->except(['_token', '_method']);
         $data['user_id'] = $data['user_id'] ?? 0;
 

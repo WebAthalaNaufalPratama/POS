@@ -34,7 +34,7 @@ class Returinden extends Model
         return $this->belongsTo(Mutasiindens::class, 'mutasiinden_id', 'id');
     }
     public function produkreturinden (){
-        return $this->hasMany(produkreturinden::class, 'returinden_id', 'id');
+        return $this->hasMany(Produkreturinden::class, 'returinden_id', 'id');
     }
     public function pembuat(){
         return $this->belongsTo(User::class, 'pembuat_id', 'id');
