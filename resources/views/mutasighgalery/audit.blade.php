@@ -249,7 +249,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" >
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" value="{{ $mutasis->alamat_tujuan}}" class="form-control" >
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->

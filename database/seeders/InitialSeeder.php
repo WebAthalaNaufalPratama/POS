@@ -210,6 +210,8 @@ class InitialSeeder extends Seeder
                 'invoice_purchase',
                 'pembelianinden',
                 'inden',
+                'auditmutasigalerygalery.edit',
+                'auditmutasigalerygalery.update',
                 'returbeli',
                 'pembayaranbeli.index',
                 'retur_purchase.update',
