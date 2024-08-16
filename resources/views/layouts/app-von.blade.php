@@ -353,12 +353,12 @@
 </head>
 
 <body>
-  {{-- <div id="global-loader">
+  <div id="global-loader">
     <div class="whirly-loader"> </div>
-  </div> --}}
-  {{-- <div id="global-loader-transparent">
+  </div>
+  <div id="global-loader-transparent">
     <div class="whirly-loader-transparent"> </div>
-  </div> --}}
+  </div>
 
   <div class="main-wrapper">
 
