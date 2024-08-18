@@ -955,7 +955,6 @@ class PenjualanController extends Controller
                     $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
                                 ->where('kode_produk', $getProdukJual->kode)
                                 ->first();
-                    
                     if (!$stok) {
                         return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
                     }
