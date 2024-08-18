@@ -708,7 +708,7 @@
         }
 
         function cantMinus(element) {
-          console.log('awal')
+          // console.log('awal')
           var value = $(element).val().trim();
           
           if (value !== "" && !value.startsWith("0.") && value.length > 1) {
@@ -718,7 +718,7 @@
           value = parseFloat(value);
           
           if (isNaN(value) || value < 0) {
-            console.log('akhir')
+            // console.log('akhir')
             $(element).val(0);
             return false;
           }
@@ -801,7 +801,7 @@
                   },
                   dataSrc: function(json) {
                       // Debugging data from server
-                      console.log('Data received from server:', json); 
+                      // console.log('Data received from server:', json); 
                       return json.data;
                   },
                   error: function(xhr, error, code) {

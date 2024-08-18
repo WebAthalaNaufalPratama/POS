@@ -44,7 +44,7 @@ class PenjualanController extends Controller
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-        $query = Penjualan::with('karyawan');
+        $query = Penjualan::with('karyawan', 'lokasi');
 
         if ($lokasi) {
             if ($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet', 'KasirGallery', 'AdminGallery'])) {
@@ -96,6 +96,14 @@ class PenjualanController extends Controller
         
             $data->map(function ($penjualan) use ($latestPayments, $returData) {
                 $penjualan->latest_payment = $latestPayments[$penjualan->id] ?? null;
+                $allNoForm = false;
+                if ($penjualan->produk && $penjualan->produk->isNotEmpty()) {
+                    // Check if all produkMutasi have a non-null no_form
+                    $allNoForm = $penjualan->produk->every(function($produk) {
+                        return $produk->no_form == null;
+                    });
+                }
+                $penjualan->all_no_form = $allNoForm;
                 $penjualan->retur = $returData->get($penjualan->no_invoice) ? true : false;
                 return $penjualan;
             });
@@ -926,6 +934,39 @@ class PenjualanController extends Controller
 
         $penjualan = Penjualan::where('id', $penjualanId)->first();
 
+        $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+
+        //cek produk outlet
+        if($lokasi->tipe_lokasi == 2) {
+            $produkJumlah = [];
+
+            for ($i = 0; $i < count($nama_produk); $i++) {
+                if (isset($produkJumlah[$nama_produk[$i]])) {
+                    $produkJumlah[$nama_produk[$i]] += intval($req->jumlah[$i]);
+                } else {
+                    $produkJumlah[$nama_produk[$i]] = intval($req->jumlah[$i]);
+                }
+            }
+
+            foreach ($produkJumlah as $kode_produk => $total_jumlah) {
+                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $kode_produk)->first();
+
+                if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi == 2){
+                    $stok = InventoryOutlet::where('lokasi_id', $req->lokasi_id)
+                                ->where('kode_produk', $getProdukJual->kode)
+                                ->first();
+                    
+                    if (!$stok) {
+                        return redirect(route('inven_outlet.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                    }
+
+                    if (intval($stok->jumlah) < $total_jumlah) {
+                        return redirect(route('inven_outlet.create'))->with('fail', 'Stok Produk Tidak Mencukupi');
+                    }
+                }
+            }
+        }
+
         if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
             ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua')) {
             $deletepj = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualan->no_invoice)->get();
@@ -1056,7 +1097,7 @@ class PenjualanController extends Controller
         }
 
         $update = Penjualan::where('id', $penjualanId)->update($data);
-        $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+        
         if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||
             ($user->hasRole(['Finance']) && $penjualan->status == 'DIKONFIRMASI' && $req->ubahapa == 'ubahsemua') ||
             (!$user->hasRole(['Auditor', 'Finance']))) {

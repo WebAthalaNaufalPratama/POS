@@ -104,7 +104,7 @@
                                                 @if($user->hasRole(['KasirGallery', 'AdminGallery']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                                 @endif
-                                            </select>s
+                                            </select>
                                         </div>
                                         <div class="custom-file-container" data-upload-id="myFirstImage">
                                             <label>Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
@@ -136,7 +136,7 @@
                                                     <tr>
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
+                                                        <!-- <th>Jumlah Diterima</th> -->
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -156,7 +156,7 @@
                                                             </select>
                                                         </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly></td>
-                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" readonly></td>
+                                                        <!-- <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" readonly></td> -->
                                                         <td>
                                                     </tr>
                                                     @php
@@ -246,7 +246,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" readonly>
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" value="{{ $mutasis->alamat_tujuan}}" readonly>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -280,6 +280,21 @@
                                     <div class="mb-4">
                                         <h5>Riwayat Pembayaran</h5>
                                         </div>
+                                        @php
+                                            $showButton = true;
+                                            $user = Auth::user();
+                                        @endphp
+
+                                        @foreach ($pembayarans as $pembayaran)
+                                            @if($pembayaran->status_bayar == 'LUNAS')
+                                                @php
+                                                    $showButton = false;
+                                                @endphp
+                                                @break
+                                            @endif
+                                        @endforeach
+
+                                        @if($showButton)
                                         <div class="row justify-content-between">
                                             <div class="col-md-12">
                                                 <label for=""></label>
@@ -288,6 +303,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
                                         <div class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table datanew">
@@ -299,7 +315,9 @@
                                                             <th>Rekening</th>
                                                             <th>Tanggal_Bayar</th>
                                                             <th>Status Bayar</th>
+                                                            @if($user->hasRole(['Finance']))
                                                             <th>Aksi</th>
+                                                            @endif
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -307,15 +325,23 @@
                                                         <tr>
                                                             <td>{{ $loop->iteration }}</td>
                                                             <td>{{ $pembayaran->no_invoice_bayar }}</td>
-                                                            <td>{{ $pembayaran->nominal }}</td>
+                                                            <td>{{ 'Rp '. number_format($pembayaran->nominal, 0, ',', '.') }}</td>
                                                             <td>@if($pembayaran->rekening == null)
                                                                 Pembayaran Cash
                                                                 @else
-                                                                {{ $pembayaran->rekening->bank }}
+                                                                {{ $pembayaran->rekening->bank }} - {{ $pembayaran->rekening->nama_akun }} ({{ $pembayaran->rekening->nomor_rekening }})
                                                                 @endif
                                                             </td>
                                                             <td>{{ $pembayaran->tanggal_bayar }}</td>
-                                                            <td>{{ $pembayaran->status_bayar }}</td>
+                                                            <td>@if($pembayaran->status_bayar == 'LUNAS')
+                                                                    <span class="badge bg-success">{{ $pembayaran->status_bayar }}</span>
+                                                                @elseif($pembayaran->status_bayar == 'BELUM LUNAS')
+                                                                    <span class="badge bg-danger">{{ $pembayaran->status_bayar }}</span>
+                                                                @else
+                                                                    <span class="badge bg-secondary">{{ $pembayaran->status_bayar }}</span> <!-- Optional: for any other status -->
+                                                                @endif
+                                                            </td>
+                                                            @if($user->hasRole(['Finance']))
                                                             <td>
                                                                 <div class="dropdown">
                                                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -326,6 +352,7 @@
                                                                     </div>
                                                                 </div>
                                                             </td>
+                                                            @endif
                                                         </tr>
                                                         @endforeach
                                                     </tbody>
@@ -1049,7 +1076,7 @@
         var pilihan = "{{ $mutasis->pilih_pengiriman}}";
         if (pilihan === "sameday") {
             $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
+            $('#biaya_pengiriman').prop('readonly', true);
         } else if (pilihan === "exspedisi") {
             $('#inputExspedisi').show();
             $('#biaya_pengiriman').prop('readonly', true);

@@ -180,7 +180,7 @@
                                                 <tbody id="dynamic_field">
                                                     @if(count($dopenjualan->produk) < 1) <tr>
                                                         <td>
-                                                            <select id="nama_produk_0" name="nama_produk[]" class="form-control" >
+                                                            <select id="nama_produk_0" name="nama_produk[]" class="form-control" readonly>
                                                                 <option value="">Pilih Produk</option>
                                                                 @foreach ($produkjuals as $produk)
                                                                 <option value="{{ $produk->kode }}">
@@ -238,11 +238,7 @@
                                                                 @php
                                                                     $user = Auth::user();
                                                                 @endphp
-                                                                @if($user->hasRole(['Auditor', 'Finance']))
                                                                 <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" readonly>
-                                                                @else
-                                                                <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control">
-                                                                @endif
                                                                     <option value="">Pilih Produk</option>
                                                                     @foreach ($produkjuals as $pj)
                                                                     <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode == $produk->produk->kode ? 'selected' : '' }}>
@@ -312,8 +308,6 @@
                             </div>
                         </div>
 
-                    @foreach ($dopenjualan->produk as $produk)
-                    @if($produk->jenis == 'TAMBAHAN')
                     @if(count($dopenjualan->produk) > 0)
                     <div class="col-sm">
                         <div class="row">
@@ -381,8 +375,6 @@
                         </div>
                     </div>
                     @endif
-                    @endif
-                    @endforeach
 
                     <div class="row  justify-content-center pt-3  mt-2">
                         <div class="col-lg-6 col-sm-12 border radius pt-2 pb-2">
@@ -561,7 +553,6 @@
                 '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
             $('#dynamic_field').append(newRow);
-            updateIndicesProduk();
 
             // Menambahkan modal untuk setiap pic
             var picModal = '<div class="modal fade" id="picModal_' + i + '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">' +
@@ -608,7 +599,6 @@
                 '</tr>';
             $('#dynamic_field_tambah').append(newrowtambah);
             $('#nama_produk_' + i + ', #jenisdiskon_' + i).select2();
-            updateIndicesProdukTambahan();
             i++;
         })
 
@@ -646,14 +636,16 @@
 
         $(document).on('click', '#dynamic_field .btn_remove', function() {
             var button_id = $(this).attr('id');
-            $('#row' + button_id).remove();
-            updateIndicesProduk();
+            if ($('#dynamic_field tr').length <= 1) {
+                alert('Mohon Jangan Biarkan Data Delivery Order Kosong');
+            } else {
+                $('#row' + button_id).remove();
+            }
         });
         
         $(document).on('click', '#dynamic_field_tambah .btn_remove', function() {
             var button_id = $(this).attr('id');
             $('#row' + button_id).remove();
-            updateIndicesProdukTambahan();
         });
 
         $(document).on('change', '[id^=nama_produk]', function() {
@@ -709,7 +701,7 @@
             });
         @endforeach
 
-        console.log('Produk Data:', produkData);
+        // console.log('Produk Data:', produkData);
 
         $(document).on('input', '.jumlah', function() {
             var inputId = $(this).attr('id');

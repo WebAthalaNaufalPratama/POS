@@ -136,7 +136,7 @@
                                                     <tr>
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
+                                                        <!-- <th>Jumlah Diterima</th> -->
                                                         <th></th>
                                                     </tr>
                                                 </thead>
@@ -156,7 +156,7 @@
                                                             </select>
                                                         </td>
                                                         <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly></td>
-                                                        <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" readonly></td>
+                                                        <!-- <td><input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control" readonly></td> -->
                                                         @php
                                                             $user = Auth::user();
                                                         @endphp
