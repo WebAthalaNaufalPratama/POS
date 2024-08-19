@@ -48,6 +48,7 @@ class TransaksiKas extends Model
     {
         $incomeQuery = self::query();
         $outcomeQuery = self::query();
+        $saldoAwalQuery = Rekening::query();
 
         $incomeQuery->where('status', $status);
         $outcomeQuery->where('status', $status);
@@ -60,6 +61,7 @@ class TransaksiKas extends Model
         if ($rekening_id) {
             $incomeQuery->where('rekening_penerima', $rekening_id);
             $outcomeQuery->where('rekening_pengirim', $rekening_id);
+            $saldoAwalQuery->where('id', $rekening_id);
         }
 
         if ($lokasi) {
@@ -74,8 +76,12 @@ class TransaksiKas extends Model
 
         $incomeBalance = $incomeQuery->sum('nominal');
         $outcomeBalance = $outcomeQuery->sum(DB::raw('nominal + biaya_lain'));
-
-        $balance = $incomeBalance - $outcomeBalance;
+        if($metode == 'Transfer'){
+            $saldoAwal = $saldoAwalQuery->sum('saldo_awal');
+        } else {
+            $saldoAwal = 0;
+        }
+        $balance = $saldoAwal + $incomeBalance - $outcomeBalance;
 
         return $balance;
     }

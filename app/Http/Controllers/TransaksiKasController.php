@@ -252,6 +252,19 @@ class TransaksiKasController extends Controller
         $data = $req->except(['_token', '_method']);
         $data['status'] = 'DIKONFIRMASI';
 
+        // cek saldo
+        if($req->metode == 'Transfer'){
+            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
+            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+            }
+        } else {
+            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
+            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            }
+        }
+
         // store file
         if ($req->hasFile('file')) {
             // Simpan file baru
@@ -336,6 +349,20 @@ class TransaksiKasController extends Controller
         if (!$existingTransaksi) {
             return redirect()->back()->with('fail', 'Transaksi tidak ditemukan.');
         }
+
+        // cek saldo
+        if($req->metode == 'Transfer'){
+            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
+            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+            }
+        } else {
+            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
+            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            }
+        }
+
         if($req->metode == 'Cash'){
             $data['rekening_penerima'] = null;
             $data['rekening_pengirim'] = null;
