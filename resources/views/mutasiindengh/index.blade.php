@@ -313,8 +313,8 @@
                                 </td>
                                 
                                 
-                            </tr>
-                            @endforeach --}}
+                           </tr>
+                            @endforeach  --}}
                         </tbody>
                     </table>
                 </div>
@@ -376,11 +376,11 @@
                                 badgeClass = 'bg-lightred';
                                 break;
                             default:
-                                badgeClass = 'bg-lightgrey';
+                                badgeClass = 'bg-lightred';
                                 break;
                         }
                         
-                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                        return `<span class="badges ${badgeClass}">${data || 'TUNDA'}</span>`;
                     }
                 },
                 {
@@ -396,11 +396,11 @@
                                 badgeClass = 'bg-lightred';
                                 break;
                             default:
-                                badgeClass = 'bg-lightgrey';
+                                badgeClass = 'bg-lightred';
                                 break;
                         }
                         
-                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                        return `<span class="badges ${badgeClass}">${data || 'TUNDA'}</span>`;
                     }
                 },
                 {
@@ -416,16 +416,38 @@
                                 badgeClass = 'bg-lightred';
                                 break;
                             default:
-                                badgeClass = 'bg-lightgrey';
+                                badgeClass = 'bg-lightred';
                                 break;
                         }
                         
-                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                        return `<span class="badges ${badgeClass}">${data || 'TUNDA'}</span>`;
                     }
                 },
-                { data: 'status_dibuku', name: 'status_dibuku' },
-                { data: 'tagihan', name: 'tagihan' },
-                { data: 'sisa_tagihan', name: 'sisa_tagihan' },
+                {
+                    data: 'status_dibuku',
+                    name: 'status_dibuku',
+                    render: function(data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'DIKONFIRMASI':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'TUNDA':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            case 'MENUNGGU PEMBAYARAN':
+                                badgeClass = 'bg-lightyellow';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightred';
+                                break;
+                        }
+                        
+                        return `<span class="badges ${badgeClass}">${data || 'TUNDA'}</span>`;
+                    }
+                },
+                { data: 'tagihan_format', name: 'tagihan_format' },
+                { data: 'sisa_tagihan_format', name: 'sisa_tagihan_format' },
                 {
                     data: 'status_pembayaran',
                     name: 'status_pembayaran',
@@ -528,7 +550,7 @@
                                         </li>`;
                                 }
                             }
-                            if ((row.sisa_bayar == row.total_biaya || row.sisa_bayar == 0) && row.status_dibuku === "MENUNGGU PEMBAYARAN" && !row.returinden) {
+                            if ((row.sisa_tagihan == row.total_biaya || row.sisa_tagihan == 0) && row.status_dibuku === "MENUNGGU PEMBAYARAN" && !row.returinden) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.createRetur.replace('__ID__', row.id)}">
@@ -536,7 +558,7 @@
                                         </a>
                                     </li>`;
                             }
-                            if (row.returinden && (row.returinden.status_dibuat === "DIKONFIRMASI" && (row.returinden.status_dibuku === "TUNDA" || row.returinden.status_dibuku == null))) {
+                            if (row.returinden && (row.returinden.status_dibuat === "DIKONFIRMASI" && (row.returinden.status_dibukukan === "TUNDA" || row.returinden.status_dibukukan == null))) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
@@ -556,21 +578,21 @@
                                         </a>
                                     </li>`;
                             }
-                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.sisa_bayar != 0 && (!row.returinden || (row.returinden && row.returinden.status_dibuku === "BATAL"))) {
+                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.sisa_tagihan != 0 && (!row.returinden || (row.returinden && row.returinden.status_dibukukan === "BATAL"))) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.confirmPayment.replace('__ID__', row.id)}">
                                             <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi
                                         </a>
                                     </li>`;
-                            } else if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.sisa_bayar == 0 && (!row.returinden || (row.returinden && row.returinden.status_dibuku === "BATAL"))) {
+                            } else if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.sisa_tagihan == 0 && (!row.returinden || (row.returinden && row.returinden.status_dibukukan === "BATAL"))) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.confirmPayment.replace('__ID__', row.id)}">
                                             <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi
                                         </a>
                                     </li>`;
-                            } else if ((row.status_dibuku === "DIKONFIRMASI" && row.sisa_bayar == 0 && !row.returinden) || (row.returinden && row.returinden.status_dibuku === "BATAL")) {
+                            } else if ((row.status_dibuku === "DIKONFIRMASI" && row.sisa_tagihan == 0 && !row.returinden) || (row.returinden && row.returinden.status_dibukukan === "BATAL")) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
@@ -579,7 +601,7 @@
                                     </li>`;
                             }
                             if (row.returinden) {
-                                if ((row.returinden.status_dibuku === "TUNDA" || row.returinden.status_dibuku == null) && row.returinden.status_dibuat === "DIKONFIRMASI") {
+                                if ((row.returinden.status_dibukukan === "TUNDA" || row.returinden.status_dibukukan == null) && row.returinden.status_dibuat === "DIKONFIRMASI") {
                                     dropdownHtml += `
                                         <li>
                                             <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
@@ -587,39 +609,45 @@
                                             </a>
                                         </li>`;
                                 }
-                                if (row.returinden.status_dibuku === "MENUNGGU PEMBAYARAN" && (row.returinden.sisa_refund != 0 || row.sisa_bayar != 0)) {
+                                if (row.returinden.status_dibukukan === "MENUNGGU PEMBAYARAN" && (row.returinden.sisa_refund != 0 || row.sisa_tagihan != 0)) {
                                     dropdownHtml += `
                                         <li>
                                             <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar Mutasi/Input Refund
                                             </a>
                                         </li>`;
-                                } else if (row.returinden.status_dibuku === "MENUNGGU PEMBAYARAN" && row.returinden.sisa_refund == 0 && row.sisa_bayar == 0) {
+                                } else if (row.returinden.status_dibukukan === "MENUNGGU PEMBAYARAN" && row.returinden.sisa_refund == 0 && row.sisa_tagihan == 0) {
                                     dropdownHtml += `
                                         <li>
                                             <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi Retur
                                             </a>
                                         </li>`;
-                                } else if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.returinden.status_dibuku === "DIKONFIRMASI") {
+                                } else if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && row.returinden.status_dibukukan === "DIKONFIRMASI") {
                                     dropdownHtml += `
                                         <li>
-                                            <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
+                                            <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi Mutasi
                                             </a>
                                         </li>`;
+                                } else if (row.returinden.status_dibukukan === "DIKONFIRMASI" && row.returinden.sisa_refund == 0 && row.sisa_tagihan == 0) {
+                                    dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
+                                        </a>
+                                    </li>`;
+                                    if (row.returinden && row.returinden.status_dibuat !== "BATAL") {
+                                        dropdownHtml += `
+                                            <li>
+                                                <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
+                                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Retur
+                                                </a>
+                                            </li>`;
+                                    }
                                 }
                                 
                             }
-                        }
-                        if (row.returinden) {
-
-                            dropdownHtml += `
-                                            <li>
-                                                <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
-                                                    <img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit Komplain
-                                                </a>
-                                            </li>`;
                         }
 
                         dropdownHtml += `
@@ -632,6 +660,7 @@
             ]
         });
     });
+    
     function deleteData(id) {
         $.ajax({
             type: "GET",
