@@ -624,7 +624,6 @@
                 var lokasiId = $(this).data('lokasi_id');
                 
                 if (lokasiId != lokasiPengirimId) {
-                    $(this).hide();
                 } else {
                     $(this).show();
                 }
