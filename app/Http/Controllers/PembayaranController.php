@@ -120,10 +120,29 @@ class PembayaranController extends Controller
         if ($req->hasFile('bukti')) {
             $file = $req->file('bukti');
             $fileName = $req->no_invoice_bayar . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $filePath = 'bukti_pembayaran_penjualan/' . $fileName;
 
             $do = Pembayaran::find($pembayaran);
+
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+            ->save(storage_path('app/public/' . $filePath));
+    
+            // Hapus file lama
+            if (!empty($do->bukti)) {
+                $oldFilePath = storage_path('app/public/' . $do->bukti);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+        }
 
             $penjualan = Penjualan::find($do->invoice_penjualan_id);
 
@@ -185,16 +204,45 @@ class PembayaranController extends Controller
 
         $data = $req->except(['_token', '_method', 'bukti', 'status_bayar']);
 
-        if ($req->hasFile('bukti')) {
-            $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
-            $data['bukti'] = $filePath;
-        }
+        // if ($req->hasFile('bukti')) {
+        //     $file = $req->file('bukti');
+        //     $fileName = time() . '_' . $file->getClientOriginalName();
+        //     $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
+        //     $data['bukti'] = $filePath;
+        // }
 
         $data['nominal'] = $this->parseRupiahToNumber($data['nominal']);
         $penjualan = Penjualan::find($req->invoice_penjualan_id);
+        
         if ($penjualan) {
+            // store file
+            if ($req->hasFile('bukti')) {
+                // Simpan file baru
+                $file = $req->file('bukti');
+                $fileName = $penjualan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = 'bukti_pembayaran_penjualan/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                // if (!empty($pembayaran->bukti)) {
+                //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                //     if (File::exists($oldFilePath)) {
+                //         File::delete($oldFilePath);
+                //     }
+                // }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
+            }
+
             $cekTotalTagihan = $penjualan->sisa_bayar - $data['nominal'];
             $penjualan->update([
                 'sisa_bayar' => $cekTotalTagihan,
@@ -519,12 +567,39 @@ class PembayaranController extends Controller
         $data['cara_bayar'] = $cara_bayar;
         $data['rekening_id'] = $rekening_id;
     
+        // if ($req->hasFile('bukti')) {
+        //     // Mengunggah file bukti pembayaran
+        //     $file = $req->file('bukti');
+        //     $fileName = time() . '_' . $file->getClientOriginalName();
+        //     $filePath = $file->storeAs('bukti_pembayaran_purchase', $fileName, 'public');
+        //     $data['bukti'] = $filePath;
+        // }
+        // store file
         if ($req->hasFile('bukti')) {
-            // Mengunggah file bukti pembayaran
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_pembayaran_purchase', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $fileName = $datainv->no_inv . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_pembayaran_purchase/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
     
         // Menghitung sisa tagihan setelah pembayaran
@@ -630,12 +705,39 @@ class PembayaranController extends Controller
         $data['cara_bayar'] = $cara_bayar;
         $data['rekening_id'] = $rekening_id;
     
+        // if ($req->hasFile('buktitf')) {
+        //     // Mengunggah file bukti pembayaran
+        //     $file = $req->file('buktitf');
+        //     $fileName = time() . '_' . $file->getClientOriginalName();
+        //     $filePath = $file->storeAs('bukti_pembayaran_mutasiinden', $fileName, 'public');
+        //     $data['bukti'] = $filePath;
+        // }
+        // store file
         if ($req->hasFile('buktitf')) {
-            // Mengunggah file bukti pembayaran
+            // Simpan file baru
             $file = $req->file('buktitf');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_pembayaran_mutasiinden', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $fileName = $datamutasi->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_pembayaran_mutasiinden/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['buktitf'] = $filePath;
+            } else {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
     
         // Menghitung sisa tagihan setelah pembayaran
@@ -845,12 +947,39 @@ class PembayaranController extends Controller
             $check = $invoice_tagihan->update();
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
+            // // store file
+            // if ($req->hasFile('bukti')) {
+            //     $file = $req->file('bukti');
+            //     $fileName = $invoice_tagihan->no_inv . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            //     $filePath = $file->storeAs('bukti_pembayaran_purchase', $fileName, 'public');
+            //     $data['bukti'] = $filePath;
+            // }
             // store file
             if ($req->hasFile('bukti')) {
+                // Simpan file baru
                 $file = $req->file('bukti');
                 $fileName = $invoice_tagihan->no_inv . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_purchase', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $filePath = 'bukti_pembayaran_purchase/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                // if (!empty($pembayaran->bukti)) {
+                //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                //     if (File::exists($oldFilePath)) {
+                //         File::delete($oldFilePath);
+                //     }
+                // }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
 
             $new_invoice_tagihan = Invoicepo::find($data['invoice_purchase_id']);
@@ -915,12 +1044,39 @@ class PembayaranController extends Controller
             $check = $tagihan_refund->update();
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
+            // // store file
+            // if ($req->hasFile('bukti')) {
+            //     $file = $req->file('bukti');
+            //     $fileName = $tagihan_refund->no_retur . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            //     $filePath = $file->storeAs('bukti_pembayaran_refundpurchase', $fileName, 'public');
+            //     $data['bukti'] = $filePath;
+            // }
             // store file
             if ($req->hasFile('bukti')) {
+                // Simpan file baru
                 $file = $req->file('bukti');
                 $fileName = $tagihan_refund->no_retur . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_refundpurchase', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $filePath = 'bukti_pembayaran_refundpurchase/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                // if (!empty($pembayaran->bukti)) {
+                //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                //     if (File::exists($oldFilePath)) {
+                //         File::delete($oldFilePath);
+                //     }
+                // }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
 
             $new_refund_tagihan = Returpembelian::find($data['retur_pembelian_id']);
@@ -990,12 +1146,39 @@ class PembayaranController extends Controller
             $check = $tagihan_refund->update();
             if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
 
+            // // store file
+            // if ($req->hasFile('bukti')) {
+            //     $file = $req->file('bukti');
+            //     $fileName = $tagihan_refund->no_retur . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            //     $filePath = $file->storeAs('bukti_pembayaran_refundinden', $fileName, 'public');
+            //     $data['bukti'] = $filePath;
+            // }
             // store file
             if ($req->hasFile('bukti')) {
+                // Simpan file baru
                 $file = $req->file('bukti');
                 $fileName = $tagihan_refund->no_retur . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_pembayaran_refundinden', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $filePath = 'bukti_pembayaran_refundinden/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                // if (!empty($pembayaran->bukti)) {
+                //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                //     if (File::exists($oldFilePath)) {
+                //         File::delete($oldFilePath);
+                //     }
+                // }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
 
             $new_refund_tagihan = Returinden::find($data['returinden_id']);
