@@ -169,6 +169,7 @@
                                                     @php
                                                     $i = 0;
                                                     @endphp
+                                                    @if($penjualans->auditor_id != null && $penjualans->dibukukan_id !== null)
                                                     @foreach ($penjualans->produk as $produk)
                                                     @if($produk->jumlah_dikirim != 0)
                                                     <tr id="row{{ $i }}">
@@ -231,6 +232,7 @@
                                                     </tr>
                                                     @endif 
                                                     @endforeach
+                                                    @endif
                                                     @endif
                                             </tbody>
                                         </table>

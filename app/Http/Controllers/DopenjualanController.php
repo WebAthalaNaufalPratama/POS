@@ -107,7 +107,7 @@ class DopenjualanController extends Controller
 
     public function create($penjualan)
     {
-        $penjualans = Penjualan::with('produk')->whereNotNull('auditor_id')->whereNotNull('dibukukan_id')->find($penjualan);
+        $penjualans = Penjualan::with('produk')->find($penjualan);
         $kondisis = Kondisi::all();
         $user = Auth::user();
         $karyawans = Karyawan::where('jabatan', 'Driver')->get();
