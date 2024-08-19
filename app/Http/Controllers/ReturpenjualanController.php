@@ -1018,7 +1018,7 @@ class ReturpenjualanController extends Controller
                 'alasan' => $req->alasan[$i],
                 'jumlah_dikirim' => $req->jumlah[$i],
                 'jumlah' => $req->jumlah[$i],
-                'jenis_diskon' => $req->jenis_diskon[$i],
+                'jenis_diskon' => $req->jenis_diskon[$i] ?? 0,
                 'diskon' => $req->diskon[$i],
                 'harga' => $req->harga[$i],
                 'harga_jual' => $req->totalharga[$i]

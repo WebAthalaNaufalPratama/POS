@@ -107,7 +107,7 @@ class DopenjualanController extends Controller
 
     public function create($penjualan)
     {
-        $penjualans = Penjualan::with('produk')->find($penjualan);
+        $penjualans = Penjualan::with('produk')->whereNotNull('auditor_id')->whereNotNull('dibukukan_id')->find($penjualan);
         $kondisis = Kondisi::all();
         $user = Auth::user();
         $karyawans = Karyawan::where('jabatan', 'Driver')->get();
@@ -481,7 +481,9 @@ class DopenjualanController extends Controller
         $dopenjualan = DeliveryOrder::find($dopenjualan);
         $produkjuals = Produk_Jual::all();
         $customers = Customer::all();
-        $karyawans = Karyawan::all();
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $karyawans = Karyawan::where('jabatan', 'Driver')->where('lokasi_id', $karyawan->lokasi_id)->get();
         $kondisis = Kondisi::all();
         $Invoice = DeliveryOrder::latest()->first();
         if ($Invoice != null) {

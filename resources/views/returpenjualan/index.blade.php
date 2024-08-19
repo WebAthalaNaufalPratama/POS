@@ -186,7 +186,7 @@
                 { data: 'no_invoice', name: 'no_invoice' },
                 { data: 'no_do', name: 'no_do' },
                 { data: 'customer.nama', name: 'customer.nama' },
-                { data: 'lokasi', name: 'lokasi' },
+                { data: 'lokasi.nama', name: 'lokasi.nama' },
                 { data: 'supplier.nama', name: 'supplier.nama' },
                 { data: 'tanggal_retur', name: 'tanggal_retur' },
                 { data: 'komplain', name: 'komplain' },

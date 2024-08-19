@@ -149,7 +149,7 @@
                                         </div>
                                         <div class="form-group" style="display:none;" id="driver">
                                             <label for="driver">Driver</label>
-                                            <select id="driver" name="driver" class="form-control">
+                                            <select id="driver" name="driver" class="form-control" required>
                                                 <option value=""> Pilih Driver </option>
                                                 @foreach ($drivers as $driver)
                                                 <option value="{{ $driver->id }}">{{ $driver->nama }}</option>
@@ -180,7 +180,7 @@
                                                 <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_kirim" class="custom-file-container__custom-file__custom-file-input_2" name="file" accept="image/*">
+                                                    <input type="file" id="bukti_kirim" class="custom-file-container__custom-file__custom-file-input_2" name="file" accept="image/*" required>
                                                     <span class="custom-file-container__custom-file__custom-file-control_2"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
@@ -662,7 +662,7 @@
                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
                 '<td><input type="text" name="unit_satuan[]" id="unit_satuan_' + i + '" class="form-control" required></td>' +
                 '<td><input type="text" name="keterangan[]" id="keterangan_' + i + '" class="form-control" required></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove2"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
             $('#dynamic_field').append(newRow);
 
@@ -750,6 +750,11 @@
                 calculateTotal(0);
                 updateSubTotal();
             }
+        });
+
+        $(document).on('click', '.btn_remove2', function() {
+            var button_id = $(this).attr("id");
+            $('#row' + button_id).remove();
         });
 
         function updateIndices() {
@@ -920,6 +925,15 @@
             $('#bukti_file').val('');
             $('#preview').attr('src', defaultImg);
         };
+
+        $('[id^=jumlah2]').input(function(){
+            var jumlah = $(this).val();
+
+            if(jumlah < 0) {
+                alert('Jumlah Tidak Boleh Kurang dari 0!');
+                $(this).val(0);
+            }
+        });
 
         function formatRupiah(angka, prefix) {
             var numberString = angka.toString().replace(/[^,\d]/g, ''),
