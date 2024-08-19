@@ -1118,6 +1118,20 @@
             }
         }
 
+        $(document).on('change', '[id^=jumlahproduk_id]', function() {
+            var jumlah = $(this).val();
+
+            if (jumlah < 0) {
+                alert('Jumlah Gift tidak boleh kurang dari 0!');
+                $(this).val(0);
+            }
+        });
+
+        $('#modalGift').on('shown.bs.modal', function () {
+            $('[id^=jumlahproduk_id]').trigger('change');
+        });
+
+
         // Add change event listener
         $('#cara_bayar').change(function() {
             togglePaymentFields();
