@@ -2633,12 +2633,6 @@ class MutasiController extends Controller
         $data['tanggal_kirim'] = $req->tanggal_kirim;
         $data['tanggal_diterima'] = $req->tanggal_diterima;
 
-        $update = Mutasi::where('id', $mutasis)->update($data);
-
-        if($req->status == 'DIBATALKAN'){
-            return redirect(route('mutasigalerygalery.index'))->with('success', 'Berhasil Mengupdate Data');
-        }
-
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
 
         //cek produk
@@ -2675,6 +2669,12 @@ class MutasiController extends Controller
                     return back()->with('fail', "Produk {$getProdukJual->produk->nama} - {$getProdukJual->kondisi->nama} tidak ditemukan di inventory!");
                 }
             }
+        }
+
+        $update = Mutasi::where('id', $mutasis)->update($data);
+
+        if($req->status == 'DIBATALKAN'){
+            return redirect(route('mutasigalerygalery.index'))->with('success', 'Berhasil Mengupdate Data');
         }
 
         if($user->hasRole(['Auditor', 'Finance'])) {
@@ -2807,15 +2807,8 @@ class MutasiController extends Controller
         $data['tanggal_kirim'] = $req->tanggal_kirim;
         $data['tanggal_diterima'] = $req->tanggal_diterima;
 
-        $update = Mutasi::where('id', $mutasis)->update($data);
-
-        if($req->status == 'DIBATALKAN'){
-            return redirect(route('mutasighgalery.index'))->with('success', 'Berhasil Mengupdate Data');
-        }
-
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
 
-        //cek produk
         $groupedProduk = [];
         for ($i = 0; $i < count($req->kode_produk); $i++) {
             $kodeProduk = $req->kode_produk[$i];
@@ -2865,6 +2858,17 @@ class MutasiController extends Controller
                 }
             }
         }
+
+        $update = Mutasi::where('id', $mutasis)->update($data);
+
+        if($req->status == 'DIBATALKAN'){
+            return redirect(route('mutasighgalery.index'))->with('success', 'Berhasil Mengupdate Data');
+        }
+
+        
+
+        //cek produk
+        
         
         if($user->hasRole(['Auditor', 'Finance'])) {
             for ($i = 0; $i < count($req->nama_produk); $i++) {
