@@ -273,12 +273,15 @@
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
                                 break;
+                            case 'MENUNGGU PEMBAYARAN':
+                                badgeClass = 'bg-lightyellow';
+                                break;
                             default:
-                                badgeClass = 'bg-lightgrey';
+                                badgeClass = 'bg-lightred';
                                 break;
                         }
                         
-                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                        return `<span class="badges ${badgeClass}">${data || 'TUNDA'}</span>`;
                     }
                 },
                 {
@@ -293,12 +296,15 @@
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
                                 break;
+                            case 'MENUNGGU PEMBAYARAN':
+                                badgeClass = 'bg-lightyellow';
+                                break;
                             default:
-                                badgeClass = 'bg-lightgrey';
+                                badgeClass = 'bg-lightred';
                                 break;
                         }
                         
-                        return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                        return `<span class="badges ${badgeClass}">${data || 'TUNDA'}</span>`;
                     }
                 },
                 {

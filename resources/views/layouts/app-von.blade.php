@@ -815,6 +815,7 @@
               columns: options.columns,
               order: options.order || [[0, 'asc']],
               searching: options.searching !== undefined ? options.searching : true,
+              searchDelay: 1000,
               lengthChange: options.lengthChange !== undefined ? options.lengthChange : true,
               pageLength: options.pageLength || 10,
               lengthMenu: [ [5, 10, 25, 50], [5, 10, 25, 50] ],
