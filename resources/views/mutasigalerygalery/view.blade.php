@@ -60,6 +60,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required readonly>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}" {{ $rekening->id == $mutasis->rekening_id ? 'selected':''}}>{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -123,7 +134,7 @@
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
                                                         <th>Jumlah Diterima</th>
-                                                        <th></th>
+                                                        <th>Kondisi Diterima</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
@@ -149,6 +160,16 @@
                                                         </td>
                                                         <td>
                                                             <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}" readonly>
+                                                        </td>
+                                                        <td>
+                                                            <select id="kondisi_diterima_{{ $i }}" name="kondisi_diterima[]" class="form-control" readonly>
+                                                                <option value="">Pilih Kondisi</option>
+                                                                @foreach ($kondisis as $kondisi)
+                                                                <option value="{{ $kondisi->id }}"  {{ $kondisi->id == $produk->komponen[0]->kondisi_diterima ? 'selected' : '' }}>
+                                                                    {{ $kondisi->nama }}
+                                                                </option>
+                                                                @endforeach
+                                                            </select>
                                                         </td>
                                                     </tr>
                                                     @php
@@ -238,7 +259,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" readonly>
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" value="{{ $mutasis->alamat_tujuan}}" class="form-control" readonly>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -353,9 +374,6 @@
         element.value = today;
     }
 
-    // Call the function to set the date to today's date initially
-    updateDate(document.getElementById('tanggal_kirim'));
-    updateDate(document.getElementById('tanggal_diterima'));
     @foreach($produks as $index => $produk)
     updateDate(document.getElementById('tglrangkai_{{ $index }}'), '{{ $index }}');
     @endforeach
@@ -776,7 +794,7 @@
         var pilihan = "{{ $mutasis->pilih_pengiriman}}";
         if (pilihan === "sameday") {
             $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
+            $('#biaya_pengiriman').prop('readonly', true);
         } else if (pilihan === "exspedisi") {
             $('#inputExspedisi').show();
             $('#biaya_pengiriman').prop('readonly', true);

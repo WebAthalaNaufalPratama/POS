@@ -133,7 +133,26 @@
                 { data: 'nominal', name: 'nominal' },
                 { data: 'rekening', name: 'rekening' },
                 { data: 'tanggal_bayar', name: 'tanggal_bayar' },
-                { data: 'status_bayar', name: 'status_bayar' },
+                {
+                    data: 'status_bayar',
+                    name: 'status_bayar',
+                    render: function (data) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'LUNAS':
+                                badgeClass = 'bg-lightgreen';
+                                break;
+                            case 'BELUM LUNAS':
+                                badgeClass = 'bg-lightred';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightgrey';
+                                break;
+                        }
+
+                        return `<span class="badges ${badgeClass}">${data || 'Belum Ada Pembayaran'}</span>`;
+                    }
+                },
                 { data: 'action', name: 'action', orderable: false, searchable: false }
             ],
             columnDefs: [

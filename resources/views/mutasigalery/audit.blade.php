@@ -97,7 +97,7 @@
                                                 @php
                                                     $user = Auth::user();
                                                 @endphp
-                                                @if($user->hasRole(['KasirOutlet']) && $mutasis->status != 'DIKONFIRMASI')
+                                                @if($user->hasRole(['KasirGallery', 'AdminGallery']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
                                                 @endif
                                                 <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
@@ -162,11 +162,15 @@
                                                                 @endforeach
                                                             </select>
                                                         </td>
-                                                        <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" ></td>
+                                                        <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}" ></td>
                                                         @if($i == 0)
                                                             <td><button type="button" name="add" id="add" class="btn btnubah"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></button></td>
-                                                        @else
-                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btn-danger  btnubah"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
+                                                        @endif
+                                                        @php
+                                                            $user = Auth::user();
+                                                        @endphp
+                                                        @if($user->hasRole(['AdminGallery', 'KasirGallery']) && $i != 0) 
+                                                            <td><button type="button" name="remove" id="{{ $i }}" class="btn btnubah"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                                                         @endif
                                                     </tr>
                                                     @php
@@ -528,7 +532,7 @@
                                 </select>
                             </td>
                             <td><input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_${i}" class="form-control" value=""></td>
-                            <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
+                            <td><button type="button" name="remove" id="${i}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
@@ -864,28 +868,65 @@
             }
         });
 
-        var pilihan = "{{ $mutasis->pilih_pengiriman}}";
-        if (pilihan === "sameday") {
-            $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
-        } else if (pilihan === "exspedisi") {
-            $('#inputExspedisi').show();
-            $('#biaya_pengiriman').prop('readonly', true);
-            ongkirId();
+        function formatRupiah(angka, prefix) {
+            var numberString = angka.toString().replace(/[^,\d]/g, ''),
+                split = numberString.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix === undefined ? rupiah : (rupiah ? 'Rp ' + rupiah : '');
         }
+
         $('#pilih_pengiriman').change(function() {
             var pengiriman = $(this).val();
             var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
 
             $('#inputOngkir').hide();
             $('#inputExspedisi').hide();
-            if (pilihan === "sameday") {
+
+            if (pengiriman === "sameday") {
                 $('#inputOngkir').show();
                 $('#biaya_pengiriman').prop('readonly', false);
-            } else if (pilihan === "exspedisi") {
+            } else if (pengiriman === "exspedisi") {
                 $('#inputExspedisi').show();
                 $('#biaya_pengiriman').prop('readonly', true);
-                ongkirId();
+                $('#ongkir_id').trigger('change');
+            }
+        });
+
+        $('#pilih_pengiriman').trigger('change');
+
+        var produkData = [];
+
+        @foreach ($produks as $produk)
+            produkData.push({
+                id: {{ $produk->id }},
+                jumlah: {{ $produk->jumlah }}
+            });
+        @endforeach
+
+        $('input[id^="jumlah_dikirim"]').on('input', function() {
+            var inputDiterima = $(this).val();
+            var jumlah = parseInt($(this).val(), 10); 
+            var produkId = $(this).data('produk-id'); 
+
+            var produk = produkData.find(function(item) {
+                return item.id == produkId;
+            });
+
+            if (inputDiterima < 0) {
+                alert('Jumlah Dikirim tidak boleh kurang dari 0!');
+                $(this).val(0);
+            }else if(inputDiterima > produk.jumlah){
+                alert('Jumlah Dikirim Tidak boleh Melebihi!');
+                $(this).val(produk.jumlah);
             }
         });
 
@@ -1100,12 +1141,11 @@
         }
 
         function Totaltagihan() {
-            var biayaOngkir = parseFloat($('#biaya_pengiriman').val()) || 0;
+            var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
             var totalTagihan = biayaOngkir;
 
-            $('#total_biaya').val(totalTagihan.toFixed(2));
-            $('#sisa_bayar').val(sisaBayar.toFixed(2));
-            $('#jumlah_ppn').val(ppn.toFixed(2));
+            $('#total_biaya').val(formatRupiah(totalTagihan));
+            $('#biaya_pengiriman').val(formatRupiah(biayaOngkir));
         }
 
         $('#biaya_pengiriman').on('input', Totaltagihan);

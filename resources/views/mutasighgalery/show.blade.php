@@ -88,7 +88,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="nama">Tanggal Diterima</label>
-                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_diterima}}" required disabled>
+                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_diterima}}" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="status">Status</label>
@@ -265,7 +265,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" readonly>
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" value="{{ $mutasis->alamat_tujuan}}" readonly>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -804,7 +804,7 @@
         var pilihan = "{{ $mutasis->pilih_pengiriman}}";
         if (pilihan === "sameday") {
             $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
+            $('#biaya_pengiriman').prop('readonly', true);
         } else if (pilihan === "exspedisi") {
             $('#inputExspedisi').show();
             $('#biaya_pengiriman').prop('readonly', true);

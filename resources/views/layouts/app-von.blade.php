@@ -415,7 +415,7 @@
         </li>
 
 
-        <li class="nav-item dropdown has-arrow flag-nav">
+        <!-- <li class="nav-item dropdown has-arrow flag-nav">
           <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);" role="button">
             <img src="/assets/img/flags/us1.png" alt="" height="20">
           </a>
@@ -433,10 +433,10 @@
               <img src="/assets/img/flags/de.png" alt="" height="16"> German
             </a>
           </div>
-        </li>
+        </li> -->
 
 
-        <li class="nav-item dropdown">
+        <!-- <li class="nav-item dropdown">
           <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
             <img src="/assets/img/icons/notification-bing.svg" alt="img"> <span class="badge rounded-pill">4</span>
           </a>
@@ -518,7 +518,7 @@
               <a href="activities.html">View all Notifications</a>
             </div>
           </div>
-        </li>
+        </li> -->
 
         <li class="nav-item dropdown has-arrow main-drop">
           <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
@@ -657,6 +657,9 @@
                 element.value = element.value.slice(0, limit);
             }
         }
+        $(document).ready(function() {
+          $('#searchdiv').trigger('click');
+        });
 
         function validateName(element) {
             element.value = element.value.replace(/[^a-zA-Z\s'-]/g, '');
@@ -708,7 +711,7 @@
         }
 
         function cantMinus(element) {
-          console.log('awal')
+          // console.log('awal')
           var value = $(element).val().trim();
           
           if (value !== "" && !value.startsWith("0.") && value.length > 1) {
@@ -718,7 +721,7 @@
           value = parseFloat(value);
           
           if (isNaN(value) || value < 0) {
-            console.log('akhir')
+            // console.log('akhir')
             $(element).val(0);
             return false;
           }
@@ -801,7 +804,7 @@
                   },
                   dataSrc: function(json) {
                       // Debugging data from server
-                      console.log('Data received from server:', json); 
+                      // console.log('Data received from server:', json); 
                       return json.data;
                   },
                   error: function(xhr, error, code) {

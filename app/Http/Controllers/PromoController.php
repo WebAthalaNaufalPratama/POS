@@ -142,9 +142,13 @@ class PromoController extends Controller
         // $lokasi = Auth::user()->karyawan->lokasi_id;
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
+        $semualokasi = Lokasi::where('nama', 'Semua Lokasi')->first();
         // check promo minimal transaksi
         $promoMinTransaksi = [];
-        $minTransaksi = Promo::where('lokasi_id', $lokasi->lokasi)->orWhereIn('lokasi_id', [$lokasi->lokasi->nama, 'Semua Lokasi'])->where('ketentuan', 'min_transaksi')->where('ketentuan_min_transaksi', '<', intval($data['total_transaksi']))->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
+        $minTransaksi = Promo::where(function($query) use ($lokasi, $semualokasi) {
+            $query->where('lokasi_id', $lokasi->lokasi_id)
+                  ->orWhere('lokasi_id', $semualokasi->id);
+        })->where('ketentuan', 'min_transaksi')->where('ketentuan_min_transaksi', '<', intval($data['total_transaksi']))->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
         if($minTransaksi->isNotEmpty()){
             foreach ($minTransaksi as $item) {
                 $promoMinTransaksi[] = $item;
@@ -153,7 +157,10 @@ class PromoController extends Controller
         // check promo produk
         $promoProduk = [];
         foreach ($data['produk'] as $item) {
-            $checkProduk = Promo::where('lokasi_id', $lokasi->lokasi)->orWhereIn('lokasi_id', [$lokasi->lokasi->nama, 'Semua Lokasi'])->where('ketentuan', 'produk')->where('ketentuan_produk', $item)->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
+            $checkProduk = Promo::where(function($query) use ($lokasi, $semualokasi) {
+                $query->where('lokasi_id', $lokasi->lokasi_id)
+                      ->orWhere('lokasi_id', $semualokasi->id);
+            })->where('ketentuan', 'produk')->where('ketentuan_produk', $item)->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
             if($checkProduk->isNotEmpty()){
                 foreach ($checkProduk as $item) {
                     $promoProduk[] = $item;
@@ -164,7 +171,10 @@ class PromoController extends Controller
         // check promo tipe_produk
         $promoTipeProduk = [];
         foreach ($data['tipe_produk'] as $item) {
-            $checkTipeProduk = Promo::where('lokasi_id', $lokasi->lokasi)->orWhereIn('lokasi_id', [$lokasi->lokasi->nama, 'Semua Lokasi'])->where('ketentuan', 'tipe_produk')->where('ketentuan_tipe_produk', $item)->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
+            $checkTipeProduk = Promo::where(function($query) use ($lokasi, $semualokasi) {
+                $query->where('lokasi_id', $lokasi->lokasi_id)
+                      ->orWhere('lokasi_id', $semualokasi->id);
+            })->where('ketentuan', 'tipe_produk')->where('ketentuan_tipe_produk', $item)->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
             if($checkTipeProduk->isNotEmpty()){
                 foreach ($checkTipeProduk as $item) {
                     $promoTipeProduk[] = $item;

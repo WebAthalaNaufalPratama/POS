@@ -127,9 +127,9 @@
 
     window.routes = {
         auditmutasiedit: "{{ route('auditmutasigalery.edit', ['mutasiGO' => '__ID__']) }}",
-        mutasiGalleryAcc: "{{ route('mutasigalery.acc', ['mutasiGO' => '__ID__']) }}",
-        mutasiGalleryPayment: "{{ route('mutasigalery.payment', ['mutasiGO' => '__ID__']) }}",
-        mutasiGalleryShow: "{{ route('mutasigalery.show', ['mutasiGO' => '__ID__']) }}",
+        mutasiOutletAcc: "{{ route('mutasigalery.acc', ['mutasiGO' => '__ID__']) }}",
+        mutasiOutletPayment: "{{ route('mutasigalery.payment', ['mutasiGO' => '__ID__']) }}",
+        mutasiOutletyShow: "{{ route('mutasigalery.show', ['mutasiGO' => '__ID__']) }}",
         mutasiOutletView: "{{ route('mutasioutlet.view', ['mutasiOG' => '__ID__']) }}",
     };
     
@@ -206,19 +206,20 @@
                             dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasiedit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>`;
                         }
 
-                        if (userRoles.includes('KasirOutlet')) {
+                        if (userRoles.includes('KasirOutlet') && row.status == 'DIKONFIRMASI') {
                             dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiOutletPayment.replace('__ID__', row.id)}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>`;
                         }
                         if (userRoles.includes('KasirGallery') || userRoles.includes('AdminGallery')) {
                             dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiOutletView.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>`;
                         }
                     }
-
-                    dropdownHtml += `
-                        <a class="dropdown-item" href="${window.routes.auditmutasiedit.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
-                        </div>
-                    </div>`;
-
+                    if(row.status == 'DIKONFIRMASI') {
+                        dropdownHtml += `
+                            <a class="dropdown-item" href="${window.routes.auditmutasiedit.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
+                            </div>
+                        </div>`;
+                    }
+                    
                     return dropdownHtml;
                 }
             }

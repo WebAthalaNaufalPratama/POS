@@ -94,11 +94,11 @@
                                                 @php
                                                     $user = Auth::user();
                                                 @endphp
-                                                @if($user->hasRole(['KasirOutlet']) && $mutasis->status != 'DIKONFIRMASI')
+                                                @if($user->hasRole(['Purchasing']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
                                                 @endif
                                                 <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
-                                                @if($user->hasRole(['KasirGallery', 'AdminGallery']) && $mutasis->status != 'DIKONFIRMASI')
+                                                @if($user->hasRole(['Purchasing']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
                                                 @endif
                                             </select>
@@ -137,7 +137,7 @@
                                                         <th>Nama</th>
                                                         <th>Jumlah Dikirim</th>
                                                         <th>Jumlah Diterima</th>
-                                                        <th></th>
+                                                        <th>Kondisi Diterima</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
@@ -163,6 +163,16 @@
                                                         </td>
                                                         <td>
                                                             <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}" readonly>
+                                                        </td>
+                                                        <td>
+                                                            <select id="kondisi_diterima_{{ $i }}" name="kondisi_diterima[]" class="form-control" readonly>
+                                                                <option value="">Pilih Kondisi</option>
+                                                                @foreach ($kondisis as $kondisi)
+                                                                <option value="{{ $kondisi->id }}"  {{ $kondisi->id == $produk->komponen[0]->kondisi_diterima ? 'selected' : '' }}>
+                                                                    {{ $kondisi->nama }}
+                                                                </option>
+                                                                @endforeach
+                                                            </select>
                                                         </td>
                                                     </tr>
                                                     @php
@@ -252,7 +262,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" readonly>
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" value="{{ $mutasis->alamat_tujuan}}" class="form-control" readonly>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -367,9 +377,6 @@
         element.value = today;
     }
 
-    // Call the function to set the date to today's date initially
-    updateDate(document.getElementById('tanggal_kirim'));
-    updateDate(document.getElementById('tanggal_diterima'));
     @foreach($produks as $index => $produk)
     updateDate(document.getElementById('tglrangkai_{{ $index }}'), '{{ $index }}');
     @endforeach
@@ -790,7 +797,7 @@
         var pilihan = "{{ $mutasis->pilih_pengiriman}}";
         if (pilihan === "sameday") {
             $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
+            $('#biaya_pengiriman').prop('readonly', true);
         } else if (pilihan === "exspedisi") {
             $('#inputExspedisi').show();
             $('#biaya_pengiriman').prop('readonly', true);

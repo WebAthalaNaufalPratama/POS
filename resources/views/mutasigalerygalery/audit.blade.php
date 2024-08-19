@@ -38,7 +38,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="pengirim">Nama Pengirim</label>
-                                            <select id="pengirim" name="pengirim" class="form-control" required >
+                                            <select id="pengirim" name="pengirim" class="form-control" required readonly>
                                                 <option value="">Pilih Nama Pengirim</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $mutasis->pengirim ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -60,7 +60,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="no_mutasi">No Mutasi</label>
-                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" >
+                                            <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -94,9 +94,16 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required >
                                                 <option value="">Pilih Status</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if($user->hasRole(['Purchasing']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                @endif
                                                 <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                @if($user->hasRole(['Purchasing']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -162,6 +169,12 @@
                                                         </td>
                                                         @if($i == 0)
                                                             <td><button type="button" name="add" id="add" class="btn"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></button></td>
+                                                        @endif
+                                                        @php
+                                                            $user = Auth::user();
+                                                        @endphp
+                                                        @if($user->hasRole(['Purchasing']) && $i != 0) 
+                                                            <td><button type="button" name="remove" id="${i}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                                                         @endif
                                                     </tr>
                                                     @php
@@ -401,6 +414,10 @@
 
         calculateTotal(index);
     }
+
+    $('#pengirim').on('mousedown click focus', function(e) {
+        e.preventDefault();
+    });
 
     function calculateTotal(index) {
         var diskonType = $('#jenis_diskon_' + index).val();
@@ -675,7 +692,7 @@
 
             if (inputDiterima < 0) {
                 alert('Jumlah Dikirim tidak boleh kurang dari 0!');
-                $(this).val(jumlahkirim);
+                $(this).val(0);
             }
         });
 

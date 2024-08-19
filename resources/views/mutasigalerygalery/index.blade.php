@@ -151,6 +151,10 @@
                     d.dateStart = $('#filterDateStart').val();
                     d.dateEnd = $('#filterDateEnd').val();
                 },
+                //   dataSrc: function (json) {
+                //     console.log("Received Data:", json); // Log received data
+                //     return json.data;
+                // }
             },
             columns: [
                 { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
@@ -202,9 +206,9 @@
                         // Add permission-based actions
                         if (userRoles.includes('Auditor') || userRoles.includes('Finance') || userRoles.includes('SuperAdmin')) {
                             if (isJumlahDiterima) {
-                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasigalerygaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>`;
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGalleryGalleryShow.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit Acc Terima</a>`;
                             } else {
-                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasigalerygalery.show.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit Acc Terima</a>`;
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasigalerygaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>`;
                             }
                         }
 

@@ -237,13 +237,13 @@
                                                 </a>`;
                             }
 
-                            if (lokasiTipe != 2 && row.komplain === 'retur') {
+                            if (lokasiTipe != 2 && row.komplain === 'retur' && row.status == 'DIKONFIRMASI') {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.returPenjualanShow.replace('__ID__', row.id)}">
                                                     <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Set Ganti
                                                 </a>`;
                             }
 
-                            if (lokasiTipe != 2) {
+                            if (lokasiTipe != 2 && row.status == 'DIKONFIRMASI') {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.returPenjualanView.replace('__ID__', row.id)}">
                                                     <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">View
                                                 </a>`;
