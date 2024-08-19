@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Models\Pembayaran;
 
-class ReturPenjualanController extends Controller
+class ReturpenjualanController extends Controller
 {
     public function index(Request $req)
 {

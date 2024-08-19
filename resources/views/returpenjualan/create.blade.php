@@ -921,6 +921,15 @@
             $('#preview').attr('src', defaultImg);
         };
 
+        $('[id^=jumlah2]').input(function(){
+            var jumlah = $(this).val();
+
+            if(jumlah < 0) {
+                alert('Jumlah Tidak Boleh Kurang dari 0!');
+                $(this).val(0);
+            }
+        });
+
         function formatRupiah(angka, prefix) {
             var numberString = angka.toString().replace(/[^,\d]/g, ''),
                 split = numberString.split(','),
