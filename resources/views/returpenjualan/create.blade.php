@@ -662,7 +662,7 @@
                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
                 '<td><input type="text" name="unit_satuan[]" id="unit_satuan_' + i + '" class="form-control" required></td>' +
                 '<td><input type="text" name="keterangan[]" id="keterangan_' + i + '" class="form-control" required></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove2"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
             $('#dynamic_field').append(newRow);
 
@@ -750,6 +750,11 @@
                 calculateTotal(0);
                 updateSubTotal();
             }
+        });
+
+        $(document).on('click', '.btn_remove2', function() {
+            var button_id = $(this).attr("id");
+            $('#row' + button_id).remove();
         });
 
         function updateIndices() {
