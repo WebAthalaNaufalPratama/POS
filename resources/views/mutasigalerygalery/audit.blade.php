@@ -617,6 +617,20 @@
             }
         });
 
+        $(document).on('change', '#pengirim', function() {
+            var lokasiPengirimId = $(this).val();
+
+            $('[id^=nama_produk_] option').each(function() {
+                var lokasiId = $(this).data('lokasi_id');
+                
+                if (lokasiId != lokasiPengirimId) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            });
+        });
+
         function formatRupiah(angka, prefix) {
             var numberString = angka.toString().replace(/[^,\d]/g, ''),
                 split = numberString.split(','),
