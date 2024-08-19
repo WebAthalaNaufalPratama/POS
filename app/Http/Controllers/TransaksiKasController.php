@@ -26,21 +26,27 @@ class TransaksiKasController extends Controller
         // Define the base query for incoming and outgoing transactions
         $queryMasuk = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_pengirim', 'rek_penerima');
         $queryKeluar = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_pengirim', 'rek_penerima');
+        $queryRekening = Rekening::query();
 
         // Apply filters for location and rekening if provided
         if ($req->lokasi) {
             $queryMasuk->where('lokasi_penerima', $req->lokasi);
             $queryKeluar->where('lokasi_pengirim', $req->lokasi);
+            $queryRekening->where('lokasi_id', $req->lokasi);
         } else {
             $queryMasuk->whereHas('lok_penerima', fn($q) => $q->where('operasional_id', 1));
             $queryKeluar->whereHas('lok_pengirim', fn($q) => $q->where('operasional_id', 1));
+            $dataLokasi = Lokasi::where('operasional_id', 1)->pluck('id');
+            $queryRekening->whereIn('lokasi_id', $dataLokasi);
         }
 
         if ($req->rekening) {
             $queryMasuk->where('rekening_penerima', $req->rekening);
             $queryKeluar->where('rekening_pengirim', $req->rekening);
+            $queryRekening->where('id', $req->rekening);
         }
 
+        $saldoAwal = $queryRekening->sum('saldo_awal');
         // start datatable masuk
             if ($req->ajax() && $req->table == 'masuk') {
                 $start = $req->input('start');
@@ -170,33 +176,35 @@ class TransaksiKasController extends Controller
         $saldoMasuk = $queryMasuk->clone()->where($confirmedCondition)->sum('nominal');
         $saldoKeluar = $queryKeluar->clone()->where($confirmedCondition)->sum('nominal') 
                     + $queryKeluar->clone()->where($confirmedCondition)->sum('biaya_lain');
-        $saldo = $saldoMasuk - $saldoKeluar;
+        $saldo = $saldoMasuk - $saldoKeluar + $saldoAwal;
 
-        $saldoMasukRekening = $queryMasuk->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Transfer')
-                                            ->sum('nominal');
-        $saldoKeluarRekening = $queryKeluar->clone()->where($confirmedCondition)
-                                                ->where('metode', 'Transfer')
-                                                ->sum('nominal') 
-                        + $queryKeluar->clone()->where($confirmedCondition)
-                                                ->where('metode', 'Transfer')
-                                                ->sum('biaya_lain');
-        $saldoRekening = $saldoMasukRekening - $saldoKeluarRekening;
+        $saldoMasukRekening = $queryMasuk->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Transfer')
+                                ->sum('nominal');
+        $saldoKeluarRekening = $queryKeluar->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Transfer')
+                                ->sum('nominal') 
+                        + $queryKeluar->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Transfer')
+                                ->sum('biaya_lain');
+        $saldoRekening = ($saldoMasukRekening - $saldoKeluarRekening) + $saldoAwal;
 
-        $saldoMasukCash = $queryMasuk->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Cash')
-                                            ->sum('nominal');
-        $saldoKeluarCash = $queryKeluar->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Cash')
-                                            ->sum('nominal') 
-                            + $queryKeluar->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Cash')
-                                            ->sum('biaya_lain');
+        $saldoMasukCash = $queryMasuk->clone()
+                            ->where($confirmedCondition)
+                            ->where('metode', 'Cash')
+                            ->sum('nominal');
+        $saldoKeluarCash = $queryKeluar->clone()
+                            ->where($confirmedCondition)
+                            ->where('metode', 'Cash')
+                            ->sum('nominal') 
+                        + $queryKeluar->clone()
+                            ->where($confirmedCondition)
+                            ->where('metode', 'Cash')
+                            ->sum('biaya_lain');
         $saldoCash = $saldoMasukCash - $saldoKeluarCash;
-
-        // Retrieve data for view
-        // $dataMasuk = $queryMasuk->get();
-        // $dataKeluar = $queryKeluar->get();
 
         // Get the basic data for locations and accounts
         $rekenings = Rekening::whereHas('lokasi', fn($q) => $q->where('operasional_id', 1))->get();
@@ -243,6 +251,19 @@ class TransaksiKasController extends Controller
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
         $data['status'] = 'DIKONFIRMASI';
+
+        // cek saldo
+        if($req->metode == 'Transfer'){
+            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
+            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+            }
+        } else {
+            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
+            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            }
+        }
 
         // store file
         if ($req->hasFile('file')) {
@@ -328,6 +349,20 @@ class TransaksiKasController extends Controller
         if (!$existingTransaksi) {
             return redirect()->back()->with('fail', 'Transaksi tidak ditemukan.');
         }
+
+        // cek saldo
+        if($req->metode == 'Transfer'){
+            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
+            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+            }
+        } else {
+            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
+            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            }
+        }
+
         if($req->metode == 'Cash'){
             $data['rekening_penerima'] = null;
             $data['rekening_pengirim'] = null;
@@ -384,33 +419,41 @@ class TransaksiKasController extends Controller
     {
         $queryMasuk = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim');
         $queryKeluar = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim');
+        $queryRekening = Rekening::query();
+
         $rekenings = Rekening::whereHas('lokasi', function($q){
             $q->where('tipe_lokasi', 1);
         })->get();
         $lokasis = Lokasi::where('tipe_lokasi', 1)->get();
+
         if($req->lokasi){
             $queryMasuk->where('lokasi_penerima', $req->lokasi);
             $queryKeluar->where('lokasi_pengirim', $req->lokasi);
             $lokasi_pengirim = $req->lokasi;
             $rekeningKeluar = Rekening::where('lokasi_id', $req->lokasi)->get();
+            $queryRekening->where('lokasi_id', $req->lokasi);
         } else {
             if(Auth::user()->hasRole('AdminGallery')){
                 $queryMasuk->where('lokasi_penerima', Auth::user()->karyawans->lokasi_id);
                 $queryKeluar->where('lokasi_pengirim', Auth::user()->karyawans->lokasi_id);
                 $lokasi_pengirim = Auth::user()->karyawans->lokasi_id;
                 $rekeningKeluar = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+                $queryRekening->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             } else {
                 $lokasi_pengirim = $lokasis->first()->id;
                 $rekeningKeluar = Rekening::where('lokasi_id', $lokasi_pengirim)->get();
                 $queryMasuk->where('lokasi_penerima', $lokasis->first()->id);
                 $queryKeluar->where('lokasi_pengirim', $lokasis->first()->id);
+                $queryRekening->where('lokasi_id', $lokasis->first()->id);
             }
         }
         if($req->rekening){
             $queryMasuk->where('rekening_penerima', $req->rekening);
             $queryKeluar->where('rekening_pengirim', $req->rekening);
+            $queryRekening->where('id', $req->rekening);
         }
 
+        $saldoAwal = $queryRekening->sum('saldo_awal');
         // start datatable masuk
             if ($req->ajax() && $req->table == 'masuk') {
                 $start = $req->input('start');
@@ -540,34 +583,36 @@ class TransaksiKasController extends Controller
         $saldoMasuk = $queryMasuk->clone()->where($confirmedCondition)->sum('nominal');
         $saldoKeluar = $queryKeluar->clone()->where($confirmedCondition)->sum('nominal') 
                     + $queryKeluar->clone()->where($confirmedCondition)->sum('biaya_lain');
-        $saldo = $saldoMasuk - $saldoKeluar;
+        $saldo = $saldoMasuk - $saldoKeluar + $saldoAwal;
 
-        $saldoMasukRekening = $queryMasuk->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Transfer')
-                                            ->sum('nominal');
-        $saldoKeluarRekening = $queryKeluar->clone()->where($confirmedCondition)
-                                                ->where('metode', 'Transfer')
-                                                ->sum('nominal') 
-                        + $queryKeluar->clone()->where($confirmedCondition)
-                                                ->where('metode', 'Transfer')
-                                                ->sum('biaya_lain');
-        $saldoRekening = $saldoMasukRekening - $saldoKeluarRekening;
+        $saldoMasukRekening = $queryMasuk->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Transfer')
+                                ->sum('nominal');
+        $saldoKeluarRekening = $queryKeluar->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Transfer')
+                                ->sum('nominal') 
+                        + $queryKeluar->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Transfer')
+                                ->sum('biaya_lain');
+        $saldoRekening = ($saldoMasukRekening - $saldoKeluarRekening) + $saldoAwal;
 
-        $saldoMasukCash = $queryMasuk->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Cash')
-                                            ->sum('nominal');
-        $saldoKeluarCash = $queryKeluar->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Cash')
-                                            ->sum('nominal') 
-                            + $queryKeluar->clone()->where($confirmedCondition)
-                                            ->where('metode', 'Cash')
-                                            ->sum('biaya_lain');
+        $saldoMasukCash = $queryMasuk->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Cash')
+                                ->sum('nominal');
+        $saldoKeluarCash = $queryKeluar->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Cash')
+                                ->sum('nominal') 
+                            + $queryKeluar->clone()
+                                ->where($confirmedCondition)
+                                ->where('metode', 'Cash')
+                                ->sum('biaya_lain');
         $saldoCash = $saldoMasukCash - $saldoKeluarCash;
 
-        // Retrieve data for view
-        // $dataMasuk = $queryMasuk->get();
-        // $dataKeluar = $queryKeluar->get();
-        
         return view('kas_gallery.index', compact(
             'lokasis', 'rekenings', 
             'saldoMasuk', 'saldoKeluar', 'saldoMasukRekening', 

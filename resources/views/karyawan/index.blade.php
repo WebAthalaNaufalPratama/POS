@@ -45,7 +45,7 @@
                               </a>
                               <ul class="dropdown-menu">
                                   <li>
-                                      <a href="javascript:void(0);" onclick="getData({{ $karyawan->id }})" data-bs-toggle="modal" data-bs-target="#editkaryawan" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                      <a href="javascript:void(0);" onclick="getData({{ $karyawan->id }})" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                   </li>
                                   <li>
                                       <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData({{ $karyawan->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
@@ -111,9 +111,11 @@
               <label for="user_id" class="col-form-label">User</label>
               <div class="form-group">
                 <select class="select2" name="user_id" id="add_user_id">
-                  <option value="">Pilih user</option>
+                  <option value="">Pilih User</option>
                   @foreach($users as $user)
-                    <option value="{{ $user->id }}">{{ $user->username }}</option>
+                    @if(!$user->karyawans)
+                        <option value="{{ $user->id }}">{{ $user->username }}</option>
+                    @endif
                   @endforeach
                 </select>
               </div>
@@ -178,7 +180,7 @@
                 <select class="select2" name="user_id" id="edit_user_id">
                   <option value="">Pilih user</option>
                   @foreach($users as $user)
-                    <option value="{{ $user->id }}">{{ $user->username }}</option>
+                    <option value="{{ $user->id }}" data-karyawan="{{ $user->karyawans }}">{{ $user->username }}</option>
                   @endforeach
                 </select>
               </div>
@@ -211,6 +213,8 @@
         input.val(value);
     });
 
+    var originalOptions = $('#edit_user_id').html();
+
     function getData(id){
         $.ajax({
             type: "GET",
@@ -218,14 +222,31 @@
             headers: {
                 'X-CSRF-TOKEN': csrfToken
             },
+            beforeSend: function() {
+                $('#global-loader-transparent').show();
+            },
             success: function(response) {
-                // console.log(response)
+                $('#global-loader-transparent').hide();
                 $('#editForm').attr('action', 'karyawan/'+id+'/update');
-                $('#edit_nama').val(response.nama)
-                $('#edit_jabatan').val(response.jabatan).trigger('change')
-                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
-                $('#edit_handphone').val(response.handphone)
-                $('#edit_alamat').val(response.alamat)
+
+                $('#edit_nama').val(response.nama);
+                $('#edit_jabatan').val(response.jabatan).trigger('change');
+                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change');
+                $('#edit_handphone').val(response.handphone);
+                $('#edit_alamat').val(response.alamat);
+
+                $('#edit_user_id').html(originalOptions);
+
+                var userIdSelect = $('#edit_user_id');
+                var selectedUserId = response.user_id;
+                userIdSelect.find('option').each(function() {
+                    if ($(this).val() != selectedUserId && $(this).val() != '' && $(this).data('karyawan') != '') {
+                        $(this).remove();
+                    }
+                });
+
+                userIdSelect.val(selectedUserId).trigger('change');
+                $('#editkaryawan').modal('show');
             },
             error: function(error) {
                 toastr.error('Ambil data error', 'Error', {

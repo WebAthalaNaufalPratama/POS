@@ -154,10 +154,10 @@
                     d.dateStart = $('#filterDateStart').val();
                     d.dateEnd = $('#filterDateEnd').val();
                 },
-                dataSrc: function(json) {
-                    console.log("Received Data:", json); 
-                    return json.data;
-                }
+                // dataSrc: function(json) {
+                //     console.log("Received Data:", json); 
+                //     return json.data;
+                // }
             },
             columns: [
                 { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
@@ -214,14 +214,16 @@
                                                     <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit
                                                 </a>`;
                             }
-
-                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditDoPenjualanShow.replace('__ID__', row.id)}">
+                            if(row.status !== 'TUNDA') {
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditDoPenjualanShow.replace('__ID__', row.id)}">
                                                 <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show
                                             </a>`;
 
-                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.pdfDoPenjualan.replace('__ID__', row.id)}">
-                                                <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak DO
-                                            </a>`;
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.pdfDoPenjualan.replace('__ID__', row.id)}">
+                                                    <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak DO
+                                                </a>`;
+                            }
+                            
                         } else {
                             dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditDoPenjualanShow.replace('__ID__', row.id)}">
                                                 <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Show

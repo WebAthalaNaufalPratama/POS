@@ -281,34 +281,55 @@ class FormPerangkaiController extends Controller
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
         
         //pengurangan inventory gallery dan outlet dari admin
-        if($req->distribusi == 'Diambil' && $req->status == 'DIKONFIRMASI' && $req->jenis_rangkaian == 'Penjualan' || $req->jenis_rangkaian == 'Retur Penjualan' || $req->jenis_rangkaian == 'MUTASIGO')
+        if($req->status == 'DIKONFIRMASI' && $req->jenis_rangkaian == 'Penjualan' || $req->jenis_rangkaian == 'Retur Penjualan' || $req->jenis_rangkaian == 'MUTASIGO')
         {
-            foreach($updateProdukTerjual->komponen as $komponen) 
-            {
-                $allStockAvailable = true;
-                $cekstokproduk = true;
-        
+            $komponenGrouped = [];
+            foreach ($updateProdukTerjual->komponen as $komponen) {
+                $key = $komponen->kode_produk . '-' . $komponen->kondisi;
+                if (isset($komponenGrouped[$key])) {
+                    $komponenGrouped[$key]->jumlah += $komponen->jumlah;
+                } else {
+                    $komponenGrouped[$key] = clone $komponen;
+                }
+            }
+
+            $allStockAvailable = true;
+            $cekstokproduk = true;
+
+            foreach ($komponenGrouped as $komponen) {
                 $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
-                                            ->where('kode_produk', $komponen->kode_produk)
-                                            ->where('kondisi_id', $komponen->kondisi)
-                                            ->first();
+                                        ->where('kode_produk', $komponen->kode_produk)
+                                        ->where('kondisi_id', $komponen->kondisi)
+                                        ->first();
                 if (!$stok) {
                     $allStockAvailable = false;
                     break;
                 }
-                
-                $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($req->jml_produk));
-                if ($stok->jumlah < 0) {
+
+                $requiredQuantity = intval($komponen->jumlah) * intval($req->jml_produk);
+                if (intval($stok->jumlah) < $requiredQuantity) {
                     $cekstokproduk = false;
                     break;
                 }
-                $stok->update();
             }
+
+            if ($allStockAvailable && $cekstokproduk) {
+                foreach ($komponenGrouped as $komponen) {
+                    $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)
+                                            ->where('kode_produk', $komponen->kode_produk)
+                                            ->where('kondisi_id', $komponen->kondisi)
+                                            ->first();
+                    $stok->jumlah -= intval($komponen->jumlah) * intval($req->jml_produk);
+                    $stok->update();
+                }
+            }
+
             if (!$allStockAvailable) {
                 return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
             }
+
             if (!$cekstokproduk) {
-                return redirect(route('inven_galeri.create'))->with('fail', 'Jumlah Produk Kurang Dari Stok');
+                return redirect(route('inven_galeri.create'))->with('fail', "Stok untuk produk {$komponen->nama_produk} tidak mencukupi!");
             }
         }
 
@@ -465,13 +486,6 @@ class FormPerangkaiController extends Controller
 
         return view('form_jual.index', compact('perangkai'));
     }
-
-
-
-
-
-
-
 
     public function penjualan_show($formpenjualan)
     {

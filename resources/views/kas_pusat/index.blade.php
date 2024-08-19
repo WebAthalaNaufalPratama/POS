@@ -1010,26 +1010,36 @@
     });
     $(document).on('change', '#edit_keluar_jenis, #keluar_jenis', function(){
         var jenis = $(this).val();
+        if ($(this).is('#edit_keluar_jenis')){
+          var metode = $('#edit_keluar_metode').val();
+        } else {
+          var metode = $('#keluar_metode').val();
+        }
         if(jenis != 'Pemindahan Saldo') {
             $('div.pemindahan_saldo').addClass('d-none');
             $('div.pemindahan_saldo select').each(function(){
-                $(this).attr('disabled', true).attr('required', false);
+                $(this).attr('disabled', true).prop('required', false);
             });
-            
             $('div.lainnya').removeClass('d-none');
-            $('div.lainnya select').each(function(){
-                $(this).attr('disabled', false).attr('required', true);
-            });
-        } else {
+            $('#edit_keluar_lokasi').attr('disabled', false).prop('required', true);
+            if(metode == 'Cash'){
+                $('#edit_keluar_rekening_penerima').attr('disabled', true).prop('required', false);
+                $('#edit_keluar_rekening_pengirim').attr('disabled', true).prop('required', false);
+            }
+          } else {
             $('div.lainnya').addClass('d-none');
             $('div.lainnya select').each(function(){
-                $(this).attr('disabled', true).attr('required', false);
+                $(this).attr('disabled', true).prop('required', false);
             });
             
             $('div.pemindahan_saldo').removeClass('d-none');
             $('div.pemindahan_saldo select').each(function(){
-                $(this).attr('disabled', false).attr('required', true);
+                $(this).attr('disabled', false).prop('required', true);
             });
+            if(metode == 'Cash'){
+                $('#edit_keluar_rekening_penerima').attr('disabled', true).prop('required', false);
+                $('#edit_keluar_rekening_pengirim').attr('disabled', true).prop('required', false);
+            }
         }
     });
     $('#masuk_metode').on('change', function() {
@@ -1136,30 +1146,41 @@
             headers: {
                 'X-CSRF-TOKEN': csrfToken
             },
+            beforeSend: function() {
+                $('#global-loader-transparent').show();
+            },
             success: function(response) {
                 $('#editFormKeluar').attr('action', 'kas_pusat/'+id+'/update');
 
-                $('#edit_keluar_jenis').val(response.jenis).trigger('change')
-                
                 $('#edit_keluar_rekening').val(response.rekening_pengirim).trigger('change')
                 $('#edit_keluar_lokasi').val(response.lokasi_pengirim).trigger('change')
                 $('#edit_keluar_metode').val(response.metode).trigger('change')
+                $('#edit_keluar_jenis').val(response.jenis).trigger('change')
 
-
-                $('#edit_keluar_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change')
-                $('#edit_keluar_lokasi_penerima').val(response.lokasi_penerima).trigger('change')
-                $('#edit_keluar_rekening_pengirim').val(response.rekening_pengirim).trigger('change')
-                $('#edit_keluar_rekening_penerima').val(response.rekening_penerima).trigger('change')
-
+                var rekeningPengirim = response.rekening_pengirim;
+                var rekeningPenerima = response.rekening_penerima;
+                
+                $('#edit_keluar_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change');
+                $('#edit_keluar_lokasi_penerima').val(response.lokasi_penerima).trigger('change');
+                
                 $('#edit_keluar_tanggal').val(response.tanggal)
                 $('#edit_keluar_nominal').val(response.nominal)
                 $('#edit_keluar_biaya_lain').val(response.biaya_lain)
                 $('#edit_keluar_keterangan').val(response.keterangan)
                 $('#edit_keluar_status').val(response.status).trigger('change')
                 $('#edit_keluar_preview').attr('src', 'storage/' + response.file)
-                $('#editkaskeluar').modal('show');
+
+
+                getRekening($('#edit_keluar_lokasi_pengirim')[0], 'edit_keluar_rekening_pengirim', rekeningPengirim, function() {
+                    getRekening($('#edit_keluar_lokasi_penerima')[0], 'edit_keluar_rekening_penerima', rekeningPenerima, function() {
+                        $('#global-loader-transparent').hide();
+                        $('#editkaskeluar').modal('show');
+                    });
+                });
+
             },
             error: function(error) {
+                $('#global-loader-transparent').hide();
                 toastr.error('Ambil data error', 'Error', {
                     closeButton: true,
                     tapToDismiss: false,
@@ -1177,30 +1198,40 @@
             headers: {
                 'X-CSRF-TOKEN': csrfToken
             },
+            beforeSend: function() {
+                $('#global-loader-transparent').show();
+            },
             success: function(response) {
-                $('#editFormMasuk').attr('action', 'kas_pusat/'+id+'/update');
-                rekening_pengirim = response.rekening_pengirim;
+              $('#editFormMasuk').attr('action', 'kas_pusat/'+id+'/update');
+              
+              
+              $('#edit_masuk_rekening').val(response.rekening_pengirim).trigger('change')
+              $('#edit_masuk_lokasi').val(response.lokasi_pengirim).trigger('change')
+              $('#edit_masuk_metode').val(response.metode).trigger('change')
+              $('#edit_masuk_jenis').val(response.jenis).trigger('change')
+              
+              var rekeningPengirim = response.rekening_pengirim;
+              var rekeningPenerima = response.rekening_penerima;
+              
+              $('#edit_masuk_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change')
+              $('#edit_masuk_lokasi_penerima').val(response.lokasi_penerima).trigger('change')
 
-                $('#edit_masuk_jenis').val(response.jenis).trigger('change')
-                
-                $('#edit_masuk_rekening').val(response.rekening_pengirim).trigger('change')
-                $('#edit_masuk_lokasi').val(response.lokasi_pengirim).trigger('change')
-                $('#edit_masuk_metode').val(response.metode).trigger('change')
+              $('#edit_masuk_tanggal').val(response.tanggal)
+              $('#edit_masuk_nominal').val(response.nominal)
+              $('#edit_masuk_biaya_lain').val(response.biaya_lain)
+              $('#edit_masuk_keterangan').val(response.keterangan)
+              $('#edit_masuk_status').val(response.status).trigger('change')
+              $('#edit_masuk_preview').attr('src', 'storage/' + response.file)
 
-                $('#edit_masuk_lokasi_pengirim').val(response.lokasi_pengirim).trigger('change')
-                $('#edit_masuk_lokasi_penerima').val(response.lokasi_penerima).trigger('change')
-                $('#edit_masuk_rekening_pengirim').val(response.rekening_pengirim).trigger('change')
-                $('#edit_masuk_rekening_penerima').val(response.rekening_penerima).trigger('change')
-
-                $('#edit_masuk_tanggal').val(response.tanggal)
-                $('#edit_masuk_nominal').val(response.nominal)
-                $('#edit_masuk_biaya_lain').val(response.biaya_lain)
-                $('#edit_masuk_keterangan').val(response.keterangan)
-                $('#edit_masuk_status').val(response.status).trigger('change')
-                $('#edit_masuk_preview').attr('src', 'storage/' + response.file)
-                $('#editkasmasuk').modal('show');
+              getRekening($('#edit_masuk_lokasi_pengirim')[0], 'edit_masuk_rekening_pengirim', rekeningPengirim, function() {
+                  getRekening($('#edit_masuk_lokasi_penerima')[0], 'edit_masuk_rekening_penerima', rekeningPenerima, function() {
+                      $('#global-loader-transparent').hide();
+                      $('#editkasmasuk').modal('show');
+                  });
+              });
             },
             error: function(error) {
+                $('#global-loader-transparent').hide();
                 toastr.error('Ambil data error', 'Error', {
                     closeButton: true,
                     tapToDismiss: false,
@@ -1253,60 +1284,58 @@
             }
         });
     }
-    function getRekening(element, id) {
-      var lokasi_id = element.value;
-      if(!lokasi_id){
-        var rekeningElement = $('#'+id);
-        rekeningElement.attr('disabled', true);
-        rekeningElement.attr('required', false);
-        rekeningElement.empty();
-        rekeningElement.append('<option value="">Rekening</option>');
-        return false;
-      }
-      $.ajax({
+    function getRekening(element, id, selectedRekening = '', callback = null) {
+        var lokasi_id = element.value;
+        if(!lokasi_id){
+            var rekeningElement = $('#'+id);
+            rekeningElement.attr('disabled', true);
+            rekeningElement.attr('required', false);
+            rekeningElement.empty();
+            rekeningElement.append('<option value="">Rekening</option>');
+            if(callback) callback();
+            return false;
+        }
+        $.ajax({
             type: "GET",
             url: "/rekeningPerLokasi/",
             data: {
-              lokasi_id: lokasi_id,
+                lokasi_id: lokasi_id,
             },
             headers: {
                 'X-CSRF-TOKEN': csrfToken
             },
             success: function(response) {
-                populateRekening(response, id)
+                populateRekening(response, id, selectedRekening);
+                if(callback) callback();
             },
             error: function(error) {
-              var rekeningElement = $('#'+id);
-              rekeningElement.attr('disabled', true);
-              rekeningElement.attr('required', false);
-              rekeningElement.empty();
-              rekeningElement.append('<option value="">Rekening</option>');
-              toastr.error('Ambil data error', 'Error', {
-                  closeButton: true,
-                  tapToDismiss: false,
-                  rtl: false,
-                  progressBar: true
-              });
+                var rekeningElement = $('#'+id);
+                rekeningElement.attr('disabled', true);
+                rekeningElement.attr('required', false);
+                rekeningElement.empty();
+                rekeningElement.append('<option value="">Rekening</option>');
+                if(callback) callback();
+                toastr.error('Ambil data error', 'Error', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
             }
         });
     }
-    function populateRekening(data, id) {
+
+    function populateRekening(data, id, selectedRekening) {
       var rekeningElement = $('#'+id);
       rekeningElement.attr('disabled', false);
       rekeningElement.attr('required', true);
       rekeningElement.empty();
       rekeningElement.append('<option value="">Rekening</option>');
-      data.forEach(function(item){
-        var isSelected = '';
-        if(id == 'edit_masuk_rekening_pengirim'){
-          isSelected = rekening_pengirim == item['id'] ? 'selected' : '';
-        }
-        rekeningElement.append('<option value="'+item['id']+'" '+isSelected+'>'+item['nama_akun']+'</option>')
-      })
-      $('#masuk_metode').trigger('change');
-      $('#edit_masuk_metode').trigger('change');
-      $('#keluar_metode').trigger('change');
-      $('#edit_keluar_metode').trigger('change');
+      
+      data.forEach(function(item) {
+          var isSelected = selectedRekening == item['id'] ? 'selected' : '';
+          rekeningElement.append('<option value="'+item['id']+'" '+isSelected+'>'+item['nama_akun']+'</option>');
+      });
     }
     $('#filterBtn').click(function(){
         var baseUrl = $(this).data('base-url');

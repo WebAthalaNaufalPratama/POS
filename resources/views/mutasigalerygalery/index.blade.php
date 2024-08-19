@@ -151,6 +151,10 @@
                     d.dateStart = $('#filterDateStart').val();
                     d.dateEnd = $('#filterDateEnd').val();
                 },
+                //   dataSrc: function (json) {
+                //     console.log("Received Data:", json); // Log received data
+                //     return json.data;
+                // }
             },
             columns: [
                 { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
@@ -202,17 +206,19 @@
                         // Add permission-based actions
                         if (userRoles.includes('Auditor') || userRoles.includes('Finance') || userRoles.includes('SuperAdmin')) {
                             if (isJumlahDiterima) {
-                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasigalerygaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>`;
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGalleryGalleryShow.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit Acc Terima</a>`;
                             } else {
-                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasigalerygalery.show.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Audit Acc Terima</a>`;
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasigalerygaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit</a>`;
                             }
                         }
 
                         if (userRoles.includes('Purchasing') && mutasiStatus !== 'DIBATALKAN') {
                             if (mutasiStatus !== 'DIKONFIRMASI') {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasigalerygaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>`;
+                            }else{
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGalleryGalleryPayment.replace('__ID__', row.id)}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>`;
                             }
-                            dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGalleryGalleryPayment.replace('__ID__', row.id)}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>`;
+                            
                         }
 
                         if (userRoles.includes('KasirGallery') || userRoles.includes('AdminGallery')) {
@@ -220,11 +226,13 @@
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGalleryGalleryShow.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">Acc Terima</a>`;
                             }
                         }
-
-                        dropdownHtml += `
-                            <a class="dropdown-item" href="${window.routes.mutasiGalleryGalleryView.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
-                            </div>
-                        </div>`;
+                        if(mutasiStatus !== 'TUNDA') {
+                            dropdownHtml += `
+                                <a class="dropdown-item" href="${window.routes.mutasiGalleryGalleryView.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
+                                </div>
+                            </div>`;
+                        }
+                        
 
                         return dropdownHtml;
                     }

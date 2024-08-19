@@ -523,9 +523,85 @@ class DopenjualanController extends Controller
         }
         $data['alasan_batal'] = $req->alasan;
 
-        // dd($data);
-        //update do
+        $invoice = Penjualan::where('no_invoice', $req->no_referensi)->first();
+        $lokasi = Lokasi::where('id', $invoice->lokasi_id)->first();
+        $lokasipengirim = Penjualan::where('no_invoice', $req->no_referensi)->value('lokasi_pengirim');
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet', 'Auditor', 'Finance'])) {
+            $lokasikirimdo = DeliveryOrder::where('no_do', $req->no_do)->first();
+        }
+
+        //cek produk urung bar
+        if ($lokasi->tipe_lokasi == 1 && $invoice->distribusi == 'Dikirim' && $req->status == 'DIKONFIRMASI') {
+            if (empty($req->nama_produk)) {
+                $merged_nama_produk = $req->nama_produk2;
+                $merged_jumlah = $req->jumlah2;
+            } elseif (empty($req->nama_produk2)) {
+                $merged_nama_produk = $req->nama_produk;
+                $merged_jumlah = $req->jumlah;
+            } else {
+                $merged_nama_produk = array_merge($req->nama_produk, $req->nama_produk2);
+                $merged_jumlah = array_merge($req->jumlah, $req->jumlah2);
+            }
+            $komponenJumlah = [];
+            $produkJumlah = [];
+    
+            for ($i = 0; $i < count($merged_nama_produk); $i++) {
+                $getProdukJual = Produk_Terjual::with('komponen')->where('id', $merged_nama_produk[$i])->first();
+    
+                if ($lokasi->tipe_lokasi == 1 && $invoice->distribusi == 'Dikirim') {
+                    foreach ($getProdukJual->komponen as $komponen) {
+                        $key = $komponen->kode_produk . '-' . $komponen->kondisi;
+                        // dd($key);
+                        if (!isset($komponenJumlah[$key])) {
+                            $komponenJumlah[$key] = 0;
+                        }
+    
+                        $komponenJumlah[$key] += $komponen->jumlah * $merged_jumlah[$i];
+                    }
+                } elseif ($lokasi->tipe_lokasi == 2 && $invoice->distribusi == 'Dikirim') {
+                    $key = $getProdukJual->produk->kode;
+                    
+                    if (!isset($produkJumlah[$key])) {
+                        $produkJumlah[$key] = 0;
+                    }
+    
+                    $produkJumlah[$key] += $merged_jumlah[$i];
+                }
+            }
+
+            if ($lokasi->tipe_lokasi == 1 && $invoice->distribusi == 'Dikirim') {
+                foreach ($komponenJumlah as $key => $totalJumlah) {
+                    $parts = explode('-', $key);
+                    $kode_produk = $parts[0] . "-" . $parts[1];
+                    $kondisi = $parts[2];
+    
+                    $stok = InventoryGallery::where('lokasi_id', $lokasipengirim)
+                                            ->where('kode_produk', $kode_produk)
+                                            ->where('kondisi_id', $kondisi)
+                                            ->first();
+
+                    if (!$stok || $stok->jumlah < $totalJumlah) {
+                        return redirect()->back()->with('fail', 'Data Produk Tidak Ada atau Tidak Cukup Di Inventory');
+                    }
+                }
+            } elseif ($lokasi->tipe_lokasi == 2 && $invoice->distribusi == 'Dikirim') {
+                foreach ($produkJumlah as $kode_produk => $totalJumlah) {
+                    $stok = InventoryOutlet::where('lokasi_id', $lokasikirimdo->lokasi_pengirim)
+                                            ->where('kode_produk', $kode_produk)
+                                            ->first();
+    
+                    if (!$stok || $stok->jumlah < $totalJumlah) {
+                        return redirect()->back()->with('fail', 'Data Produk Tidak Cukup Di Inventory Outlet');
+                    }
+                }
+            }
+        }
+        
+
+
         $update = DeliveryOrder::where('id', $dopenjualanIds)->update($data);
+
         if($req->status == 'DIBATALKAN')
         {
             // Mendapatkan data yang ada berdasarkan id untuk nama_produk
@@ -551,15 +627,8 @@ class DopenjualanController extends Controller
             }
             return redirect(route('dopenjualan.index'))->with('success', 'Berhasil Mengupdate Data');
         }
-        $lokasipengirim = Penjualan::where('no_invoice', $req->no_referensi)->value('lokasi_pengirim');
-        $user = Auth::user();
-        if($user->hasRole(['KasirOutlet', 'Auditor', 'Finance'])) {
-            $lokasikirimdo = DeliveryOrder::where('no_do', $req->no_do)->first();
-        }
-        $invoice = Penjualan::where('no_invoice', $req->no_referensi)->first();
-        // dd($invoice);
-        $lokasi = Lokasi::where('id', $invoice->lokasi_id)->first();
 
+        
         $exist = Produk_Terjual::whereIn('id', $req->nama_produk)->get();
         $arrayExist = $exist->pluck('id')->toArray();
         if(!empty($req->nama_produk2)) {

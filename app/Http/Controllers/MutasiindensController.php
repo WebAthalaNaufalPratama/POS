@@ -194,23 +194,46 @@ class MutasiindensController extends Controller
             
                 return [
                     'id' => $item->id,
-                    'no_mutasi' => $item->no_mutasi ?? 'N/A',
-                    'supplier' => $item->supplier->nama ?? 'N/A',
-                    'penerima' => $item->lokasi->nama ?? 'N/A',
+                    'no_mutasi' => $item->no_mutasi ?? '-',
+                    'supplier' => $item->supplier->nama ?? '-',
+                    'penerima' => $item->lokasi->nama ?? '-',
                     'tgl_kirim' => $formattedTglKirim,
                     'tgl_diterima' => $formattedTglDiterima,
-                    'status_dibuat' => $item->status_dibuat ?? 'N/A',
-                    'status_diterima' => $item->status_diterima ?? 'N/A',
-                    'status_diperiksa' => $item->status_diperiksa ?? 'N/A',
-                    'status_dibuku' => $item->status_dibukukan ?? 'N/A',
-                    'tagihan' => $item->total_biaya ?? 'N/A',
-                    'sisa_tagihan' => $item->sisa_bayar ?? 'N/A',
+                    'status_dibuat' => $item->status_dibuat ?? 'TUNDA',
+                    'status_diterima' => $item->status_diterima,
+                    'status_diperiksa' => $item->status_diperiksa,
+                    'status_dibuku' => $item->status_dibukukan ?? 'TUNDA',
+                    'tagihan' => $item->total_biaya ?? '-',
+                    'tagihan_format' => formatRupiah($item->total_biaya),
+                    'sisa_tagihan' => $item->sisa_bayar ?? '-',
+                    'sisa_tagihan_format' => formatRupiah($item->sisa_bayar),
                     'komplain' => $komplain,
-                    'status_komplain' => $statusKomplain ?? 'N/A',
+                    'status_komplain' => $statusKomplain ?? '-',
                     'returinden' => $item->returinden,
                 ];
             });
-                            
+            
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $data = $data->filter(function($item) use ($search) {
+                    return stripos($item['no_mutasi'], $search) !== false
+                        || stripos($item['supplier'], $search) !== false
+                        || stripos($item['penerima'], $search) !== false
+                        || stripos($item['tgl_kirim'], $search) !== false
+                        || stripos($item['tgl_diterima'], $search) !== false
+                        || stripos($item['status_dibuat'], $search) !== false
+                        || stripos($item['status_diterima'], $search) !== false
+                        || stripos($item['status_diperiksa'], $search) !== false
+                        || stripos($item['status_dibuku'], $search) !== false
+                        || stripos($item['tagihan'], $search) !== false
+                        || stripos($item['tagihan_format'], $search) !== false
+                        || stripos($item['sisa_tagihan'], $search) !== false
+                        || stripos($item['sisa_tagihan_format'], $search) !== false
+                        || stripos($item['komplain'], $search) !== false
+                        || stripos($item['status_komplain'], $search) !== false;
+                });
+            }
 
             return response()->json([
                 'draw' => (int) $req->input('draw'),
@@ -1230,10 +1253,12 @@ private function formatDate($date)
                             ->get();
 
             $data = $returs->map(function($item) {
-                $tipeKomplainFormatted = 'N/A';
+                $tipeKomplainFormatted = '-';
                 if ($item->status_dibuat !== "BATAL") {
                     if ($item->tipe_komplain == "Refund") {
                         $tipeKomplainFormatted = $item->sisa_refund == 0 ? '| Lunas' : '| Belum Lunas';
+                    } else {
+                        $tipeKomplainFormatted = $item->tipe_komplain;
                     }
                 }
                 $alasanList = $item->produkreturinden->map(function($produkretur) {
@@ -1257,22 +1282,42 @@ private function formatDate($date)
                 return [
                     'id' => $item->id,
                     'tgl_komplain' => $this->formatDate($item->tgl_dibuat),
-                    'no_retur' => $item->no_retur ?? 'N/A',
-                    'no_mutasi' => $item->mutasiinden->no_mutasi ?? 'N/A',
-                    'tipe_komplain' => $tipeKomplainFormatted ?? 'N/A',
-                    'alasan' => $alasanList ?? 'N/A',
-                    'kode_inden' => $kode_inden ?? 'N/A',
-                    'nama_produk' => $nama_produk ?? 'N/A',
-                    'harga' => formatRupiah(floatval($formattedHarga)) ?? 'N/A',
-                    'qty' => $qty ?? 'N/A',
-                    'total' => formatRupiah(floatval($item->refund)) ?? 'N/A',
-                    'supplier' => $item->mutasiinden->supplier->nama ?? 'N/A',
-                    'tujuan' => $item->mutasiinden->lokasi->nama ?? 'N/A',
-                    'status_dibuat' => $item->status_dibuat ?? 'N/A',
-                    'status_dibuku' => $item->status_dibukukan ?? 'N/A',
+                    'no_retur' => $item->no_retur ?? '-',
+                    'no_mutasi' => $item->mutasiinden->no_mutasi ?? '-',
+                    'tipe_komplain' => $tipeKomplainFormatted ?? '-',
+                    'alasan' => $alasanList ?? '-',
+                    'kode_inden' => $kode_inden ?? '-',
+                    'nama_produk' => $nama_produk ?? '-',
+                    'harga' => formatRupiah(floatval($formattedHarga)) ?? '-',
+                    'qty' => $qty ?? '-',
+                    'total' => formatRupiah(floatval($item->refund)) ?? '-',
+                    'supplier' => $item->mutasiinden->supplier->nama ?? '-',
+                    'tujuan' => $item->mutasiinden->lokasi->nama ?? '-',
+                    'status_dibuat' => $item->status_dibuat ?? 'TUNDA',
+                    'status_dibuku' => $item->status_dibukukan ?? 'TUNDA',
                     'mutasiinden' => $item->mutasiinden,
                 ];
             });
+
+            // search
+            $search = $req->input('search.value');
+            if (!empty($search)) {
+                $data = $data->filter(function($item) use ($search) {
+                    return stripos($item['no_retur'], $search) !== false
+                        || stripos($item['no_mutasi'], $search) !== false
+                        || stripos($item['tipe_komplain'], $search) !== false
+                        || stripos($item['alasan'], $search) !== false
+                        || stripos($item['kode_inden'], $search) !== false
+                        || stripos($item['nama_produk'], $search) !== false
+                        || stripos($item['harga'], $search) !== false
+                        || stripos($item['qty'], $search) !== false
+                        || stripos($item['total'], $search) !== false
+                        || stripos($item['supplier'], $search) !== false
+                        || stripos($item['tujuan'], $search) !== false
+                        || stripos($item['status_dibuat'], $search) !== false
+                        || stripos($item['status_dibuku'], $search) !== false;
+                });
+            }
 
             return response()->json([
                 'draw' => (int) $req->input('draw'),

@@ -464,8 +464,6 @@
     }
 
     // Call the function to set the date to today's date initially
-    updateDate(document.getElementById('tanggal_kirim'));
-    updateDate(document.getElementById('tanggal_diterima'));
     @foreach($produks as $index => $produk)
     updateDate(document.getElementById('tglrangkai_{{ $index }}'), '{{ $index }}');
     @endforeach

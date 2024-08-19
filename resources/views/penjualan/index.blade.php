@@ -190,7 +190,8 @@
             pdfInvoicePenjualanGenerate: "{{ route('pdfinvoicepenjualan.generate', ['penjualan' => '__ID__']) }}",
             penjualanView: "{{ route('penjualan.view', ['penjualan' => '__ID__']) }}",
             auditPenjualanShow: "{{ route('auditpenjualan.show', ['penjualan' => '__ID__']) }}",
-            penjualanPayment: "{{ route('penjualan.payment', ['penjualan' => '__ID__']) }}"
+            penjualanPayment: "{{ route('penjualan.payment', ['penjualan' => '__ID__']) }}",
+            penjualanShow: "{{ route('penjualan.show', ['penjualan' => '__ID__'])}}",
         };
 
         $('#penjualanTable').DataTable({
@@ -266,6 +267,7 @@
                     searchable: false,
                     render: function (data, type, row) {
                         const isRetur = row.retur === true || row.retur === 'true';
+                        const isNoForm = row.all_no_form === true || row.all_no_form === 'true';
                         var dropdownHtml = `
                             <div class="dropdown">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -287,30 +289,40 @@
                             }
 
                             if (row.status === 'DIKONFIRMASI') {
-                                if (row.lokasi && row.lokasi.lokasi && row.lokasi.lokasi.tipe_lokasi !== 2 && userPermissions.includes('penjualan.show')) {
-                                    dropdownHtml += `<a class="dropdown-item" href="${window.routes.penjualanShow.replace('__ID__', row.id)}">
+                                if ( row.lokasi.tipe_lokasi != 2 && userPermissions.includes('penjualan.show')) {
+                                    if(isNoForm) {
+                                        dropdownHtml += `<a class="dropdown-item" href="${window.routes.penjualanShow.replace('__ID__', row.id)}">
                                                         <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Perangkai
                                                     </a>`;
+                                    }
                                 }
 
                                 if (userPermissions.includes('penjualan.payment')) {
+                                    if(!isNoForm || row.lokasi.tipe_lokasi != 1 && row.status == 'DIKONFIRMASI') {
                                     dropdownHtml += `<a class="dropdown-item" href="${window.routes.penjualanPayment.replace('__ID__', row.id)}">
                                                         <img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Pembayaran
                                                     </a>`;
+                                    }
                                 }
                                 if (row.distribusi === 'Dikirim' && userPermissions.includes('dopenjualan.create')) {
+                                    if(!isNoForm || row.lokasi.tipe_lokasi != 1 && row.status == 'DIKONFIRMASI') {
                                     dropdownHtml += `<a class="dropdown-item" href="${window.routes.dopenjualanCreate.replace('__ID__', row.id)}">
                                                         <img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order
                                                     </a>`;
+                                    }
                                 }
                                 if (userPermissions.includes('returpenjualan.create') && !userHasRole.includes('Auditor') && !userHasRole.includes('Finance') && row.status == 'DIKONFIRMASI' && !isRetur) {
+                                    if(!isNoForm || row.lokasi.tipe_lokasi != 1 && row.status == 'DIKONFIRMASI') {
                                     dropdownHtml += `<a class="dropdown-item" href="${window.routes.returPenjualanCreate.replace('__ID__', row.id)}">
                                                         <img src="assets/img/icons/return1.svg" class="me-2" alt="img">Retur
                                                     </a>`;
+                                    }
                                 }
+                                if(!isNoForm || row.lokasi.tipe_lokasi != 1 && row.status == 'DIKONFIRMASI') {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.pdfInvoicePenjualanGenerate.replace('__ID__', row.id)}">
                                                     <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak Invoice
                                                 </a>`;
+                                }
                                 if (isRetur) {
                                     dropdownHtml += `<a class="dropdown-item" href="${window.routes.penjualanView.replace('__ID__', row.id)}">
                                                     <img src="assets/img/icons/eye1.svg" class="me-2" alt="img">View Retur

@@ -63,6 +63,17 @@
                                             <input type="text" id="no_mutasi" name="no_mutasi" class="form-control" value="{{ $mutasis->no_mutasi}}" readonly>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="rekening_id">Rekening</label>
+                                            <select id="rekening_id" name="rekening_id" class="form-control" required readonly>
+                                                <option value="">Pilih Rekening</option>
+                                                @foreach ($bankpens as $rekening)
+                                                <option value="{{ $rekening->id }}" {{ $rekening->id == $mutasis->rekening_id ? 'selected':''}}>{{ $rekening->bank }} -{{ $rekening->nama_akun}}({{$rekening->nomor_rekening}})</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -77,7 +88,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="nama">Tanggal Diterima</label>
-                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_diterima}}" required disabled>
+                                            <input type="date" class="form-control" id="tanggal_diterima" name="tanggal_diterima" placeholder="Tanggal_Invoice" value="{{ $mutasis->tanggal_diterima}}" required >
                                         </div>
                                         <div class="form-group">
                                             <label for="status">Status</label>
@@ -243,7 +254,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" readonly>
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" value="{{ $mutasis->alamat_tujuan}}" readonly>
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -782,7 +793,7 @@
         var pilihan = "{{ $mutasis->pilih_pengiriman}}";
         if (pilihan === "sameday") {
             $('#inputOngkir').show();
-            $('#biaya_pengiriman').prop('readonly', false);
+            $('#biaya_pengiriman').prop('readonly', true);
         } else if (pilihan === "exspedisi") {
             $('#inputExspedisi').show();
             $('#biaya_pengiriman').prop('readonly', true);

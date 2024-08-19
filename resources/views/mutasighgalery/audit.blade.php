@@ -38,14 +38,8 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="pengirim">Nama Pengirim</label>
-                                            @php
-                                                $user = Auth::user();
-                                            @endphp
-                                            @if($user->hasRole(['Auditor', 'Finance']))
+                                            
                                             <select id="pengirim" name="pengirim" class="form-control" required readonly>
-                                            @else
-                                            <select id="pengirim" name="pengirim" class="form-control" required>
-                                            @endif
                                                 <option value="">Pilih Nama Pengirim</option>
                                                 @foreach ($lokasis as $lokasi)
                                                 <option value="{{ $lokasi->id }}" data-tipe-lokasi="{{ $lokasi->tipe_lokasi }}" {{ $lokasi->id == $mutasis->pengirim ? 'selected' : ''}}>{{ $lokasi->nama }}</option>
@@ -101,9 +95,16 @@
                                             <label for="status">Status</label>
                                             <select id="status" name="status" class="form-control" required >
                                                 <option value="">Pilih Status</option>
+                                                @php
+                                                    $user = Auth::user();
+                                                @endphp
+                                                @if($user->hasRole(['Purchasing']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="TUNDA" {{ $mutasis->status == 'TUNDA' ? 'selected' : ''}}>TUNDA</option>
+                                                @endif
                                                 <option value="DIKONFIRMASI" {{ $mutasis->status == 'DIKONFIRMASI' ? 'selected' : ''}}>DIKONFIRMASI</option>
+                                                @if($user->hasRole(['Purchasing']) && $mutasis->status != 'DIKONFIRMASI')
                                                 <option value="DIBATALKAN" {{ $mutasis->status == 'DIBATALKAN' ? 'selected' : ''}}>DIBATALKAN</option>
+                                                @endif
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -164,6 +165,12 @@
                                                             </td>
                                                             @if($i == 0)
                                                                 <td><button type="button" name="add" id="add" class="btn"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></button></td>
+                                                            @endif
+                                                            @php
+                                                                $user = Auth::user();
+                                                            @endphp
+                                                            @if($user->hasRole(['Purchasing']) && $i != 0) 
+                                                                <td><button type="button" name="remove" id="${i}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                                                             @endif
                                                         </tr>
                                                     @endforeach
@@ -249,7 +256,7 @@
                                                     <h5>
                                                     <div id="inputOngkir" style="display: none;">
                                                         <!-- <label for="alamat_tujuan">Alamat Tujuan </label> -->
-                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" class="form-control" >
+                                                        <input type="text" id="alamat_tujuan" name="alamat_tujuan" value="{{ $mutasis->alamat_tujuan}}" class="form-control" >
                                                     </div>
                                                     <div id="inputExspedisi" style="display: none;">
                                                         <!-- <label>Alamat Pengiriman</label> -->
@@ -264,11 +271,11 @@
                                                 </li>
                                                 <li>
                                                     <h4>Biaya Ongkir (Rp)</h4>
-                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value=""  required></h5>
+                                                    <h5><input type="text" id="biaya_pengiriman" name="biaya_pengiriman" class="form-control" value="{{ $mutasis->biaya_pengiriman ?? '-'}}"  required></h5>
                                                 </li>
                                                 <li class="total">
                                                     <h4>Total Biaya (Rp)</h4>
-                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value=""  required readonly></h5>
+                                                    <h5><input type="text" id="total_biaya" name="total_biaya" class="form-control" value="{{ $mutasis->total_biaya ?? '-'}}"  required readonly></h5>
                                                 </li>
                                             </ul>
                                         </div>
@@ -579,6 +586,10 @@
             updateHargaSatuan(this);
         });
 
+        $('#pengirim').on('mousedown click focus', function(e) {
+            e.preventDefault();
+        });
+
         $('#status').change(function(){
             var status = $(this).val();
             if(status == 'DIBATALKAN')
@@ -594,7 +605,7 @@
 
             if (inputDiterima < 0) {
                 alert('Jumlah Dikirim tidak boleh kurang dari 0!');
-                $(this).val(jumlahkirim);
+                $(this).val(0);
             }
         });
 

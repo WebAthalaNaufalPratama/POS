@@ -864,6 +864,8 @@
             updateHargaSatuan(this);
         });
 
+      
+
         @foreach($produks as $index => $produk)
         $('#jumlahStaff_{{ $index }}').on('input', function() {
             var jumlahStaff = parseInt($(this).val());
@@ -904,7 +906,14 @@
         });
         @endforeach
 
-       
+        $('[id^="jumlah"]').change(function(e) {
+            jumlah = $(this).val();
+            
+            if(jumlah < 0){
+                alert('Jumlah Tidak Boleh kurang dari 0!');
+                $(this).val(0);
+            }
+        });
 
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();

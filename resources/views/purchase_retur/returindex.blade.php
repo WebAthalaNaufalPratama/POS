@@ -275,7 +275,7 @@
                                 dropdownHtml += `
                                 <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
                                     <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">
-                                    ${row.komplain === 'Refund' && row.sisa !== 0 ? 'Input Refund' : 'Detail Retur'}
+                                    ${row.komplain === 'Refund' && row.sisa != 0 ? 'Input Refund' : 'Detail Retur'}
                                 </a>`;
                             }
                             

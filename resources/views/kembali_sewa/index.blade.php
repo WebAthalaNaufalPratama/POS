@@ -243,13 +243,6 @@
             dateEnd: '#filterDateEnd'
         });
 
-        const handleSearch = debounce(function() {
-            table.ajax.reload();
-        }, 5000); // Adjust the debounce delay as needed
-
-        // Event listeners for search filters
-        $('#filterCustomer, #filterDriver, #filterDateStart, #filterDateEnd').on('input', handleSearch);
-
         $('#filterBtn').on('click', function() {
             table.ajax.reload();
         });
