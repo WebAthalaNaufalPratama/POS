@@ -133,7 +133,7 @@ class PenjualanController extends Controller
         $customers = Customer::where('tipe', 'tradisional')->where('lokasi_id', $lokasi[0]->lokasi_id)->get();
         $lokasis = Lokasi::where('id', $lokasi[0]->lokasi_id)->get();
         $lokasigalery = Lokasi::where('tipe_lokasi', 1)->get();
-        $ongkirs = Ongkir::where('id', $lokasi[0]->lokasi_id)->get();
+        $ongkirs = Ongkir::where('lokasi_id', $lokasi[0]->lokasi_id)->get();
         $karyawans = Karyawan::where('lokasi_id', $lokasi[0]->lokasi_id)->where('jabatan', 'Sales')->get();
         $promos = Promo::where('lokasi_id', $lokasi[0]->lokasi_id)->orWhere('lokasi_id', 'Semua')->get();
         $produks = Produk_Jual::with('komponen.kondisi')->get();

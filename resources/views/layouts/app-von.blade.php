@@ -395,7 +395,8 @@
               @csrf
               <div class="searchinputs">
                   @php
-                    $user = Auth::user();                    
+                    $user = Auth::user();             
+                    $karyawan = \App\Models\Karyawan::where('user_id', $user->id)->first();       
                     $lokasis = \App\Models\Lokasi::all();
                   @endphp
                   @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance']))
@@ -403,7 +404,7 @@
                       <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
                           <option value="">Pilih Lokasi</option>
                           @foreach ($lokasis as $lokasi)
-                          <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}">{{ $lokasi->nama }}</option>
+                          <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}" {{ $lokasi->id == $karyawan->lokasi_id}}>{{ $lokasi->nama }}</option>
                           @endforeach
                       </select>
                   </div>
