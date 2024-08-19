@@ -313,7 +313,7 @@ class KembaliSewaController extends Controller
             
                 // Verifikasi penyimpanan file baru
                 if (File::exists(storage_path('app/public/' . $filePath))) {
-                    $data['bukti'] = $filePath;
+                    $data['file'] = $filePath;
                 } else {
                     DB::rollBack();
                     return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
@@ -516,121 +516,134 @@ class KembaliSewaController extends Controller
             // old data
             $oldData = KembaliSewa::with('produk.komponen')->find($kembaliSewa);
 
-            if ($req->hasFile('file')) {
-                $file = $req->file('file');
-                $fileName = $req->no_kembali . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_kembali_sewa', $fileName, 'public');
-                $data['file'] = $filePath;
-            }
-            // store file
-            if ($req->hasFile('file')) {
-                // Simpan file baru
-                $file = $req->file('file');
-                $fileName = $req->no_kembali . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = 'bukti_kembali_sewa/' . $fileName;
+            DB::beginTransaction();
+            try {
+                // store file
+                if ($req->hasFile('file')) {
+                    $file = $req->file('file');
+                    $fileName = $req->no_kembali . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                    $filePath = 'bukti_kembali_sewa/' . $fileName;
             
-                // Optimize dan simpan file baru
-                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
-                    ->save(storage_path('app/public/' . $filePath));
+                    Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                        ->save(storage_path('app/public/' . $filePath));
             
-                // Hapus file lama
-                if (!empty($oldData->file)) {
-                    $oldFilePath = storage_path('app/public/' . $oldData->file);
-                    if (File::exists($oldFilePath)) {
-                        File::delete($oldFilePath);
+                    if (!empty($oldData->file)) {
+                        $oldFilePath = storage_path('app/public/' . $oldData->file);
+                        if (File::exists($oldFilePath)) {
+                            File::delete($oldFilePath);
+                        }
+                    }
+            
+                    if (File::exists(storage_path('app/public/' . $filePath))) {
+                        $data['file'] = $filePath;
+                    } else {
+                        DB::rollBack();
+                        return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
                     }
                 }
             
-                // Verifikasi penyimpanan file baru
-                if (File::exists(storage_path('app/public/' . $filePath))) {
-                    $data['file'] = $filePath;
-                } else {
+                // Kembalikan stok area diupdate
+                if ($oldData->status == 'DIKONFIRMASI') {
+                    foreach ($oldData->produk as $produk) {
+                        foreach ($produk->komponen as $komponen) {
+                            $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)
+                                ->where('kode_produk', $komponen->kode_produk)
+                                ->where('kondisi_id', $komponen->kondisi)
+                                ->first();
+                            if (!$stok) {
+                                $stok = InventoryGallery::create([
+                                    'kode_produk' => $komponen->kode_produk,
+                                    'kondisi_id' => $komponen->kondisi,
+                                    'lokasi_id' => $kontrak->lokasi_id,
+                                    'jumlah' => 0,
+                                    'min_stok' => 20,
+                                ]);
+                            }
+                            $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($produk->jumlah));
+                            $stok->update();
+                            $komponen->forceDelete();
+                        }
+                        $produk->forceDelete();
+                    }
+                }
+            
+                // save data kembali
+                $check = KembaliSewa::find($kembaliSewa)->update($data);
+                if (!$check) {
                     DB::rollBack();
-                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                    return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                 }
-            }
-
-            // kembalikan stok akrea diupdate
-            if($oldData->status == 'DIKONFIRMASI'){
-                foreach ($oldData->produk as $produk) {
-                    foreach ($produk->komponen as $komponen) {
-                        $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $komponen->kondisi)->first();
-                        if(!$stok){
-                            $stok = InventoryGallery::create([
-                                'kode_produk' => $komponen->kode_produk,
-                                'kondisi_id' => $komponen->kondisi,
-                                'lokasi_id' => $kontrak->lokasi_id,
-                                'jumlah' => 0,
-                                'min_stok' => 20,
-                            ]);
-                        }
-                        $stok->jumlah = intval($stok->jumlah) - (intval($komponen->jumlah) * intval($produk->jumlah));
-                        $stok->update();
-                        $komponen->forceDelete();
-                    }
-                    $produk->forceDelete();
-                }
-            }
-
-            // save data kembali
-            $check = KembaliSewa::find($kembaliSewa)->update($data);
-            if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-            // save produk kembali
-            $startIdx = 0;
-            $tempNama = $tempKondisi = $tempJumlah = [];
-            for ($i=0; $i < count($data['nama_produk']); $i++) { 
-                $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
-                $produk_terjual = Produk_Terjual::create([
-                    'produk_jual_id' => $getProdukJual->id,
-                    'no_do' => $data['no_do_produk'][$i],
-                    'no_kembali_sewa' => KembaliSewa::find($kembaliSewa)->no_kembali,
-                    'jumlah' => $data['jumlah'][$i],
-                    'detail_lokasi' => $data['lokasi'][$i],
-                    'jenis' => 'KEMBALI_SEWA'
-                ]);
-
-                // pisahkan array komponen per produk terjual
-                $endIdx = $startIdx + $data['indexKomponen'][$i];
-                $tempNama[$data['nama_produk'][$i]] = array_slice($data['namaKomponen'], $startIdx, $data['indexKomponen'][$i]);
-                $tempKondisi[$data['nama_produk'][$i]] = array_slice($data['kondisiKomponen'], $startIdx, $data['indexKomponen'][$i]);
-                $tempJumlah[$data['nama_produk'][$i]] = array_slice($data['jumlahKomponen'], $startIdx, $data['indexKomponen'][$i]);
-                $startIdx = $endIdx;
-
-                if(!$produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-                for ($j=0; $j < count($tempNama[$data['nama_produk'][$i]]); $j++) { 
-                    $komponen = Produk::where('kode', $tempNama[$data['nama_produk'][$i]][$j])->first();
-                    $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                        'produk_terjual_id' => $produk_terjual->id,
-                        'kode_produk' => $tempNama[$data['nama_produk'][$i]][$j],
-                        'nama_produk' => $komponen->nama,
-                        'tipe_produk' => $komponen->tipe_produk,
-                        'kondisi' => $tempKondisi[$data['nama_produk'][$i]][$j],
-                        'deskripsi' => $komponen->deskripsi,
-                        'jumlah' => $tempJumlah[$data['nama_produk'][$i]][$j],
-                        'harga_satuan' => 0,
-                        'harga_total' => 0
+            
+                // save produk kembali
+                $startIdx = 0;
+                $tempNama = $tempKondisi = $tempJumlah = [];
+                for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                    $getProdukJual = Produk_Jual::with('komponen')->where('kode', $data['nama_produk'][$i])->first();
+                    $produk_terjual = Produk_Terjual::create([
+                        'produk_jual_id' => $getProdukJual->id,
+                        'no_do' => $data['no_do_produk'][$i],
+                        'no_kembali_sewa' => KembaliSewa::find($kembaliSewa)->no_kembali,
+                        'jumlah' => $data['jumlah'][$i],
+                        'detail_lokasi' => $data['lokasi'][$i],
+                        'jenis' => 'KEMBALI_SEWA'
                     ]);
-                    if(!$komponen_produk_terjual) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-
-                    // update stok
-                    if(in_array($komponen->tipe_produk, [1, 2]) && $oldData->status == 'DIKONFIRMASI'){
-                        $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)->where('kode_produk', $tempNama[$data['nama_produk'][$i]][$j])->where('kondisi_id', $tempKondisi[$data['nama_produk'][$i]][$j])->first();
-                        if(!$stok){
-                            $stok = InventoryGallery::create([
-                                'kode_produk' => $tempNama[$data['nama_produk'][$i]][$j],
-                                'kondisi_id' => $tempKondisi[$data['nama_produk'][$i]][$j],
-                                'lokasi_id' => $kontrak->lokasi_id,
-                                'jumlah' => 0,
-                                'min_stok' => 20,
-                            ]);
+            
+                    $endIdx = $startIdx + $data['indexKomponen'][$i];
+                    $tempNama[$data['nama_produk'][$i]] = array_slice($data['namaKomponen'], $startIdx, $data['indexKomponen'][$i]);
+                    $tempKondisi[$data['nama_produk'][$i]] = array_slice($data['kondisiKomponen'], $startIdx, $data['indexKomponen'][$i]);
+                    $tempJumlah[$data['nama_produk'][$i]] = array_slice($data['jumlahKomponen'], $startIdx, $data['indexKomponen'][$i]);
+                    $startIdx = $endIdx;
+            
+                    if (!$produk_terjual) {
+                        DB::rollBack();
+                        return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+                    }
+            
+                    for ($j = 0; $j < count($tempNama[$data['nama_produk'][$i]]); $j++) {
+                        $komponen = Produk::where('kode', $tempNama[$data['nama_produk'][$i]][$j])->first();
+                        $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                            'produk_terjual_id' => $produk_terjual->id,
+                            'kode_produk' => $tempNama[$data['nama_produk'][$i]][$j],
+                            'nama_produk' => $komponen->nama,
+                            'tipe_produk' => $komponen->tipe_produk,
+                            'kondisi' => $tempKondisi[$data['nama_produk'][$i]][$j],
+                            'deskripsi' => $komponen->deskripsi,
+                            'jumlah' => $tempJumlah[$data['nama_produk'][$i]][$j],
+                            'harga_satuan' => 0,
+                            'harga_total' => 0
+                        ]);
+            
+                        if (!$komponen_produk_terjual) {
+                            DB::rollBack();
+                            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
                         }
-                        $stok->jumlah = intval($stok->jumlah) + (intval($tempJumlah[$data['nama_produk'][$i]][$j]) * intval($data['jumlah'][$i]));
-                        $stok->update();
+            
+                        if (in_array($komponen->tipe_produk, [1, 2]) && $oldData->status == 'DIKONFIRMASI') {
+                            $stok = InventoryGallery::where('lokasi_id', $kontrak->lokasi_id)
+                                ->where('kode_produk', $tempNama[$data['nama_produk'][$i]][$j])
+                                ->where('kondisi_id', $tempKondisi[$data['nama_produk'][$i]][$j])
+                                ->first();
+                            if (!$stok) {
+                                $stok = InventoryGallery::create([
+                                    'kode_produk' => $tempNama[$data['nama_produk'][$i]][$j],
+                                    'kondisi_id' => $tempKondisi[$data['nama_produk'][$i]][$j],
+                                    'lokasi_id' => $kontrak->lokasi_id,
+                                    'jumlah' => 0,
+                                    'min_stok' => 20,
+                                ]);
+                            }
+                            $stok->jumlah = intval($stok->jumlah) + (intval($tempJumlah[$data['nama_produk'][$i]][$j]) * intval($data['jumlah'][$i]));
+                            $stok->update();
+                        }
                     }
                 }
+            
+                DB::commit();
+                return redirect(route('kembali_sewa.index'))->with('success', 'Data tersimpan');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
             }
-            return redirect(route('kembali_sewa.index'))->with('success', 'Data tersimpan');
         }
     }
 
