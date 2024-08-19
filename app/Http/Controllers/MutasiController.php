@@ -2651,7 +2651,7 @@ class MutasiController extends Controller
             }
         }
 
-        foreach ($groupedProduk as $kodeProduk => $data) {
+        foreach ($groupedProduk as $kodeProduk => $datajumlah) {
             $getProdukJual = InventoryGallery::where('id', $kodeProduk)->first();
         
             if ($req->status == 'DIKONFIRMASI') {
@@ -2661,7 +2661,7 @@ class MutasiController extends Controller
                                 ->first();
         
                 if ($stok) {
-                    $newJumlah = $stok->jumlah - $data['jumlah'];
+                    $newJumlah = $stok->jumlah - $datajumlah['jumlah'];
                     if ($newJumlah < 0) {
                         return redirect('inven_galeri')->with('fail', "Stok untuk produk {$getProdukJual->produk->nama} - {$getProdukJual->kondisi->nama} tidak mencukupi!");
                     }
@@ -2824,7 +2824,7 @@ class MutasiController extends Controller
             }
         }
 
-        foreach ($groupedProduk as $kodeProduk => $data) {
+        foreach ($groupedProduk as $kodeProduk => $datajumlah) {
             if ($lokasi->tipe_lokasi == 3) {
                 $getProdukJual = InventoryGreenHouse::where('id', $kodeProduk)->first();
             } else if ($lokasi->tipe_lokasi == 4) {
@@ -2845,7 +2845,7 @@ class MutasiController extends Controller
                 }
         
                 if ($stok) {
-                    $newJumlah = $stok->jumlah - $data['jumlah'];
+                    $newJumlah = $stok->jumlah - $datajumlah['jumlah'];
                     if ($newJumlah < 0) {
                         if ($lokasi->tipe_lokasi == 3) {
                             return redirect('inven_greenhouse')->with('fail', "Stok untuk produk {$getProdukJual->produk->nama} - {$getProdukJual->kondisi->nama} tidak mencukupi!");
