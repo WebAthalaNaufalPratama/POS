@@ -505,9 +505,14 @@ Carbon::setLocale('id');
               <input type="text" class="form-control"  id="nominal2" name="nominal" hidden>
             </div>
             <div class="mb-3">
-              <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*" required>
-            </div>
+                <div class="row mx-auto">
+                    <label for="bukti" class="form-label ps-0">Bukti</label>
+                    <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
+                </div>
+                <div style="text-align: center;">
+                    <img id="preview" src="" alt="Bukti tf" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                </div>
+            </div>  
             
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -525,6 +530,31 @@ Carbon::setLocale('id');
 
 @section('scripts')
 <script>
+    $(document).ready(function(){
+        if ($('#preview').attr('src') === '') {
+            $('#preview').attr('src', defaultImg);
+        }
+        $('#bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
     function formatRupiah(angka) {
             var reverse = angka.toString().split('').reverse().join('');
             var ribuan = reverse.match(/\d{1,3}/g);
