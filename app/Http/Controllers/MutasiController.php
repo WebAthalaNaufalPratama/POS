@@ -1464,7 +1464,7 @@ class MutasiController extends Controller
         // dd($coba);
         // $produks = Produk_Jual::with('komponen.kondisi')->get();
         $kondisis = Kondisi::all();
-        $produkjuals = InventoryGreenHouse::all();
+        $produkjuals = InventoryGallery::all();
         $bankpens = Rekening::all();
         $ongkirs = Ongkir::all();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
@@ -1590,7 +1590,7 @@ class MutasiController extends Controller
         // dd($coba);
         // $produks = Produk_Jual::with('komponen.kondisi')->get();
         $kondisis = Kondisi::all();
-        $produkjuals = InventoryGreenHouse::all();
+        $produkjuals = InventoryGallery::all();
         $bankpens = Rekening::all();
         $ongkirs = Ongkir::all();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
@@ -1702,7 +1702,7 @@ class MutasiController extends Controller
         // dd($coba);
         // $produks = Produk_Jual::with('komponen.kondisi')->get();
         $kondisis = Kondisi::all();
-        $produkjuals = InventoryGreenHouse::all();
+        $produkjuals = InventoryGallery::all();
         $bankpens = Rekening::all();
         $ongkirs = Ongkir::all();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
