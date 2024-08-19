@@ -22,10 +22,10 @@
             <div class="card-body">
                 <div class="row ps-2 pe-2">
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                        <input type="text" class="form-control" name="filterDateStart" id="filterDateStart" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal dikirim" value="{{ request()->input('dateStart') }}">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                        <input type="text" class="form-control" name="filterDateEnd" id="filterDateEnd" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir dikirim" value="{{ request()->input('dateEnd') }}" >
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterSupplier" name="filterSupplier" class="form-control" title="Supplier">
@@ -432,7 +432,7 @@
                     name: 'tgl_kirim',
                     render: function(data, type, row) {
                         return row.tgl_kirim_format;
-                    }  
+                    }
                 },
                 { 
                     data: 'tgl_diterima', 
@@ -450,7 +450,7 @@
                             case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
                             case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
                             case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
-                            default: return '-';
+                            default: return '<span class="badges bg-lightred">TUNDA</span>';
                         }
                     }
                 },
@@ -462,7 +462,7 @@
                             case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
                             case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
                             case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
-                            default: return '-';
+                            default: return '<span class="badges bg-lightred">TUNDA</span>';
                         }
                     }
                 },
@@ -576,11 +576,6 @@
                 dateEnd: '#filterDateEnd'
             }, 'po');
 
-            const handleSearch = debounce(function() {
-                table.ajax.reload();
-            }, 5000); // Adjust the debounce delay as needed
-
-            $('#filterSupplier, #filterGallery, #filterStatus, #filterDateStart, #filterDateEnd').on('input', handleSearch);
 
             $('#filterBtn').on('click', function() {
                 table.ajax.reload();
@@ -617,7 +612,7 @@
                             case 'BATAL': return '<span class="badges bg-lightgrey">BATAL</span>';
                             case 'TUNDA': return '<span class="badges bg-lightred">TUNDA</span>';
                             case 'DIKONFIRMASI': return '<span class="badges bg-lightgreen">DIKONFIRMASI</span>';
-                            default: return '-';
+                            default: return '<span class="badges bg-lightred">TUNDA</span>';
                         }
                     }
                 },

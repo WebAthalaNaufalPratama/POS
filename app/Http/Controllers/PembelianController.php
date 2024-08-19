@@ -94,10 +94,10 @@ class PembelianController extends Controller
                 }
                     
                 if ($req->dateStart) {
-                    $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+                    $query->where('tgl_kirim', '>=', $req->input('dateStart'));
                 }
                 if ($req->dateEnd) {
-                    $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+                    $query->where('tgl_kirim', '<=', $req->input('dateEnd'));
                 }
             
                 $start = $req->input('start');

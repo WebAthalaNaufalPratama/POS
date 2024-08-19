@@ -33,7 +33,7 @@ class Poinden extends Model
         return $this->belongsTo(User::class, 'pemeriksa', 'id');
     }
     public function produkbeli (){
-        return $this->hasMany(produkbeli::class);
+        return $this->hasMany(Produkbeli::class);
     }
     public function invoice (){
         return $this->hasOne(Invoicepo::class);

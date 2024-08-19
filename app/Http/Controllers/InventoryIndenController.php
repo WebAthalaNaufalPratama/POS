@@ -128,4 +128,13 @@ class InventoryIndenController extends Controller
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
     }
+
+    public function show($inventoryInden)
+    {
+        $data = InventoryInden::find($inventoryInden);
+        $produks = Produk::all();
+        $suppliers = Supplier::where('tipe_supplier', 'inden')->get();
+        return view('inven_inden.show', compact('data', 'produks', 'suppliers'));
+    }
+
 }

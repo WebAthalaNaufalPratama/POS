@@ -17,10 +17,10 @@
             <div class="card-body">
                 <div class="row ps-2 pe-2">
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                        <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal dikirim" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                        <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir dikirim" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterGallery" name="filterGallery" class="form-control" title="Gallery">
