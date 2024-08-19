@@ -313,8 +313,8 @@
                                 </td>
                                 
                                 
-                            </tr>
-                            @endforeach --}}
+                           </tr>
+                            @endforeach  --}}
                         </tbody>
                     </table>
                 </div>
@@ -660,6 +660,7 @@
             ]
         });
     });
+    
     function deleteData(id) {
         $.ajax({
             type: "GET",
