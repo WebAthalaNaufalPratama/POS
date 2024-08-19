@@ -517,6 +517,8 @@ class InitialSeeder extends Seeder
                 'auditpenjualan.show',
                 'penjualan.view',
                 'dopenjualan.index',
+                'auditmutasighgalery.update',
+                'mutasigalerygalery.update',
                 'dopenjualan.show',
                 'pdfdopenjualan.generate',
                 'auditdopenjualan.edit',
