@@ -641,8 +641,7 @@ class DopenjualanController extends Controller
             $arrayCombined = $arrayExist;
         }
     
-        // $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_do', $req->no_do)->get();
-        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->get();
+        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_do', $req->no_do)->get();
         $ceken = $cek->pluck('id')->toArray();
         $dikirim = Produk_Terjual::whereIn('id', $ceken)->get();
         $idkirim = $dikirim->pluck('no_invoice')->toArray();
