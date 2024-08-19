@@ -2602,7 +2602,7 @@ class MutasiController extends Controller
     public function audit_GAGUpdate(Request $req)
     {
         $mutasis = $req->input('mutasiGAG');
-        $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG', 'alasan', 'kode_produk', 'nama_produk', ]);
+        $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG', 'alasan', 'kode_produk', 'nama_produk', 'jumlah']);
 
         if ($req->hasFile('bukti')) {
             $file = $req->file('bukti');
@@ -2774,7 +2774,7 @@ class MutasiController extends Controller
         $mutasis = $req->input('mutasiGG');
 
         $allkeys = array_keys($req->all());
-        $keys = ['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGG', 'kode_produk'];
+        $keys = ['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGG', 'kode_produk', 'jumlah'];
         $filter = array_filter($allkeys, function($key) use ($keys){
             foreach($keys as $ke){
                 if(strpos($ke, $key) === 0){
