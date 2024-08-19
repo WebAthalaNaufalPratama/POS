@@ -907,9 +907,9 @@
         @endforeach
 
         $('[id^="jumlah"]').change(function(e) {
-            $jumlah = $(this).val();
+            jumlah = $(this).val();
             
-            if($jumlah < 0){
+            if(jumlah < 0){
                 alert('Jumlah Tidak Boleh kurang dari 0!');
                 $(this).val(0);
             }
