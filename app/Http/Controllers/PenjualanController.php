@@ -33,6 +33,7 @@ use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\DeliveryOrder;
 use App\Exports\PergantianExport;
 use PDF;
 
@@ -86,6 +87,11 @@ class PenjualanController extends Controller
                                                     ->where('status', 'DIKONFIRMASI')
                                                     ->get()
                                                     ->keyBy('no_invoice');
+
+            $doData = DeliveryOrder::whereIn('no_referensi', $data->pluck('no_invoice'))
+                                                    ->where('status', 'DIKONFIRMASI')
+                                                    ->get()
+                                                    ->keyBy('no_referensi');
                                                     
             $latestPayments = Pembayaran::with('penjualan')->get()->reduce(function ($carry, $payment) {
                 if (!isset($carry[$payment->invoice_penjualan_id]) || $payment->id > $carry[$payment->invoice_penjualan_id]->id) {
@@ -94,7 +100,7 @@ class PenjualanController extends Controller
                 return $carry;
             }, []);
         
-            $data->map(function ($penjualan) use ($latestPayments, $returData) {
+            $data->map(function ($penjualan) use ($latestPayments, $returData, $doData) {
                 $penjualan->latest_payment = $latestPayments[$penjualan->id] ?? null;
                 $allNoForm = false;
                 if ($penjualan->produk && $penjualan->produk->isNotEmpty()) {
@@ -103,6 +109,7 @@ class PenjualanController extends Controller
                         return $produk->no_form == null;
                     });
                 }
+                $penjualan->do = $doData->get($penjualan->no_invoice) ? true : false;
                 $penjualan->all_no_form = $allNoForm;
                 $penjualan->retur = $returData->get($penjualan->no_invoice) ? true : false;
                 return $penjualan;

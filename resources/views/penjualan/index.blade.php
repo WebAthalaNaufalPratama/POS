@@ -267,6 +267,7 @@
                     searchable: false,
                     render: function (data, type, row) {
                         const isRetur = row.retur === true || row.retur === 'true';
+                        const isDO = row.do === true || row.do === 'true';
                         const isNoForm = row.all_no_form === true || row.all_no_form === 'true';
                         var dropdownHtml = `
                             <div class="dropdown">
@@ -278,7 +279,7 @@
                         var userHasRole = @json(Auth::user()->roles->pluck('name')->toArray());
 
                         if (row.status !== 'DIBATALKAN') {
-                            if (userHasRole.includes('Auditor') || userHasRole.includes('Finance') || userHasRole.includes('SuperAdmin')) {
+                            if (userHasRole.includes('Auditor') && !isDO || userHasRole.includes('Finance') && !isDO || userHasRole.includes('SuperAdmin') && !isDO) {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditPenjualanEdit.replace('__ID__', row.id)}">
                                                     <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit
                                                 </a>`;
