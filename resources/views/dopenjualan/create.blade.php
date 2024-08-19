@@ -58,7 +58,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="driver">Driver</label>
-                                            <select id="driver" name="driver" class="form-control">
+                                            <select id="driver" name="driver" class="form-control" required>
                                                 <option value=""> Pilih Nama Driver </option>
                                                 @foreach ($karyawans as $karyawan)
                                                 <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>

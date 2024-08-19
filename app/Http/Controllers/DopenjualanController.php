@@ -481,7 +481,9 @@ class DopenjualanController extends Controller
         $dopenjualan = DeliveryOrder::find($dopenjualan);
         $produkjuals = Produk_Jual::all();
         $customers = Customer::all();
-        $karyawans = Karyawan::all();
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $karyawans = Karyawan::where('jabatan', 'Driver')->where('lokasi_id', $karyawan->lokasi_id)->get();
         $kondisis = Kondisi::all();
         $Invoice = DeliveryOrder::latest()->first();
         if ($Invoice != null) {
@@ -639,7 +641,8 @@ class DopenjualanController extends Controller
             $arrayCombined = $arrayExist;
         }
     
-        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_do', $req->no_do)->get();
+        // $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->where('no_do', $req->no_do)->get();
+        $cek = Produk_Terjual::whereNotIn('id', $arrayCombined)->get();
         $ceken = $cek->pluck('id')->toArray();
         $dikirim = Produk_Terjual::whereIn('id', $ceken)->get();
         $idkirim = $dikirim->pluck('no_invoice')->toArray();
