@@ -1891,6 +1891,7 @@ class MutasiController extends Controller
         $validator = Validator::make($req->all(), [
             'jumlah_diterima' => 'required',
             'kondisi_diterima' => 'required',
+            'tanggal_diterima' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -2819,7 +2820,6 @@ class MutasiController extends Controller
             } else {
                 $groupedProduk[$kodeProduk] = [
                     'jumlah' => $jumlahDikirim,
-                    // 'kondisi_id' => $req->kondisi_id[$i]
                 ];
             }
         }
