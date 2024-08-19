@@ -2652,7 +2652,7 @@ class MutasiController extends Controller
             } else {
                 $groupedProduk[$kodeProduk] = [
                     'jumlah' => $jumlahDikirim,
-                    'kondisi_id' => $req->kondisi_id[$i]
+                    // 'kondisi_id' => $req->kondisi_id[$i]
                 ];
             }
         }
