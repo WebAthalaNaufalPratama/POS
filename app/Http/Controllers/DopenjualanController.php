@@ -653,6 +653,7 @@ class DopenjualanController extends Controller
                 if($item->jenis != 'TAMBAHAN') {
                     $itemKirim = $kirim->where('id', $item->no_invoice)->first();
                     $tambah = (int)$itemKirim->jumlah_dikirim + (int)$item->jumlah;
+                    // dd($tambah);
                     Produk_Terjual::where('id', $item->no_invoice)->update([
                         'jumlah_dikirim' => $tambah 
                     ]);
