@@ -662,7 +662,7 @@
                 '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
                 '<td><input type="text" name="unit_satuan[]" id="unit_satuan_' + i + '" class="form-control" required></td>' +
                 '<td><input type="text" name="keterangan[]" id="keterangan_' + i + '" class="form-control" required></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove2"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
             $('#dynamic_field').append(newRow);
 
@@ -731,7 +731,7 @@
                 '<td><input type="number" name="jumlah2[]" id="jumlah2_' + i + '" oninput="multiply(this)" class="form-control"></td>' +
                 '<td><input type="text" name="satuan2[]" id="satuan2_' + i + '" class="form-control"></td>' +
                 '<td><input type="text" name="keterangan2[]" id="keterangan2_' + i + '" class="form-control"></td>' +
-                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
+                '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove2"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>' +
                 '</tr>';
 
             $('#dynamic_field_tambah').append(newrowtambah);
@@ -926,7 +926,7 @@
             $('#preview').attr('src', defaultImg);
         };
 
-        $('[id^=jumlah2]').input(function(){
+        $('[id^=jumlah2]').on('input', function(){
             var jumlah = $(this).val();
 
             if(jumlah < 0) {
