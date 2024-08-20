@@ -20,10 +20,10 @@ $user = Auth::user();
             <div class="card-body">
                 <div class="row ps-2 pe-2">
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                        <input type="text" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal Invoice" title="Tanggal Awal">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                        <input type="text" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir Invoice" title="Tanggal Akhir">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterSupplier" name="filterSupplier" class="form-control" title="Supplier">
@@ -54,7 +54,7 @@ $user = Auth::user();
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table" id="po">
+                    <table class="table" id="po" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -245,10 +245,10 @@ $user = Auth::user();
             <div class="card-body">
                 <div class="row ps-2 pe-2">
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateStartInd" id="filterDateStartInd" value="{{ request()->input('dateStartInd') }}" title="Tanggal Awal">
+                        <input type="text" class="form-control" name="filterDateStartInd" id="filterDateStartInd" value="{{ request()->input('dateStartInd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal Invoice" title="Tanggal Awal">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateEndInd" id="filterDateEndInd" value="{{ request()->input('dateEndInd') }}" title="Tanggal Akhir">
+                        <input type="text" class="form-control" name="filterDateEndInd" id="filterDateEndInd" value="{{ request()->input('dateEndInd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal Invoice" title="Tanggal Akhir">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterSupplierInd" name="filterSupplierInd" class="form-control" title="Supplier">
@@ -271,7 +271,7 @@ $user = Auth::user();
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table" id="inden">
+                    <table class="table" id="inden" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -391,84 +391,7 @@ $user = Auth::user();
     </div>
 </div>
 
-<div class="modal fade" id="modalBayar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Form Pembayaran</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="{{ route('pembayaranbeli.store')}}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor PO</label>
-                            <input type="text" class="form-control" id="no_po" name="no_po" placeholder="Nomor Po" required readonly>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Nomor Invoice</label>
-                            <input type="text" class="form-control" id="no_invoice_bayar" name="no_invoice_bayar" placeholder="Nomor Invoice" value="{{ $no_invpo }}" required readonly>
-                            <input type="hidden" id="invoice_purchase_id" name="invoice_purchase_id" value="">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Total Tagihan</label>
-                            <input type="text" class="form-control" id="total_tagihan" name="total_tagihan" placeholder="Total Taqgihan" required readonly>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="no_invoice">Sisa Tagihan</label>
-                            <input type="text" class="form-control" id="sisa_tagihan" name="sisa_tagihan" placeholder="Sisa Taqgihan" required readonly>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="bayar">Cara Bayar</label>
-                            <select class="form-control" id="bayar" name="cara_bayar" required>
-                                <option value="">Pilih Cara Bayar</option>
-                                <option value="cash">Cash</option>
-                                <option value="transfer">Transfer</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-6" id="rekening" style="display: none">
-                            <label for="bankpenerima">Rekening Vonflorist</label>
-                            <select class="form-control" id="rekening_id" name="rekening_id" required>
-                                <option value="">Pilih Rekening Von</option>
-                                @foreach ($bankpens as $bankpen)
-                                <option value="{{ $bankpen->id }}">{{ $bankpen->nama_akun }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="nominal">Nominal</label>
-                            <input type="number" class="form-control" id="nominal" name="nominal" value="" placeholder="Nominal Bayar" required>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="tanggalbayar">Tanggal</label>
-                            <input type="date" class="form-control" id="tanggal_bayar" name="tanggal_bayar" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-12">
-                            <label for="buktibayar">Unggah Bukti</label>
-                            <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*" required>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 @endsection
 
 @section('scripts')
