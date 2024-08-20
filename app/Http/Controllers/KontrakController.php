@@ -93,9 +93,10 @@ class KontrakController extends Controller
                 $kontrak->no = ($currentPage - 1) * $perPage + ($index + 1);
                 $kontrak->masa_sewa = $kontrak->masa_sewa . ' bulan';
                 $kontrak->total_harga = formatRupiah($kontrak->total_harga);
-                $kontrak->tanggal_pembuat = $kontrak->tanggal_pembuat == null ? null : formatTanggal($kontrak->tanggal_pembuat);
-                $kontrak->tanggal_penyetuju = $kontrak->tanggal_penyetuju == null ? null : formatTanggal($kontrak->tanggal_penyetuju);
-                $kontrak->tanggal_pemeriksa = $kontrak->tanggal_pemeriksa == null ? null : formatTanggal($kontrak->tanggal_pemeriksa);
+                $kontrak->tanggal_pembuat_format = $kontrak->tanggal_pembuat == null ? '-' : tanggalindo($kontrak->tanggal_pembuat);
+                $kontrak->tanggal_penyetuju_format = $kontrak->tanggal_penyetuju == null ? '-' : tanggalindo($kontrak->tanggal_penyetuju);
+                $kontrak->tanggal_pemeriksa_format = $kontrak->tanggal_pemeriksa == null ? '-' : tanggalindo($kontrak->tanggal_pemeriksa);
+                $kontrak->tanggal_kontrak_format = $kontrak->tanggal_kontrak == null ? '-' : tanggalindo($kontrak->tanggal_kontrak);
                 $kontrak->nama_customer = $kontrak->customer->nama;
                 $kontrak->nama_sales = $kontrak->data_sales->nama;
                 $kontrak->rentang_tanggal = formatTanggal($kontrak->tanggal_mulai) . ' - ' . formatTanggal($kontrak->tanggal_selesai);

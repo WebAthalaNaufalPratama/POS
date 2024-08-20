@@ -91,11 +91,11 @@ class InvoiceSewaController extends Controller
         
             $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
-                $item->tanggal_invoice = $item->tanggal_invoice == null ? null : formatTanggal($item->tanggal_invoice);
-                $item->jatuh_tempo = $item->jatuh_tempo == null ? null : formatTanggal($item->jatuh_tempo);
-                $item->tanggal_pembuat = $item->tanggal_pembuat == null ? null : formatTanggal($item->tanggal_pembuat);
-                $item->tanggal_penyetuju = $item->tanggal_penyetuju == null ? null : formatTanggal($item->tanggal_penyetuju);
-                $item->tanggal_pemeriksa = $item->tanggal_pemeriksa == null ? null : formatTanggal($item->tanggal_pemeriksa);
+                $item->tanggal_invoice_format = $item->tanggal_invoice == null ? '-' : tanggalindo($item->tanggal_invoice);
+                $item->jatuh_tempo_format = $item->jatuh_tempo == null ? '-' : tanggalindo($item->jatuh_tempo);
+                $item->tanggal_pembuat_format = $item->tanggal_pembuat == null ? '-' : tanggalindo($item->tanggal_pembuat);
+                $item->tanggal_penyetuju_format = $item->tanggal_penyetuju == null ? '-' : tanggalindo($item->tanggal_penyetuju);
+                $item->tanggal_pemeriksa_format = $item->tanggal_pemeriksa == null ? '-' : tanggalindo($item->tanggal_pemeriksa);
                 $item->total_tagihan = $item->total_tagihan == null ? null : formatRupiah($item->total_tagihan);
                 $item->dp = $item->dp == null ? null : formatRupiah($item->dp);
                 $item->isLunas = $item->sisa_bayar == 0 ? true : false;

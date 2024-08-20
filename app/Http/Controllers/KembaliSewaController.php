@@ -91,10 +91,10 @@ class KembaliSewaController extends Controller
         
             $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
-                $item->tanggal_kembali = $item->tanggal_kembali == null ? null : formatTanggal($item->tanggal_kembali);
-                $item->tanggal_pembuat = $item->tanggal_pembuat == null ? null : formatTanggal($item->tanggal_pembuat);
-                $item->tanggal_penyetuju = $item->tanggal_penyetuju == null ? null : formatTanggal($item->tanggal_penyetuju);
-                $item->tanggal_pemeriksa = $item->tanggal_pemeriksa == null ? null : formatTanggal($item->tanggal_pemeriksa);
+                $item->tanggal_kembali_format = $item->tanggal_kembali == null ? '-' : tanggalindo($item->tanggal_kembali);
+                $item->tanggal_pembuat_format = $item->tanggal_pembuat == null ? '-' : tanggalindo($item->tanggal_pembuat);
+                $item->tanggal_penyetuju_format = $item->tanggal_penyetuju == null ? '-' : tanggalindo($item->tanggal_penyetuju);
+                $item->tanggal_pemeriksa_format = $item->tanggal_pemeriksa == null ? '-' : tanggalindo($item->tanggal_pemeriksa);
                 $item->nama_customer = $item->sewa->customer->nama;
                 $item->nama_driver = $item->data_driver->nama;
                 $item->userRole = Auth::user()->getRoleNames()->first();

@@ -321,7 +321,7 @@ class PembayaranController extends Controller
         
             $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
-                $item->tanggal_bayar_format = $item->tanggal_bayar == null ? null : formatTanggal($item->tanggal_bayar);
+                $item->tanggal_bayar_format = $item->tanggal_bayar == null ? '-' : tanggalindo($item->tanggal_bayar);
                 $item->no_kontrak = $item->sewa->no_sewa;
                 $item->no_invoice_tagihan = $item->sewa->no_invoice;
                 $item->nominal_format = formatRupiah($item->nominal);

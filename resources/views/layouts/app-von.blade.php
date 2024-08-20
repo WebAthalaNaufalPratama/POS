@@ -821,6 +821,7 @@
               pageLength: options.pageLength || 10,
               lengthMenu: [ [5, 10, 25, 50], [5, 10, 25, 50] ],
               responsive: true,
+              autoWidth: true,
               info: false,
               language: {
                   url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json',
