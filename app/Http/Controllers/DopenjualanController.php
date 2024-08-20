@@ -107,7 +107,7 @@ class DopenjualanController extends Controller
 
     public function create($penjualan)
     {
-        $penjualans = Penjualan::with('produk')->whereNotNull('auditor_id')->whereNotNull('dibukukan_id')->find($penjualan);
+        $penjualans = Penjualan::with('produk')->find($penjualan);
         $kondisis = Kondisi::all();
         $user = Auth::user();
         $karyawans = Karyawan::where('jabatan', 'Driver')->get();
@@ -648,15 +648,8 @@ class DopenjualanController extends Controller
         $kirim = Produk_Terjual::whereIn('id', $idkirim)->get();
 
         if ($dikirim->isNotEmpty()) {
-            // Update data jumlah_dikirim
             foreach ($dikirim as $item) {
-                if($item->jenis != 'TAMBAHAN') {
-                    $itemKirim = $kirim->where('id', $item->no_invoice)->first();
-                    $tambah = (int)$itemKirim->jumlah_dikirim + (int)$item->jumlah;
-                    Produk_Terjual::where('id', $item->no_invoice)->update([
-                        'jumlah_dikirim' => $tambah 
-                    ]);
-                }
+                //update stok pengurangan untuk auditor dan finance 
                 if($user->hasRole(['Auditor', 'Finance'])) {
                     $komponens = Komponen_Produk_Terjual::where('produk_terjual_id', $item->id)->get();
                     foreach($komponens as $komponen) {
@@ -685,11 +678,14 @@ class DopenjualanController extends Controller
                         'keterangan' => $req->keterangan[$i]
                     ]);
 
+                    //update jumlah dikirim
                     if($getProdukJual->jumlah != $req->jumlah[$i])
                     {
                         $intinvoice = $getProdukJual->no_invoice;
+                        // pj invoice
                         $updateexist = Produk_Terjual::where('id', $intinvoice)->first();
-                        $jumlahDikirim = intval($updateexist->jumlah) - intval($req->jumlah[$i]);
+                        //kurang invoice update invoice
+                        $jumlahDikirim = (intval($getProdukJual->jumlah) - intval($req->jumlah[$i])) + intval($updateexist->jumlah_dikirim);
                         $updatecek = Produk_terjual::where('id', $updateexist->id)->update([
                             'jumlah_dikirim' => $jumlahDikirim
                         ]);   

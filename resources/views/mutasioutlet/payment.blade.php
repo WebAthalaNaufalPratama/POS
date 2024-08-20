@@ -342,6 +342,21 @@
                                     <div class="row">
                                         <h5>Riwayat Pembayaran</h5>
                                         </div>
+                                        @php
+                                            $showButton = true;
+                                            $user = Auth::user();
+                                        @endphp
+
+                                        @foreach ($pembayarans as $pembayaran)
+                                            @if($pembayaran->status_bayar == 'LUNAS')
+                                                @php
+                                                    $showButton = false;
+                                                @endphp
+                                                @break
+                                            @endif
+                                        @endforeach
+
+                                        @if($showButton)
                                         <div class="row justify-content-between">
                                             <div class="col-md-12">
                                                 <label for=""></label>
@@ -350,6 +365,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
                                         <div class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table datanew">
