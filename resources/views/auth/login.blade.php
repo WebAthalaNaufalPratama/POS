@@ -5,7 +5,7 @@
         <input type="hidden" name="_token" value="{{ csrf_token() }}" />
         <!-- <img class="mb-4" src="{!! url('images/bootstrap-logo.svg') !!}" alt="" width="72" height="57"> -->
         <div class="form-holder text-center">
-        <img src="https://system.vonflorist.com/admin/assets/images/logo.png" width="200px">
+        <img src="/assets/img/logo.png" width="200px">
         </div>
         
         <h1 class="h3 mb-3 fw-normal">Login</h1>

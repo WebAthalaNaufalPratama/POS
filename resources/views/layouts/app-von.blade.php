@@ -366,7 +366,7 @@
 
       <div class="header-left active">
         <a href="index.html" class="logo">
-          <img src="https://system.vonflorist.com/admin/assets/images/logo.png" style="width: 3rem;" alt="">
+          <img src="/assets/img/logo.png" style="width: 3rem;" alt="">
         </a>
         <!-- <a href="index.html" class="logo-small">
           <img src="/assets/img/logo-small.png" alt="">
