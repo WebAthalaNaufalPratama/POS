@@ -1303,7 +1303,7 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
+                    var total_transaksi = parseInt($('#sub_total').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
