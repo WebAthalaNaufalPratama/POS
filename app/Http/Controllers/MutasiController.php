@@ -32,6 +32,8 @@ use App\Models\ReturPenjualan;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\File;
 
 class MutasiController extends Controller
 {
@@ -182,11 +184,29 @@ class MutasiController extends Controller
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
 
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_mutasi/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $data['pembuat_id'] = Auth::user()->id;
@@ -402,10 +422,29 @@ class MutasiController extends Controller
         // dd($data);
 
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_pembayaran_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($mutasipenjualan->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $mutasipenjualan->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $penjualan = Mutasi::find($req->mutasi_id);
@@ -643,11 +682,29 @@ class MutasiController extends Controller
         // dd($data);
 
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_mutasi/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
@@ -1360,13 +1417,30 @@ class MutasiController extends Controller
         }
         $data = $req->except(['_token', '_method', 'bukti_file', 'bukti', 'status_bayar']);
         // dd($data);
-
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_mutasi/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $allStockAvailable = true;
@@ -1733,11 +1807,29 @@ class MutasiController extends Controller
         // dd($data);
 
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_mutasi/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($mutasipenjualan->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $mutasipenjualan->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
@@ -2197,22 +2289,41 @@ class MutasiController extends Controller
         // dd($req);
 
         $mutasis = $req->input('mutasiGO');
+        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
         $data = $req->except(['_method', '_token','ubahapa', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO', 'nama_produk', 'kode_produk']);
         // dd($data);
 
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_mutasi/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($mutasipenjualan->bukti)) {
+                $oldFilePath = storage_path('app/public/' . $mutasipenjualan->bukti);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         //update data ttd
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
-        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
+        
         $data['penerima'] = $req->penerima;
         $data['rekening_id'] = $req->rekening_id;
         $data['tanggal_kirim'] = $req->tanggal_kirim;
@@ -2383,6 +2494,7 @@ class MutasiController extends Controller
     {
         // dd($req);
         $mutasis = $req->input('mutasiOG');
+        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
         $allkeys = array_keys($req->all());
         $komponens = ['_token', '_method','nama_produk', 'kodegiftproduk', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk', 'kondisitradproduk', 'jumlahtradproduk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiOG', 'kode_produk'];
         $filter = array_filter($allkeys, function($key) use ($komponens){
@@ -2393,17 +2505,35 @@ class MutasiController extends Controller
             }
         });
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_mutasi/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($mutasipenjualan->bukti)) {
+                $oldFilePath = storage_path('app/public/' . $mutasipenjualan->bukti);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
         $data = $req->except($filter);
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
-        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
+        
 
         if($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
             $data['dibukukan_id'] = $user->id;
@@ -2603,20 +2733,40 @@ class MutasiController extends Controller
     public function audit_GAGUpdate(Request $req)
     {
         $mutasis = $req->input('mutasiGAG');
+        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
         $data = $req->except(['_method', '_token', 'nama_produk', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGAG', 'alasan', 'kode_produk', 'nama_produk', 'jumlah']);
 
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_mutasi', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $fileName = $req->no_mutasi . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_mutasi/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($mutasipenjualan->bukti)) {
+                $oldFilePath = storage_path('app/public/' . $mutasipenjualan->bukti);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         //update data ttd
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
-        $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
+        
 
         if($mutasipenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Finance'])){
             $data['diperiksa_id'] = Auth::user()->id;
