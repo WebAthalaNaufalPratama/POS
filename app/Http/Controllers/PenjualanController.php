@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\DeliveryOrder;
 use App\Exports\PergantianExport;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\File;
 use PDF;
 
 class PenjualanController extends Controller
@@ -221,10 +223,29 @@ class PenjualanController extends Controller
           
         $data['dibuat_id'] = Auth::user()->id;
         if ($req->hasFile('bukti_file')) {
+            // Simpan file baru
             $file = $req->file('bukti_file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
-            $data['bukti_file'] = $filePath;
+            $fileName = $req->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_invoice_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti_file'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
         if($req->cara_bayar == 'cash')
         {
@@ -1089,17 +1110,43 @@ class PenjualanController extends Controller
             $data['dibukukan_id'] = Auth::user()->id;
         }
 
-        if ($penjualan) {
-            $delete = $penjualan->bukti_file;
-            $deletefile = Storage::disk('public')->delete('bukti_invoice_penjualan/' . $delete);
-        }
+        // if ($penjualan) {
+        //     $delete = $penjualan->bukti_file;
+        //     $deletefile = Storage::disk('public')->delete('bukti_invoice_penjualan/' . $delete);
+        // }
+
+        // if ($req->hasFile('file')) {
+        //     $file = $req->file('file');
+        //     $fileName = time() . '_' . $file->getClientOriginalName();
+        //     $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
+        //     // dd($filePath);
+        //     $data['bukti_file'] = $filePath;
+        // }
 
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti_file'] = $filePath;
+            $fileName = $req->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_invoice_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($penjualan->bukti_file)) {
+                $oldFilePath = storage_path('app/public/' . $penjualan->bukti_file);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti_file'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $update = Penjualan::where('id', $penjualanId)->update($data);
