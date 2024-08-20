@@ -38,7 +38,7 @@
                                     <div class="col-md-10">
                                         <div class="form-group">
                                             <label for="id_customer">Nama Customer</label>
-                                            <select id="id_customer" name="id_customer" class="form-control" required>
+                                            <select id="id_customer" name="id_customer" class="form-control select2" required>
                                                 <option value="">Pilih Nama Customer</option>
                                                 @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}" data-point="{{ $customer->poin_loyalty }}" data-hp="{{ $customer->handphone }}" {{ $customer->status_piutang == 'LUNAS' || $customer->status_buka != 'TUTUP' ? '' : 'disabled'}}>{{ $customer->nama }} - {{ $customer->handphone}}</option>
