@@ -140,9 +140,8 @@ class PembayaranController extends Controller
             if (File::exists(storage_path('app/public/' . $filePath))) {
                 $data['bukti'] = $filePath;
             } else {
-                DB::rollBack();
                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
-        }
+            }
 
             $penjualan = Penjualan::find($do->invoice_penjualan_id);
 
@@ -238,7 +237,6 @@ class PembayaranController extends Controller
                 if (File::exists(storage_path('app/public/' . $filePath))) {
                     $data['bukti'] = $filePath;
                 } else {
-                    DB::rollBack();
                     return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
                 }
             }
