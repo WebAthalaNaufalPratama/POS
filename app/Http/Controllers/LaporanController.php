@@ -4142,7 +4142,14 @@ class LaporanController extends Controller
         }
 
         $penjualan1 = $query->get();
-        $galleries = Lokasi::whereIn('tipe_lokasi', [1, 2])->get();
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet'])) {
+            $galleries = Lokasi::whereIn('tipe_lokasi', [2])->get();
+        }else if($user->hasRole(['AdminGallery', 'KasirGallery'])) {
+            $galleries = Lokasi::whereIn('tipe_lokasi', [1])->get();
+        }else{
+            $galleries = Lokasi::whereIn('tipe_lokasi', [1,2])->get();
+        }
 
         $arrinvoice = $penjualan1->pluck('no_invoice')->toArray();
         $produkterjual1 = Produk_Terjual::whereIn('no_invoice', $arrinvoice)->get();
@@ -4343,7 +4350,14 @@ class LaporanController extends Controller
         });
 
         $penjualan = $groupedPenjualan->values();
-        $galleries = Lokasi::whereIn('tipe_lokasi', [1,2])->get();
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet'])) {
+            $galleries = Lokasi::whereIn('tipe_lokasi', [2])->get();
+        }else if($user->hasRole(['AdminGallery', 'KasirGallery'])) {
+            $galleries = Lokasi::whereIn('tipe_lokasi', [1])->get();
+        }else{
+            $galleries = Lokasi::whereIn('tipe_lokasi', [1,2])->get();
+        }
         $customers = Customer::whereNotNull('tanggal_bergabung')->get();
 
         return view('laporan.pelanggan', compact('penjualan', 'galleries', 'customers'));
@@ -4450,7 +4464,11 @@ class LaporanController extends Controller
 
     public function pembayaran_index(Request $req)
     {
-        $penjualan = Penjualan::where('status', 'DIKONFIRMASI')
+        $user = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        if($user->hasRole(['KasirOutlet'])) {
+            $penjualan = Penjualan::where('status', 'DIKONFIRMASI')
+                    ->where('lokasi_id', $karyawan->lokasi_id)
                     ->wherenotNull('dibuat_id')
                     ->wherenotNull('dibukukan_id')
                     ->wherenotNull('auditor_id')
@@ -4458,6 +4476,27 @@ class LaporanController extends Controller
                     ->wherenotNull('tanggal_dibukukan')
                     ->wherenotNull('tanggal_audit')
                     ->get();
+        }else if($user->hasRole(['AdminGallery', 'KasirGallery'])) {
+            $penjualan = Penjualan::where('status', 'DIKONFIRMASI')
+                    ->where('lokasi_id', $karyawan->lokasi_id)
+                    ->wherenotNull('dibuat_id')
+                    ->wherenotNull('dibukukan_id')
+                    ->wherenotNull('auditor_id')
+                    ->wherenotNull('tanggal_dibuat')
+                    ->wherenotNull('tanggal_dibukukan')
+                    ->wherenotNull('tanggal_audit')
+                    ->get();
+        }else{
+            $penjualan = Penjualan::where('status', 'DIKONFIRMASI')
+                    ->wherenotNull('dibuat_id')
+                    ->wherenotNull('dibukukan_id')
+                    ->wherenotNull('auditor_id')
+                    ->wherenotNull('tanggal_dibuat')
+                    ->wherenotNull('tanggal_dibukukan')
+                    ->wherenotNull('tanggal_audit')
+                    ->get();
+        }
+        
 
         $duit = [];
 
@@ -5087,7 +5126,15 @@ class LaporanController extends Controller
                 }
             }
         }
-        $galleries = Lokasi::whereIn('tipe_lokasi', [1,2])->get();
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet'])) {
+            $galleries = Lokasi::whereIn('tipe_lokasi', [2])->get();
+        }else if($user->hasRole(['AdminGallery', 'KasirGallery'])) {
+            $galleries = Lokasi::whereIn('tipe_lokasi', [1])->get();
+        }else{
+            $galleries = Lokasi::whereIn('tipe_lokasi', [1,2])->get();
+        }
+        
         $customers = Customer::whereNotNull('tanggal_bergabung')->get();
         $sales  = Karyawan::where('jabatan', 'Sales')->get();
 
