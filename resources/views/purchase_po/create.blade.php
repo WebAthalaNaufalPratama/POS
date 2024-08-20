@@ -26,12 +26,13 @@
                 Transaksi Pembelian
             </h4>
         </hr>
-            <label>
-                <input type="checkbox" id="returCheckbox"> Pembelian Retur
-            </label>
+        <label style="color: black; font-size: 16px; z-index: 1; position: relative;">
+            <input type="checkbox" id="returCheckbox"> Pembelian Retur
+        </label>
+        
             <div id="returDropdown" style="display:none; margin-top: 10px;">
                 <label for="nomerRetur">Nomor Retur:</label>
-                <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur') }}">
+                <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 30%;" value="{{ old('no_retur') }}" placeholder="Nomor Retur">
             </div>
             
         </div>
@@ -93,16 +94,17 @@
                                                 <label for="tgl_kirim">Tanggal Kirim</label>
                                                 <input type="date" class="form-control" id="tgl_kirim" name="tgl_kirim" value="{{ old('tgl_kirim', now()->format('Y-m-d')) }}" >
                                             </div>
-                                            <div class="form-group">
+                                            {{-- <div class="form-group">
                                                 <label for="tgl_terima">Tanggal Terima</label>
                                                     <input type="date" class="form-control" id="tgl_diterima" name="tgl_diterima" readonly>
-                                                </div>
-                                        </div>
-                                        <div class="col-md-3">
+                                            </div> --}}
                                             <div class="form-group">
                                                 <label for="no_do">Nomor DO supplier</label>
                                                 <input type="text" class="form-control" id="no_do" name="no_do" value="{{ old('no_do')}}">
                                             </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            
                                             <div class="form-group">
 
                                                 <div class="custom-file-container" data-upload-id="myFirstImage">
@@ -170,9 +172,9 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td>
-                                                        <button type="button" name="add" id="add" class="btn btn-success">+</button>
-                                                    </td>
+                                                    
+                                                        <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
+                                                    
                                                 </tr>
                                             </tbody>
                                             
@@ -358,7 +360,7 @@
                                 '@endforeach'+
                             '</select>'+
                         '</td>'+
-                        '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>'+
+                        '<td><a href="javascript:void(0);" name="remove" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>';
                     '</tr>';
         $('#dynamic_field').append(newRow);
 

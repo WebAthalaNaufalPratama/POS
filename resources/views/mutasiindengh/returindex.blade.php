@@ -28,7 +28,7 @@
                 </div>
             </div>
                 <div class="table-responsive">
-                    <table class="table pb-5" id="mutasiReturInden">
+                    <table class="table pb-5" id="mutasiReturInden" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>No</th>

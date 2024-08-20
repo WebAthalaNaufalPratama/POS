@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table pb-5" id="returTable">
+                    <table class="table pb-5" id="returTable" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -299,6 +299,14 @@
                                         <img src="/assets/img/icons/edit.svg" class="me-2" alt="img"> Edit Retur
                                     </a>`;
                             }
+                        }
+
+                        if (userRoles.includes('Auditor')) {
+                            dropdownHtml += `
+                                <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur
+                                </a>`;
+                     
                         }
 
                         dropdownHtml += `

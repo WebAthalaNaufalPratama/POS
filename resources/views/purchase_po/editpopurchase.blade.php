@@ -26,12 +26,12 @@
                 <h4 class="card-title mb-0">
                     Transaksi Pembelian
                 </h4>
-                <label>
+                <label style="color: black; font-size: 16px; z-index: 1; position: relative;">
                     <input type="checkbox" id="returCheckbox" {{ $beli->no_retur ? 'checked' : '' }}> Pembelian Retur
                 </label>
                 <div id="returDropdown" style="display: {{ $beli->no_retur ? 'block' : 'none' }}; margin-top: 10px;">
                     <label for="nomerRetur">Nomor Retur:</label>
-                    <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur', $beli->no_retur) }}">
+                    <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur', $beli->no_retur) }}"  placeholder="Nomor Retur">
                 </div>
             </div>
 
@@ -163,9 +163,13 @@
                                                                 </select>
                                                             </td>
                                                             @if($index == 0)
-                                                            <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                            <td><button type="button" name="add" id="add" class="btn"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></button></td>
+
+                                                            {{-- <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td> --}}
                                                             @else
-                                                            <td><button type="button" name="remove" id="{{ $index }}" class="btn btn-danger btn_remove">x</button></td>
+                                                            {{-- <td><a href="javascript:void(0);"  id="{{ $index }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td> --}}
+
+                                                            <td><button type="button" name="remove" id="{{ $index }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>
                                                             @endif
                                                         </tr>
                                                     @endforeach
@@ -408,7 +412,7 @@
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
-                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>'+
+                            '<td><button type="button" name="remove" id="' + i + '" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button></td>'+
                         '</tr>';
             $('#dynamic_field').append(newRow);
 

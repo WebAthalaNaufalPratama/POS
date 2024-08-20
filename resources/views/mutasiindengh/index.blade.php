@@ -30,7 +30,7 @@
                 </div>
             </div>
                 <div class="table-responsive">
-                    <table id="mutasiInden" class="table pb-5">
+                    <table id="mutasiInden" class="table pb-5" style="width: 100%">
                         <thead>
                             <tr> 
                                 <th>No</th>
