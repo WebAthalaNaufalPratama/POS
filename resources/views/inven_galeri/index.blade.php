@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table" id="inventory">
+            <table class="table" id="inventory" style="width: 100%">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -153,7 +153,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table" id="pemakaian_sendiri">
+            <table class="table" id="pemakaian_sendiri" style="width: 100%">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -219,7 +219,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table" style="width: 100%">
                     <thead>
                         <tr>
                            <th style="width: 5%">No</th> 
@@ -253,7 +253,7 @@
         </div>
         <div class="modal-body">
             <div class="table-responsive">
-                <table class="table" id="log">
+                <table class="table" id="log" style="width: 100%">
                     <thead>
                         <tr>
                             <th>No</th>
