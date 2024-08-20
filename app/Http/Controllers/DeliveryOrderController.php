@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
 use Intervention\Image\Facades\Image;
 
+
 class DeliveryOrderController extends Controller
 {
     /**
