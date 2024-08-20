@@ -35,10 +35,10 @@
                     </select>
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                    <input type="text" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Mulai Kontrak" title="Tanggal Awal Kontrak">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                    <input type="text" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Akhir Kontrak" title="Tanggal Akhir Kontrak">
                 </div>
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('kontrak.index') }}" class="btn btn-info">Filter</a>
@@ -55,6 +55,7 @@
                     <th>PIC</th>
                     <th>Sales</th>
                     <th>Handphone</th>
+                    <th>Tanggal Kontrak</th>
                     <th>Masa Kontrak</th>
                     <th>Rentang Tanggal</th>
                     <th>Total Biaya</th>
@@ -166,6 +167,13 @@
             { data: 'pic', name: 'pic', orderable: false },
             { data: 'nama_sales', name: 'nama_sales', orderable: false },
             { data: 'handphone', name: 'handphone' },
+            { 
+                data: 'tanggal_kontrak', 
+                name: 'tanggal_kontrak', 
+                render: function(data, type, row) {
+                    return row.tanggal_kontrak_format;
+                } 
+            },
             { data: 'masa_sewa', name: 'masa_sewa' },
             { data: 'rentang_tanggal', name: 'rentang_tanggal', orderable: false },
             { data: 'total_harga', name: 'total_harga' },
@@ -193,9 +201,27 @@
                     `;
                 }
             },
-            { data: 'tanggal_pembuat', name: 'tanggal_pembuat' },
-            { data: 'tanggal_pemeriksa', name: 'tanggal_pemeriksa' },
-            { data: 'tanggal_penyetuju', name: 'tanggal_penyetuju' },
+            { 
+                data: 'tanggal_pembuat', 
+                name: 'tanggal_pembuat', 
+                render: function(data, type, row) {
+                    return row.tanggal_pembuat_format;
+                } 
+            },
+            { 
+                data: 'tanggal_pemeriksa', 
+                name: 'tanggal_pemeriksa', 
+                render: function(data, type, row) {
+                    return row.tanggal_pemeriksa_format;
+                } 
+            },
+            { 
+                data: 'tanggal_penyetuju', 
+                name: 'tanggal_penyetuju', 
+                render: function(data, type, row) {
+                    return row.tanggal_penyetuju_format;
+                } 
+            },
             {
                 data: 'action',
                 name: 'action',

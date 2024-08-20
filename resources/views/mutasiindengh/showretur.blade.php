@@ -648,9 +648,14 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="bukti" class="form-label">Bukti</label>
-                                <input type="file" class="form-control" id="bukti" name="bukti" accept="image/*">
-                            </div>
+                                <div class="row mx-auto">
+                                    <label for="bukti" class="form-label ps-0">Bukti</label>
+                                    <input type="file" class="form-control" id="buktiByr" name="bukti" accept="image/*">
+                                </div>
+                                <div style="text-align: center;">
+                                    <img id="previewByr" src="" alt="Bukti tf" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                                </div>
+                            </div> 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Simpan</button>
@@ -690,9 +695,14 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="bukti" class="form-label">Bukti</label>
-                                <input type="file" class="form-control" id="bukti" name="buktitf" accept="image/*">
-                            </div>
+                                <div class="row mx-auto">
+                                    <label for="bukti" class="form-label ps-0">Bukti</label>
+                                    <input type="file" class="form-control" id="buktitf" name="buktitf" accept="image/*">
+                                </div>
+                                <div style="text-align: center;">
+                                    <img id="previewtf" src="" alt="Bukti tf" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                                </div>
+                            </div> 
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Simpan</button>
@@ -709,6 +719,56 @@
 
 @section('scripts')
 <script>
+
+    $(document).ready(function() {
+        if ($('#previewtf').attr('src') === '') {
+            $('#previewtf').attr('src', defaultImg);
+        }
+        if ($('#previewByr').attr('src') === '') {
+            $('#previewByr').attr('src', defaultImg);
+        }
+
+        $('#buktitf').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#previewtf').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        $('#buktiByr').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#previewByr').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
 
     document.getElementById('dynamic_field2').addEventListener('input', function(event) {
     if (event.target.matches('[id^="rawat_retur_dis_"]')) {

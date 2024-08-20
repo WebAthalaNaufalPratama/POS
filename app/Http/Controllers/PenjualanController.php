@@ -33,7 +33,10 @@ use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\DeliveryOrder;
 use App\Exports\PergantianExport;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\File;
 use PDF;
 
 class PenjualanController extends Controller
@@ -86,6 +89,11 @@ class PenjualanController extends Controller
                                                     ->where('status', 'DIKONFIRMASI')
                                                     ->get()
                                                     ->keyBy('no_invoice');
+
+            $doData = DeliveryOrder::whereIn('no_referensi', $data->pluck('no_invoice'))
+                                                    ->where('status', 'DIKONFIRMASI')
+                                                    ->get()
+                                                    ->keyBy('no_referensi');
                                                     
             $latestPayments = Pembayaran::with('penjualan')->get()->reduce(function ($carry, $payment) {
                 if (!isset($carry[$payment->invoice_penjualan_id]) || $payment->id > $carry[$payment->invoice_penjualan_id]->id) {
@@ -94,7 +102,7 @@ class PenjualanController extends Controller
                 return $carry;
             }, []);
         
-            $data->map(function ($penjualan) use ($latestPayments, $returData) {
+            $data->map(function ($penjualan) use ($latestPayments, $returData, $doData) {
                 $penjualan->latest_payment = $latestPayments[$penjualan->id] ?? null;
                 $allNoForm = false;
                 if ($penjualan->produk && $penjualan->produk->isNotEmpty()) {
@@ -103,6 +111,7 @@ class PenjualanController extends Controller
                         return $produk->no_form == null;
                     });
                 }
+                $penjualan->do = $doData->get($penjualan->no_invoice) ? true : false;
                 $penjualan->all_no_form = $allNoForm;
                 $penjualan->retur = $returData->get($penjualan->no_invoice) ? true : false;
                 return $penjualan;
@@ -214,10 +223,29 @@ class PenjualanController extends Controller
           
         $data['dibuat_id'] = Auth::user()->id;
         if ($req->hasFile('bukti_file')) {
+            // Simpan file baru
             $file = $req->file('bukti_file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
-            $data['bukti_file'] = $filePath;
+            $fileName = $req->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_invoice_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($pembayaran->bukti)) {
+            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti_file'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
         if($req->cara_bayar == 'cash')
         {
@@ -937,7 +965,7 @@ class PenjualanController extends Controller
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
 
         //cek produk outlet
-        if($lokasi->tipe_lokasi == 2) {
+        if($lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet']) || $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua' || $user->hasRole(['Finance']) && $req->ubahapa == 'ubahsemua') {
             $produkJumlah = [];
 
             for ($i = 0; $i < count($nama_produk); $i++) {
@@ -1082,17 +1110,43 @@ class PenjualanController extends Controller
             $data['dibukukan_id'] = Auth::user()->id;
         }
 
-        if ($penjualan) {
-            $delete = $penjualan->bukti_file;
-            $deletefile = Storage::disk('public')->delete('bukti_invoice_penjualan/' . $delete);
-        }
+        // if ($penjualan) {
+        //     $delete = $penjualan->bukti_file;
+        //     $deletefile = Storage::disk('public')->delete('bukti_invoice_penjualan/' . $delete);
+        // }
+
+        // if ($req->hasFile('file')) {
+        //     $file = $req->file('file');
+        //     $fileName = time() . '_' . $file->getClientOriginalName();
+        //     $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
+        //     // dd($filePath);
+        //     $data['bukti_file'] = $filePath;
+        // }
 
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_invoice_penjualan', $fileName, 'public');
-            // dd($filePath);
-            $data['bukti_file'] = $filePath;
+            $fileName = $req->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_invoice_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($penjualan->bukti_file)) {
+                $oldFilePath = storage_path('app/public/' . $penjualan->bukti_file);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti_file'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $update = Penjualan::where('id', $penjualanId)->update($data);

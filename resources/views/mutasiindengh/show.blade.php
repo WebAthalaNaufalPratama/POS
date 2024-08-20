@@ -530,13 +530,17 @@ $user = Auth::user();
                   <input type="text" class="form-control"  id="nominal" value="{{ formatRupiah2($data->sisa_bayar) }}">
                 </div>
                 <input type="text" class="form-control"  id="nominal2" name="nominal" value="{{ $data->sisa_bayar }}" hidden>
-              </div>
-            <div class="mb-3">
-              <label for="bukti" class="form-label">Bukti</label>
-              <input type="file" class="form-control" id="buktitf" name="buktitf" accept="image/*">
             </div>
-            
-            <div class="modal-footer">
+            <div class="mb-3">
+                <div class="row mx-auto">
+                    <label for="bukti" class="form-label ps-0">Bukti</label>
+                    <input type="file" class="form-control" id="buktitf" name="buktitf" accept="image/*">
+                </div>
+                <div style="text-align: center;">
+                    <img id="previewtf" src="" alt="Bukti tf" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                </div>
+            </div>            
+            <div class="modal-footer justify-content-center">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
@@ -648,6 +652,9 @@ function calculateTotalAll() {
             if ($('#preview').attr('src') === '') {
                 $('#preview').attr('src', defaultImg);
             }
+            if ($('#previewtf').attr('src') === '') {
+                $('#previewtf').attr('src', defaultImg);
+            }
 
             $('#bukti').on('change', function() {
                 const file = $(this)[0].files[0];
@@ -665,6 +672,26 @@ function calculateTotalAll() {
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         $('#preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            $('#buktitf').on('change', function() {
+                const file = $(this)[0].files[0];
+                if (file.size > 2 * 1024 * 1024) { 
+                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                        progressBar: true
+                    });
+                    $(this).val(''); 
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewtf').attr('src', e.target.result);
                     }
                     reader.readAsDataURL(file);
                 }

@@ -107,7 +107,7 @@
       </div>
       <div class="card-body">
           <div class="table-responsive">
-          <table class="table" id="masuk">
+          <table class="table" id="masuk" style="width: 100%">
               <thead>
               <tr>
                   <th>No</th>
@@ -179,7 +179,7 @@
       </div>
       <div class="card-body">
           <div class="table-responsive">
-          <table class="table" id="keluar">
+          <table class="table" id="keluar" style="width: 100%">
               <thead>
               <tr>
                   <th>No</th>

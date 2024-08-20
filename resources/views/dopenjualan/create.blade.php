@@ -58,7 +58,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="driver">Driver</label>
-                                            <select id="driver" name="driver" class="form-control">
+                                            <select id="driver" name="driver" class="form-control" required>
                                                 <option value=""> Pilih Nama Driver </option>
                                                 @foreach ($karyawans as $karyawan)
                                                 <option value="{{ $karyawan->id }}">{{ $karyawan->nama }}</option>
@@ -169,6 +169,7 @@
                                                     @php
                                                     $i = 0;
                                                     @endphp
+                                                    @if($penjualans->auditor_id != null && $penjualans->dibukukan_id !== null)
                                                     @foreach ($penjualans->produk as $produk)
                                                     @if($produk->jumlah_dikirim != 0)
                                                     <tr id="row{{ $i }}">
@@ -231,6 +232,7 @@
                                                     </tr>
                                                     @endif 
                                                     @endforeach
+                                                    @endif
                                                     @endif
                                             </tbody>
                                         </table>

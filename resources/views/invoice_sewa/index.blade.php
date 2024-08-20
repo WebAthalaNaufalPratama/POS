@@ -22,10 +22,10 @@
                     </select>
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                    <input type="text" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Awal Invoice" title="Tanggal Awal Invoice">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                    <input type="text" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Akhir Invoice" title="Tanggal Akhir Invoice">
                 </div>
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('invoice_sewa.index') }}" class="btn btn-info">Filter</a>
@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table" id="dataTable">
+            <table class="table" id="dataTable" style="width: 100%">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -225,8 +225,20 @@
                 { data: 'no_invoice', name: 'no_invoice' },
                 { data: 'no_sewa', name: 'no_sewa' },
                 { data: 'nama_customer', name: 'nama_customer', orderable: false },
-                { data: 'tanggal_invoice', name: 'tanggal_invoice' },
-                { data: 'jatuh_tempo', name: 'jatuh_tempo' },
+                { 
+                    data: 'tanggal_invoice', 
+                    name: 'tanggal_invoice',
+                    render: function(data, type, row){
+                        return row.tanggal_invoice_format;
+                    }
+                },
+                { 
+                    data: 'jatuh_tempo', 
+                    name: 'jatuh_tempo',
+                    render: function(data, type, row){
+                        return row.jatuh_tempo_format;
+                    }
+                },
                 { data: 'total_tagihan', name: 'total_tagihan' },
                 { data: 'dp', name: 'dp' },
                 { data: 'sisa_bayar', name: 'sisa_bayar' },
@@ -254,9 +266,27 @@
                         `;
                     }
                 },
-                { data: 'tanggal_pembuat', name: 'tanggal_pembuat' },
-                { data: 'tanggal_pemeriksa', name: 'tanggal_pemeriksa' },
-                { data: 'tanggal_penyetuju', name: 'tanggal_penyetuju' },
+                { 
+                    data: 'tanggal_pembuat', 
+                    name: 'tanggal_pembuat',
+                    render: function(data, type, row){
+                        return row.tanggal_pembuat_format;
+                    }
+                },
+                { 
+                    data: 'tanggal_pemeriksa', 
+                    name: 'tanggal_pemeriksa',
+                    render: function(data, type, row){
+                        return row.tanggal_pemeriksa_format;
+                    }
+                },
+                { 
+                    data: 'tanggal_penyetuju', 
+                    name: 'tanggal_penyetuju',
+                    render: function(data, type, row){
+                        return row.tanggal_penyetuju_format;
+                    }
+                },
                 {
                     data: 'action',
                     name: 'action',

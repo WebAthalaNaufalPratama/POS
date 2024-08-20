@@ -22,10 +22,10 @@
                     </select>
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                    <input type="text" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal" title="Tanggal Awal">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                    <input type="text" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('form.index', ['jenis_rangkaian' => 'Sewa']) }}" class="btn btn-info">Filter</a>
@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table" id="dataTable">
+            <table class="table" id="dataTable" style="width: 100%">
                 <thead>
                 <tr>
                     <th>No</th>

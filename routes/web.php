@@ -419,11 +419,11 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{returpenjualan}/edit', 'ReturpenjualanController@edit')->name('returpenjualan.edit');
             Route::patch('/{returpenjualan}/update', 'ReturpenjualanController@update')->name('returpenjualan.update');
             Route::get('/{returpenjualan}/delete', 'ReturpenjualanController@destroy')->name('returpenjualan.destroy');
-            Route::get('/{returpenjualan}/payment', 'ReturPenjualanController@payment')->name('returpenjualan.payment');
-            Route::post('/paymentretur', 'ReturPenjualanController@paymentretur')->name('returpenjualan.paymentretur');
-            Route::get('/{returpenjualan}/auditretur', 'ReturPenjualanController@audit')->name('auditretur.edit');
-            Route::patch('/storeauditretur', 'ReturPenjualanController@auditretur_update')->name('auditretur.update');
-            Route::get('/{returpenjualan}/view', 'ReturPenjualanController@view_retur')->name('returpenjualan.view');
+            Route::get('/{returpenjualan}/payment', 'ReturpenjualanController@payment')->name('returpenjualan.payment');
+            Route::post('/paymentretur', 'ReturpenjualanController@paymentretur')->name('returpenjualan.paymentretur');
+            Route::get('/{returpenjualan}/auditretur', 'ReturpenjualanController@audit')->name('auditretur.edit');
+            Route::patch('/storeauditretur', 'ReturpenjualanController@auditretur_update')->name('auditretur.update');
+            Route::get('/{returpenjualan}/view', 'ReturpenjualanController@view_retur')->name('returpenjualan.view');
         });
 
         Route::group(['prefix' => 'inven_galeri'], function() {

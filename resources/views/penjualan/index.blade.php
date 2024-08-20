@@ -183,6 +183,23 @@
             $('#penjualanTable').DataTable().destroy();
         }
 
+        function formatRupiah(angka, prefix = "Rp") {
+            let number_string = angka.toString().replace(/[^,\d]/g, ''),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            // tambahkan titik jika yang di input sudah menjadi angka ribuan
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return prefix + ' ' + rupiah;
+        }
+
         window.routes = {
             auditPenjualanEdit: "{{ route('auditpenjualan.edit', ['penjualan' => '__ID__']) }}",
             dopenjualanCreate: "{{ route('dopenjualan.create', ['penjualan' => '__ID__']) }}",
@@ -238,8 +255,20 @@
                         return `<span class="badges ${badgeClass}">${data || 'Belum Ada Pembayaran'}</span>`;
                     }
                 },
-                { data: 'total_tagihan', name: 'total_tagihan' },
-                { data: 'sisa_bayar', name: 'sisa_bayar' },
+                {
+                    data: 'total_tagihan',
+                    name: 'total_tagihan',
+                    render: function (data, type, row) {
+                        return formatRupiah(data);
+                    }
+                },
+                {
+                    data: 'sisa_bayar',
+                    name: 'sisa_bayar',
+                    render: function (data, type, row) {
+                        return formatRupiah(data);
+                    }
+                },
                 {
                     data: 'status',
                     name: 'status',
@@ -267,6 +296,7 @@
                     searchable: false,
                     render: function (data, type, row) {
                         const isRetur = row.retur === true || row.retur === 'true';
+                        const isDO = row.do === true || row.do === 'true';
                         const isNoForm = row.all_no_form === true || row.all_no_form === 'true';
                         var dropdownHtml = `
                             <div class="dropdown">
@@ -278,7 +308,7 @@
                         var userHasRole = @json(Auth::user()->roles->pluck('name')->toArray());
 
                         if (row.status !== 'DIBATALKAN') {
-                            if (userHasRole.includes('Auditor') || userHasRole.includes('Finance') || userHasRole.includes('SuperAdmin')) {
+                            if (userHasRole.includes('Auditor') && !isDO || userHasRole.includes('Finance') && !isDO || userHasRole.includes('SuperAdmin') && !isDO) {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditPenjualanEdit.replace('__ID__', row.id)}">
                                                     <img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Audit
                                                 </a>`;

@@ -30,6 +30,8 @@ use App\Models\Komponen_Produk_Terjual;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Models\Pembayaran;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\File;
 
 class ReturpenjualanController extends Controller
 {
@@ -285,12 +287,55 @@ class ReturpenjualanController extends Controller
         }
         
         if ($req->hasFile('bukti')) {
-            $filePath = $this->uploadFile($req->file('bukti'));
-            $data['bukti'] = $filePath;
+            // Simpan file baru
+            $file = $req->file('bukti');
+            $fileName = $req->no_retur . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_retur_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($dopenjualan->file)) {
+            //     $oldFilePath = storage_path('app/public/' . $dopenjualan->file);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
+
         if ($req->hasFile('file')) {
-            $filePath = $this->uploadFileDO($req->file('file'));
-            $data['file'] = $filePath;
+            // Simpan file baru
+            $file = $req->file('file');
+            $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_DO_Retur/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($dopenjualan->file)) {
+            //     $oldFilePath = storage_path('app/public/' . $dopenjualan->file);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['file'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $data['jenis_do'] = 'RETUR';
@@ -586,24 +631,13 @@ class ReturpenjualanController extends Controller
     {
         $penjualans = ReturPenjualan::with('produk_retur', 'deliveryorder')->find($returpenjualan);
         $returpenjualans = ReturPenjualan::with('deliveryorder')->find($returpenjualan);
-        // dd($returpenjualans);
-        // foreach($returpenjualans->deliveryorder as $delivery){
-        //     dd($delivery->penerima);
-        // }
-        // dd($returpenjualans->deliveryorder);
-        // $user = Auth::user();
         $lokasis = Lokasi::all();
         $karyawans = Karyawan::all();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_retur', $returpenjualans->no_retur)->get();
-        // dd($produks);
-        // $customers = Customer::where('id', $penjualans->id_customer)->get();
-        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         $produkjuals = Produk_Terjual::all();
         $produkreturjuals = Produk_Jual::all();
-        // dd($produkjuals);
         $suppliers = Supplier::all();
         $dopenjualans = DeliveryOrder::where('no_referensi', $returpenjualans->no_retur)->first();
-        // $produkjuals = Produk_Jual::all();
         $customers = Customer::all();
         $karyawans = Karyawan::all();
         $kondisis = Kondisi::all();
@@ -707,11 +741,7 @@ class ReturpenjualanController extends Controller
         // dd($penjualan);
         if ($penjualan) {
             $cekTotalTagihan = $penjualan->total - $req->nominal;
-            // $penjualan->update([
-            //     'sisa_bayar' => $cekTotalTagihan,
-            // ]);
             $cek = $penjualan->total;
-            // dd($cek);
             if ($cek <= 0) {
                 $data['status_bayar'] = 'LUNAS';
                 $pembayaran = Pembayaran::create($data);
@@ -812,12 +842,33 @@ class ReturpenjualanController extends Controller
     {
         // dd($req);
         $retur = $req->input('penjualan');
+        $returId = ReturPenjualan::where('id', $retur)->first();
+        $returpenjualan = DeliveryOrder::where('no_referensi', $returId->no_retur)->first();
 
         if ($req->hasFile('bukti')) {
+            // Simpan file baru
             $file = $req->file('bukti');
             $fileName = $req->no_retur . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('bukti_retur_penjualan', $fileName, 'public');
-            $data['bukti'] = $filePath;
+            $filePath = 'bukti_retur_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($dopenjualan->file)) {
+                $oldFilePath = storage_path('app/public/' . $returId->bukti);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['bukti'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         $allkeys = array_keys($req->all());
@@ -849,8 +900,7 @@ class ReturpenjualanController extends Controller
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
-        $returId = ReturPenjualan::where('id', $retur)->first();
-        $returpenjualan = DeliveryOrder::where('no_referensi', $returId->no_retur)->first();
+       
 
         if($returId->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
             $data['pembuku'] = Auth::user()->id;
@@ -876,8 +926,29 @@ class ReturpenjualanController extends Controller
             ];
             
             if ($req->hasFile('file')) {
-                $filePath = $this->uploadFileDO($req->file('file'));
-                $datado['file'] = $filePath;
+                // Simpan file baru
+                $file = $req->file('file');
+                $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = 'bukti_DO_Retur/' . $fileName;
+            
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            
+                // Hapus file lama
+                if (!empty($dopenjualan->file)) {
+                    $oldFilePath = storage_path('app/public/' . $returpenjualan->file);
+                    if (File::exists($oldFilePath)) {
+                        File::delete($oldFilePath);
+                    }
+                }
+            
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['file'] = $filePath;
+                } else {
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
             }
             
             $updateDO = DeliveryOrder::where('no_do', $req->no_do)->update($datado);
@@ -1018,7 +1089,7 @@ class ReturpenjualanController extends Controller
                 'alasan' => $req->alasan[$i],
                 'jumlah_dikirim' => $req->jumlah[$i],
                 'jumlah' => $req->jumlah[$i],
-                'jenis_diskon' => $req->jenis_diskon[$i],
+                'jenis_diskon' => $req->jenis_diskon[$i] ?? 0,
                 'diskon' => $req->diskon[$i],
                 'harga' => $req->harga[$i],
                 'harga_jual' => $req->totalharga[$i]

@@ -282,7 +282,7 @@
                                                                 </select>
                                                             </td>
                                                             @if($user->hasRole(['Auditor', 'Finance']))
-                                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}" readonly></td>
+                                                            <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}"></td>
                                                             @else
                                                             <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" class="form-control jumlah" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}"></td>
                                                             @endif
