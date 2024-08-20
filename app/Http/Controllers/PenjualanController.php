@@ -965,7 +965,7 @@ class PenjualanController extends Controller
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
 
         //cek produk outlet
-        if($lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet']) || $user->hasRole(['Auditor'] && $req->ubahapa == 'ubahsemua') || $user->hasRole(['Finance'] && $req->ubahapa == 'ubahsemua')) {
+        if($lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet']) || $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua' || $user->hasRole(['Finance']) && $req->ubahapa == 'ubahsemua') {
             $produkJumlah = [];
 
             for ($i = 0; $i < count($nama_produk); $i++) {
