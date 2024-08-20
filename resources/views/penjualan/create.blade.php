@@ -833,11 +833,15 @@
 
         $('.customer').select2();
         // $('[id^=nama_produk]').select2();
+        // $('select[id^="nama_produk_"]').change(function(){
+        //     var selectedValue = $(this).select2().find(":selected").val();
+        //     console.log(selectedValue);
+        // });
 
-        $(document).on('change', '[id^=nama_produk]', function() {
+        $('select[id^="nama_produk_"]').change(function(){
             var id = $(this).attr('id').split('_')[2];
             var selectedOption = $(this).find(':selected');
-            var selectedValue = $(this).val();
+            var selectedValue = $(this).select2().find(":selected").val();
             console.log(selectedValue);
             var selectedProduk = {!! json_encode($produks) !!}.find(produk => produk.kode === selectedValue);
 
