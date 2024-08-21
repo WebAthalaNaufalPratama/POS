@@ -842,7 +842,7 @@
             var id = $(this).attr('id').split('_')[2];
             var selectedOption = $(this).find(':selected');
             var selectedValue = $(this).select2().find(":selected").val();
-            console.log(selectedValue);
+            // console.log(selectedValue);
             var selectedProduk = {!! json_encode($produks) !!}.find(produk => produk.kode === selectedValue);
 
             var kode = selectedValue.substring(0, 3);
@@ -1312,7 +1312,12 @@
                             // console.log(total_promo);
                             break;
                         case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
+                            if(diskon.nominal > total_transaksi) {
+                                alert('Promo Tidak Bisa digunakan karena melebihi sub_total!');
+                                $('#total_promo').val(0);
+                            }else{
+                                total_promo = parseInt(response.diskon_nominal);
+                            }
                             break;
                         case 'poin':
                             var pointInput = parseFloat($('#point_dipakai').val()) || 0;
