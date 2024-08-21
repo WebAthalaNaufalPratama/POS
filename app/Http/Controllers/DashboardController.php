@@ -24,7 +24,7 @@ use App\Models\Produkreturinden;
 use App\Models\Returinden;
 use App\Models\InventoryInden;
 use App\Models\InventoryGudang;
-use App\Models\InventoryGreenhouse;
+use App\Models\InventoryGreenHouse;
 use App\Models\InventoryGallery;
 use App\Models\Invoicepo;
 use App\Models\Kondisi;
@@ -545,7 +545,7 @@ class DashboardController extends Controller
                 // };
                 // dd($req->input('inven'));
                 if("Greenhouse" == $req->input('inven')) {
-                    $topMinusProducts = InventoryGreenhouse::orderBy('jumlah', 'asc')
+                    $topMinusProducts = InventoryGreenHouse::orderBy('jumlah', 'asc')
                         ->take(5)
                         ->get();
                 }else if("Inden" == $req->input('inven')){
@@ -589,7 +589,7 @@ class DashboardController extends Controller
         
                 if ($lokasi->tipe_lokasi == 5) {
                     if("Greenhouse" == $req->input('inven')) {
-                        $topMinusProducts = InventoryGreenhouse::orderBy('jumlah', 'asc')
+                        $topMinusProducts = InventoryGreenHouse::orderBy('jumlah', 'asc')
                             ->take(5)
                             ->get();
                     }else if("Inden" == $req->input('inven')){
