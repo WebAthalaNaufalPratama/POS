@@ -125,8 +125,7 @@ class DashboardController extends Controller
             $startOfMonth = Carbon::now()->startOfMonth();
             $endOfMonth = Carbon::now()->endOfMonth();
     
-            $jumlahpenjualan = Pembelian::where('lokasi_id', $lokasiId)
-                                ->where('status_dibuat', 'DIKONFIRMASI')
+            $jumlahpenjualan = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
                                 ->where('status_diperiksa', 'DIKONFIRMASI')
                                 ->whereNotNull('tgl_dibuat')
                                 ->whereNotNull('tgl_diperiksa')
@@ -137,8 +136,7 @@ class DashboardController extends Controller
                                             ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
-            $batalpenjualan = Pembelian::where('lokasi_id', $lokasiId)
-                                ->where('status_dibuat', 'DIBATALKAN')
+            $batalpenjualan = Pembelian::where('status_dibuat', 'DIBATALKAN')
                                 ->whereNotNull('tgl_dibuat')
                                 ->whereNotNull('pembuat')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
@@ -146,8 +144,7 @@ class DashboardController extends Controller
                                             ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
-            $pembelian = Pembelian::where('lokasi_id', $lokasiId)
-                    ->where('status_dibuat', 'DIKONFIRMASI')
+            $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
                     ->where('status_diperiksa', 'DIKONFIRMASI')
                     ->whereNotNull('tgl_dibuat')
                     ->whereNotNull('tgl_diperiksa')
@@ -306,9 +303,12 @@ class DashboardController extends Controller
             $lokasi = $karyawan->lokasi->id;
             $lokasinama = Lokasi::where('id', $lokasi)->value('tipe_lokasi');
         } else {
-            $lokasi = $req->query('lokasi_id');
-            
-            $lokasinama = Lokasi::where('id', $lokasi)->value('tipe_lokasi');
+            if($user->hasRole(['Purchasing'])) {
+                $lokasinama = Lokasi::where('id', $karyawan->lokasi_id)->value('tipe_lokasi');
+            }else{
+                $lokasi = $req->query('lokasi_id');
+                $lokasinama = Lokasi::where('id', $lokasi)->value('tipe_lokasi');
+            }
         }
         if($lokasinama != 5) {
             if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
@@ -360,8 +360,7 @@ class DashboardController extends Controller
         }else {
             if ($user->hasRole(['Purchasing'])) {
                 $lokasi = $karyawan->lokasi->id;
-                $pembelianList = Pembelian::where('lokasi_id', $lokasi)
-                            ->where('status_dibuat', 'DIKONFIRMASI')
+                $pembelianList = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
                             ->where('status_diperiksa', 'DIKONFIRMASI')
                             ->where(function($query) use ($startOfMonth, $endOfMonth) {
                                 $query->where('created_at', '>=', $startOfMonth)
@@ -369,8 +368,7 @@ class DashboardController extends Controller
                             })->get();
             } else {
                 $lokasi = $req->query('lokasi_id');
-                $pembelianList = Pembelian::where('lokasi_id', $lokasi)
-                            ->where('status_dibuat', 'DIKONFIRMASI')
+                $pembelianList = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
                             ->where('status_diperiksa', 'DIKONFIRMASI')
                             ->where(function($query) use ($startOfMonth, $endOfMonth) {
                                 $query->where('created_at', '>=', $startOfMonth)
@@ -589,24 +587,31 @@ class DashboardController extends Controller
                     $query->where('jumlah', '<', 0);
                 };
         
-                if ($lokasi->tipe_lokasi == 4) {
-                    if ($req->inven) {
-                        if('Greenhouse' == $req->input('inven')) {
-                            $topMinusProducts = InventoryGreenhouse::where($query)
+                if ($lokasi->tipe_lokasi == 5) {
+                    if("Greenhouse" == $req->input('inven')) {
+                        $topMinusProducts = InventoryGreenhouse::orderBy('jumlah', 'asc')
+                            ->take(5)
+                            ->get();
+                    }else if("Inden" == $req->input('inven')){
+                        if($req->input('dateInden')) {
+                            $dateInden = $req->input('dateInden');
+                            $formattedDate = $this->formatDateInden($dateInden);
+                            // dd($formattedDate);
+                            $topMinusProducts = InventoryInden::where('bulan_inden', $formattedDate)
                                 ->orderBy('jumlah', 'asc')
                                 ->take(5)
                                 ->get();
-                        }else if('Inden' == $req->input('inven')){
-                            $topMinusProducts = InventoryInden::where($query)
-                                ->orderBy('jumlah', 'asc')
-                                ->take(5)
-                                ->get();
-                        }else if('Gudang' == $req->input('inven')){
-                            $topMinusProducts = InventoryGudang::where($query)
-                                ->orderBy('jumlah', 'asc')
+                                // dd($topMinusProducts);
+                        }else{
+                            $topMinusProducts = InventoryInden::orderBy('jumlah', 'asc')
                                 ->take(5)
                                 ->get();
                         }
+                        
+                    }else if("Gudang" == $req->input('inven')){
+                        $topMinusProducts = InventoryGudang::orderBy('jumlah', 'asc')
+                            ->take(5)
+                            ->get();
                     }
                     
     
