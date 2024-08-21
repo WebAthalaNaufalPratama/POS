@@ -212,10 +212,9 @@ Carbon::setLocale('id');
                                                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#buktiModal{{ $bayar->id }}">
                                                             Lihat Bukti
                                                         </button>
-                                                
                                                         <!-- Modal -->
                                                         <div class="modal fade" id="buktiModal{{ $bayar->id }}" tabindex="-1" role="dialog" aria-labelledby="buktiModalLabel{{ $bayar->id }}" aria-hidden="true">
-                                                            <div class="modal-dialog" role="document">
+                                                            <div class="modal-dialog modal-lg" role="document"> <!-- Tambahkan modal-lg untuk memperbesar modal -->
                                                                 <div class="modal-content">
                                                                     <div class="modal-header">
                                                                         <h5 class="modal-title" id="buktiModalLabel{{ $bayar->id }}">Bukti Pembayaran</h5>
@@ -223,8 +222,8 @@ Carbon::setLocale('id');
                                                                             <span aria-hidden="true">&times;</span>
                                                                         </button>
                                                                     </div>
-                                                                    <div class="modal-body">
-                                                                        <img src="{{ asset('storage/'.$bayar->bukti) }}" class="img-fluid" alt="Bukti Pembayaran">
+                                                                    <div class="modal-body text-center"> <!-- Tambahkan text-center agar gambar berada di tengah -->
+                                                                        <img src="{{ asset('storage/'.$bayar->bukti) }}" class="w-100 img-fluid" alt="Bukti Pembayaran"> <!-- Gunakan w-100 untuk membuat gambar selebar modal -->
                                                                     </div>
                                                                     <div class="modal-footer">
                                                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -232,6 +231,7 @@ Carbon::setLocale('id');
                                                                 </div>
                                                             </div>
                                                         </div>
+
                                             
                                                     </td>
                                                         <td>{{ $bayar->status_bayar}}</td>

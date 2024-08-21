@@ -143,11 +143,11 @@ Carbon::setLocale('id');
                                                     </div>
                                                     <div class="text-end mt-3">
                                                         <button class="btn btn-primary" type="submit">Upload File</button>
-                                                        <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
+                                                        {{-- <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a> --}}
                                                     </div>
                                                 </form>
+                                                {{-- <input type="file" class="form-control" id="filedo" name="filedo"> --}}
                                                 
-                                                    {{-- <input type="file" class="form-control" id="filedo" name="filedo"> --}}
                                                
                                         </div>
                                     </div>
