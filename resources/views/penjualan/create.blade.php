@@ -801,6 +801,7 @@
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
+            $('#nama_produk_' + i).select2();
 
             function validateNumericInput() {
                 $('input[id^="diskon_"]').on('input', function() {
@@ -832,13 +833,18 @@
         });
 
         $('.customer').select2();
+        $('#ongkir_id').select2();
         // $('[id^=nama_produk]').select2();
+        // $('select[id^="nama_produk_"]').change(function(){
+        //     var selectedValue = $(this).select2().find(":selected").val();
+        //     console.log(selectedValue);
+        // });
 
-        $(document).on('change', '[id^=nama_produk]', function() {
+        $('select[id^="nama_produk_"]').change(function(){
             var id = $(this).attr('id').split('_')[2];
             var selectedOption = $(this).find(':selected');
-            var selectedValue = $(this).val();
-            console.log(selectedValue);
+            var selectedValue = $(this).select2().find(":selected").val();
+            // console.log(selectedValue);
             var selectedProduk = {!! json_encode($produks) !!}.find(produk => produk.kode === selectedValue);
 
             var kode = selectedValue.substring(0, 3);
@@ -1300,7 +1306,7 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#sub_total').val());
+                    var total_transaksi = parseRupiahToNumber($('#sub_total').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
@@ -1308,7 +1314,12 @@
                             // console.log(total_promo);
                             break;
                         case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
+                            if(parseInt(response.diskon_nominal) > total_transaksi) {
+                                alert('Promo Tidak Bisa digunakan karena melebihi sub_total!');
+                                $('#total_promo').val(0);
+                            }else{
+                                total_promo = parseInt(response.diskon_nominal);
+                            }
                             break;
                         case 'poin':
                             var pointInput = parseFloat($('#point_dipakai').val()) || 0;
