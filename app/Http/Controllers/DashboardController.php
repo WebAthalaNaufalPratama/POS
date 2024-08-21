@@ -23,8 +23,13 @@ use App\Models\InventoryOutlet;
 use App\Models\Produkreturinden;
 use App\Models\Returinden;
 use App\Models\InventoryInden;
+use App\Models\InventoryGudang;
+use App\Models\InventoryGreenhouse;
 use App\Models\InventoryGallery;
 use App\Models\Invoicepo;
+use App\Models\Kondisi;
+use DateTime;
+use IntlDateFormatter;
 
 class DashboardController extends Controller
 {
@@ -412,8 +417,14 @@ class DashboardController extends Controller
             $lokasi = $karyawan;
             $lokasinama = Lokasi::where('id', $lokasi->lokasi_id)->value('tipe_lokasi');
         } else {
-            $lokasiId = $req->query('lokasi_id');
-            $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
+            if($user->hasRole(['Purchasing'])){
+                $lokasinama = Lokasi::where('id', $karyawan->lokasi_id)->value('tipe_lokasi');
+            }else{
+                $lokasiId = $req->query('lokasi_id');
+                $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
+            }
+            
+            
         }
         if($lokasinama != 5) {
             if ($user->hasRole(['KasirAdmin', 'KasirOutlet', 'AdminGallery'])) {
@@ -530,50 +541,83 @@ class DashboardController extends Controller
 
         }else {
             if($user->hasRole(['Purchasing'])) {
-                $lokasi = $karyawan;
     
-                $query = function ($query) {
-                    $query->where('jumlah', '<', 0);
-                };
-        
-                if ($lokasi->lokasi->tipe_lokasi == 4) {
-                    $topMinusProducts = InventoryInden::where($query)
-                        ->orderBy('jumlah', 'asc')
+                // $query = function ($query) {
+                //     $query->where('jumlah', '>', 0);
+                // };
+                // dd($req->input('inven'));
+                if("Greenhouse" == $req->input('inven')) {
+                    $topMinusProducts = InventoryGreenhouse::orderBy('jumlah', 'asc')
                         ->take(5)
                         ->get();
-    
-                    if ($topMinusProducts->isEmpty()) {
-                        return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                }else if("Inden" == $req->input('inven')){
+                    if($req->input('dateInden')) {
+                        $dateInden = $req->input('dateInden');
+                        $formattedDate = $this->formatDateInden($dateInden);
+                        // dd($formattedDate);
+                        $topMinusProducts = InventoryInden::where('bulan_inden', $formattedDate)
+                            ->orderBy('jumlah', 'asc')
+                            ->take(5)
+                            ->get();
+                            // dd($topMinusProducts);
+                    }else{
+                        $topMinusProducts = InventoryInden::orderBy('jumlah', 'asc')
+                            ->take(5)
+                            ->get();
                     }
-            
-                    $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
-                    $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
                     
-                } else {
-                    return response()->json(['error' => 'Invalid location type'], 400);
+                }else if("Gudang" == $req->input('inven')){
+                    $topMinusProducts = InventoryGudang::orderBy('jumlah', 'asc')
+                        ->take(5)
+                        ->get();
                 }
+
+                if ($topMinusProducts->isEmpty()) {
+                    return response()->json(['message' => 'No products with low or negative stock found'], 204);
+                }
+
+                $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                $kondisiCodes = $topMinusProducts->pluck('kondisi_id')->toArray();
+                $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                $kondisiProduk = Kondisi::whereIn('id', $kondisiCodes)->pluck('nama', 'id')->toArray();
+                
             } else {
                 $lokasiId = $req->query('lokasi_id');
                 $lokasi = Lokasi::find($lokasiId);
     
                 $query = function ($query) {
-                    $query->where('jumlah', '<', 0)
-                        ->orWhereRaw('jumlah < min_stok + 100');
+                    $query->where('jumlah', '<', 0);
                 };
         
-                if ($lokasi->tipe_lokasi == 1) {
-                    $topMinusProducts = InventoryInden::where('lokasi_id', $lokasi->id)
-                        ->where($query)
-                        ->orderBy('jumlah', 'asc')
-                        ->take(5)
-                        ->get();
+                if ($lokasi->tipe_lokasi == 4) {
+                    if ($req->inven) {
+                        if('Greenhouse' == $req->input('inven')) {
+                            $topMinusProducts = InventoryGreenhouse::where($query)
+                                ->orderBy('jumlah', 'asc')
+                                ->take(5)
+                                ->get();
+                        }else if('Inden' == $req->input('inven')){
+                            $topMinusProducts = InventoryInden::where($query)
+                                ->orderBy('jumlah', 'asc')
+                                ->take(5)
+                                ->get();
+                        }else if('Gudang' == $req->input('inven')){
+                            $topMinusProducts = InventoryGudang::where($query)
+                                ->orderBy('jumlah', 'asc')
+                                ->take(5)
+                                ->get();
+                        }
+                    }
+                    
     
                     if ($topMinusProducts->isEmpty()) {
                         return response()->json(['message' => 'No products with low or negative stock found'], 204);
                     }
             
                     $productCodes = $topMinusProducts->pluck('kode_produk')->toArray();
+                    $kondisiCodes = $topMinusProducts->pluck('kondisi_id')->toArray();
                     $namaProduk = Produk::whereIn('kode', $productCodes)->pluck('nama', 'kode')->toArray();
+                    $kondisiProduk = Kondisi::whereIn('id', $kondisiCodes)->pluck('nama', 'id')->toArray();
                 } else {
                     return response()->json(['error' => 'Invalid location type'], 400);
                 }
@@ -583,12 +627,21 @@ class DashboardController extends Controller
             $labels = [];
             $currentStock = [];
             $minStock = [];
-    
-            foreach ($topMinusProducts as $product) {
-                $labels[] = $namaProduk[$product->kode_produk] ?? 'Unknown Product';
-                $currentStock[] = $product->jumlah;
-                $minStock[] = $product->min_stok ?? 0;
+
+            if("Inden" == $req->input('inven')){
+                foreach ($topMinusProducts as $product) {
+                    $labels[] = $namaProduk[$product->kode_produk] ?? 'Unknown Product';
+                    $currentStock[] = $product->jumlah;
+                     $minStock[] = $product->min_stok ?? 0;
+                }
+            }else{
+                foreach ($topMinusProducts as $product) {
+                    $labels[] = $namaProduk[$product->kode_produk] .'-'. $kondisiProduk[$product->kondisi_id] ?? 'Unknown Product';
+                    $currentStock[] = $product->jumlah;
+                     $minStock[] = $product->min_stok ?? 0;
+                }
             }
+            
     
             $deficit = array_map(function ($min, $current) {
                 return max($min - $current, 0);
@@ -612,6 +665,26 @@ class DashboardController extends Controller
         }
         
     }
+
+    function formatDateInden($dateInden) {
+        $date = DateTime::createFromFormat('Y-m', $dateInden);
+    
+        if ($date) {
+            $monthNames = [
+                'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
+                'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
+                'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September',
+                'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'
+            ];
+    
+            $formattedMonth = $monthNames[$date->format('F')] ?? $date->format('F');
+            return $formattedMonth . '-' . $date->format('Y');
+        }
+    
+        return 'Invalid date';
+    }
+    
+
 
     public function getTopSales(Request $req)
     {
