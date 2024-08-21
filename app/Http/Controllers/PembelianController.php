@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Log;
 use App\Models\InventoryGallery;
 use App\Models\InventoryGreenHouse;
@@ -1018,7 +1019,7 @@ class PembelianController extends Controller
         try {
             // Simpan data pembelian
             $pembelian = new ModelsPoinden();
-            $pembelian->no_po = $request->nopo;
+            $pembelian->no_po = $this->generatePOIndenNumber();
             $pembelian->supplier_id = $request->id_supplier;
             $pembelian->bulan_inden = $request->bulan_inden;
             $pembelian->pembuat = $request->pembuat; // ID pengguna yang membuat pembelian
@@ -1200,7 +1201,7 @@ class PembelianController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'invoicepo_id' => 'required',
-                'no_retur' => 'required',
+                // 'no_retur' => 'required',
                 'tgl_retur' => 'required',
                 'komplain' => 'required',
                 'subtotal' => 'required',
@@ -1216,7 +1217,7 @@ class PembelianController extends Controller
                 return redirect()->back()->withInput()->with('fail', 'Retur Sudah Dibuat.');
             }
     
-            $data = $request->except(['_token', '_method', 'file']);
+            $data = $request->except(['_token', '_method', 'file', 'no_retur']);
     
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
@@ -1231,6 +1232,7 @@ class PembelianController extends Controller
                 $data['sisa'] = 0;
             }
     
+            $data['no_retur'] = $this->generateReturNumber();
             $data['ongkir'] = $request->biaya_pengiriman ?? 0;
             $jenis = $data['komplain'];
     
