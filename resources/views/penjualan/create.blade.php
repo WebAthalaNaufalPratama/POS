@@ -1312,7 +1312,7 @@
                             // console.log(total_promo);
                             break;
                         case 'nominal':
-                            if(diskon.nominal > total_transaksi) {
+                            if(parseInt(response.diskon_nominal) > total_transaksi) {
                                 alert('Promo Tidak Bisa digunakan karena melebihi sub_total!');
                                 $('#total_promo').val(0);
                             }else{
