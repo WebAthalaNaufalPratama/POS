@@ -834,6 +834,8 @@
 
         $('.customer').select2();
         $('#ongkir_id').select2();
+        $('#employee_id').select2();
+        $('#lokasi_pengirim').select2();
         // $('[id^=nama_produk]').select2();
         // $('select[id^="nama_produk_"]').change(function(){
         //     var selectedValue = $(this).select2().find(":selected").val();
