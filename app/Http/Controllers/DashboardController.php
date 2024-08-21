@@ -72,11 +72,7 @@ class DashboardController extends Controller
                                 ->count();
             $returpenjualan = ReturPenjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
                                 ->whereNotNull('tanggal_pembuat')
-                                ->whereNotNull('tanggal_diperiksa')
-                                ->whereNotNull('tanggal_dibukukan')
                                 ->whereNotNull('pembuat')
-                                ->whereNotNull('pemeriksa')
-                                ->whereNotNull('pembuku')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
                                     $query->where('created_at', '>=', $startOfMonth)
                                             ->orWhere('created_at', '<=', $endOfMonth);
