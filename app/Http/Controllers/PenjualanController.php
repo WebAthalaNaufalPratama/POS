@@ -460,9 +460,9 @@ class PenjualanController extends Controller
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         if($lokasi->lokasi->tipe_lokasi == 1){
-            $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BYR' .date('ymd').'%')->latest()->first();
+            $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BYR' .date('Ymd').'%')->latest()->first();
         }elseif($lokasi->lokasi->tipe_lokasi == 2){
-            $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BOT' .date('ymd').'%')->latest()->first();
+            $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BOT' .date('Ymd').'%')->latest()->first();
         }
         if ($Invoice != null) {
             $substring = substr($Invoice->no_invoice_bayar, 11);
