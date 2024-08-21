@@ -801,6 +801,7 @@
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
+            $('#nama_produk_' + i).select2();
 
             function validateNumericInput() {
                 $('input[id^="diskon_"]').on('input', function() {
@@ -832,6 +833,7 @@
         });
 
         $('.customer').select2();
+        $('#ongkir_id').select2();
         // $('[id^=nama_produk]').select2();
         // $('select[id^="nama_produk_"]').change(function(){
         //     var selectedValue = $(this).select2().find(":selected").val();
