@@ -458,7 +458,7 @@ class PenjualanController extends Controller
         $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
         $user = Auth::user();
-        $lokasi = Karyawan::where('user_id', $user->id)->value('lokasi_id');
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
         if($lokasi->lokasi->tipe_lokasi == 1){
             $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BYR' .date('ymd').'%')->latest()->first();
         }elseif($lokasi->lokasi->tipe_lokasi == 2){
@@ -474,7 +474,7 @@ class PenjualanController extends Controller
         $pembayaran = Pembayaran::where('invoice_penjualan_id', $penjualans->id)->first();
         $lokasigalery = Lokasi::where('tipe_lokasi', 1)->get();
         $roles = Auth::user()->roles()->value('name');
-        $lokasis = Lokasi::where('id', $lokasi)->get();
+        $lokasis = Lokasi::where('id', $lokasi->lokasi_id)->get();
         $rekenings = Rekening::get();
         $ongkirs = Ongkir::get();
         $bankpens = Rekening::get();
