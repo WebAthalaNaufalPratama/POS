@@ -104,14 +104,14 @@
                                             </div>
                                             <!-- Modal -->
                                             <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Tambahkan kelas modal-lg -->
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="imageModalLabel">Preview Image</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body text-center">
-                                                            <img id="modalImage" src="" alt="Preview Image" class="img-fluid">
+                                                            <img id="modalImage" src="" alt="Preview Image" class="img-fluid w-100"> <!-- Tambahkan kelas w-100 -->
                                                         </div>
                                                     </div>
                                                 </div>

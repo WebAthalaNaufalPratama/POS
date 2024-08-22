@@ -683,7 +683,7 @@ class PembelianController extends Controller
                     'alasan' => $alasan,
                     'jumlah' => $jumlah,
                     'komplain' => $item->komplain,
-                    'subtotal' => $item->subtotal,
+                    'subtotal' => formatRupiah($item->subtotal),
                     'status_dibuat' => $item->status_dibuat,
                     'status_dibuku' => $item->status_dibuku ?? 'TUNDA',
                     'invoice' => $item->invoice,
@@ -2510,7 +2510,7 @@ class PembelianController extends Controller
                 $pembelian->save();
     
                 // Hapus data ProdukBeli lama
-                ProdukBeli::where('pembelian_id', $pembelian->id)->delete();
+                ProdukBeli::where('pembelian_id', $pembelian->id)->forceDelete();
     
                 // Simpan data ProdukBeli baru
                 if ($request->has('produk')) {

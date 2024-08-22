@@ -90,18 +90,19 @@
                                             </div>
                                             <!-- Modal -->
                                             <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Tambahkan kelas modal-lg -->
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="imageModalLabel">Preview Image</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body text-center">
-                                                            <img id="modalImage" src="" alt="Preview Image" class="img-fluid">
+                                                            <img id="modalImage" src="" alt="Preview Image" class="img-fluid w-100"> <!-- Tambahkan kelas w-100 -->
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -160,15 +161,13 @@
                                
                                     <center><h5>Riwayat uang masuk (Refund) </h5></center><br>
                                     {{-- @if(Auth::user()->hasRole('Finance') && $data->status_dibuat == "DIKONFIRMASI") --}}
-                                    @if(Auth::user()->hasRole('Finance'))
-                                    {{-- <button type="submit" class="btn btn-primary">Simpan</button> --}}
-                                    
+                                    @if (Auth::user()->hasRole('Finance') && $data->status_dibuku == "MENUNGGU PEMBAYARAN" && $data->sisa !== 0 )   
                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
                                          Tambah Pembayaran
                                     </button>
-                                    
+                                    @else
+                                        Riwayat Pembayaran
                                     @endif
-                                    
                                     {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
                                
                                 <div class="table-responsive">
