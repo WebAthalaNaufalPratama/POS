@@ -128,6 +128,7 @@
             },
             columns: [
                 { data: 'id', name: 'id', orderable: false, searchable: false },
+                { data: 'no_invoice', name: 'no_invoice' },
                 { data: 'no_invoice_bayar', name: 'no_invoice_bayar' },
                 { data: 'cara_bayar', name: 'cara_bayar' },
                 { data: 'nominal', name: 'nominal' },

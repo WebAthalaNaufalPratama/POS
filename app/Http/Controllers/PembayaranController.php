@@ -81,6 +81,7 @@ class PembayaranController extends Controller
 
             return [
                 'id' => $item->id,
+                'no_invoice' => $item->penjualan->no_invoice,
                 'no_invoice_bayar' => $item->no_invoice_bayar,
                 'cara_bayar' => $item->cara_bayar,
                 'nominal' => $nominal, 
