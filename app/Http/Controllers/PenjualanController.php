@@ -1184,8 +1184,8 @@ class PenjualanController extends Controller
         }
 
         $bayarList = Pembayaran::where('invoice_penjualan_id', $penjualan->id)->get();
-        dd($bayarList);
-        if($bayarList->isNotEmpty()) {
+        // dd($bayarList);
+        if(!empty($bayarList)) {
             $totalBayar = 0;
             foreach($bayarList as $byr){
                 $totalBayar += $byr->nominal;
