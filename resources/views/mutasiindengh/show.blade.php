@@ -211,7 +211,9 @@ $user = Auth::user();
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                       
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        <th>Aksi</th>
+                                                        @endif
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -249,7 +251,18 @@ $user = Auth::user();
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                       
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        <td class="text-center">
+                                                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                            </a>
+                                                            <ul class="dropdown-menu">
+                                                                <li>
+                                                                    <a href="javascript:void(0);" onclick="editbayar({{ $databayar->id }})" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                        @endif
                                                        
                                                     </tr>
                                                     @endforeach
@@ -558,6 +571,63 @@ $user = Auth::user();
                 </div>
             </div>            
             <div class="modal-footer justify-content-center">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="modal fade" id="editModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Pembayaran</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="editBayarForm" action="" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('patch')
+            <div class="mb-3">
+              <label for="nobay" class="form-label">No Bayar</label>
+              <input type="hidden" class="form-control" id="edit_type" name="type" value="MutasiInden">
+              <input type="hidden" class="form-control" id="edit_invoice_id" name="invoice_id" value="">
+              <input type="text" class="form-control" id="edit_nobay" name="no_invoice_bayar" value="" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="tgl" class="form-label">Tanggal</label>
+              <input type="date" class="form-control" id="edit_tgl" name="tanggal_bayar" value="">
+            </div>
+            <div class="mb-3">
+                <label for="metode" class="form-label">Metode</label>
+                <select class="form-control select2" id="edit_metode" name="metode">
+                    <option value="cash">cash</option>
+                    @foreach ($rekenings as $item)
+                        <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
+                    @endforeach
+                </select>
+                
+            </div>
+            <div class="mb-3">
+              <label for="nominal" class="form-label">Nominal</label>
+              <div class="input-group">
+                <span class="input-group-text">Rp. </span>
+                <input type="text" class="form-control"  id="edit_nominal" name="nominal" value="">
+              </div>
+            </div>
+            <div class="mb-3">
+                <div class="row mx-auto">
+                    <label for="bukti" class="form-label ps-0">Bukti</label>
+                    <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*">
+                </div>
+                <div style="text-align: center;">
+                    <img id="edit_preview" src="" alt="Bukti tf" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                </div>
+            </div>  
+            
+            <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
@@ -933,181 +1003,74 @@ function calculateTotalAll() {
             $('#preview').attr('src', defaultImg);
         }
 
+        $(document).on('input', '[id^=edit_nominal]', function() {
+        let input = $(this);
+        let value = input.val();
         
-</script>
-@endsection
-
-
-{{-- <script>
-
-
-    $(document).ready(function() {
-        $('.select2').select2();
-
-            if ($('#preview').attr('src') === '') {
-                $('#preview').attr('src', defaultImg);
-            }
-
-            $('#bukti').on('change', function() {
-                const file = $(this)[0].files[0];
-                if (file.size > 2 * 1024 * 1024) { 
-                    toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                        closeButton: true,
-                        tapToDismiss: false,
-                        rtl: false,
-                        progressBar: true
-                    });
-                    $(this).val(''); 
-                    return;
-                }
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        $('#preview').attr('src', e.target.result);
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
-
-           
-        var i = 0;
-        var bulanIndenData = [];
-
-        $('#add').click(function() {
-            i++;
-            var newRow = `
-                <tr id="row${i}">
-                    <td>
-                        <select class="form-control" id="bulan_inden_${i}" name="bulan_inden[]">
-                            <option value="">Pilih Bulan Inden</option>
-                            ${bulanIndenData.map(bulan => `<option value="${bulan}">${bulan}</option>`).join('')}
-                        </select>
-                    </td>
-                    <td>
-                        <select class="form-control" id="kode_inden_${i}" name="kode_inden[]">
-                            <option value="">Pilih Kode Inden</option>
-                        </select>
-                    </td>
-                    <td><input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
-                    <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(${i})"></td>
-                    <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(${i})"></td>
-                    <td>
-                        <select id="kondisi_${i}" name="kondisi[]" class="form-control" onchange="showInputType(${i})">
-                            <option value="" disabled>Pilih Kondisi</option>
-                        </select>
-                    </td>
-                    <td>
-                        <div class="input-group">
-                            <span class="input-group-text">Rp. </span> 
-                            <input type="text" name="rawat2[]" id="rawat2_${i}" class="form-control-banyak" oninput="calculateTotal(${i})" value="" required>
-                            <input type="hidden" name="rawat[]" id="rawat_${i}" class="form-control" oninput="calculateTotal(${i})" value="" required>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="input-group">
-                            <span class="input-group-text">Rp. </span> 
-                            <input type="text" name="jumlah_display[]" id="jumlah_${i}" class="form-control-banyak" value="" readonly>
-                            <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" value="" readonly>
-                        </div>
-                    </td>
-                    <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
-                </tr>
-            `;
-            $('#dynamic_field').append(newRow);
-            bindSelectEvents(i);
-        });
-
-        $(document).on('click', '.btn_remove', function() {
-            var button_id = $(this).attr("id"); 
-            $('#row' + button_id + '').remove();
-        });
-
-        function bindSelectEvents(index) {
-            $('#bulan_inden_' + index).change(function() {
-                const supplierId = $('#supplier').val();
-                const bulanInden = $(this).val();
-                const kodeIndenDropdown = $('#kode_inden_' + index);
-
-                kodeIndenDropdown.empty();
-                kodeIndenDropdown.append('<option value="">Pilih Kode Inden</option>');
-
-                if (bulanInden) {
-                    $.ajax({
-                        url: `/get-kode-inden/${bulanInden}/${supplierId}`,
-                        type: 'GET',
-                        success: function(data) {
-                            data.forEach(function(kodeInden) {
-                                kodeIndenDropdown.append('<option value="' + kodeInden + '">' + kodeInden + '</option>');
-                            });
-                        },
-                        error: function() {
-                            alert('Gagal mengambil data kode inden');
-                        }
-                    });
-                }
-            });
-
-            $('#kode_inden_' + index).change(function() {
-                const supplierId = $('#supplier').val();
-                const bulanInden = $('#bulan_inden_' + index).val();
-                const kodeInden = $(this).val();
-                const kategoriInput = $('#kategori_' + index); 
-
-                if (kodeInden) {
-                    $.ajax({
-                        url: `/get-kategori-inden/${kodeInden}/${bulanInden}/${supplierId}`,
-                        type: 'GET',
-                        success: function(kategori) {
-                            kategoriInput.val(kategori);
-                        },
-                        error: function() {
-                            alert('Gagal mengambil data kategori');
-                        }
-                    });
-                }
-            });
+        if (!isNumeric(cleanNumber(value))) {
+        value = value.replace(/[^\d]/g, "");
         }
 
-        $('#supplier').change(function() {
-            const supplierId = $(this).val();
+        value = cleanNumber(value);
+        let formattedValue = formatNumber(value);
+        
+        input.val(formattedValue);
+    });
+    $('#editBayarForm').on('submit', function(e) {
+        // Add input number cleaning for specific inputs
+        let inputs = $('#editBayarForm').find('[id^=edit_nominal]');
+        inputs.each(function() {
+            let input = $(this);
+            let value = input.val();
+            let cleanedValue = cleanNumber(value);
 
-            // Kosongkan opsi bulan inden pada setiap dropdown bulan_inden
-            $('select[id^="bulan_inden_"]').each(function() {
-                $(this).empty();
-                $(this).append('<option value="">Pilih Bulan Inden</option>');
-            });
+            // Set the cleaned value back to the input
+            input.val(cleanedValue);
+        });
 
-            if (supplierId) {
-                // Ambil data bulan inden dari server
-                $.ajax({
-                    url: `/get-bulan-inden/${supplierId}`,
-                    type: 'GET',
-                    success: function(data) {
-                        bulanIndenData = data; // Simpan data bulan inden
-                        $('select[id^="bulan_inden_"]').each(function() {
-                            var bulanIndenDropdown = $(this);
-                            data.forEach(function(bulanInden) {
-                                bulanIndenDropdown.append('<option value="' + bulanInden + '">' + bulanInden + '</option>');
-                            });
-                        });
-                    },
-                    error: function() {
-                        alert('Gagal mengambil data bulan inden');
-                    }
+        return true;
+    });
+    function editbayar(id){
+        $.ajax({
+            type: "GET",
+            url: "/purchase/pembayaran/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            data: {
+                'jenis': 'MutasiInden',
+            },
+            beforeSend: function() {
+                $('#global-loader-transparent').show();
+            },
+            success: function(response) {
+                $('#editBayarForm').attr('action', `{{ route("pembayaran_pembelian.update", ":id") }}`.replace(':id', id));
+                $('#edit_nobay').val(response.no_invoice_bayar);
+                $('#edit_invoice_id').val(response.invoice_id);
+                $('#edit_metode').val(response.metode).trigger('change');
+                $('#edit_nominal').val(formatNumber(response.nominal));
+                $('#edit_tgl').val(response.tanggal_bayar);
+                if(response.bukti){
+                    $('#edit_preview').attr('src', '/storage/'+response.bukti);
+                } else {
+                    $('#edit_preview').attr('src', defaultImg);
+                }
+                $('#edit_metode').select2({
+                    dropdownParent: $("#editModalbayar")
+                });
+                $('#global-loader-transparent').hide();
+                $('#editModalbayar').modal('show');
+            },
+            error: function(error) {
+                $('#global-loader-transparent').hide();
+                toastr.error(error.responseJSON, 'Error', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
                 });
             }
         });
-
-        bindSelectEvents(0); // Initial binding for the first row
-    });
-   
-
-
-
-        function clearFile(){
-            $('#bukti').val('');
-            $('#preview').attr('src', defaultImg);
-        }
-
-        
-</script> --}}
+    }
+</script>
+@endsection

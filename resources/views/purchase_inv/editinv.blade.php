@@ -205,7 +205,9 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
                                                         <th>Aksi</th>
+                                                        @endif
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -241,21 +243,18 @@ Carbon::setLocale('id');
                                                         </div>
                                                         </td>
                                                         <td>{{ $bayar->status_bayar}}</td>
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
                                                         <td class="text-center">
                                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                                             </a>
                                                             <ul class="dropdown-menu">
                                                                 <li>
-                                                                    <a href="javascript:void(0);"  onclick="bukti('{{ $item->bukti }}')" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
+                                                                    <a href="javascript:void(0);" onclick="editbayar({{ $bayar->id }})" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
                                                                 </li>
-                                                                @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
-                                                                    <li>
-                                                                        <a href="javascript:void(0);" onclick="editbayar({{ $item->id }})" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                                                    </li>
-                                                                @endif
                                                             </ul>
                                                         </td>
+                                                        @endif
                                                        
                                                     </tr>
                                                     @endforeach
@@ -551,14 +550,14 @@ Carbon::setLocale('id');
           <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form id="supplierForm" action="{{ route('bayarpo.store')}}" method="POST" enctype="multipart/form-data">
-                @csrf
+            <form id="editBayarForm" action="" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('patch')
             <div class="mb-3">
               <label for="nobay" class="form-label">No Bayar</label>
-              <input type="hidden" class="form-control" id="edit_type" name="type" value="pembelian">
-              <input type="hidden" class="form-control" id="edit_idpo" name="id_po" value="">
-              <input type="hidden" class="form-control" id="edit_invoice_purchase_id" name="invoice_purchase_id" value="">
-              <input type="text" class="form-control" id="edit_nobay" name="no_invoice_bayar" value="{{ $no_bypo }}" readonly>
+              <input type="hidden" class="form-control" id="edit_type" name="type" value="InvoicePO">
+              <input type="hidden" class="form-control" id="edit_invoice_id" name="invoice_id" value="">
+              <input type="text" class="form-control" id="edit_nobay" name="no_invoice_bayar" value="" readonly>
             </div>
             <div class="mb-3">
               <label for="tgl" class="form-label">Tanggal</label>
@@ -578,9 +577,8 @@ Carbon::setLocale('id');
               <label for="nominal" class="form-label">Nominal</label>
               <div class="input-group">
                 <span class="input-group-text">Rp. </span>
-                <input type="text" class="form-control"  id="edit_nominal" value="">
+                <input type="text" class="form-control"  id="edit_nominal" name="nominal" value="">
               </div>
-              <input type="text" class="form-control"  id="edit_nominal2" name="nominal" hidden>
             </div>
             <div class="mb-3">
                 <div class="row mx-auto">
@@ -664,43 +662,75 @@ Carbon::setLocale('id');
     });
     });
 
-    function editbayar(id){
-            $.ajax({
-                    type: "GET",
-                    url: "/pembayaran/"+id+"/edit",
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    beforeSend: function() {
-                        $('#global-loader-transparent').show();
-                    },
-                    success: function(response) {
-                        $('#editModalbayar').attr('action', `{{ route("pembayaran_pembelian.update", ":id") }}`.replace(':id', id));
-                        $('#edit_nobay').val(response.no_invoice_bayar);
-                        $('#edit_nominal').val(formatNumber(response.sewa.total_tagihan));
-                        $('#edit_nominal').val(formatNumber(response.nominal));
-                        $('#edit_tgl').val(response.tanggal_bayar);
-                        if(response.bukti){
-                            $('#edit_preview').attr('src', '/storage/'+response.bukti);
-                        } else {
-                            $('#edit_preview').attr('src', defaultImg);
-                        }
-                        $('#edit_metode').select2({
-                            dropdownParent: $("#editModalbayar")
-                        });
-                        $('#global-loader-transparent').hide();
-                        $('#modalEditBayar').modal('show');
-                    },
-                    error: function(error) {
-                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                            closeButton: true,
-                            tapToDismiss: false,
-                            rtl: false,
-                            progressBar: true
-                        });
-                    }
-                });
+    $(document).on('input', '[id^=edit_nominal]', function() {
+        let input = $(this);
+        let value = input.val();
+        
+        if (!isNumeric(cleanNumber(value))) {
+        value = value.replace(/[^\d]/g, "");
         }
+
+        value = cleanNumber(value);
+        let formattedValue = formatNumber(value);
+        
+        input.val(formattedValue);
+    });
+    $('#editBayarForm').on('submit', function(e) {
+        // Add input number cleaning for specific inputs
+        let inputs = $('#editBayarForm').find('[id^=edit_nominal]');
+        inputs.each(function() {
+            let input = $(this);
+            let value = input.val();
+            let cleanedValue = cleanNumber(value);
+
+            // Set the cleaned value back to the input
+            input.val(cleanedValue);
+        });
+
+        return true;
+    });
+    function editbayar(id){
+        $.ajax({
+            type: "GET",
+            url: "/purchase/pembayaran/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            data: {
+                'jenis': 'InvoicePO',
+            },
+            beforeSend: function() {
+                $('#global-loader-transparent').show();
+            },
+            success: function(response) {
+                $('#editBayarForm').attr('action', `{{ route("pembayaran_pembelian.update", ":id") }}`.replace(':id', id));
+                $('#edit_nobay').val(response.no_invoice_bayar);
+                $('#edit_invoice_id').val(response.invoice_id);
+                $('#edit_metode').val(response.metode).trigger('change');
+                $('#edit_nominal').val(formatNumber(response.nominal));
+                $('#edit_tgl').val(response.tanggal_bayar);
+                if(response.bukti){
+                    $('#edit_preview').attr('src', '/storage/'+response.bukti);
+                } else {
+                    $('#edit_preview').attr('src', defaultImg);
+                }
+                $('#edit_metode').select2({
+                    dropdownParent: $("#editModalbayar")
+                });
+                $('#global-loader-transparent').hide();
+                $('#editModalbayar').modal('show');
+            },
+            error: function(error) {
+                $('#global-loader-transparent').hide();
+                toastr.error(error.responseJSON, 'Error', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+            }
+        });
+    }
 
 </script>
 
