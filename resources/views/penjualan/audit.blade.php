@@ -1191,6 +1191,11 @@
             togglePaymentFields();
         });
 
+        $('#ongkir_id').select2();
+        $('#employee_id').select2();
+        $('#lokasi_pengirim').select2();
+
+
         // Initial value from backend
         var initialPembayaran = "{{ $penjualans->cara_bayar }}";
 
@@ -1943,7 +1948,7 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#sub_total').val());
+                    var total_transaksi = parseRupiahToNumber($('#total_tagihan').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
