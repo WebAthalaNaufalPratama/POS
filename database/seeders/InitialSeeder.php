@@ -34,7 +34,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'SuperAdmin', 
                 'username' => 'superadmin',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $useradmingallery = User::firstOrCreate(
@@ -42,7 +42,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'AdminGallery', 
                 'username' => 'admingallery',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $userpurchasing = User::firstOrCreate(
@@ -50,7 +50,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'Purchasing', 
                 'username' => 'purchasing',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $usersales = User::firstOrCreate(
@@ -58,7 +58,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'Sales', 
                 'username' => 'sales',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $userkasirgallery = User::firstOrCreate(
@@ -66,7 +66,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'KasirGallery', 
                 'username' => 'kasirgallery',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $userkasiroutlet = User::firstOrCreate(
@@ -74,7 +74,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'KasirOutlet', 
                 'username' => 'kasiroutlet',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $userfinance = User::firstOrCreate(
@@ -82,7 +82,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'Finance', 
                 'username' => 'finance',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $userauditor = User::firstOrCreate(
@@ -90,7 +90,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'Auditor', 
                 'username' => 'auditor',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
         );
         $usersalesmanger = User::firstOrCreate(
@@ -98,7 +98,7 @@ class InitialSeeder extends Seeder
             [
                 'name' => 'Salesmanager', 
                 'username' => 'salmen',
-                'password' => '123'
+                'password' => 'von#123456'
             ]
 );
 
