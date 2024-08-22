@@ -476,7 +476,7 @@ class KembaliSewaController extends Controller
                 }
                 $msg = 'Dikonfirmasi';
             } else if($req->konfirmasi == 'cancel'){
-                $kembaliSewa->status = 'BATAl';
+                $kembaliSewa->status = 'BATAL';
                 $msg = 'Dibatalkan';
             } else {
                 return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');

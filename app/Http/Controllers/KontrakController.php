@@ -327,7 +327,7 @@ class KontrakController extends Controller
                 $kontrak->status = 'DIKONFIRMASI';
                 $msg = 'Dikonfirmasi';
             } else if($req->konfirmasi == 'cancel'){
-                $kontrak->status = 'BATAl';
+                $kontrak->status = 'BATAL';
                 $msg = 'Dibatalkan';
             } else {
                 return redirect()->back()->withInput()->with('fail', 'Status tidak sesuai');

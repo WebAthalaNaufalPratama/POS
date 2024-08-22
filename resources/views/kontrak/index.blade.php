@@ -281,20 +281,18 @@
                     if (userPermissions.includes('kontrak.show')) {
                         if ((['DIKONFIRMASI', 'BATAL'].includes(row.status) && row.userRole === 'AdminGallery') ||
                             (row.status === 'DIKONFIRMASI' && (row.tanggal_penyetuju || row.tanggal_pemeriksa) &&
-                            (['Auditor', 'Finance'].includes(row.userRole) && (row.tanggal_penyetuju || row.tanggal_pemeriksa)))) {
+                            (['Auditor', 'Finance'].includes(row.userRole) && (row.tanggal_penyetuju || row.tanggal_pemeriksa) && (row.userRole === 'Auditor' && row.tanggal_penyetuju ||  row.userRole === 'Finance' && row.tanggal_pemeriksa)))) {
                             actionsHtml += `
                                 <li>
                                     <a href="kontrak/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
                                 </li>
                             `;
                         } else {
-                            if (row.status === 'TUNDA') {
-                                actionsHtml += `
-                                    <li>
-                                        <a href="kontrak/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
-                                    </li>
-                                `;
-                            }
+                            actionsHtml += `
+                                <li>
+                                    <a href="kontrak/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/check.svg" class="me-2" alt="img">Konfirmasi</a>
+                                </li>
+                            `;
                         }
                     }
 
