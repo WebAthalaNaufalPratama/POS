@@ -197,7 +197,7 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        {{-- <th>Aksi</th> --}}
+                                                        <th>Aksi</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -231,11 +231,23 @@ Carbon::setLocale('id');
                                                                 </div>
                                                             </div>
                                                         </div>
-
-                                            
-                                                    </td>
+                                                        </td>
                                                         <td>{{ $bayar->status_bayar}}</td>
-                                                        {{-- <td></td> --}}
+                                                        <td class="text-center">
+                                                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                            </a>
+                                                            <ul class="dropdown-menu">
+                                                                <li>
+                                                                    <a href="javascript:void(0);"  onclick="bukti('{{ $item->bukti }}')" class="dropdown-item"><img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Bukti</a>
+                                                                </li>
+                                                                @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                                    <li>
+                                                                        <a href="javascript:void(0);" onclick="editbayar({{ $item->id }})" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                                                    </li>
+                                                                @endif
+                                                            </ul>
+                                                        </td>
                                                        
                                                     </tr>
                                                     @endforeach
@@ -523,6 +535,64 @@ Carbon::setLocale('id');
       </div>
     </div>
 </div>
+<div class="modal fade" id="editModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Pembayaran</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="supplierForm" action="{{ route('bayarpo.store')}}" method="POST" enctype="multipart/form-data">
+                @csrf
+            <div class="mb-3">
+              <label for="nobay" class="form-label">No Bayar</label>
+              <input type="hidden" class="form-control" id="edit_type" name="type" value="pembelian">
+              <input type="hidden" class="form-control" id="edit_idpo" name="id_po" value="">
+              <input type="hidden" class="form-control" id="edit_invoice_purchase_id" name="invoice_purchase_id" value="">
+              <input type="text" class="form-control" id="edit_nobay" name="no_invoice_bayar" value="{{ $no_bypo }}" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="tgl" class="form-label">Tanggal</label>
+              <input type="date" class="form-control" id="edit_tgl" name="tanggal_bayar" value="">
+            </div>
+            <div class="mb-3">
+                <label for="metode" class="form-label">Metode</label>
+                <select class="form-control select2" id="edit_metode" name="metode">
+                    <option value="cash">cash</option>
+                    @foreach ($rekenings as $item)
+                        <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
+                    @endforeach
+                </select>
+                
+            </div>
+            <div class="mb-3">
+              <label for="nominal" class="form-label">Nominal</label>
+              <div class="input-group">
+                <span class="input-group-text">Rp. </span>
+                <input type="text" class="form-control"  id="edit_nominal" value="">
+              </div>
+              <input type="text" class="form-control"  id="edit_nominal2" name="nominal" hidden>
+            </div>
+            <div class="mb-3">
+                <div class="row mx-auto">
+                    <label for="bukti" class="form-label ps-0">Bukti</label>
+                    <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*">
+                </div>
+                <div style="text-align: center;">
+                    <img id="edit_preview" src="" alt="Bukti tf" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                </div>
+            </div>  
+            
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
 
 
 {{-- <input type="text" name="rupiah" id="rupiah"> --}}
@@ -586,106 +656,43 @@ Carbon::setLocale('id');
     });
     });
 
-    // $(document).ready(function() {
-    //     $("#metode").select2({
-    //     dropdownParent: $("#myModalbayar")
-    //     });
-
-    //      $('#jenis_ppn').change(function() {
-    //         var selectedOption = $(this).val();
-    //         if (selectedOption === 'exclude') {
-    //             $('#persen_ppn').prop('readonly', false);
-    //         } else {
-    //             $('#persen_ppn').prop('readonly', true);
-    //             $('#persen_ppn').val(''); // Set nilai input menjadi string kosong
-    //         }
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     });
-
-    //     // Fungsi untuk menghitung total tagihan
-    //     function calculateTotalAll() {
-    //         var subTotal = 0;
-    //         var diskonTotal = parseFloat($('#diskon_total').val()) || 0;
-    //         var biayaOngkir = parseFloat($('#biaya_ongkir').val()) || 0;
-    //         var persenPpn = parseFloat($('#persen_ppn').val()) || 0;
-
-    //         // Menghitung sub total
-    //         $('input[name^="jumlah"]').each(function() {
-    //             subTotal += parseFloat($(this).val()) || 0;
-    //         });
-
-    //         // Menghitung PPN berdasarkan jenis_ppn
-    //         var ppn = 0;
-    //         var jenisPpn = $('#jenis_ppn').val();
-    //         if (jenisPpn === 'exclude') {
-    //             ppn = (subTotal - diskonTotal) * persenPpn / 100;
-    //         }
-
-    //         // Menghitung total tagihan
-    //         var totalTagihan = subTotal - diskonTotal + ppn + biayaOngkir;
-
-    //         // Memperbarui nilai total tagihan
-    //         $('#sub_total').val(subTotal.toFixed(2));
-    //         $('#total_tagihan').val(totalTagihan.toFixed(2));
-    //     }
-
-    //     // Panggil fungsi calculateTotal ketika ada perubahan pada input jumlah atau diskon
-    //     $('input[name^="jumlah"], #diskon_total, #biaya_ongkir, #persen_ppn').on('input', function() {
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     });
-
-    //     // Fungsi untuk menghitung total harga per baris
-    //     function calculateTotal(index) {
-    //         var qtytrm = parseFloat($('#qtytrm_' + index).val()) || 0;
-    //         var harga = parseFloat($('#harga_' + index).val()) || 0;
-    //         var diskon = parseFloat($('#diskon_' + index).val()) || 0;
-    //         var jumlah = qtytrm * harga - diskon;
-
-    //         $('#jumlah_' + index).val(jumlah.toFixed(2));
-    //         calculateTotalAll(); // Memanggil fungsi untuk menghitung total keseluruhan
-    //     }
-
-    //     // Panggil fungsi calculateTotal ketika ada perubahan pada input harga atau diskon per baris
-    //     $('input[name^="harga"], input[name^="diskon"]').on('input', function() {
-    //         var index = $(this).attr('id').split('_')[1];
-    //         calculateTotal(index);
-    //     });
-    // });
-
-
-
-
-//     function formatRupiah(angka) {
-//     var reverse = angka.toString().split('').reverse().join('');
-//     var ribuan = reverse.match(/\d{1,3}/g);
-//     ribuan = ribuan.join('.').split('').reverse().join('');
-//     return ribuan;
-// }
-
-// function unformatRupiah(formattedValue) {
-//     return formattedValue.replace(/\./g, '');
-// }
-
-// document.getElementById('nominal').addEventListener('input', function(e) {
-//     var nominalField = this;
-//     var cursorPosition = nominalField.selectionStart;
-
-//     // Remove non-numeric characters
-//     var unformattedValue = unformatRupiah(nominalField.value);
-
-//     // Format the value
-//     var formattedValue = formatRupiah(unformattedValue);
-//     nominalField.value = formattedValue;
-
-//     // Set the integer value to hidden input
-//     document.getElementById('nominal2').value = unformattedValue;
-
-//     // Adjust cursor position
-//     cursorPosition = cursorPosition - (nominalField.value.length - formattedValue.length);
-//     setTimeout(function() {
-//         nominalField.setSelectionRange(cursorPosition, cursorPosition);
-//     }, 0);
-// });
+    function editbayar(id){
+            $.ajax({
+                    type: "GET",
+                    url: "/pembayaran/"+id+"/edit",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    beforeSend: function() {
+                        $('#global-loader-transparent').show();
+                    },
+                    success: function(response) {
+                        $('#editModalbayar').attr('action', `{{ route("pembayaran_pembelian.update", ":id") }}`.replace(':id', id));
+                        $('#edit_nobay').val(response.no_invoice_bayar);
+                        $('#edit_nominal').val(formatNumber(response.sewa.total_tagihan));
+                        $('#edit_nominal').val(formatNumber(response.nominal));
+                        $('#edit_tgl').val(response.tanggal_bayar);
+                        if(response.bukti){
+                            $('#edit_preview').attr('src', '/storage/'+response.bukti);
+                        } else {
+                            $('#edit_preview').attr('src', defaultImg);
+                        }
+                        $('#edit_metode').select2({
+                            dropdownParent: $("#editModalbayar")
+                        });
+                        $('#global-loader-transparent').hide();
+                        $('#modalEditBayar').modal('show');
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
+                });
+        }
 
 </script>
 
