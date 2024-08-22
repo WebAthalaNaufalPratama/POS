@@ -842,7 +842,7 @@
         //     console.log(selectedValue);
         // });
 
-        $('select[id^="nama_produk_"]').change(function(){
+        $(document).on('change', 'select[id^="nama_produk_"]', function() {
             var id = $(this).attr('id').split('_')[2];
             var selectedOption = $(this).find(':selected');
             var selectedValue = $(this).select2().find(":selected").val();
