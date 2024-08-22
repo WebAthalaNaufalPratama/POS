@@ -27,6 +27,8 @@ use App\Models\User;
 use App\Models\Komponen_Produk_Terjual;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\File;
 use PDF;
 
 class DopenjualanController extends Controller
@@ -141,10 +143,29 @@ class DopenjualanController extends Controller
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_do_penjualan', $fileName, 'public');
-            $data['file'] = $filePath;
+            $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_do_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            // if (!empty($penjualan->bukti_file)) {
+            //     $oldFilePath = storage_path('app/public/' . $penjualan->bukti_file);
+            //     if (File::exists($oldFilePath)) {
+            //         File::delete($oldFilePath);
+            //     }
+            // }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['file'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
         $lokasipengirim = Penjualan::where('no_invoice', $req->no_referensi)->value('lokasi_pengirim');
         $data['lokasi_pengirim'] = $lokasipengirim;
@@ -499,22 +520,41 @@ class DopenjualanController extends Controller
     {
         // dd($req);
         $dopenjualanIds = $req->input('dopenjualan');
+        $dopenjualan = DeliveryOrder::where('id', $dopenjualanIds)->first();
 
         $data = $req->except(['_token', '_method','dopenjualan', 'nama_produk', 'jumlah', 'satuan', 'keterangan', 'nama_produk2', 'jumlah2', 'satuan2', 'keterangan2', 'alasan']);
         //update bukti do
         if ($req->hasFile('file')) {
+            // Simpan file baru
             $file = $req->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('bukti_do_penjualan', $fileName, 'public');
-            // dd($filePath);
-            $data['file'] = $filePath;
+            $fileName = $req->no_do . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $filePath = 'bukti_do_penjualan/' . $fileName;
+        
+            // Optimize dan simpan file baru
+            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+        
+            // Hapus file lama
+            if (!empty($dopenjualan->file)) {
+                $oldFilePath = storage_path('app/public/' . $dopenjualan->file);
+                if (File::exists($oldFilePath)) {
+                    File::delete($oldFilePath);
+                }
+            }
+        
+            // Verifikasi penyimpanan file baru
+            if (File::exists(storage_path('app/public/' . $filePath))) {
+                $data['file'] = $filePath;
+            } else {
+                return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+            }
         }
 
         //update data ttd
         $user = Auth::user();
         $jabatan = Karyawan::where('user_id', $user->id)->first();
         $jabatanpegawai = $jabatan->jabatan;
-        $dopenjualan = DeliveryOrder::where('id', $dopenjualanIds)->first();
+       
 
         if($dopenjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor'])){
             $data['pemeriksa'] = Auth::user()->id;
@@ -534,7 +574,7 @@ class DopenjualanController extends Controller
         }
 
         //cek produk urung bar
-        if ($lokasi->tipe_lokasi == 1 && $invoice->distribusi == 'Dikirim' && $req->status == 'DIKONFIRMASI') {
+        if ($lokasi->tipe_lokasi == 1 && $invoice->distribusi == 'Dikirim' && $req->status == 'DIKONFIRMASI' && $user->hasRole(['KasirOutlet', 'AdminGallery', 'KasirGallery']) || $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua' || $user->hasRole(['Finance']) && $req->ubahapa == 'ubahsemua') {
             if (empty($req->nama_produk)) {
                 $merged_nama_produk = $req->nama_produk2;
                 $merged_jumlah = $req->jumlah2;

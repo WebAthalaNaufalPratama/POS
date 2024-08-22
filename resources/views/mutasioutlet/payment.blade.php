@@ -389,11 +389,19 @@
                                                             <td>@if($pembayaran->rekening == null)
                                                                 Pembayaran Cash
                                                                 @else
-                                                                {{ $pembayaran->rekening->bank }}
+                                                                {{ $pembayaran->rekening->bank }} - {{ $pembayaran->rekening->nama_akun }} ({{ $pembayaran->rekening->nomor_rekening }})
                                                                 @endif
                                                             </td>
                                                             <td>{{ $pembayaran->tanggal_bayar }}</td>
-                                                            <td>{{ $pembayaran->status_bayar }}</td>
+                                                            <td>
+                                                                @if($pembayaran->status_bayar == 'LUNAS')
+                                                                    <span class="badge bg-success">{{ $pembayaran->status_bayar }}</span>
+                                                                @elseif($pembayaran->status_bayar == 'BELUM LUNAS')
+                                                                    <span class="badge bg-danger">{{ $pembayaran->status_bayar }}</span>
+                                                                @else
+                                                                    <span class="badge bg-secondary">{{ $pembayaran->status_bayar }}</span> <!-- Optional: for any other status -->
+                                                                @endif
+                                                            </td>
                                                             <td>
                                                                 <div class="dropdown">
                                                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">

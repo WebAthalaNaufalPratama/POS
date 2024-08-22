@@ -38,7 +38,7 @@
                                     <div class="col-md-10">
                                         <div class="form-group">
                                             <label for="id_customer">Nama Customer</label>
-                                            <select id="id_customer" name="id_customer" class="form-control" required>
+                                            <select id="id_customer" name="id_customer" class="form-control customer" required>
                                                 <option value="">Pilih Nama Customer</option>
                                                 @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}" data-point="{{ $customer->poin_loyalty }}" data-hp="{{ $customer->handphone }}" {{ $customer->status_piutang == 'LUNAS' || $customer->status_buka != 'TUTUP' ? '' : 'disabled'}}>{{ $customer->nama }} - {{ $customer->handphone}}</option>
@@ -174,7 +174,7 @@
                                             <tbody id="dynamic_field">
                                                 <tr>
                                                     <td>
-                                                        <select id="nama_produk_0" name="nama_produk[]" class="form-control" onchange="updateProductDetails(0)">
+                                                        <select id="nama_produk_0" name="nama_produk[]" class="form-control">
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
                                                                 <option value="{{ $produk->kode }}" data-harga="{{ $produk->harga_jual }}" data-tipe_produk="{{ $produk->tipe_produk }}">
@@ -801,6 +801,7 @@
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
+            $('#nama_produk_' + i).select2();
 
             function validateNumericInput() {
                 $('input[id^="diskon_"]').on('input', function() {
@@ -831,36 +832,40 @@
             addModal();
         });
 
-        $(document).on('change', '[id^=nama_produk]', function() {
+        $('.customer').select2();
+        $('#ongkir_id').select2();
+        $('#employee_id').select2();
+        $('#lokasi_pengirim').select2();
+        // $('[id^=nama_produk]').select2();
+        // $('select[id^="nama_produk_"]').change(function(){
+        //     var selectedValue = $(this).select2().find(":selected").val();
+        //     console.log(selectedValue);
+        // });
+
+        $('select[id^="nama_produk_"]').change(function(){
             var id = $(this).attr('id').split('_')[2];
             var selectedOption = $(this).find(':selected');
-            var selectedValue = $(this).val();
-
-            // Menggunakan JSON.stringify untuk mengonversi variabel PHP $produks menjadi string JSON
+            var selectedValue = $(this).select2().find(":selected").val();
+            // console.log(selectedValue);
             var selectedProduk = {!! json_encode($produks) !!}.find(produk => produk.kode === selectedValue);
 
             var kode = selectedValue.substring(0, 3);
             if (selectedProduk && selectedProduk.komponen && kode === 'GFT') {
-                // Sembunyikan semua baris komponen
                 $('[id^="komponen_row_"]').hide();
-                $('[id^=add_produk_' + id + ']').show(); // Menampilkan tombol tambah produk komponen
+                $('[id^=add_produk_' + id + ']').show(); 
 
             } else {
-                // Sembunyikan semua baris komponen jika tidak ada komponen yang sesuai
                 $('[id^=add_produk_' + id + ']').hide();
                 $('[id^="komponen_row_"]').hide();
             }
 
-            // Menetapkan nilai data pada elemen HTML
             var kodeProduk = selectedOption.data('kode');
             var tipeProduk = selectedOption.data('tipe_produk');
             var deskripsiProduk = selectedOption.data('deskripsi');
-            // console.log(kodeProduk);
             $('#kode_produk_' + id).val(kodeProduk);
             $('#tipe_produk_' + id).val(tipeProduk);
             $('#deskripsi_komponen_' + id).val(deskripsiProduk);
 
-            // Memanggil fungsi updateHargaSatuan
             updateHargaSatuan(this);
         });
 
@@ -1303,7 +1308,7 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
+                    var total_transaksi = parseRupiahToNumber($('#sub_total').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
@@ -1311,7 +1316,12 @@
                             // console.log(total_promo);
                             break;
                         case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
+                            if(parseInt(response.diskon_nominal) > total_transaksi) {
+                                alert('Promo Tidak Bisa digunakan karena melebihi sub_total!');
+                                $('#total_promo').val(0);
+                            }else{
+                                total_promo = parseInt(response.diskon_nominal);
+                            }
                             break;
                         case 'poin':
                             var pointInput = parseFloat($('#point_dipakai').val()) || 0;

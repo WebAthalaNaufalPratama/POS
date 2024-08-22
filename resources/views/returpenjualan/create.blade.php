@@ -149,7 +149,7 @@
                                         </div>
                                         <div class="form-group" style="display:none;" id="driver">
                                             <label for="driver">Driver</label>
-                                            <select id="driver" name="driver" class="form-control" required>
+                                            <select id="driver" name="driver" class="form-control">
                                                 <option value=""> Pilih Driver </option>
                                                 @foreach ($drivers as $driver)
                                                 <option value="{{ $driver->id }}">{{ $driver->nama }}</option>
@@ -180,7 +180,7 @@
                                                 <label>Bukti Kirim <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_kirim" class="custom-file-container__custom-file__custom-file-input_2" name="file" accept="image/*" required>
+                                                    <input type="file" id="bukti_kirim" class="custom-file-container__custom-file__custom-file-input_2" name="file" accept="image/*">
                                                     <span class="custom-file-container__custom-file__custom-file-control_2"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>

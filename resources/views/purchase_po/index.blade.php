@@ -63,7 +63,7 @@
                 </div>
                 
                 <div class="table-responsive">
-                    <table class="table" id="po">
+                    <table class="table" id="po" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -254,10 +254,10 @@
             <div class="card-body">
                 <div class="row ps-2 pe-2">
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateStartInd" id="filterDateStartInd" value="{{ request()->input('dateStartInd') }}" title="Tanggal Awal">
+                        <input type="text" class="form-control" name="filterDateStartInd" id="filterDateStartInd" value="{{ request()->input('dateStartInd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal dikirim" title="Tanggal Awal">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
-                        <input type="date" class="form-control" name="filterDateEndInd" id="filterDateEndInd" value="{{ request()->input('dateEndInd') }}" title="Tanggal Akhir">
+                        <input type="text" class="form-control" name="filterDateEndInd" id="filterDateEndInd" value="{{ request()->input('dateEndInd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir dikirim" title="Tanggal Akhir">
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
                         <select id="filterSupplierInd" name="filterSupplierInd" class="form-control" title="Supplier">
@@ -284,7 +284,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table" id="inden">
+                        <table class="table" id="inden" style="width: 100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -438,9 +438,14 @@
                     data: 'tgl_diterima', 
                     name: 'tgl_diterima',
                     render: function(data, type, row) {
-                        return row.tgl_diterima_format;
+                        if (row.tgl_diterima_format) {
+                            return row.tgl_diterima_format;
+                        } else {
+                            return '-';
+                        }
                     }  
                 },
+
                 { data: 'no_do_suplier', name: 'no_do_suplier' },
                 { 
                     data: 'status_dibuat', 

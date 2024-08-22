@@ -139,7 +139,6 @@ class PromoController extends Controller
         if ($validator->fails()) return response()->json(['msg' => $error], 400);
         $data = $req->except(['_token', '_method']);
         $tanggalSekarang = Carbon::now()->toDateString();
-        // $lokasi = Auth::user()->karyawan->lokasi_id;
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         $semualokasi = Lokasi::where('nama', 'Semua Lokasi')->first();

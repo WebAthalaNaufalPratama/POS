@@ -143,11 +143,11 @@ Carbon::setLocale('id');
                                                     </div>
                                                     <div class="text-end mt-3">
                                                         <button class="btn btn-primary" type="submit">Upload File</button>
-                                                        <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
+                                                        {{-- <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a> --}}
                                                     </div>
                                                 </form>
+                                                {{-- <input type="file" class="form-control" id="filedo" name="filedo"> --}}
                                                 
-                                                    {{-- <input type="file" class="form-control" id="filedo" name="filedo"> --}}
                                                
                                         </div>
                                     </div>
@@ -203,7 +203,7 @@ Carbon::setLocale('id');
                         </div>
 
                         <div class="row justify-content-start">
-                            <div class="col-md-7 border rounded pt-3 me-1 mt-2">
+                            <div class="col-md-8 border rounded pt-3 me-1 mt-2">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
@@ -270,15 +270,15 @@ Carbon::setLocale('id');
                                         </tr>
                                         <tr>
                                             <td id="tgl_pembuat">
-                                                <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ $beli->tgl_dibuat }}" disabled>
+                                                <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ tanggallengkap($beli->tgl_dibuat) }}" disabled>
                                             </td>
                                             {{-- @if(in_array($beli->lokasi->tipe->id, [1, 2])) --}}
                                             <td id="tgl_diterima">
-                                                <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima_ttd ?? '-'}}" disabled>
+                                                <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ $beli->tgl_diterima_ttd ? tanggallengkap($beli->tgl_diterima_ttd) :  '-'}}" disabled>
                                             </td>
                                             {{-- @endif --}}
                                             <td id="tgl_pemeriksa">
-                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ?? '-' }}" disabled>
+                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ $beli->tgl_diperiksa ? tanggallengkap($beli->tgl_diperiksa ): '-' }}" disabled>
                                             </td>
                                         </tr>
                                     </tbody>

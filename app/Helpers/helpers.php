@@ -23,6 +23,16 @@ if (!function_exists('formatTanggal')) {
 
 }
 
+
+if (!function_exists('tanggallengkap')) {
+    function tanggallengkap($tanggal, $format = 'd F Y H:i:s')
+    {
+        return $tanggal ? Carbon::parse($tanggal)->translatedFormat($format) : '-';
+    }
+
+}
+
+
 if (!function_exists('tanggalindo')) {
     function tanggalindo($date)
     {

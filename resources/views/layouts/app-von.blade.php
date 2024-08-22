@@ -366,7 +366,7 @@
 
       <div class="header-left active">
         <a href="index.html" class="logo">
-          <img src="https://system.vonflorist.com/admin/assets/images/logo.png" style="width: 3rem;" alt="">
+          <img src="/assets/img/logo.png" style="width: 3rem;" alt="">
         </a>
         <!-- <a href="index.html" class="logo-small">
           <img src="/assets/img/logo-small.png" alt="">
@@ -543,9 +543,9 @@
                 
               </div>
               <hr class="m-0">
-              <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> My Profile</a>
+              <!-- <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> My Profile</a>
               <a class="dropdown-item" href="generalsettings.html"><i class="me-2" data-feather="settings"></i>Settings</a>
-              <hr class="m-0">
+              <hr class="m-0"> -->
               @auth
               <a href="{{ route('logout.perform') }}" class="dropdown-item logout pb-0"><img src="/assets/img/icons/log-out.svg" class="me-2" alt="img">Logout</a>
               @endauth
