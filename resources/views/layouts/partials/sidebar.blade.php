@@ -373,6 +373,6 @@
                 @endif
             </ul>
         </div>
-        <img src="/assets/img/bunga.png" alt="Gambar Bunga" id="bawah" style="width:100%">
+        <!-- <img src="/assets/img/bunga.png" alt="Gambar Bunga" id="bawah" style="width:100%"> -->
     </div>
 </div>
