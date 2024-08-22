@@ -1190,7 +1190,7 @@ class PenjualanController extends Controller
             foreach($bayarList as $byr){
                 $totalBayar += $byr->nominal;
             }
-            $data['sisa_bayar'] = $totalBayar;
+            $data['sisa_bayar'] = intval($data['total_tagihan']) - intval($totalBayar);
         }
 
         $update = Penjualan::where('id', $penjualanId)->update($data);
