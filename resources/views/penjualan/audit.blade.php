@@ -317,7 +317,7 @@
 
                                             <!-- Shipping Section -->
                                             <div class="col-lg-6">
-                                                <div class="form-group" style="display:none;" id="kirimpilih">
+                                                <div class="form-group" id="kirimpilih">
                                                     <label>Pengiriman</label>
                                                     <select id="pilih_pengiriman" name="pilih_pengiriman" class="form-control">
                                                         <option value="">Pilih Jenis Pengiriman</option>
@@ -1191,6 +1191,11 @@
             togglePaymentFields();
         });
 
+        $('#ongkir_id').select2();
+        $('#employee_id').select2();
+        $('#lokasi_pengirim').select2();
+
+
         // Initial value from backend
         var initialPembayaran = "{{ $penjualans->cara_bayar }}";
 
@@ -1650,7 +1655,7 @@
 
         $('#distribusi').change(function() {
             var kirim = $(this).val();
-
+            
             if (kirim === 'Diambil') {
                 $('#kirimpilih').hide();
                 $('#biaya_ongkir').val(0);
@@ -1943,7 +1948,7 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
+                    var total_transaksi = parseRupiahToNumber($('#total_tagihan').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
@@ -1951,7 +1956,12 @@
                             // console.log(total_promo);
                             break;
                         case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
+                            if(parseInt(response.diskon_nominal) > total_transaksi) {
+                                alert('Promo Tidak Bisa digunakan karena melebihi sub_total!');
+                                $('#total_promo').val(0);
+                            }else{
+                                total_promo = parseInt(response.diskon_nominal);
+                            }
                             break;
                         case 'poin':
                             var pointInput = parseFloat($('#point_dipakai').val()) || 0;

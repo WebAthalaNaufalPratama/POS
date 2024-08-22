@@ -14,7 +14,13 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $customer = Customer::all();
+        $user = Auth::user();
+        if($user->hasRole(['KasirOutlet','KasirGallery', 'AdminGallery'])) {
+            $karyawan = Karyawan::where('user_id', $user->id)->first();
+            $customer = Customer::where('lokasi_id', $karyawan->lokasi_id)->get();
+        }else{
+            $customer = Customer::all();
+        }
         $lokasis = Lokasi::whereIn('tipe_lokasi', [1, 2])->get();
         $thisLokasi = Auth::user()->karyawans ? Auth::user()->karyawans->lokasi_id : '';
         return view('customer.index', compact('customer', 'lokasis', 'thisLokasi'));

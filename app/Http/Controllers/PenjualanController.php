@@ -252,6 +252,42 @@ class PenjualanController extends Controller
             $data['jumlahCash'] = $req->nominal;
         }
 
+        //cek no_invoice
+        $lokasi = Lokasi::where('id', $data['lokasi_id'])->first();
+
+        if ($lokasi->tipe_lokasi != 2) {
+            $prefix = 'INV' . date('Ymd');
+            $cekInvoice = Penjualan::where('no_invoice', 'LIKE', $prefix . '%')
+                ->orderBy('no_invoice', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_invoice'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        } elseif ($lokasi->tipe_lokasi != 1) {
+            $prefix = 'IPO' . date('Ymd');
+            $cekInvoice = Penjualan::where('no_invoice', 'LIKE', $prefix . '%')
+                ->orderBy('no_invoice', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_invoice'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+        }
+
         $penjualan = Penjualan::create($data);
         $updatecust = Customer::where('id', $data['id_customer'])->update([
             'status_piutang' => 'BELUM LUNAS',
@@ -332,7 +368,7 @@ class PenjualanController extends Controller
                 // if(!empty($newProdukTerjual)){
                 //     return redirect(route('auditpenjualan.edit', ['penjualan' => $penjualan->id]))->with('success', 'Silakan update invoice ke Dikonfirmasi');
                 // }
-                return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
+                return redirect(route('penjualan.index'))->with('success', $penjualan->no_invoice . ' Berhasil Disimpan');
             } else {
                 return redirect()->back()->with('fail', 'Gagal menyimpan data');
             }
@@ -418,7 +454,7 @@ class PenjualanController extends Controller
                 // } else {
                 //     return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
                 // }
-                return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
+                return redirect(route('penjualan.index'))->with('success', $penjualan->no_invoice . ' Berhasil Disimpan');
             } else {
                 return redirect()->back()->with('fail', 'Gagal menyimpan data');
             }
@@ -1145,6 +1181,16 @@ class PenjualanController extends Controller
             } else {
                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
             }
+        }
+
+        $bayarList = Pembayaran::where('invoice_penjualan_id', $penjualan->id)->get();
+        dd($bayarList);
+        if($bayarList->isNotEmpty()) {
+            $totalBayar = 0;
+            foreach($bayarList as $byr){
+                $totalBayar += $byr->nominal;
+            }
+            $data['sisa_bayar'] = $totalBayar;
         }
 
         $update = Penjualan::where('id', $penjualanId)->update($data);

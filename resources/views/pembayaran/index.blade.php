@@ -36,8 +36,9 @@
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>No Invoice</th>
                                 <th>No Invoice Bayar</th>
-                                <th> Cara Bayar</th>
+                                <th>Cara Bayar</th>
                                 <th>Nominal</th>
                                 <th>Rekening</th>
                                 <th>Tanggal_Bayar</th>
@@ -128,6 +129,7 @@
             },
             columns: [
                 { data: 'id', name: 'id', orderable: false, searchable: false },
+                { data: 'no_invoice', name: 'no_invoice' },
                 { data: 'no_invoice_bayar', name: 'no_invoice_bayar' },
                 { data: 'cara_bayar', name: 'cara_bayar' },
                 { data: 'nominal', name: 'nominal' },
@@ -163,7 +165,7 @@
                     }
                 },
                 {
-                    targets: 3,
+                    targets: 4,
                     render: function(data, type, row) {
                         return Number(data).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
                     }
