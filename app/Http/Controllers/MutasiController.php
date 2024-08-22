@@ -454,7 +454,7 @@ class MutasiController extends Controller
                 $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->id)->where('no_invoice_bayar', 'LIKE', 'BGO%')->get();
             }elseif(substr($penjualan->no_mutasi, 0, 3) == 'MOG'){
                 $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->id)->where('no_invoice_bayar', 'LIKE', 'BOG%')->get();
-            }elseif(substr($penjualan->no_mutasi, 0, 3) == 'MGG'){
+            }elseif(substr($penjualan->no_mutasi, 0, 3) == 'MGG' || substr($penjualan->no_mutasi, 0, 3) == 'MPG'){
                 $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->id)->where('no_invoice_bayar', 'LIKE', 'BGG%')->get();
             }elseif(substr($penjualan->no_mutasi, 0, 3) == 'MGA'){
                 $cekTotalTagihan = Pembayaran::where('mutasi_id', $penjualan->id)->where('no_invoice_bayar', 'LIKE', 'BGA%')->get();
