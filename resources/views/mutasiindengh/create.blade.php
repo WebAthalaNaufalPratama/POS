@@ -136,8 +136,8 @@
                                                     <th>Kode Inden</th>
                                                     <th>Kategori</th>
                                                     <th>QTY Kirim</th>
-                                                    <th>QTY Terima</th>
-                                                    <th>Kondisi</th>
+                                                    {{-- <th>QTY Terima</th>
+                                                    <th>Kondisi</th> --}}
                                                     <th>Biaya Perawatan</th>
                                                     <th>Total Biaya Perawatan</th>
                                                     <th></th>
@@ -158,7 +158,7 @@
                                                     <td><input type="hidden" class="form-control" name="idinven[]" id="idinven_0" value="" readonly>
                                                         <input type="text" class="form-control" name="kategori[]" id="kategori_0" readonly required></td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" oninput="validateQty(0)" required></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                                                    {{-- <td><input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
                                                     <td>
                                                         <select id="kondisi_0" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
                                                             <option value="">Pilih Kondisi</option>
@@ -166,7 +166,7 @@
                                                                 <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
                                                             @endforeach
                                                         </select>
-                                                    </td>
+                                                    </td> --}}
                                                     <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
@@ -580,15 +580,7 @@ function validateQty(index) {
                 <td><input type="hidden" class="form-control" name="idinven[]" id="idinven_${i}" value="" readonly>
                     <input type="text" class="form-control" name="kategori[]" id="kategori_${i}" readonly></td>
                 <td><input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control"  oninput="validateQty(${i})"></td>
-                <td><input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly></td>
-                <td>
-                    <select id="kondisi_${i}" name="kondisi[]" class="form-control" readonly>
-                        <option value="">Pilih Kondisi</option>
-                        @foreach ($kondisis as $kondisi)
-                         <option value="{{ $kondisi->id }}" disabled>{{ $kondisi->nama }}</option>
-                        @endforeach
-                    </select>
-                </td>
+                
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">Rp. </span>

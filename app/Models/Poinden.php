@@ -38,6 +38,4 @@ class Poinden extends Model
     public function invoice(){
         return $this->hasOne(Invoicepo::class);
     }
-
-
 }

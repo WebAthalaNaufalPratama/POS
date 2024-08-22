@@ -708,7 +708,7 @@ class PembayaranController extends Controller
         //     $file = $req->file('buktitf');
         //     $fileName = time() . '_' . $file->getClientOriginalName();
         //     $filePath = $file->storeAs('bukti_pembayaran_mutasiinden', $fileName, 'public');
-        //     $data['bukti'] = $filePath;
+        //     $data['bukti'] = $filePath; 
         // }
         // store file
         if ($req->hasFile('buktitf')) {

@@ -14,10 +14,10 @@
         <div class="card-body">
             <div class="row ps-2 pe-2">
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                    <input type="text" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal Bayar" title="Tanggal Awal">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                    <input type="text" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir Bayar" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterMetodekeluar" name="metode_keluar" class="form-control" title="metode">
@@ -99,10 +99,10 @@
         <div class="card-body">
             <div class="row ps-2 pe-2">
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart2" id="filterDateStart2" value="{{ request()->input('dateStart2') }}" title="Tanggal Awal">
+                    <input type="text" class="form-control" name="filterDateStart2" id="filterDateStart2" value="{{ request()->input('dateStart2') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Awal Bayar" title="Tanggal Awal">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd2" id="filterDateEnd2" value="{{ request()->input('dateEnd2') }}" title="Tanggal Akhir">
+                    <input type="text" class="form-control" name="filterDateEnd2" id="filterDateEnd2" value="{{ request()->input('dateEnd2') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir Bayar" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterMetodemasuk" name="metode_masuk" class="form-control" title="metode">

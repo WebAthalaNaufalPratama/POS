@@ -86,7 +86,21 @@
                                                 {{-- <div class="input-group">
                                                     <input type="file" id="file" name="file" value="" class="form-control" accept=".pdf,image/*">
                                                 </div> --}}
-                                                <img id="preview" src="{{ $data->foto ? '/storage/' . $data->foto : '' }}" alt="your image" />
+                                                <img id="preview" src="{{ $data->foto ? '/storage/' . $data->foto : '' }}" alt="your image" class="img-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageInModal(this)" />
+                                            </div>
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="imageModalLabel">Preview Image</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body text-center">
+                                                            <img id="modalImage" src="" alt="Preview Image" class="img-fluid">
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -500,6 +514,11 @@
 
 @section('scripts')
 <script>
+    function showImageInModal(element) {
+        var imgSrc = element.src;
+        document.getElementById('modalImage').src = imgSrc;
+    }
+
     $(document).ready(function(){
         if ($('#previewByr').attr('src') === '') {
             $('#previewByr').attr('src', defaultImg);
