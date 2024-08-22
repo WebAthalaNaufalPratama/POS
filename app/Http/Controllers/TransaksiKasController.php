@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\File;
 use Intervention\Image\Facades\Image;
+use Spatie\Activitylog\Models\Activity;
 
 class TransaksiKasController extends Controller
 {
@@ -658,6 +659,19 @@ class TransaksiKasController extends Controller
         }
         $data['status'] = 'DIKONFIRMASI';
 
+        // cek saldo
+        if($req->metode == 'Transfer'){
+            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
+            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+            }
+        } else {
+            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
+            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            }
+        }
+
         // store file
         if ($req->hasFile('file')) {
             // Simpan file baru
@@ -743,6 +757,19 @@ class TransaksiKasController extends Controller
             return redirect()->back()->with('fail', 'Transaksi tidak ditemukan.');
         }
 
+        // cek saldo
+        if($req->metode == 'Transfer'){
+            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
+            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+            }
+        } else {
+            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
+            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            }
+        }
+
         // save data
         $data['file'] = $existingTransaksi->file;
         // store file
@@ -802,5 +829,76 @@ class TransaksiKasController extends Controller
         if ($validator->fails()) return response()->json($error, 400);
         $rekenings = Rekening::where('lokasi_id', $req->lokasi_id)->get();
         return response()->json($rekenings);
+    }
+
+    public function log(Request $req, $id)
+    {
+        $queryLogs = Activity::with('causer', 'subject')->where('subject_type', TransaksiKas::class)->where('subject_id', $id)->orderBy('id', 'desc');
+        $start = $req->input('start');
+        $length = $req->input('length');
+        $order = $req->input('order')[0]['column'];
+        $dir = $req->input('order')[0]['dir'];
+        $columnName = $req->input('columns')[$order]['data'];
+
+        $queryLogs->orderBy($columnName, $dir);
+        $recordsFiltered = $queryLogs->count();
+        $tempData = $queryLogs->offset($start)->limit($length)->get();
+
+        $currentPage = ($start / $length) + 1;
+        $perPage = $length;
+    
+        $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+            $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+            $changes = $item->changes();
+    
+            if (isset($changes['old'])) {
+                $diff = array_keys(array_diff_assoc($changes['attributes'], $changes['old']));
+                $descriptionLog = [];
+                foreach ($diff as $key => $value) {
+                    $descriptionLog[] = [
+                        'field' => $value,
+                        'old' => $changes['old'][$value],
+                        'new' => $changes['attributes'][$value]
+                    ];
+                }
+            } else {
+                $descriptionLog = [['message' => 'Data Kas Terbuat']];
+            }
+            
+            $item->description_log = $descriptionLog;
+            $item->pengubah = $item->causer->name;
+            return $item;
+        });
+
+        // search
+        $search = $req->input('search.value');
+        if (!empty($search)) {
+            $data = $data->filter(function($item) use ($search) {
+                $descriptionLogMatches = collect($item->description_log)->filter(function($log) use ($search) {
+                    // Pastikan key yang diakses ada
+                    $field = $log['field'] ?? '';
+                    $old = $log['old'] ?? '';
+                    $new = $log['new'] ?? '';
+                    $message = $log['message'] ?? '';
+
+                    return stripos($field, $search) !== false
+                        || stripos($old, $search) !== false
+                        || stripos($message, $search) !== false
+                        || stripos($new, $search) !== false;
+                })->isNotEmpty();
+
+                return $descriptionLogMatches
+                    || stripos($item->no, $search) !== false
+                    || stripos($item->pengubah, $search) !== false
+                    || stripos($item->created_at, $search) !== false;
+            });
+        }
+
+        return response()->json([
+            'draw' => $req->input('draw'),
+            'recordsTotal' => Activity::count(),
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 }

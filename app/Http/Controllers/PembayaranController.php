@@ -504,7 +504,7 @@ class PembayaranController extends Controller
                 DB::rollBack();
                 return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
             }
-    
+            $this->updateStatusAll($data['invoice_sewa_id'], 'Sewa');
             DB::commit();
             return redirect()->back()->with('success', 'Pembayaran berhasil');
     
@@ -1209,4 +1209,26 @@ class PembayaranController extends Controller
 
     }
 
+    public function updateStatusAll($invoice_id, $jenis)
+    {
+        if ($jenis == 'Sewa') {
+            $pembayarans = Pembayaran::where('invoice_sewa_id', $invoice_id)->orderBy('tanggal_bayar')->get();
+            $invoice = InvoiceSewa::find($invoice_id);
+            $totalPaid = 0;
+            $remainingBalance = $invoice->total_tagihan - $invoice->dp;
+            $lastPaymentIndex = $pembayarans->count() - 1;
+    
+            foreach ($pembayarans as $index => $pembayaran) {
+                $totalPaid += $pembayaran->nominal;
+    
+                if ($totalPaid == $remainingBalance && $index == $lastPaymentIndex) {
+                    $pembayaran->status_bayar = 'LUNAS';
+                } else {
+                    $pembayaran->status_bayar = 'BELUM LUNAS';
+                }
+    
+                $pembayaran->save();
+            }
+        }
+    }
 }

@@ -457,26 +457,24 @@ class PenjualanController extends Controller
         $promos = Promo::where('id', $penjualans->promo_id)->get();
         $perangkai = Karyawan::where('jabatan', 'Perangkai')->get();
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_invoice', $penjualans->no_invoice)->get();
-        $Invoice = Pembayaran::latest()->first();
-        // dd($Invoice);
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
+        if($lokasi->lokasi->tipe_lokasi == 1){
+            $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BYR' .date('Ymd').'%')->latest()->first();
+        }elseif($lokasi->lokasi->tipe_lokasi == 2){
+            $Invoice = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BOT' .date('Ymd').'%')->latest()->first();
+        }
         if ($Invoice != null) {
             $substring = substr($Invoice->no_invoice_bayar, 11);
             $cekInvoice = substr($substring, 0, 3);
-            // dd($cekInvoice);
         } else {
             $cekInvoice = 000;
         }
         $pembayarans = Pembayaran::with('rekening')->where('invoice_penjualan_id', $penjualan)->orderBy('created_at', 'desc')->get();
-        // dd($produks);
         $pembayaran = Pembayaran::where('invoice_penjualan_id', $penjualans->id)->first();
         $lokasigalery = Lokasi::where('tipe_lokasi', 1)->get();
-        // dd($promos);
-        // $getProdukJual = Produk_Jual::find($penjualan);
-        // $getKomponen = Komponen_Produk_Jual::where('produk_jual_id', $getProdukJual->id)->get();
         $roles = Auth::user()->roles()->value('name');
-        $user = Auth::user();
-        $lokasi = Karyawan::where('user_id', $user->id)->value('lokasi_id');
-        $lokasis = Lokasi::where('id', $lokasi)->get();
+        $lokasis = Lokasi::where('id', $lokasi->lokasi_id)->get();
         $rekenings = Rekening::get();
         $ongkirs = Ongkir::get();
         $bankpens = Rekening::get();

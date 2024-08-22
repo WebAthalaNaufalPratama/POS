@@ -343,7 +343,7 @@
                             '</td>'+
                             '<td><input type="number" name="jumlah2[]" id="jumlah2_'+i+'" class="form-control"></td>'+
                             '<td><input type="text" name="satuan2[]" id="satuan2_'+i+'" class="form-control"></td>'+
-                            '<td><input type="text" name="detail_lokasis2[]" id="detail_lokasis2_'+i+'" class="form-control"></td>'+
+                            '<td><input type="text" name="detail_lokasi2[]" id="detail_lokasi2_'+i+'" class="form-control"></td>'+
                             '<td><a href="javascript:void(0);" class="btn_remove2" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td></tr>';
                 $('#dynamic_field2').append(newRow);
                 $('#produk2_' + i).select2();

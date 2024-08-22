@@ -96,10 +96,10 @@ class InvoiceSewaController extends Controller
                 $item->tanggal_pembuat_format = $item->tanggal_pembuat == null ? '-' : tanggalindo($item->tanggal_pembuat);
                 $item->tanggal_penyetuju_format = $item->tanggal_penyetuju == null ? '-' : tanggalindo($item->tanggal_penyetuju);
                 $item->tanggal_pemeriksa_format = $item->tanggal_pemeriksa == null ? '-' : tanggalindo($item->tanggal_pemeriksa);
-                $item->total_tagihan = $item->total_tagihan == null ? null : formatRupiah($item->total_tagihan);
-                $item->dp = $item->dp == null ? null : formatRupiah($item->dp);
+                $item->total_tagihan_format = $item->total_tagihan == null ? null : formatRupiah($item->total_tagihan);
+                $item->dp_format = $item->dp == null ? null : formatRupiah($item->dp);
                 $item->isLunas = $item->sisa_bayar == 0 ? true : false;
-                $item->sisa_bayar = $item->sisa_bayar == null ? null : formatRupiah($item->sisa_bayar);
+                $item->sisa_bayar_format = $item->sisa_bayar == null ? null : formatRupiah($item->sisa_bayar);
                 $item->nama_customer = $item->kontrak->customer->nama;
                 $item->userRole = Auth::user()->getRoleNames()->first();
                 $item->hasKembaliSewa = KembaliSewa::where('no_sewa', $item->no_sewa)->where('status', 'DIKONFIRMASI')->exists();
@@ -123,12 +123,19 @@ class InvoiceSewaController extends Controller
             })
             ->orderBy('customers.nama')
         ->get();
-        $Invoice = Pembayaran::latest()->first();
-        if ($Invoice != null) {
-            $substring = substr($Invoice->no_invoice_bayar, 11);
-            $invoice_bayar = substr($substring, 0, 3);
+        $Invoice = Pembayaran::whereRaw('LENGTH(no_invoice_bayar) = 16')->latest()->first();
+        if (!$Invoice) {
+            $invoice_bayar = 'BYR' . date('Ymd') . '00001';
         } else {
-            $invoice_bayar = 0;
+            $lastDate = substr($Invoice->no_invoice_bayar, 3, 8);
+            $todayDate = date('Ymd');
+            if ($lastDate != $todayDate) {
+                $invoice_bayar = 'BYR' . date('Ymd') . '00001';
+            } else {
+                $lastNumber = substr($Invoice->no_invoice_bayar, -5);
+                $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                $invoice_bayar = 'BYR' . date('Ymd') . $nextNumber;
+            }
         }
         $bankpens = Rekening::get();
         return view('invoice_sewa.index', compact('invoice_bayar', 'bankpens', 'customer'));
@@ -321,8 +328,8 @@ class InvoiceSewaController extends Controller
         $produkSewa = $kontrak->produk()->whereHas('produk')->get();
         $riwayat = Activity::where('subject_type', InvoiceSewa::class)->where('subject_id', $invoiceSewa)->orderBy('id', 'desc')->get();
         $pembayaran = $data->pembayaran()->orderByDesc('id')->get();
-        $bankpens = Rekening::get();
-        $Invoice = Pembayaran::latest()->first();
+        $bankpens = Rekening::where('lokasi_id', $data->kontrak->lokasi_id)->get();
+        $Invoice = Pembayaran::whereRaw('LENGTH(no_invoice_bayar) = 16')->latest()->first();
         if (!$Invoice) {
             $invoice_bayar = 'BYR' . date('Ymd') . '00001';
         } else {
@@ -359,7 +366,7 @@ class InvoiceSewaController extends Controller
         $riwayat = Activity::where('subject_type', InvoiceSewa::class)->where('subject_id', $invoiceSewa)->orderBy('id', 'desc')->get();
         $pembayaran = $data->pembayaran()->orderByDesc('id')->get();
         $bankpens = Rekening::get();
-        $Invoice = Pembayaran::latest()->first();
+        $Invoice = Pembayaran::whereRaw('LENGTH(no_invoice_bayar) = 16')->latest()->first();
         if (!$Invoice) {
             $invoice_bayar = 'BYR' . date('Ymd') . '00001';
         } else {

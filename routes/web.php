@@ -61,6 +61,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::post('addKomponen', 'KomponenProdukTerjualController@addKomponen')->name('addKomponen');
         Route::get('getProdukDo', 'DeliveryOrderController@getProdukDo')->name('getProdukDo');
         Route::get('rekeningPerLokasi', 'TransaksiKasController@rekeningPerLokasi')->name('rekeningPerLokasi');
+        Route::get('log/{id}', 'TransaksiKasController@log')->name('kas.log');
 
 
         Route::group(['prefix' => 'dashboard'], function() {

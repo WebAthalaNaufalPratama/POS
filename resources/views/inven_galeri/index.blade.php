@@ -142,10 +142,10 @@
                     </div>
                 @endif
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart2" id="filterDateStart2" value="{{ request()->input('dateStart2') }}" title="Tanggal Awal">
+                    <input type="text" class="form-control" name="filterDateStart2" id="filterDateStart2" value="{{ request()->input('dateStart2') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Awal Pemakaian" title="Tanggal Awal">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd2" id="filterDateEnd2" value="{{ request()->input('dateEnd2') }}" title="Tanggal Akhir">
+                    <input type="text" class="form-control" name="filterDateEnd2" id="filterDateEnd2" value="{{ request()->input('dateEnd2') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Akhir Pemakaian" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn2" data-base-url="{{ route('inven_galeri.index') }}" class="btn btn-info">Filter</a>
@@ -224,8 +224,8 @@
                         <tr>
                            <th style="width: 5%">No</th> 
                            <th style="width: 15%">Tanggal</th> 
-                           <th style="width: 30%">Produk</th> 
-                           <th style="width: 5%">Jumlah</th> 
+                           <th style="width: 25%">Produk</th> 
+                           <th style="width: 10%">Jumlah</th> 
                            <th style="width: 20%">Pemakai</th> 
                            <th style="width: 20%">Alasan</th>
                            <th style="width: 5%" class="text-center"><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></th>

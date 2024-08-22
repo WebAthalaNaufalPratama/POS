@@ -239,9 +239,27 @@
                         return row.jatuh_tempo_format;
                     }
                 },
-                { data: 'total_tagihan', name: 'total_tagihan' },
-                { data: 'dp', name: 'dp' },
-                { data: 'sisa_bayar', name: 'sisa_bayar' },
+                { 
+                    data: 'total_tagihan', 
+                    name: 'total_tagihan',
+                    render: function(data, type, row){
+                        return row.total_tagihan_format;
+                    }
+                },
+                { 
+                    data: 'dp', 
+                    name: 'dp',
+                    render: function(data, type, row){
+                        return row.dp_format;
+                    }
+                },
+                { 
+                    data: 'sisa_bayar', 
+                    name: 'sisa_bayar',
+                    render: function(data, type, row){
+                        return row.sisa_bayar_format;
+                    }
+                },
                 { 
                     data: 'status',
                     name: 'status',
@@ -457,6 +475,7 @@
             $('#total_tagihan').val(formatNumber(invoice.total_tagihan));
             $('#sisa_tagihan').val(formatNumber(invoice.sisa_bayar));
             $('#nominal').val(formatNumber(invoice.sisa_bayar));
+            $('#no_invoice_bayar').val("{{ $invoice_bayar }}");
             $('#rekening_id').select2({
                 dropdownParent: $("#modalBayar")
             });
@@ -464,7 +483,7 @@
                 dropdownParent: $("#modalBayar")
             });
             $('#modalBayar').modal('show');
-            generateInvoice();
+            // generateInvoice();
         }
 
         function generateInvoice() {

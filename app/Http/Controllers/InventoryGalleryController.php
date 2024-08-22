@@ -122,6 +122,12 @@ class InventoryGalleryController extends Controller
                 if ($req->gallery2) {
                     $query2->where('lokasi_id', $req->input('gallery2'));
                 }
+                if ($req->dateStart2) {
+                    $query2->whereDate('tanggal', '>=', $req->input('dateStart2'));
+                }
+                if ($req->dateEnd2) {
+                    $query2->whereDate('tanggal', '<=', $req->input('dateEnd2'));
+                }
             
                 $start = $req->input('start');
                 $length = $req->input('length');
@@ -454,6 +460,32 @@ class InventoryGalleryController extends Controller
                         $mergedCollection = $mergedCollection->merge($datamutasiMasuk);
                     }
                 // mutasi end
+
+                // pemakaioan sendiri start
+                    $pemakaianSendiri = PemakaianSendiri::with('lokasi', 'produk', 'kondisi', 'karyawan')->where(function($q) use($isAdminGallery){
+                        if ($isAdminGallery) {
+                            $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+                        }
+                    })->get();
+                    if($pemakaianSendiri->isNotEmpty()){
+                        $dataPemakaianSendiri = $pemakaianSendiri->map(function($produk){
+                            return [
+                                'Id' => $produk->produk->id,
+                                'Pengubah' => '-',
+                                'No Referensi' => null,
+                                'Kode Produk Jual' => null,
+                                'Nama Produk Jual' => null,
+                                'Kode Komponen' => $produk->produk->kode ?? null,
+                                'Nama Komponen' => $produk->produk->nama ?? null,
+                                'Kondisi' => $produk->kondisi->nama ?? null,
+                                'Masuk' => '-',
+                                'Keluar' => $produk->jumlah,
+                                'Waktu' => $produk->updated_at
+                            ];
+                        });
+                        $mergedCollection = $mergedCollection->merge($dataPemakaianSendiri);
+                    }
+                //  pemakaian sendiri end
 
                 $start = $req->input('start');
                 $length = $req->input('length');

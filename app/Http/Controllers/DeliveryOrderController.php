@@ -55,6 +55,7 @@ class DeliveryOrderController extends Controller
             ->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
                 return $query->where('customers.lokasi_id', Auth::user()->karyawans->lokasi_id);
             })
+            ->where('tipe', 'sewa')
             ->orderBy('customers.nama')
         ->get();
         $driver = DeliveryOrder::select('driver')
@@ -341,7 +342,7 @@ class DeliveryOrderController extends Controller
                         'jumlah' => $data['jumlah2'][$i],
                         'satuan' => $data['satuan2'][$i],
                         'jenis' => 'TAMBAHAN',
-                        'keterangan' => $data['keterangan2'][$i]
+                        'detail_lokasi' => $data['detail_lokasi2'][$i]
                     ]);
 
                     if (!$produk_terjual) {

@@ -211,7 +211,7 @@
             var symbol = '';
 
             var Produk = $('#filterProduk').val();
-            console.log(Produk);
+            // console.log(Produk);
             if (Produk) {
                 var filterProduk = 'produk=' + Produk;
                 if (first == true) {

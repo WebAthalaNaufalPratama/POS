@@ -771,7 +771,7 @@
 
 @section('scripts')
 <script>
-    var cekInvoiceNumbers = "0";
+    var cekInvoiceNumbers = "<?php echo $cekInvoice ?>";
     // console.log(cekInvoiceNumbers);
     var ceklokasi = "<?php echo $ceklokasi ?>";
     var nextInvoiceNumber = parseInt(cekInvoiceNumbers) + 1;

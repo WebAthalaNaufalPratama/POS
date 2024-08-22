@@ -113,6 +113,19 @@
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
             <div class="card-header">
                 <h5 class="card-title">Top Minus Produk</h5>
+                <div class="row">
+                    <div class="col-8">
+                        <select id="InvenSelect" class="custom-select">
+                            <option value="">Pilih Inventory</option>
+                            <option value="Greenhouse" {{ request('inven') == 'Greenhouse' ? 'selected':''}}>Greenhouse</option>
+                            <option value="Inden" {{ request('inven') == 'Inden' ? 'selected':''}}>Inden</option>
+                            <option value="Gudang" {{ request('inven') == 'Gudang' ? 'selected':''}}>Gudang</option>
+                        </select>
+                    </div>
+                    <div class="col-4 bulan">
+                        <input type="month" class="form-control" name="filterDate" id="filterDate" value="{{ request()->input('dateInden') }}">
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div id="top_minus_produk" class="chart-set"></div>
@@ -142,8 +155,59 @@
             window.location.href = '{{ url("dashboard") }}' + '?lokasi_id=' + locationId;
         });
     @endif
-    
+    var first = true;
+    var urlString = '';
 
+    $(document).ready(function() {
+        var urlString = '';
+
+        invenSelect();
+
+        function invenSelect() {
+            var InvenId = $('#InvenSelect').val();
+            if (InvenId === "Inden") {
+                $('.bulan').show();
+            } else {
+                $('.bulan').hide();
+            }
+        }
+
+        $('#InvenSelect').on('change', function() {
+            var InvenId = $(this).val();
+            if(InvenId == 'Inden'){
+                $('.bulan').show();
+                 updateUrl(InvenId, $('#filterDate').val());
+            }else{
+                
+                updateUrl(InvenId, null);
+            }
+           
+        });
+
+        $('#filterDate').on('change', function() {
+            var dateInden = $(this).val();
+            updateUrl($('#InvenSelect').val(), dateInden);
+        });
+
+        function updateUrl(InvenId, dateInden) {
+            urlString = '';
+
+            if (InvenId) {
+                urlString += 'inven=' + InvenId;
+            }
+
+            if (dateInden) {
+                if (urlString.length > 0) {
+                    urlString += '&';
+                }
+                urlString += 'dateInden=' + dateInden;
+            }
+
+            window.location.href = '{{ url("dashboard") }}' + (urlString ? '?' + urlString : '');
+        }
+    });
+
+    
     function formatTanggal(date) {
         var options = {
             year: 'numeric',
@@ -286,16 +350,18 @@
         topMinusProductsChart.render();
 
         var locationId = $('#locationSelect').val();
+        var InvenId = $('#InvenSelect').val();
+        var dateInden = $('#filterDate').val();
+        console.log(dateInden);
 
         $.ajax({
             @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
             url: '{{ route('getTopMinusProduk') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
-            url: '{{ route('getTopMinusProduk') }}',
+            url: '{{ route('getTopMinusProduk') }}' + (InvenId ? '?inven=' + InvenId : '') +'&'+ (dateInden ? 'dateInden=' + dateInden : ''),
             @endif
             method: 'GET',
             success: function(response) {
-
                 if (response.labels && response.series && response.series.length === 2) {
                     topMinusProductsChart.updateOptions({
                         xaxis: {
