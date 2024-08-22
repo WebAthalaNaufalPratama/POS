@@ -49,7 +49,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table datanew" style="width: 100%">
                 <thead>
                 <tr>
                     <th>No</th>

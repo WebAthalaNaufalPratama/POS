@@ -177,8 +177,11 @@ $user = Auth::user();
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
                                         <div class="page-btn">
-                                            @if (Auth::user()->hasRole('Finance'))    
-                                            <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
+                                            @if (Auth::user()->hasRole('Finance') && $data->sisa_bayar !== 0)    
+                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
+                                                Tambah Pembayaran
+                                           </button>
+                                            {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
                                             @else
                                             Riwayat Pembayaran
                                             @endif

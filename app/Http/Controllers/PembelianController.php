@@ -642,10 +642,10 @@ class PembelianController extends Controller
         }
 
         if ($req->dateStart) {
-            $query->where('tgl_dibuat', '>=', $req->input('dateStart'));
+            $query->where('tgl_retur', '>=', $req->input('dateStart'));
         }
         if ($req->dateEnd) {
-            $query->where('tgl_dibuat', '<=', $req->input('dateEnd'));
+            $query->where('tgl_retur', '<=', $req->input('dateEnd'));
         }
 
         if ($req->ajax()) {
@@ -685,7 +685,7 @@ class PembelianController extends Controller
                     'komplain' => $item->komplain,
                     'subtotal' => $item->subtotal,
                     'status_dibuat' => $item->status_dibuat,
-                    'status_dibuku' => $item->status_dibuku,
+                    'status_dibuku' => $item->status_dibuku ?? 'TUNDA',
                     'invoice' => $item->invoice,
                 ];
             });
@@ -948,10 +948,21 @@ class PembelianController extends Controller
 
             if ($request->hasFile('filedo')) {
                 $file = $request->file('filedo');
-                $fileName = $request->nopo . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('bukti_do_supplier', $fileName, 'public');
-                $pembelian->file_do_suplier = $filePath; // Simpan path file ke dalam model jika ada
-            }
+                $fileName = $this->generatePONumber() . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = 'bukti_do_supplier/'. $fileName;
+
+                        // Optimize dan simpan file baru
+                    Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $pembelian->file_do_suplier = $filePath; // Simpan path file ke dalam model jika ada
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
+            }       
+          
 
             $pembelian->save();
 
@@ -1221,9 +1232,20 @@ class PembelianController extends Controller
     
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('bukti_retur_pembelian', $fileName, 'public');
-                $data['foto'] = $filePath;
+                $fileName = $this->generateReturNumber() . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+                $filePath = 'bukti_retur_pembelian/'. $fileName;
+
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                ->save(storage_path('app/public/' . $filePath));
+
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['foto'] = $filePath;
+                } else {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+                }
+
+               
             }
     
             if ($request->komplain == "Refund") {
@@ -2006,7 +2028,7 @@ class PembelianController extends Controller
     }
 
 
-    /**
+    /** 
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -3041,7 +3063,7 @@ class PembelianController extends Controller
                 if (File::exists(storage_path('app/public/' . $filePath))) {
                     $datapo->file_do_suplier = $filePath;
                 } else {
-                    // DB::rollBack();
+                    DB::rollBack();
                     return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
                 }
             
