@@ -184,7 +184,15 @@ Carbon::setLocale('id');
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
                                         <div class="page-btn">
-                                            <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a>
+
+                                           @if (Auth::user()->hasRole('Finance') && $inv_po->sisa !== 0)   
+                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
+                                                Tambah Pembayaran
+                                           </button>
+                                            @else
+                                            Riwayat Pembayaran
+                                            @endif
+
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table datanew">

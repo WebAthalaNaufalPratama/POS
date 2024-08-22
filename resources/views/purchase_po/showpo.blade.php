@@ -8,6 +8,8 @@ Carbon::setLocale('id');
 
 @section('content')
 
+
+
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
@@ -32,7 +34,8 @@ Carbon::setLocale('id');
             </h4>
         </hr>
         @if($beli->no_retur !== null)
-        <label>
+        <label style="color: black; font-size: 16px; z-index: 1; position: relative;">
+
             <input type="checkbox" id="returCheckbox" @if($beli->no_retur !== null)  checked @endif disabled> Pembelian Retur
         </label>
     </br>
@@ -139,7 +142,7 @@ Carbon::setLocale('id');
                                                             <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                         </label>
                                                         <span class="text-danger">max 2mb</span>
-                                                        <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" />
+                                                        <img id="previewdo" src="{{ $beli->file_do_suplier ? '/storage/' . $beli->file_do_suplier : '' }}" alt="your image" class="img-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageInModal(this)" />
                                                     </div>
                                                     <div class="text-end mt-3">
                                                         <button class="btn btn-primary" type="submit">Upload File</button>
@@ -150,6 +153,21 @@ Carbon::setLocale('id');
                                                 
                                                
                                         </div>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="imageModalLabel">Preview Image</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    <img id="modalImage" src="" alt="Preview Image" class="img-fluid">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -303,6 +321,14 @@ Carbon::setLocale('id');
 
 @section('scripts')
     <script>
+
+
+    function showImageInModal(element) {
+        var imgSrc = element.src;
+        document.getElementById('modalImage').src = imgSrc;
+    }
+
+
         // var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
             if ($('#previewdo').attr('src') === '') {

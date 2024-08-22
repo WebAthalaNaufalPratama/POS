@@ -396,7 +396,7 @@ class MutasiindensController extends Controller
                     return $produkretur->jml_diretur;
                 })->implode('</li><li>');
                 $formattedHarga = $harga;
-                
+                // dd($item->produkreturinden);
 
                 return [
                     'id' => $item->id,
@@ -1478,7 +1478,7 @@ class MutasiindensController extends Controller
 
         try {
 
-            Produkreturinden::where('returinden_id', $retur->id)->delete();
+            Produkreturinden::where('returinden_id', $retur->id)->forceDelete();
            
             $mutasi = Mutasiindens::find($request->mutasiinden_id);
             $lokasi_id = $mutasi->lokasi_id;
@@ -1593,6 +1593,7 @@ class MutasiindensController extends Controller
             }
 
 
+            
                 
             // Loop melalui data produk dan masukkan ke tabel Produkreturinden
         foreach ($validated['produk_mutasi_inden_id'] as $index => $produk_mutasi_inden_id) {

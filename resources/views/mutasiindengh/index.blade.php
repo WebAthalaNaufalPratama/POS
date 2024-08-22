@@ -19,10 +19,10 @@
             <div class="card-body">
             <div class="row ps-2 pe-2">
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" title="Tanggal Awal">
+                    <input type="text" class="form-control" name="filterDateStart" id="filterDateStart" value="{{ request()->input('dateStart') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir Bayar" title="Tanggal Awal">
                 </div>
                 <div class="col-sm-2 ps-0 pe-0">
-                    <input type="date" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" title="Tanggal Akhir">
+                    <input type="text" class="form-control" name="filterDateEnd" id="filterDateEnd" value="{{ request()->input('dateEnd') }}" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Tanggal Akhir Bayar" title="Tanggal Akhir">
                 </div>
                 <div class="col-sm-2">
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('mutasiindengh.index') }}" class="btn btn-info">Filter</a>
