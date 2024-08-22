@@ -1943,7 +1943,7 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    var total_transaksi = parseInt($('#total_tagihan').val());
+                    var total_transaksi = parseInt($('#sub_total').val());
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
@@ -1951,7 +1951,12 @@
                             // console.log(total_promo);
                             break;
                         case 'nominal':
-                            total_promo = parseInt(response.diskon_nominal);
+                            if(parseInt(response.diskon_nominal) > total_transaksi) {
+                                alert('Promo Tidak Bisa digunakan karena melebihi sub_total!');
+                                $('#total_promo').val(0);
+                            }else{
+                                total_promo = parseInt(response.diskon_nominal);
+                            }
                             break;
                         case 'poin':
                             var pointInput = parseFloat($('#point_dipakai').val()) || 0;
