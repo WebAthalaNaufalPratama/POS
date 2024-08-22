@@ -252,6 +252,42 @@ class PenjualanController extends Controller
             $data['jumlahCash'] = $req->nominal;
         }
 
+        //cek no_invoice
+        $lokasi = Lokasi::where('id', $data['lokasi_id'])->first();
+
+        if ($lokasi->tipe_lokasi != 2) {
+            $prefix = 'INV' . date('Ymd');
+            $cekInvoice = Penjualan::where('no_invoice', 'LIKE', $prefix . '%')
+                ->orderBy('no_invoice', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_invoice'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        } elseif ($lokasi->tipe_lokasi != 1) {
+            $prefix = 'IPO' . date('Ymd');
+            $cekInvoice = Penjualan::where('no_invoice', 'LIKE', $prefix . '%')
+                ->orderBy('no_invoice', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_invoice'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+        }
+
         $penjualan = Penjualan::create($data);
         $updatecust = Customer::where('id', $data['id_customer'])->update([
             'status_piutang' => 'BELUM LUNAS',
