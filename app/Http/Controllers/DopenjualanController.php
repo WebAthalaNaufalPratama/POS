@@ -187,6 +187,39 @@ class DopenjualanController extends Controller
             }
         }
 
+        if (substr($data['no_do'], 0,3) == 'DOP') {
+            $prefix = 'DOP' . date('Ymd');
+            $cekInvoice = DeliveryOrder::where('no_do', 'LIKE', $prefix . '%')
+                ->orderBy('no_do', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_do'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        } elseif (substr($data['no_do'], 0,3) == 'DOR') {
+            $prefix = 'DOR' . date('Ymd');
+            $cekInvoice = DeliveryOrder::where('no_do', 'LIKE', $prefix . '%')
+                ->orderBy('no_do', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_do'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+        }
+
         // save data do
         $check = DeliveryOrder::create($data);
         if (!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');

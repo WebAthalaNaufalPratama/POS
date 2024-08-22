@@ -81,6 +81,7 @@ class PembayaranController extends Controller
 
             return [
                 'id' => $item->id,
+                'no_invoice' => $item->penjualan->no_invoice,
                 'no_invoice_bayar' => $item->no_invoice_bayar,
                 'cara_bayar' => $item->cara_bayar,
                 'nominal' => $nominal, 
@@ -1231,4 +1232,112 @@ class PembayaranController extends Controller
             }
         }
     }
+
+    public function edit_pembelian(Request $req, $id)
+    {
+        $validator = Validator::make($req->all(), [
+            'jenis' => 'required|InvoicePO,InvoiceInden,ReturPO,ReturInden,MutasiInden',
+        ]);
+        $error = $validator->errors()->all();
+        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+        $data = Pembayaran::with('pembelian.pembelian', 'pembelian.poinden', 'mutasiinden', 'retur', 'returinden')->find($id);
+        if(!$data) return response()->json('Data tidak ditemukan', 404);
+
+        $data = $data->map(function($item) use($req){
+            switch ($req->jenis) {
+                case 'InvoicePO':
+                    $item->no_referensi = $item->pembelian->pembelian->no_po;
+                    break;
+                case 'InvoiceInden':
+                    $item->no_referensi = $item->pembelian->poinden->no_po;
+                    break;
+                case 'ReturPO':
+                    $item->no_referensi = $item->retur->no_retur;
+                    break;
+                case 'ReturInden':
+                    $item->no_referensi = $item->returinden->no_retur;
+                    break;
+                case 'MutasiInden':
+                    $item->no_referensi = $item->mutasiinden->no_mutasi;
+                    break;
+                default:
+                    $item->no_referensi = '-';
+                    break;
+            }
+        });
+        return response()->json($data);
+    }
+
+    // public function update_pembelian(Request $req, $id) {
+    //     // Validasi
+    //     $validator = Validator::make($req->all(), [
+    //         'invoice_sewa_id' => 'required',
+    //         'no_invoice_bayar' => 'required',
+    //         'nominal' => 'required',
+    //         'tanggal_bayar' => 'required',
+    //     ]);
+    
+    //     if ($validator->fails()) {
+    //         $error = $validator->errors()->all();
+    //         return redirect()->back()->withInput()->with('fail', $error);
+    //     }
+    
+    //     $data = $req->except(['_token', '_method', 'bukti']);
+    //     $invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
+    //     $pembayaran = Pembayaran::find($id);
+    
+    //     DB::beginTransaction();
+    //     try {
+    //         // Update sisa invoice
+    //         $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->sisa_bayar) + intval($pembayaran->nominal) - intval($data['nominal']);
+    
+    //         if (!$invoice_tagihan->save()) {
+    //             DB::rollBack();
+    //             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+    //         }
+    
+    //         // store file
+    //         if ($req->hasFile('bukti')) {
+    //             // Simpan file baru
+    //             $file = $req->file('bukti');
+    //             $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+    //             $filePath = 'bukti_pembayaran_sewa/' . $fileName;
+            
+    //             // Optimize dan simpan file baru
+    //             Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+    //                 ->save(storage_path('app/public/' . $filePath));
+            
+    //             // Hapus file lama
+    //             if (!empty($pembayaran->bukti)) {
+    //                 $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+    //                 if (File::exists($oldFilePath)) {
+    //                     File::delete($oldFilePath);
+    //                 }
+    //             }
+            
+    //             // Verifikasi penyimpanan file baru
+    //             if (File::exists(storage_path('app/public/' . $filePath))) {
+    //                 $data['bukti'] = $filePath;
+    //             } else {
+    //                 DB::rollBack();
+    //                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
+    //             }
+    //         }
+    
+    //         $data['status_bayar'] = $invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+    
+    //         if (!$pembayaran->update($data)) {
+    //             DB::rollBack();
+    //             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+    //         }
+    //         $this->updateStatusAll($data['invoice_sewa_id'], 'Sewa');
+    //         DB::commit();
+    //         return redirect()->back()->with('success', 'Pembayaran berhasil');
+    
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
+    //     }
+    // }
 }
