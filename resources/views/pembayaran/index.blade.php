@@ -38,7 +38,7 @@
                                 <th>No</th>
                                 <th>No Invoice</th>
                                 <th>No Invoice Bayar</th>
-                                <th> Cara Bayar</th>
+                                <th>Cara Bayar</th>
                                 <th>Nominal</th>
                                 <th>Rekening</th>
                                 <th>Tanggal_Bayar</th>
@@ -165,7 +165,7 @@
                     }
                 },
                 {
-                    targets: 3,
+                    targets: 4,
                     render: function(data, type, row) {
                         return Number(data).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' });
                     }
