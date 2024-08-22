@@ -8,6 +8,9 @@ use App\Models\Produk;
 use App\Models\Kondisi;
 use App\Models\Lokasi;
 use App\Models\Supplier;
+use App\Models\Mutasiindens;
+use App\Models\Poinden;
+use Spatie\Activitylog\Models\Activity;
 use Illuminate\Support\Facades\Validator;
 
 class InventoryIndenController extends Controller
@@ -47,8 +50,57 @@ class InventoryIndenController extends Controller
         $query->where('bulan_inden', $req->input('periode'));
     }
     $data = $query->get();
+
+    //log inventory
+    $pomasukpo = Poinden::where('status_dibuat', 'DIKONFIRMASI')
+                ->where('status_diperiksa', 'DIKONFIRMASI')
+                ->with('produkbeli')->get(); 
+ 
+    $keluarmutasi = Mutasiindens::where('status_dibuat', 'DIKONFIRMASI')
+                ->where('status_diperiksa', 'DIKONFIRMASI')
+                ->with('produkmutasi')->get();
+                
+    $riwayat = collect();
+
+    if($keluarmutasi) {
+        foreach ($keluarmutasi as $produk) {
+            $produkActivity = Activity::where('subject_type', Mutasiindens::class)
+                ->where('subject_id', $produk->id)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($produkActivity) {
+                $produkActivity->jenis = 'Produk Mutasi';
+                $produkActivity->produkmutasi = $produk->produkmutasi;
+                $riwayat->push($produkActivity);
+            }
+        }
+
+    }
+
+    if($pomasukpo) {
+        foreach ($pomasukpo as $produk) {
+            $produkActivity = Activity::where('subject_type', Poinden::class)
+                ->where('subject_id', $produk->id)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($produkActivity) {
+                $produkActivity->jenis = 'Produk Beli';
+                $produkActivity->produkbeli = $produk->produkbeli;
+                $riwayat->push($produkActivity);
+            }
+        }
+
+    }
+
     
-    return view('inven_inden.index', compact('data', 'namaproduks', 'suppliers', 'periodes'));
+
+    $riwayat = $riwayat->sortByDesc('id')->values();
+
+    // dd($riwayat);
+    
+    return view('inven_inden.index', compact('data', 'namaproduks', 'suppliers', 'periodes', 'riwayat'));
     }
 
 
