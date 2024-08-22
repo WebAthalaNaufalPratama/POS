@@ -132,10 +132,10 @@
                 <td style="width: 30%">Nama Pic</td>
                 <td style="width: 30%" class="text-start">: {{ stringToCamelCase($pic) }}</td>
             </tr>
-            <tr>
+            {{-- <tr>
                 <td style="width: 30%">Jabatan</td>
                 <td style="width: 30%" class="text-start">: -</td>
-            </tr>
+            </tr> --}}
             <tr>
                 <td style="width: 30%">Contact Person</td>
                 <td style="width: 30%" class="text-start">: {{ $handphone }}</td>
@@ -152,10 +152,10 @@
                 <td style="width: 30%">Alamat Pengiriman Tanaman</td>
                 <td style="width: 30%" class="text-start">: {{ $alamat }}</td>
             </tr>
-            <tr>
+            {{-- <tr>
                 <td style="width: 30%">Deskripsi Sewa</td>
                 <td style="width: 30%" class="text-start">: -</td>
-            </tr>
+            </tr> --}}
         </table>
         <br>
         <table class="full-width border">
@@ -177,6 +177,10 @@
                         <td>{{ formatRupiah($item['harga_jual']) }}</td>
                     </tr>
                     @endforeach
+                </tr>
+                <tr>
+                    <td colspan="3" class="text-end">Jumlah Diskon</td>
+                    <td>{{ formatRupiah($total_promo) }}</td>
                 </tr>
                 <tr>
                     <td colspan="3" class="text-end">Jumlah Harga Nett</td>

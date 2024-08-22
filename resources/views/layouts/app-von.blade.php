@@ -404,7 +404,7 @@
                       <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
                           <option value="">Pilih Lokasi</option>
                           @foreach ($lokasis as $lokasi)
-                          <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}" {{ $lokasi->id == $karyawan->lokasi_id}}>{{ $lokasi->nama }}</option>
+                          <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}" {{ $karyawan ? $lokasi->id == $karyawan->lokasi_id : ''}}>{{ $lokasi->nama }}</option>
                           @endforeach
                       </select>
                   </div>

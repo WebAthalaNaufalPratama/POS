@@ -112,7 +112,7 @@ class KaryawanController extends Controller
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
 
         if (!empty($req->user_id)) {
-            $existingKaryawan = Karyawan::where('user_id', $req->user_id)->first();
+            $existingKaryawan = Karyawan::where('user_id', $req->user_id)->where('id', '!=', $karyawan)->first();
             if ($existingKaryawan) {
                 return redirect()->back()->withInput()->with('fail', 'User sudah digunakan');
             }

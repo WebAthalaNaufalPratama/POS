@@ -10,7 +10,6 @@
                         <h5 class="card-title">Detail Delivery order</h5>
                     </div>
                     <div class="page-btn">
-                        <a href="#" class="btn btn-added">Cetak DO</a>
                     </div>
                 </div>
             </div>

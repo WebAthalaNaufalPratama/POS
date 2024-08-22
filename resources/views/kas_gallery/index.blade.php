@@ -404,6 +404,35 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="modalLog" tabindex="-1" aria-labelledby="modalLogLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLogLabel">Log Kas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table id="logTable" class="table" style="width: 100%">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Pengubah</th>
+                <th>Deskripsi</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
 {{-- modal end --}}
 @endsection
 
@@ -539,6 +568,17 @@
                             <li>
                                 <a href="javascript:void(0);" onclick="edit(${row.id})" class="dropdown-item">
                                     <img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit
+                                </a>
+                            </li>
+                        `;
+                    }
+
+                    // Cek izin untuk lihat log
+                    if (userPermissions.includes('kas.log')) {
+                        actionsHtml += `
+                            <li>
+                                <a href="javascript:void(0);" onclick="log(${row.id})" class="dropdown-item">
+                                    <img src="assets/img/icons/purchase1.svg" class="me-2" alt="img">Log
                                 </a>
                             </li>
                         `;
@@ -824,5 +864,55 @@
             reader.readAsDataURL(file);
         }
     };
+    function log(id) {
+      if ($.fn.DataTable.isDataTable('#logTable')) {
+          $('#logTable').DataTable().clear().destroy();
+      }
+      const logColumns = [
+          { data: 'no', name: 'no', orderable: false },
+          { data: 'created_at', name: 'created_at' },
+          { 
+            data: 'causer_id', 
+            name: 'causer_id', 
+            orderable: false, 
+            render: function(data, type, row){
+              return row.pengubah;
+            } 
+          },
+          { 
+              data: 'description_log', 
+              name: 'description_log', 
+              orderable: false,
+              render: function(data, type, row) {
+                  let descriptionLogHtml = '';
+                  if (Array.isArray(row.description_log)) {
+                      row.description_log.forEach(log => {
+                          if (log.message) {
+                              descriptionLogHtml += `<div>${log.message}</div>`;
+                          } else {
+                              descriptionLogHtml += `<div>${log.field}: <span class='text-danger'>${log.old}</span> => <span class='text-success'>${log.new}</span></div>`;
+                          }
+                          if(row.description_log.length > 1){
+                            descriptionLogHtml += `<br>`
+                          }
+                      });
+                  }
+                  return descriptionLogHtml;
+              }
+          }
+      ];
+
+      let tableLog = initDataTable('#logTable', {
+          ajaxUrl: "log/"+id,
+          columns: logColumns,
+          order: [[1, 'asc']],
+          searching: true,
+          lengthChange: true,
+          pageLength: 5
+      }, {
+      }, 'logTable'); 
+
+      $('#modalLog').modal('show');
+    }
     </script>
 @endsection

@@ -76,7 +76,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Jatuh Tempo</label>
-                                                <input type="date" id="jatuh_tempo" name="jatuh_tempo" value="{{ old('jatuh_tempo') ?? date('Y-m-d') }}" class="form-control" required>
+                                                <input type="date" id="jatuh_tempo" name="jatuh_tempo" value="{{ old('jatuh_tempo') ?? date('Y-m-d', strtotime('+1 month')) }}" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Sales</label>

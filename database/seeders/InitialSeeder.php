@@ -188,7 +188,8 @@ class InitialSeeder extends Seeder
                 'laporan.kontrak',
                 'laporan.tagihan_sewa',
                 'laporan.pergantian_sewa',
-                'laporan.do_sewa'
+                'laporan.do_sewa',
+                'kas.log'
             ];
             $admingalleryPermissionList = array_merge($basiPermissionList, $admingalleryPermissionList);
             $query = Permission::query();
@@ -499,6 +500,7 @@ class InitialSeeder extends Seeder
                 'laporan.bunga_datang',
                 'retur_purchase.update',
                 'edit.retur',
+                'kas.log',
             ];
         
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
