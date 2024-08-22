@@ -93,8 +93,22 @@ $user = Auth::user();
                                          </div>
                                         <div class="form-group">
                                             <label for="tgl_terima">Bukti</label>
-                                                <img id="preview" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" />                                            
+                                                <img id="preview" src="{{ $data->bukti ? '/storage/' . $data->bukti : '' }}" alt="your image" class="img-thumbnail" data-bs-toggle="modal" data-bs-target="#imageModal" onclick="showImageInModal(this)" />                                            
                                         </div>
+                                        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Tambahkan kelas modal-lg -->
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="imageModalLabel">Preview Image</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body text-center">
+                                                        <img id="modalImage" src="" alt="Preview Image" class="img-fluid w-100"> <!-- Tambahkan kelas w-100 -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -559,6 +573,10 @@ $user = Auth::user();
 
 @section('scripts')
  <script>
+    function showImageInModal(element) {
+        var imgSrc = element.src;
+        document.getElementById('modalImage').src = imgSrc;
+    }
 
     document.getElementById('nominal').addEventListener('keyup', function(e) {
         var rupiah = this.value.replace(/[^\d]/g, ''); // hanya ambil angka
