@@ -368,7 +368,7 @@ class PenjualanController extends Controller
                 // if(!empty($newProdukTerjual)){
                 //     return redirect(route('auditpenjualan.edit', ['penjualan' => $penjualan->id]))->with('success', 'Silakan update invoice ke Dikonfirmasi');
                 // }
-                return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
+                return redirect(route('penjualan.index'))->with('success', $penjualan->no_invoice . ' Berhasil Disimpan');
             } else {
                 return redirect()->back()->with('fail', 'Gagal menyimpan data');
             }
@@ -454,7 +454,7 @@ class PenjualanController extends Controller
                 // } else {
                 //     return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
                 // }
-                return redirect(route('penjualan.index'))->with('success', 'Data Berhasil Disimpan');
+                return redirect(route('penjualan.index'))->with('success', $penjualan->no_invoice . ' Berhasil Disimpan');
             } else {
                 return redirect()->back()->with('fail', 'Gagal menyimpan data');
             }
