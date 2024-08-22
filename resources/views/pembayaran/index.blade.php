@@ -36,6 +36,7 @@
                         <thead>
                             <tr>
                                 <th>No</th>
+                                <th>No Invoice</th>
                                 <th>No Invoice Bayar</th>
                                 <th> Cara Bayar</th>
                                 <th>Nominal</th>
