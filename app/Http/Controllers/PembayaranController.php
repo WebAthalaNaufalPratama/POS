@@ -1214,19 +1214,72 @@ class PembayaranController extends Controller
         if ($jenis == 'Sewa') {
             $pembayarans = Pembayaran::where('invoice_sewa_id', $invoice_id)->orderBy('tanggal_bayar')->get();
             $invoice = InvoiceSewa::find($invoice_id);
-            $totalPaid = 0;
             $remainingBalance = $invoice->total_tagihan - $invoice->dp;
-            $lastPaymentIndex = $pembayarans->count() - 1;
-    
-            foreach ($pembayarans as $index => $pembayaran) {
+
+            $totalPaid = 0;
+            foreach ($pembayarans as $pembayaran) {
                 $totalPaid += $pembayaran->nominal;
-    
-                if ($totalPaid == $remainingBalance && $index == $lastPaymentIndex) {
-                    $pembayaran->status_bayar = 'LUNAS';
-                } else {
-                    $pembayaran->status_bayar = 'BELUM LUNAS';
+            }
+
+            $isFullyPaid = $totalPaid >= $remainingBalance;
+            $lastPaymentIndex = $pembayarans->count() - 1;
+
+            foreach ($pembayarans as $index => $pembayaran) {
+                $remainingBalance -= $pembayaran->nominal;
+                $status = 'Cicilan ke-' . ($index + 1);
+
+                if ($isFullyPaid && $index == $lastPaymentIndex) {
+                    $status = 'LUNAS';
                 }
-    
+
+                $pembayaran->status_bayar = $status;
+                $pembayaran->save();
+            }
+        } else {
+            switch ($jenis) {
+                case 'InvoicePO':
+                case 'InvoiceInden':
+                    $pembayarans = Pembayaran::where('invoice_purchase_id', $invoice_id)->orderBy('tanggal_bayar')->get();
+                    $invoice = Invoicepo::find($invoice_id);
+                    $remainingBalance = $invoice->total_tagihan - $invoice->dp;
+                    // dd($remainingBalance);
+                    break;
+                case 'ReturPO':
+                    $pembayarans = Pembayaran::where('retur_pembelian_id', $invoice_id)->orderBy('tanggal_bayar')->get();
+                    $invoice = Returpembelian::find($invoice_id);
+                    $remainingBalance = $invoice->subtotal;
+                    break;
+                case 'ReturInden':
+                    $pembayarans = Pembayaran::where('returinden_id', $invoice_id)->orderBy('tanggal_bayar')->get();
+                    $invoice = Returinden::find($invoice_id);
+                    $remainingBalance = $invoice->refund;
+                    break;
+                case 'MutasiInden':
+                    $pembayarans = Pembayaran::where('mutasiinden_id', $invoice_id)->orderBy('tanggal_bayar')->get();
+                    $invoice = Mutasiindens::find($invoice_id);
+                    $remainingBalance = $invoice->returinden ? $invoice->returinden->total_akhir : $invoice->total_biaya;
+                    break;
+                default:
+                    return;
+            }
+
+            $totalPaid = 0;
+            foreach ($pembayarans as $pembayaran) {
+                $totalPaid += $pembayaran->nominal;
+            }
+            
+            $isFullyPaid = $totalPaid >= $remainingBalance;
+            $lastPaymentIndex = $pembayarans->count() - 1;
+
+            foreach ($pembayarans as $index => $pembayaran) {
+                $remainingBalance -= $pembayaran->nominal;
+                $status = 'Cicilan ke-' . ($index + 1);
+
+                if ($isFullyPaid && $index == $lastPaymentIndex) {
+                    $status = 'LUNAS';
+                }
+
+                $pembayaran->status_bayar = $status;
                 $pembayaran->save();
             }
         }
@@ -1235,108 +1288,216 @@ class PembayaranController extends Controller
     public function edit_pembelian(Request $req, $id)
     {
         $validator = Validator::make($req->all(), [
-            'jenis' => 'required|InvoicePO,InvoiceInden,ReturPO,ReturInden,MutasiInden',
+            'jenis' => 'required|in:InvoicePO,InvoiceInden,ReturPO,ReturInden,MutasiInden',
         ]);
         $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        if ($validator->fails()) return response()->json('Jenis tidak valid', 400);
 
-        $data = Pembayaran::with('pembelian.pembelian', 'pembelian.poinden', 'mutasiinden', 'retur', 'returinden')->find($id);
+        $data = Pembayaran::with('po.pembelian', 'po.poinden', 'mutasiinden', 'retur', 'returinden')->find($id);
         if(!$data) return response()->json('Data tidak ditemukan', 404);
-
-        $data = $data->map(function($item) use($req){
-            switch ($req->jenis) {
-                case 'InvoicePO':
-                    $item->no_referensi = $item->pembelian->pembelian->no_po;
-                    break;
-                case 'InvoiceInden':
-                    $item->no_referensi = $item->pembelian->poinden->no_po;
-                    break;
-                case 'ReturPO':
-                    $item->no_referensi = $item->retur->no_retur;
-                    break;
-                case 'ReturInden':
-                    $item->no_referensi = $item->returinden->no_retur;
-                    break;
-                case 'MutasiInden':
-                    $item->no_referensi = $item->mutasiinden->no_mutasi;
-                    break;
-                default:
-                    $item->no_referensi = '-';
-                    break;
-            }
-        });
+        switch ($req->jenis) {
+            case 'InvoicePO':
+                $data->no_referensi = $data->po->pembelian->no_po;
+                $data->total_tagihan = $data->po->sisa;
+                $data->invoice_id = $data->po->id;
+                break;
+            case 'InvoiceInden':
+                $data->no_referensi = $data->po->poinden->no_po;
+                $data->total_tagihan = $data->po->sisa;
+                $data->invoice_id = $data->po->id;
+                break;
+            case 'ReturPO':
+                $data->no_referensi = $data->retur->no_retur;
+                $data->total_tagihan = $data->retur->subtotal;
+                $data->invoice_id = $data->retur->id;
+                break;
+            case 'ReturInden':
+                $data->no_referensi = $data->returinden->no_retur;
+                $data->total_tagihan = $data->returinden->refund;
+                $data->invoice_id = $data->returinden->id;
+                break;
+            case 'MutasiInden':
+                $data->no_referensi = $data->mutasiinden->no_mutasi;
+                $data->total_tagihan = $data->mutasiinden->total_biaya;
+                $data->invoice_id = $data->mutasiinden->id;
+                break;
+            default:
+                $data->no_referensi = '-';
+                $data->total_tagihan = 0;
+                $data->invoice_id = null;
+                break;
+        }
+        if($data->cara_bayar == 'cash'){
+            $data->metode = 'cash';
+        } else {
+            $data->metode = 'transfer-' . $data->rekening_id;
+        }
         return response()->json($data);
     }
 
-    // public function update_pembelian(Request $req, $id) {
-    //     // Validasi
-    //     $validator = Validator::make($req->all(), [
-    //         'invoice_sewa_id' => 'required',
-    //         'no_invoice_bayar' => 'required',
-    //         'nominal' => 'required',
-    //         'tanggal_bayar' => 'required',
-    //     ]);
+    public function update_pembelian(Request $req, $id) 
+    {
+        // Validasi
+        $validator = Validator::make($req->all(), [
+            'tanggal_bayar' => 'required|date',
+            'metode' => 'required|string',
+            'invoice_id' => 'required|integer',
+            'type' => 'required|in:InvoicePO,InvoiceInden,ReturPO,ReturInden,MutasiInden',
+            'nominal' => 'required|numeric',
+            'bukti' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
     
-    //     if ($validator->fails()) {
-    //         $error = $validator->errors()->all();
-    //         return redirect()->back()->withInput()->with('fail', $error);
-    //     }
+        if ($validator->fails()) {
+            $error = $validator->errors()->all();
+            return redirect()->back()->withInput()->with('fail', $error);
+        }
     
-    //     $data = $req->except(['_token', '_method', 'bukti']);
-    //     $invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
-    //     $pembayaran = Pembayaran::find($id);
+        $data = $req->except(['_token', '_method', 'bukti']);
+        $pembayaran = Pembayaran::find($id);
     
-    //     DB::beginTransaction();
-    //     try {
-    //         // Update sisa invoice
-    //         $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->sisa_bayar) + intval($pembayaran->nominal) - intval($data['nominal']);
+        DB::beginTransaction();
     
-    //         if (!$invoice_tagihan->save()) {
-    //             DB::rollBack();
-    //             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-    //         }
+        try {
+            $fileName = '';
+            $filePath = '';
     
-    //         // store file
-    //         if ($req->hasFile('bukti')) {
-    //             // Simpan file baru
-    //             $file = $req->file('bukti');
-    //             $fileName = $invoice_tagihan->no_invoice . date('YmdHis') . '.' . $file->getClientOriginalExtension();
-    //             $filePath = 'bukti_pembayaran_sewa/' . $fileName;
-            
-    //             // Optimize dan simpan file baru
-    //             Image::make($file)->encode($file->getClientOriginalExtension(), 70)
-    //                 ->save(storage_path('app/public/' . $filePath));
-            
-    //             // Hapus file lama
-    //             if (!empty($pembayaran->bukti)) {
-    //                 $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
-    //                 if (File::exists($oldFilePath)) {
-    //                     File::delete($oldFilePath);
-    //                 }
-    //             }
-            
-    //             // Verifikasi penyimpanan file baru
-    //             if (File::exists(storage_path('app/public/' . $filePath))) {
-    //                 $data['bukti'] = $filePath;
-    //             } else {
-    //                 DB::rollBack();
-    //                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
-    //             }
-    //         }
+            switch ($req->type) {
+                case 'InvoicePO':
+                    $invoice_tagihan = Invoicepo::find($data['invoice_id']);
+                    $invoice_tagihan->sisa = intval($invoice_tagihan->sisa) + intval($pembayaran->nominal) - intval($data['nominal']);
+
+                    if($invoice_tagihan->sisa < 0){
+                        throw new \Exception('Nominal melebihi tagihan');
+                    }
+
+                    $data['status_bayar'] = $invoice_tagihan->sisa <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+                    
+                    $fileName = 'invoice_' . $invoice_tagihan->no_invoice . '_' . date('YmdHis') . '.';
+                    $filePath = 'bukti_pembayaran_purchase/';
+                    
+                    break;
+                case 'InvoiceInden':
+                    $invoice_tagihan = Invoicepo::find($data['invoice_id']);
+                    $invoice_tagihan->sisa = intval($invoice_tagihan->sisa) + intval($pembayaran->nominal) - intval($data['nominal']);
+                    
+                    if($invoice_tagihan->sisa < 0){
+                        throw new \Exception('Nominal melebihi tagihan');
+                    }
+
+                    $data['status_bayar'] = $invoice_tagihan->sisa <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+                    
+                    $fileName = 'invoice_' . $invoice_tagihan->no_invoice . '_' . date('YmdHis') . '.';
+                    $filePath = 'bukti_pembayaran_purchase/';
+                    
+                    break;
+                case 'ReturPO':
+                    $invoice_tagihan = Returpembelian::find($data['invoice_id']);
+                    $invoice_tagihan->sisa = intval($invoice_tagihan->sisa) + intval($pembayaran->nominal) - intval($data['nominal']);
+                    
+                    if($invoice_tagihan->sisa < 0){
+                        throw new \Exception('Nominal melebihi tagihan');
+                    }
+
+                    $data['status_bayar'] = $invoice_tagihan->sisa <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+                    
+                    $fileName = 'returpo_' . $invoice_tagihan->no_retur . '_' . date('YmdHis') . '.';
+                    $filePath = 'bukti_pembayaran_refundpurchase/';
+                    
+                    break;
+                case 'ReturInden':
+                    $invoice_tagihan = Returinden::find($data['invoice_id']);
+                    $invoice_tagihan->sisa_refund = intval($invoice_tagihan->sisa_refund) + intval($pembayaran->nominal) - intval($data['nominal']);
+                    
+                    if($invoice_tagihan->sisa_refund < 0){
+                        throw new \Exception('Nominal melebihi tagihan');
+                    }
+
+                    $data['status_bayar'] = $invoice_tagihan->sisa_refund <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+                    
+                    $fileName = 'returinden_' . $invoice_tagihan->no_retur . '_' . date('YmdHis') . '.';
+                    $filePath = 'bukti_pembayaran_refundinden/';
+                    
+                    break;
+                case 'MutasiInden':
+                    $invoice_tagihan = Mutasiindens::find($data['invoice_id']);
+                    $invoice_tagihan->sisa_bayar = intval($invoice_tagihan->sisa_bayar) + intval($pembayaran->nominal) - intval($data['nominal']);
+                    
+                    if($invoice_tagihan->sisa_bayar < 0){
+                        throw new \Exception('Nominal melebihi tagihan');
+                    }
+
+                    $data['status_bayar'] = $invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+                    
+                    $fileName = 'mutasiinden_' . $invoice_tagihan->no_mutasi . '_' . date('YmdHis') . '.';
+                    $filePath = 'bukti_pembayaran_mutasiinden/';
+                    
+                    break;
+                default:
+                    throw new \Exception('Tipe tidak valid');
+                    break;
+            }
+
+            // Mengolah metode pembayaran
+            $metode = $req->input('metode');
+            if (strpos($metode, 'transfer-') === 0) {
+                $cara_bayar = 'transfer';
+                $rekening_id = str_replace('transfer-', '', $metode);
+            } else {
+                $cara_bayar = $metode;
+                $rekening_id = null;
+            }
+        
+            // Menyiapkan data untuk disimpan
+            $data = $req->except(['_token', '_method', 'bukti', 'status_bayar', 'metode']);
+            $data['cara_bayar'] = $cara_bayar;
+            $data['rekening_id'] = $rekening_id;
     
-    //         $data['status_bayar'] = $invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
+            // Update sisa invoice
+            if ($invoice_tagihan && !$invoice_tagihan->save()) {
+                throw new \Exception('Gagal menyimpan data invoice.');
+            }
     
-    //         if (!$pembayaran->update($data)) {
-    //             DB::rollBack();
-    //             return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-    //         }
-    //         $this->updateStatusAll($data['invoice_sewa_id'], 'Sewa');
-    //         DB::commit();
-    //         return redirect()->back()->with('success', 'Pembayaran berhasil');
+            // store file
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
     
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
-    //     }
-    // }
+                // Generate nama file dengan ekstensi
+                $fileName .= $file->getClientOriginalExtension();
+                $filePath .= $fileName;
+    
+                // Optimize dan simpan file baru
+                Image::make($file)->encode($file->getClientOriginalExtension(), 70)
+                    ->save(storage_path('app/public/' . $filePath));
+    
+                // Hapus file lama
+                if (!empty($pembayaran->bukti)) {
+                    $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
+                    if (File::exists($oldFilePath)) {
+                        File::delete($oldFilePath);
+                    }
+                }
+    
+                // Verifikasi penyimpanan file baru
+                if (File::exists(storage_path('app/public/' . $filePath))) {
+                    $data['bukti'] = $filePath;
+                } else {
+                    throw new \Exception('File gagal disimpan.');
+                }
+            }
+    
+            if (!$pembayaran->update($data)) {
+                throw new \Exception('Gagal menyimpan data pembayaran.');
+            }
+
+            // Update status semua pembayaran
+            $this->updateStatusAll($data['invoice_id'], $req->type);
+    
+            DB::commit(); 
+            return redirect()->back()->with('success', 'Pembayaran berhasil');
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
 }

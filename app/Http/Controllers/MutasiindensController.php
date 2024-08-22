@@ -285,6 +285,7 @@ class MutasiindensController extends Controller
                     'komplain' => $komplain,
                     'status_komplain' => $statusKomplain ?? '-',
                     'returinden' => $item->returinden,
+                    'total_biaya' => $item->total_biaya,
                 ];
             });
             
@@ -306,6 +307,7 @@ class MutasiindensController extends Controller
                         || stripos($item['sisa_tagihan'], $search) !== false
                         || stripos($item['sisa_tagihan_format'], $search) !== false
                         || stripos($item['komplain'], $search) !== false
+                        || stripos($item['total_biaya'], $search) !== false
                         || stripos($item['status_komplain'], $search) !== false;
                 });
             }

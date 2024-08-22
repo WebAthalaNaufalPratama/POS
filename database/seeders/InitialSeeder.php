@@ -500,6 +500,8 @@ class InitialSeeder extends Seeder
                 'retur_purchase.update',
                 'edit.retur',
                 'kas.log',
+                'pembayaran_pembelian.edit',
+                'pembayaran_pembelian.update',
             ];
         
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);
