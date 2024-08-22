@@ -336,6 +336,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::post('/pembayaran/store', 'PembayaranController@store_po')->name('pembayaranbeli.store'); //fin
             Route::post('/refund/store', 'PembayaranController@bayar_refund')->name('bayarrefund.store'); //fin
             Route::post('/refundinden/store', 'PembayaranController@refundInden')->name('refundinden.store'); //fin
+            Route::get('/pembayaran/{id}/edit', 'PembayaranController@edit_pembelian')->name('pembayaran_pembelian.edit'); //fin
+            Route::get('/pembayaran/{id}/update', 'PembayaranController@update_pembelian')->name('pembayaran_pembelian.update'); //fin
 
              Route::get('/returbeli/{retur_id}/show', 'PembelianController@show_returpo')->name('returbeli.show');  //fin , pur
              Route::get('/returbeli/{retur_id}/edit', 'PembelianController@edit_returpo')->name('returbeli.edit'); //pur, fin
