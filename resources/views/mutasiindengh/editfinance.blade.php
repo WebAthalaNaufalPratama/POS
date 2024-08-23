@@ -689,7 +689,13 @@ function bindSelectEvents(index) {
                     }
                 },
                 error: function() {
-                    alert('Gagal mengambil data kode inden');
+                    // alert('Gagal mengambil data kode inden');
+                    toastr.warning('Gagal mengambil data kode inden.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
                 }
             });
         }
@@ -721,7 +727,13 @@ function bindSelectEvents(index) {
                 },
               
                 error: function() {
-                    alert('Gagal mengambil data kategori');
+                    // alert('Gagal mengambil data kategori');
+                    toastr.warning('Gagal mengambil data kategori.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
                 }
             });
         }
@@ -769,7 +781,14 @@ $('#supplier').change(function() {
                 }
             },
             error: function() {
-                alert('Gagal mengambil data bulan inden');
+                // alert('Gagal mengambil data bulan inden');
+                toastr.warning('Gagal mengambil data bulan inden.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
+                
             }
         });
     }
@@ -812,7 +831,13 @@ $(document).on('change', 'select[id^="kode_inden_"]', function() {
                     console.log('Jumlah saved in data attribute:', response.jumlah); 
                 },
                 error: function() {
-                    alert('Gagal mengambil data kategori');
+                    // alert('Gagal mengambil data kategori');
+                    toastr.warning('Gagal mengambil data kategori.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
                 }
             });
         }
@@ -851,7 +876,13 @@ $(document).on('change', 'select[id^="kode_inden_"]', function() {
                 }
             },
             error: function() {
-                alert('Gagal mengambil data bulan inden');
+                // alert('Gagal mengambil data bulan inden');
+                toastr.warning('Gagal mengambil data bulan inden.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
             }
         });
     }
@@ -876,7 +907,13 @@ $(document).on('change', 'select[id^="kode_inden_"]', function() {
                     }
                 },
                 error: function() {
-                    alert('Gagal mengambil data kode inden');
+                    // alert('Gagal mengambil data kode inden');
+                    toastr.warning('Gagal mengambil data kode inden.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
                 }
             });
     }

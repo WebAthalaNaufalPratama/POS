@@ -375,6 +375,9 @@
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
                                 break;
+                            case 'BATAL':
+                                badgeClass = 'bg-lightgrey';
+                                break;
                             default:
                                 badgeClass = 'bg-lightred';
                                 break;
@@ -395,6 +398,9 @@
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
                                 break;
+                            case 'BATAL':
+                                badgeClass = 'bg-lightgrey';
+                                break;
                             default:
                                 badgeClass = 'bg-lightred';
                                 break;
@@ -414,6 +420,9 @@
                                 break;
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
+                                break;
+                            case 'BATAL':
+                                badgeClass = 'bg-lightgrey';
                                 break;
                             default:
                                 badgeClass = 'bg-lightred';
@@ -437,6 +446,9 @@
                                 break;
                             case 'MENUNGGU PEMBAYARAN':
                                 badgeClass = 'bg-lightyellow';
+                                break;
+                            case 'BATAL':
+                                badgeClass = 'bg-lightgrey';
                                 break;
                             default:
                                 badgeClass = 'bg-lightred';

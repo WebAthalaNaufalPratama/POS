@@ -17,6 +17,15 @@
         border: 1px solid #ced4da; /* Nilai border default */
         border-radius: 0.25rem; /* Radius default untuk border */
     }
+    td {
+    min-width: 50px; /* Atur sesuai kebutuhan */
+    white-space: nowrap;
+    }
+
+    .icon-large {
+        width: 24px;
+        height: 24px;
+    }
 
 </style>
 <div class="page-header">
@@ -181,8 +190,12 @@
                                                             <input type="hidden" name="jumlah[]" id="jumlahint_0" class="form-control" oninput="calculateTotal(0)"></td>
                                                         </div>
                                                     </td>
-                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                                </tr>
+                                                    <td>
+                                                        <a href="javascript:void(0);" name="add" id="add">
+                                                            <img src="/assets/img/icons/plus.svg" class="icon-large" style="color: #90ee90;" alt="svg">
+                                                        </a>
+                                                    </td>
+                                                  </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -595,7 +608,8 @@ function validateQty(index) {
                         <input type="hidden" name="jumlah[]" id="jumlahint_${i}" class="form-control" readonly>
                     </div>
                 </td>
-                <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">X</button></td>
+                <td><a href="javascript:void(0);" name="remove" class="btn_remove" id="${i}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
+
             </tr>
         `;
 
@@ -679,7 +693,14 @@ function bindSelectEvents(index) {
                     }
                 },
                 error: function() {
-                    alert('Gagal mengambil data kode inden');
+                    // alert('Gagal mengambil data kode inden');
+                toastr.warning('Gagal mengambil data kode inden.', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                    
                 }
             });
         }
@@ -711,7 +732,14 @@ function bindSelectEvents(index) {
 
                 },
                 error: function() {
-                    alert('Gagal mengambil data kategori');
+                    // alert('Gagal mengambil data kategori');
+                toastr.warning('Gagal mengambil data kategori.', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+
                 }
             });
         }
@@ -763,7 +791,13 @@ $('#supplier').change(function() {
                 }
             },
             error: function() {
-                alert('Gagal mengambil data bulan inden');
+                // alert('Gagal mengambil data bulan inden');
+                toastr.warning('Gagal mengambil data bulan inden.', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
             }
         });
     }
