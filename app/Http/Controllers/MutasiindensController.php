@@ -1434,7 +1434,7 @@ class MutasiindensController extends Controller
             // Commit transaksi
             DB::commit();
 
-            return redirect(route('returinden.index'))->with('success', 'Data berhasil diperbarui');
+            return redirect(route('returbeli.show', ['retur_id' => $idretur]))->with('success', 'Data berhasil diperbarui');
             
         } catch (\Exception $e) {
             // Rollback jika terjadi kesalahan
@@ -1659,7 +1659,7 @@ class MutasiindensController extends Controller
             // Commit transaksi jika tidak ada error
             DB::commit();
 
-            return redirect()->route('returinden.index')->with('success', 'Data retur berhasil diperbarui.');
+            return redirect(route('returbeli.show', ['retur_id' => $idretur]))->with('success', 'Data berhasil diperbarui');
         } catch (\Exception $e) {
             // Rollback transaksi jika terjadi error
             DB::rollBack();

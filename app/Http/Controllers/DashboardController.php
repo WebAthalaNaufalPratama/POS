@@ -81,11 +81,11 @@ class DashboardController extends Controller
                                 })
                                 ->count();
         
-            $customerslama = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
+            $customerslama = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
                 $query->where('tanggal_bergabung', '<', $startOfMonth)
                         ->orWhere('tanggal_bergabung', '>', $endOfMonth);
             })->get();
-            $customersbaru = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
+            $customersbaru = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
                 $query->where('tanggal_bergabung', '>=', $startOfMonth)
                         ->orWhere('tanggal_bergabung', '<=', $endOfMonth);
             })->get();
@@ -103,7 +103,13 @@ class DashboardController extends Controller
                             })->count();
             $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
             $penjualanIds = $penjualanList->pluck('id');
-            $pembayaranList = Pembayaran::whereIn('invoice_penjualan_id', $penjualanIds)->get();
+            $prefixes = ['BYR', 'BOT'];
+            $pembayaranList = Pembayaran::where(function ($query) use ($prefixes) {
+                foreach ($prefixes as $prefix) {
+                    $query->orWhere('no_invoice_bayar', 'LIKE', $prefix . '%');
+                }
+            })->get();
+
     
             $pemasukan = 0;
             foreach ($pembayaranList as $pembayaran) {
@@ -134,7 +140,7 @@ class DashboardController extends Controller
                                             ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
-            $batalpenjualan = Pembelian::where('status_dibuat', 'DIBATALKAN')
+            $batalpenjualan = Pembelian::where('status_dibuat', 'BATAL')
                                 ->whereNotNull('tgl_dibuat')
                                 ->whereNotNull('pembuat')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
@@ -144,10 +150,6 @@ class DashboardController extends Controller
                                 ->count();
             $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
                     ->where('status_diperiksa', 'DIKONFIRMASI')
-                    ->whereNotNull('tgl_dibuat')
-                    ->whereNotNull('tgl_diperiksa')
-                    ->whereNotNull('pembuat')
-                    ->whereNotNull('pemeriksa')
                     ->where(function($query) use ($startOfMonth, $endOfMonth) {
                         $query->where('created_at', '>=', $startOfMonth)
                                 ->orWhere('created_at', '<=', $endOfMonth);
@@ -157,12 +159,7 @@ class DashboardController extends Controller
             $arrinvoicepo = $invoicepo->pluck('id')->toArray();
             $returpenjualan = Returpembelian::where('invoicepo_id', $arrinvoicepo)
                                 ->where('status_dibuat', 'DIKONFIRMASI')
-                                ->where('status_dibuku', 'DIKONFIRMASI')
-                                ->whereNotNull('tgl_dibuat')
-                                ->whereNotNull('tgl_dibuku')
-                                ->whereNotNull('pembuat')
-                                ->whereNotNull('pembuku')
-                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
+                                ->where('status_dibuku', 'DIKONFIRMASI')                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
                                     $query->where('created_at', '>=', $startOfMonth)
                                             ->orWhere('created_at', '<=', $endOfMonth);
                                 })
@@ -201,11 +198,16 @@ class DashboardController extends Controller
             $penjualanbaru = $hitungmasuk;
 
 
-            $pembayaranList = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
+            $pembayaranList = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BYMI%')
+                            ->orwhere('no_invoice_bayar', 'LIKE', 'BYPO%')                
+                            ->get();
+            $pengeluaranList = Pembayaran::where('no_invoice_bayar', 'LIKE', 'RefundInden%')
+                            ->orwhere('no_invoice_bayar', 'LIKE', 'Refundpo%')                
+                            ->get();
     
             $pemasukan = 0;
             foreach ($pembayaranList as $pembayaran) {
-                $nominal = $pembayaran->totaltagihan;
+                $nominal = $pembayaran->nominal;
                 $pemasukan += $nominal;
             }
 
@@ -214,8 +216,8 @@ class DashboardController extends Controller
                         ->get();
     
             $pengeluaran = 0;
-            foreach ($pembayaranList as $pembayaran) {
-                $nominal = $pembayaran->subtotal;
+            foreach ($pengeluaranList as $pembayaran) {
+                $nominal = $pembayaran->nominal;
                 $pengeluaran += $nominal;
             }
     

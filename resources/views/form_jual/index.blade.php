@@ -157,7 +157,17 @@
                 { data: 'no_form', name: 'no_form' },
                 { data: 'tanggal', name: 'tanggal' },
                 { data: 'jenis_rangkaian', name: 'jenis_rangkaian' },
-                { data: 'perangkai.nama', name: 'perangkai.nama' },
+                { 
+                    data: 'perangkai.nama', 
+                    name: 'perangkai.nama', 
+                    orderable: false, 
+                    render: function(data, type, row) {
+                        if (Array.isArray(data)) {
+                            return data.join('<br>');
+                        }
+                        return '';
+                    }
+                },
                 { data: 'tanggal', name: 'tanggal' },
                 {
                     data: 'aksi',

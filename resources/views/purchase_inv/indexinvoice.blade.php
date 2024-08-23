@@ -479,7 +479,7 @@ $user = Auth::user();
 
                     // Komplain for Purchasing role if conditions met
                     if (row.userRole == 'Purchasing' &&
-                        ((row.invoiceRetur && row.invoiceRetur.status_dibuat == 'DIKONFIRMASI' && row.sisa != 0) ||
+                        (
                         (row.sisa == 0 || row.sisa === row.total_tagihan) && !row.invoiceRetur &&
                         (row.status_dibuku != "TUNDA" && row.status_dibuku != null) &&
                         row.status_dibuat == "DIKONFIRMASI" &&
