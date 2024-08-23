@@ -79,11 +79,11 @@ class DashboardController extends Controller
                                 })
                                 ->count();
         
-            $customerslama = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
+            $customerslama = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
                 $query->where('tanggal_bergabung', '<', $startOfMonth)
                         ->orWhere('tanggal_bergabung', '>', $endOfMonth);
             })->get();
-            $customersbaru = Customer::where(function($query) use ($startOfMonth, $endOfMonth) {
+            $customersbaru = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
                 $query->where('tanggal_bergabung', '>=', $startOfMonth)
                         ->orWhere('tanggal_bergabung', '<=', $endOfMonth);
             })->get();
