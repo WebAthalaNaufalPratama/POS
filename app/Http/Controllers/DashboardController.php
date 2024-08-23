@@ -28,6 +28,8 @@ use App\Models\InventoryGreenHouse;
 use App\Models\InventoryGallery;
 use App\Models\Invoicepo;
 use App\Models\Kondisi;
+use App\Models\Rekening;
+use App\Models\TransaksiKas;
 use DateTime;
 use IntlDateFormatter;
 
@@ -220,6 +222,20 @@ class DashboardController extends Controller
             }
     
             $lokasis = Lokasi::all();
+
+            if($user->hasRole('Finance')){
+                // saldo rekening
+                $rekenings = Rekening::when($req->lokasi_id, function($q) use($req){
+                    $q->where('lokasi_id', $req->lokasi_id);
+                })->get();
+                
+                $balance = 0;
+                if($req->rekening_id){
+                    $balance = TransaksiKas::getSaldo($req->rekening_id);
+                }
+                return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran', 'rekenings', 'balance'));
+            }
+
             return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
         }
         
