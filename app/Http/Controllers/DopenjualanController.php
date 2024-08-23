@@ -196,7 +196,7 @@ class DopenjualanController extends Controller
             if ($cekInvoice->isEmpty()) {
                 $increment = 1;
             } else {
-                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastInvoice = $cekInvoice->first()->no_do;
                 $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
                 $increment = $lastIncrement + 1;
             }
@@ -212,7 +212,7 @@ class DopenjualanController extends Controller
             if ($cekInvoice->isEmpty()) {
                 $increment = 1;
             } else {
-                $lastInvoice = $cekInvoice->first()->no_invoice;
+                $lastInvoice = $cekInvoice->first()->no_do;
                 $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
                 $increment = $lastIncrement + 1;
             }

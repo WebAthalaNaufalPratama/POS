@@ -351,6 +351,39 @@ class ReturpenjualanController extends Controller
         $data['handphone'] = $handphone->handphone;
         $data['status'] = $req->status;
         $data['catatan'] = $req->catatan_komplain;
+
+        if (substr($data['no_retur'], 0,3) == 'RTP') {
+            $prefix = 'RTP' . date('Ymd');
+            $cekInvoice = ReturPenjualan::where('no_retur', 'LIKE', $prefix . '%')
+                ->orderBy('no_retur', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_retur;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_retur'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        } elseif (substr($data['no_retur'], 0,3) == 'RTO') {
+            $prefix = 'RTO' . date('Ymd');
+            $cekInvoice = ReturPenjualan::where('no_retur', 'LIKE', $prefix . '%')
+                ->orderBy('no_retur', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_retur;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_retur'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+        }
         // dd($data);
         $returPenjualan = ReturPenjualan::create($data);
         

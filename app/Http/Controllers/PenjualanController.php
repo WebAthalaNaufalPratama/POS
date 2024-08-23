@@ -1183,6 +1183,16 @@ class PenjualanController extends Controller
             }
         }
 
+        $bayarList = Pembayaran::where('invoice_penjualan_id', $penjualan->id)->get();
+        // dd($bayarList);
+        if(!empty($bayarList)) {
+            $totalBayar = 0;
+            foreach($bayarList as $byr){
+                $totalBayar += $byr->nominal;
+            }
+            $data['sisa_bayar'] = intval($data['total_tagihan']) - intval($totalBayar);
+        }
+
         $update = Penjualan::where('id', $penjualanId)->update($data);
         
         if (($penjualan->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']) && $req->ubahapa == 'ubahsemua') ||

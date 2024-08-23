@@ -281,7 +281,7 @@ class FormPerangkaiController extends Controller
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
         
         //pengurangan inventory gallery dan outlet dari admin
-        if($req->status == 'DIKONFIRMASI' && $req->jenis_rangkaian == 'Penjualan' || $req->jenis_rangkaian == 'Retur Penjualan' || $req->jenis_rangkaian == 'MUTASIGO')
+        if($req->status == 'DIKONFIRMASI' && $req->jenis_rangkaian == 'Penjualan' && $req->distribusi == 'Diambil' || $req->jenis_rangkaian == 'Retur Penjualan' || $req->jenis_rangkaian == 'MUTASIGO')
         {
             $komponenGrouped = [];
             foreach ($updateProdukTerjual->komponen as $komponen) {
@@ -462,7 +462,7 @@ class FormPerangkaiController extends Controller
         $query->when($req->dateEnd, function ($query, $dateEnd) {
             $query->where('tanggal', '<=', $dateEnd);
         });
-
+        $query->distinct('no_form');
 
         if ($req->ajax()) {
             $orderColumn = $req->input('columns.' . $req->input('order.0.column') . '.data');

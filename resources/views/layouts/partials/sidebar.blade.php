@@ -21,25 +21,85 @@
                 </li>
 
 
-                @if($user->hasRole(['SuperAdmin', 'Finance']))
+                @if(
+                        in_array('tipe_produk.index', $rolePermissions) ||
+                        in_array('produks.index', $rolePermissions) ||
+                        in_array('kondisi.index', $rolePermissions) ||
+                        in_array('tipe_lokasi.index', $rolePermissions) ||
+                        in_array('operasional.index', $rolePermissions) ||
+                        in_array('lokasi.index', $rolePermissions) ||
+                        in_array('supplier.index', $rolePermissions) ||
+                        in_array('ongkir.index', $rolePermissions) ||
+                        in_array('customer.index', $rolePermissions) ||
+                        in_array('jabatan.index', $rolePermissions) ||
+                        in_array('karyawan.index', $rolePermissions) ||
+                        in_array('rekening.index', $rolePermissions) ||
+                        in_array('akun.index', $rolePermissions) ||
+                        in_array('aset.index', $rolePermissions) ||
+                        in_array('promo.index', $rolePermissions)
+                    )
                 <li class="submenu">
                     <a href="javascript:void(0);"><i data-feather="box"></i><span> Master</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('tipe_produk.index') }}" class="{{ request()->is('tipe_produks*') ? 'active' : '' }}">Tipe Produk</a></li>
-                        <li><a href="{{ route('produks.index') }}" class="{{ request()->is('produks*') ? 'active' : '' }}">Produk</a></li>
-                        <li><a href="{{ route('kondisi.index') }}" class="{{ request()->is('kondisi*') ? 'active' : '' }}">Kondisi</a></li>
-                        <li><a href="{{ route('tipe_lokasi.index') }}" class="{{ request()->is('tipe_lokasi*') ? 'active' : ''}}">Tipe Lokasi</a></li>
-                        <li><a href="{{ route('operasional.index') }}" class="{{ request()->is('operasional*') ? 'active' : ''}}">Operasional</a></li>
-                        <li><a href="{{ route('lokasi.index') }}" class="{{ request()->is('lokasi*') ? 'active' : '' }}">Lokasi</a></li>
-                        <li><a href="{{ route('supplier.index') }}" class="{{ request()->is('supplier*') ? 'active' : '' }}">Supplier</a></li>
-                        <li><a href="{{ route('ongkir.index') }}" class="{{ request()->is('ongkir*') ? 'active' : '' }}">Ongkir</a></li>
-                        <li><a href="{{ route('customer.index') }}" class="{{ request()->is('customer*') ? 'active' : '' }}">Customer</a></li>
-                        <li><a href="{{ route('jabatan.index') }}" class="{{ request()->is('jabatan*') ? 'active' : '' }}">Jabatan</a></li>
-                        <li><a href="{{ route('karyawan.index') }}" class="{{ request()->is('karyawan*') ? 'active' : '' }}">Karyawan</a></li>
-                        <li><a href="{{ route('rekening.index') }}" class="{{ request()->is('rekening*') ? 'active' : '' }}">Rekening</a></li>
-                        <li><a href="{{ route('akun.index') }}" class="{{ request()->is('akun*') ? 'active' : '' }}">Akun</a></li>
-                        <li><a href="{{ route('aset.index') }}" class="{{ request()->is('aset*') ? 'active' : '' }}">Aset</a></li>
-                        <li><a href="{{ route('promo.index') }}" class="{{ request()->is('promo*') ? 'active' : '' }}">Promo</a></li>
+                        @if(in_array('tipe_produk.index', $rolePermissions))
+                            <li><a href="{{ route('tipe_produk.index') }}" class="{{ request()->is('tipe_produks*') ? 'active' : '' }}">Tipe Produk</a></li>
+                        @endif
+                        
+                        @if(in_array('produks.index', $rolePermissions))
+                            <li><a href="{{ route('produks.index') }}" class="{{ request()->is('produks*') ? 'active' : '' }}">Produk</a></li>
+                        @endif
+                        
+                        @if(in_array('kondisi.index', $rolePermissions))
+                            <li><a href="{{ route('kondisi.index') }}" class="{{ request()->is('kondisi*') ? 'active' : '' }}">Kondisi</a></li>
+                        @endif
+                        
+                        @if(in_array('tipe_lokasi.index', $rolePermissions))
+                            <li><a href="{{ route('tipe_lokasi.index') }}" class="{{ request()->is('tipe_lokasi*') ? 'active' : '' }}">Tipe Lokasi</a></li>
+                        @endif
+                        
+                        @if(in_array('operasional.index', $rolePermissions))
+                            <li><a href="{{ route('operasional.index') }}" class="{{ request()->is('operasional*') ? 'active' : '' }}">Operasional</a></li>
+                        @endif
+                        
+                        @if(in_array('lokasi.index', $rolePermissions))
+                            <li><a href="{{ route('lokasi.index') }}" class="{{ request()->is('lokasi*') ? 'active' : '' }}">Lokasi</a></li>
+                        @endif
+                        
+                        @if(in_array('supplier.index', $rolePermissions))
+                            <li><a href="{{ route('supplier.index') }}" class="{{ request()->is('supplier*') ? 'active' : '' }}">Supplier</a></li>
+                        @endif
+                        
+                        @if(in_array('ongkir.index', $rolePermissions))
+                            <li><a href="{{ route('ongkir.index') }}" class="{{ request()->is('ongkir*') ? 'active' : '' }}">Ongkir</a></li>
+                        @endif
+                        
+                        @if(in_array('customer.index', $rolePermissions))
+                            <li><a href="{{ route('customer.index') }}" class="{{ request()->is('customer*') ? 'active' : '' }}">Customer</a></li>
+                        @endif
+                        
+                        @if(in_array('jabatan.index', $rolePermissions))
+                            <li><a href="{{ route('jabatan.index') }}" class="{{ request()->is('jabatan*') ? 'active' : '' }}">Jabatan</a></li>
+                        @endif
+                        
+                        @if(in_array('karyawan.index', $rolePermissions))
+                            <li><a href="{{ route('karyawan.index') }}" class="{{ request()->is('karyawan*') ? 'active' : '' }}">Karyawan</a></li>
+                        @endif
+                        
+                        @if(in_array('rekening.index', $rolePermissions))
+                            <li><a href="{{ route('rekening.index') }}" class="{{ request()->is('rekening*') ? 'active' : '' }}">Rekening</a></li>
+                        @endif
+                        
+                        @if(in_array('akun.index', $rolePermissions))
+                            <li><a href="{{ route('akun.index') }}" class="{{ request()->is('akun*') ? 'active' : '' }}">Akun</a></li>
+                        @endif
+                        
+                        @if(in_array('aset.index', $rolePermissions))
+                            <li><a href="{{ route('aset.index') }}" class="{{ request()->is('aset*') ? 'active' : '' }}">Aset</a></li>
+                        @endif
+                        
+                        @if(in_array('promo.index', $rolePermissions))
+                            <li><a href="{{ route('promo.index') }}" class="{{ request()->is('promo*') ? 'active' : '' }}">Promo</a></li>
+                        @endif
                     </ul>
                 </li>
                 @endif
@@ -313,6 +373,6 @@
                 @endif
             </ul>
         </div>
-        <img src="/assets/img/bunga.png" alt="Gambar Bunga" id="bawah" style="width:100%">
+        <!-- <img src="/assets/img/bunga.png" alt="Gambar Bunga" id="bawah" style="width:100%"> -->
     </div>
 </div>

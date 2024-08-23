@@ -272,7 +272,9 @@
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        {{-- <th>Aksi</th> --}}
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        <th>Aksi</th>
+                                                        @endif
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -310,7 +312,18 @@
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                        {{-- <td></td> --}}
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        <td class="text-center">
+                                                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                            </a>
+                                                            <ul class="dropdown-menu">
+                                                                <li>
+                                                                    <a href="javascript:void(0);" onclick="editbayar({{ $databayar->id }}, '{{ $databayar->mutasiinden ? 'MutasiInden' : 'ReturInden' }}')" class="dropdown-item"><img src="/assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                        @endif
                                                        
                                                     </tr>
                                                     @endforeach
@@ -731,6 +744,63 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="editModalbayar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Pembayaran</h5>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="editBayarForm" action="" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('patch')
+            <div class="mb-3">
+              <label for="nobay" class="form-label">No Bayar</label>
+              <input type="hidden" class="form-control" id="edit_type" name="type" value="ReturInden">
+              <input type="hidden" class="form-control" id="edit_invoice_id" name="invoice_id" value="">
+              <input type="text" class="form-control" id="edit_nobay" name="no_invoice_bayar" value="" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="tgl" class="form-label">Tanggal</label>
+              <input type="date" class="form-control" id="edit_tgl" name="tanggal_bayar" value="">
+            </div>
+            <div class="mb-3">
+                <label for="metode" class="form-label">Metode</label>
+                <select class="form-control select2" id="edit_metode" name="metode">
+                    <option value="cash">cash</option>
+                    @foreach ($rekenings as $item)
+                        <option value="transfer-{{ $item->id }}">transfer - {{ $item->bank }} | {{ $item->nomor_rekening }}</option>
+                    @endforeach
+                </select>
+                
+            </div>
+            <div class="mb-3">
+              <label for="nominal" class="form-label">Nominal</label>
+              <div class="input-group">
+                <span class="input-group-text">Rp. </span>
+                <input type="text" class="form-control"  id="edit_nominal" name="nominal" value="">
+              </div>
+            </div>
+            <div class="mb-3">
+                <div class="row mx-auto">
+                    <label for="bukti" class="form-label ps-0">Bukti</label>
+                    <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*">
+                </div>
+                <div style="text-align: center;">
+                    <img id="edit_preview" src="" alt="Bukti tf" style="max-width: 100%; max-height: 300px; object-fit: contain;">
+                </div>
+            </div>  
+            
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
 </div>
 @endsection
 
@@ -909,49 +979,49 @@
 
 
   // Tambah baris untuk input kode inden retur
-    document.getElementById('add').addEventListener('click', function() {
-    const counter = document.querySelectorAll('#dynamic_field2 tr').length;
-    const maxOptions = {{ count($barangmutasi) }};
+    // document.getElementById('add').addEventListener('click', function() {
+    // const counter = document.querySelectorAll('#dynamic_field2 tr').length;
+    // const maxOptions = {{ count($barangmutasi) }};
 
-    if (counter < maxOptions) {
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>
-                <select class="form-control" id="kode_inden_retur_${counter}" name="kode_inden_retur[]" onchange="updateKategori(this, ${counter})">
-                    <option value="" disabled selected>Pilih Kode Inden</option>
-                    @foreach ($barangmutasi as $item)
-                    <option value="{{ $item->produk->kode_produk_inden }}" data-kategori="{{ $item->produk->produk->nama }}" data-diterima="{{ $item->jml_diterima }}" data-produk-id="{{ $item->id }}">
-                        {{ $item->produk->kode_produk_inden }}
-                    </option>
-                    @endforeach
-                </select>
-            </td>
-            <input type="hidden" class="form-control" name="produk_mutasi_inden_id[]" id="produk_mutasi_inden_id_${counter}" readonly>
-            <td><input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_${counter}" readonly></td>
-            <td><textarea name="alasan[]" id="alasan_${counter}" class="form-control" cols="30"></textarea></td>
-            <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_${counter}" oninput="calculateJumlahRetur(${counter})"></td>
-            <td>
-                <div class="input-group">
-                    <span class="input-group-text">Rp. </span> 
-                    <input type="text" name="rawat_retur_dis[]" id="rawat_retur_dis_${counter}" class="form-control-banyak" oninput="calculateJumlahRetur(${counter})">
-                    <input type="hidden" name="harga_satuan[]" id="rawat_retur_${counter}" class="form-control">
-                </div>
-            </td>
-            <td>
-                <div class="input-group">
-                    <span class="input-group-text">Rp. </span> 
-                    <input type="text" name="jumlah_retur_dis[]" id="jumlah_retur_dis_${counter}" class="form-control-banyak" readonly>
-                    <input type="hidden" name="totalharga[]" id="jumlah_retur_${counter}" class="form-control">
-                </div>
-            </td>
-            <td><button type="button" name="remove" class="btn btn-danger remove">-</button></td>
-        `;
-        document.getElementById('dynamic_field2').appendChild(newRow);
-        counter++;
-    } else {
-        alert('Tidak dapat menambah lebih banyak baris.');
-    }
-    });
+    // if (counter < maxOptions) {
+    //     const newRow = document.createElement('tr');
+    //     newRow.innerHTML = `
+    //         <td>
+    //             <select class="form-control" id="kode_inden_retur_${counter}" name="kode_inden_retur[]" onchange="updateKategori(this, ${counter})">
+    //                 <option value="" disabled selected>Pilih Kode Inden</option>
+    //                 @foreach ($barangmutasi as $item)
+    //                 <option value="{{ $item->produk->kode_produk_inden }}" data-kategori="{{ $item->produk->produk->nama }}" data-diterima="{{ $item->jml_diterima }}" data-produk-id="{{ $item->id }}">
+    //                     {{ $item->produk->kode_produk_inden }}
+    //                 </option>
+    //                 @endforeach
+    //             </select>
+    //         </td>
+    //         <input type="hidden" class="form-control" name="produk_mutasi_inden_id[]" id="produk_mutasi_inden_id_${counter}" readonly>
+    //         <td><input type="text" class="form-control" name="kategori_retur[]" id="kategori_retur_${counter}" readonly></td>
+    //         <td><textarea name="alasan[]" id="alasan_${counter}" class="form-control" cols="30"></textarea></td>
+    //         <td><input type="number" class="form-control qty_retur" name="jml_diretur[]" id="qty_retur_${counter}" oninput="calculateJumlahRetur(${counter})"></td>
+    //         <td>
+    //             <div class="input-group">
+    //                 <span class="input-group-text">Rp. </span> 
+    //                 <input type="text" name="rawat_retur_dis[]" id="rawat_retur_dis_${counter}" class="form-control-banyak" oninput="calculateJumlahRetur(${counter})">
+    //                 <input type="hidden" name="harga_satuan[]" id="rawat_retur_${counter}" class="form-control">
+    //             </div>
+    //         </td>
+    //         <td>
+    //             <div class="input-group">
+    //                 <span class="input-group-text">Rp. </span> 
+    //                 <input type="text" name="jumlah_retur_dis[]" id="jumlah_retur_dis_${counter}" class="form-control-banyak" readonly>
+    //                 <input type="hidden" name="totalharga[]" id="jumlah_retur_${counter}" class="form-control">
+    //             </div>
+    //         </td>
+    //         <td><button type="button" name="remove" class="btn btn-danger remove">-</button></td>
+    //     `;
+    //     document.getElementById('dynamic_field2').appendChild(newRow);
+    //     counter++;
+    // } else {
+    //     alert('Tidak dapat menambah lebih banyak baris.');
+    // }
+    // });
 
     // Remove baris untuk input kode inden retur
     document.addEventListener('click', function(event) {
@@ -991,5 +1061,76 @@
             }
         });
     });
+    $(document).on('input', '[id^=edit_nominal]', function() {
+        let input = $(this);
+        let value = input.val();
+        
+        if (!isNumeric(cleanNumber(value))) {
+        value = value.replace(/[^\d]/g, "");
+        }
+
+        value = cleanNumber(value);
+        let formattedValue = formatNumber(value);
+        
+        input.val(formattedValue);
+    });
+    $('#editBayarForm').on('submit', function(e) {
+        // Add input number cleaning for specific inputs
+        let inputs = $('#editBayarForm').find('[id^=edit_nominal]');
+        inputs.each(function() {
+            let input = $(this);
+            let value = input.val();
+            let cleanedValue = cleanNumber(value);
+
+            // Set the cleaned value back to the input
+            input.val(cleanedValue);
+        });
+
+        return true;
+    });
+    function editbayar(id, type){
+        $.ajax({
+            type: "GET",
+            url: "/purchase/pembayaran/"+id+"/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            data: {
+                'jenis': type,
+            },
+            beforeSend: function() {
+                $('#global-loader-transparent').show();
+            },
+            success: function(response) {
+                console.log(response)
+                $('#editBayarForm').attr('action', `{{ route("pembayaran_pembelian.update", ":id") }}`.replace(':id', id));
+                $('#edit_nobay').val(response.no_invoice_bayar);
+                $('#edit_type').val(type);
+                $('#edit_invoice_id').val(response.invoice_id);
+                $('#edit_metode').val(response.metode).trigger('change');
+                $('#edit_nominal').val(formatNumber(response.nominal));
+                $('#edit_tgl').val(response.tanggal_bayar);
+                if(response.bukti){
+                    $('#edit_preview').attr('src', '/storage/'+response.bukti);
+                } else {
+                    $('#edit_preview').attr('src', defaultImg);
+                }
+                $('#edit_metode').select2({
+                    dropdownParent: $("#editModalbayar")
+                });
+                $('#global-loader-transparent').hide();
+                $('#editModalbayar').modal('show');
+            },
+            error: function(error) {
+                $('#global-loader-transparent').hide();
+                toastr.error(error.responseJSON, 'Error', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+            }
+        });
+    }
 </script>
  @endsection

@@ -211,7 +211,23 @@ class MutasiController extends Controller
 
         $data['pembuat_id'] = Auth::user()->id;
         $data['tanggal_pembuat'] = $req->tanggal_pembuat;
-        
+        if (substr($data['no_mutasi'], 0,3) == 'MGO') {
+            $prefix = 'MGO' . date('Ymd');
+            $cekInvoice = Mutasi::where('no_mutasi', 'LIKE', $prefix . '%')
+                ->orderBy('no_mutasi', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_mutasi;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_mutasi'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        }
         $mutasi = Mutasi::create($data);
 
         if ($mutasi) {
@@ -710,7 +726,23 @@ class MutasiController extends Controller
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
         $data['pembuat_id'] = Auth::user()->id;
         $data['tanggal_pembuat'] = $req->tanggal_pembuat;
+        if (substr($data['no_mutasi'], 0,3) == 'MOG') {
+            $prefix = 'MOG' . date('Ymd');
+            $cekInvoice = Mutasi::where('no_mutasi', 'LIKE', $prefix . '%')
+                ->orderBy('no_mutasi', 'desc')
+                ->get();
 
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_mutasi;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_mutasi'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        }
         $mutasi = Mutasi::create($data);
 
         $cek = [];
@@ -1469,7 +1501,23 @@ class MutasiController extends Controller
 
         $data['pembuat_id'] = Auth::user()->id;
         $data['tanggal_pembuat'] = $req->tanggal_pembuat;
-        
+        if (substr($data['no_mutasi'], 0,3) == 'MGA') {
+            $prefix = 'MGA' . date('Ymd');
+            $cekInvoice = Mutasi::where('no_mutasi', 'LIKE', $prefix . '%')
+                ->orderBy('no_mutasi', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_mutasi;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_mutasi'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        }
         $mutasi = Mutasi::create($data);
 
         $lokasi = Lokasi::where('id', $req->pengirim)->first();
@@ -1885,7 +1933,39 @@ class MutasiController extends Controller
 
         $data['pembuat_id'] = Auth::user()->id;
         $data['tanggal_pembuat'] = $req->tanggal_pembuat;
-        
+        if (substr($data['no_mutasi'], 0,3) == 'MGG') {
+            $prefix = 'MGG' . date('Ymd');
+            $cekInvoice = Mutasi::where('no_mutasi', 'LIKE', $prefix . '%')
+                ->orderBy('no_mutasi', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_mutasi;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_mutasi'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        }elseif (substr($data['no_mutasi'], 0,3) == 'MPG') {
+            $prefix = 'MPG' . date('Ymd');
+            $cekInvoice = Mutasi::where('no_mutasi', 'LIKE', $prefix . '%')
+                ->orderBy('no_mutasi', 'desc')
+                ->get();
+
+            if ($cekInvoice->isEmpty()) {
+                $increment = 1;
+            } else {
+                $lastInvoice = $cekInvoice->first()->no_mutasi;
+                $lastIncrement = (int)substr($lastInvoice, strlen($prefix));
+                $increment = $lastIncrement + 1;
+            }
+
+            $data['no_mutasi'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
+
+        }
         $mutasi = Mutasi::create($data);
 
         
