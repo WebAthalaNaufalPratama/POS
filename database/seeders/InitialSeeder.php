@@ -371,6 +371,7 @@ class InitialSeeder extends Seeder
                 'formpenjualan.cetak',
                 'returpenjualan.index',
                 'returpenjualan.show',
+                'mutasigalery.index',
                 'auditretur.edit',
                 'auditretur.update',
                 'returpenjualan.view',
