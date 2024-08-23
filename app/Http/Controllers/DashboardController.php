@@ -132,7 +132,7 @@ class DashboardController extends Controller
                                             ->orWhere('created_at', '<=', $endOfMonth);
                                 })
                                 ->count();
-            $batalpenjualan = Pembelian::where('status_dibuat', 'DIBATALKAN')
+            $batalpenjualan = Pembelian::where('status_dibuat', 'BATAL')
                                 ->whereNotNull('tgl_dibuat')
                                 ->whereNotNull('pembuat')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
