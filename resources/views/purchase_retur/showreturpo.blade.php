@@ -161,7 +161,7 @@
                                
                                     <center><h5>Riwayat uang masuk (Refund) </h5></center><br>
                                     {{-- @if(Auth::user()->hasRole('Finance') && $data->status_dibuat == "DIKONFIRMASI") --}}
-                                    @if (Auth::user()->hasRole('Finance') && $data->status_dibuku == "MENUNGGU PEMBAYARAN" && $data->sisa !== 0 )   
+                                    @if (Auth::user()->hasRole('Finance') && $data->sisa !== 0 )   
                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
                                          Tambah Pembayaran
                                     </button>

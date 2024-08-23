@@ -1,6 +1,18 @@
 @extends('layouts.app-von')
 
 @section('content')
+<style>
+     td {
+    min-width: 50px; /* Atur sesuai kebutuhan */
+    white-space: nowrap;
+    }
+
+    .icon-large {
+        width: 24px;
+        height: 24px;
+    }
+</style>
+
 <div class="row">
     <div class="col-sm-12">
         <div class="card">
@@ -100,14 +112,17 @@
                             </div>
                     </div>
                 </div>
-                <div class="row mt-3">
-                    <div class="form-row row">
-                        <label>List Produk</label>
+                         <div class="row justify-content-around">
+                            <div class="col-md-12 border rounded pt-3 me-1 mt-2">
+                                <div class="form-row row">
+                                    <div class="mb-4">
+                                        <h5>List Produk</h5>
+                                    </div>
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>No</th>
+                                        {{-- <th>No</th> --}}
                                         {{-- <th>Kode Produk</th> --}}
                                         <th>Nama Produk</th>
                                         <th>Alasan</th>
@@ -120,7 +135,7 @@
                                 </thead>
                                 <tbody id="dynamic_field">
                                     <tr>
-                                        <td>1</td>
+                                        {{-- <td>1</td> --}}
                                         <input type="hidden" name="kode_produk[]" id="kode_produk_0" class="form-control" required readonly>
                                         <td style="width: 250px;">
                                             <select id="produk_0" name="nama_produk[]" class="form-control" required>
@@ -135,7 +150,12 @@
                                         <td id="tdDiskon_0"><input type="text" name="diskon[]" id="diskon_0" oninput="multiply(this), validateDiskon(0)" class="form-control" required></td>
                                         <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" required readonly></td>
                                         <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" required readonly></td>
-                                        <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                        {{-- <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td> --}}
+                                        <td>
+                                            <a href="javascript:void(0);" name="add" id="add">
+                                                <img src="/assets/img/icons/plus.svg" class="icon-large" style="color: #90ee90;" alt="svg">
+                                            </a>
+                                        </td>
                                     </tr>
                                 </tbody>
 
@@ -182,6 +202,7 @@
 
                             </table>
                         </div>
+                    </div>
                     </div>
                 </div>
                 <div class="row">
@@ -329,7 +350,6 @@
             $('#add').click(function(){
                 if($('[id^=produk_]').length < limitRow){
                     var newRow = '<tr id="row'+i+'">'+
-                                    '<td>'+(i + 1)+'</td>'+
                                     '<input type="hidden" name="kode_produk[]" id="kode_produk_'+i+'" class="form-control" required readonly>' +
                                     '<td>' + 
                                         '<select id="produk_'+i+'" name="nama_produk[]" class="form-control">'+
@@ -344,7 +364,8 @@
                                     '<td id="tdDiskon_'+i+'"><input type="text" name="diskon[]" id="diskon_'+i+'" oninput="multiply(this), validateDiskon('+i+')" class="form-control" required></td>' +
                                     '<td><input type="text" name="harga_satuan[]" id="harga_satuan_'+i+'" oninput="multiply(this)" class="form-control" required readonly></td>'+
                                     '<td><input type="text" name="harga_total[]" id="harga_total_'+i+'" class="form-control" readonly></td>'+
-                                    '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td></tr>';
+                                    '<td><a href="javascript:void(0);" name="remove" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>';
+
                         $('#dynamic_field').append(newRow);
                         $('#produk_' + i).select2();
                         i++;
@@ -354,7 +375,13 @@
                         } else {
                             displayDskon(false);
                         }
-                }
+                    } else {
+                        toastr.warning('Jumlah retur tidak bisa melebihi jumlah yang dibeli.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });                    }
             })
             $(document).on('input', '[id^=biaya_pengiriman], [id^=diskon_]', function() {
                 let input = $(this);

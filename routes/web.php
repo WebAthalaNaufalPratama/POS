@@ -312,7 +312,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/invoice/{datapo}/edit_inv_nominal', 'PembelianController@edit_invoice_purchase')->name('invoicepurchase.edit'); //pur, fin
             Route::put('/update/{idinv}/nominal', 'PembelianController@update_purchase_invoice')->name('invoice_purchase.update'); //pur, fin
 
-
+ 
             //inden
             Route::get('/invoice/{datapo}/editinvoice', 'PembelianController@editinvoice')->name('editinvoice.edit'); //pur, fin
             Route::patch('/{datapo}/editinvoiceupdate', 'PembelianController@editinvoiceupdate')->name('editinvoice.update'); //pur, fin
