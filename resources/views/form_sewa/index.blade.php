@@ -89,7 +89,17 @@
             { data: 'no_form', name: 'no_form' },
             { data: 'no_kontrak', name: 'no_kontrak', orderable: false },
             { data: 'nama_produk', name: 'nama_produk', orderable: false },
-            { data: 'nama_perangkai', name: 'nama_perangkai', orderable: false },
+            { 
+                data: 'nama_perangkai', 
+                name: 'nama_perangkai', 
+                orderable: false, 
+                render: function(data, type, row) {
+                    if (Array.isArray(data)) {
+                        return data.join('<br>');
+                    }
+                    return '';
+                }
+            },
             { 
                 data: 'tanggal', 
                 name: 'tanggal', 

@@ -217,6 +217,22 @@ class InvoiceSewaController extends Controller
         DB::beginTransaction();
 
         try {
+            $latestInvSewa = InvoiceSewa::withTrashed()->orderByDesc('id')->first();
+
+            if (!$latestInvSewa) {
+                $data['no_invoice'] = 'INS' . date('Ymd') . '00001';
+            } else {
+                $lastInvDate = substr($latestInvSewa->no_invoice, 3, 8);
+                $todayDate = date('Ymd');
+                if ($lastInvDate != $todayDate) {
+                    $data['no_invoice'] = 'INS' . date('Ymd') . '00001';
+                } else {
+                    $lastInvNumber = substr($latestInvSewa->no_invoice, -5);
+                    $nextInvNumber = str_pad((int)$lastInvNumber + 1, 5, '0', STR_PAD_LEFT);
+                    $data['no_invoice'] = 'INS' . date('Ymd') . $nextInvNumber;
+                }
+            }
+
             // Save invoice data
             $check = InvoiceSewa::create($data);
             if (!$check) {
@@ -366,7 +382,7 @@ class InvoiceSewaController extends Controller
         $riwayat = Activity::where('subject_type', InvoiceSewa::class)->where('subject_id', $invoiceSewa)->orderBy('id', 'desc')->get();
         $pembayaran = $data->pembayaran()->orderByDesc('id')->get();
         $bankpens = Rekening::get();
-        $Invoice = Pembayaran::whereRaw('LENGTH(no_invoice_bayar) = 16')->latest()->first();
+        $Invoice = Pembayaran::withTrashed()->whereRaw('LENGTH(no_invoice_bayar) = 16')->latest()->first();
         if (!$Invoice) {
             $invoice_bayar = 'BYR' . date('Ymd') . '00001';
         } else {

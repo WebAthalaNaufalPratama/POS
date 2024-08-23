@@ -375,29 +375,35 @@ class MutasiindensController extends Controller
 
             $data = $returs->map(function($item) {
                 $tipeKomplainFormatted = '-';
-                if ($item->status_dibuat !== "BATAL") {
+                if ($item->status_dibuat != "BATAL") {
                     if ($item->tipe_komplain == "Refund") {
-                        $tipeKomplainFormatted = $item->sisa_refund == 0 ? '| Lunas' : '| Belum Lunas';
+                        $tipeKomplainFormatted = $item->sisa_refund == 0 
+                            ? $item->tipe_komplain . ' | Lunas' 
+                            : $item->tipe_komplain . ' | Belum Lunas';
                     } else {
                         $tipeKomplainFormatted = $item->tipe_komplain;
                     }
                 }
+
                 $alasanList = $item->produkreturinden->map(function($produkretur) {
                     return $produkretur->alasan;
-                })->implode('</li><li>');
+                })->implode('<br>');
                 $kode_inden = $item->produkreturinden->map(function($produkretur) {
                     return $produkretur->produk->produk->kode_produk_inden;
-                })->implode('</li><li>');
+                })->implode('<br>');
                 $nama_produk = $item->produkreturinden->map(function($produkretur) {
                     return $produkretur->produk->produk->produk->nama;
-                })->implode('</li><li>');
+                })->implode('<br>');
                 $harga = $item->produkreturinden->map(function($produkretur) {
                     return $produkretur->harga_satuan;
-                })->implode('</li><li>');
+                })->toArray();
                 $qty = $item->produkreturinden->map(function($produkretur) {
                     return $produkretur->jml_diretur;
-                })->implode('</li><li>');
-                $formattedHarga = $harga;
+                })->implode('<br>');
+                $total = $item->produkreturinden->map(function($produkretur) {
+                    return $produkretur->totalharga;
+                })->toArray();
+                // $formattedHarga = $harga;
                 // dd($item->produkreturinden);
 
                 return [
@@ -409,9 +415,9 @@ class MutasiindensController extends Controller
                     'alasan' => $alasanList ?? '-',
                     'kode_inden' => $kode_inden ?? '-',
                     'nama_produk' => $nama_produk ?? '-',
-                    'harga' => formatRupiah(floatval($formattedHarga)) ?? '-',
+                    'harga' =>$harga ?? '-',
                     'qty' => $qty ?? '-',
-                    'total' => formatRupiah(floatval($item->refund)) ?? '-',
+                    'total' => $total ?? '-',
                     'supplier' => $item->mutasiinden->supplier->nama ?? '-',
                     'tujuan' => $item->mutasiinden->lokasi->nama ?? '-',
                     'status_dibuat' => $item->status_dibuat ?? 'TUNDA',

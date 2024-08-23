@@ -419,6 +419,21 @@ class PembayaranController extends Controller
             $new_invoice_tagihan = InvoiceSewa::find($data['invoice_sewa_id']);
             $data['status_bayar'] = $new_invoice_tagihan->sisa_bayar <= 0 ? 'LUNAS' : 'BELUM LUNAS';
     
+            $Invoice = Pembayaran::whereRaw('LENGTH(no_invoice_bayar) = 16')->latest()->first();
+            if (!$Invoice) {
+                $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . '00001';
+            } else {
+                $lastDate = substr($Invoice->no_invoice_bayar, 3, 8);
+                $todayDate = date('Ymd');
+                if ($lastDate != $todayDate) {
+                    $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . '00001';
+                } else {
+                    $lastNumber = substr($Invoice->no_invoice_bayar, -5);
+                    $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                    $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $nextNumber;
+                }
+            }
+
             $pembayaran = Pembayaran::create($data);
             if (!$pembayaran) {
                 DB::rollBack();

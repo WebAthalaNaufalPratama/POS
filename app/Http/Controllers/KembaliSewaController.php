@@ -320,6 +320,23 @@ class KembaliSewaController extends Controller
                 }
             }
 
+            $latestKembali = KembaliSewa::withTrashed()->orderByDesc('id')->first();
+
+            // kode kembali sewa
+            if (!$latestKembali) {
+                $data['no_kembali'] = 'KMB' . date('Ymd') . '00001';
+            } else {
+                $lastDate = substr($latestKembali->no_kembali, 3, 8);
+                $todayDate = date('Ymd');
+                if ($lastDate != $todayDate) {
+                    $data['no_kembali'] = 'KMB' . date('Ymd') . '00001';
+                } else {
+                    $lastNumber = substr($latestKembali->no_kembali, -5);
+                    $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                    $data['no_kembali'] = 'KMB' . date('Ymd') . $nextNumber;
+                }
+            }
+
             // Simpan data kembali
             $check = KembaliSewa::create($data);
             if (!$check) {
