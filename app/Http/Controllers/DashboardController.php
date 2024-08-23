@@ -142,10 +142,6 @@ class DashboardController extends Controller
                                 ->count();
             $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
                     ->where('status_diperiksa', 'DIKONFIRMASI')
-                    ->whereNotNull('tgl_dibuat')
-                    ->whereNotNull('tgl_diperiksa')
-                    ->whereNotNull('pembuat')
-                    ->whereNotNull('pemeriksa')
                     ->where(function($query) use ($startOfMonth, $endOfMonth) {
                         $query->where('created_at', '>=', $startOfMonth)
                                 ->orWhere('created_at', '<=', $endOfMonth);
