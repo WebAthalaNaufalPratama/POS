@@ -101,7 +101,8 @@ class DashboardController extends Controller
                             })->count();
             $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
             $penjualanIds = $penjualanList->pluck('id');
-            $pembayaranList = Pembayaran::whereIn('invoice_penjualan_id', $penjualanIds)->get();
+            $prefix = ['BYR', 'BOT'];
+            $pembayaranList = Pembayaran::where('no_invoice_bayar', 'LIKE',  $prefix . '%')->get();
     
             $pemasukan = 0;
             foreach ($pembayaranList as $pembayaran) {
