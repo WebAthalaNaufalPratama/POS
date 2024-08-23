@@ -479,12 +479,13 @@ class FormPerangkaiController extends Controller
             $query->where('tanggal', '<=', $dateEnd);
         });
 
-        $query->unique('no_form');
+        // $query->unique('no_form');
 
 
         if ($req->ajax()) {
             $orderColumn = $req->input('columns.' . $req->input('order.0.column') . '.data');
             $orderDirection = $req->input('order.0.dir');
+             
 
             $totalRecords = $query->count();
             $data = $query->orderByDesc('id')
@@ -492,11 +493,18 @@ class FormPerangkaiController extends Controller
                         ->take($req->input('length'))
                         ->get();
 
+            $groupedData = $data->groupBy('no_form')->map(function ($group) {
+                // Assuming 'perangkai' is a relation and has a 'nama' field
+                $firstItem = $group->first();
+                $firstItem->nama_perangkai = $group->pluck('perangkai.nama')->unique()->implode(', ');
+                return $firstItem;
+            })->values();
+
             return response()->json([
                 'draw' => intval($req->input('draw')),
                 'recordsTotal' => $totalRecords,
                 'recordsFiltered' => $totalRecords,
-                'data' => $data
+                'data' => $groupedData
             ]);
         }
 
