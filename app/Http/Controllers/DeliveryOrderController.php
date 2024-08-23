@@ -285,6 +285,23 @@ class DeliveryOrderController extends Controller
                 }
             }
 
+            $latestDO = DeliveryOrder::withTrashed()->orderByDesc('id')->first();
+
+            // kode do
+            if (!$latestDO) {
+                $data['no_do'] = 'DVS' . date('Ymd') . '00001';
+            } else {
+                $lastDate = substr($latestDO->no_do, 3, 8);
+                $todayDate = date('Ymd');
+                if ($lastDate != $todayDate) {
+                    $data['no_do'] = 'DVS' . date('Ymd') . '00001';
+                } else {
+                    $lastNumber = substr($latestDO->no_do, -5);
+                    $nextNumber = str_pad((int)$lastNumber + 1, 5, '0', STR_PAD_LEFT);
+                    $data['no_do'] = 'DVS' . date('Ymd') . $nextNumber;
+                }
+            }
+
             // Save data DO
             $check = DeliveryOrder::create($data);
             if (!$check) {

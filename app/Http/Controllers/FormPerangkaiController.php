@@ -35,7 +35,7 @@ class FormPerangkaiController extends Controller
         ->get();
 
         $query = FormPerangkai::where('jenis_rangkaian', 'Sewa')->whereHas('produk_terjual');
-        if(Auth::user()->karyawans){
+        if(Auth::user()->hasRole('AdminGallery')){
             $query->whereHas('perangkai', function($q) {
                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             });
@@ -64,15 +64,19 @@ class FormPerangkaiController extends Controller
             $currentPage = ($start / $length) + 1;
             $perPage = $length;
         
-            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+            $data = $tempData->map(function($item, $index) use ($currentPage, $perPage, $req) {
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
                 $item->tanggal_format = $item->tanggal == null ? null : tanggalindo($item->tanggal);
                 $item->no_kontrak = $item->produk_terjual->no_sewa;
                 $item->nama_produk = $item->produk_terjual->produk->nama;
-                $item->nama_perangkai = $item->perangkai->nama;
+                $item->nama_perangkai = FormPerangkai::with('perangkai')->where('no_form', $item->no_form)->get()->pluck('perangkai.nama')->toArray();
                 $item->userRole = Auth::user()->getRoleNames()->first();
+                $item->search = strtolower(trim($req->input('search.value')));
                 return $item;
             });
+
+            // Unique no form
+            $data = $data->unique('no_form');
 
             // search
             $search = $req->input('search.value');
@@ -83,7 +87,9 @@ class FormPerangkaiController extends Controller
                         || stripos($item->nominal_format, $search) !== false
                         || stripos($item->no_kontrak, $search) !== false
                         || stripos($item->nama_produk, $search) !== false
-                        || stripos($item->nama_perangkai, $search) !== false;
+                        || $this->array_some($item->nama_perangkai, function($perangkai) use ($search) {
+                            return stripos($perangkai, $search) !== false;
+                        });
                 });
             }
 
@@ -91,11 +97,20 @@ class FormPerangkaiController extends Controller
                 'draw' => $req->input('draw'),
                 'recordsTotal' => FormPerangkai::where('jenis_rangkaian', 'Sewa')->count(),
                 'recordsFiltered' => $recordsFiltered,
-                'data' => $data,
+                'data' => $data->values()->toArray(),
             ]);
 
         }
         return view('form_sewa.index', compact('perangkai'));
+    }
+
+    function array_some($array, $callback) {
+        foreach ($array as $item) {
+            if ($callback($item)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -162,6 +177,7 @@ class FormPerangkaiController extends Controller
     public function cetak($id)
     {
         $data = FormPerangkai::with('perangkai', 'produk_terjual', 'produk_terjual.sewa', 'produk_terjual.produk', 'produk_terjual.sewa.data_sales', 'produk_terjual.sewa.lokasi', 'produk_terjual.komponen')->find($id)->toArray();
+        $data['perangkais'] = FormPerangkai::with('perangkai')->where('no_form', $data['no_form'])->get()->pluck('perangkai.nama');
         $pdf = PDF::loadView('form_sewa.pdf', $data);
 
         return $pdf->stream('Form-Perangkai.pdf');

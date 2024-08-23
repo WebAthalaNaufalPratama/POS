@@ -805,7 +805,7 @@
                   },
                   dataSrc: function(json) {
                       // Debugging data from server
-                      // console.log('Data received from server:', json); 
+                      console.log('Data received from server:', json); 
                       return json.data;
                   },
                   error: function(xhr, error, code) {

@@ -134,7 +134,15 @@
             </tr>
             <tr>
                 <td style="width: 20%">Staff Perangkai</td>
-                <td style="width: 20%" class="text-start">: {{ $perangkai['nama'] }}</td>
+                <td style="width: 20%" class="text-start">
+                    @foreach($perangkais as $index => $perangkai)
+                        @if($loop->first)
+                            : {{ $perangkai }} <br>
+                        @else
+                            &nbsp;&nbsp;{{ $perangkai }} <br>
+                        @endif
+                    @endforeach
+                </td>
             </tr>
         </table>
         <br>
