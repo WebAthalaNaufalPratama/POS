@@ -734,7 +734,13 @@ function clearFile(){
         document.getElementById('dynamic_field2').appendChild(newRow);
         counter++;
     } else {
-        alert('Tidak dapat menambah lebih banyak baris.');
+        // alert('Tidak dapat menambah lebih banyak baris.');
+        toastr.warning('Tidak dapat menambah lebih banyak baris.', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                rtl: false,
+                                progressBar: true
+                            });
     }
     
     });

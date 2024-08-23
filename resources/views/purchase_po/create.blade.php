@@ -172,9 +172,7 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    
                                                         <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
-                                                    
                                                 </tr>
                                             </tbody>
                                             

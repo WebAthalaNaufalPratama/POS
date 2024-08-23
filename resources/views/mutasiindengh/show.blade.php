@@ -935,7 +935,14 @@ function calculateTotalAll() {
                             });
                         },
                         error: function() {
-                            alert('Gagal mengambil data kode inden');
+                            // alert('Gagal mengambil data kode inden');
+                            toastr.warning('Gagal mengambil data kode inden.', {
+                                        closeButton: true,
+                                        tapToDismiss: false,
+                                        rtl: false,
+                                        progressBar: true
+                            });
+                            
                         }
                     });
                 }
@@ -955,7 +962,13 @@ function calculateTotalAll() {
                             kategoriInput.val(kategori);
                         },
                         error: function() {
-                            alert('Gagal mengambil data kategori');
+                            // alert('Gagal mengambil data kategori');
+                            toastr.warning('Gagal mengambil data kategori.', {
+                                        closeButton: true,
+                                        tapToDismiss: false,
+                                        rtl: false,
+                                        progressBar: true
+                            });
                         }
                     });
                 }
@@ -986,7 +999,13 @@ function calculateTotalAll() {
                         });
                     },
                     error: function() {
-                        alert('Gagal mengambil data bulan inden');
+                        // alert('Gagal mengambil data bulan inden');
+                        toastr.warning('Gagal mengambil data bulan inden.', {
+                                        closeButton: true,
+                                        tapToDismiss: false,
+                                        rtl: false,
+                                        progressBar: true
+                            });
                     }
                 });
             }

@@ -590,7 +590,12 @@ Carbon::setLocale('id');
         tempInput.select();
         document.execCommand('copy');
         document.body.removeChild(tempInput);
-        alert('Nomor retur berhasil disalin: ' + returNumber);
+        toastr.success('Nomor retur berhasil disalin: ' + returNumber, {
+                                        closeButton: true,
+                                        tapToDismiss: false,
+                                        rtl: false,
+                                        progressBar: true
+        });
     });
 
     function formatRupiah(angka) {

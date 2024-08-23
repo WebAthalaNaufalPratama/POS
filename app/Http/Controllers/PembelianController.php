@@ -2675,7 +2675,13 @@ class PembelianController extends Controller
                 return redirect()->back()->withInput()->with('fail', 'Gagal update data');
             } else {
                 DB::commit();
-                return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe, 'id' => $idinv]))->with('success', 'Berhasil update data');
+                if (Auth::user()->hasRole('Finance') &&  $inv->status_dibuku == "MENUNGGU PEMBAYARAN") {
+                    return redirect(route('invoice.edit', ['datapo' => $datapo, 'type' => $tipe, 'id' => $idinv]))->with('success', 'Berhasil update data');
+                } else {
+                    return redirect(route('invoice.show', ['datapo' => $datapo, 'type' => $tipe, 'id' => $idinv]))->with('success', 'Berhasil update data');
+                }
+                
+                
             }
         } catch (\Exception $e) {
             DB::rollBack();

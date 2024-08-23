@@ -28,6 +28,17 @@
         min-width: 100px; /* Atur lebar minimum label sesuai kebutuhan */
     }
 
+    
+    td {
+    min-width: 50px; /* Atur sesuai kebutuhan */
+    white-space: nowrap;
+    }
+
+    .icon-large {
+        width: 24px;
+        height: 24px;
+    }
+
 </style>
 
 <div class="page-header">
@@ -236,8 +247,12 @@
                                                             <input type="hidden" name="totalharga[]" id="jumlah_retur_0" class="form-control">
                                                         </div>
                                                     </td>
-                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
-                                                </tr>
+                                                    <td>
+                                                        <a href="javascript:void(0);" name="add" id="add">
+                                                            <img src="/assets/img/icons/plus.svg" class="icon-large" style="color: #90ee90;" alt="svg">
+                                                        </a>
+                                                    </td>
+                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -693,26 +708,33 @@ function clearFile(){
                     <input type="hidden" name="totalharga[]" id="jumlah_retur_${counter}" class="form-control">
                 </div>
             </td>
-            <td><button type="button" name="remove" class="btn btn-danger remove">-</button></td>
+            <td><a href="javascript:void(0);" name="remove" class="btn_remove remove"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
+
         `;
         document.getElementById('dynamic_field2').appendChild(newRow);
         counter++;
     } else {
-        alert('Tidak dapat menambah lebih banyak baris.');
+        
+        toastr.warning('Tidak dapat menambah lebih banyak baris.', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+        });
     }
     
     });
 
-    // Remove baris untuk input kode inden retur
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('remove')) {
-            const rowsCount = document.querySelectorAll('#dynamic_field2 tr').length;
-            if (rowsCount > 1) {
-                event.target.closest('tr').remove();
-                calculateTotal();
-            }
+    document.getElementById('dynamic_field2').addEventListener('click', function(event) {
+    if (event.target.closest('.remove')) {
+        const rowsCount = document.querySelectorAll('#dynamic_field2 tr').length;
+        if (rowsCount > 1) {
+            event.target.closest('tr').remove();
+            calculateTotal();
         }
-    });
+    }
+});
+
 
     $(document).ready(function() {
 
