@@ -462,7 +462,7 @@ class FormPerangkaiController extends Controller
         $query->when($req->dateEnd, function ($query, $dateEnd) {
             $query->where('tanggal', '<=', $dateEnd);
         });
-        $query->distinct('no_form');
+
 
         if ($req->ajax()) {
             $orderColumn = $req->input('columns.' . $req->input('order.0.column') . '.data');
