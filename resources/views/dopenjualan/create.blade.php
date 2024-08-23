@@ -633,6 +633,8 @@
             e.preventDefault();
         });
 
+        $('#driver').select2();
+
 
         $(document).on('change', '[id^=nama_produk]', function() {
             var id = $(this).attr('id').split('_')[2]; 

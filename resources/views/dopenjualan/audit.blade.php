@@ -125,7 +125,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="customer_id">Pengirim</label>
-                                                <select id="customer_id" name="customer_id" class="form-control"  >
+                                                <select id="customer_id" name="customer_id" class="form-control" readonly>
                                                     <option value="">Pilih Nama Pengirim</option>
                                                     @foreach ($customers as $customer)
                                                     <option value="{{ $customer->id }}" {{ $customer->id == $dopenjualan->customer_id ? 'selected' : '' }}>{{ $customer->nama }}</option>
@@ -600,7 +600,9 @@
             $('#dynamic_field_tambah').append(newrowtambah);
             $('#nama_produk_' + i + ', #jenisdiskon_' + i).select2();
             i++;
-        })
+        });
+
+        $('#driver').select2();
 
         function updateIndicesProduk() {
             var i = 0;
