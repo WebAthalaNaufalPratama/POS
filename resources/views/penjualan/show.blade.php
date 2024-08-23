@@ -708,7 +708,7 @@
 
             if (pengiriman === "sameday") {
                 $('#inputOngkir').show();
-                $('#biaya_ongkir').prop('readonly', false);
+                $('#biaya_ongkir').prop('readonly', true);
             } else if (pengiriman === "exspedisi") {
                 $('#inputExspedisi').show();
                 $('#biaya_ongkir').prop('readonly', true);
