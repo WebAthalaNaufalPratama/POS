@@ -72,6 +72,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/top_minus_produk', 'DashboardController@getTopMinusProduk')->name('getTopMinusProduk');
             Route::get('/top_sales', 'DashboardController@getTopSales')->name('getTopSales');
             Route::get('/loyalty', 'DashboardController@getLoyalty')->name('getLoyalty');
+            Route::get('/uang_keluar', 'DashboardController@uang_keluar')->name('uang_keluar');
+            Route::get('/tagihan_supplier', 'DashboardController@tagihan_supplier')->name('tagihan_supplier');
         });
 
         /**

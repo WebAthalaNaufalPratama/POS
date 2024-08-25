@@ -49,4 +49,7 @@ class Invoicepo extends Model
     public function retur(){
         return $this->hasOne(Returpembelian::class, 'invoicepo_id', 'id');
     }
+    public function pembayaran(){
+        return $this->hasMany(Pembayaran::class, 'invoice_purchase_id');
+    }
 }
