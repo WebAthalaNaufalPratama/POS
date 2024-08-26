@@ -10,11 +10,25 @@
                 <i data-feather="map-pin"></i>
                 </div>
                 <div class="dash-widgetcontent">
-                    <select id="locationSelect" class="custom-select">
-                        @foreach($lokasis as $lokasi)
-                            <option value="{{ $lokasi->id }}" {{ request('lokasi_id') == $lokasi->id ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
-                        @endforeach
-                    </select>
+                    <div class="row">
+                        <div class="col-6">
+                            <select id="locationSelect" class="custom-select">
+                                @foreach($lokasis as $lokasi)
+                                    <option value="{{ $lokasi->id }}" {{ request('lokasi_id') == $lokasi->id ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            @role('Finance')
+                            <select id="rekeningSelect" class="custom-select">
+                                <option value="">--Rekening--</option>
+                                @foreach($rekenings as $rekening)
+                                    <option value="{{ $rekening->id }}" {{ request('rekening_id') == $rekening->id ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
+                                @endforeach
+                            </select>
+                            @endrole
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,6 +101,7 @@
             </div>
         </div>
     </div>
+    @role('Purchasing')
     <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-pemasukan">
             <div class="dash-counts">
@@ -109,6 +124,31 @@
             </div>
         </div>
     </div>
+    @endrole
+    @role('Finance')
+    <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+        <div class="dash-count dash-penjualan-retur">
+            <div class="dash-counts">
+                <h4>{{ 'Rp ' . number_format($balance, 0, ',', '.') }}</h4>
+                <h5>Saldo Rekening</h5>
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="credit-card"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+        <div class="dash-count dash-pemasukan">
+            <div class="dash-counts">
+                <h4>{{ 'Rp ' . number_format($pemasukan, 0, ',', '.') }}</h4>
+                <h5>Pemasukan</h5>
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="dollar-sign"></i>
+            </div>
+        </div>
+    </div>
+    @endrole
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
             <div class="card-header">
@@ -144,15 +184,52 @@
             </div>
         </div>
     </div>
+    
+    {{-- Uang Keluar --}}
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Uang Keluar</h5>
+            </div>
+            <div class="card-body">
+                <div id="uang_keluar_chart" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
+    
+    {{-- Tagihan SUpplier --}}
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Tagihan Supplier</h5>
+            </div>
+            <div class="card-body">
+                <div id="tagihan_supplier_chart" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
     @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
-        $('#locationSelect').on('change', function() {
-            var locationId = $(this).val();
-            window.location.href = '{{ url("dashboard") }}' + '?lokasi_id=' + locationId;
+        $(document).ready(function() {
+            // Handle change event for locationSelect
+            $('#locationSelect').on('change', function() {
+                var locationId = $(this).val();
+                var currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('lokasi_id', locationId);
+                window.location.href = currentUrl.toString();
+            });
+
+            // Handle change event for rekeningSelect
+            $('#rekeningSelect').on('change', function() {
+                var rekeningId = $(this).val();
+                var currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('rekening_id', rekeningId);
+                window.location.href = currentUrl.toString();
+            });
         });
     @endif
     var first = true;
@@ -547,6 +624,149 @@
             }
         });
     }
+    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+        if ($('#uang_keluar_chart').length > 0) {
+            var uang_keluarChart = {
+                chart: {
+                    height: 350,
+                    type: 'donut',
+                    toolbar: {
+                        show: false,
+                    }
+                },
+                series: [], 
+                labels: [], 
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val, opts) {
+                        return opts.w.config.series[opts.seriesIndex]; // Display the series value
+                    },
+                    style: {
+                        fontSize: '14px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 'bold',
+                        colors: undefined
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (val) {
+                            return val;
+                        }
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                show: true,
+                                name: {
+                                    show: true
+                                },
+                                value: {
+                                    show: true,
+                                    formatter: function(val) {
+                                        return val;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                legend: {
+                    show: true,
+                    position: 'right', 
+                    offsetX: 0,
+                    offsetY: 0,
+                    labels: {
+                        colors: ['#000'], 
+                        useSeriesColors: false 
+                    },
+                    itemMargin: {
+                        horizontal: 10, // Space between items
+                        vertical: 5 // Space between rows
+                    }
+                }
+            };
+
+            var donut2 = new ApexCharts($('#uang_keluar_chart')[0], uang_keluarChart);
+            donut2.render();
+
+            $.ajax({
+                url: '{{ route('uang_keluar') }}',
+                method: 'GET',
+                success: function(response) {
+                    console.log(response)
+                    if (response.labels && response.data) {
+                        donut2.updateOptions({
+                            labels: response.labels
+                        });
+                        donut2.updateSeries(response.data);
+                    } else {
+                        console.error('Invalid data format received from server');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching uang keluar data:", error);
+                }
+            });
+        }
+
+        if ($('#tagihan_supplier_chart').length > 0) {
+        var tagihanSupplierOptions = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                toolbar: {
+                    show: false,
+                }
+            },
+            series: [{
+                name: 'Tagihan Supplier',
+                data: []
+            }],
+            xaxis: {
+                categories: []
+            },
+            yaxis: {
+                title: {
+                    text: 'Nominal',
+                },
+            },
+            tooltip: {
+                y: {
+                    formatter: function(value) {
+                        return value.toLocaleString('id-ID');
+                    }
+                }
+            }
+        };
+
+        var tagihanSupplierChart = new ApexCharts($('#tagihan_supplier_chart')[0], tagihanSupplierOptions);
+        tagihanSupplierChart.render();
+
+        var locationId = $('#locationSelect').val();
+
+        $.ajax({
+            url: '{{ route('tagihan_supplier') }}',
+            method: 'GET',
+            success: function(response) {
+                console.log(response)
+                tagihanSupplierChart.updateOptions({
+                    xaxis: {
+                        categories: response.labels
+                    }
+                });
+                tagihanSupplierChart.updateSeries([{
+                    data: response.data
+                }]);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching tagihan supplier data:", error);
+            }
+        });
+    }
+    @endif
 
     function deleteData(id) {
         Swal.fire({

@@ -503,6 +503,8 @@ class InitialSeeder extends Seeder
                 'kas.log',
                 'pembayaran_pembelian.edit',
                 'pembayaran_pembelian.update',
+                'uang_keluar',
+                'tagihan_supplier'
             ];
         
             $financePermissionList = array_merge($basiPermissionList, $financePermissionList);

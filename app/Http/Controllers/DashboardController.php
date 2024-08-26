@@ -31,6 +31,7 @@ use App\Models\Kondisi;
 use App\Models\Rekening;
 use App\Models\TransaksiKas;
 use DateTime;
+use Illuminate\Support\Facades\DB;
 use IntlDateFormatter;
 
 class DashboardController extends Controller
@@ -232,6 +233,7 @@ class DashboardController extends Controller
                 $balance = 0;
                 if($req->rekening_id){
                     $balance = TransaksiKas::getSaldo($req->rekening_id);
+                    $balance += Rekening::find($req->rekening_id)->saldo_awal;
                 }
                 return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran', 'rekenings', 'balance'));
             }
@@ -813,5 +815,54 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function uang_keluar(Request $req)
+    {
+        $labels = ['Kas', 'Invoice Pembelian', 'Retur', 'Mutasi'];
 
+        $lokasi_pusat = Lokasi::where('tipe_lokasi', 5)->pluck('id');
+        
+        $kas = TransaksiKas::whereIn('lokasi_pengirim', $lokasi_pusat)->sum('nominal');
+        $invoice = Pembayaran::whereHas('pembelian')->sum('nominal');
+
+        $returSum = Pembayaran::whereHas('retur', function($q) {
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+        })->sum('nominal');
+        
+        $returindenSum = Pembayaran::whereHas('returinden', function($q) {
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+        })->sum('nominal');
+
+        $mutasiinden = Pembayaran::whereHas('mutasiinden')->sum('nominal');
+
+        $data = [
+            intval($kas),
+            intval($invoice),
+            intval($returSum) + intval($returindenSum),
+            intval($mutasiinden)
+        ];
+
+        return response()->json([
+            'labels' => $labels,
+            'data' => $data
+        ]);
+    }
+
+    public function tagihan_supplier()
+    {
+        $invoices = Invoicepo::with('pembayaran')
+                    ->where('status_dibuat', 'DIKONFIRMASI')
+                    ->get();
+
+        $totalNominal = $invoices->sum('total_tagihan');
+        $terbayar = $invoices->reduce(function($carry, $invoice) {
+            return $carry + $invoice->pembayaran->sum('nominal');
+        }, 0);
+
+        $belumTerbayar = $totalNominal - $terbayar;
+
+        return response()->json([
+            'labels' => ['Terbayar', 'Belum Terbayar'],
+            'data' => [$terbayar, $belumTerbayar]
+        ]);
+    }
 }
