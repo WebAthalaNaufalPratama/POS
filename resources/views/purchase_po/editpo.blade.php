@@ -149,7 +149,7 @@
                                                     <input type="number" name="qtykrm[]" id="qtykrm_{{ $index }}" class="form-control" value="{{ $item->jml_dikirim }}" readonly>
                                                 </td>
                                                 <td>
-                                                    <input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" value="{{ old('qtytrm.' . $index, $item->jml_diterima ?? '') }}">
+                                                    <input type="number" name="qtytrm[]" id="qtytrm_{{ $index }}" class="form-control" value="{{ old('qtytrm.' . $index, $item->jml_diterima ?? '') }}" min="0">
                                                 </td>
                                                 <td>
                                                     <select id="kondisi_{{ $index }}" name="kondisi[]" class="form-control" onchange="showInputType({{ $index }})">

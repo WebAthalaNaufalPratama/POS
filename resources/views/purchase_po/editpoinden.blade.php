@@ -1,6 +1,14 @@
 @extends('layouts.app-von')
 
 @section('content')
+<style>
+
+    .icon-large {
+            width: 240px;
+            
+            height: 240px;
+        }
+    </style>
 
 <div class="page-header">
     <div class="row">
@@ -117,10 +125,10 @@
                                                     </select>
                                                 </td>
                                                 <td><input type="text" name="kode[]" id="kode_{{ $index }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
-                                                <td><input type="number" name="qty[]" id="qty_{{ $index }}" class="form-control" value="{{ $item->jumlahInden }}"></td>
+                                                <td><input type="number" name="qty[]" id="qty_{{ $index }}" class="form-control" value="{{ $item->jumlahInden }}" min="0"></td>
                                                 <td><input type="text" name="ket[]" id="ket_{{ $index }}" class="form-control" value="{{ $item->keterangan }}"></td>
                                                 @if($index == 0)
-                                                <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                <td><a href="javascript:void(0);" id="add"  class="icon-large"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                                 @else
                                                 <td><button type="button" name="remove" id="{{ $index }}" class="btn btn-danger btn_remove">x</button></td>
                                                 @endif
@@ -158,13 +166,15 @@
                     </div>
                 </div>
 
-                        <div class="row justify-content-start">
-                            <div class="col-md-6 border rounded pt-3 me-1 mt-2">
-                                <table class="table table-responsive border rounded">
+                <div class="row justify-content-start">
+                    <div class="col-md-6 border rounded pt-3 me-1 mt-2">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
                                     <thead>
                                         <tr>
-                                            <th>Dibuat</th>
-                                            <th>Diperiksa</th>
+                                            <th style="width: 33%;">Dibuat</th>
+                                            <th style="width: 33%;">Diperiksa</th>
+                                       
                                         </tr>
                                     </thead>
                                     @if(Auth::user()->hasRole('Purchasing'))
@@ -284,6 +294,7 @@
                                     </tbody>
                                     @endif
                                 </table>
+                        </div>
                                 <br>
                             </div>
                         </div>
@@ -568,7 +579,7 @@ $(document).ready(function() {
                         <td><input type="text" name="kode[]" id="kode_${i}" class="form-control" readonly></td>
                         <td><input type="number" name="qty[]" id="qty_${i}" class="form-control"></td>
                         <td><input type="text" name="ket[]" id="ket_${i}" class="form-control"></td>
-                        <td><button type="button" name="remove" id="${i}" class="btn btn-danger btn_remove">x</button></td>
+                        <td><a href="javascript:void(0);" name="remove" class="btn_remove" id="${i}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                     </tr>`;
         $('#dynamic_field').append(newRow);
         initializeSelect2AndEvents(i);

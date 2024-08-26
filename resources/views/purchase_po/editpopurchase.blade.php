@@ -149,7 +149,7 @@
                                                                 </select>
                                                             </td>
                                                             <td>
-                                                                <input type="number" name="qtykrm[{{ $index }}]" id="qtykrm_{{ $index }}" class="form-control" value="{{ old('qtykrm.' . $index, $item->jml_dikirim) }}">
+                                                                <input type="number" name="qtykrm[{{ $index }}]" id="qtykrm_{{ $index }}" class="form-control" value="{{ old('qtykrm.' . $index, $item->jml_dikirim) }}" min="0">
                                                             </td>
                                                             <td>
                                                                 <input type="number" name="qtytrm[{{ $index }}]" id="qtytrm_{{ $index }}" class="form-control" value="{{ old('qtytrm.' . $index, $item->jml_diterima) }}" disabled>
@@ -181,63 +181,66 @@
                             </div>
                         </div>
                         <div class="row justify-content-start">
-                            <div class="col-md-7 border rounded pt-3 me-1 mt-2">
-                                <table class="table table-responsive border rounded">
-                                    <thead>
-                                        <tr>
-                                            <th>Dibuat :</th>
-                                            <th>Diterima :</th>
-                                            <th>Diperiksa :</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td id="pembuat">
-                                                <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
-                                                <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})"  disabled>
-                                            </td>
-                                            <td id="penerima">
-                                                @if (!$penerima)
-                                                    <input type="text" class="form-control" value="Nama (Admin Galery)" disabled>
-                                                @else
-                                                    <input type="text" class="form-control" value="{{ $penerima }} ({{ $penerimajbt }})" disabled>
-                                                @endif
-                                            </td>
-                                            <td id="pemeriksa">
-                                                @if (!$pemeriksa)
-                                                    <input type="text" class="form-control" value="Nama (Auditor)"  disabled>
-                                                @else
-                                                    <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})"  disabled>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td id="status_dibuat">
-                                                <input type="text" class="form-control" id="status_buat" value="{{ old('status_dibuat', $beli->status_dibuat) }}" readonly>
-                                            </td>
-                                            <td id="status_diterima">
-                                                <input type="text" class="form-control" id="status_diterima" value="{{ old('status_diterima', $beli->status_diterima) ?? '-' }}" readonly>
-                                            </td>
-                                            <td id="status_diperiksa">
-                                                <input type="text" class="form-control" id="status_diperiksa" value="{{ old('status_diperiksa', $beli->status_diperiksa) ?? '-' }}" readonly>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td id="tgl_pembuat">
-                                                <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" readonly>
-                                            </td>
-                                            <td id="tgl_diterima">
-                                                <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', $beli->tgl_diterima_ttd) ?? '-' }}" disabled>
-                                            </td>
-                                            <td id="tgl_pemeriksa">
-                                                <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', $beli->tgl_diperiksa) ?? '-' }}" disabled>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="col-md-9 border rounded pt-3 me-1 mt-2">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 33%;">Dibuat</th>
+                                                <th style="width: 33%;">Diterima</th>
+                                                <th style="width: 33%;">Diperiksa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <input type="hidden" name="pembuat" value="{{ Auth::user()->id ?? '' }}">
+                                                    <input type="text" class="form-control" value="{{ $pembuat }} ({{ $pembuatjbt }})" disabled>
+                                                </td>
+                                                <td>
+                                                    @if (!$penerima)
+                                                        <input type="text" class="form-control" value="Nama (Admin Galery)" disabled>
+                                                    @else
+                                                        <input type="text" class="form-control" value="{{ $penerima }} ({{ $penerimajbt }})" disabled>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if (!$pemeriksa)
+                                                        <input type="text" class="form-control" value="Nama (Auditor)" disabled>
+                                                    @else
+                                                        <input type="text" class="form-control" value="{{ $pemeriksa }} ({{ $pemeriksajbt }})" disabled>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <input type="text" class="form-control" id="status_buat" value="{{ old('status_dibuat', $beli->status_dibuat) }}" readonly>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" id="status_diterima" value="{{ old('status_diterima', $beli->status_diterima) ?? '-' }}" readonly>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" id="status_diperiksa" value="{{ old('status_diperiksa', $beli->status_diperiksa) ?? '-' }}" readonly>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <input type="datetime-local" class="form-control" id="tgl_dibuat" name="tgl_dibuat" value="{{ now() }}" readonly>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" id="tgl_diterima" name="tgl_diterima" value="{{ old('tgl_diterima', $beli->tgl_diterima_ttd) ?? '-' }}" disabled>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" id="tgl_pemeriksa" name="tgl_diperiksa" value="{{ old('tgl_diperiksa', $beli->tgl_diperiksa) ?? '-' }}" disabled>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                                 <br>
                             </div>
                         </div>
+                        
                         <div class="text-end mt-3">
                             <button class="btn btn-primary" type="submit">Submit</button>
                             <a href="{{ route('pembelian.index') }}" class="btn btn-secondary" type="button">Back</a>
@@ -402,7 +405,7 @@
                                     '@endforeach'+
                                 '</select>'+
                             '</td>'+
-                            '<td><input type="number" name="qtykrm['+i+']" id="qtykrm_'+i+'" class="form-control"></td>'+
+                            '<td><input type="number" name="qtykrm['+i+']" id="qtykrm_'+i+'" class="form-control" min="0"></td>'+
                             '<td><input type="number" name="qtytrm['+i+']" id="qtytrm_'+i+'" class="form-control" disabled></td>'+
                             '<td>'+
                                 '<select id="kondisi_'+i+'" name="kondisi['+i+']" class="form-control" disabled required>'+

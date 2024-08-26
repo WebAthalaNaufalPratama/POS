@@ -18,7 +18,6 @@
         </div>
     </div>
 </div>
-
 <div class="row">
     <div class="card">
         <div class="card-header">
@@ -43,7 +42,6 @@
                 {{-- @method('PUT') --}}
                 <div class="row">
                     <div class="col-sm">
-                        @csrf
                         <div class="row justify-content-start">
                         <div class="col-md-12 border rounded pt-3 me-1">
                                 <div class="row">
@@ -146,7 +144,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                       
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
@@ -176,7 +174,7 @@
                                                     <td><input type="text" name="kode[]" id="kode_{{ $i }}" class="form-control" value="{{ $item->produk->kode }}" readonly></td>
                                                     <td><input type="text" name="nama[]" id="nama_{{ $i }}" class="form-control" value="{{ $item->produk->nama }}" readonly></td>
                                                     <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $item->jml_dikirim }}" readonly></td>
-                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ old('qtytrm.' . $i, $item->jml_diterima ?? '') }}" ></td>
+                                                    <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ old('qtytrm.' . $i, $item->jml_diterima ?? '') }}" min="0"></td>
                                                     <td>
                                                         <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" onchange="showInputType({{ $i }})">
                                                             <option value="">Pilih Kondisi</option>
@@ -197,8 +195,10 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
                         <div class="row justify-content-start">
-                            <div class="col-md-7 border rounded pt-3 me-1 mt-2">
+                            <div class="col-md-9 border rounded pt-3 me-1 mt-2">
+                                <div class="table-responsive">
                                 <table class="table table-responsive border rounded">
                                     <thead>
                                         <tr>
@@ -268,6 +268,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                </div>
                                 <br>
                             </div>
                         </div>
@@ -283,6 +284,7 @@
 </div>
 </div>
 </div>
+
 <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">

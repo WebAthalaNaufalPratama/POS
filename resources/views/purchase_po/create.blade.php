@@ -1,6 +1,14 @@
 @extends('layouts.app-von')
 
 @section('content')
+<style>
+
+.icon-large {
+        width: 24px;
+        
+        height: 24px;
+    }
+</style>
 
 <div class="page-header">
     <div class="row">
@@ -157,7 +165,7 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" value="{{ old('qtykrm.0') }}">
+                                                        <input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" value="{{ old('qtykrm.0') }}" min="0">
                                                     </td>
                                                     <td>
                                                         <input type="number" name="qtytrm[]" id="qtytrm_0" class="form-control" onchange="calculateTotal(0)" value="{{ old('qtytrm.0') }}" readonly>
@@ -172,7 +180,7 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                        <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
+                                                        <td><a href="javascript:void(0);"  class="icon-large" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                                 </tr>
                                             </tbody>
                                             
@@ -348,7 +356,7 @@
                                 '@endforeach'+
                             '</select>'+
                         '</td>'+
-                        '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
+                        '<td><input type="number" name="qtykrm[]" id="qtykrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')" min="0"></td>'+
                         '<td><input type="number" name="qtytrm[]" id="qtytrm_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')" readonly></td>'+
                         '<td>'+
                             '<select id="kondisi_'+i+'" name="kondisi[]" class="form-control" onchange="showInputType('+i+') required" readonly>'+
@@ -358,7 +366,7 @@
                                 '@endforeach'+
                             '</select>'+
                         '</td>'+
-                        '<td><a href="javascript:void(0);" name="remove" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>';
+                        '<td><a href="javascript:void(0);" name="remove" class="btn_remove icon-large" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>';
                     '</tr>';
         $('#dynamic_field').append(newRow);
 
