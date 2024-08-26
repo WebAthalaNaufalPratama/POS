@@ -14,6 +14,13 @@
                             $rolePermissions = $roles->flatMap->permissions->pluck('name')->toArray();
                         }
                     }
+                    if($user->hasRole(['AdminGallery'])) {
+                        $hitungpenjualan = \App\Models\Penjualan::where('status', 'TUNDA')->count();
+                    }else if($user->hasRole(['Finance'])){
+                        $hitungpenjualan = \App\Models\Penjualan::where('status', 'DIKONFIRMASI')->whereNotNull('dibukukan_id')->count();
+                    }else if($user->hasRole(['Auditor'])){
+                        $hitungpenjualan = \App\Models\Penjualan::where('status', 'DIKONFIRMASI')->whereNotNull('auditor_id')->count();
+                    }
                 @endphp
                 <li class="active">
                     <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
@@ -134,7 +141,7 @@
                     @if((in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
+                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualan}}</span></a></li>
                         <li>
                             <a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}"
                             class="{{ request()->is('formpenjualan') && request()->query('jenis_rangkaian') == 'Penjualan' ? 'active' : '' }}">
