@@ -200,7 +200,7 @@
                 </li>
                 @endif
                 <li class="submenu">
-                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 2)
+                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi == 1)
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljual }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualan }}</span></a></li>
@@ -216,7 +216,7 @@
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
-                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi != 1)
+                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi == 2)
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljualoutlet }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualanoutlet}}</span></a></li>
