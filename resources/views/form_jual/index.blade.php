@@ -155,15 +155,15 @@
                     return meta.row + 1;
                 }},
                 { data: 'no_form', name: 'no_form' },
-                { data: 'tanggal', name: 'tanggal' },
+                { data: 'no_invoice', name: 'no_invoice' },
                 { data: 'jenis_rangkaian', name: 'jenis_rangkaian' },
                 { 
-                    data: 'perangkai.nama', 
+                    data: 'perangkai_nama', // This should match the field containing the array of names
                     name: 'perangkai.nama', 
-                    orderable: false, 
+                    orderable: false, // Set to false as perangkai_nama is not directly sortable
                     render: function(data, type, row) {
                         if (Array.isArray(data)) {
-                            return data.join('<br>');
+                            return data.join('<br>'); // Join array elements with a line break
                         }
                         return '';
                     }

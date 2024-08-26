@@ -38,7 +38,7 @@ class DopenjualanController extends Controller
     $user = Auth::user();
     $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-    $query = DeliveryOrder::with('customer', 'data_driver')->where('jenis_do', 'PENJUALAN')->where('lokasi_pengirim', $lokasi->lokasi_id);
+    $query = DeliveryOrder::with('customer', 'data_driver')->where('lokasi_pengirim', $lokasi->lokasi_id);
 
     if ($lokasi) {
         if ($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet'])) {
