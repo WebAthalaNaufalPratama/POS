@@ -184,7 +184,7 @@
             </div>
         </div>
     </div>
-    
+    @role('Finance')
     {{-- Uang Keluar --}}
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
@@ -208,6 +208,7 @@
             </div>
         </div>
     </div>
+    @endrole
 </div>
 @endsection
 
@@ -230,59 +231,85 @@
                 currentUrl.searchParams.set('rekening_id', rekeningId);
                 window.location.href = currentUrl.toString();
             });
-        });
-    @endif
-    var first = true;
-    var urlString = '';
 
-    $(document).ready(function() {
+            // Handle change event for invenSelect
+            $('#InvenSelect').on('change', function() {
+                var invenId = $(this).val();
+                var currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('inven', invenId);
+                window.location.href = currentUrl.toString();
+            });
+
+            invenSelect();
+
+            function invenSelect() {
+                var InvenId = $('#InvenSelect').val();
+                if (InvenId === "Inden") {
+                    $('.bulan').show();
+                } else {
+                    $('.bulan').hide();
+                }
+            }
+
+            // Handle change event for invenSelect
+            $('#filterDate').on('change', function() {
+                var invenId = $(this).val();
+                var currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('dateInden', invenId);
+                window.location.href = currentUrl.toString();
+            });
+        });
+    @else
+        var first = true;
         var urlString = '';
 
-        invenSelect();
+        $(document).ready(function() {
+            var urlString = '';
 
-        function invenSelect() {
-            var InvenId = $('#InvenSelect').val();
-            if (InvenId === "Inden") {
-                $('.bulan').show();
-            } else {
-                $('.bulan').hide();
-            }
-        }
+            invenSelect();
 
-        $('#InvenSelect').on('change', function() {
-            var InvenId = $(this).val();
-            if(InvenId == 'Inden'){
-                $('.bulan').show();
-                 updateUrl(InvenId, $('#filterDate').val());
-            }else{
-                
-                updateUrl(InvenId, null);
-            }
-           
-        });
-
-        $('#filterDate').on('change', function() {
-            var dateInden = $(this).val();
-            updateUrl($('#InvenSelect').val(), dateInden);
-        });
-
-        function updateUrl(InvenId, dateInden) {
-            urlString = '';
-
-            if (InvenId) {
-                urlString += 'inven=' + InvenId;
-            }
-
-            if (dateInden) {
-                if (urlString.length > 0) {
-                    urlString += '&';
+            function invenSelect() {
+                var InvenId = $('#InvenSelect').val();
+                if (InvenId === "Inden") {
+                    $('.bulan').show();
+                } else {
+                    $('.bulan').hide();
                 }
-                urlString += 'dateInden=' + dateInden;
             }
 
-            window.location.href = '{{ url("dashboard") }}' + (urlString ? '?' + urlString : '');
-        }
-    });
+            $('#InvenSelect').on('change', function() {
+                var InvenId = $(this).val();
+                if(InvenId == 'Inden'){
+                    $('.bulan').show();
+                    updateUrl(InvenId, $('#filterDate').val());
+                }else{
+                    updateUrl(InvenId, null);
+                }
+            });
+
+            $('#filterDate').on('change', function() {
+                var dateInden = $(this).val();
+                updateUrl($('#InvenSelect').val(), dateInden);
+            });
+
+            function updateUrl(InvenId, dateInden) {
+                urlString = '';
+
+                if (InvenId) {
+                    urlString += 'inven=' + InvenId;
+                }
+
+                if (dateInden) {
+                    if (urlString.length > 0) {
+                        urlString += '&';
+                    }
+                    urlString += 'dateInden=' + dateInden;
+                }
+
+                window.location.href = '{{ url("dashboard") }}' + (urlString ? '?' + urlString : '');
+            }
+        });
+    @endif
 
     
     function formatTanggal(date) {
@@ -429,11 +456,11 @@
         var locationId = $('#locationSelect').val();
         var InvenId = $('#InvenSelect').val();
         var dateInden = $('#filterDate').val();
-        console.log(dateInden);
+        // console.log(dateInden);
 
         $.ajax({
             @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
-            url: '{{ route('getTopMinusProduk') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
+            url: '{{ route('getTopMinusProduk') }}' + (locationId ? '?lokasi_id=' + locationId : '') +'&'+ (InvenId ? 'inven=' + InvenId : '') +'&'+ (dateInden ? 'dateInden=' + dateInden : ''),
             @else
             url: '{{ route('getTopMinusProduk') }}' + (InvenId ? '?inven=' + InvenId : '') +'&'+ (dateInden ? 'dateInden=' + dateInden : ''),
             @endif

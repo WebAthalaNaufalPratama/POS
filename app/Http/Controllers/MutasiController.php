@@ -505,7 +505,7 @@ class MutasiController extends Controller
         $karyawan = Karyawan::where('user_id', $user->id)->first();
         $tipe = $karyawan->lokasi->tipe_lokasi;
 
-        $query = Mutasi::where('no_mutasi', 'like', 'MGO%');
+        $query = Mutasi::where('no_mutasi', 'like', 'MOG%');
 
         if ($tipe == 1 && !$user->hasRole(['Auditor', 'Finance'])) {
             $query->where('status', 'DIKONFIRMASI')->orderBy('created_at', 'desc');

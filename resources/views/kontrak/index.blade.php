@@ -189,6 +189,9 @@
                         case 'TUNDA':
                             badgeClass = 'bg-lightred';
                             break;
+                        case 'SELESAI':
+                            badgeClass = 'bg-lightgreen';
+                            break;
                         default:
                             badgeClass = 'bg-lightgrey';
                             break;
@@ -244,6 +247,14 @@
                         `;
                     }
 
+                    if (row.canSelesai) {
+                        actionsHtml += `
+                            <li>
+                                <a href="#" class="dropdown-item" onclick="selesai(${row.id})"><img src="assets/img/icons/signature.svg" class="me-2" alt="img">Selesai</a>
+                            </li>
+                        `;
+                    }
+
                     if (row.status === 'DIKONFIRMASI' && userPermissions.includes('kontrak.excelPergantian') && row.tanggal_pemeriksa && row.tanggal_penyetuju && row.hasKembaliSewa) {
                         actionsHtml += `
                             <li>
@@ -252,7 +263,7 @@
                         `;
                     }
 
-                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('do_sewa.create')) {
+                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('do_sewa.create') && row.tanggal_pemeriksa && row.tanggal_penyetuju) {
                         actionsHtml += `
                             <li>
                                 <a href="do_sewa/create?kontrak=${row.id}" class="dropdown-item">
@@ -262,7 +273,7 @@
                         `;
                     }
 
-                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('kembali_sewa.create')) {
+                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('kembali_sewa.create') && row.tanggal_pemeriksa && row.tanggal_penyetuju) {
                         actionsHtml += `
                             <li>
                                 <a href="kembali_sewa/create?kontrak=${row.id}" class="dropdown-item"><img src="assets/img/icons/return1.svg" class="me-2" alt="img">Kembali Sewa</a>
@@ -270,7 +281,7 @@
                         `;
                     }
 
-                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('invoice_sewa.create')) {
+                    if (row.status === 'DIKONFIRMASI' && userPermissions.includes('invoice_sewa.create') && row.tanggal_pemeriksa && row.tanggal_penyetuju) {
                         actionsHtml += `
                             <li>
                                 <a href="invoice_sewa/create?kontrak=${row.id}" class="dropdown-item"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Invoice Sewa</a>
@@ -279,9 +290,20 @@
                     }
 
                     if (userPermissions.includes('kontrak.show')) {
-                        if ((['DIKONFIRMASI', 'BATAL'].includes(row.status) && row.userRole === 'AdminGallery') ||
-                            (row.status === 'DIKONFIRMASI' && (row.tanggal_penyetuju || row.tanggal_pemeriksa) &&
-                            (['Auditor', 'Finance'].includes(row.userRole) && (row.tanggal_penyetuju || row.tanggal_pemeriksa) && (row.userRole === 'Auditor' && row.tanggal_penyetuju ||  row.userRole === 'Finance' && row.tanggal_pemeriksa)))) {
+                        if (
+                            (['DIKONFIRMASI', 'BATAL'].includes(row.status) && row.userRole === 'AdminGallery') ||
+                            (
+                                row.status === 'DIKONFIRMASI' &&
+                                (row.tanggal_penyetuju || row.tanggal_pemeriksa) &&
+                                (['Auditor', 'Finance'].includes(row.userRole)) &&
+                                (
+                                    (row.userRole === 'Auditor' && row.tanggal_penyetuju) ||
+                                    (row.userRole === 'Finance' && row.tanggal_penyetuju) ||
+                                    (row.userRole === 'Finance' && row.tanggal_pemeriksa)
+                                )
+                            ) ||
+                            row.status === 'SELESAI'
+                        ) {
                             actionsHtml += `
                                 <li>
                                     <a href="kontrak/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
@@ -367,6 +389,48 @@
                 $.ajax({
                     type: "GET",
                     url: "/kontrak/"+id+"/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+        
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function selesai(id){
+        Swal.fire({
+            title: 'Selesaikan kontrak?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, selesaikan!',
+            cancelButtonText: 'Tidak'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/kontrak/"+id+"/selesai",
                     headers: {
                         'X-CSRF-TOKEN': csrfToken
                     },

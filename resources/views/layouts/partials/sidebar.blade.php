@@ -14,13 +14,82 @@
                             $rolePermissions = $roles->flatMap->permissions->pluck('name')->toArray();
                         }
                     }
+
+                    //penjualan
+                    if($user->hasRole(['AdminGallery', 'KasirGallery'])) {
+                        $hitungpenjualan = \App\Models\Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('status', 'TUNDA')->count();
+                        $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('status', 'TUNDA')->count();
+                        $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('status', 'TUNDA')->count();
+                    }else if($user->hasRole(['KasirOutlet'])) {
+                        $hitungpenjualanoutlet = \App\Models\Penjualan::where('no_invoice', 'LIKE', 'IPO%')->where('status', 'TUNDA')->count();
+                        $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTO%')->where('status', 'TUNDA')->count();
+                    }else if($user->hasRole(['Finance'])){
+                        $hitungpenjualan = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'INV%')->where('status', 'DIKONFIRMASI')->whereNull('dibukukan_id')->count();
+                        $hitungpenjualanoutlet = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'IPO%')->where('status', 'DIKONFIRMASI')->whereNull('dibukukan_id')->count();
+                        $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('lokasi_pengirim', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('penyetuju')->count();
+                        $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pemeriksa')->count();
+                        $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTO%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pemeriksa')->count();
+                    }else if($user->hasRole(['Auditor'])){
+                        $hitungpenjualan = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'INV%')->where('status', 'DIKONFIRMASI')->whereNull('auditor_id')->count();
+                        $hitungpenjualanoutlet = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'IPO%')->where('status', 'DIKONFIRMASI')->whereNull('auditor_id')->count();
+                        $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('lokasi_pengirim', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pemeriksa')->count();
+                        $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pembuku')->count();
+                        $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTO%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pembuku')->count();
+                    }
+                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2) {
+                        $totaljualoutlet = $hitungpenjualanoutlet + $returpenjualanoutlet;
+                    }else if($user->hasRole(['AdminGallery', 'KasirGallery']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
+                        $totaljual = $hitungpenjualan + $dopenjualan + $returpenjualan;
+                    }
+
+                    //mutasi
+                    if($user->hasRole(['AdminGallery', 'KasirGallery'])) {
+                        $hitungmutasigo = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGO%')->where('status', 'TUNDA')->count();
+                        $hitungmutasiog = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
+                        $hitungmutasigag = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
+                        $hitungmutasigg = \App\Models\Mutasi::where(function ($query){
+                                                                $query->where('no_mutasi', 'LIKE', 'MPG%')
+                                                                    ->where('no_mutasi', 'LIKE', 'MGG%');    
+                                                                })->orwhere('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
+                    }else if($user->hasRole(['Finance'])){
+                        $hitungmutasigo = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGO%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
+                        $hitungmutasiog = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
+                        $hitungmutasigag = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
+                        $hitungmutasigg = \App\Models\Mutasi::where(function ($query){
+                                                                $query->where('no_mutasi', 'LIKE', 'MPG%')
+                                                                    ->orwhere('no_mutasi', 'LIKE', 'MGG%');
+                                                                })->orwhere('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
+                    }else if($user->hasRole(['Auditor'])){
+                        $hitungmutasigo = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGO%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('dibukukan_id')->count();
+                        $hitungmutasiog = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('dibukukan_id')->count();
+                        $hitungmutasigag = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('dibukukan_id')->count();
+                        $hitungmutasigg = \App\Models\Mutasi::where(function($query) {
+                                                                $query->where('no_mutasi', 'LIKE', 'MPG%')
+                                                                    ->orwhere('no_mutasi', 'LIKE', 'MGG%');
+                                                            })->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('dibukukan_id')->count();
+                    }else if($user->hasRole(['KasirOutlet'])) {
+                        $hitungmutasigo = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGO%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
+                        $hitungmutasiog = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->where('status', 'TUNDA')->count();
+                        $hitungmutasigg = 0;
+                        $hitungmutasigag = 0;
+                    }else if($user->hasRole(['Purchasing'])) {
+                        $hitungmutasigo = 0;
+                        $hitungmutasiog = 0;
+                        $hitungmutasigg = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'TUNDA')->orwhere('no_mutasi', 'LIKE', 'MPG%')->where('status', 'TUNDA')->count();
+                        $hitungmutasigag = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->where('status', 'TUNDA')->count();
+                    }
+
+                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2) {
+                        $totalmutasi = $hitungmutasiog + $hitungmutasigo;
+                    }else if($user->hasRole(['AdminGallery', 'KasirGallery', 'Purchasing']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
+                        $totalmutasi = $hitungmutasiog + $hitungmutasigo + $hitungmutasigag + $hitungmutasigg;
+                    }
+                    
                 @endphp
                 <li class="active">
                     <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                     
                 </li>
-
-
                 @if(
                         in_array('tipe_produk.index', $rolePermissions) ||
                         in_array('produks.index', $rolePermissions) ||
@@ -132,9 +201,9 @@
                 @endif
                 <li class="submenu">
                     @if((in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljual }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
+                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualan }}</span></a></li>
                         <li>
                             <a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}"
                             class="{{ request()->is('formpenjualan') && request()->query('jenis_rangkaian') == 'Penjualan' ? 'active' : '' }}">
@@ -142,19 +211,19 @@
                             </a>
                         </li>
                         <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
-                        <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
-                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
+                        <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order <span class="badge rounded-pill bg-danger ms-auto">{{$dopenjualan }}</span></a></li>
+                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur <span class="badge rounded-pill bg-danger ms-auto">{{$returpenjualan}}</span></a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
                     @if(in_array('penjualan.index', $rolePermissions) && isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1)
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet</span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljualoutlet }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
+                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualanoutlet}}</span></a></li>
                         <!-- <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="{{ request()->is('formpenjualan*') ? 'active' : '' }}">Perangkai</a></li> -->
                         <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
                         <!-- <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li> -->
-                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
+                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur <span class="badge rounded-pill bg-danger ms-auto">{{$returpenjualanoutlet}}</span></a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
@@ -179,10 +248,10 @@
                 @endif
                 <li class="submenu">
 
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi</span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totalmutasi }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
                         @if(in_array('mutasigalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet</a></li>
+                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasigo}}</span></a></li>
                         @endif
                         @if(in_array('formpenjualan.index', $rolePermissions) && isset($lokasi->lokasi->tipe_lokasi) && $lokasi->lokasi->tipe_lokasi != 2)
                         <li>
@@ -193,13 +262,13 @@
                         </li>
                         @endif
                         @if(in_array('mutasioutlet.index', $rolePermissions))
-                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery</a></li>
+                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasiog}}</span></a></li>
                         @endif
                         @if(in_array('mutasighgalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH/Pusat</a></li>
+                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH/Pusat <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasigg}}</span></a></li>
                         @endif
                         @if(in_array('mutasigalerygalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery</a></li>
+                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasigag}}</span></a></li>
                             {{-- <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                             <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
                             <li><a href="#" class="">Mutasi Galery Ke Inden</a></li> --}}

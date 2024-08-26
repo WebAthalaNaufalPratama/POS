@@ -402,10 +402,10 @@
                   @endphp
                   @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance']))
                   <div class="form-group">
-                      <select id="lokasi_id" name="lokasi_id" class="form-control" readonly required>
+                      <select id="lokasi_id" name="lokasi_id" class="form-control p-1" readonly required>
                           <option value="">Pilih Lokasi</option>
                           @foreach ($lokasis as $lokasi)
-                          <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}" {{ $karyawan ? $lokasi->id == $karyawan->lokasi_id : ''}}>{{ $lokasi->nama }}</option>
+                          <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}" {{ $lokasi->id == ($karyawan->lokasi_id ?? '') ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
                           @endforeach
                       </select>
                   </div>
@@ -438,7 +438,7 @@
         </li> -->
 
 
-        <!-- <li class="nav-item dropdown">
+        <li class="nav-item dropdown">
           <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
             <img src="/assets/img/icons/notification-bing.svg" alt="img"> <span class="badge rounded-pill">4</span>
           </a>
@@ -456,7 +456,7 @@
                         <img alt="" src="/assets/img/profiles/avatar-02.jpg">
                       </span>
                       <div class="media-body flex-grow-1">
-                        <p class="noti-details"><span class="noti-title">John Doe</span> added new task <span class="noti-title">Patient appointment booking</span></p>
+                        <p class="noti-details"><span class="noti-title">Paleonepsis Baik</span> Kurang Dari Stok</p>
                         <p class="noti-time"><span class="notification-time">4 mins ago</span></p>
                       </div>
                     </div>
@@ -520,7 +520,7 @@
               <a href="activities.html">View all Notifications</a>
             </div>
           </div>
-        </li> -->
+        </li>
 
         <li class="nav-item dropdown has-arrow main-drop">
           <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
