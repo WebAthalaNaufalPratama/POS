@@ -61,28 +61,16 @@ class PenjualanController extends Controller
             }
         }
 
-        // Apply filters
-       // Join with karyawans table
-    $query->leftJoin('karyawans', 'karyawans.id', '=', 'penjualans.employee_id');
-    
-    // Apply search filter
-    if ($search = $req->input('search.value')) {
-        $columns = [
-            'penjualans.no_invoice',
-            'karyawans.nama',
-            'penjualans.tanggal_invoice',
-            'penjualans.jatuh_tempo',
-            'penjualans.total_tagihan',
-            'penjualans.sisa_bayar',
-            'penjualans.status'
-        ];
 
-        $query->where(function ($q) use ($search, $columns) {
-            foreach ($columns as $column) {
-                $q->orWhere($column, 'like', "%{$search}%");
-            }
-        });
-    }
+        // Apply search filter
+        if ($search = $req->input('search.value')) {
+            $columns = ['penjualans.no_invoice', 'penjualans.tanggal_invoice', 'penjualans.jatuh_tempo', 'penjualans.total_tagihan', 'penjualans.sisa_bayar', 'penjualans.status'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
+            });
+        }
         
         if ($order = $req->input('order.0.column')) {
             $columns = ['no_invoice', 'tanggal_invoice', 'jatuh_tempo', 'total_tagihan', 'sisa_bayar', 'status'];
