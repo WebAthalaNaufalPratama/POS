@@ -231,7 +231,7 @@
                 { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
                     return meta.row + 1;
                 }},
-                { data: 'no_invoice', name: 'no_invoice' },
+                { data: 'no_invoice', name: 'no_invoice', searchable: true, orderable: true },
                 { data: 'karyawan.nama', name: 'karyawan.nama' },
                 { data: 'tanggal_invoice', name: 'tanggal_invoice' },
                 { data: 'jatuh_tempo', name: 'jatuh_tempo' },
