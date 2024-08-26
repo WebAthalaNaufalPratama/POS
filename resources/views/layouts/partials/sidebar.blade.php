@@ -61,8 +61,8 @@
                     }else if($user->hasRole(['KasirOutlet'])) {
                         $hitungmutasigo = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGO%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
                         $hitungmutasiog = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->where('status', 'TUNDA')->count();
-                        $hitungmutasigg = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
-                        $hitungmutasigag = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
+                        $hitungmutasigg = 0;
+                        $hitungmutasigag = 0;
                     }else if($user->hasRole(['Purchasing'])) {
                         $hitungmutasigo = 0;
                         $hitungmutasiog = 0;
