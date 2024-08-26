@@ -15,19 +15,49 @@
                         }
                     }
                     if($user->hasRole(['AdminGallery'])) {
-                        $hitungpenjualan = \App\Models\Penjualan::where('status', 'TUNDA')->count();
+                        $hitungpenjualan = \App\Models\Penjualan::where('no_invoice', 'LIKE', 'INV%')->where('status', 'TUNDA')->count();
                     }else if($user->hasRole(['Finance'])){
-                        $hitungpenjualan = \App\Models\Penjualan::where('status', 'DIKONFIRMASI')->whereNotNull('dibukukan_id')->count();
+                        $hitungpenjualan = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'INV%')->where('status', 'DIKONFIRMASI')->whereNotNull('dibukukan_id')->count();
                     }else if($user->hasRole(['Auditor'])){
-                        $hitungpenjualan = \App\Models\Penjualan::where('status', 'DIKONFIRMASI')->whereNotNull('auditor_id')->count();
+                        $hitungpenjualan = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'INV%')->where('status', 'DIKONFIRMASI')->whereNotNull('auditor_id')->count();
+                    }
+
+                    if($user->hasRole(['KasirOutlet'])) {
+                        $hitungpenjualanoutlet = \App\Models\Penjualan::where('no_invoice', 'LIKE', 'IPO%')->where('status', 'TUNDA')->count();
+                    }else if($user->hasRole(['Finance'])){
+                        $hitungpenjualanoutlet = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'IPO%')->where('status', 'DIKONFIRMASI')->whereNotNull('dibukukan_id')->count();
+                    }else if($user->hasRole(['Auditor'])){
+                        $hitungpenjualanoutlet = \App\Models\Penjualan::where('lokasi_id', $lokasi->lokasi_id)->where('no_invoice', 'LIKE', 'IPO%')->where('status', 'DIKONFIRMASI')->whereNotNull('auditor_id')->count();
+                    }
+
+                    if($user->hasRole(['AdminGallery'])) {
+                        $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('status', 'TUNDA')->count();
+                    }else if($user->hasRole(['Finance'])){
+                        $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNotNull('penyetuju')->count();
+                    }else if($user->hasRole(['Auditor'])){
+                        $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNotNull('pemeriksa')->count();
+                    }
+
+                    if($user->hasRole(['AdminGallery'])) {
+                        $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('status', 'TUNDA')->count();
+                    }else if($user->hasRole(['Finance'])){
+                        $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNotNull('penyetuju')->count();
+                    }else if($user->hasRole(['Auditor'])){
+                        $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNotNull('pemeriksa')->count();
+                    }
+
+                    if($user->hasRole(['KasirOutlet'])) {
+                        $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('status', 'TUNDA')->count();
+                    }else if($user->hasRole(['Finance'])){
+                        $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNotNull('pemeriksa')->count();
+                    }else if($user->hasRole(['Auditor'])){
+                        $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNotNull('pembuku')->count();
                     }
                 @endphp
                 <li class="active">
                     <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                     
                 </li>
-
-
                 @if(
                         in_array('tipe_produk.index', $rolePermissions) ||
                         in_array('produks.index', $rolePermissions) ||
@@ -141,7 +171,7 @@
                     @if((in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualan}}</span></a></li>
+                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualan }}</span></a></li>
                         <li>
                             <a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}"
                             class="{{ request()->is('formpenjualan') && request()->query('jenis_rangkaian') == 'Penjualan' ? 'active' : '' }}">
@@ -149,19 +179,19 @@
                             </a>
                         </li>
                         <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
-                        <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li>
-                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
+                        <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order<span class="badge rounded-pill bg-danger ms-auto">{{$dopenjualan }}</span></a></li>
+                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur<span class="badge rounded-pill bg-danger ms-auto">{{$returpenjualan}}</span></a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
                     @if(in_array('penjualan.index', $rolePermissions) && isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1)
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice</a></li>
+                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice<span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualanoutlet}}</span></a></li>
                         <!-- <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="{{ request()->is('formpenjualan*') ? 'active' : '' }}">Perangkai</a></li> -->
                         <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
                         <!-- <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li> -->
-                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur</a></li>
+                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur<span class="badge rounded-pill bg-danger ms-auto">{{$returpenjualanoutlet}}</span></a></li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
