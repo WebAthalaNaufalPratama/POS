@@ -232,7 +232,7 @@
                     return meta.row + 1;
                 }},
                 { data: 'no_invoice', name: 'no_invoice', searchable: true, orderable: true },
-                { data: 'karyawan.nama', name: 'karyawan.nama' },
+                { data: 'karyawan.nama', name: 'karyawan.nama', searchable: true, orderable: true },
                 { data: 'tanggal_invoice', name: 'tanggal_invoice' },
                 { data: 'jatuh_tempo', name: 'jatuh_tempo' },
                 {
