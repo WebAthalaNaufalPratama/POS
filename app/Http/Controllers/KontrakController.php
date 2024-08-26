@@ -102,6 +102,7 @@ class KontrakController extends Controller
                 $kontrak->rentang_tanggal = formatTanggal($kontrak->tanggal_mulai) . ' - ' . formatTanggal($kontrak->tanggal_selesai);
                 $kontrak->userRole = Auth::user()->getRoleNames()->first();
                 $kontrak->hasKembaliSewa = KembaliSewa::where('no_sewa', $kontrak->no_kontrak)->where('status', 'DIKONFIRMASI')->exists();
+                $kontrak->canSelesai = now()->gte($kontrak->tanggal_selesai);
                 return $kontrak;
             });
 
@@ -508,38 +509,6 @@ class KontrakController extends Controller
         $kondisi = Kondisi::all();
         return view('kontrak.create_gift', compact('gift', 'bungapot', 'kondisi'));
     }
-    public function datatable(Request $request)
-    {
-        $query = Kontrak::with('customer');
-
-        if ($request->has('customer')) {
-            $query->where('customer_id', $request->input('customer'));
-        }
-        $data = $query->paginate($request->input('length'));
-    
-        $formattedData = [];
-        foreach ($data as $index => $kontrak) {
-            $formattedData[] = [
-                'loop_number' => $index + 1,
-                'no_kontrak' => $kontrak->no_kontrak,
-                'customer' => $kontrak->customer->nama,
-                'pic' => $kontrak->pic,
-                'handphone' => $kontrak->handphone,
-                'masa_sewa' => $kontrak->masa_sewa . ' bulan',
-                'rentang_tanggal' => $kontrak->tanggal_mulai . ' - ' . $kontrak->tanggal_selesai,
-                'total_biaya' => $kontrak->total_harga,
-            ];
-        }
-    
-        $response = [
-            'draw' => $request->input('draw'),
-            'recordsTotal' => $data->total(),
-            'recordsFiltered' => $data->total(),
-            'data' => $formattedData,
-        ];
-    
-        return response()->json($response);
-    }
 
     public function pdfKontrak($id)
     {
@@ -656,5 +625,51 @@ class KontrakController extends Controller
         ];
 
         return Excel::download(new PergantianExport($result), 'pergantian_barang.xlsx');
+    }
+
+    public function selesai($id)
+    {
+        $kontrak = Kontrak::find($id);
+
+        if (!$kontrak) {
+            return response()->json(['msg' => 'Kontrak tidak ditemukan'], 404);
+        }
+        // Check if the current date is on or after the completion date
+        if (now()->gte($kontrak->tanggal_selesai)) {
+            return response()->json(['msg' => 'Masa Kontrak belum berakhir'], 400);
+        }
+
+        $user = Auth::user();
+
+        // Update contract based on user role
+        $updated = false;
+
+        if ($user->hasRole('AdminGallery') && is_null($kontrak->selesai_pembuat)) {
+            $kontrak->selesai_pembuat = now();
+            $updated = true;
+        }
+
+        if ($user->hasRole('Finance') && is_null($kontrak->selesai_finance)) {
+            $kontrak->selesai_finance = now();
+            $updated = true;
+        }
+
+        if ($user->hasRole('Auditor') && is_null($kontrak->selesai_auditor)) {
+            $kontrak->selesai_auditor = now();
+            $updated = true;
+        }
+
+        // Save only if there were changes
+        if ($updated) {
+            $kontrak->save();
+        }
+
+        // Check if the contract can be marked as complete
+        if ($kontrak->selesai_pembuat && $kontrak->selesai_auditor && $kontrak->selesai_finance) {
+            $kontrak->status = 'SELESAI';
+            $kontrak->save();
+        }
+
+        return response()->json(['msg' => 'Kontrak berhasil diselesaikan']);
     }
 }

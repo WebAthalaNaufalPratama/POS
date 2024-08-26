@@ -46,6 +46,9 @@ class Kontrak extends Model
         'tanggal_pembuat',
         'tanggal_penyetuju',
         'tanggal_pemeriksa',
+        'selesai_pembuat',
+        'selesai_auditor',
+        'selesai_finance',
     ];
 
     public function lokasi(){
