@@ -28,7 +28,10 @@ use App\Models\InventoryGreenHouse;
 use App\Models\InventoryGallery;
 use App\Models\Invoicepo;
 use App\Models\Kondisi;
+use App\Models\Rekening;
+use App\Models\TransaksiKas;
 use DateTime;
+use Illuminate\Support\Facades\DB;
 use IntlDateFormatter;
 
 class DashboardController extends Controller
@@ -101,8 +104,13 @@ class DashboardController extends Controller
                             })->count();
             $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
             $penjualanIds = $penjualanList->pluck('id');
-            $prefix = ['BYR', 'BOT'];
-            $pembayaranList = Pembayaran::whereIn('no_invoice_bayar', 'LIKE',  $prefix . '%')->get();
+            $prefixes = ['BYR', 'BOT'];
+            $pembayaranList = Pembayaran::where(function ($query) use ($prefixes) {
+                foreach ($prefixes as $prefix) {
+                    $query->orWhere('no_invoice_bayar', 'LIKE', $prefix . '%');
+                }
+            })->get();
+
     
             $pemasukan = 0;
             foreach ($pembayaranList as $pembayaran) {
@@ -216,6 +224,21 @@ class DashboardController extends Controller
             }
     
             $lokasis = Lokasi::all();
+
+            if($user->hasRole('Finance')){
+                // saldo rekening
+                $rekenings = Rekening::when($req->lokasi_id, function($q) use($req){
+                    $q->where('lokasi_id', $req->lokasi_id);
+                })->get();
+                
+                $balance = 0;
+                if($req->rekening_id){
+                    $balance = TransaksiKas::getSaldo($req->rekening_id);
+                    $balance += Rekening::find($req->rekening_id)->saldo_awal;
+                }
+                return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran', 'rekenings', 'balance'));
+            }
+
             return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
         }
         
@@ -793,5 +816,54 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function uang_keluar(Request $req)
+    {
+        $labels = ['Kas', 'Invoice Pembelian', 'Retur', 'Mutasi'];
 
+        $lokasi_pusat = Lokasi::where('tipe_lokasi', 5)->pluck('id');
+        
+        $kas = TransaksiKas::whereIn('lokasi_pengirim', $lokasi_pusat)->sum('nominal');
+        $invoice = Pembayaran::whereHas('pembelian')->sum('nominal');
+
+        $returSum = Pembayaran::whereHas('retur', function($q) {
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+        })->sum('nominal');
+        
+        $returindenSum = Pembayaran::whereHas('returinden', function($q) {
+            $q->where('status_dibuat', 'DIKONFIRMASI');
+        })->sum('nominal');
+
+        $mutasiinden = Pembayaran::whereHas('mutasiinden')->sum('nominal');
+
+        $data = [
+            intval($kas),
+            intval($invoice),
+            intval($returSum) + intval($returindenSum),
+            intval($mutasiinden)
+        ];
+
+        return response()->json([
+            'labels' => $labels,
+            'data' => $data
+        ]);
+    }
+
+    public function tagihan_supplier()
+    {
+        $invoices = Invoicepo::with('pembayaran')
+                    ->where('status_dibuat', 'DIKONFIRMASI')
+                    ->get();
+
+        $totalNominal = $invoices->sum('total_tagihan');
+        $terbayar = $invoices->reduce(function($carry, $invoice) {
+            return $carry + $invoice->pembayaran->sum('nominal');
+        }, 0);
+
+        $belumTerbayar = $totalNominal - $terbayar;
+
+        return response()->json([
+            'labels' => ['Terbayar', 'Belum Terbayar'],
+            'data' => [$terbayar, $belumTerbayar]
+        ]);
+    }
 }

@@ -437,6 +437,7 @@ class FormPerangkaiController extends Controller
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
         $query = FormPerangkai::with('perangkai');
+        $type = $req->jenis_rangkaian;
 
         // Handle the different types of 'jenis_rangkaian'
         if ($req->jenis_rangkaian) {
@@ -479,24 +480,50 @@ class FormPerangkaiController extends Controller
             $query->where('tanggal', '<=', $dateEnd);
         });
 
-        $query->unique('no_form');
-
-
         if ($req->ajax()) {
-            $orderColumn = $req->input('columns.' . $req->input('order.0.column') . '.data');
-            $orderDirection = $req->input('order.0.dir');
-
-            $totalRecords = $query->count();
-            $data = $query->orderByDesc('id')
-                        ->skip($req->input('start'))
-                        ->take($req->input('length'))
-                        ->get();
-
+            $orderColumnIndex = $req->input('order.0.column'); 
+            $orderColumn = $req->input("columns.$orderColumnIndex.data", 'id'); 
+            $orderDirection = $req->input('order.0.dir', 'desc'); 
+        
+            $validColumns = ['id', 'no_form', 'tanggal', 'jenis_rangkaian']; 
+            if (!in_array($orderColumn, $validColumns)) {
+                $orderColumn = 'id'; 
+            }
+        
+            $data = $query->orderBy('id', 'desc')->orderBy($orderColumn, $orderDirection)->get();
+        
+            $groupedData = $data->groupBy('no_form')->map(function ($items) use ($req) {
+                $firstItem = $items->first(); 
+                $perangkaiIds = $items->pluck('perangkai_id')->unique(); 
+            
+                $perangkaiNames = Karyawan::whereIn('id', $perangkaiIds)
+                                          ->where('jabatan', 'Perangkai')
+                                          ->pluck('nama', 'id')
+                                          ->toArray();
+            
+                $produkTerjual = Produk_Terjual::where('no_form', $firstItem->no_form)->first();
+                $invoiceColumn = ($req->jenis_rangkaian == 'Penjualan') ? 'no_invoice' : 'no_mutasigo';
+                $noInvoice = $produkTerjual && isset($produkTerjual->$invoiceColumn) ? $produkTerjual->$invoiceColumn : 'Unknown';
+                
+                $firstItem->perangkai_nama = $items->pluck('perangkai_id')->map(function ($id) use ($perangkaiNames) {
+                    return $perangkaiNames[$id] ?? 'Unknown'; 
+                })->values(); 
+            
+                $firstItem->no_invoice = $noInvoice;
+            
+                return $firstItem;
+            });
+            
+        
+            $totalRecords = $groupedData->count();
+        
+            $paginatedData = $groupedData->slice($req->input('start'), $req->input('length'))->values();
+        
             return response()->json([
                 'draw' => intval($req->input('draw')),
                 'recordsTotal' => $totalRecords,
                 'recordsFiltered' => $totalRecords,
-                'data' => $data
+                'data' => $paginatedData
             ]);
         }
 
