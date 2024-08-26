@@ -184,7 +184,7 @@
             </div>
         </div>
     </div>
-    
+    @role('Finance')
     {{-- Uang Keluar --}}
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
@@ -208,6 +208,7 @@
             </div>
         </div>
     </div>
+    @endrole
 </div>
 @endsection
 

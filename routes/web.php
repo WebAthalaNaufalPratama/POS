@@ -356,6 +356,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{kontrak}/delete', 'KontrakController@destroy')->name('kontrak.destroy');
             Route::get('/{kontrak}/pdfKontrak', 'KontrakController@pdfKontrak')->name('kontrak.pdfKontrak');
             Route::get('/{kontrak}/excelPergantian', 'KontrakController@excelPergantian')->name('kontrak.excelPergantian');
+            Route::get('/{id}/selesai', 'KontrakController@selesai')->name('kontrak.selesai');
         });
 
         Route::group(['prefix' => 'dopenjualan'], function() {
