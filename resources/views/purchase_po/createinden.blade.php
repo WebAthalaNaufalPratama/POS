@@ -1,7 +1,14 @@
 @extends('layouts.app-von')
 
 @section('content')
+<style>
 
+    .icon-large {
+            width: 240px;
+            
+            height: 240px;
+        }
+    </style>
 <div class="page-header">
     <div class="row">
         <div class="col-sm-12">
@@ -78,10 +85,10 @@
                                                 <tr>
                                                     <th style="width: 200px;">Kode Inden</th>
                                                     <th style="width: 250px;">Kategori Produk</th>
-                                                    <th style="width: 200px;">Kode Produk</th>
+                                                    <th style="width: 250px;">Kode Produk</th>
                                                     <th style="width: 200px;">Jumlah</th>
                                                     <th style="width: 300px;">Keterangan</th>
-                                                    <th></th>
+                                                    <th style="width: 100px;"></th>
                                                 </tr>
                                             </thead>
                                             <tbody id="dynamic_field">
@@ -96,10 +103,10 @@
                                                         </select>
                                                     </td>
                                                     <td><input type="text" name="kode[]" id="kode_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" readonly></td>
-                                                    <td><input type="number" name="qty[]" id="qty_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" required></td>
+                                                    <td><input type="number" name="qty[]" id="qty_0" oninput="multiply($(this))" class="form-control" onchange="calculateTotal(0)" required min="0"></td>
                                                     <td><input type="text" name="ket[]" id="ket_0" class="form-control"></td>
                                                     <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
-                                                    <td><button type="button" name="add" id="add" class="btn btn-success">+</button></td>
+                                                    <td><a href="javascript:void(0);" id="add"  class="icon-large"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -108,10 +115,11 @@
                             </div>
                         </div>
 
-                        <div class="row justify-content-start">
-                            <div class="col-md-3 border rounded pt-3 me-1 mt-2">
-                                <table class="table table-responsive border rounded">
-                                    <thead>
+                        <div class="row justify-content-end">
+                            <div class="col-md-3 col-12 border rounded pt-3 me-1 mt-2">
+                                <div class="table-responsive">
+                                    <table class="table border rounded">
+                                        <thead>
                                         <tr>
                                             <th>Dibuat</th>
                                             <!-- <th>Diperiksa</th> -->
@@ -140,6 +148,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                </div>
                                 <br>
                             </div>
                         </div>
@@ -183,7 +192,7 @@
             </div>
             <div class="mb-3">
               <label for="tanggal_bergabung" class="form-label">Tanggal bergabung</label>
-              <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung">
+              <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung" value="{{ now()->format('Y-m-d') }}">
             </div>
             <div class="mb-3">
               <label for="tipe_supplier" class="form-label">Tipe Supplier</label>
@@ -243,9 +252,9 @@ $(document).ready(function() {
                             '</select>'+
                         '</td>'+
                         '<td><input type="text" name="kode[]" id="kode_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')" readonly></td>'+
-                        '<td><input type="number" name="qty[]" id="qty_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')"></td>'+
+                        '<td><input type="number" name="qty[]" id="qty_'+i+'" oninput="multiply($(this))" class="form-control" onchange="calculateTotal('+i+')" min="0"></td>'+
                         '<td><input type="text" name="ket[]" id="ket_'+i+'" class="form-control"></td>'+
-                        '<td><button type="button" name="remove" id="' + i + '" class="btn btn-danger btn_remove">x</button></td>'+
+                        '<td><a href="javascript:void(0);" name="remove" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>';
                     '</tr>';
         $('#dynamic_field').append(newRow);
 

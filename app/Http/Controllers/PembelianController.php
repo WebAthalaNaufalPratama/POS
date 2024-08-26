@@ -2108,127 +2108,187 @@ class PembelianController extends Controller
                  return redirect(route('pembelian.show', ['datapo' => $datapo, 'type' => 'pembelian']))->with('success', 'Data pembelian berhasil diupdate. Nomor PO: ' . $pembelian->no_po);
      
              } elseif ($type === 'poinden') {
-                 $validator = Validator::make($request->all(), [
-                     'kode_inden' => 'required|array',
-                     'kode_inden.*' => 'required|string',
-                     'kategori' => 'required|array',
-                     'kategori.*' => 'required|string',
-                     'kode' => 'required|array',
-                     'kode.*' => 'required|string',
-                     'qty' => 'required|array',
-                     'qty.*' => 'required|integer',
-                 ]);
-     
-                 if ($validator->fails()) {
-                     return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
-                 }
-     
-                 $pembelian = ModelsPoinden::find($datapo);
-                 if (!$pembelian) {
-                     return redirect()->back()->with('fail', 'Pembelian tidak ditemukan');
-                 }
-     
-                 $user = Auth::user();
-                 if ($user->hasRole(['Purchasing'])) {
-                     $existingProduct = ModelsPoinden::where('supplier_id', $request->id_supplier)
-                         ->where('bulan_inden', $request->bulan_inden)
-                         ->where('status_dibuat', '!=', 'BATAL')
-                         ->where('id', '!=', $datapo)
-                         ->first();
-     
-                     if ($existingProduct) {
-                         DB::rollBack();
-                         return redirect()->back()->withInput()->with('fail', 'Data sudah ada.');
-                     }
-     
-                     $pembelian->bulan_inden = $request->bulan_inden;
-                     $pembelian->supplier_id = $request->id_supplier;
-                     $pembelian->pembuat = $user->id;
-                     $pembelian->status_dibuat = $request->status_dibuat;
-                     $pembelian->tgl_dibuat = $request->tgl_dibuat;
-     
-                     if ($request->status_dibuat == "BATAL") {
-                         $pembelian->status_diperiksa = "BATAL";
-                     }
-     
-                     $pembelian->save();
-     
-                     foreach ($request->id as $index => $item) {
-                         $produkBeliData = [
-                             'produk_id' => $request->kategori[$index],
-                             'kode_produk_inden' => $request->kode_inden[$index],
-                             'jumlahInden' => $request->qty[$index],
-                             'keterangan' => $request->ket[$index],
-                         ];
-     
-                         if (isset($pembelian->produkbeli[$index])) {
-                             $produkBeli = ProdukBeli::find($pembelian->produkbeli[$index]);
-                             if ($produkBeli) {
-                                 $produkBeli->update($produkBeliData);
-                             }
-                         } else {
-                             $pembelian->produkbeli()->create($produkBeliData);
-                         }
-                     }
-     
-                     if ($request->status_dibuat == "DIKONFIRMASI") {
-                         foreach ($pembelian->produkbeli as $produkBeli) {
-                             InventoryInden::updateOrCreate(
-                                 [
-                                     'supplier_id' => $pembelian->supplier_id,
-                                     'kode_produk_inden' => $produkBeli->kode_produk_inden,
-                                     'bulan_inden' => $pembelian->bulan_inden,
-                                     'kode_produk' => $produkBeli->produk->kode,
-                                 ],
-                                 ['jumlah' => DB::raw('jumlah + ' . $produkBeli->jumlahInden)]
-                             );
-                         }
-                     }
-     
-                 } elseif ($user->hasRole(['Auditor'])) {
-                     $pembelian->pemeriksa = $request->pemeriksa;
-                     $pembelian->status_diperiksa = $request->status_diperiksa;
-                     $pembelian->tgl_diperiksa = $request->tgl_diperiksa;
-                     $pembelian->save();
-     
-                     foreach ($request->id as $index => $item) {
-                         $produkBeliData = [
-                             'produk_id' => $request->kategori[$index],
-                             'kode_produk_inden' => $request->kode_inden[$index],
-                             'jumlahInden' => $request->qty[$index],
-                             'keterangan' => $request->ket[$index],
-                         ];
-     
-                         if (isset($pembelian->produkbeli[$index])) {
-                             $produkBeli = ProdukBeli::find($pembelian->produkbeli[$index]);
-                             if ($produkBeli) {
-                                 $inventoryIndenLama = InventoryInden::where('kode_produk', $produkBeli->produk->kode)
-                                     ->where('supplier_id', $pembelian->supplier_id)
-                                     ->where('bulan_inden', $pembelian->bulan_inden)
-                                     ->where('kode_produk_inden', $produkBeli->kode_produk_inden)
-                                     ->first();
-     
-                                 if ($inventoryIndenLama) {
-                                     $inventoryIndenLama->jumlah -= $produkBeli->jumlahInden;
-                                     $inventoryIndenLama->save();
-                                 }
-     
-                                 $produkBeli->update($produkBeliData);
-     
-                                 $inventoryIndenBaru = InventoryInden::updateOrCreate(
-                                     [
-                                         'kode_produk' => $produkBeli->produk->kode,
-                                         'supplier_id' => $pembelian->supplier_id,
-                                         'bulan_inden' => $pembelian->bulan_inden,
-                                         'kode_produk_inden' => $request->kode_inden[$index],
-                                     ],
-                                     ['jumlah' => DB::raw('jumlah + ' . $request->qty[$index])]
-                                 );
-                             }
-                         }
-                     }
-                 }
-     
+                $user = Auth::user();
+            
+            
+            $validator = Validator::make($request->all(), [
+                'kode_inden' => 'required|array',
+                'kode_inden.*' => 'required|string',
+                'kategori' => 'required|array',
+                'kategori.*' => 'required|string',
+                'kode' => 'required|array',
+                'kode.*' => 'required|string',
+                'qty' => 'required|array',
+                'qty.*' => 'required|integer',
+            ]);
+            
+            if ($validator->fails()) {
+                $errors = $validator->errors()->all();
+                return redirect()->back()->withInput()->with('fail', $errors);
+            }
+            
+            
+            $pembelian = ModelsPoinden::find($datapo);
+            if (!$pembelian) {
+                return redirect()->back()->with('fail', 'Pembelian tidak ditemukan');
+            }
+            
+            if($user->hasRole(['Purchasing'])){
+                
+                $existingProduct = ModelsPoinden::where('supplier_id', $request->id_supplier)
+                    ->where('bulan_inden', $request->bulan_inden)
+                    ->where('status_dibuat', '!=', 'BATAL')
+                    ->where('id', '!=', $datapo) // Tambahkan kondisi ini untuk mengecualikan $datapo
+                    ->first();
+                
+                if ($existingProduct) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', 'Data sudah ada.');
+                }
+                // $pembelian->supplier_id = $request->id_supplier;
+                $pembelian->bulan_inden = $request->bulan_inden;
+                $pembelian->supplier_id = $request->id_supplier;
+                $pembelian->pembuat = Auth::user()->id;
+                $pembelian->status_dibuat = $request->status_dibuat;
+                $pembelian->tgl_dibuat = $request->tgl_dibuat;
+
+                // $pembelian->pemeriksa = $request->pemeriksa;
+                // $pembelian->status_diperiksa = $request->status_diperiksa;
+                // $pembelian->tgl_diperiksa = $request->tgl_diperiksa;
+    
+                if ($request->status_dibuat == "BATAL") {
+                   $pembelian->status_diperiksa = "BATAL";
+               } 
+    
+                $pembelian->save();
+            
+                $existingProdukBeli = $pembelian->produkbeli()->pluck('id')->toArray();
+            
+                $indenid = $request->id;
+                $kodeProduk = $request->kode;
+                $kodeInden = $request->kode_inden;
+                $kategori = $request->kategori;
+                $jumlah = $request->qty;
+                $keterangan = $request->ket;
+            
+                foreach ($indenid as $index => $item) {
+                    $produkBeliData = [
+                        'produk_id' => $kategori[$index],
+                        'kode_produk_inden' => $kodeInden[$index],
+                        'jumlahInden' => $jumlah[$index],
+                        'keterangan' => $keterangan[$index],
+                    ];
+            
+                    if (isset($existingProdukBeli[$index])) {
+                        $produkBeli = ProdukBeli::find($existingProdukBeli[$index]);
+                        if ($produkBeli) {
+                            $produkBeli->update($produkBeliData);
+                        }
+                    } else {
+                        $pembelian->produkbeli()->create($produkBeliData);
+                    }
+                }
+    
+                if ($request->status_dibuat == "DIKONFIRMASI") {
+                   $produkbelis = Produkbeli::where('poinden_id', $datapo )->get();
+                   foreach ($produkbelis as $index => $produkbeli) {
+                       $kode = $produkbeli->produk->kode;
+                       $kode_inden = $produkbeli->kode_produk_inden;
+                       $jumlah = $produkbeli->jumlahInden;
+                       // return $kode;
+       
+       
+                        $inventoryInden = InventoryInden::where('kode_produk',$kode )
+                                       ->where('supplier_id', $pembelian->supplier_id)
+                                       ->where('bulan_inden', $pembelian->bulan_inden)
+                                       ->where('kode_produk_inden', $kode_inden)
+                                       ->first();
+       
+                       // return $inventoryInden;
+       
+                       if ($inventoryInden) {
+                               // Update existing InventoryInden
+                               $inventoryInden->jumlah += $jumlah;
+                               $inventoryInden->save();
+                       } else {
+                       // Create new InventoryInden
+                           InventoryInden::create([
+                                   'supplier_id' => $pembelian->supplier_id,
+                                   'kode_produk_inden' => $kode_inden,
+                                   'bulan_inden' => $pembelian->bulan_inden,
+                                   'kode_produk' => $kode,
+                                   'jumlah' => $jumlah,
+                           ]);
+                       }
+                   }
+                   
+                }
+
+            } elseif($user->hasRole(['Auditor'])){
+
+                $pembelian->pemeriksa = $request->pemeriksa;
+                $pembelian->status_diperiksa = $request->status_diperiksa;
+                $pembelian->tgl_diperiksa = $request->tgl_diperiksa;
+                $pembelian->save();
+
+                $existingProdukBeli = $pembelian->produkbeli()->pluck('id')->toArray();
+
+                $indenid = $request->id;
+                $kodeProduk = $request->kode;
+                $kodeInden = $request->kode_inden;
+                $kategori = $request->kategori;
+                $jumlah = $request->qty;
+                $keterangan = $request->ket;
+                
+                foreach ($indenid as $index => $item) {
+                    $produkBeliData = [
+                        'produk_id' => $kategori[$index],
+                        'kode_produk_inden' => $kodeInden[$index],
+                        'jumlahInden' => $jumlah[$index],
+                        'keterangan' => $keterangan[$index],
+                    ];
+                
+                    if (isset($existingProdukBeli[$index])) {
+                        $produkBeli = ProdukBeli::find($existingProdukBeli[$index]);
+                        if ($produkBeli) {
+                            // Update inventory for the old condition and amount
+                            $inventoryIndenLama = InventoryInden::where('kode_produk', $produkBeli->produk->kode)
+                                ->where('supplier_id', $pembelian->supplier_id)
+                                ->where('bulan_inden', $pembelian->bulan_inden)
+                                ->where('kode_produk_inden', $produkBeli->kode_produk_inden)
+                                ->first();
+                
+                            if ($inventoryIndenLama) {
+                                $inventoryIndenLama->jumlah -= $produkBeli->jumlahInden;
+                                $inventoryIndenLama->save();
+                            }
+                
+                            // Update produkBeli with the new data
+                            $produkBeli->update($produkBeliData);
+                
+                            // Update inventory for the new condition and amount
+                            $inventoryIndenBaru = InventoryInden::where('kode_produk', $produkBeli->produk->kode)
+                                ->where('supplier_id', $pembelian->supplier_id)
+                                ->where('bulan_inden', $pembelian->bulan_inden)
+                                ->where('kode_produk_inden', $kodeInden[$index])
+                                ->first();
+                
+                            if ($inventoryIndenBaru) {
+                                $inventoryIndenBaru->jumlah += $jumlah[$index];
+                                $inventoryIndenBaru->save();
+                            } else {
+                                InventoryInden::create([
+                                    'supplier_id' => $pembelian->supplier_id,
+                                    'kode_produk_inden' => $kodeInden[$index],
+                                    'bulan_inden' => $pembelian->bulan_inden,
+                                    'kode_produk' => $produkBeli->produk->kode,
+                                    'jumlah' => $jumlah[$index],
+                                ]);
+                            }
+                        }
+                    } 
+                }
+            }
                  DB::commit();
                  return redirect()->route('pembelian.show', ['datapo' => $datapo, 'type' => 'poinden'])->with('success', 'Data pembelian berhasil diupdate');
              }
