@@ -50,7 +50,7 @@
                         $hitungmutasigag = \App\Models\Mutasi::where(function ($query){
                                                                 $query->where('no_mutasi', 'LIKE', 'MPG%')
                                                                     ->where('no_mutasi', 'LIKE', 'MGG%');    
-                                                                })->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
+                                                                })->orwhere('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('penerima_id')->count();
                     }else if($user->hasRole(['Finance'])){
                         $hitungmutasigo = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGO%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
                         $hitungmutasiog = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
@@ -58,7 +58,7 @@
                         $hitungmutasigag = \App\Models\Mutasi::where(function ($query){
                                                                 $query->where('no_mutasi', 'LIKE', 'MPG%')
                                                                     ->orwhere('no_mutasi', 'LIKE', 'MGG%');
-                                                                })->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
+                                                                })->orwhere('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('diperiksa_id')->count();
                     }else if($user->hasRole(['Auditor'])){
                         $hitungmutasigo = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGO%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('dibukukan_id')->count();
                         $hitungmutasiog = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MOG%')->where('status', 'DIKONFIRMASI')->where('penerima', $lokasi->lokasi_id)->whereNull('dibukukan_id')->count();
