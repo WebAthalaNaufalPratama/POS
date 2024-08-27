@@ -147,7 +147,7 @@ $user = Auth::user();
                                                             </div>
                                                     </td>
                                                     <input type="hidden" name="distot_display[]" id="distot_{{ $index }}" class="form-control" value="{{ old('distot_display.'.$index) }}" readonly></td>
-                                                    <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ old('distot.'.$index) }}" readonly></td>
+                                                    <input type="hidden" name="distot[]" id="distot_int_{{ $index }}" class="form-control" value="{{ $item->diskon * $item->jumlahInden  }}"></td>
                                                     {{-- <td>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
@@ -267,7 +267,7 @@ $user = Auth::user();
                                                     <h5>
                                                         <div class="input-group">
                                                             <span class="input-group-text">Rp. </span> 
-                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total" oninput="calculateTotal(0)"  value="{{ $totalDis }}" readonly>
+                                                            <input type="text" class="form-control" required name="diskon_total_dis" id="diskon_total" oninput="calculateTotal(0), calculateTotal({{ $index }})"  value="{{ $totalDis }}" readonly>
                                                             {{-- <input type="hidden" class="form-control" required name="diskon_total" id="diskon_total" oninput="calculateTotal(0)"  value="{{ old('diskon_total') }}" > --}}
                                                         </div>
                                                     </h5>
