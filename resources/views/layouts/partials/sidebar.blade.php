@@ -260,7 +260,7 @@
                 @endif
                 <li class="submenu">
 
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totalmutasi }}</span></span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totalmutasi ?? 0 }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
                         @if(in_array('mutasigalery.index', $rolePermissions))
                             <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasigo}}</span></a></li>
