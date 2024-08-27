@@ -35,10 +35,16 @@
                         $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('lokasi_pengirim', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pemeriksa')->count();
                         $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pembuku')->count();
                         $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTO%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pembuku')->count();
+                    }else{
+                        $hitungpenjualan = 0;
+                        $hitungpenjualanoutlet = 0;
+                        $dopenjualan = 0;
+                        $returpenjualan = 0;
+                        $returpenjualanoutlet = 0;
                     }
-                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2) {
+                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor', 'SuperAdmin']) && $lokasi->lokasi->tipe_lokasi == 2) {
                         $totaljualoutlet = $hitungpenjualanoutlet + $returpenjualanoutlet;
-                    }else if($user->hasRole(['AdminGallery', 'KasirGallery']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
+                    }else if($user->hasRole(['AdminGallery', 'KasirGallery']) || $user->hasRole(['Finance', 'Auditor', 'SuperAdmin']) && $lokasi->lokasi->tipe_lokasi == 1) {
                         $totaljual = $hitungpenjualan + $dopenjualan + $returpenjualan;
                     }
 
@@ -77,11 +83,16 @@
                         $hitungmutasiog = 0;
                         $hitungmutasigg = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'TUNDA')->orwhere('no_mutasi', 'LIKE', 'MPG%')->where('status', 'TUNDA')->count();
                         $hitungmutasigag = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->where('status', 'TUNDA')->count();
+                    }else{
+                        $hitungmutasigo = 0;
+                        $hitungmutasiog = 0;
+                        $hitungmutasigg = 0;
+                        $hitungmutasigag = 0;
                     }
 
-                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2) {
+                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor', 'SuperAdmin']) && $lokasi->lokasi->tipe_lokasi == 2) {
                         $totalmutasi = $hitungmutasiog + $hitungmutasigo;
-                    }else if($user->hasRole(['AdminGallery', 'KasirGallery', 'Purchasing']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
+                    }else if($user->hasRole(['AdminGallery', 'KasirGallery', 'Purchasing', 'SuperAdmin']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
                         $totalmutasi = $hitungmutasiog + $hitungmutasigo + $hitungmutasigag + $hitungmutasigg;
                     }
                     
