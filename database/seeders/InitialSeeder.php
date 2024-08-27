@@ -700,6 +700,13 @@ class InitialSeeder extends Seeder
         // sales
             $permissionssales = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
 
+            $pimpinanPermissionList = $basiPermissionList;
+            $query = Permission::query();
+            foreach ($pimpinanPermissionList as $prefix) {
+                $query->orWhere('name', 'like', $prefix . '%');
+            }
+            $permissionspimpinan = $query->pluck('id');
+
         // sync permission to role
         $role->syncPermissions($permissionssuperadmin);
         $roleadmingallery->syncPermissions($permissionsadmingallery);
@@ -709,7 +716,7 @@ class InitialSeeder extends Seeder
         $rolekasiroutlet->syncPermissions($permissionskasiroutlet);
         $rolefinance->syncPermissions($permissionsfinance);
         $roleauditor->syncPermissions($permissionsauditor);
-        $rolepimpinan->syncPermissions();
+        $rolepimpinan->syncPermissions($permissionspimpinan);
 
         // assign role to user default
         $user->assignRole([$role->id]);
@@ -720,7 +727,7 @@ class InitialSeeder extends Seeder
         $userkasiroutlet->assignRole([$rolekasiroutlet->id]);
         $userfinance->assignRole([$rolefinance->id]);
         $userauditor->assignRole([$roleauditor->id]);
-        $userpimpinan->assignRole();
+        $userpimpinan->assignRole([$userpimpinan->id]);
 
         // create lokasi
         Lokasi::firstOrCreate(

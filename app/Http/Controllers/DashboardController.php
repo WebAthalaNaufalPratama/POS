@@ -49,7 +49,7 @@ class DashboardController extends Controller
             $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
         }
 
-        if($lokasinama != 5) {
+        if($lokasinama != 5 && !$user->hasRole(['Pimpinan'])) {
             $startOfMonth = Carbon::now()->startOfMonth();
             $endOfMonth = Carbon::now()->endOfMonth();
     
@@ -120,6 +120,8 @@ class DashboardController extends Controller
     
             $lokasis = Lokasi::all();
             return view('dashboard.index', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama'));
+        }elseif($user->hasRole(['Pimpinan'])){
+            return view('dashboard.dashboardpimpinan');
         }else{
             if ($user->hasRole(['Purchasing'])) {
                 $lokasiId = $karyawan->lokasi->id;
