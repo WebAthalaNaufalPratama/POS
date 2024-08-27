@@ -90,6 +90,7 @@
                     <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                     
                 </li>
+                @if(!$user->hasRole(['Pimpinan']))
                 @if(
                         in_array('tipe_produk.index', $rolePermissions) ||
                         in_array('produks.index', $rolePermissions) ||
@@ -440,7 +441,9 @@
                     </ul>
                 </li>
                 @endif
+                @endif
             </ul>
+            
         </div>
         <!-- <img src="/assets/img/bunga.png" alt="Gambar Bunga" id="bawah" style="width:100%"> -->
     </div>
