@@ -27,6 +27,7 @@ class InitialSeeder extends Seeder
         $rolefinance = Role::firstOrCreate(['name' => 'Finance']);
         $roleauditor = Role::firstOrCreate(['name' => 'Auditor']);
         $rolesalmen = Role::firstOrCreate(['name' => 'SalesManager']);
+        $rolepimpinan = Role::firstOrCreate(['name' => 'Pimpinan']);
         
         // create user default
         $user = User::firstOrCreate(
@@ -100,7 +101,17 @@ class InitialSeeder extends Seeder
                 'username' => 'salmen',
                 'password' => 'von#123456'
             ]
-);
+        );
+
+
+        $userpimpinan = User::firstOrCreate(
+            ['email' => 'pimpinan@gmail.com'],
+            [
+                'name' => 'Pimpinan',
+                'username' => 'pimpinan',
+                'password' => 'von#123456'
+            ]
+        );
 
         // permission
         // basic permission
@@ -698,6 +709,7 @@ class InitialSeeder extends Seeder
         $rolekasiroutlet->syncPermissions($permissionskasiroutlet);
         $rolefinance->syncPermissions($permissionsfinance);
         $roleauditor->syncPermissions($permissionsauditor);
+        $rolepimpinan->syncPermissions();
 
         // assign role to user default
         $user->assignRole([$role->id]);
@@ -708,6 +720,7 @@ class InitialSeeder extends Seeder
         $userkasiroutlet->assignRole([$rolekasiroutlet->id]);
         $userfinance->assignRole([$rolefinance->id]);
         $userauditor->assignRole([$roleauditor->id]);
+        $userpimpinan->assignRole();
 
         // create lokasi
         Lokasi::firstOrCreate(
