@@ -700,7 +700,11 @@ class InitialSeeder extends Seeder
         // sales
             $permissionssales = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
 
-            $pimpinanPermissionList = $basiPermissionList;
+            $pimpinanPermissionList = [
+                'auditor.update'
+            ];
+
+            $pimpinanPermissionList = array_merge($basiPermissionList, $pimpinanPermissionList);
             $query = Permission::query();
             foreach ($pimpinanPermissionList as $prefix) {
                 $query->orWhere('name', 'like', $prefix . '%');
