@@ -189,59 +189,59 @@
                     }
                 },
                 {
-                data: 'penerima_id',
-                name: 'penerima_id',
-                render: function (data) {
-                    let badgeClass;
-                    let displayText;
+                    data: 'penerima_id',
+                    name: 'penerima_id',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
 
-                    if (data !== null) { 
-                        badgeClass = 'bg-lightgreen';
-                        displayText = 'DIKONFIRMASI'; 
-                    } else { 
-                        badgeClass = 'bg-lightred';
-                        displayText = 'TUNDA'; 
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
+
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
                     }
+                },
+                {
+                    data: 'diperiksa_id',
+                    name: 'diperiksa_id',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
 
-                    return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
-                }
-            },
-            {
-                data: 'diperiksa_id',
-                name: 'diperiksa_id',
-                render: function (data) {
-                    let badgeClass;
-                    let displayText;
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
 
-                    if (data !== null) { 
-                        badgeClass = 'bg-lightgreen';
-                        displayText = 'DIKONFIRMASI'; 
-                    } else { 
-                        badgeClass = 'bg-lightred';
-                        displayText = 'TUNDA'; 
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
                     }
+                },
+                {
+                    data: 'dibukukan_id',
+                    name: 'dibukukan_id',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
 
-                    return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
-                }
-            },
-            {
-                data: 'dibukukan_id',
-                name: 'dibukukan_id',
-                render: function (data) {
-                    let badgeClass;
-                    let displayText;
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
 
-                    if (data !== null) { 
-                        badgeClass = 'bg-lightgreen';
-                        displayText = 'DIKONFIRMASI'; 
-                    } else { 
-                        badgeClass = 'bg-lightred';
-                        displayText = 'TUNDA'; 
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
                     }
-
-                    return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
-                }
-            },
+                },
                 {
                     data: 'aksi',
                     name: 'aksi',
