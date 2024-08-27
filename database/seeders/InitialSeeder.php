@@ -727,7 +727,7 @@ class InitialSeeder extends Seeder
         $userkasiroutlet->assignRole([$rolekasiroutlet->id]);
         $userfinance->assignRole([$rolefinance->id]);
         $userauditor->assignRole([$roleauditor->id]);
-        $userpimpinan->assignRole([$userpimpinan->id]);
+        $userpimpinan->assignRole([$rolepimpinan->id]);
 
         // create lokasi
         Lokasi::firstOrCreate(
