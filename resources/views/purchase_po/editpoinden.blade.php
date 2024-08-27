@@ -130,7 +130,7 @@
                                                 @if($index == 0)
                                                 <td><a href="javascript:void(0);" id="add"  class="icon-large"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
                                                 @else
-                                                <td><button type="button" name="remove" id="{{ $index }}" class="btn btn-danger btn_remove">x</button></td>
+                                                <td><a href="javascript:void(0);" name="remove" id="{{ $index }}" class="btn-remove"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
                                                 @endif
                                             </tr>
                                         @endforeach

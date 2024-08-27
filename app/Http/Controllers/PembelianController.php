@@ -2842,7 +2842,12 @@ class PembelianController extends Controller
                             return redirect()->back()->withInput()->with('fail', 'Gagal mengupdate Data Invoice');
                         } else {
                             DB::commit();
-                            return redirect()->route('invoice.show',  ['datapo' => $id_po, 'type' => $type, 'id' => $datapo])->with('success', 'Data pembelian berhasil diupdate. Nomor Invoice: ' . $invData['no_inv']);
+                            if($user->hasRole(['Purchasing'])){
+                                return redirect()->route('invoice.show',  ['datapo' => $id_po, 'type' => $type, 'id' => $datapo])->with('success', 'Data pembelian berhasil diupdate. Nomor Invoice: ' . $invData['no_inv']);
+                            }else{
+                                return redirect()->route('invoice.edit',  ['datapo' => $id_po, 'type' => $type, 'id' => $datapo])->with('success', 'Data pembelian berhasil diupdate. Nomor Invoice: ' . $invData['no_inv']);
+                                
+                            }
                         }
             
                     } else {
@@ -3093,7 +3098,7 @@ class PembelianController extends Controller
                 }
 
                     DB::commit();
-                    return redirect(route('returbeli.index', ['retur_id' => $returpem->id]))->with('success', 'Berhasil Menyimpan Data');
+                    return redirect(route('returbeli.show', ['retur_id' => $returpem->id]))->with('success', 'Berhasil Menyimpan Data');
 
                 }
             } catch (\Exception $e) {
