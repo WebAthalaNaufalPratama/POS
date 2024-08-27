@@ -198,7 +198,6 @@
             </div>
         </div>
     </div>
-    @role('Purchasing')
     <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-pemasukan">
             <div class="dash-counts">
@@ -218,6 +217,88 @@
             </div>
             <div class="dash-imgs">
                 <i data-feather="dollar-sign"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+        <div class="dash-count dash-penjualan-retur">
+            <div class="dash-counts">
+                <h4>{{ 'Rp ' . number_format($balance, 0, ',', '.') }}</h4>
+                <h5>Saldo Rekening</h5>
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="credit-card"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+        <div class="dash-count dash-pemasukan">
+            <div class="dash-counts">
+                <h4>{{ 'Rp ' . number_format($pemasukan, 0, ',', '.') }}</h4>
+                <h5>Pemasukan</h5>
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="dollar-sign"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Top Minus Produk</h5>
+                <div class="row">
+                    <div class="col-8">
+                        <select id="InvenSelect" class="custom-select">
+                            <option value="">Pilih Inventory</option>
+                            <option value="Greenhouse" {{ request('inven') == 'Greenhouse' ? 'selected':''}}>Greenhouse</option>
+                            <option value="Inden" {{ request('inven') == 'Inden' ? 'selected':''}}>Inden</option>
+                            <option value="Gudang" {{ request('inven') == 'Gudang' ? 'selected':''}}>Gudang</option>
+                        </select>
+                    </div>
+                    <div class="col-4 bulan">
+                        <input type="month" class="form-control" name="filterDate" id="filterDate" value="{{ request()->input('dateInden') }}">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="top_minus_produk" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Produk Terjual -->
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Produk Paling Banyak Dibeli</h5>
+            </div>
+            <div class="card-body">
+                <div id="top_produk_chart" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
+    {{-- Uang Keluar --}}
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Uang Keluar</h5>
+            </div>
+            <div class="card-body">
+                <div id="uang_keluar_chart" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
+    
+    {{-- Tagihan SUpplier --}}
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Tagihan Supplier</h5>
+            </div>
+            <div class="card-body">
+                <div id="tagihan_supplier_chart" class="chart-set"></div>
             </div>
         </div>
     </div>
