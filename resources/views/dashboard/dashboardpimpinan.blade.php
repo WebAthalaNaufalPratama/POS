@@ -23,123 +23,78 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+            <div class="dash-count dash-penjualan-sukses">
+                <div class="dash-counts">
+                    <h4>{{ $jumlahpenjualan }}</h4>
+                    <h5>Penjualan (SUKSES)</h5>
+                </div>
+                <div class="dash-imgs">
+                    <i data-feather="shopping-cart"></i>
+                </div>
+            </div>
+        </div>
 
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
-        <div class="dash-count dash-penjualan-sukses">
-            <div class="dash-counts">
-                <h4>{{ $jumlahpenjualan }}</h4>
-                <h5>Penjualan (SUKSES)</h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="shopping-cart"></i>
+        <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+            <div class="dash-count dash-penjualan-batal">
+                <div class="dash-counts">
+                    <h4>{{ $batalpenjualan }}</h4>
+                    <h5>Penjualan (BATAL)</h5>
+                </div>
+                <div class="dash-imgs">
+                    <i data-feather="shopping-cart"></i>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
-        <div class="dash-count dash-penjualan-batal">
-            <div class="dash-counts">
-                <h4>{{ $batalpenjualan }}</h4>
-                <h5>Penjualan (BATAL)</h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="shopping-cart"></i>
+        <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+            <div class="dash-count dash-penjualan-retur">
+                <div class="dash-counts">
+                    <h4>{{ $returpenjualan }}</h4>
+                    <h5>Penjualan (RETUR)</h5>
+                </div>
+                <div class="dash-imgs">
+                    <i data-feather="shopping-cart"></i>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
-        <div class="dash-count dash-penjualan-retur">
-            <div class="dash-counts">
-                <h4>{{ $returpenjualan }}</h4>
-                <h5>Penjualan (RETUR)</h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="shopping-cart"></i>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
-        <div class="dash-count dash-customerlama">
-            <div class="dash-counts">
-                <h4>{{ $penjualanlama }}</h4>
-                <h5>Customer Lama</h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="user"></i>
+        <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+            <div class="dash-count dash-customerlama">
+                <div class="dash-counts">
+                    <h4>{{ $penjualanlama }}</h4>
+                    <h5>Customer Lama</h5>
+                </div>
+                <div class="dash-imgs">
+                    <i data-feather="user"></i>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
-        <div class="dash-count dash-customerbaru">
-            <div class="dash-counts">
-                <h4>{{ $penjualanbaru }}</h4>
-                <h5>Customer Baru</h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="user"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
-        <div class="dash-count dash-pemasukan">
-            <div class="dash-counts">
-                <h4>{{ 'Rp ' . number_format($pemasukan, 0, ',', '.') }}</h4>
-                <h5>Pemasukan</h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="dollar-sign"></i>
+        <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+            <div class="dash-count dash-customerbaru">
+                <div class="dash-counts">
+                    <h4>{{ $penjualanbaru }}</h4>
+                    <h5>Customer Baru</h5>
+                </div>
+                <div class="dash-imgs">
+                    <i data-feather="user"></i>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-6 col-sm-12 col-12 d-flex">
-        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
-            <div class="card-header">
-                <h5 class="card-title">Top Minus Produk</h5>
-            </div>
-            <div class="card-body">
-                <div id="top_minus_produk" class="chart-set"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Produk Terjual -->
-    <div class="col-lg-6 col-sm-12 col-12 d-flex">
-        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
-            <div class="card-header">
-                <h5 class="card-title">Top Produk Terjual</h5>
-            </div>
-            <div class="card-body">
-                <div id="top_produk_chart" class="chart-set"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Sales -->
-    <div class="col-lg-7 col-sm-12 col-12 d-flex">
-        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
-            <div class="card-header">
-                <h5 class="card-title">Penjualan Sales</h5>
-            </div>
-            <div class="card-body">
-                <div id="top_sales" class="chart-set"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-5 col-sm-12 col-12 d-flex">
-        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
-            <div class="card-header">
-                <h5 class="card-title">Transaksi Diskon/Loyalty Point</h5>
-            </div>
-            <div class="card-body">
-                <div id="loyalty" class="chart-set"></div>
+        <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
+            <div class="dash-count dash-pemasukan">
+                <div class="dash-counts">
+                    <h4>{{ 'Rp ' . number_format($pemasukan, 0, ',', '.') }}</h4>
+                    <h5>Pemasukan</h5>
+                </div>
+                <div class="dash-imgs">
+                    <i data-feather="dollar-sign"></i>
                 </div>
             </div>
         </div>
     </div>
-
+    <div class="row">
     <div class="col-lg-2 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-penjualan-sukses">
             <div class="dash-counts">
@@ -243,6 +198,55 @@
             </div>
         </div>
     </div>
+    </div>
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Top Minus Produk</h5>
+            </div>
+            <div class="card-body">
+                <div id="top_minus_produk" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Produk Terjual -->
+    <div class="col-lg-6 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Top Produk Terjual</h5>
+            </div>
+            <div class="card-body">
+                <div id="top_produk_chart" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Sales -->
+    <div class="col-lg-7 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Penjualan Sales</h5>
+            </div>
+            <div class="card-body">
+                <div id="top_sales" class="chart-set"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 col-sm-12 col-12 d-flex">
+        <div class="card col-lg-12 col-sm-12 col-12 d-flex">
+            <div class="card-header">
+                <h5 class="card-title">Transaksi Diskon/Loyalty Point</h5>
+            </div>
+            <div class="card-body">
+                <div id="loyalty" class="chart-set"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
 
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
