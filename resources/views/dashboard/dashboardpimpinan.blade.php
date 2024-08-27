@@ -704,4 +704,394 @@
         });
     }
 </script>
+<script>
+    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+        $('#locationSelect').on('change', function() {
+            var locationId = $(this).val();
+            window.location.href = '{{ url("dashboard") }}' + '?lokasi_id=' + locationId;
+        });
+    @endif
+    
+
+    function formatTanggal(date) {
+        var options = {
+            year: 'numeric',
+            month: 'long',
+        };
+        return date.toLocaleDateString('id-ID', options);
+    }
+
+    function updateDate() {
+        var now = new Date();
+        $('#currentDate').text(formatTanggal(now));
+    }
+    setInterval(updateDate, 1000);
+    updateDate();
+
+    function getData(id) {
+        $.ajax({
+            type: "GET",
+            url: "/aset/" + id + "/edit",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            success: function(response) {
+                // console.log(response)
+                $('#editForm').attr('action', 'aset/' + id + '/update');
+                $('#edit_nama').val(response.nama)
+                $('#edit_deskripsi').val(response.deskripsi)
+                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
+                $('#edit_jumlah').val(response.jumlah)
+                $('#edit_tahun_beli').val(response.tahun_beli)
+            },
+            error: function(error) {
+                toastr.error('Ambil data error', 'Error', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+            }
+        });
+    }
+    if ($('#top_sales').length > 0) {
+        var topSalesBar = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                toolbar: {
+                    show: false,
+                }
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            series: [{
+                data: [400, 430, 448, 470, 540, 580, 690, 1100, 1200, 1380]
+            }],
+            xaxis: {
+                categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy', 'France', 'Japan', 'United States', 'China', 'Germany']
+            }
+        };
+
+        var topSalesChart = new ApexCharts($('#top_sales')[0], topSalesBar);
+        topSalesChart.render();
+
+        var locationId = $('#locationSelect').val();
+
+        $.ajax({
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            url: '{{ route('getTopSales') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
+            @else
+            url: '{{ route('getTopSales') }}',
+            @endif
+            method: 'GET',
+            success: function(response) {
+                if (response.labels && response.data) {
+                    topSalesChart.updateOptions({
+                        xaxis: {
+                            categories: response.labels
+                        }
+                    });
+                    topSalesChart.updateSeries([{
+                        data: response.data
+                    }]);
+                } else {
+                    console.error('Invalid data format received from server');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching top sales data:", error);
+            }
+        });
+    }
+
+    if ($('#top_minus_produk').length > 0) {
+        var topMinusProductsOptions = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                stacked: true,
+                toolbar: {
+                    show: false,
+                }
+            },
+            series: [],
+            xaxis: {
+                categories: []
+            },
+            yaxis: {
+                title: {
+                    text: 'Jumlah Stok',
+                },
+            },
+            tooltip: {
+                y: {
+                    formatter: function(value) {
+                        return value.toLocaleString('id-ID');
+                    }
+                }
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                },
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'left',
+                offsetX: 40
+            },
+            colors: ['#FF4560', '#008FFB']
+        };
+
+        var topMinusProductsChart = new ApexCharts($('#top_minus_produk')[0], topMinusProductsOptions);
+        topMinusProductsChart.render();
+
+        var locationId = $('#locationSelect').val();
+
+        $.ajax({
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            url: '{{ route('getTopMinusProduk') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
+            @else
+            url: '{{ route('getTopMinusProduk') }}',
+            @endif
+            method: 'GET',
+            success: function(response) {
+
+                if (response.labels && response.series && response.series.length === 2) {
+                    topMinusProductsChart.updateOptions({
+                        xaxis: {
+                            categories: response.labels
+                        }
+                    });
+                    topMinusProductsChart.updateSeries([{
+                            name: 'Melewati Minimal Stok',
+                            data: response.series[1].data
+                        },
+                        {
+
+                            name: 'Stok Saat Ini',
+                            data: response.series[0].data
+                        }
+                    ]);
+                } else {
+                    console.error('Invalid data format received from server');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching top minus products data:", error);
+            }
+        });
+    }
+
+    if ($('#top_produk_chart').length > 0) {
+        var topProductsOptions = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                toolbar: {
+                    show: false,
+                }
+            },
+            series: [{
+                name: 'Jumlah Terjual',
+                data: []
+            }],
+            xaxis: {
+                categories: []
+            },
+            yaxis: {
+                title: {
+                    text: 'Jumlah Terjual',
+                },
+            },
+            tooltip: {
+                y: {
+                    formatter: function(value) {
+                        return value.toLocaleString('id-ID');
+                    }
+                }
+            }
+        };
+
+        var topProductsChart = new ApexCharts($('#top_produk_chart')[0], topProductsOptions);
+        topProductsChart.render();
+
+        var locationId = $('#locationSelect').val();
+
+        // Fetch data for Top Products Chart
+        $.ajax({
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            url: '{{ route('getTopProduk') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
+            @else
+            url: '{{ route('getTopProduk') }}',
+            @endif
+            method: 'GET',
+            success: function(response) {
+                topProductsChart.updateOptions({
+                    xaxis: {
+                        categories: response.labels
+                    }
+                });
+                topProductsChart.updateSeries([{
+                    data: response.data
+                }]);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching top products data:", error);
+            }
+        });
+    }
+
+    if ($('#loyalty').length > 0) {
+        var loyaltyChart = {
+            chart: {
+                height: 350,
+                type: 'donut',
+                toolbar: {
+                    show: false,
+                }
+            },
+            series: [], 
+            labels: [], 
+            dataLabels: {
+                enabled: true,
+                formatter: function (val, opts) {
+                    return opts.w.config.series[opts.seriesIndex]; // Display the series value
+                },
+                style: {
+                    fontSize: '14px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 'bold',
+                    colors: undefined
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val;
+                    }
+                }
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }],
+            plotOptions: {
+                pie: {
+                    donut: {
+                        labels: {
+                            show: true,
+                            name: {
+                                show: true
+                            },
+                            value: {
+                                show: true,
+                                formatter: function(val) {
+                                    return val;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            legend: {
+                show: true,
+                position: 'right', 
+                offsetX: 0,
+                offsetY: 0,
+                labels: {
+                    colors: ['#000'], 
+                    useSeriesColors: false 
+                },
+                itemMargin: {
+                    horizontal: 10, // Space between items
+                    vertical: 5 // Space between rows
+                }
+            }
+        };
+
+        var donut = new ApexCharts($('#loyalty')[0], loyaltyChart);
+        donut.render();
+
+        $.ajax({
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            url: '{{ route('getLoyalty') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
+            @else
+            url: '{{ route('getLoyalty') }}',
+            @endif
+            method: 'GET',
+            success: function(response) {
+                if (response.labels && response.data) {
+                    donut.updateOptions({
+                        labels: response.labels
+                    });
+                    donut.updateSeries(response.data);
+                } else {
+                    console.error('Invalid data format received from server');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching top products data:", error);
+            }
+        });
+    }
+
+    function deleteData(id) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data ini akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "GET",
+                    url: "/aset/" + id + "/delete",
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        toastr.success(response.msg, 'Success', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+
+                        setTimeout(() => {
+                            location.reload()
+                        }, 2000);
+                    },
+                    error: function(error) {
+                        toastr.error(JSON.parse(error.responseText).msg, 'Error', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            rtl: false,
+                            progressBar: true
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>
 @endsection
