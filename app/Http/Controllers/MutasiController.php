@@ -42,7 +42,7 @@ class MutasiController extends Controller
     $user = Auth::user();
     $karyawan = Karyawan::where('user_id', $user->id)->first();
     $tipe = $karyawan->lokasi->tipe_lokasi;
-    $query = Mutasi::where('no_mutasi', 'like', 'MGO%');
+    $query = Mutasi::where('no_mutasi', 'like', 'MGO%')->with('lokasi', 'lokasi_penerima');
 
     if ($tipe == 1 && !$user->hasRole(['Auditor', 'Finance'])) {
         $query->orderBy('created_at', 'desc');
@@ -57,6 +57,26 @@ class MutasiController extends Controller
     }
     if ($req->dateEnd) {
         $query->where('created_at', '<=', $req->input('dateEnd'));
+    }
+    if ($search = $req->input('search.value')) {
+        $columns = ['mutasis.no_mutasi', 'mutasis.tanggal_kirim', 'mutasis.tanggal_diterima', 'mutasis.status'];
+        $query->where(function($q) use ($search, $columns) {
+            foreach ($columns as $column) {
+                $q->orWhere($column, 'like', "%{$search}%");
+            }
+
+            $q->orWhereHas('lokasi', function($query) use ($search) {
+                $query->where('nama', 'like', "%{$search}%");
+            });
+            $q->orWhereHas('lokasi_penerima', function($query) use ($search) {
+                $query->where('nama', 'like', "%{$search}%");
+            });
+        });
+    }
+    
+    if ($order = $req->input('order.0.column')) {
+        $columns = ['no_mutasi', 'tanggal_kirim','tanggal_diterima','status'];
+        $query->orderBy($columns[$order], $req->input('order.0.dir'));
     }
 
     if ($req->ajax()) {
@@ -107,6 +127,9 @@ class MutasiController extends Controller
                 'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
                 'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
                 'status' => $item->status,
+                'penerima_id' => $item->penerima_id,
+                'diperiksa_id' => $item->diperiksa_id,
+                'dibukukan_id' => $item->dibukukan_id,
                 'jumlah_diterima' => $jumlahDiterima ? 'true' : 'false',
                 'noform' => $allNoForm ? 'true' : 'false',
             ];
@@ -521,6 +544,26 @@ class MutasiController extends Controller
         if ($req->dateEnd) {
             $query->where('created_at', '<=', $req->input('dateEnd'));
         }
+        if ($search = $req->input('search.value')) {
+            $columns = ['mutasis.no_mutasi', 'mutasis.tanggal_kirim', 'mutasis.tanggal_diterima', 'mutasis.status'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
+    
+                $q->orWhereHas('lokasi', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('lokasi_penerima', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+            });
+        }
+        
+        if ($order = $req->input('order.0.column')) {
+            $columns = ['no_mutasi', 'tanggal_kirim','tanggal_diterima','status'];
+            $query->orderBy($columns[$order], $req->input('order.0.dir'));
+        }
 
         if ($req->ajax()) {
             $columns = [
@@ -556,6 +599,9 @@ class MutasiController extends Controller
                     'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
                     'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
                     'status' => $item->status,
+                    'penerima_id' => $item->penerima_id,
+                    'diperiksa_id' => $item->diperiksa_id,
+                    'dibukukan_id' => $item->dibukukan_id,
                     'jumlah_diterima' => $jumlahDiterima !== null ? 'true' : 'false',
                 ];
             });
@@ -1291,6 +1337,26 @@ class MutasiController extends Controller
         if ($req->dateEnd) {
             $query->where('created_at', '<=', $req->input('dateEnd'));
         }
+        if ($search = $req->input('search.value')) {
+            $columns = ['mutasis.no_mutasi', 'mutasis.tanggal_kirim', 'mutasis.tanggal_diterima', 'mutasis.status'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
+    
+                $q->orWhereHas('lokasi', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('lokasi_penerima', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+            });
+        }
+        
+        if ($order = $req->input('order.0.column')) {
+            $columns = ['no_mutasi', 'tanggal_kirim','tanggal_diterima','status'];
+            $query->orderBy($columns[$order], $req->input('order.0.dir'));
+        }
 
         if ($req->ajax()) {
             $totalRecords = $query->count();
@@ -1314,6 +1380,9 @@ class MutasiController extends Controller
                     'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
                     'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
                     'status' => $item->status,
+                    'penerima_id' => $item->penerima_id,
+                    'diperiksa_id' => $item->diperiksa_id,
+                    'dibukukan_id' => $item->dibukukan_id,
                     'jumlah_diterima' => $jumlahDiterima !== null ? 'true' : 'false',
                     'lokasi' => $karyawan->lokasi_id,
                 ];
@@ -1352,6 +1421,26 @@ class MutasiController extends Controller
         if ($req->dateEnd) {
             $query->where('created_at', '<=', $req->input('dateEnd'));
         }
+        if ($search = $req->input('search.value')) {
+            $columns = ['mutasis.no_mutasi', 'mutasis.tanggal_kirim', 'mutasis.tanggal_diterima', 'mutasis.status'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
+    
+                $q->orWhereHas('lokasi', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('lokasi_penerima', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+            });
+        }
+        
+        if ($order = $req->input('order.0.column')) {
+            $columns = ['no_mutasi', 'tanggal_kirim','tanggal_diterima','status'];
+            $query->orderBy($columns[$order], $req->input('order.0.dir'));
+        }
 
         if ($req->ajax()) {
             $totalRecords = $query->count();
@@ -1375,6 +1464,9 @@ class MutasiController extends Controller
                     'tanggal_diterima' => date('d F Y', strtotime($item->tanggal_diterima)),
                     'tanggal_dibuat' => date('d F Y', strtotime($item->tanggal_pembuat)),
                     'status' => $item->status,
+                    'penerima_id' => $item->penerima_id,
+                    'diperiksa_id' => $item->diperiksa_id,
+                    'dibukukan_id' => $item->dibukukan_id,
                     'jumlah_diterima' => $jumlahDiterima !== null ? 'true' : 'false',
                     'lokasi' => $item->lokasi->nama,
                 ];

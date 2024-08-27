@@ -47,7 +47,7 @@ class PenjualanController extends Controller
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-        $query = Penjualan::with('karyawan', 'lokasi');
+        $query = Penjualan::with('karyawan', 'lokasi', 'customer');
 
         if ($lokasi) {
             if ($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet', 'KasirGallery', 'AdminGallery'])) {
@@ -61,7 +61,28 @@ class PenjualanController extends Controller
             }
         }
 
-        // Apply filters
+
+        // Apply search filter
+        if ($search = $req->input('search.value')) {
+            $columns = ['penjualans.no_invoice', 'penjualans.tanggal_invoice', 'penjualans.jatuh_tempo', 'penjualans.total_tagihan', 'penjualans.sisa_bayar', 'penjualans.status'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
+
+                $q->orWhereHas('karyawan', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('customer', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+            });
+        }
+        
+        if ($order = $req->input('order.0.column')) {
+            $columns = ['no_invoice', 'tanggal_invoice', 'jatuh_tempo', 'total_tagihan', 'sisa_bayar', 'status'];
+            $query->orderBy($columns[$order], $req->input('order.0.dir'));
+        }
         $query->when($req->customer, function ($query, $customer) {
             $query->where('id_customer', $customer);
         });
@@ -126,8 +147,8 @@ class PenjualanController extends Controller
         }
         
 
-        $sales = Karyawan::all();
-        $customers = Customer::all();
+        $sales = Karyawan::where('jabatan', 'Perangkai')->get();
+        $customers = Customer::where('lokasi_id', $lokasi->lokasi_id)->get();
 
         return view('penjualan.index', compact('customers', 'sales'));
     }

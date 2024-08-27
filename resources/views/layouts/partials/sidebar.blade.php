@@ -35,10 +35,16 @@
                         $dopenjualan = \App\Models\DeliveryOrder::where('no_do', 'LIKE', 'DOP%')->where('lokasi_pengirim', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pemeriksa')->count();
                         $returpenjualan = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTP%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pembuku')->count();
                         $returpenjualanoutlet = \App\Models\ReturPenjualan::where('no_retur', 'LIKE', 'RTO%')->where('lokasi_id', $lokasi->lokasi_id)->where('status', 'DIKONFIRMASI')->whereNull('pembuku')->count();
+                    }else{
+                        $hitungpenjualan = 0;
+                        $hitungpenjualanoutlet = 0;
+                        $dopenjualan = 0;
+                        $returpenjualan = 0;
+                        $returpenjualanoutlet = 0;
                     }
-                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2) {
+                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor', 'SuperAdmin']) && $lokasi->lokasi->tipe_lokasi == 2) {
                         $totaljualoutlet = $hitungpenjualanoutlet + $returpenjualanoutlet;
-                    }else if($user->hasRole(['AdminGallery', 'KasirGallery']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
+                    }else if($user->hasRole(['AdminGallery', 'KasirGallery']) || $user->hasRole(['Finance', 'Auditor', 'SuperAdmin']) && $lokasi->lokasi->tipe_lokasi == 1) {
                         $totaljual = $hitungpenjualan + $dopenjualan + $returpenjualan;
                     }
 
@@ -77,11 +83,16 @@
                         $hitungmutasiog = 0;
                         $hitungmutasigg = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGG%')->where('status', 'TUNDA')->orwhere('no_mutasi', 'LIKE', 'MPG%')->where('status', 'TUNDA')->count();
                         $hitungmutasigag = \App\Models\Mutasi::where('no_mutasi', 'LIKE', 'MGA%')->where('status', 'TUNDA')->count();
+                    }else{
+                        $hitungmutasigo = 0;
+                        $hitungmutasiog = 0;
+                        $hitungmutasigg = 0;
+                        $hitungmutasigag = 0;
                     }
 
-                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 2) {
+                    if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor', 'SuperAdmin']) && $lokasi->lokasi->tipe_lokasi == 2) {
                         $totalmutasi = $hitungmutasiog + $hitungmutasigo;
-                    }else if($user->hasRole(['AdminGallery', 'KasirGallery', 'Purchasing']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
+                    }else if($user->hasRole(['AdminGallery', 'KasirGallery', 'Purchasing', 'SuperAdmin']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
                         $totalmutasi = $hitungmutasiog + $hitungmutasigo + $hitungmutasigag + $hitungmutasigg;
                     }
                     
@@ -90,6 +101,7 @@
                     <a href="{{ route('dashboard.index') }}"><img src="/assets/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
                     
                 </li>
+                @if(!$user->hasRole(['Pimpinan']))
                 @if(
                         in_array('tipe_produk.index', $rolePermissions) ||
                         in_array('produks.index', $rolePermissions) ||
@@ -200,7 +212,7 @@
                 </li>
                 @endif
                 <li class="submenu">
-                    @if((in_array('penjualan.index', $rolePermissions) && (isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 2)))
+                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi == 1)
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljual }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualan }}</span></a></li>
@@ -216,7 +228,7 @@
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
-                    @if(in_array('penjualan.index', $rolePermissions) && isset($lokasi->lokasi) && $lokasi->lokasi->tipe_lokasi != 1)
+                    @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi == 2)
                     <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljualoutlet }}</span></span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualanoutlet}}</span></a></li>
@@ -440,7 +452,9 @@
                     </ul>
                 </li>
                 @endif
+                @endif
             </ul>
+            
         </div>
         <!-- <img src="/assets/img/bunga.png" alt="Gambar Bunga" id="bawah" style="width:100%"> -->
     </div>

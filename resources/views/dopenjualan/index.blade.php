@@ -49,8 +49,10 @@
                                 <th>No Invoice</th>
                                 <th>Customer</th>
                                 <th>Tanggal Kirim</th>
-                                <th>Status</th>
                                 <th>Driver</th>
+                                <th>Status</th>
+                                <th>Status Finance</th>
+                                <th>Status Auditor</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -167,6 +169,7 @@
                 { data: 'no_referensi', name: 'no_referensi' },
                 { data: 'customer.nama', name: 'customer.nama' },
                 { data: 'tanggal_kirim', name: 'tanggal_kirim' },
+                { data: 'data_driver.nama', name: 'data_driver.nama' },
                 {
                     data: 'status',
                     name: 'status',
@@ -187,7 +190,42 @@
                         return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
                     }
                 },
-                { data: 'data_driver.nama', name: 'data_driver.nama' },
+                {
+                    data: 'penyetuju',
+                    name: 'penyetuju',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
+
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
+
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'pemeriksa',
+                    name: 'pemeriksa',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
+
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
+
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
+                    }
+                },
                 {
                     data: 'aksi',
                     name: 'aksi',

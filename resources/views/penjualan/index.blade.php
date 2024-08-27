@@ -65,12 +65,15 @@
                                 <th>No</th>
                                 <th>No Invoice</th>
                                 <th>Sales</th>
+                                <th>Customer</th>
                                 <th>Tanggal Invoice</th>
                                 <th>Jatuh Tempo</th>
                                 <th>Status Bayar</th>
                                 <th>Total Tagihan</th>
                                 <th>Sisa Bayar</th>
-                                <th>Status</th>
+                                <th>Status Pembuat</th>
+                                <th>Status Finance</th>
+                                <th>Status Auditor</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -183,6 +186,9 @@
             $('#penjualanTable').DataTable().destroy();
         }
 
+        $('#filterCustomer').select2();
+        $('#filterSales').select2();
+
         function formatRupiah(angka, prefix = "Rp") {
             let number_string = angka.toString().replace(/[^,\d]/g, ''),
                 split = number_string.split(','),
@@ -231,8 +237,9 @@
                 { data: null, name: null, searchable: false, orderable: false, render: function (data, type, row, meta) {
                     return meta.row + 1;
                 }},
-                { data: 'no_invoice', name: 'no_invoice' },
-                { data: 'karyawan.nama', name: 'karyawan.nama' },
+                { data: 'no_invoice', name: 'no_invoice', searchable: true, orderable: true },
+                { data: 'karyawan.nama', name: 'karyawan.nama', searchable: true, orderable: true },
+                { data: 'customer.nama', name: 'customer.nama', searchable: true, orderable: true },
                 { data: 'tanggal_invoice', name: 'tanggal_invoice' },
                 { data: 'jatuh_tempo', name: 'jatuh_tempo' },
                 {
@@ -287,6 +294,42 @@
                         }
                         
                         return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'dibukukan_id',
+                    name: 'dibukukan_id',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
+
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
+
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'auditor_id',
+                    name: 'auditor_id',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
+
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
+
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
                     }
                 },
                 {

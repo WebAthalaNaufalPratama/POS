@@ -27,6 +27,7 @@ class InitialSeeder extends Seeder
         $rolefinance = Role::firstOrCreate(['name' => 'Finance']);
         $roleauditor = Role::firstOrCreate(['name' => 'Auditor']);
         $rolesalmen = Role::firstOrCreate(['name' => 'SalesManager']);
+        $rolepimpinan = Role::firstOrCreate(['name' => 'Pimpinan']);
         
         // create user default
         $user = User::firstOrCreate(
@@ -100,7 +101,17 @@ class InitialSeeder extends Seeder
                 'username' => 'salmen',
                 'password' => 'von#123456'
             ]
-);
+        );
+
+
+        $userpimpinan = User::firstOrCreate(
+            ['email' => 'pimpinan@gmail.com'],
+            [
+                'name' => 'Pimpinan',
+                'username' => 'pimpinan',
+                'password' => 'von#123456'
+            ]
+        );
 
         // permission
         // basic permission
@@ -689,6 +700,13 @@ class InitialSeeder extends Seeder
         // sales
             $permissionssales = Permission::whereIn('id',[1, 3, 4])->pluck('id')->all();
 
+            $pimpinanPermissionList = $basiPermissionList;
+            $query = Permission::query();
+            foreach ($pimpinanPermissionList as $prefix) {
+                $query->orWhere('name', 'like', $prefix . '%');
+            }
+            $permissionspimpinan = $query->pluck('id');
+
         // sync permission to role
         $role->syncPermissions($permissionssuperadmin);
         $roleadmingallery->syncPermissions($permissionsadmingallery);
@@ -698,6 +716,7 @@ class InitialSeeder extends Seeder
         $rolekasiroutlet->syncPermissions($permissionskasiroutlet);
         $rolefinance->syncPermissions($permissionsfinance);
         $roleauditor->syncPermissions($permissionsauditor);
+        $rolepimpinan->syncPermissions($permissionspimpinan);
 
         // assign role to user default
         $user->assignRole([$role->id]);
@@ -708,6 +727,7 @@ class InitialSeeder extends Seeder
         $userkasiroutlet->assignRole([$rolekasiroutlet->id]);
         $userfinance->assignRole([$rolefinance->id]);
         $userauditor->assignRole([$roleauditor->id]);
+        $userpimpinan->assignRole([$rolepimpinan->id]);
 
         // create lokasi
         Lokasi::firstOrCreate(
