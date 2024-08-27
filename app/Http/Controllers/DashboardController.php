@@ -229,8 +229,7 @@ class DashboardController extends Controller
             $arrpembelian = $pembelian->pluck('id')->toArray();
             $invoicepo = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
             $arrinvoicepo = $invoicepo->pluck('id')->toArray();
-            $returpenjualan = Returpembelian::
-                                where('status_dibuat', 'DIKONFIRMASI')
+            $returpembelian = Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
                                 ->where('status_dibuku', 'DIKONFIRMASI')
                                 ->where(function($query) use ($startOfMonth, $endOfMonth) {
                                     $query->where('created_at', '>=', $startOfMonth)
