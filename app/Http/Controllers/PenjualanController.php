@@ -47,7 +47,7 @@ class PenjualanController extends Controller
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-        $query = Penjualan::with('karyawan', 'lokasi');
+        $query = Penjualan::with('karyawan', 'lokasi', 'customer');
 
         if ($lokasi) {
             if ($lokasi->lokasi->tipe_lokasi == 2 && $user->hasRole(['KasirOutlet', 'KasirGallery', 'AdminGallery'])) {
@@ -69,6 +69,13 @@ class PenjualanController extends Controller
                 foreach ($columns as $column) {
                     $q->orWhere($column, 'like', "%{$search}%");
                 }
+
+                $q->orWhereHas('karyawan', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('customer', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
             });
         }
         
@@ -140,8 +147,8 @@ class PenjualanController extends Controller
         }
         
 
-        $sales = Karyawan::all();
-        $customers = Customer::all();
+        $sales = Karyawan::where('jabatan', 'Perangkai')->get();
+        $customers = Customer::where('lokasi_id', $lokasi->lokasi_id)->get();
 
         return view('penjualan.index', compact('customers', 'sales'));
     }

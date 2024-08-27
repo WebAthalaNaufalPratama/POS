@@ -52,6 +52,27 @@ class DopenjualanController extends Controller
     }
 
     // Apply filters
+    if ($search = $req->input('search.value')) {
+        $columns = ['delivery_orders.no_do','delivery_orders.no_referensi', 'delivery_orders.tanggal_kirim', 'delivery_orders.status'];
+        $query->where(function($q) use ($search, $columns) {
+            foreach ($columns as $column) {
+                $q->orWhere($column, 'like', "%{$search}%");
+            }
+
+            $q->orWhereHas('data_driver', function($query) use ($search) {
+                $query->where('nama', 'like', "%{$search}%");
+            });
+            $q->orWhereHas('customer', function($query) use ($search) {
+                $query->where('nama', 'like', "%{$search}%");
+            });
+        });
+    }
+    
+    if ($order = $req->input('order.0.column')) {
+        $columns = ['no_do', 'no_referensi', 'tanggal_kirim','status'];
+        $query->orderBy($columns[$order], $req->input('order.0.dir'));
+    }
+
     if ($req->customer) {
         $query->where('customer_id', $req->input('customer'));
     }
@@ -99,7 +120,7 @@ class DopenjualanController extends Controller
     }
 
     // Load data for filters and non-AJAX view
-    $customers = Customer::orderBy('nama')->get();
+    $customers = Customer::where('lokasi_id', $lokasi->lokasi_id)->orderBy('nama')->get();
     $drivers = Karyawan::where('jabatan', 'driver')->orderBy('nama')->get();
 
     return view('dopenjualan.index', compact('customers', 'drivers'));

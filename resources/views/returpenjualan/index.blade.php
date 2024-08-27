@@ -22,10 +22,10 @@
                         </select>
                     </div>
                     <div class="col-sm-2 ps-0 pe-0">
-                        <select id="filterDriver" name="filterDriver" class="form-control" title="driver">
-                            <option value="">Pilih driver</option>
+                        <select id="filterDriver" name="filterDriver" class="form-control" title="supplier">
+                            <option value="">Pilih Supplier</option>
                             @foreach ($suppliers as $item)
-                                <option value="{{ $item->id }}" {{ $item->id == request()->input('driver') ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                <option value="{{ $item->id }}" {{ $item->id == request()->input('supplier') ? 'selected' : '' }}>{{ $item->nama }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -47,13 +47,15 @@
                                 <th>No</th>
                                 <th>No Retur</th>
                                 <th>No Invoice</th>
-                                <th>No DO</th>
+                                <th>No DO Retur</th>
                                 <th>Customer</th>
                                 <th>Lokasi</th>
                                 <th>Supplier</th>
                                 <th>Tanggal Retur</th>
                                 <th>Komplain</th>
                                 <th>Status</th>
+                                <th>Status Finance</th>
+                                <th>Status Auditor</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -184,7 +186,21 @@
                 }},
                 { data: 'no_retur', name: 'no_retur' },
                 { data: 'no_invoice', name: 'no_invoice' },
-                { data: 'no_do', name: 'no_do' },
+                { 
+                    data: 'no_do', 
+                    name: 'no_do',
+                    render: function(data) {
+                        let DisplayText;
+
+                        if(data == null){
+                            DisplayText = 'Bukan Produk Komplain';
+                        }else{
+                            DisplayText = data;
+                        }
+
+                        return `<span>${DisplayText || '-'}</span>`;
+                    }
+                },
                 { data: 'customer.nama', name: 'customer.nama' },
                 { data: 'lokasi.nama', name: 'lokasi.nama' },
                 { data: 'supplier.nama', name: 'supplier.nama' },
@@ -208,6 +224,42 @@
                         }
                         
                         return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'pemeriksa',
+                    name: 'pemeriksa',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
+
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
+
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
+                    }
+                },
+                {
+                    data: 'pembuku',
+                    name: 'pembuku',
+                    render: function (data) {
+                        let badgeClass;
+                        let displayText;
+
+                        if (data !== null) { 
+                            badgeClass = 'bg-lightgreen';
+                            displayText = 'DIKONFIRMASI'; 
+                        } else { 
+                            badgeClass = 'bg-lightred';
+                            displayText = 'TUNDA'; 
+                        }
+
+                        return `<span class="badges ${badgeClass}">${displayText || '-'}</span>`;
                     }
                 },
                 {
@@ -289,7 +341,7 @@
         
         var driver = $('#filterDriver').val();
         if (driver) {
-            var filterDriver = 'driver=' + driver;
+            var filterDriver = 'supplier=' + driver;
             if (first == true) {
                 symbol = '?';
                 first = false;

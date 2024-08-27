@@ -36,78 +36,100 @@ use Illuminate\Support\Facades\File;
 class ReturpenjualanController extends Controller
 {
     public function index(Request $req)
-{
-    $user = Auth::user();
-    $lokasi = Karyawan::where('user_id', $user->id)->first();
+    {
+        // dd($req);
+        $user = Auth::user();
+        $lokasi = Karyawan::where('user_id', $user->id)->first();
 
-    // Initialize query based on user role and lokasi
-    $query = ReturPenjualan::with('deliveryorder', 'customer', 'supplier', 'lokasi');
+        // Initialize query based on user role and lokasi
+        $query = ReturPenjualan::with('deliveryorder', 'customer', 'supplier', 'lokasi');
 
-    if ($lokasi) {
-        if ($lokasi->lokasi->tipe_lokasi == 2 && !$user->hasRole(['Auditor', 'Finance'])) {
-            $query->where('no_retur', 'LIKE', 'RTO%')
-                ->where('lokasi_id', $lokasi->lokasi_id);
-        } elseif ($lokasi->lokasi->tipe_lokasi == 1 && !$user->hasRole(['Auditor', 'Finance'])) {
-            $query->where('no_retur', 'LIKE', 'RTP%')
-                ->where('lokasi_id', $lokasi->lokasi_id);
-        } elseif ($user->hasRole(['Auditor', 'Finance'])) {
-            $query->where('no_retur', 'LIKE', 'RTP%')
-                ->where('lokasi_id', $lokasi->lokasi_id)
-                ->where('status', '!=', 'TUNDA');
-        } else {
-            $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
+        if ($lokasi) {
+            if ($lokasi->lokasi->tipe_lokasi == 2 && !$user->hasRole(['Auditor', 'Finance'])) {
+                $query->where('no_retur', 'LIKE', 'RTO%')
+                    ->where('lokasi_id', $lokasi->lokasi_id);
+            } elseif ($lokasi->lokasi->tipe_lokasi == 1 && !$user->hasRole(['Auditor', 'Finance'])) {
+                $query->where('no_retur', 'LIKE', 'RTP%')
+                    ->where('lokasi_id', $lokasi->lokasi_id);
+            } elseif ($user->hasRole(['Auditor', 'Finance'])) {
+                $query->where('no_retur', 'LIKE', 'RTP%')
+                    ->where('lokasi_id', $lokasi->lokasi_id)
+                    ->where('status', '!=', 'TUNDA');
+            } else {
+                $query = Penjualan::with('karyawan')->whereNotNull('no_invoice');
+            }
         }
-    }
 
-    // Apply filters
-    if ($req->customer) {
-        $query->where('customer_id', $req->input('customer'));
-    }
-    if ($req->driver) {
-        $query->where('supplier_id', $req->input('driver'));
-    }
-    if ($req->dateStart) {
-        $query->where('tanggal_retur', '>=', $req->input('dateStart'));
-    }
-    if ($req->dateEnd) {
-        $query->where('tanggal_retur', '<=', $req->input('dateEnd'));
-    }
+        // Apply filters
+        if ($search = $req->input('search.value')) {
+            $columns = ['retur_penjualans.no_retur','retur_penjualans.no_invoice', 'retur_penjualans.no_do', 'retur_penjualans.komplain', 'retur_penjualans.tanggal_retur', 'retur_penjualans.status'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
 
-    if ($req->ajax()) {
-        // Define column mappings
-        $columns = [
-            0 => 'no_retur',
-            1 => 'tanggal_retur',
-            2 => 'customer_id',
-            3 => 'supplier_id',
-            4 => 'status',
-        ];
-
-        // Get the column name from the index
-        $columnIndex = $req->input('order.0.column');
-        $columnName = $columns[$columnIndex] ?? 'no_retur'; // Default column if index is not mapped
-
-        $totalRecords = $query->count();
+                $q->orWhereHas('supplier', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('customer', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+            });
+        }
         
-        $data = $query->orderByDesc('id')
-                    ->skip($req->input('start'))
-                    ->take($req->input('length'))
-                    ->get();
+        if ($order = $req->input('order.0.column')) {
+            $columns = ['no_retur', 'no_invoice','no_do','komplain', 'tanggal_retur','status'];
+            $query->orderBy($columns[$order], $req->input('order.0.dir'));
+        }
 
-        return response()->json([
-            'draw' => intval($req->input('draw')),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data' => $data
-        ]);
+        if ($req->customer) {
+            $query->where('customer_id', $req->input('customer'));
+        }
+        if ($req->supplier) {
+            $query->where('supplier_id', $req->input('supplier'));
+        }
+        if ($req->dateStart) {
+            $query->where('tanggal_retur', '>=', $req->input('dateStart'));
+        }
+        if ($req->dateEnd) {
+            $query->where('tanggal_retur', '<=', $req->input('dateEnd'));
+        }
+
+        if ($req->ajax()) {
+            // Define column mappings
+            $columns = [
+                0 => 'no_retur',
+                1 => 'tanggal_retur',
+                2 => 'customer_id',
+                3 => 'supplier_id',
+                4 => 'status',
+            ];
+
+            // Get the column name from the index
+            $columnIndex = $req->input('order.0.column');
+            $columnName = $columns[$columnIndex] ?? 'no_retur'; // Default column if index is not mapped
+
+            $totalRecords = $query->count();
+            
+            $data = $query->orderByDesc('id')
+                        ->skip($req->input('start'))
+                        ->take($req->input('length'))
+                        ->get();
+
+            return response()->json([
+                'draw' => intval($req->input('draw')),
+                'recordsTotal' => $totalRecords,
+                'recordsFiltered' => $totalRecords,
+                'data' => $data
+            ]);
+        }
+
+        // Load data for filters and non-AJAX view
+        $customers = Customer::orderBy('nama')->get();
+        $suppliers = Supplier::orderBy('nama')->get();
+
+        return view('returpenjualan.index', compact('customers', 'suppliers'));
     }
-
-    // Load data for filters and non-AJAX view
-    $customers = Customer::orderBy('nama')->get();
-    $suppliers = Supplier::orderBy('nama')->get();
-
-    return view('returpenjualan.index', compact('customers', 'suppliers'));
-}
 
 
 
