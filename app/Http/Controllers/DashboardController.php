@@ -305,7 +305,7 @@ class DashboardController extends Controller
                 $balance = TransaksiKas::getSaldo($req->rekening_id);
                 $balance += Rekening::find($req->rekening_id)->saldo_awal;
             }
-            return view('dashboard.dashboardpimpinan', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'jumlahpembelian', 'pemasukan', 'batalpembelian', 'returpembelian', 'pembelianbaru', 'pembelianlama', 'pengeluaran', 'rekenings', 'balance'));
+            return view('dashboard.dashboardpimpinan', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'jumlahpembelian', 'pemasukan', 'batalpembelian', 'returpembelian', 'pembelianbaru', 'pembalianlama', 'pengeluaran', 'rekenings', 'balance'));
         }else{
             if ($user->hasRole(['Purchasing'])) {
                 $lokasiId = $karyawan->lokasi->id;
