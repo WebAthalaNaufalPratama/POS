@@ -186,6 +186,9 @@
             $('#penjualanTable').DataTable().destroy();
         }
 
+        $('#filterCustomer').select();
+        $('#filterSales').select();
+
         function formatRupiah(angka, prefix = "Rp") {
             let number_string = angka.toString().replace(/[^,\d]/g, ''),
                 split = number_string.split(','),
