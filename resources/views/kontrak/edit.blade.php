@@ -60,8 +60,10 @@
                                                 <label>Status</label>
                                                 <select id="status" name="status" class="form-control" required>
                                                     <option value="TUNDA" {{ $kontraks->status == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
-                                                    {{-- <option value="DIKONFIRMASI" {{ $kontraks->status == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
-                                                    <option value="BATAL" {{ $kontraks->status == 'BATAL' ? 'selected' : '' }}>BATAL</option> --}}
+                                                    @role(['Finance', 'Auditor'])
+                                                    <option value="DIKONFIRMASI" {{ $kontraks->status == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
+                                                    <option value="BATAL" {{ $kontraks->status == 'BATAL' ? 'selected' : '' }}>BATAL</option>
+                                                    @endrole
                                                 </select>
                                             </div>
                                         </div>
