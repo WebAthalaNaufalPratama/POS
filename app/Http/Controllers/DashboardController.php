@@ -411,7 +411,7 @@ class DashboardController extends Controller
     
             $lokasis = Lokasi::all();
 
-            if($user->hasRole('Finance')){
+            if($user->hasRole('Finance', 'Pimpinan')){
                 // saldo rekening
                 $rekenings = Rekening::when($req->lokasi_id, function($q) use($req){
                     $q->where('lokasi_id', $req->lokasi_id);
