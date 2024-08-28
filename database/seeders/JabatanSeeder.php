@@ -29,6 +29,7 @@ class JabatanSeeder extends Seeder
             ['nama' => 'admin', 'deskripsi' => 'admin', 'created_at' => now(), 'updated_at' => now()],
             ['nama' => 'sales manager', 'deskripsi' => 'sales manager', 'created_at' => now(), 'updated_at' => now()],
             ['nama' => 'purchasing', 'deskripsi' => 'purchase', 'created_at' => now(), 'updated_at' => now()],
+            ['nama' => 'Pimpinan', 'deskripsi' => 'pimpinan', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

@@ -49,7 +49,7 @@ class DashboardController extends Controller
             $lokasinama = Lokasi::where('id', $lokasiId)->value('tipe_lokasi');
         }
 
-        if($lokasinama != 5 && !$user->hasRole(['Pimpinan'])) {
+        if($lokasinama != 5) {
             $startOfMonth = Carbon::now()->startOfMonth();
             $endOfMonth = Carbon::now()->endOfMonth();
     
@@ -120,192 +120,192 @@ class DashboardController extends Controller
     
             $lokasis = Lokasi::all();
             return view('dashboard.index', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama'));
-        }elseif($user->hasRole(['Pimpinan'])){
-            $startOfMonth = Carbon::now()->startOfMonth();
-            $endOfMonth = Carbon::now()->endOfMonth();
+        // }elseif($user->hasRole(['Pimpinan'])){
+        //     $startOfMonth = Carbon::now()->startOfMonth();
+        //     $endOfMonth = Carbon::now()->endOfMonth();
     
-            $jumlahpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
-                                ->whereNotNull('tanggal_dibuat')
-                                ->whereNotNull('tanggal_dibukukan')
-                                ->whereNotNull('tanggal_audit')
-                                ->whereNotNull('dibuat_id')
-                                ->whereNotNull('dibukukan_id')
-                                ->whereNotNull('auditor_id')
-                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '>=', $startOfMonth)
-                                            ->orWhere('created_at', '<=', $endOfMonth);
-                                })
-                                ->count();
-            $batalpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIBATALKAN')
-                                ->whereNotNull('tanggal_dibuat')
-                                ->whereNotNull('dibuat_id')
-                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '>=', $startOfMonth)
-                                            ->orWhere('created_at', '<=', $endOfMonth);
-                                })
-                                ->count();
-            $returpenjualan = ReturPenjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
-                                ->whereNotNull('tanggal_pembuat')
-                                ->whereNotNull('pembuat')
-                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '>=', $startOfMonth)
-                                            ->orWhere('created_at', '<=', $endOfMonth);
-                                })
-                                ->count();
+        //     $jumlahpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
+        //                         ->whereNotNull('tanggal_dibuat')
+        //                         ->whereNotNull('tanggal_dibukukan')
+        //                         ->whereNotNull('tanggal_audit')
+        //                         ->whereNotNull('dibuat_id')
+        //                         ->whereNotNull('dibukukan_id')
+        //                         ->whereNotNull('auditor_id')
+        //                         ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                             $query->where('created_at', '>=', $startOfMonth)
+        //                                     ->orWhere('created_at', '<=', $endOfMonth);
+        //                         })
+        //                         ->count();
+        //     $batalpenjualan = Penjualan::where('lokasi_id', $lokasiId)->where('status', 'DIBATALKAN')
+        //                         ->whereNotNull('tanggal_dibuat')
+        //                         ->whereNotNull('dibuat_id')
+        //                         ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                             $query->where('created_at', '>=', $startOfMonth)
+        //                                     ->orWhere('created_at', '<=', $endOfMonth);
+        //                         })
+        //                         ->count();
+        //     $returpenjualan = ReturPenjualan::where('lokasi_id', $lokasiId)->where('status', 'DIKONFIRMASI')
+        //                         ->whereNotNull('tanggal_pembuat')
+        //                         ->whereNotNull('pembuat')
+        //                         ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                             $query->where('created_at', '>=', $startOfMonth)
+        //                                     ->orWhere('created_at', '<=', $endOfMonth);
+        //                         })
+        //                         ->count();
         
-            $customerslama = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
-                $query->where('tanggal_bergabung', '<', $startOfMonth)
-                        ->orWhere('tanggal_bergabung', '>', $endOfMonth);
-            })->get();
-            $customersbaru = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
-                $query->where('tanggal_bergabung', '>=', $startOfMonth)
-                        ->orWhere('tanggal_bergabung', '<=', $endOfMonth);
-            })->get();
-            $arrcustomerbaru = $customersbaru->pluck('id')->toArray();
-            $arrcustomerlama = $customerslama->pluck('id')->toArray();
-            $penjualanlama = Penjualan::whereIn('id_customer',$arrcustomerlama)->where('lokasi_id', $lokasiId)
-                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                $query->where('created_at', '>=', $startOfMonth)
-                                        ->orWhere('created_at', '<=', $endOfMonth);
-                            })->count();
-            $penjualanbaru = Penjualan::whereIn('id_customer',$arrcustomerbaru)->where('lokasi_id', $lokasiId)
-                            ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                $query->where('created_at', '>=', $startOfMonth)
-                                        ->orWhere('created_at', '<=', $endOfMonth);
-                            })->count();
-            $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
-            $penjualanIds = $penjualanList->pluck('id');
-            $prefixes = ['BYR', 'BOT'];
-            $pembayaranList = Pembayaran::where(function ($query) use ($prefixes) {
-                foreach ($prefixes as $prefix) {
-                    $query->orWhere('no_invoice_bayar', 'LIKE', $prefix . '%');
-                }
-            })->get();
+        //     $customerslama = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //         $query->where('tanggal_bergabung', '<', $startOfMonth)
+        //                 ->orWhere('tanggal_bergabung', '>', $endOfMonth);
+        //     })->get();
+        //     $customersbaru = Customer::where('lokasi_id', $karyawan->lokasi_id)->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //         $query->where('tanggal_bergabung', '>=', $startOfMonth)
+        //                 ->orWhere('tanggal_bergabung', '<=', $endOfMonth);
+        //     })->get();
+        //     $arrcustomerbaru = $customersbaru->pluck('id')->toArray();
+        //     $arrcustomerlama = $customerslama->pluck('id')->toArray();
+        //     $penjualanlama = Penjualan::whereIn('id_customer',$arrcustomerlama)->where('lokasi_id', $lokasiId)
+        //                     ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                         $query->where('created_at', '>=', $startOfMonth)
+        //                                 ->orWhere('created_at', '<=', $endOfMonth);
+        //                     })->count();
+        //     $penjualanbaru = Penjualan::whereIn('id_customer',$arrcustomerbaru)->where('lokasi_id', $lokasiId)
+        //                     ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                         $query->where('created_at', '>=', $startOfMonth)
+        //                                 ->orWhere('created_at', '<=', $endOfMonth);
+        //                     })->count();
+        //     $penjualanList = Penjualan::where('lokasi_id', $lokasiId)->get();
+        //     $penjualanIds = $penjualanList->pluck('id');
+        //     $prefixes = ['BYR', 'BOT'];
+        //     $pembayaranList = Pembayaran::where(function ($query) use ($prefixes) {
+        //         foreach ($prefixes as $prefix) {
+        //             $query->orWhere('no_invoice_bayar', 'LIKE', $prefix . '%');
+        //         }
+        //     })->get();
 
     
-            $pemasukan = 0;
-            foreach ($pembayaranList as $pembayaran) {
-                $nominal = $pembayaran->nominal;
-                $pemasukan += $nominal;
-            }
+        //     $pemasukan = 0;
+        //     foreach ($pembayaranList as $pembayaran) {
+        //         $nominal = $pembayaran->nominal;
+        //         $pemasukan += $nominal;
+        //     }
     
-            $lokasis = Lokasi::all();
+        //     $lokasis = Lokasi::all();
 
 
-            if ($user->hasRole(['Purchasing'])) {
-                $lokasiId = $karyawan->lokasi->id;
-            } else {
-                $lokasiId = $req->query('lokasi_id');
-            }
+        //     if ($user->hasRole(['Purchasing'])) {
+        //         $lokasiId = $karyawan->lokasi->id;
+        //     } else {
+        //         $lokasiId = $req->query('lokasi_id');
+        //     }
 
-            $startOfMonth = Carbon::now()->startOfMonth();
-            $endOfMonth = Carbon::now()->endOfMonth();
+        //     $startOfMonth = Carbon::now()->startOfMonth();
+        //     $endOfMonth = Carbon::now()->endOfMonth();
     
-            $jumlahpembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
-                                ->where('status_diperiksa', 'DIKONFIRMASI')
-                                ->whereNotNull('tgl_dibuat')
-                                ->whereNotNull('tgl_diperiksa')
-                                ->whereNotNull('pembuat')
-                                ->whereNotNull('pemeriksa')
-                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '>=', $startOfMonth)
-                                            ->orWhere('created_at', '<=', $endOfMonth);
-                                })
-                                ->count();
-            $batalpembelian = Pembelian::where('status_dibuat', 'BATAL')
-                                ->whereNotNull('tgl_dibuat')
-                                ->whereNotNull('pembuat')
-                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '>=', $startOfMonth)
-                                            ->orWhere('created_at', '<=', $endOfMonth);
-                                })
-                                ->count();
-            $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
-                    ->where('status_diperiksa', 'DIKONFIRMASI')
-                    ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                        $query->where('created_at', '>=', $startOfMonth)
-                                ->orWhere('created_at', '<=', $endOfMonth);
-                    })->get();
-            $arrpembelian = $pembelian->pluck('id')->toArray();
-            $invoicepo = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
-            $arrinvoicepo = $invoicepo->pluck('id')->toArray();
-            $returpembelian = Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
-                                ->where('status_dibuku', 'DIKONFIRMASI')
-                                ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                                    $query->where('created_at', '>=', $startOfMonth)
-                                            ->orWhere('created_at', '<=', $endOfMonth);
-                                })
-                                ->count();
+        //     $jumlahpembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+        //                         ->where('status_diperiksa', 'DIKONFIRMASI')
+        //                         ->whereNotNull('tgl_dibuat')
+        //                         ->whereNotNull('tgl_diperiksa')
+        //                         ->whereNotNull('pembuat')
+        //                         ->whereNotNull('pemeriksa')
+        //                         ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                             $query->where('created_at', '>=', $startOfMonth)
+        //                                     ->orWhere('created_at', '<=', $endOfMonth);
+        //                         })
+        //                         ->count();
+        //     $batalpembelian = Pembelian::where('status_dibuat', 'BATAL')
+        //                         ->whereNotNull('tgl_dibuat')
+        //                         ->whereNotNull('pembuat')
+        //                         ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                             $query->where('created_at', '>=', $startOfMonth)
+        //                                     ->orWhere('created_at', '<=', $endOfMonth);
+        //                         })
+        //                         ->count();
+        //     $pembelian = Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+        //             ->where('status_diperiksa', 'DIKONFIRMASI')
+        //             ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                 $query->where('created_at', '>=', $startOfMonth)
+        //                         ->orWhere('created_at', '<=', $endOfMonth);
+        //             })->get();
+        //     $arrpembelian = $pembelian->pluck('id')->toArray();
+        //     $invoicepo = Invoicepo::whereIn('pembelian_id', $arrpembelian)->get();
+        //     $arrinvoicepo = $invoicepo->pluck('id')->toArray();
+        //     $returpembelian = Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
+        //                         ->where('status_dibuku', 'DIKONFIRMASI')
+        //                         ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                             $query->where('created_at', '>=', $startOfMonth)
+        //                                     ->orWhere('created_at', '<=', $endOfMonth);
+        //                         })
+        //                         ->count();
         
-            $barangmasuk = Produkbeli::whereIn('pembelian_id', $arrpembelian)->get();
-            $hitungmasuk = 0;
-            foreach($barangmasuk as $masuk) {
-                $brgmasuk = $masuk->jml_diterima;
-                $hitungmasuk += $brgmasuk;
-            }
+        //     $barangmasuk = Produkbeli::whereIn('pembelian_id', $arrpembelian)->get();
+        //     $hitungmasuk = 0;
+        //     foreach($barangmasuk as $masuk) {
+        //         $brgmasuk = $masuk->jml_diterima;
+        //         $hitungmasuk += $brgmasuk;
+        //     }
 
-            $pembalianlama = $hitungmasuk;
+        //     $pembalianlama = $hitungmasuk;
                                                             
-            $returpem = Returinden::where('status_dibuat', 'DIKONFIRMASI')
-                    ->where('status_dibukukan', 'DIKONFIRMASI')
-                    ->whereNotNull('tgl_dibuat')
-                    ->whereNotNull('tgl_dibukukan')
-                    ->whereNotNull('pembuat_id')
-                    ->whereNotNull('pembuku_id')
-                    ->where(function($query) use ($startOfMonth, $endOfMonth) {
-                        $query->where('created_at', '>=', $startOfMonth)
-                                ->orWhere('created_at', '<=', $endOfMonth);
-                    })->get();
+        //     $returpem = Returinden::where('status_dibuat', 'DIKONFIRMASI')
+        //             ->where('status_dibukukan', 'DIKONFIRMASI')
+        //             ->whereNotNull('tgl_dibuat')
+        //             ->whereNotNull('tgl_dibukukan')
+        //             ->whereNotNull('pembuat_id')
+        //             ->whereNotNull('pembuku_id')
+        //             ->where(function($query) use ($startOfMonth, $endOfMonth) {
+        //                 $query->where('created_at', '>=', $startOfMonth)
+        //                         ->orWhere('created_at', '<=', $endOfMonth);
+        //             })->get();
             
-            $arrreturpem = $returpem->pluck('id')->toArray();
-            $produkretur = ProdukReturInden::where('returinden_id', $arrreturpem)->get();
-            $arrprodukmutasi = $produkretur->pluck('produk_mutasi_inden_id')->toArray();
-            $produkmutasi = ProdukMutasiInden::whereIn('id',$arrprodukmutasi)->get();
-            $hitungkeluar = 0;
-            foreach($produkmutasi as $keluar) {
-                $brgkeluar = $keluar->jml_diterima;
-                $hitungkeluar += $brgkeluar;
-            }
+        //     $arrreturpem = $returpem->pluck('id')->toArray();
+        //     $produkretur = ProdukReturInden::where('returinden_id', $arrreturpem)->get();
+        //     $arrprodukmutasi = $produkretur->pluck('produk_mutasi_inden_id')->toArray();
+        //     $produkmutasi = ProdukMutasiInden::whereIn('id',$arrprodukmutasi)->get();
+        //     $hitungkeluar = 0;
+        //     foreach($produkmutasi as $keluar) {
+        //         $brgkeluar = $keluar->jml_diterima;
+        //         $hitungkeluar += $brgkeluar;
+        //     }
 
-            $pembelianbaru = $hitungmasuk;
+        //     $pembelianbaru = $hitungmasuk;
 
 
-            $pembayaranList = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BYMI%')
-                            ->orwhere('no_invoice_bayar', 'LIKE', 'BYPO%')                
-                            ->get();
-            $pengeluaranList = Pembayaran::where('no_invoice_bayar', 'LIKE', 'RefundInden%')
-                            ->orwhere('no_invoice_bayar', 'LIKE', 'Refundpo%')                
-                            ->get();
+        //     $pembayaranList = Pembayaran::where('no_invoice_bayar', 'LIKE', 'BYMI%')
+        //                     ->orwhere('no_invoice_bayar', 'LIKE', 'BYPO%')                
+        //                     ->get();
+        //     $pengeluaranList = Pembayaran::where('no_invoice_bayar', 'LIKE', 'RefundInden%')
+        //                     ->orwhere('no_invoice_bayar', 'LIKE', 'Refundpo%')                
+        //                     ->get();
     
-            $pemasukan = 0;
-            foreach ($pembayaranList as $pembayaran) {
-                $nominal = $pembayaran->nominal;
-                $pemasukan += $nominal;
-            }
+        //     $pemasukan = 0;
+        //     foreach ($pembayaranList as $pembayaran) {
+        //         $nominal = $pembayaran->nominal;
+        //         $pemasukan += $nominal;
+        //     }
 
-            $pembayaranList = Returpembelian::whereIn('invoicepo_id', $arrpembelian)
-                        ->where('komplain', 'LIKE', 'Refund')
-                        ->get();
+        //     $pembayaranList = Returpembelian::whereIn('invoicepo_id', $arrpembelian)
+        //                 ->where('komplain', 'LIKE', 'Refund')
+        //                 ->get();
     
-            $pengeluaran = 0;
-            foreach ($pengeluaranList as $pembayaran) {
-                $nominal = $pembayaran->nominal;
-                $pengeluaran += $nominal;
-            }
+        //     $pengeluaran = 0;
+        //     foreach ($pengeluaranList as $pembayaran) {
+        //         $nominal = $pembayaran->nominal;
+        //         $pengeluaran += $nominal;
+        //     }
     
-            $lokasis = Lokasi::all();
+        //     $lokasis = Lokasi::all();
 
-            // saldo rekening
-            $rekenings = Rekening::when($req->lokasi_id, function($q) use($req){
-                $q->where('lokasi_id', $req->lokasi_id);
-            })->get();
+        //     // saldo rekening
+        //     $rekenings = Rekening::when($req->lokasi_id, function($q) use($req){
+        //         $q->where('lokasi_id', $req->lokasi_id);
+        //     })->get();
             
-            $balance = 0;
-            if($req->rekening_id){
-                $balance = TransaksiKas::getSaldo($req->rekening_id);
-                $balance += Rekening::find($req->rekening_id)->saldo_awal;
-            }
-            return view('dashboard.dashboardpimpinan', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'jumlahpembelian', 'pemasukan', 'batalpembelian', 'returpembelian', 'pembelianbaru', 'pembalianlama', 'pengeluaran', 'rekenings', 'balance'));
+        //     $balance = 0;
+        //     if($req->rekening_id){
+        //         $balance = TransaksiKas::getSaldo($req->rekening_id);
+        //         $balance += Rekening::find($req->rekening_id)->saldo_awal;
+        //     }
+        //     return view('dashboard.dashboardpimpinan', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'jumlahpembelian', 'pemasukan', 'batalpembelian', 'returpembelian', 'pembelianbaru', 'pembalianlama', 'pengeluaran', 'rekenings', 'balance'));
         }else{
             if ($user->hasRole(['Purchasing'])) {
                 $lokasiId = $karyawan->lokasi->id;
@@ -411,7 +411,7 @@ class DashboardController extends Controller
     
             $lokasis = Lokasi::all();
 
-            if($user->hasRole('Finance')){
+            if($user->hasRole(['Finance', 'Pimpinan'])){
                 // saldo rekening
                 $rekenings = Rekening::when($req->lokasi_id, function($q) use($req){
                     $q->where('lokasi_id', $req->lokasi_id);
@@ -424,8 +424,10 @@ class DashboardController extends Controller
                 }
                 return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran', 'rekenings', 'balance'));
             }
-
-            return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
+            if(!$user->hasRole(['Pimpinan'])) {
+                return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
+            }
+           
         }
         
     }

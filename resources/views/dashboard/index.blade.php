@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="row">
-    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
         <div class="col-lg-6 col-sm-12 col-12 d-flex justify-content-start align-items-center">
             <div class="dash-widget">
                 <div class="dash-widgetimg">
@@ -149,7 +149,7 @@
 
 @section('scripts')
 <script>
-    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
         $('#locationSelect').on('change', function() {
             var locationId = $(this).val();
             window.location.href = '{{ url("dashboard") }}' + '?lokasi_id=' + locationId;
@@ -229,7 +229,7 @@
         var locationId = $('#locationSelect').val();
 
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getTopSales') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
             url: '{{ route('getTopSales') }}',
@@ -301,7 +301,7 @@
         var locationId = $('#locationSelect').val();
 
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getTopMinusProduk') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
             url: '{{ route('getTopMinusProduk') }}',
@@ -372,7 +372,7 @@
 
         // Fetch data for Top Products Chart
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getTopProduk') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
             url: '{{ route('getTopProduk') }}',
@@ -473,7 +473,7 @@
         donut.render();
 
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getLoyalty') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
             url: '{{ route('getLoyalty') }}',
