@@ -402,7 +402,7 @@
                   @endphp
                   @if($user->hasRole(['Auditor', 'SuperAdmin', 'Finance']))
                   <div class="form-group">
-                      <select id="lokasi_id" name="lokasi_id" class="form-control p-1" readonly required>
+                      <select id="lokasi_id" name="lokasi_id" class="form-control p-1 audit" readonly required>
                           <option value="">Pilih Lokasi</option>
                           @foreach ($lokasis as $lokasi)
                           <option value="{{ $lokasi->id }}" data-tipe="{{ $lokasi->tipe_lokasi }}" {{ $lokasi->id == ($karyawan->lokasi_id ?? '') ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
@@ -614,6 +614,8 @@
     <script type="text/javascript">
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         var userPermissions = @json($thisUserPermissions);
+        
+        $('.audit').select2();
 
         function formatNumber(value) {
           return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
