@@ -19,7 +19,7 @@
                             </select>
                         </div>
                         <div class="col-6">
-                            @if($user->hasRole(['Finance', 'Pimpinan']))
+                            @if(Auth::user()->hasRole(['Finance', 'Pimpinan']))
                             <select id="rekeningSelect" class="custom-select">
                                 <option value="">--Rekening--</option>
                                 @foreach($rekenings as $rekening)
@@ -101,7 +101,7 @@
             </div>
         </div>
     </div>
-    @role('Purchasing')
+    @if(Auth::user()->hasRole(['Purchasing', 'Pimpinan']))
     <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-pemasukan">
             <div class="dash-counts">
@@ -124,8 +124,8 @@
             </div>
         </div>
     </div>
-    @endrole
-    @if($user->hasRole(['Finance', 'Pimpinan']))
+    @endif
+    @if(Auth::user()->hasRole(['Finance', 'Pimpinan']))
     <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-penjualan-retur">
             <div class="dash-counts">
@@ -184,7 +184,7 @@
             </div>
         </div>
     </div>
-    @if($user->hasRole(['Finance', 'Pimpinan']))
+    @if(Auth::user()->hasRole(['Finance', 'Pimpinan']))
     {{-- Uang Keluar --}}
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
