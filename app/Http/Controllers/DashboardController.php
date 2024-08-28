@@ -424,8 +424,10 @@ class DashboardController extends Controller
                 }
                 return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran', 'rekenings', 'balance'));
             }
-
-            return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
+            if(!$user->hasRole(['Pimpinan'])) {
+                return view('dashboard.index_purchase', compact('lokasis', 'jumlahpenjualan', 'pemasukan', 'batalpenjualan', 'returpenjualan', 'penjualanbaru', 'penjualanlama', 'pengeluaran'));
+            }
+           
         }
         
     }
