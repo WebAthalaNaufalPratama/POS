@@ -377,7 +377,7 @@
                         <li>
                             <a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order 
                                 @if($hitungpenjualan > 0)
-                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$c }}</span>
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungpenjualan }}</span>
                                 @endif
                             </a>
                         </li>
