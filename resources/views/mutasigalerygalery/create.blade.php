@@ -403,6 +403,8 @@
 
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     $(document).ready(function() {
+        $('#pengirim').select2();
+        $('#penerima').select2();
         var i = 1;
         $('#add').click(function() {
             var newRow = `<tr class="tr_clone" id="row${i}">

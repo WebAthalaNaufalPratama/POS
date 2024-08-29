@@ -269,7 +269,8 @@
                 }
             });
         });
-
+        $('#pengirim').select2();
+        $('#penerima').select2();
         var i = 1;
         $('#add').click(function() {
             var newRow = `<tr id="row${i}">

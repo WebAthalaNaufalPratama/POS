@@ -418,6 +418,8 @@
 <script>
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function() {
+            $('#pengirim').select2();
+            $('#penerima').select2();
             function fetchProducts(tipeLokasi, rowId, selectedProdukId = null, selectedKondisiId = null) {
 
             $.ajax({
