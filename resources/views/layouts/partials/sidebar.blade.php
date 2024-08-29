@@ -105,13 +105,19 @@
                     if($user->hasRole('AdminGallery')) {
                         $totalKontrak += \App\Models\Kontrak::where('lokasi_id', $user->karyawans->lokasi_id)->whereStatus('TUNDA')->count();
                         $totalDOSewa += \App\Models\DeliveryOrder::where('jenis_do', 'SEWA')
-                                    ->whereHas('kontrak', fn($query) => $query->where('lokasi_id', $user->karyawans->lokasi_id))
+                                    ->whereHas('kontrak', function ($query) use ($user) {
+                                        $query->where('lokasi_id', $user->karyawans->lokasi_id);
+                                    })
                                     ->whereStatus('TUNDA')
                                     ->count();
-                        $totalKembaliSewa += \App\Models\KembaliSewa::whereHas('sewa', fn($query) => $query->where('lokasi_id', $user->karyawans->lokasi_id))
+                        $totalKembaliSewa += \App\Models\KembaliSewa::whereHas('sewa', function ($query) use ($user) {
+                                        $query->where('lokasi_id', $user->karyawans->lokasi_id);
+                                    })
                                     ->whereStatus('TUNDA')
                                     ->count();
-                        $totalInvoiceSewa += \App\Models\InvoiceSewa::whereHas('kontrak', fn($query) => $query->where('lokasi_id', $user->karyawans->lokasi_id))
+                        $totalInvoiceSewa += \App\Models\InvoiceSewa::whereHas('kontrak', function ($query) use ($user) {
+                                        $query->where('lokasi_id', $user->karyawans->lokasi_id);
+                                    })
                                     ->whereStatus('TUNDA')
                                     ->count();
                     } else if($user->hasRole('Finance')) {
@@ -156,20 +162,32 @@
                     } else if($user->hasRole('Auditor')) {
                         $totalPO += \App\Models\Pembelian::where('status_dibuat', 'DIKONFIRMASI')
                                             ->where('status_diterima', 'DIKONFIRMASI')
-                                            ->where(fn($query) => $query->whereNull('status_diperiksa')->orWhere('status_diperiksa', 'TUNDA'))
+                                            ->where(function ($query) {
+                                                $query->whereNull('status_diperiksa')
+                                                    ->orWhere('status_diperiksa', 'TUNDA');
+                                            })
                                             ->count() 
                                             + 
                                             \App\Models\Poinden::where('status_dibuat', 'DIKONFIRMASI')
-                                            ->where(fn($query) => $query->whereNull('status_diperiksa')->orWhere('status_diperiksa', 'TUNDA'))
+                                            ->where(function ($query) {
+                                                $query->whereNull('status_diperiksa')
+                                                    ->orWhere('status_diperiksa', 'TUNDA');
+                                            })
                                             ->count();
                         // $totalInvoicePembelian += \App\Models\Invoicepo::where('status_dibuat', 'DIKONFIRMASI')->where('status_diperiksa', 'TUNDA')->count();
                         // $totalReturPembelian += \App\Models\Returpembelian::where('status_dibuat', 'DIKONFIRMASI')->where('status_diperiksa', 'TUNDA')->count() + \App\Models\Returinden::where('status_dibuat', 'DIKONFIRMASI')->where('status_diperiksa', 'TUNDA')->count();
                     } else if($user->hasRole('Finance')) {
                         $totalInvoicePembelian += \App\Models\Invoicepo::where('status_dibuat', 'DIKONFIRMASI')
-                                            ->where(fn($query) => $query->where('status_dibuku', 'TUNDA')->orWhere('status_dibuku', 'MENUNGGU PEMBAYARAN'))
+                                            ->where(function ($query) {
+                                                $query->where('status_dibuku', 'TUNDA')
+                                                    ->orWhere('status_dibuku', 'MENUNGGU PEMBAYARAN');
+                                            })
                                             ->count();
                         $totalReturPembelian += \App\Models\Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
-                                            ->where(fn($query) => $query->where('status_dibuku', 'TUNDA')->orWhere('status_dibuku', 'MENUNGGU PEMBAYARAN'))
+                                            ->where(function ($query) {
+                                                $query->where('status_dibuku', 'TUNDA')
+                                                    ->orWhere('status_dibuku', 'MENUNGGU PEMBAYARAN');
+                                            })
                                             ->count() 
                                             + 
                                             \App\Models\Returinden::where('status_dibuat', 'DIKONFIRMASI')
@@ -178,7 +196,10 @@
                     } else if($user->hasRole('AdminGallery')) {
                         $totalPO += \App\Models\Pembelian::where('lokasi_id', $user->karyawans->lokasi_id)
                                             ->where('status_dibuat', 'DIKONFIRMASI')
-                                            ->where(fn($query) => $query->whereNull('status_diterima')->orWhere('status_diterima', 'TUNDA'))
+                                            ->where(function ($query) {
+                                                $query->whereNull('status_diterima')
+                                                    ->orWhere('status_diterima', 'TUNDA');
+                                            })
                                             ->count();
                     }
                     $totalPembelian = ($totalPO + $totalInvoicePembelian + $totalReturPembelian) ?? 0;
