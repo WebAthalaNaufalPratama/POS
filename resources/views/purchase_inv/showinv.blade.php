@@ -169,7 +169,7 @@ Carbon::setLocale('id');
                                         <a href="{{ route('pembelian.show', ['type' => 'pembelian', 'datapo' => $poretur->id]) }}"  class="btn btn-primary" target="_blank">Lihat PO retur</a>
                                     @endif
 
-                                            @if($retur->komplain == "Refund" && $retur->sisa != 0)
+                                            @if($retur->komplain == "Refund" && $retur->sisa != 0 && $retur->status_dibuku == "DIKONFIRMASI")
                                                 @if(Auth::user()->hasRole('Finance'))
                                                 <a href="{{ route('returbeli.show', ['retur_id' => $retur->id]) }}" class="btn btn-primary" target="_blank">Input Refund</a>
                                                  @endif

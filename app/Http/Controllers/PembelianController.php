@@ -2900,6 +2900,9 @@ class PembelianController extends Controller
                     $getretur->pembuku = Auth::user()->id;
                     $getretur->status_dibuku = $data['status_dibuku'];
                     $getretur->tgl_dibuku = $data['tgl_dibuku'];
+                    if ($request->status_dibuku == "BATAL") {
+                        $getretur->status_dibuat = "BATAL";
+                    }
                     $check = $getretur->update();
                 }
 
