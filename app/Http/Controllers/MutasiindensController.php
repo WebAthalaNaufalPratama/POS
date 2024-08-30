@@ -729,13 +729,19 @@ class MutasiindensController extends Controller
                 //     $mutasi->update();  // Memanggil update() pada objek model Mutasiindens
             // }
 
+            $uniqueProdukMutasiIndenIds = [];
 
-            // Loop melalui data produk dan masukkan ke tabel Produkreturinden
             foreach ($validated['produk_mutasi_inden_id'] as $index => $produk_mutasi_inden_id) {
-
-            // Log::info("Memasukkan produk returing: index={$index}, produk_mutasi_inden_id={$produk_mutasi_inden_id}");
-                
-            $check = Produkreturinden::create([
+                // Pengecekan apakah produk_mutasi_inden_id sudah ada dalam array uniqueProdukMutasiIndenIds
+                if (in_array($produk_mutasi_inden_id, $uniqueProdukMutasiIndenIds)) {
+                    throw new \Exception('Produk tidak boleh ada yang sama');
+                }
+            
+                // Tambahkan produk_mutasi_inden_id ke dalam array uniqueProdukMutasiIndenIds
+                $uniqueProdukMutasiIndenIds[] = $produk_mutasi_inden_id;
+            
+                // Proses penyimpanan ke dalam tabel Produkreturinden
+                $check = Produkreturinden::create([
                     'returinden_id' => $returinden->id,
                     'produk_mutasi_inden_id' => $produk_mutasi_inden_id,
                     'alasan' => $validated['alasan'][$index],
@@ -743,6 +749,25 @@ class MutasiindensController extends Controller
                     'harga_satuan' => $validated['harga_satuan'][$index],
                     'totalharga' => $validated['totalharga'][$index],
                 ]);
+            
+                if (!$check) {
+                    throw new \Exception('Gagal menyimpan data produk retur inden.');
+                }
+            }
+
+            // Loop melalui data produk dan masukkan ke tabel Produkreturinden
+            // foreach ($validated['produk_mutasi_inden_id'] as $index => $produk_mutasi_inden_id) {
+
+            // Log::info("Memasukkan produk returing: index={$index}, produk_mutasi_inden_id={$produk_mutasi_inden_id}");
+                
+            // $check = Produkreturinden::create([
+            //         'returinden_id' => $returinden->id,
+            //         'produk_mutasi_inden_id' => $produk_mutasi_inden_id,
+            //         'alasan' => $validated['alasan'][$index],
+            //         'jml_diretur' => $validated['jml_diretur'][$index],
+            //         'harga_satuan' => $validated['harga_satuan'][$index],
+            //         'totalharga' => $validated['totalharga'][$index],
+            //     ]);
 
                 //pengurangan dilakukan setelah acc finance
 
@@ -783,7 +808,7 @@ class MutasiindensController extends Controller
                     //         }
                 // }
 
-        }
+        // }
 
             // Commit transaksi jika tidak ada error
             DB::commit();

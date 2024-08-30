@@ -1271,20 +1271,50 @@ class PembelianController extends Controller
             if (!$save) {
                 throw new \Exception('Gagal menyimpan data retur pembelian.');
             }
+
+            $uniqueProdukIds = [];
+
+            // for ($i = 0; $i < count($data['nama_produk']); $i++) {
+            //     $produkReturBeli = [
+            //         'returpembelian_id' => $save->id,
+            //         'produkbeli_id' => $data['nama_produk'][$i],
+            //         'alasan' => $data['alasan'][$i],
+            //         'jumlah' => $data['jumlah'][$i],
+            //         'harga' => $data['harga_satuan'][$i],
+            //         'diskon' => $data['diskon'][$i] ?? 0,
+            //         'totharga' => $data['harga_total'][$i]
+            //     ];
     
+            //     $produk_retur = Produkretur::create($produkReturBeli);
+    
+            //     if (!$produk_retur) {
+            //         throw new \Exception('Gagal menyimpan data produk retur.');
+            //     }
+            // }
+
             for ($i = 0; $i < count($data['nama_produk']); $i++) {
+                $produkbeliId = $data['nama_produk'][$i];
+        
+                // Pengecekan apakah produkbeli_id sudah ada dalam array uniqueProdukIds
+                if (in_array($produkbeliId, $uniqueProdukIds)) {
+                    throw new \Exception('Produk tidak boleh ada yang sama.');
+                }
+        
+                // Tambahkan produkbeliId ke dalam array uniqueProdukIds
+                $uniqueProdukIds[] = $produkbeliId;
+        
                 $produkReturBeli = [
                     'returpembelian_id' => $save->id,
-                    'produkbeli_id' => $data['nama_produk'][$i],
+                    'produkbeli_id' => $produkbeliId,
                     'alasan' => $data['alasan'][$i],
                     'jumlah' => $data['jumlah'][$i],
                     'harga' => $data['harga_satuan'][$i],
                     'diskon' => $data['diskon'][$i] ?? 0,
                     'totharga' => $data['harga_total'][$i]
                 ];
-    
+        
                 $produk_retur = Produkretur::create($produkReturBeli);
-    
+        
                 if (!$produk_retur) {
                     throw new \Exception('Gagal menyimpan data produk retur.');
                 }
@@ -2904,7 +2934,7 @@ class PembelianController extends Controller
                     if ($request->status_dibuku == "BATAL") {
                         $getretur->status_dibuat = "BATAL";
                     }
-                    
+
                     $check = $getretur->update();
                 }
 
@@ -3025,7 +3055,7 @@ class PembelianController extends Controller
                         if($request->status_dibuku == "DIKONFIRMASI"){
 
                             $getProdukBeli = Produkbeli::where('id', $request->nama_produk[$i])->first();
-                            if($jenis == 'Retur' || 'Refund'){
+                            if($jenis == 'Retur' || $jenis == 'Refund'){
                                 if ($getProdukBeli->pembelian->lokasi->tipe_lokasi == 1 ) {
                                     $getInven = InventoryGallery::where('kode_produk', $getProdukBeli->produk->kode)->where('lokasi_id', $getProdukBeli->pembelian->lokasi_id)->where('kondisi_id', $getProdukBeli->kondisi_id)->first();
                                     $getInven->jumlah -=  $request->jumlah[$i];
@@ -3039,7 +3069,7 @@ class PembelianController extends Controller
                                     $getInven->jumlah -=  $request->jumlah[$i];
                                     $getInven->update();
                                 }
-                            } 
+                            }
 
                             $totalharga = ($getProdukBeli->jml_diterima - $request->jumlah[$i]) * ($getProdukBeli->harga - $getProdukBeli->diskon);
                             $updateproduk = [
