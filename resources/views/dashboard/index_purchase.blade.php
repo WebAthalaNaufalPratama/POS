@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="row">
-    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
         <div class="col-lg-6 col-sm-12 col-12 d-flex justify-content-start align-items-center">
             <div class="dash-widget">
                 <div class="dash-widgetimg">
@@ -19,14 +19,14 @@
                             </select>
                         </div>
                         <div class="col-6">
-                            @role('Finance')
+                            @if(Auth::user()->hasRole(['Finance', 'Pimpinan']))
                             <select id="rekeningSelect" class="custom-select">
                                 <option value="">--Rekening--</option>
                                 @foreach($rekenings as $rekening)
                                     <option value="{{ $rekening->id }}" {{ request('rekening_id') == $rekening->id ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
                                 @endforeach
                             </select>
-                            @endrole
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
             </div>
         </div>
     </div>
-    @role('Purchasing')
+    @if(Auth::user()->hasRole(['Purchasing', 'Pimpinan']))
     <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-pemasukan">
             <div class="dash-counts">
@@ -124,8 +124,8 @@
             </div>
         </div>
     </div>
-    @endrole
-    @role('Finance')
+    @endif
+    @if(Auth::user()->hasRole(['Finance', 'Pimpinan']))
     <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center mb-4">
         <div class="dash-count dash-penjualan-retur">
             <div class="dash-counts">
@@ -148,7 +148,7 @@
             </div>
         </div>
     </div>
-    @endrole
+    @endif
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
             <div class="card-header">
@@ -184,7 +184,7 @@
             </div>
         </div>
     </div>
-    @role('Finance')
+    @if(Auth::user()->hasRole(['Finance', 'Pimpinan']))
     {{-- Uang Keluar --}}
     <div class="col-lg-6 col-sm-12 col-12 d-flex">
         <div class="card col-lg-12 col-sm-12 col-12 d-flex">
@@ -208,13 +208,13 @@
             </div>
         </div>
     </div>
-    @endrole
+    @endif
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
         $(document).ready(function() {
             // Handle change event for locationSelect
             $('#locationSelect').on('change', function() {
@@ -384,7 +384,7 @@
         var locationId = $('#locationSelect').val();
 
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getTopSales') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
             url: '{{ route('getTopSales') }}',
@@ -459,7 +459,7 @@
         // console.log(dateInden);
 
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getTopMinusProduk') }}' + (locationId ? '?lokasi_id=' + locationId : '') +'&'+ (InvenId ? 'inven=' + InvenId : '') +'&'+ (dateInden ? 'dateInden=' + dateInden : ''),
             @else
             url: '{{ route('getTopMinusProduk') }}' + (InvenId ? '?inven=' + InvenId : '') +'&'+ (dateInden ? 'dateInden=' + dateInden : ''),
@@ -529,7 +529,7 @@
 
         // Fetch data for Top Products Chart
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getTopProduk') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
             url: '{{ route('getTopProduk') }}',
@@ -630,7 +630,7 @@
         donut.render();
 
         $.ajax({
-            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+            @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
             url: '{{ route('getLoyalty') }}' + (locationId ? '?lokasi_id=' + locationId : ''),
             @else
             url: '{{ route('getLoyalty') }}',
@@ -651,7 +651,7 @@
             }
         });
     }
-    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance']))
+    @if(Auth::user()->hasRole(['SuperAdmin', 'Auditor', 'Finance', 'Pimpinan']))
         if ($('#uang_keluar_chart').length > 0) {
             var uang_keluarChart = {
                 chart: {

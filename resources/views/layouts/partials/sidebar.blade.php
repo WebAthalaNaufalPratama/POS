@@ -90,11 +90,119 @@
                         $hitungmutasigag = 0;
                     }
 
+                    $totalmutasi = 0;
                     if($user->hasRole(['KasirOutlet']) || $user->hasRole(['Finance', 'Auditor', 'SuperAdmin']) && $lokasi->lokasi->tipe_lokasi == 2) {
                         $totalmutasi = $hitungmutasiog + $hitungmutasigo;
                     }else if($user->hasRole(['AdminGallery', 'KasirGallery', 'Purchasing', 'SuperAdmin']) || $user->hasRole(['Finance', 'Auditor']) && $lokasi->lokasi->tipe_lokasi == 1) {
                         $totalmutasi = $hitungmutasiog + $hitungmutasigo + $hitungmutasigag + $hitungmutasigg;
                     }
+
+                    // sewa
+                    $totalKontrak = 0;
+                    $totalDOSewa = 0;
+                    $totalKembaliSewa = 0;
+                    $totalInvoiceSewa = 0;
+                    if($user->hasRole('AdminGallery')) {
+                        $totalKontrak += \App\Models\Kontrak::where('lokasi_id', $user->karyawans->lokasi_id)->whereStatus('TUNDA')->count();
+                        $totalDOSewa += \App\Models\DeliveryOrder::where('jenis_do', 'SEWA')
+                                    ->whereHas('kontrak', function ($query) use ($user) {
+                                        $query->where('lokasi_id', $user->karyawans->lokasi_id);
+                                    })
+                                    ->whereStatus('TUNDA')
+                                    ->count();
+                        $totalKembaliSewa += \App\Models\KembaliSewa::whereHas('sewa', function ($query) use ($user) {
+                                        $query->where('lokasi_id', $user->karyawans->lokasi_id);
+                                    })
+                                    ->whereStatus('TUNDA')
+                                    ->count();
+                        $totalInvoiceSewa += \App\Models\InvoiceSewa::whereHas('kontrak', function ($query) use ($user) {
+                                        $query->where('lokasi_id', $user->karyawans->lokasi_id);
+                                    })
+                                    ->whereStatus('TUNDA')
+                                    ->count();
+                    } else if($user->hasRole('Finance')) {
+                        $totalKontrak += \App\Models\Kontrak::whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_pemeriksa')
+                                    ->count();
+                        $totalDOSewa += \App\Models\DeliveryOrder::where('jenis_do', 'SEWA')
+                                    ->whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_pemeriksa')
+                                    ->count();
+                        $totalKembaliSewa += \App\Models\KembaliSewa::whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_pemeriksa')
+                                    ->count();
+                        $totalInvoiceSewa += \App\Models\InvoiceSewa::whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_pemeriksa')
+                                    ->count();
+                    } else if($user->hasRole('Auditor')) {
+                        $totalKontrak += \App\Models\Kontrak::whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_penyetuju')
+                                    ->count();
+                        $totalDOSewa += \App\Models\DeliveryOrder::where('jenis_do', 'SEWA')
+                                    ->whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_penyetuju')
+                                    ->count();
+                        $totalKembaliSewa += \App\Models\KembaliSewa::whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_penyetuju')
+                                    ->count();
+                        $totalInvoiceSewa += \App\Models\InvoiceSewa::whereStatus('DIKONFIRMASI')
+                                    ->whereNull('tanggal_penyetuju')
+                                    ->count();
+                    }
+                    $totalSewa = ($totalKontrak + $totalDOSewa + $totalKembaliSewa + $totalInvoiceSewa) ?? 0;
+
+                    // pembelian
+                    $totalPO = 0;
+                    $totalInvoicePembelian = 0;
+                    $totalReturPembelian = 0;
+                    if($user->hasRole('Purchasing')) {
+                        $totalPO += \App\Models\Pembelian::where('status_dibuat', 'TUNDA')->count() + \App\Models\Poinden::where('status_dibuat', 'TUNDA')->count();
+                        $totalInvoicePembelian += \App\Models\Invoicepo::where('status_dibuat', 'TUNDA')->count();
+                        $totalReturPembelian += \App\Models\Returpembelian::where('status_dibuat', 'TUNDA')->count() + \App\Models\Returinden::where('status_dibuat', 'TUNDA')->count();
+                    } else if($user->hasRole('Auditor')) {
+                        $totalPO += \App\Models\Pembelian::where('status_dibuat', 'DIKONFIRMASI')
+                                            ->where('status_diterima', 'DIKONFIRMASI')
+                                            ->where(function ($query) {
+                                                $query->whereNull('status_diperiksa')
+                                                    ->orWhere('status_diperiksa', 'TUNDA');
+                                            })
+                                            ->count() 
+                                            + 
+                                            \App\Models\Poinden::where('status_dibuat', 'DIKONFIRMASI')
+                                            ->where(function ($query) {
+                                                $query->whereNull('status_diperiksa')
+                                                    ->orWhere('status_diperiksa', 'TUNDA');
+                                            })
+                                            ->count();
+                        // $totalInvoicePembelian += \App\Models\Invoicepo::where('status_dibuat', 'DIKONFIRMASI')->where('status_diperiksa', 'TUNDA')->count();
+                        // $totalReturPembelian += \App\Models\Returpembelian::where('status_dibuat', 'DIKONFIRMASI')->where('status_diperiksa', 'TUNDA')->count() + \App\Models\Returinden::where('status_dibuat', 'DIKONFIRMASI')->where('status_diperiksa', 'TUNDA')->count();
+                    } else if($user->hasRole('Finance')) {
+                        $totalInvoicePembelian += \App\Models\Invoicepo::where('status_dibuat', 'DIKONFIRMASI')
+                                            ->where(function ($query) {
+                                                $query->where('status_dibuku', 'TUNDA')
+                                                    ->orWhere('status_dibuku', 'MENUNGGU PEMBAYARAN');
+                                            })
+                                            ->count();
+                        $totalReturPembelian += \App\Models\Returpembelian::where('status_dibuat', 'DIKONFIRMASI')
+                                            ->where(function ($query) {
+                                                $query->where('status_dibuku', 'TUNDA')
+                                                    ->orWhere('status_dibuku', 'MENUNGGU PEMBAYARAN');
+                                            })
+                                            ->count() 
+                                            + 
+                                            \App\Models\Returinden::where('status_dibuat', 'DIKONFIRMASI')
+                                            ->where('status_dibukukan', 'TUNDA')
+                                            ->count();
+                    } else if($user->hasRole('AdminGallery')) {
+                        $totalPO += \App\Models\Pembelian::where('lokasi_id', $user->karyawans->lokasi_id)
+                                            ->where('status_dibuat', 'DIKONFIRMASI')
+                                            ->where(function ($query) {
+                                                $query->whereNull('status_diterima')
+                                                    ->orWhere('status_diterima', 'TUNDA');
+                                            })
+                                            ->count();
+                    }
+                    $totalPembelian = ($totalPO + $totalInvoicePembelian + $totalReturPembelian) ?? 0;
                     
                 @endphp
                 <li class="active">
@@ -195,27 +303,70 @@
                 @endif
                 @if(in_array('kontrak.index', $rolePermissions))
                 <li class="submenu">
-                    <a href="javascript:void(0);"><i data-feather="file-text"></i><span> Sewa</span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><i data-feather="file-text"></i>
+                        <span> Sewa 
+                            @if($totalSewa > 0)
+                            <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalSewa ?? 0 }}</span>
+                            @endif
+                        </span> 
+                        <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('kontrak.index') }}" class="{{ request()->is('kontrak*') ? 'active' : '' }}">Kontrak</a></li>
+                        <li>
+                            <a href="{{ route('kontrak.index') }}" class="{{ request()->is('kontrak*') ? 'active' : '' }}">Kontrak
+                                @if($totalKontrak > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalKontrak ?? 0 }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li>
                             <a href="{{ route('form.index', ['jenis_rangkaian' => 'Sewa']) }}"
                             class="{{ request()->is('form') && request()->query('jenis_rangkaian') == 'Sewa' ? 'active' : '' }}">
                                 Perangkai
                             </a>
                         </li>
-                        <li><a href="{{ route('do_sewa.index') }}" class="{{ request()->is('do_sewa*') ? 'active' : '' }}">Delivery Order</a></li>
-                        <li><a href="{{ route('kembali_sewa.index') }}" class="{{ request()->is('kembali_sewa*') ? 'active' : '' }}">Barang Kembali</a></li>
-                        <li><a href="{{ route('invoice_sewa.index') }}" class="{{ request()->is('invoice_sewa*') ? 'active' : '' }}">Invoice</a></li>
+                        <li>
+                            <a href="{{ route('do_sewa.index') }}" class="{{ request()->is('do_sewa*') ? 'active' : '' }}">Delivery Order
+                                @if($totalDOSewa > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalDOSewa ?? 0 }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('kembali_sewa.index') }}" class="{{ request()->is('kembali_sewa*') ? 'active' : '' }}">Barang Kembali
+                                @if($totalKembaliSewa > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalKembaliSewa ?? 0 }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('invoice_sewa.index') }}" class="{{ request()->is('invoice_sewa*') ? 'active' : '' }}">Invoice
+                                @if($totalInvoiceSewa > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalInvoiceSewa ?? 0 }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li><a href="{{ route('pembayaran_sewa.index') }}" class="{{ request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
                     </ul>
                 </li>
                 @endif
                 <li class="submenu">
                     @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi == 1)
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Galery <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljual }}</span></span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img">
+                        <span> Penjualan Galery 
+                            @if($totaljual > 0)
+                            <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totaljual }}</span>
+                            @endif
+                        </span> 
+                        <span class="menu-arrow"></span>
+                    </a>
                     <ul>
-                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualan }}</span></a></li>
+                        <li>
+                            <a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice 
+                                @if($hitungpenjualan > 0)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungpenjualan }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li>
                             <a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}"
                             class="{{ request()->is('formpenjualan') && request()->query('jenis_rangkaian') == 'Penjualan' ? 'active' : '' }}">
@@ -223,34 +374,90 @@
                             </a>
                         </li>
                         <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
-                        <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order <span class="badge rounded-pill bg-danger ms-auto">{{$dopenjualan }}</span></a></li>
-                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur <span class="badge rounded-pill bg-danger ms-auto">{{$returpenjualan}}</span></a></li>
+                        <li>
+                            <a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order 
+                                @if($hitungpenjualan > 0)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungpenjualan }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur 
+                                @if($returpenjualan > 0)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$returpenjualan}}</span>
+                                @endif
+                            </a>
+                        </li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
                     @if(in_array('penjualan.index', $rolePermissions) && $lokasi->lokasi->tipe_lokasi == 2)
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img"><span> Penjualan Outlet <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totaljualoutlet }}</span></span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/product.svg" alt="img">
+                        <span> Penjualan Outlet 
+                            @if($totaljualoutlet > 0)
+                            <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totaljualoutlet }}</span>
+                            @endif
+                        </span> 
+                        <span class="menu-arrow"></span>
+                    </a>
                     <ul>
-                        <li><a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice <span class="badge rounded-pill bg-danger ms-auto">{{$hitungpenjualanoutlet}}</span></a></li>
+                        <li>
+                            <a href="{{ route('penjualan.index') }}" class="{{ request()->is('penjualan*') ? 'active' : '' }}">Invoice 
+                                @if($hitungpenjualanoutlet)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungpenjualanoutlet}}</span>
+                                @endif
+                            </a>
+                        </li>
                         <!-- <li><a href="{{ route('formpenjualan.index', ['jenis_rangkaian' => 'Penjualan']) }}" class="{{ request()->is('formpenjualan*') ? 'active' : '' }}">Perangkai</a></li> -->
                         <li><a href="{{ route('pembayaran.index') }}" class="{{ request()->is('pembayaran*') && !request()->is('pembayaran_sewa*') ? 'active' : '' }}">Pembayaran</a></li>
                         <!-- <li><a href="{{ route('dopenjualan.index') }}" class="{{ request()->is('dopenjualan*') ? 'active' : '' }}">Delivery Order</a></li> -->
-                        <li><a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur <span class="badge rounded-pill bg-danger ms-auto">{{$returpenjualanoutlet}}</span></a></li>
+                        <li>
+                            <a href="{{ route('returpenjualan.index') }}" class="{{ request()->is('retur*') ? 'active' : '' }}">Retur 
+                                @if($returpenjualanoutlet > 0)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$returpenjualanoutlet}}</span>
+                                @endif
+                            </a>
+                        </li>
                         <!-- <li><a href="{{ route('gift.index') }}" class="{{ request()->is('gift*') ? 'active' : '' }}">Gift</a></li> -->
                     </ul>
                     @endif
                 </li>
                 @if(in_array('pembelian.index', $rolePermissions))
                 <li class="submenu">
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/dollar-square.svg" alt="img"><span> Pembelian</span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/dollar-square.svg" alt="img">
+                        <span>Pembelian 
+                            @if($totalPembelian > 0)
+                            <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalPembelian }}</span>
+                            @endif
+                        </span> 
+                        <span class="menu-arrow"></span>
+                    </a>
                     <ul>
                         
-                        <li><a href="{{ route('pembelian.index') }}" class="{{ request()->is('purchase/pembelian*') ? 'active' : '' }}">Purchase Order</a></li>
+                        <li>
+                            <a href="{{ route('pembelian.index') }}" class="{{ request()->is('purchase/pembelian*') ? 'active' : '' }}">Purchase Order 
+                                @if($totalPO > 0)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalPO }}</span>
+                                @endif
+                            </a>
+                        </li>
                         @if(in_array('invoicebeli.index', $rolePermissions))
-                        <li><a href="{{ route('invoicebeli.index') }}" class="{{ request()->is('purchase/invoice*') ? 'active' : '' }}">Invoice Pembelian</a></li>
+                        <li>
+                            <a href="{{ route('invoicebeli.index') }}" class="{{ request()->is('purchase/invoice*') ? 'active' : '' }}">Invoice Pembelian 
+                                @if($totalInvoicePembelian > 0)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalInvoicePembelian }}</span>
+                                @endif
+                            </a>
+                        </li>
                         @endif
                         @if(in_array('returbeli.index', $rolePermissions))
-                        <li><a href="{{ route('returbeli.index') }}" class="{{ request()->is('purchase/retur*') ? 'active' : '' }}">Retur Pembelian</a></li>
+                        <li>
+                            <a href="{{ route('returbeli.index') }}" class="{{ request()->is('purchase/retur*') ? 'active' : '' }}">Retur Pembelian 
+                                @if($totalReturPembelian > 0)
+                                <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalReturPembelian }}</span>
+                                @endif
+                            </a>
+                        </li>
                         @endif
                         @if(in_array('pembayaranbeli.index', $rolePermissions))
                         <li><a href="{{ route('pembayaranbeli.index') }}" class="{{ request()->is('purchase/pembayaran*') ? 'active' : '' }}">Pembayaran Pembelian</a></li>
@@ -260,10 +467,23 @@
                 @endif
                 <li class="submenu">
 
-                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img"><span> Mutasi <span class="badge rounded-pill bg-danger ms-auto text-white">{{$totalmutasi ?? 0 }}</span></span> <span class="menu-arrow"></span></a>
+                    <a href="javascript:void(0);"><img src="/assets/img/icons/quotation1.svg" alt="img">
+                        <span> Mutasi 
+                            @if($totalmutasi > 0)
+                            <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$totalmutasi ?? 0 }}</span>
+                            @endif
+                        </span> 
+                        <span class="menu-arrow"></span>
+                    </a>
                     <ul>
                         @if(in_array('mutasigalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasigo}}</span></a></li>
+                            <li>
+                                <a href="{{ route('mutasigalery.index') }}" class="{{ request()->is('mutasiGO*')  ? 'active' : '' }}">Mutasi Galery ke Outlet 
+                                    @if($hitungmutasigo > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungmutasigo}}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
                         @if(in_array('formpenjualan.index', $rolePermissions) && isset($lokasi->lokasi->tipe_lokasi) && $lokasi->lokasi->tipe_lokasi != 2)
                         <li>
@@ -274,13 +494,31 @@
                         </li>
                         @endif
                         @if(in_array('mutasioutlet.index', $rolePermissions))
-                            <li><a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasiog}}</span></a></li>
+                            <li>
+                                <a href="{{ route('mutasioutlet.index') }}" class="{{ request()->is('mutasiOG*') ? 'active' : '' }}">Mutasi Outlet ke Galery 
+                                    @if($hitungmutasiog > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungmutasiog}}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
                         @if(in_array('mutasighgalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH/Pusat <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasigg}}</span></a></li>
+                            <li>
+                                <a href="{{ route('mutasighgalery.index') }}" class="{{ request()->is('mutasiGG*') ? 'active' : '' }}">Mutasi GH/Pusat 
+                                    @if($hitungmutasigg > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungmutasigg}}</span>
+                                    @endif
+                                </a>
+                            </li>
                         @endif
                         @if(in_array('mutasigalerygalery.index', $rolePermissions))
-                            <li><a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery <span class="badge rounded-pill bg-danger ms-auto">{{$hitungmutasigag}}</span></a></li>
+                            <li>
+                                <a href="{{ route('mutasigalerygalery.index') }}" class="{{ request()->is('mutasiGAG*') ? 'active' : '' }}">Mutasi Galery ke Galery 
+                                    @if($hitungmutasigag > 0)
+                                    <span class="badge rounded-pill bg-danger ms-auto text-white" style="font-size: 0.75rem; padding: 0.2em 0.4em;">{{$hitungmutasigag}}</span>
+                                    @endif
+                                </a>
+                            </li>
                             {{-- <li><a href="#" class="">Mutasi Inden ke GH</a></li>
                             <li><a href="#" class="">Mutasi Inden Ke Galery</a></li>
                             <li><a href="#" class="">Mutasi Galery Ke Inden</a></li> --}}

@@ -100,10 +100,19 @@
         @php
             $previousNoDo = '';
             $no = 1;
+            $totalcount = 0;
         @endphp
         @foreach ($combinedData as $data)
             @php
+                $totalKomponenCount = 0;
                 $produkCount = count($data['produk_jual']);
+                // dump($data['produk_jual']);
+                $firstProdukJual = reset($data['produk_jual']); 
+                $firstProdukKey = key($data['produk_jual']);
+                $isGFTInFirstProdukJual = substr($firstProdukKey, 0, 3) === 'GFT'; 
+                foreach ($data['produk_jual'] as $produkJual) {
+                    $totalKomponenCount += count($produkJual['komponen']);
+                }
             @endphp
             @foreach ($data['produk_jual'] as $produkJual)
                 @php
@@ -113,12 +122,26 @@
                     @if($loop->first)
                         <tr>
                             @if($data['no_mutasi'] != $previousNoDo)
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $no++ }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['no_mutasi'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['lokasi_pengirim'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['lokasi_penerima'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['tanggal_pengiriman'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['tanggal_diterima'] }}</td>
+                            @php
+                                $rowspanValue = substr($data['no_mutasi'], 0, 3) != 'MOG' 
+                                    ? $produkCount 
+                                    : $totalKomponenCount;
+                            @endphp
+                                @if(substr($data['no_mutasi'], 0, 3) != 'MOG')
+                                    <td rowspan="{{ $produkCount }}">{{ $no++ }}</td>
+                                    <td rowspan="{{ $produkCount }}">{{ $data['no_mutasi'] }}</td>
+                                    <td rowspan="{{ $produkCount }}">{{ $data['lokasi_pengirim'] }}</td>
+                                    <td rowspan="{{ $produkCount }}">{{ $data['lokasi_penerima'] }}</td>
+                                    <td rowspan="{{ $produkCount }}">{{ $data['tanggal_pengiriman'] }}</td>
+                                    <td rowspan="{{ $produkCount }}">{{ $data['tanggal_diterima'] }}</td>
+                                @else
+                                    <td rowspan="{{ $rowspanValue }}">{{ $no++ }}</td>
+                                    <td rowspan="{{ $rowspanValue }}">{{ $data['no_mutasi'] }}</td>
+                                    <td rowspan="{{ $rowspanValue }}">{{ $data['lokasi_pengirim'] }}</td>
+                                    <td rowspan="{{ $rowspanValue }}">{{ $data['lokasi_penerima'] }}</td>
+                                    <td rowspan="{{ $rowspanValue }}">{{ $data['tanggal_pengiriman'] }}</td>
+                                    <td rowspan="{{ $rowspanValue }}">{{ $data['tanggal_diterima'] }}</td>
+                                @endif
                             @endif
                             <td>
                                 @if(substr($data['no_mutasi'], 0, 3) != 'MGO')
@@ -128,7 +151,11 @@
                                 @endif
                             </td>
                             <td>
-                                {{ $produkJual['jumlahprodukjual'] }}
+                                @if(substr($data['no_mutasi'], 0, 3) == 'MOG')
+                                    {{ $produkJual['jumlahprodukjual'] * $komponen['jumlah'] }}
+                                @else
+                                    {{ $produkJual['jumlahprodukjual'] }}
+                                @endif
                             </td>
                             <td>
                                 @if(substr($data['no_mutasi'], 0, 3) != 'MGO')
@@ -138,24 +165,54 @@
                                 @endif
                             </td>
                             <td>
+                            @if(substr($data['no_mutasi'], 0, 3) == 'MOG')
+                                {{ $produkJual['jumlah_diterima'] * $komponen['jumlah'] }}
+                            @else
                                 {{ $produkJual['jumlah_diterima'] }}
+                            @endif
                             </td>
                             <td>
                                 @if(substr($data['no_mutasi'], 0, 3) != 'MGO')
-                                    {{ $komponen['kondisi_diterima']->nama }}
+                                    {{ $komponen['kondisi_diterima']->nama ?? '-' }}
                                 @else
                                     Tidak Ada Kondisi
                                 @endif
                             </td>
                             @if($data['no_mutasi'] != $previousNoDo)
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ number_format($data['biaya_pengiriman'], 0, ',', '.') }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ $data['rekening'] }}</td>
-                                <td rowspan="{{ $produkCount * $komponenCount }}">{{ number_format($data['total_biaya'], 0, ',', '.') }}</td>
+                            @if(substr($data['no_mutasi'], 0, 3) != 'MOG')
+                                <td rowspan="{{ $produkCount }}">{{ $data['biaya_pengiriman'] }}</td>
+                                <td rowspan="{{ $produkCount }}">{{ $data['rekening'] }}</td>
+                                <td rowspan="{{ $produkCount }}">{{ $data['total_biaya'] }}</td>
+                            @else
+                                <td rowspan="{{ $rowspanValue }}">{{ $data['biaya_pengiriman'] }}</td>
+                                <td rowspan="{{ $rowspanValue }}">{{ $data['rekening'] }}</td>
+                                <td rowspan="{{ $rowspanValue }}">{{ $data['total_biaya']}}</td>
+                            @endif
                             @endif
                             @php
                                 $previousNoDo = $data['no_mutasi'];
                             @endphp
                         </tr>
+                    @else
+                        @if(substr($data['no_mutasi'], 0, 3) == 'MOG')
+                            @if($isGFTInFirstProdukJual)   
+                                <tr>
+                                    <td>{{ $komponen['nama_produk'] }}</td>
+                                    <td>{{ $produkJual['jumlahprodukjual'] * $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisi'] }}</td>
+                                    <td>{{ $produkJual['jumlah_diterima'] * $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisi_diterima']->nama ?? '-' }}</td>
+                                </tr>
+                            @else
+                                <tr>
+                                    <td>{{ $komponen['nama_produk'] }}</td>
+                                    <td>{{ $produkJual['jumlahprodukjual'] * $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisi'] }}</td>
+                                    <td>{{ $produkJual['jumlah_diterima'] * $komponen['jumlah'] }}</td>
+                                    <td>{{ $komponen['kondisi_diterima']->nama ?? '-' }}</td>
+                                </tr>
+                            @endif
+                        @endif
                     @endif
                 @endforeach
             @endforeach

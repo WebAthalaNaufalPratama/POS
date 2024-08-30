@@ -117,11 +117,21 @@
                                 </td>
                                 <td>
                                     <table>
+                                    @if(substr($data['no_mutasi'], 0, 3) == 'MOG')
+                                    @foreach ($data['produk_jual'] as $index => $produkJual)
+                                        @foreach ($produkJual['komponen'] as $komponenIndex => $komponen)
+                                        <tr>
+                                            <td>{{ $produkJual['jumlahprodukjual'] * $komponen['jumlah'] }}</td>
+                                        </tr>
+                                        @endforeach
+                                    @endforeach
+                                    @else
                                         @foreach ($data['produk_jual'] as $index => $produkJual)
                                         <tr>
                                             <td>{{ $produkJual['jumlahprodukjual'] }}</td>
                                         </tr>
                                         @endforeach
+                                    @endif
                                     </table>
                                 </td>
                                 <td>
@@ -143,11 +153,21 @@
                                 </td>
                                 <td>
                                     <table>
+                                    @if(substr($data['no_mutasi'], 0, 3) == 'MOG')
+                                        @foreach ($data['produk_jual'] as $index => $produkJual)
+                                            @foreach ($produkJual['komponen'] as $komponenIndex => $komponen)
+                                            <tr>
+                                                <td>{{ $produkJual['jumlah_diterima'] * $komponen['jumlah'] }}</td>
+                                            </tr>
+                                            @endforeach
+                                        @endforeach
+                                    @else
                                         @foreach ($data['produk_jual'] as $index => $produkJual)
                                         <tr>
                                             <td>{{ $produkJual['jumlah_diterima'] }}</td>
                                         </tr>
                                         @endforeach
+                                    @endif
                                     </table>
                                 </td>
                                 <td>

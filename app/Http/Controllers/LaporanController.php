@@ -5760,6 +5760,7 @@ class LaporanController extends Controller
             }
         }
         // dd($combinedData);
+
         $pdf = Pdf::loadView('laporan.mutasi_pdf', compact('combinedData'))->setPaper('a4', 'portrait');
         return $pdf->stream('mutasi.pdf');
     }
