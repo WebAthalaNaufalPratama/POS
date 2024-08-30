@@ -632,6 +632,13 @@ class PembelianController extends Controller
         if (Auth::user()->hasRole('Finance')) {
             $query->where('status_dibuat', 'DIKONFIRMASI');
         }
+        if (Auth::user()->hasRole('AdminGallery')) {
+            $query->whereHas('invoice', function($r) use ($req) {
+                $r->whereHas('pembelian', function($q) use ($req) {
+                    $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+                });
+            });
+        }
 
         if ($req->gallery) {
             $query->whereHas('invoice', function($r) use ($req) {
@@ -676,7 +683,7 @@ class PembelianController extends Controller
                 return [
                     'id' => $item->id,
                     'no_retur' => $item->no_retur,
-                    'tgl_retur' => isset($tglRetur) ? $tglRetur->format('Y-m-d') : 'N/A',
+                    'tgl_retur' => isset($tglRetur) ? tanggalindo($tglRetur) : 'N/A',
                     'supplier_name' => $item->invoice->pembelian->supplier->nama ?? 'N/A',
                     'lokasi_name' => $item->invoice->pembelian->lokasi->nama ?? 'N/A',
                     'produk' => $namaproduk,
@@ -2966,6 +2973,10 @@ class PembelianController extends Controller
                 $data['ongkir'] = $request->biaya_pengiriman ?? 0;
                 }elseif($request->komplain == "Diskon"){
                 $data['ongkir'] = 0;
+                }
+
+                if($request->status_dibuat == "BATAL"){
+                    $data['status_dibuku'] = "BATAL";
                 }
 
                 // $data['total'] = $request->total_harga;

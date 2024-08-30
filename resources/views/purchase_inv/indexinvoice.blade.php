@@ -519,7 +519,7 @@ $user = Auth::user();
                             `;
                         }
                     } else if (row.userRole == 'Finance') {
-                        if (!row.invoiceRetur || (row.invoiceRetur && row.invoiceRetur.status_dibuku == "DIKONFIRMASI")) {
+                        if (!row.invoiceRetur || (row.invoiceRetur && row.invoiceRetur.status_dibuku == "DIKONFIRMASI") || (row.invoiceRetur && row.invoiceRetur.status_dibuku == "BATAL") ) {
                             if (row.status_dibuku == "MENUNGGU PEMBAYARAN") {
                                 actionsHtml += `
                                     <li>

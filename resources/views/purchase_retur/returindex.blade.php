@@ -225,8 +225,11 @@
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
                                 break;
-                            default:
+                            case 'BATAL':
                                 badgeClass = 'bg-lightgrey';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightred';
                                 break;
                         }
                         
@@ -244,6 +247,9 @@
                                 break;
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
+                                break;
+                            case 'BATAL':
+                                badgeClass = 'bg-lightgrey';
                                 break;
                             default:
                                 badgeClass = 'bg-lightred';
@@ -302,6 +308,14 @@
                         }
 
                         if (userRoles.includes('Auditor')) {
+                            dropdownHtml += `
+                                <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur
+                                </a>`;
+                     
+                        }
+                        
+                        if (userRoles.includes('AdminGallery')) {
                             dropdownHtml += `
                                 <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
                                     <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur
