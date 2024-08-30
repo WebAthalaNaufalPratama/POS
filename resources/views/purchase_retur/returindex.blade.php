@@ -41,6 +41,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>No Retur</th>
+                                <th>No PO</th>
                                 <th>Tanggal</th>
                                 <th>Suplier</th>
                                 <th>Lokasi</th>
@@ -205,6 +206,7 @@
             columns: [
                 { data: 'id', name: 'id' },
                 { data: 'no_retur', name: 'no_retur' },
+                { data: 'no_po', name: 'no_po' },
                 { data: 'tgl_retur', name: 'tgl_retur' },
                 { data: 'supplier_name', name: 'supplier_name' },
                 { data: 'lokasi_name', name: 'lokasi_name' },
@@ -314,7 +316,7 @@
                                 </a>`;
                      
                         }
-                        
+
                         if (userRoles.includes('AdminGallery')) {
                             dropdownHtml += `
                                 <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">

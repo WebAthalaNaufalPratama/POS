@@ -683,6 +683,7 @@ class PembelianController extends Controller
                 return [
                     'id' => $item->id,
                     'no_retur' => $item->no_retur,
+                    'no_po' => $item->invoice->pembelian->no_po,
                     'tgl_retur' => isset($tglRetur) ? tanggalindo($tglRetur) : 'N/A',
                     'supplier_name' => $item->invoice->pembelian->supplier->nama ?? 'N/A',
                     'lokasi_name' => $item->invoice->pembelian->lokasi->nama ?? 'N/A',
@@ -2899,6 +2900,9 @@ class PembelianController extends Controller
                     $getretur->pembuku = Auth::user()->id;
                     $getretur->status_dibuku = $data['status_dibuku'];
                     $getretur->tgl_dibuku = $data['tgl_dibuku'];
+                    if ($request->status_dibuku == "BATAL") {
+                        $getretur->status_dibuat = "BATAL";
+                    }
                     $check = $getretur->update();
                 }
 

@@ -509,7 +509,7 @@ $user = Auth::user();
                         if ((!row.invoiceRetur && row.status_dibuku == "MENUNGGU PEMBAYARAN") ||
                             (row.invoiceRetur && (row.invoiceRetur.status_dibuat == "BATAL" || row.invoiceRetur.status_dibuku == "BATAL") &&
                             row.status_dibuku == "MENUNGGU PEMBAYARAN") ||
-                            (row.invoiceRetur && row.invoiceRetur.sisa == 0 && row.status_dibuku == "MENUNGGU PEMBAYARAN" && row.invoiceRetur.status_dibuat != "BATAL")) {
+                            (row.invoiceRetur && row.invoiceRetur.sisa == 0 && row.status_dibuku == "MENUNGGU PEMBAYARAN" && row.invoiceRetur.status_dibuku != "BATAL")) {
                             actionsHtml += `
                                 <li>
                                     <a href="invoice/${row.pembelian_id}/edit?type=pembelian&id=${row.id}" class="dropdown-item">
@@ -670,7 +670,7 @@ $user = Auth::user();
                                     </li>`;
                         }
 
-                        if (row.sisa !== 0 && row.status_dibuku === 'MENUNGGU PEMBAYARAN') {
+                        if (row.sisa != 0 && row.status_dibuku === 'MENUNGGU PEMBAYARAN') {
                             html += `<li>
                                         <a href="invoice/${row.poinden_id}/edit?type=poinden&id=${row.id}" class="dropdown-item">
                                             <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Pembayaran Invoice
@@ -681,7 +681,7 @@ $user = Auth::user();
                         if (row.sisa === 0) {
                             if ((!row.invoiceRetur && row.status_dibuku === 'MENUNGGU PEMBAYARAN') ||
                                 (row.invoiceRetur && (row.invoiceRetur.status_dibuat === 'BATAL' || row.invoiceRetur.status_dibuku === 'BATAL') && row.status_dibuku === 'MENUNGGU PEMBAYARAN') ||
-                                (row.invoiceRetur && row.invoiceRetur.sisa === 0 && row.status_dibuku === 'MENUNGGU PEMBAYARAN' && row.invoiceRetur.status_dibuat !== 'BATAL')) {
+                                (row.invoiceRetur && row.invoiceRetur.sisa === 0 && row.status_dibuku === 'MENUNGGU PEMBAYARAN' && row.invoiceRetur.status_dibuku !== 'BATAL')) {
                                 html += `<li>
                                             <a href="invoice/${row.poinden_id}/edit?type=poinden&id=${row.id}" class="dropdown-item">
                                                 <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Konfirmasi
