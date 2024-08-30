@@ -593,6 +593,9 @@
         if ($('#previewByr').attr('src') === '') {
             $('#previewByr').attr('src', defaultImg);
         }
+        if ($('#edit_preview').attr('src') === '') {
+                $('#edit_preview').attr('src', defaultImg);
+            }
         $('#buktiByr').on('change', function() {
             const file = $(this)[0].files[0];
             if (file.size > 2 * 1024 * 1024) { 
@@ -671,7 +674,26 @@ function formatRupiah(angka) {
         });
 
         return true;
-    });
+    });$('#edit_bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
     function editbayar(id){
         $.ajax({
             type: "GET",
@@ -714,5 +736,25 @@ function formatRupiah(angka) {
             }
         });
     }
+    $('#edit_bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
 </script>
 @endsection
