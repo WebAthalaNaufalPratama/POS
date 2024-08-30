@@ -142,7 +142,7 @@ Carbon::setLocale('id');
                             </div>
                         </div>
                         @endif
-                        @if ($retur)
+                        @if ($retur && $retur->status_dibuat !== "BATAL")
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
