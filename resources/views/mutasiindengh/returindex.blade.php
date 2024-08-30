@@ -390,7 +390,7 @@
                                     </li>`;
                             }
 
-                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && (row.sisa_refund !== 0 || row.mutasiinden.sisa_bayar !== 0)) {
+                            if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && (row.sisa_refund != 0 || row.mutasiinden.sisa_bayar != 0)) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">

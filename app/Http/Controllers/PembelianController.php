@@ -683,6 +683,7 @@ class PembelianController extends Controller
                 return [
                     'id' => $item->id,
                     'no_retur' => $item->no_retur,
+                    'no_po' => $item->invoice->pembelian->no_po,
                     'tgl_retur' => isset($tglRetur) ? tanggalindo($tglRetur) : 'N/A',
                     'supplier_name' => $item->invoice->pembelian->supplier->nama ?? 'N/A',
                     'lokasi_name' => $item->invoice->pembelian->lokasi->nama ?? 'N/A',

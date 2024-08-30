@@ -122,7 +122,7 @@ Carbon::setLocale('id');
                                 </div>
                             </div>
                         </div>
-                        @if ($retur && $retur->status_dibuat !== "BATAL")
+                        @if ($retur && $retur->status_dibuku !== "BATAL")
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
@@ -185,7 +185,7 @@ Carbon::setLocale('id');
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
                                         <div class="page-btn">
 
-                                           @if (Auth::user()->hasRole('Finance') && $inv_po->sisa !== 0)   
+                                           @if (Auth::user()->hasRole('Finance') && $inv_po->sisa != 0)   
                                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
                                                 Tambah Pembayaran
                                            </button>
@@ -326,7 +326,7 @@ Carbon::setLocale('id');
                                                     <h4>PPN
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" disabled>
                                                             <option value="">Pilih Jenis PPN</option>
-                                                            <option value="exclude" @if($inv_po->ppn !== 0) selected @endif>EXCLUDE</option>
+                                                            <option value="exclude" @if($inv_po->ppn != 0) selected @endif>EXCLUDE</option>
                                                             <option value="include" @if($inv_po->ppn == 0) selected @endif>INCLUDE</option>
                                                         </select>
                                                         
