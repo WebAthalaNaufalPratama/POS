@@ -272,7 +272,7 @@
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && ($data->status_dibukukan !== "DIKONFIRMASI" || $dataretur->status_dibukukan !== "DIKONFIRMASI" ))
                                                         <th>Aksi</th>
                                                         @endif
                                                     </tr>
@@ -312,7 +312,7 @@
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && ($data->status_dibukukan !== "DIKONFIRMASI" || $dataretur->status_dibukukan !== "DIKONFIRMASI" ))
                                                         <td class="text-center">
                                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -610,8 +610,10 @@
 
                         <div class="text-end mt-3">
                             {{-- @if($dataretur->sisa_refund == 0 && $data->sisa_bayar == 0) --}}
+                            @if(Auth::user()->hasRole('Finance') && $dataretur->status_dibukukan == "MENUNGGU PEMBAYARAN") 
+
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            {{-- @endif --}}
+                            @endif
                             <a href="{{ route('mutasiindengh.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>

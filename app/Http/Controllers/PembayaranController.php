@@ -1379,6 +1379,11 @@ class PembayaranController extends Controller
                 case 'InvoicePO':
                     $invoice_tagihan = Invoicepo::find($data['invoice_id']);
                     $invoice_tagihan->sisa = intval($invoice_tagihan->sisa) + intval($pembayaran->nominal) - intval($data['nominal']);
+                    
+                    $awalbayar = Pembayaran::where('invoice_purchase_id',$data['invoice_id'])->get();
+                    if($pembayaran->status_bayar == "Cicilan ke-1" || ($awalbayar->count() == 1 && $awalbayar->first()->status_bayar == "LUNAS")) {
+                        $invoice_tagihan->dp = intval($data['nominal']);
+                    }
 
                     if($invoice_tagihan->sisa < 0){
                         throw new \Exception('Nominal melebihi tagihan');

@@ -273,7 +273,7 @@ class MutasiindensController extends Controller
                     'supplier' => $item->supplier->nama ?? '-',
                     'penerima' => $item->lokasi->nama ?? '-',
                     'tgl_kirim' => $formattedTglKirim,
-                    'tgl_diterima' => $formattedTglDiterima,
+                    'tgl_diterima' => $item->tgl_diterima ? $formattedTglDiterima : '-',
                     'status_dibuat' => $item->status_dibuat ?? 'TUNDA',
                     'status_diterima' => $item->status_diterima,
                     'status_diperiksa' => $item->status_diperiksa,
@@ -1459,7 +1459,7 @@ class MutasiindensController extends Controller
             // Commit transaksi
             DB::commit();
 
-            return redirect(route('returbeli.show', ['retur_id' => $idretur]))->with('success', 'Data berhasil diperbarui');
+            return redirect(route('show.returinden', ['mutasiIG' => $returinden->mutasiinden_id ]))->with('success', 'Data berhasil diperbarui');
             
         } catch (\Exception $e) {
             // Rollback jika terjadi kesalahan
@@ -1684,7 +1684,7 @@ class MutasiindensController extends Controller
             // Commit transaksi jika tidak ada error
             DB::commit();
 
-            return redirect(route('returbeli.show', ['retur_id' => $idretur]))->with('success', 'Data berhasil diperbarui');
+            return redirect(route('returinden.index'))->with('success', 'Data berhasil diperbarui');
         } catch (\Exception $e) {
             // Rollback transaksi jika terjadi error
             DB::rollBack();

@@ -132,8 +132,8 @@
                                                     <th>Kode Inden</th>
                                                     <th>Kategori</th>
                                                     <th>QTY Kirim</th>
-                                                    <th>QTY Terima</th>
-                                                    <th>Kondisi</th>
+                                                    {{-- <th>QTY Terima</th>
+                                                    <th>Kondisi</th> --}}
                                                     <th>Biaya Perawatan</th>
                                                     <th>Total Biaya Perawatan</th>
                                                     <th></th>
@@ -200,7 +200,7 @@
                                                             <input type="text" class="form-control" name="kategori1[]" id="kategori1_{{ $i }}" value="{{ $produk->produk->produk->nama }}" readonly>
                                                             <input type="hidden" class="form-control" name="kode[]" id="kode_{{ $i }}" value="{{ $produk->produk->produk->kode }}" readonly></td>
                                                         <td><input type="number" name="qtykrm[]" id="qtykrm_{{ $i }}" class="form-control" value="{{ $produk->jml_dikirim ?? 0 }}" oninput="validateQty({{ $i }})" data-jumlah="{{ $produk->produk->jumlah }}" required></td>
-                                                        <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal({{ $i }})" readonly></td>
+                                                        {{-- <td><input type="number" name="qtytrm[]" id="qtytrm_{{ $i }}" class="form-control" value="{{ $produk->jml_diterima ?? 0 }}" onchange="calculateTotal({{ $i }})" readonly></td>
                                                         <td>
                                                             <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" onchange="showInputType(0)" readonly>
                                                                 <option value="">Pilih Kondisi</option>
@@ -208,7 +208,7 @@
                                                                     <option value="{{ $kondisi->id }}" {{ $kondisi->id == $produk->kondisi_id ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
                                                                 @endforeach
                                                             </select>
-                                                        </td>
+                                                        </td> --}}
                                                         <td>
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Rp. </span> 
@@ -636,17 +636,8 @@ function validateQty(index) {
             <td>
                 <input type="number" name="qtykrm[]" id="qtykrm_${i}" class="form-control" oninput="validateQty(${i})" required>
             </td>
-            <td>
-                <input type="number" name="qtytrm[]" id="qtytrm_${i}" class="form-control" onchange="calculateTotal(${i})" readonly>
-            </td>
-            <td>
-                <select id="kondisi_${i}" name="kondisi[]" class="form-control" onchange="showInputType(${i})" readonly>
-                    <option value="">Pilih Kondisi</option>
-                    @foreach ($kondisis as $kondisi)
-                        <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
-                    @endforeach
-                </select>
-            </td>
+           
+            
             <td>
                 <div class="input-group">
                     <span class="input-group-text">Rp. </span> 

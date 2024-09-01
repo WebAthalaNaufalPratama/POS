@@ -205,7 +205,7 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $inv_po->status_dibuku !== "DIKONFIRMASI")
                                                         <th>Aksi</th>
                                                         @endif
                                                     </tr>
@@ -243,7 +243,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                         </td>
                                                         <td>{{ $bayar->status_bayar}}</td>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $inv_po->status_dibuku !== "DIKONFIRMASI")
                                                         <td class="text-center">
                                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -351,7 +351,7 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
-                                                @if ($retur && $retur->komplain == 'Refund')
+                                                {{-- @if ($retur && $retur->komplain == 'Refund')
                                                 <li>
                                                     <h4>Total Tagihan barang</h4>
                                                     <h5>
@@ -361,8 +361,8 @@ Carbon::setLocale('id');
                                                         </div>    
                                                     </h5>
                                                 </li>
-                                                @endif
-                                                @if ($retur)
+                                                @endif --}}
+                                                @if ($retur && $retur->status_dibuku !== "BATAL")
                                                 <li>
                                                     <h4>Biaya Pengiriman {{ $retur->komplain }}</h4>
                                                     <h5>

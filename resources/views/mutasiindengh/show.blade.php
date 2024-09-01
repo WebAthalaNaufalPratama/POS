@@ -211,7 +211,7 @@ $user = Auth::user();
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $data->status_dibukukan !== "DIKONFIRMASI" )
                                                         <th>Aksi</th>
                                                         @endif
                                                     </tr>
@@ -251,7 +251,7 @@ $user = Auth::user();
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $data->status_dibukukan !== "DIKONFIRMASI" )
                                                         <td class="text-center">
                                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>

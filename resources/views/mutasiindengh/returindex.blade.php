@@ -389,11 +389,10 @@
                                         </a>
                                     </li>`;
                             }
-
                             if (row.status_dibuku === "MENUNGGU PEMBAYARAN" && (row.sisa_refund != 0 || row.mutasiinden.sisa_bayar != 0)) {
                                 dropdownHtml += `
                                     <li>
-                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.id)}">
+                                        <a class="dropdown-item" href="${window.routes.showRetur.replace('__ID__', row.mutasiinden.id)}">
                                             <img src="/assets/img/icons/transcation.svg" class="me-2" alt="img">Bayar
                                         </a>
                                     </li>`;

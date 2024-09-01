@@ -175,7 +175,9 @@ Carbon::setLocale('id');
                                                  @endif
                                             @elseif($retur->komplain == "Refund" && $retur->sisa == 0)
                                                 @if(Auth::user()->hasRole(['Purchasing', 'Finance']))
-                                                <span class="badges bg-lightgreen">Refund Lunas</span>
+                                                <a href="{{ route('returbeli.show', ['retur_id' => $retur->id]) }}" class="btn btn-secondary" target="_blank"> Lihat Refund Lunas</a>
+
+                                               
                                                 @endif
                                             @endif
                                     @if($retur->status_dibuku !== "DIKONFIRMASI")
@@ -255,7 +257,7 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $inv_po->status_dibuku !== "DIKONFIRMASI")
                                                         <th>Aksi</th>
                                                         @endif
                                                     </tr>
@@ -295,7 +297,7 @@ Carbon::setLocale('id');
                                             
                                                     </td>
                                                         <td>{{ $bayar->status_bayar}}</td>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $inv_po->status_dibuku !== "DIKONFIRMASI")
                                                         <td class="text-center">
                                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -407,7 +409,7 @@ Carbon::setLocale('id');
                                                     </h5>
                                                 </li>
                                                 @endif --}}
-                                                @if ($retur)
+                                                @if ($retur && $retur->status_dibuku !== "BATAL")
                                                 <li>
                                                     <h4>Biaya Pengiriman {{ $retur->komplain }}</h4>
                                                     <h5>

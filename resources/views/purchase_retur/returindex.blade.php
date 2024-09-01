@@ -213,7 +213,32 @@
                 { data: 'produk', name: 'produk' },
                 { data: 'alasan', name: 'alasan' },
                 { data: 'jumlah', name: 'jumlah' },
-                { data: 'komplain', name: 'komplain' },
+                {
+                    data: 'komplain',
+                    name: 'komplain',
+                    render: function(data, type, row) {
+                        let output = data; // komplain
+
+                        if (data === "Refund") {
+                            if (row.sisa === 0) {
+                                output += " | Lunas";
+                            } else {
+                                output += " | Belum Lunas";
+                            }
+                        }
+
+                        if (data === "Retur") {
+                            if (row.pembelianRetur) {
+                                output += " | " + row.pembelianRetur;
+                            } else {
+                                output += " | PO belum dibuat";
+                            }
+                        }
+
+                        return output;
+                    }
+                },
+
                 { data: 'subtotal', name: 'subtotal' },
                 {
                     data: 'status_dibuat',

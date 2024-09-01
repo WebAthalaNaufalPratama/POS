@@ -623,9 +623,106 @@ class PembelianController extends Controller
 
     }
 
+    // public function index_retur(Request $req)
+    // {
+    //     $query = Returpembelian::query()
+    //         ->with(['invoice.pembelian.lokasi', 'invoice.pembelian.supplier', 'produkretur.produkbeli.produk', 'invoice']) 
+    //         ->orderBy('created_at', 'desc');
+
+    //     if (Auth::user()->hasRole('Finance')) {
+    //         $query->where('status_dibuat', 'DIKONFIRMASI');
+    //     }
+    //     if (Auth::user()->hasRole('AdminGallery')) {
+    //         $query->whereHas('invoice', function($r) use ($req) {
+    //             $r->whereHas('pembelian', function($q) use ($req) {
+    //                 $q->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+    //             });
+    //         });
+    //     }
+
+    //     if ($req->gallery) {
+    //         $query->whereHas('invoice', function($r) use ($req) {
+    //             $r->whereHas('pembelian', function($q) use ($req) {
+    //                 $q->where('lokasi_id', $req->input('gallery'));
+    //             });
+    //         });
+    //     }
+
+    //     if ($req->dateStart) {
+    //         $query->where('tgl_retur', '>=', $req->input('dateStart'));
+    //     }
+    //     if ($req->dateEnd) {
+    //         $query->where('tgl_retur', '<=', $req->input('dateEnd'));
+    //     }
+
+    //     if ($req->ajax()) {
+    //         $totalRecords = $query->count();
+
+    //         $data = $query->skip($req->input('start'))
+    //                     ->take($req->input('length'))
+    //                     ->get();
+
+    //         $data = $data->map(function ($item) {
+    //             $tglRetur = $item->tgl_retur;
+    //             if (is_string($tglRetur)) {
+    //                 $tglRetur = \Carbon\Carbon::parse($tglRetur);
+    //             }
+            
+    //             $namaproduk = $item->produkretur->map(function ($produkretur) {
+    //                 return $produkretur->produkbeli->produk->nama ?? 'N/A';
+    //             })->join('<br>');
+
+    //             $alasan = $item->produkretur->map(function ($produkretur) {
+    //                 return $produkretur->alasan ?? 'N/A';
+    //             })->join('<br>');
+
+    //             $jumlah = $item->produkretur->map(function ($produkretur) {
+    //                 return $produkretur->jumlah ?? 'N/A';
+    //             })->join('<br>');
+
+    //             return [
+    //                 'id' => $item->id,
+    //                 'no_retur' => $item->no_retur,
+    //                 'no_po' => $item->invoice->pembelian->no_po,
+    //                 'tgl_retur' => isset($tglRetur) ? tanggalindo($tglRetur) : 'N/A',
+    //                 'supplier_name' => $item->invoice->pembelian->supplier->nama ?? 'N/A',
+    //                 'lokasi_name' => $item->invoice->pembelian->lokasi->nama ?? 'N/A',
+    //                 'produk' => $namaproduk,
+    //                 'alasan' => $alasan,
+    //                 'jumlah' => $jumlah,
+    //                 'komplain' => $item->komplain,
+    //                 'sisa' => $item->sisa,
+    //                 'subtotal' => formatRupiah($item->subtotal),
+    //                 'status_dibuat' => $item->status_dibuat,
+    //                 'status_dibuku' => $item->status_dibuku ?? 'TUNDA',
+    //                 'invoice' => $item->invoice,
+    //             ];
+    //         });
+
+    //         return response()->json([
+    //             'draw' => intval($req->input('draw')),
+    //             'recordsTotal' => $totalRecords,
+    //             'recordsFiltered' => $totalRecords,
+    //             'data' => $data
+    //         ]);
+    //     }
+
+    //     $gallery = Returpembelian::select('lokasis.id', 'lokasis.nama')
+    //         ->distinct()
+    //         ->join('invoicepo', 'returpembelians.invoicepo_id', '=', 'invoicepo.id')
+    //         ->join('pembelians', 'invoicepo.pembelian_id', '=', 'pembelians.id')
+    //         ->join('lokasis', 'pembelians.lokasi_id', '=', 'lokasis.id')
+    //         ->orderBy('lokasis.nama')
+    //         ->get();
+    //     $pembelian = Pembelian::all();
+    //     $datainv = Invoicepo::all();
+
+    //     return view('purchase_retur.returindex', compact('pembelian', 'datainv', 'gallery'));
+    // }
+
     public function index_retur(Request $req)
     {
-        $query = Returpembelian::query()
+        $query = Returpembelian::query() 
             ->with(['invoice.pembelian.lokasi', 'invoice.pembelian.supplier', 'produkretur.produkbeli.produk', 'invoice']) 
             ->orderBy('created_at', 'desc');
 
@@ -658,16 +755,20 @@ class PembelianController extends Controller
         if ($req->ajax()) {
             $totalRecords = $query->count();
 
+            // Mengambil data
             $data = $query->skip($req->input('start'))
                         ->take($req->input('length'))
                         ->get();
 
-            $data = $data->map(function ($item) {
+            // Mengambil data pembelian
+            $pembelian = Pembelian::all()->keyBy('no_retur');
+
+            $data = $data->map(function ($item) use ($pembelian) {
                 $tglRetur = $item->tgl_retur;
                 if (is_string($tglRetur)) {
                     $tglRetur = \Carbon\Carbon::parse($tglRetur);
                 }
-            
+
                 $namaproduk = $item->produkretur->map(function ($produkretur) {
                     return $produkretur->produkbeli->produk->nama ?? 'N/A';
                 })->join('<br>');
@@ -680,6 +781,9 @@ class PembelianController extends Controller
                     return $produkretur->jumlah ?? 'N/A';
                 })->join('<br>');
 
+                // Menambahkan data pembelianRetur
+                $pembelianRetur = $pembelian->get($item->no_retur);
+
                 return [
                     'id' => $item->id,
                     'no_retur' => $item->no_retur,
@@ -690,7 +794,9 @@ class PembelianController extends Controller
                     'produk' => $namaproduk,
                     'alasan' => $alasan,
                     'jumlah' => $jumlah,
+                    'pembelianRetur' => $pembelianRetur ? $pembelianRetur->no_po : null, // Menyediakan no_po dari pembelianRetur
                     'komplain' => $item->komplain,
+                    'sisa' => $item->sisa,
                     'subtotal' => formatRupiah($item->subtotal),
                     'status_dibuat' => $item->status_dibuat,
                     'status_dibuku' => $item->status_dibuku ?? 'TUNDA',
@@ -706,6 +812,7 @@ class PembelianController extends Controller
             ]);
         }
 
+        // Jika bukan ajax request, kembalikan view
         $gallery = Returpembelian::select('lokasis.id', 'lokasis.nama')
             ->distinct()
             ->join('invoicepo', 'returpembelians.invoicepo_id', '=', 'invoicepo.id')
@@ -713,11 +820,13 @@ class PembelianController extends Controller
             ->join('lokasis', 'pembelians.lokasi_id', '=', 'lokasis.id')
             ->orderBy('lokasis.nama')
             ->get();
+
         $pembelian = Pembelian::all();
         $datainv = Invoicepo::all();
 
         return view('purchase_retur.returindex', compact('pembelian', 'datainv', 'gallery'));
     }
+
 
 
 
@@ -2954,13 +3063,14 @@ class PembelianController extends Controller
             'tgl_retur' => 'required',
             'komplain' => 'required',
             'subtotal' => 'required',
-            // 'total_harga' => 'required',
+            // 'total_harga' => 'required', 
         ]);
 
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
 
         $data = $request->except(['_token', '_method', 'file', 'supplier_id', 'lokasi_id', 'tanggal_po', 'tanggal_invoice', 'no_po', 'no_invoice', 'kode_produk', 'nama_produk', 'alasan', 'jumlah', 'diskon', 'harga_satuan', 'harga_total', 'DataTables_Table_0_length','biaya_pengiriman','total_harga']);
+        $returpem = ReturPembelian::where('id', $retur)->first();
        
         DB::beginTransaction();
         try {
@@ -2971,7 +3081,6 @@ class PembelianController extends Controller
                 //     $filePath = $file->storeAs('bukti_retur_pembelian', $fileName, 'public');
                 //     $data['foto'] = $filePath;
                 // }
-                $returpem = ReturPembelian::where('id', $retur)->first();
 
                 if ($request->hasFile('file')) {
                     // Simpan file baru
@@ -3114,16 +3223,16 @@ class PembelianController extends Controller
                         $getInvoice->total_tagihan =  $subrefund + $getInvoice->biaya_kirim +  $getInvoice->ppn  + $getretur->ongkir;
                         $getInvoice->sisa = $getretur->ongkir;
                     
-                        try {
-                            $getretur->sisa = $subrefund;
-                            $check2 = $getretur->update();
+                        // try {
+                        //     $getretur->sisa = $subrefund;
+                        //     $check2 = $getretur->update();
                     
-                            if (!$check2) {
-                                return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur');
-                            }
-                        } catch (\Exception $e) {
-                            return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur: ' . $e->getMessage());
-                        }
+                        //     if (!$check2) {
+                        //         return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur');
+                        //     }
+                        // } catch (\Exception $e) {
+                        //     return redirect()->back()->withInput()->with('fail', 'Gagal Update Retur: ' . $e->getMessage());
+                        // }
                     
                         $check = $getInvoice->update();
                     } else {
