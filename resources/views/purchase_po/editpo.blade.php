@@ -23,15 +23,13 @@
     <div class="card">
         <div class="card-header">
             <h4 class="card-title mb-0">Transaksi Pembelian</h4>
-            @if($beli->no_retur !== null)
-            <div>
-                <label>
-                    <input type="checkbox" id="returCheckbox" checked disabled> Pembelian Retur
-                </label>
-                <div>
-                    <label for="nomerRetur">Nomor Retur:</label>
-                    <input type="text" class="form-control" id="nomerRetur" name="no_retur" value="{{ $beli->no_retur }}" style="width: 20%;" disabled>
-                </div>
+             @if($beli->no_retur !== null)
+            <label style="color: black; font-size: 16px; z-index: 1; position: relative;">
+                <input type="checkbox" id="returCheckbox" {{ $beli->no_retur ? 'checked' : '' }}> Pembelian Retur
+            </label>
+            <div id="returDropdown" style="display: {{ $beli->no_retur ? 'block' : 'none' }}; margin-top: 10px;">
+                <label for="nomerRetur">Nomor Retur:</label>
+                <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur', $beli->no_retur) }}"  placeholder="Nomor Retur" readonly>
             </div>
             @endif
         </div>

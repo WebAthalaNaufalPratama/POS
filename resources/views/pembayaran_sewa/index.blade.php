@@ -150,9 +150,9 @@
                             <div class="row">
                                 <div class="form-group col-sm-12">
                                     <label for="buktibayar">Unggah Bukti</label>
-                                    <input type="file" class="form-control" id="bukti" name="bukti" onchange="previewImage(this, 'preview')" accept="image/*">
+                                    <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*">
                                 </div>
-                                <img id="preview" src="" alt="your image" style="max-width: 100%"/>
+                                <img id="edit_preview" src="" alt="your image" style="max-width: 100%"/>
                             </div>
                         </div>
                     </div>
@@ -172,6 +172,9 @@
     <script>
         var csrfToken = $('meta[name="csrf-token"]').attr('content');
         $(document).ready(function(){
+            if ($('#edit_preview').attr('src') === '') {
+                $('#edit_preview').attr('src', defaultImg);
+            }
             $('#rekening_id, #bayar, #filterMetode').select2();
 
             // Start Datatable
@@ -347,7 +350,26 @@
                 reader.readAsDataURL(file);
             }
         });
-        
+        $('#edit_bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
         function editbayar(id){
             $.ajax({
                     type: "GET",
@@ -367,9 +389,9 @@
                         $('#rekening_id').val(response.rekening_id).change();
                         $('#bayar').val(response.cara_bayar).change();
                         if(response.bukti){
-                            $('#preview').attr('src', '/storage/'+response.bukti);
+                            $('#edit_preview').attr('src', '/storage/'+response.bukti);
                         } else {
-                            $('#preview').attr('src', defaultImg);
+                            $('#edit_preview').attr('src', defaultImg);
                         }
                         $('#rekening_id').select2({
                             dropdownParent: $("#modalBayar")

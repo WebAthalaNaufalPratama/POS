@@ -593,7 +593,7 @@
                             <div class="row">
                                 <div class="form-group col-sm-12">
                                     <label for="buktibayar">Unggah Bukti</label>
-                                    <input type="file" class="form-control" id="bukti" name="bukti" required onchange="previewImage(this, 'add_preview')" accept="image/*">
+                                    <input type="file" class="form-control" id="bukti" name="bukti" required accept="image/*">
                                     <img class="mt-2" src="" alt="" id="add_preview" style="width: 100%;height:auto;">
                                 </div>
                             </div>
@@ -678,7 +678,7 @@
                             <div class="row">
                                 <div class="form-group col-sm-12">
                                     <label for="buktibayar">Unggah Bukti</label>
-                                    <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*" onchange="previewImage(this, 'edit_preview')">
+                                    <input type="file" class="form-control" id="edit_bukti" name="bukti" accept="image/*">
                                 </div>
                                 <img id="edit_preview" src="" alt="your image" style="max-width: 100%"/>
                             </div>

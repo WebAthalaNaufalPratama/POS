@@ -147,7 +147,7 @@ Carbon::setLocale('id');
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
                                         <div class="page-btn">
-                                            @if (Auth::user()->hasRole('Finance') && $inv_po->sisa !== 0)   
+                                            @if (Auth::user()->hasRole('Finance') && $inv_po->sisa != 0)   
                                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
                                                 Tambah Pembayaran
                                            </button>
@@ -166,7 +166,7 @@ Carbon::setLocale('id');
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $inv_po->status_dibuku !== "DIKONFIRMASI")
                                                         <th>Aksi</th>
                                                         @endif
                                                     </tr>
@@ -205,7 +205,7 @@ Carbon::setLocale('id');
                                                         </div>
                                                     </td>
                                                         <td>{{ $bayar->status_bayar}}</td>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $inv_po->status_dibuku !== "DIKONFIRMASI")
                                                         <td class="text-center">
                                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -540,6 +540,9 @@ Carbon::setLocale('id');
         if ($('#preview').attr('src') === '') {
             $('#preview').attr('src', defaultImg);
         }
+        if ($('#edit_preview').attr('src') === '') {
+            $('#edit_preview').attr('src', defaultImg);
+        }
         $('#bukti').on('change', function() {
             const file = $(this)[0].files[0];
             if (file.size > 2 * 1024 * 1024) { 
@@ -619,6 +622,26 @@ Carbon::setLocale('id');
 
         return true;
     });
+    $('#edit_bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
     function editbayar(id){
         $.ajax({
             type: "GET",

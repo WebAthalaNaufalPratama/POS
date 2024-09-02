@@ -41,6 +41,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>No Retur</th>
+                                <th>No PO</th>
                                 <th>Tanggal</th>
                                 <th>Suplier</th>
                                 <th>Lokasi</th>
@@ -205,13 +206,39 @@
             columns: [
                 { data: 'id', name: 'id' },
                 { data: 'no_retur', name: 'no_retur' },
+                { data: 'no_po', name: 'no_po' },
                 { data: 'tgl_retur', name: 'tgl_retur' },
                 { data: 'supplier_name', name: 'supplier_name' },
                 { data: 'lokasi_name', name: 'lokasi_name' },
                 { data: 'produk', name: 'produk' },
                 { data: 'alasan', name: 'alasan' },
                 { data: 'jumlah', name: 'jumlah' },
-                { data: 'komplain', name: 'komplain' },
+                {
+                    data: 'komplain',
+                    name: 'komplain',
+                    render: function(data, type, row) {
+                        let output = data; // komplain
+
+                        if (data === "Refund") {
+                            if (row.sisa === 0) {
+                                output += " | Lunas";
+                            } else {
+                                output += " | Belum Lunas";
+                            }
+                        }
+
+                        if (data === "Retur") {
+                            if (row.pembelianRetur) {
+                                output += " | " + row.pembelianRetur;
+                            } else {
+                                output += " | PO belum dibuat";
+                            }
+                        }
+
+                        return output;
+                    }
+                },
+
                 { data: 'subtotal', name: 'subtotal' },
                 {
                     data: 'status_dibuat',
@@ -225,8 +252,11 @@
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
                                 break;
-                            default:
+                            case 'BATAL':
                                 badgeClass = 'bg-lightgrey';
+                                break;
+                            default:
+                                badgeClass = 'bg-lightred';
                                 break;
                         }
                         
@@ -244,6 +274,9 @@
                                 break;
                             case 'TUNDA':
                                 badgeClass = 'bg-lightred';
+                                break;
+                            case 'BATAL':
+                                badgeClass = 'bg-lightgrey';
                                 break;
                             default:
                                 badgeClass = 'bg-lightred';
@@ -302,6 +335,14 @@
                         }
 
                         if (userRoles.includes('Auditor')) {
+                            dropdownHtml += `
+                                <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
+                                    <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur
+                                </a>`;
+                     
+                        }
+
+                        if (userRoles.includes('AdminGallery')) {
                             dropdownHtml += `
                                 <a href="${window.routes.ReturBeliShow.replace('__ID__', row.id)}" class="dropdown-item">
                                     <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img"> Detail Retur

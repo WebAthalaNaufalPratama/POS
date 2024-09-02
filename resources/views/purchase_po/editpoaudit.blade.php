@@ -19,20 +19,19 @@
     </div>
 </div>
 <div class="row">
-    <div class="card">
+    <div class="card"> 
         <div class="card-header">
                 <h4 class="card-title mb-0">
                     Transaksi Pembelian
                 </h4>
             </hr>
             @if($beli->no_retur !== null)
-            <label>
-                <input type="checkbox" id="returCheckbox" @if($beli->no_retur !== null)  checked @endif disabled> Pembelian Retur
+            <label style="color: black; font-size: 16px; z-index: 1; position: relative;">
+                <input type="checkbox" id="returCheckbox" {{ $beli->no_retur ? 'checked' : '' }}> Pembelian Retur
             </label>
-        </br>
-            <div>
+            <div id="returDropdown" style="display: {{ $beli->no_retur ? 'block' : 'none' }}; margin-top: 10px;">
                 <label for="nomerRetur">Nomor Retur:</label>
-                <input type="text" class="form-control" id="nomerRetur" name="no_retur" value="{{ $beli->no_retur}}" style="width: 20%;" disabled>
+                <input type="text" class="form-control" id="nomerRetur" name="no_retur" style="width: 20%;" value="{{ old('no_retur', $beli->no_retur) }}"  placeholder="Nomor Retur" readonly>
             </div>
             @endif
         </div>

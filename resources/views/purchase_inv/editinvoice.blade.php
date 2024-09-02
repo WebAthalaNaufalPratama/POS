@@ -226,7 +226,7 @@ $user = Auth::user();
                                                     <h4>PPN
                                                         <select id="jenis_ppn" name="jenis_ppn" class="form-control" required>
                                                             <option value="">Pilih Jenis PPN</option>
-                                                            <option value="exclude" @if($inv_po->ppn !== 0) selected @endif>EXCLUDE</option>
+                                                            <option value="exclude" @if($inv_po->ppn != 0) selected @endif>EXCLUDE</option>
                                                             <option value="include" @if($inv_po->ppn == 0) selected @endif>INCLUDE</option>
                                                         </select>
                                                         

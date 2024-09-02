@@ -44,13 +44,13 @@
                                 <th>Status diterima</th>
                                 <th>Status diperiksa</th>
                                 <th>Status dibuku</th>
-                                {{-- @if (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchasing')) --}}
+                                @if (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchasing'))
                                 <th>Tagihan</th>
                                 <th>Sisa Tagihan</th>
                                 <th>Status Pembayaran</th>
+                                @endif
                                 <th>Komplain</th>
                                 <th>Status Komplain</th>
-                                {{-- @endif --}}
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -362,7 +362,7 @@
                 { data: 'supplier', name: 'supplier' },
                 { data: 'penerima', name: 'penerima' },
                 { data: 'tgl_kirim', name: 'tgl_kirim' },
-                { data: 'tgl_diterima', name: 'tgl_diterima' },
+                { data: 'tgl_diterima', name: 'tgl_diterima' }, 
                 {
                     data: 'status_dibuat',
                     name: 'status_dibuat',
@@ -458,6 +458,7 @@
                         return `<span class="badges ${badgeClass}">${data || 'TUNDA'}</span>`;
                     }
                 },
+                @if (Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchasing'))
                 { data: 'tagihan_format', name: 'tagihan_format' },
                 { data: 'sisa_tagihan_format', name: 'sisa_tagihan_format' },
                 {
@@ -483,6 +484,7 @@
                         return statusHtml;
                     }
                 },
+                @endif
                 { data: 'komplain', name: 'komplain' },
                 { data: 'status_komplain', name: 'status_komplain' },
                 {
@@ -570,7 +572,7 @@
                                         </a>
                                     </li>`;
                             }
-                            if (row.returinden && (row.returinden.status_dibuat === "DIKONFIRMASI" && (row.returinden.status_dibukukan === "TUNDA" || row.returinden.status_dibukukan == null))) {
+                            if (row.returinden && (row.returinden.status_dibuat === null || row.returinden.status_dibuat === "TUNDA" )) {
                                 dropdownHtml += `
                                     <li>
                                         <a class="dropdown-item" href="${window.routes.editRetur.replace('__ID__', row.returinden.id)}">
@@ -657,6 +659,14 @@
                                                 </a>
                                             </li>`;
                                     }
+                                }else{
+                                    dropdownHtml += `
+                                    <li>
+                                        <a class="dropdown-item" href="${window.routes.showMutasi.replace('__ID__', row.id)}">
+                                            <img src="/assets/img/icons/eye1.svg" class="me-2" alt="img">Detail Mutasi
+                                        </a>
+                                    </li>`;
+                                    
                                 }
                                 
                             }

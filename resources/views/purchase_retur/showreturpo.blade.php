@@ -161,7 +161,7 @@
                                
                                     <center><h5>Riwayat uang masuk (Refund) </h5></center><br>
                                     {{-- @if(Auth::user()->hasRole('Finance') && $data->status_dibuat == "DIKONFIRMASI") --}}
-                                    @if (Auth::user()->hasRole('Finance') && $data->sisa !== 0 )   
+                                    @if (Auth::user()->hasRole('Finance') && $data->sisa != 0 && $data->status_dibuku == "DIKONFIRMASI")   
                                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
                                          Tambah Pembayaran
                                     </button>
@@ -181,7 +181,7 @@
                                                 <th>Nominal</th>
                                                 <th>Bukti</th>
                                                 <th>Status</th>
-                                                @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $data->status_dibuku !== "DIKONFIRMASI")
                                                 <th>Aksi</th>
                                                 @endif
                                             </tr>
@@ -221,7 +221,7 @@
                                     
                                             </td>
                                                 <td>{{ $bayar->status_bayar}}</td>
-                                                @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && $data->status_dibuku !== "DIKONFIRMASI")
                                                 <td class="text-center">
                                                     <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                         <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -314,14 +314,13 @@
                                                     @endif
                                                     @if(Auth::user()->hasRole('Finance'))
 
-                                                        @if($data->status_dibuku == "DIKONFIRMASI")
-                                                        <input type="text" class="form-control" id="status_buku" value="{{ $data->status_dibuku }}" readonly>
-
-                                                        @else
+                                                        @if($data->status_dibuku == "TUNDA" && $data->sisa = 0)
                                                         <select id="status" name="status_dibuku" class="form-control select2" required>
                                                             <option value="TUNDA" {{ old('status_dibuku', $data->status_dibuku) == 'TUNDA' ? 'selected' : '' }}>TUNDA</option>
                                                             <option value="DIKONFIRMASI" {{ old('status_dibuku', $data->status_dibuku)  == 'DIKONFIRMASI' ? 'selected' : '' }}>DIKONFIRMASI</option>
                                                         </select>
+                                                        @else
+                                                        <input type="text" class="form-control" id="status_buku" value="{{ $data->status_dibuku }}" readonly>
                                                         @endif
                                                     @endif
     
@@ -336,10 +335,10 @@
                                                     <input type="text" class="form-control" id="tgl_dibuku" name="tgl_dibuku" value="{{isset($data->tgl_dibuku) ? tanggalindo($data->tgl_dibuku) : '-'}}" readonly>
                                                     @endif
                                                     @if(Auth::user()->hasRole('Finance'))
-                                                        @if($data->status_dibuku == "DIKONFIRMASI")
-                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuku" value="{{tanggalindo($data->tgl_dibuku) }}" readonly>
-                                                        @else
+                                                        @if($data->status_dibuku == "TUNDA" && $data->sisa = 0)
                                                         <input type="date" class="form-control" id="tgl_dibuat" name="tgl_dibuku" value="{{ now()->format('Y-m-d') }}" >
+                                                        @else
+                                                        <input type="text" class="form-control" id="tgl_dibuat" name="tgl_dibuku" value="{{tanggalindo($data->tgl_dibuku) }}" readonly>
                                                         @endif
                                                     @endif
                                                 </td>
@@ -593,6 +592,9 @@
         if ($('#previewByr').attr('src') === '') {
             $('#previewByr').attr('src', defaultImg);
         }
+        if ($('#edit_preview').attr('src') === '') {
+                $('#edit_preview').attr('src', defaultImg);
+            }
         $('#buktiByr').on('change', function() {
             const file = $(this)[0].files[0];
             if (file.size > 2 * 1024 * 1024) { 
@@ -671,7 +673,26 @@ function formatRupiah(angka) {
         });
 
         return true;
-    });
+    });$('#edit_bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
     function editbayar(id){
         $.ajax({
             type: "GET",

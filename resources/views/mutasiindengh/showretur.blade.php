@@ -252,7 +252,7 @@
                                 <div class="row">
                                     <div class="col-lg-7 col-sm-6 col-6 mt-4 ">
                                         <div class="page-btn">
-                                            @if (Auth::user()->hasRole('Finance') && ($dataretur->sisa_refund !== 0 || $data->sisa_bayar !== 0 ) )   
+                                            @if (Auth::user()->hasRole('Finance') && ($dataretur->sisa_refund != 0 || $data->sisa_bayar != 0 ) )   
                                             {{-- <a href="" data-toggle="modal" data-target="#myModalbayar" class="btn btn-added"><img src="/assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Pembayaran</a> --}}
                                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModalbayar">
                                                 Tambah Pembayaran
@@ -272,7 +272,7 @@
                                                         <th>Nominal</th>
                                                         <th>Bukti</th>
                                                         <th>Status</th>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && ($data->status_dibukukan !== "DIKONFIRMASI" || $dataretur->status_dibukukan !== "DIKONFIRMASI" ))
                                                         <th>Aksi</th>
                                                         @endif
                                                     </tr>
@@ -312,7 +312,7 @@
                                                 
                                                         </td>
                                                         <td>{{ $databayar->status_bayar}}</td>
-                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions))
+                                                        @if(in_array('pembayaran_pembelian.edit', $thisUserPermissions) && ($data->status_dibukukan !== "DIKONFIRMASI" || $dataretur->status_dibukukan !== "DIKONFIRMASI" ))
                                                         <td class="text-center">
                                                             <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
                                                                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -610,8 +610,10 @@
 
                         <div class="text-end mt-3">
                             {{-- @if($dataretur->sisa_refund == 0 && $data->sisa_bayar == 0) --}}
+                            @if(Auth::user()->hasRole('Finance') && $dataretur->status_dibukukan == "MENUNGGU PEMBAYARAN") 
+
                             <button class="btn btn-primary" type="submit">Submit</button>
-                            {{-- @endif --}}
+                            @endif
                             <a href="{{ route('mutasiindengh.index') }}" class="btn btn-secondary" type="button">Back</a>
                         </div>
             </form>
@@ -819,6 +821,9 @@
         if ($('#previewByr').attr('src') === '') {
             $('#previewByr').attr('src', defaultImg);
         }
+        if ($('#edit_preview').attr('src') === '') {
+            $('#edit_preview').attr('src', defaultImg);
+        }
 
         $('#buktitf').on('change', function() {
             const file = $(this)[0].files[0];
@@ -856,6 +861,26 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     $('#previewByr').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        $('#edit_bukti').on('change', function() {
+            const file = $(this)[0].files[0];
+            if (file.size > 2 * 1024 * 1024) { 
+                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                    progressBar: true
+                });
+                $(this).val(''); 
+                return;
+            }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#edit_preview').attr('src', e.target.result);
                 }
                 reader.readAsDataURL(file);
             }

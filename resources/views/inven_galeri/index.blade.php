@@ -60,7 +60,9 @@
                     @endif
                     <th>Jumlah</th>
                     <th>Minimal Stok</th>
+                    @if(Auth::user()->hasRole('AdminGallery'))
                     <th class="text-center">Aksi</th>
+                    @endif
                 </tr>
                 </thead>
                 <tbody>
@@ -353,6 +355,7 @@
                     @endif
                     { data: 'jumlah', name: 'jumlah' },
                     { data: 'min_stok', name: 'min_stok' },
+                    @if(Auth::user()->hasRole('AdminGallery'))
                     {
                         data: 'action',
                         name: 'action',
@@ -376,6 +379,7 @@
                             `;
                         }
                     }
+                    @endif
                 ];
 
                 let table = initDataTable('#inventory', {
