@@ -294,8 +294,10 @@ class FormPerangkaiController extends Controller
 
         $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
-        if($req->perangkai_id == null){
-            return redirect()->back()->with('massage', 'Nama Perangkai Tidak Boleh Kosong');
+        foreach ($req->perangkai_id as $item) {
+            if($item == null){
+                return redirect()->back()->with('fail', 'Nama Perangkai Tidak Boleh Kosong');
+            }
         }
 
         if(empty($updateProdukTerjual)){
