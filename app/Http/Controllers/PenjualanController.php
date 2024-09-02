@@ -1471,38 +1471,68 @@ class PenjualanController extends Controller
                 } 
             }
         }else if($penjualans->distribusi == 'Diambil') {
-            foreach ($retur as $returpenjualans) {
-                foreach ($returpenjualans->produk_retur as $produk) {
-                    $selectedGFTKomponen = [];
-                    
-                    foreach ($produkterjuals as $index => $pj) {
-                        if($pj->produk && $produk->produk->kode)
-                        {
-                            $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
-                            if ($isSelectedGFT) {
-                                foreach ($pj->komponen as $komponen) {
-                                    if ($pj->id == $komponen->produk_terjual_id) {
-                                        foreach ($kondisis as $kondisi) {
-                                            if ($kondisi->id == $komponen->kondisi) {
-                                                $selectedGFTKomponen[$produk->no_retur][] = [
-                                                    'kode' => $komponen->kode_produk,
-                                                    'nama' => $komponen->nama_produk,
-                                                    'kondisi' => $kondisi->nama,
-                                                    'jumlah' => $komponen->jumlah,
-                                                    'produk' => $komponen->produk_terjual_id
-                                                ];
-                                            }
+            foreach ($retur->produk_retur as $produk) {
+                $selectedGFTKomponen = [];
+    
+                foreach ($produkterjuals as $index => $pj) {
+                    if($pj->produk && $produk->produk->kode)
+                    {
+                        $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+                        if ($isSelectedGFT) {
+                            foreach ($pj->komponen as $komponen) {
+                                if ($pj->id == $komponen->produk_terjual_id) {
+                                    foreach ($kondisis as $kondisi) {
+                                        if ($kondisi->id == $komponen->kondisi) {
+                                            $selectedGFTKomponen[$produk->no_retur][] = [
+                                                'kode' => $komponen->kode_produk,
+                                                'nama' => $komponen->nama_produk,
+                                                'kondisi' => $kondisi->nama,
+                                                'jumlah' => $komponen->jumlah,
+                                                'produk' => $komponen->produk_terjual_id
+                                            ];
                                         }
                                     }
                                 }
                             }
                         }
-                        if (!empty($selectedGFTKomponen)) {
-                            $perPendapatan += $selectedGFTKomponen;
-                        }
                     }
-                }
+                    if (!empty($selectedGFTKomponen)) {
+                        $perPendapatan += $selectedGFTKomponen;
+                    }
+                } 
             }
+            // foreach ($retur as $returpenjualans) {
+            //     foreach ($returpenjualans->produk_retur as $produk) {
+            //         $selectedGFTKomponen = [];
+                    
+            //         foreach ($produkterjuals as $index => $pj) {
+            //             if($pj->produk && $produk->produk->kode)
+            //             {
+            //                 $isSelectedGFT = ($pj->produk->kode == $produk->produk->kode && substr($pj->produk->kode, 0, 3) === 'GFT' && $pj->no_retur ==  $produk->no_retur && $pj->jenis != 'GANTI');
+            //                 if ($isSelectedGFT) {
+            //                     foreach ($pj->komponen as $komponen) {
+            //                         if ($pj->id == $komponen->produk_terjual_id) {
+            //                             foreach ($kondisis as $kondisi) {
+            //                                 if ($kondisi->id == $komponen->kondisi) {
+            //                                     $selectedGFTKomponen[$produk->no_retur][] = [
+            //                                         'kode' => $komponen->kode_produk,
+            //                                         'nama' => $komponen->nama_produk,
+            //                                         'kondisi' => $kondisi->nama,
+            //                                         'jumlah' => $komponen->jumlah,
+            //                                         'produk' => $komponen->produk_terjual_id
+            //                                     ];
+            //                                 }
+            //                             }
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //             if (!empty($selectedGFTKomponen)) {
+            //                 $perPendapatan += $selectedGFTKomponen;
+            //             }
+            //         }
+            //     }
+            // }
         }
         // dd($perPendapatan);
         
