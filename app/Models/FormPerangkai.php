@@ -27,6 +27,6 @@ class FormPerangkai extends Model
     }
 
     public function jual(){
-        return $this->belongsTo(Penjualan::class, 'id', 'invoice_penjualan_id')
+        return $this->belongsTo(Penjualan::class, 'id', 'invoice_penjualan_id');
     }
 }
