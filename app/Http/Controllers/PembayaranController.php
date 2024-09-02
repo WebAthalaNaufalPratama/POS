@@ -844,6 +844,7 @@ class PembayaranController extends Controller
                     $data = $data->filter(function($item) use ($search) {
                         return stripos($item->no_inv, $search) !== false
                             || stripos($item->tanggal_bayar_format, $search) !== false
+                            || stripos($item->no_invoice_bayar, $search) !== false
                             || stripos($item->nominal_format, $search) !== false
                             || stripos($item->no_referensi, $search) !== false
                             || stripos($item->sisa_format, $search) !== false

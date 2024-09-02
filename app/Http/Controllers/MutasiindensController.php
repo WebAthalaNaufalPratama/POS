@@ -430,19 +430,19 @@ class MutasiindensController extends Controller
             $search = $req->input('search.value');
             if (!empty($search)) {
                 $data = $data->filter(function($item) use ($search) {
-                    return stripos($item['no_retur'], $search) !== false
-                        || stripos($item['no_mutasi'], $search) !== false
-                        || stripos($item['tipe_komplain'], $search) !== false
-                        || stripos($item['alasan'], $search) !== false
-                        || stripos($item['kode_inden'], $search) !== false
-                        || stripos($item['nama_produk'], $search) !== false
-                        || stripos($item['harga'], $search) !== false
-                        || stripos($item['qty'], $search) !== false
-                        || stripos($item['total'], $search) !== false
-                        || stripos($item['supplier'], $search) !== false
-                        || stripos($item['tujuan'], $search) !== false
-                        || stripos($item['status_dibuat'], $search) !== false
-                        || stripos($item['status_dibuku'], $search) !== false;
+                    return stripos((string)$item['no_retur'], $search) !== false
+                        || stripos((string)$item['no_mutasi'], $search) !== false
+                        || stripos((string)$item['tipe_komplain'], $search) !== false
+                        || stripos((string)$item['alasan'], $search) !== false
+                        || stripos((string)$item['kode_inden'], $search) !== false
+                        || stripos((string)$item['nama_produk'], $search) !== false
+                        || stripos(is_array($item['harga']) ? implode(', ', $item['harga']) : (string)$item['harga'], $search) !== false
+                        || stripos((string)$item['qty'], $search) !== false
+                        || stripos(is_array($item['total']) ? implode(', ', $item['total']) : (string)$item['total'], $search) !== false
+                        || stripos((string)$item['supplier'], $search) !== false
+                        || stripos((string)$item['tujuan'], $search) !== false
+                        || stripos((string)$item['status_dibuat'], $search) !== false
+                        || stripos((string)$item['status_dibuku'], $search) !== false;
                 });
             }
 
