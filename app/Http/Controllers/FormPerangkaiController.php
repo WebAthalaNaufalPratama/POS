@@ -477,7 +477,26 @@ class FormPerangkaiController extends Controller
             }
         }
 
+        if ($search = $req->input('search.value')) {
+            $columns = ['form_perangkais.no_form', 'form_perangkais.jenis_rangkaian', 'form_perangkais.tanggal'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
 
+                $q->orWhereHas('penjualans', function($query) use ($search) {
+                    $query->where('no_invoice', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('perangkai', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+            });
+        }
+        
+        if ($order = $req->input('order.0.column')) {
+            $columns = ['no_form', 'jenis_rangkaian', 'tanggal'];
+            $query->orderBy($columns[$order], $req->input('order.0.dir'));
+        }
         $query->when($req->perangkai, function ($query, $perangkai) {
             $query->where('perangkai_id', $perangkai);
         });
