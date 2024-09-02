@@ -484,7 +484,7 @@ class FormPerangkaiController extends Controller
                     $q->orWhere($column, 'like', "%{$search}%");
                 }
 
-                $q->orWhereHas('penjualans', function($query) use ($search) {
+                $q->orWhereHas('produk_terjual', function($query) use ($search) {
                     $query->where('no_invoice', 'like', "%{$search}%");
                 });
                 $q->orWhereHas('perangkai', function($query) use ($search) {

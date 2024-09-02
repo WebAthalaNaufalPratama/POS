@@ -25,8 +25,4 @@ class FormPerangkai extends Model
     public function produk_terjual(){
         return $this->belongsTo(Produk_Terjual::class, 'no_form', 'no_form');
     }
-
-    public function jual(){
-        return $this->belongsTo(Penjualan::class, 'id', 'invoice_penjualan_id');
-    }
 }
