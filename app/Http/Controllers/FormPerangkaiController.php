@@ -285,7 +285,6 @@ class FormPerangkaiController extends Controller
             'no_form' => 'required',
             'jenis_rangkaian' => 'required',
             'tanggal' => 'required',
-            'perangkai_id' => 'required',
             'produk_id' => 'required',
             'prdTerjual_id' => 'required'
         ]);
@@ -295,6 +294,13 @@ class FormPerangkaiController extends Controller
 
         $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+        if($req->perangkai_id == null){
+            return redirect()->back()->with('massage', 'Nama Perangkai Tidak Boleh Kosong');
+        }
+
+        if(empty($updateProdukTerjual)){
+            return redirect()->back()->with('massage', 'Produk Terjual Tidak Boleh Kosong');
+        }
         
         //pengurangan inventory gallery dan outlet dari admin
         if($req->status == 'DIKONFIRMASI' && $req->jenis_rangkaian == 'Penjualan' && $req->distribusi == 'Diambil' || $req->jenis_rangkaian == 'Retur Penjualan' || $req->jenis_rangkaian == 'MUTASIGO')
