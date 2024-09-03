@@ -134,6 +134,8 @@ class InitialSeeder extends Seeder
                 'getTopMinusProduk',
                 'getTopSales',
                 'getLoyalty',
+                'profile.edit',
+                'profile.update',
             ];
 
         // super admin
