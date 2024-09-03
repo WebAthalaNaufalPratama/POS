@@ -48,15 +48,17 @@ class CustomerController extends Controller
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
             'tipe' => 'required|in:sewa,tradisional,premium',
-            'handphone' => 'required|numeric|digits_between:11,13',
+            'handphone' => 'required|numeric|digits_between:11,13|unique:customers,handphone',
             'alamat' => 'required',
             'tanggal_lahir' => 'required|date|before_or_equal:today',
             'tanggal_bergabung' => 'required|date|before_or_equal:today',
             'lokasi_id' => 'required|exists:lokasis,id',
+            'poin_loyalty' => 'nullable|integer',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method', 'route']);
+        $data['poin_loyalty'] = $req->input('poin_loyalty', 0);
         
         // save data
         $check = Customer::create($data);
@@ -105,24 +107,35 @@ class CustomerController extends Controller
      */
     public function update(Request $req, $customer)
     {
-        // validasi
+        $customer = Customer::find($customer);
+        if (!$customer) {
+            return redirect()->back()->with('fail', 'Data customer tidak ditemukan');
+        }
+
+        // Validasi data
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
-            'tipe' => 'required',
-            'handphone' => 'required',
+            'tipe' => 'required|in:sewa,tradisional,premium',
+            'handphone' => 'required|numeric|digits_between:11,13|unique:customers,handphone,' . $customer->id,
             'alamat' => 'required',
-            'tanggal_lahir' => 'required',
-            'tanggal_bergabung' => 'required',
-            'lokasi_id' => 'required',
+            'tanggal_lahir' => 'required|date|before_or_equal:today',
+            'tanggal_bergabung' => 'required|date|before_or_equal:today',
+            'lokasi_id' => 'required|exists:lokasis,id',
+            'poin_loyalty' => 'nullable|integer',
         ]);
+
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
 
-        // update data
-        $check = Customer::find($customer)->update($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
-        return redirect()->back()->with('success', 'Data berhsail diperbarui');
+        $data = $req->except(['_token', '_method']);
+        $data['poin_loyalty'] = $req->input('poin_loyalty', 0);
+
+        $check = $customer->update($data);
+        if (!$check) {
+            return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
+        }
+
+        return redirect()->back()->with('success', 'Data berhasil diperbarui');
     }
 
     /**
