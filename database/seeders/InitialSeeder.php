@@ -172,6 +172,7 @@ class InitialSeeder extends Seeder
                 'formpenjualan',
                 'returpenjualan',
                 'mutasigalery',
+                'pembayaran',
                 'mutasighgalery',
                 'mutasioutlet',
                 'formmutasigalery.cetak',

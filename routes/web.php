@@ -87,6 +87,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{user}/edit', 'UsersController@edit')->name('users.edit');
             Route::patch('/{user}/update', 'UsersController@update')->name('users.update');
             Route::get('/{user}/delete', 'UsersController@destroy')->name('users.destroy');
+            Route::get('/editProfile', 'UsersController@edit_profile')->name('profile.edit');
+            Route::patch('/updateProfile', 'UsersController@update_profile')->name('profile.update');
         });
 
         /**
