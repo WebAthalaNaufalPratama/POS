@@ -394,8 +394,7 @@
             </a>
             <form action="{{ route('auditor.update') }}" method="POST">
               @csrf
-              <div class="searchinputs">
-                  @php
+              @php
                     $user = Auth::user();             
                     $karyawan = \App\Models\Karyawan::where('user_id', $user->id)->first();       
                     $lokasis = \App\Models\Lokasi::all();
@@ -409,8 +408,6 @@
                           @endforeach
                       </select>
                   </div>
-              </div>
-              <a class="btn" id="searchdiv"><img src="/assets/img/icons/search.svg" alt="img"></a>
               @endif
             </form>
           </div>
