@@ -1209,50 +1209,50 @@ class PenjualanController extends Controller
                 $file = $req->file('bukti');
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
-                $data['bukti'] = $filePath;
+                $datu['bukti'] = $filePath;
             }
             if ($req->sisa_bayar == 0) {
-                $data['invoice_penjualan_id'] = $penjualanId;
+                $datu['invoice_penjualan_id'] = $penjualanId;
                 if($lokasi->tipe_lokasi == 1) {
                         $number = 1;
                         $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
+                        $datu['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
                 }else if($lokasi->tipe_lokasi == 2) {
                         $number = 1;
                         $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
+                        $datu['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
                 }
-                $data['cara_bayar'] = $req->cara_bayar;
-                $data['nominal'] = $req->nominal;
-                $data['rekening_id'] = $req->rekening_id;
-                $data['tanggal_bayar'] = $req->tanggal_invoice;
-                $data['status_bayar'] = 'LUNAS';
-                $status = $data['status_bayar'];
+                $datu['cara_bayar'] = $req->cara_bayar;
+                $datu['nominal'] = $req->nominal;
+                $datu['rekening_id'] = $req->rekening_id;
+                $datu['tanggal_bayar'] = $req->tanggal_invoice;
+                $datu['status_bayar'] = 'LUNAS';
+                $status = $datu['status_bayar'];
         
                 // Update the customer's status correctly
-                $updatecust = Customer::where('id', $data['id_customer'])->update(['status_piutang' => $status]);
-                $pembayaran = Pembayaran::create($data);
+                $updatecust = Customer::where('id', $datu['id_customer'])->update(['status_piutang' => $status]);
+                $pembayaran = Pembayaran::create($datu);
             } else {
-                $data['invoice_penjualan_id'] = $penjualanId;
+                $datu['invoice_penjualan_id'] = $penjualanId;
                 if($lokasi->tipe_lokasi == 1) {
                         $number = 1;
                         $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
+                        $datu['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
                 }else if($lokasi->tipe_lokasi == 2) {
                         $number = 1;
                         $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
+                        $datu['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
                 }
-                $data['cara_bayar'] = $req->cara_bayar;
-                $data['nominal'] = $req->nominal;
-                $data['rekening_id'] = $req->rekening_id;
-                $data['tanggal_bayar'] = $req->tanggal_invoice;
-                $data['status_bayar'] = 'BELUM LUNAS';
-                $status = $data['status_bayar'];
+                $datu['cara_bayar'] = $req->cara_bayar;
+                $datu['nominal'] = $req->nominal;
+                $datu['rekening_id'] = $req->rekening_id;
+                $datu['tanggal_bayar'] = $req->tanggal_invoice;
+                $datu['status_bayar'] = 'BELUM LUNAS';
+                $status = $datu['status_bayar'];
         
                 // Update the customer's status correctly
-                $updatecust = Customer::where('id', $data['id_customer'])->update(['status_piutang' => $status]);
-                $pembayaran = Pembayaran::create($data);
+                $updatecust = Customer::where('id', $datu['id_customer'])->update(['status_piutang' => $status]);
+                $pembayaran = Pembayaran::create($datu);
             }
         }  
 
