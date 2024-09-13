@@ -394,8 +394,7 @@
             </a>
             <form action="{{ route('auditor.update') }}" method="POST">
               @csrf
-              <div class="searchinputs">
-                  @php
+              @php
                     $user = Auth::user();             
                     $karyawan = \App\Models\Karyawan::where('user_id', $user->id)->first();       
                     $lokasis = \App\Models\Lokasi::all();
@@ -409,8 +408,6 @@
                           @endforeach
                       </select>
                   </div>
-              </div>
-              <a class="btn" id="searchdiv"><img src="/assets/img/icons/search.svg" alt="img"></a>
               @endif
             </form>
           </div>
@@ -438,7 +435,7 @@
         </li> -->
 
 
-        <li class="nav-item dropdown">
+        {{-- <li class="nav-item dropdown">
           <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
             <img src="/assets/img/icons/notification-bing.svg" alt="img"> <span class="badge rounded-pill">4</span>
           </a>
@@ -520,7 +517,7 @@
               <a href="activities.html">View all Notifications</a>
             </div>
           </div>
-        </li>
+        </li> --}}
 
         <li class="nav-item dropdown has-arrow main-drop">
           <a href="javascript:void(0);" class="dropdown-toggle nav-link userset" data-bs-toggle="dropdown">
@@ -544,8 +541,8 @@
                 
               </div>
               <hr class="m-0">
-              <!-- <a class="dropdown-item" href="profile.html"> <i class="me-2" data-feather="user"></i> My Profile</a>
-              <a class="dropdown-item" href="generalsettings.html"><i class="me-2" data-feather="settings"></i>Settings</a>
+              <a class="dropdown-item" href="{{ route('profile.edit')}}"> <i class="me-2" data-feather="user"></i> My Profile</a>
+              <!-- <a class="dropdown-item" href="generalsettings.html"><i class="me-2" data-feather="settings"></i>Settings</a>
               <hr class="m-0"> -->
               @auth
               <a href="{{ route('logout.perform') }}" class="dropdown-item logout pb-0"><img src="/assets/img/icons/log-out.svg" class="me-2" alt="img">Logout</a>

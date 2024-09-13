@@ -285,7 +285,6 @@ class FormPerangkaiController extends Controller
             'no_form' => 'required',
             'jenis_rangkaian' => 'required',
             'tanggal' => 'required',
-            'perangkai_id' => 'required',
             'produk_id' => 'required',
             'prdTerjual_id' => 'required'
         ]);
@@ -295,6 +294,15 @@ class FormPerangkaiController extends Controller
 
         $updateProdukTerjual = Produk_Terjual::with('komponen')->find($req->prdTerjual_id);
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
+        foreach ($req->perangkai_id as $item) {
+            if($item == null){
+                return redirect()->back()->with('fail', 'Nama Perangkai Tidak Boleh Kosong');
+            }
+        }
+
+        if(empty($updateProdukTerjual)){
+            return redirect()->back()->with('massage', 'Produk Terjual Tidak Boleh Kosong');
+        }
         
         //pengurangan inventory gallery dan outlet dari admin
         if($req->status == 'DIKONFIRMASI' && $req->jenis_rangkaian == 'Penjualan' && $req->distribusi == 'Diambil' || $req->jenis_rangkaian == 'Retur Penjualan' || $req->jenis_rangkaian == 'MUTASIGO')
@@ -469,7 +477,26 @@ class FormPerangkaiController extends Controller
             }
         }
 
+        if ($search = $req->input('search.value')) {
+            $columns = ['form_perangkais.no_form', 'form_perangkais.jenis_rangkaian', 'form_perangkais.tanggal'];
+            $query->where(function($q) use ($search, $columns) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'like', "%{$search}%");
+                }
 
+                $q->orWhereHas('produk_terjual', function($query) use ($search) {
+                    $query->where('no_invoice', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('perangkai', function($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%");
+                });
+            });
+        }
+        
+        if ($order = $req->input('order.0.column')) {
+            $columns = ['no_form', 'jenis_rangkaian', 'tanggal'];
+            $query->orderBy($columns[$order], $req->input('order.0.dir'));
+        }
         $query->when($req->perangkai, function ($query, $perangkai) {
             $query->where('perangkai_id', $perangkai);
         });

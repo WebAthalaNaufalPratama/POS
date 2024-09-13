@@ -87,6 +87,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{user}/edit', 'UsersController@edit')->name('users.edit');
             Route::patch('/{user}/update', 'UsersController@update')->name('users.update');
             Route::get('/{user}/delete', 'UsersController@destroy')->name('users.destroy');
+            Route::get('/editProfile', 'UsersController@edit_profile')->name('profile.edit');
+            Route::patch('/updateProfile', 'UsersController@update_profile')->name('profile.update');
         });
 
         /**
@@ -367,7 +369,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{dopenjualan}/edit', 'DopenjualanController@edit')->name('dopenjualan.edit');
             Route::patch('/{dopenjualan}/update', 'DopenjualanController@update')->name('dopenjualan.update');
             Route::get('/{dopenjualan}/delete', 'DopenjualanController@destroy')->name('dopenjualan.destroy');
-            Route::get('{dopenjualan}/pdfdopenjualan', 'DoPenjualanController@pdfdopenjualan')->name('pdfdopenjualan.generate');
+            Route::get('{dopenjualan}/pdfdopenjualan', 'DopenjualanController@pdfdopenjualan')->name('pdfdopenjualan.generate');
             Route::get('{dopenjualan}/auditdopenjualan', 'DopenjualanController@audit')->name('auditdopenjualan.edit');
             Route::patch('/auditdopenjualan', 'DopenjualanController@audit_update')->name('auditdopenjualan.update');
         });

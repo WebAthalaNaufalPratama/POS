@@ -134,6 +134,8 @@ class InitialSeeder extends Seeder
                 'getTopMinusProduk',
                 'getTopSales',
                 'getLoyalty',
+                'profile.edit',
+                'profile.update',
             ];
 
         // super admin
@@ -172,6 +174,7 @@ class InitialSeeder extends Seeder
                 'formpenjualan',
                 'returpenjualan',
                 'mutasigalery',
+                'pembayaran',
                 'mutasighgalery',
                 'mutasioutlet',
                 'formmutasigalery.cetak',

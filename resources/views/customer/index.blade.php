@@ -128,6 +128,10 @@
               <input type="date" class="form-control" name="tanggal_bergabung" id="add_tanggal_bergabung" value="{{ date('Y-m-d') }}" required>
             </div>
             <div class="mb-3">
+              <label for="poin_loyalty" class="col-form-label"> Poin Loyalty</label>
+              <input type="number" class="form-control hide-arrow" name="poin_loyalty" id="add_poin_loyalty" oninput="cantMinus(this)" required>
+            </div>
+            <div class="mb-3">
               <label for="lokasi" class="col-form-label">Lokasi</label>
               <div class="form-group">
                 <select class="select2" name="lokasi_id" id="lokasi_id" required>
@@ -190,6 +194,10 @@
               <input type="date" class="form-control" name="tanggal_bergabung" id="edit_tanggal_bergabung" required>
             </div>
             <div class="mb-3">
+              <label for="poin_loyalty" class="col-form-label"> Poin Loyalty</label>
+              <input type="number" class="form-control hide-arrow" name="poin_loyalty" id="edit_poin_loyalty" oninput="cantMinus(this)" required>
+            </div>
+            <div class="mb-3">
               <label for="lokasi" class="col-form-label">Lokasi</label>
               <div class="form-group">
                 <select class="select2" name="lokasi_id" id="edit_lokasi_id" required>
@@ -233,6 +241,7 @@
                 $('#edit_alamat').val(response.alamat)
                 $('#edit_tanggal_lahir').val(response.tanggal_lahir)
                 $('#edit_tanggal_bergabung').val(response.tanggal_bergabung)
+                $('#edit_poin_loyalty').val(response.poin_loyalty)
                 $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
             },
             error: function(error) {

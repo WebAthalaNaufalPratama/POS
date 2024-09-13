@@ -71,7 +71,7 @@ class PembelianController extends Controller
                     });
                 });
             
-                $query->orderBy('created_at', 'desc');
+                // $query->orderBy('created_at', 'desc');
                 
                 if ($req->supplier) {
                     $query->where('supplier_id', $req->input('supplier'));
@@ -160,7 +160,7 @@ class PembelianController extends Controller
 
                 return response()->json([
                     'draw' => $req->input('draw'),
-                    'recordsTotal' => InventoryGallery::count(),
+                    'recordsTotal' => Pembelian::count(),
                     'recordsFiltered' => $recordsFiltered,
                     'data' => $data,
                 ]);
@@ -207,9 +207,9 @@ class PembelianController extends Controller
                 $query2 = ModelsPoinden::query();
         
                 if (Auth::user()->hasRole(['Auditor', 'Finance'])) {
-                    $query2 = ModelsPoinden::where('status_dibuat', 'DIKONFIRMASI')->orderByRaw($rawOrderBy . ' DESC');
+                    $query2 = ModelsPoinden::where('status_dibuat', 'DIKONFIRMASI');
                 } elseif (Auth::user()->hasRole('Purchasing')) {
-                    $query2 = ModelsPoinden::orderByRaw($rawOrderBy . ' DESC');
+                    $query2 = ModelsPoinden::query();
                 }
                 if ($req->supplierInd) {
                     $query2->where('supplier_id', $req->input('supplierInd'));
@@ -332,7 +332,7 @@ class PembelianController extends Controller
         // START datatable po
             if ($req->ajax() && $req->table == 'po') {
                 // Query untuk invoices tanpa poinden_id
-                $query = Invoicepo::with('pembelian.supplier', 'pembelian.lokasi')->whereNull('poinden_id')->orderBy('created_at', 'desc');
+                $query = Invoicepo::with('pembelian.supplier', 'pembelian.lokasi')->whereNull('poinden_id');
 
                 // Filter untuk user dengan role Finance
                 $query->when(Auth::user()->hasRole('Finance'), function ($q) {
@@ -478,7 +478,7 @@ class PembelianController extends Controller
 
         // START dattable inden
             if ($req->ajax() && $req->table == 'inden') {
-                $query2 = Invoicepo::with('poinden.supplier')->whereNotNull('poinden_id')->orderBy('tgl_inv', 'desc');
+                $query2 = Invoicepo::with('poinden.supplier')->whereNotNull('poinden_id');
 
                 $query2->when(Auth::user()->hasRole('Finance'), function ($q) {
                         $q->where('status_dibuat', 'DIKONFIRMASI');
@@ -723,8 +723,7 @@ class PembelianController extends Controller
     public function index_retur(Request $req)
     {
         $query = Returpembelian::query() 
-            ->with(['invoice.pembelian.lokasi', 'invoice.pembelian.supplier', 'produkretur.produkbeli.produk', 'invoice']) 
-            ->orderBy('created_at', 'desc');
+            ->with(['invoice.pembelian.lokasi', 'invoice.pembelian.supplier', 'produkretur.produkbeli.produk', 'invoice']);
 
         if (Auth::user()->hasRole('Finance')) {
             $query->where('status_dibuat', 'DIKONFIRMASI');
