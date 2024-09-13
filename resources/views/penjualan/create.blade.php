@@ -609,19 +609,22 @@
     generateInvoiceBayar(kode);
 </script>
 <script>
-    // Function to update date to today's date
-    function updateDate(element) {
-        var today = new Date().toISOString().split('T')[0];
-        element.value = today;
-    }
+    $(document).ready(function() {
+        // Function to update date to today's date
+        function updateDate(selector) {
+            var today = new Date().toISOString().split('T')[0];
+            $(selector).val(today);
+        }
 
-    // Call the function to set the date to today's date initially
-    updateDate(document.getElementById('tanggal_invoice'));
-    updateDate(document.getElementById('jatuh_tempo'));
-    @foreach($produks as $index => $produk)
-    updateDate(document.getElementById('tglrangkai_{{ $index }}'), '{{ $index }}');
-    @endforeach
-    updateDate(document.getElementById('tanggalbayar'));
+        // Call the function to set the date to today's date initially
+        updateDate('#tanggal_invoice');
+        updateDate('#jatuh_tempo');
+        updateDate('#tanggalbayar');
+        
+        @foreach($produks as $index => $produk)
+            updateDate('#tglrangkai_{{ $index }}');
+        @endforeach
+    });
 </script>
 <script>
     function formatRupiah(angka, prefix) {
