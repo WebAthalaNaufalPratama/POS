@@ -1204,6 +1204,58 @@ class PenjualanController extends Controller
             }
         }
 
+        if ($req->dp > 0 && $req->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance'])) {
+            if ($req->hasFile('bukti')) {
+                $file = $req->file('bukti');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
+                $data['bukti'] = $filePath;
+            }
+            if ($req->sisa_bayar == 0) {
+                $data['invoice_penjualan_id'] = $penjualanId;
+                if($lokasi->tipe_lokasi == 1) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
+                }else if($lokasi->tipe_lokasi == 2) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
+                }
+                $data['cara_bayar'] = $req->cara_bayar;
+                $data['nominal'] = $req->nominal;
+                $data['rekening_id'] = $req->rekening_id;
+                $data['tanggal_bayar'] = $req->tanggal_invoice;
+                $data['status_bayar'] = 'LUNAS';
+                $status = $data['status_bayar'];
+        
+                // Update the customer's status correctly
+                $updatecust = Customer::where('id', $data['id_customer'])->update(['status_piutang' => $status]);
+                $pembayaran = Pembayaran::create($data);
+            } else {
+                $data['invoice_penjualan_id'] = $penjualanId;
+                if($lokasi->tipe_lokasi == 1) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
+                }else if($lokasi->tipe_lokasi == 2) {
+                        $number = 1;
+                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
+                }
+                $data['cara_bayar'] = $req->cara_bayar;
+                $data['nominal'] = $req->nominal;
+                $data['rekening_id'] = $req->rekening_id;
+                $data['tanggal_bayar'] = $req->tanggal_invoice;
+                $data['status_bayar'] = 'BELUM LUNAS';
+                $status = $data['status_bayar'];
+        
+                // Update the customer's status correctly
+                $updatecust = Customer::where('id', $data['id_customer'])->update(['status_piutang' => $status]);
+                $pembayaran = Pembayaran::create($data);
+            }
+        }  
+
         $bayarList = Pembayaran::where('invoice_penjualan_id', $penjualan->id)->get();
         // dd($bayarList);
         if(!empty($bayarList)) {
@@ -1276,59 +1328,6 @@ class PenjualanController extends Controller
                 }
             }
         }
-
-        // dd($cek);
-        if ($req->dp > 0 && $req->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance'])) {
-            if ($req->hasFile('bukti')) {
-                $file = $req->file('bukti');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('bukti_pembayaran_penjualan', $fileName, 'public');
-                $data['bukti'] = $filePath;
-            }
-            if ($req->sisa_bayar == 0) {
-                $data['invoice_penjualan_id'] = $penjualanId;
-                if($lokasi->tipe_lokasi == 1) {
-                        $number = 1;
-                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
-                }else if($lokasi->tipe_lokasi == 2) {
-                        $number = 1;
-                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
-                }
-                $data['cara_bayar'] = $req->cara_bayar;
-                $data['nominal'] = $req->nominal;
-                $data['rekening_id'] = $req->rekening_id;
-                $data['tanggal_bayar'] = $req->tanggal_invoice;
-                $data['status_bayar'] = 'LUNAS';
-                $status = $data['status_bayar'];
-        
-                // Update the customer's status correctly
-                $updatecust = Customer::where('id', $data['id_customer'])->update(['status_piutang' => $status]);
-                $pembayaran = Pembayaran::create($data);
-            } else {
-                $data['invoice_penjualan_id'] = $penjualanId;
-                if($lokasi->tipe_lokasi == 1) {
-                        $number = 1;
-                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BYR' . date('Ymd') . $paddedNumber;
-                }else if($lokasi->tipe_lokasi == 2) {
-                        $number = 1;
-                        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
-                        $data['no_invoice_bayar'] = 'BOT' . date('Ymd') . $paddedNumber;
-                }
-                $data['cara_bayar'] = $req->cara_bayar;
-                $data['nominal'] = $req->nominal;
-                $data['rekening_id'] = $req->rekening_id;
-                $data['tanggal_bayar'] = $req->tanggal_invoice;
-                $data['status_bayar'] = 'BELUM LUNAS';
-                $status = $data['status_bayar'];
-        
-                // Update the customer's status correctly
-                $updatecust = Customer::where('id', $data['id_customer'])->update(['status_piutang' => $status]);
-                $pembayaran = Pembayaran::create($data);
-            }
-        }  
         
         
         if($req->status == 'DIKONFIRMASI' && $lokasi->tipe_lokasi != 2){
