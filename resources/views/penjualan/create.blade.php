@@ -201,7 +201,7 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)"></td>
                                                     <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control" oninput="multiply($(this))" onchange="calculateTotal(0)"></td>
                                                     <td>
                                                         <select id="jenis_diskon_0" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)">
@@ -446,6 +446,7 @@
                             <select class="select2 form-control" name="tipe" id="add_tipe" required>
                                 <option value="">Pilih Tipe</option>
                                 <option value="tradisional">tradisional</option>
+                                <option value="premium">premium</option>
                             </select>
                         </div>
                     </div>
