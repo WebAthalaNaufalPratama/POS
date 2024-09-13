@@ -1114,6 +1114,11 @@
             }
         });
 
+        $('#harga_satuan').on('input', function(){
+            var inputhas = $(this).val();
+            $(this).formatRupiah(inputhas, 'Rp ');
+        });
+
         $('#promo_id').change(function() {
             var promo_id = $(this).select2().find(":selected").val()
             if (!promo_id) {
