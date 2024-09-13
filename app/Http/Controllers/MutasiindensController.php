@@ -249,8 +249,8 @@ class MutasiindensController extends Controller
                             ->get();
 
             $data = $mutasis->map(function($item) {
-                $formattedTglKirim = $this->formatDate($item->tgl_dikirim);
-                $formattedTglDiterima = $this->formatDate($item->tgl_diterima);
+                $formattedTglKirim = tanggalindo($item->tgl_dikirim);
+                $formattedTglDiterima = tanggalindo($item->tgl_diterima);
             
                 $komplain = '-';
                 if ($item->returinden !== null && $item->returinden->status_dibuat !== 'BATAL') {
@@ -408,7 +408,7 @@ class MutasiindensController extends Controller
 
                 return [
                     'id' => $item->id,
-                    'tgl_komplain' => $this->formatDate($item->tgl_dibuat),
+                    'tgl_komplain' => tanggalindo($item->tgl_dibuat),
                     'no_retur' => $item->no_retur ?? '-',
                     'no_mutasi' => $item->mutasiinden->no_mutasi ?? '-',
                     'tipe_komplain' => $tipeKomplainFormatted ?? '-',
