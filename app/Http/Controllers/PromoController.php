@@ -8,6 +8,7 @@ use App\Models\Lokasi;
 use App\Models\Produk_Jual;
 use App\Models\Tipe_Produk;
 use App\Models\Karyawan;
+use App\Models\Penjualan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -43,7 +44,7 @@ class PromoController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:promos,nama',
             'tanggal_mulai' => 'required',
             'tanggal_berakhir' => 'required',
             'ketentuan' => 'required',
@@ -95,7 +96,7 @@ class PromoController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:promos,nama,'.$promo,
             'tanggal_mulai' => 'required',
             'tanggal_berakhir' => 'required',
             'ketentuan' => 'required',
@@ -104,6 +105,11 @@ class PromoController extends Controller
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+
+        // cek jika sudah ada yang terpakai
+        $isUsed = Penjualan::where('promo_id', $promo)->exists();
+        if(!$isUsed) return redirect()->back()->withInput()->with('fail', 'Promo sudah terpakai');
+
         $data = $req->except(['_token', '_method']);
 
         // update data

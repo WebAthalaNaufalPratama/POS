@@ -37,7 +37,7 @@ class RekeningController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'bank' => 'required',
-            'nomor_rekening' => 'required|numeric|digits_between:10,16',
+            'nomor_rekening' => 'required|numeric|unique:rekenings,nomor_rekening',
             'nama_akun' => 'required',
             'lokasi_id' => 'required|exists:lokasis,id',
             'saldo_awal' => 'nullable'
@@ -88,7 +88,7 @@ class RekeningController extends Controller
         // validasi
         $validator = Validator::make($req->all(), [
             'bank' => 'required',
-            'nomor_rekening' => 'required|numeric|digits_between:10,16',
+            'nomor_rekening' => 'required|numeric|unique:rekenings,nomor_rekening,'.$rekening,
             'nama_akun' => 'required',
             'lokasi_id' => 'required|exists:lokasis,id',
             'saldo_awal' => 'nullable'

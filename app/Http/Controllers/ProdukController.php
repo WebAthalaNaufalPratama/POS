@@ -41,9 +41,10 @@ class ProdukController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:produks,nama',
             'tipe_produk' => 'required|integer',
             'deskripsi' => 'required',
+            'satuan' => 'nullable',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
@@ -101,9 +102,10 @@ class ProdukController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:produks,nama,' .$produk,
             'tipe_produk' => 'required|integer',
             'deskripsi' => 'required',
+            'satuan' => 'nullable',
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);

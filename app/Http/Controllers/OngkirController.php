@@ -41,7 +41,7 @@ class OngkirController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:ongkirs,nama',
             'lokasi_id' => 'required|integer',
             'biaya' => 'required|integer',
         ]);
@@ -89,7 +89,7 @@ class OngkirController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:ongkirs,nama,'.$ongkir,
             'lokasi_id' => 'required|integer',
             'biaya' => 'required',
         ]);

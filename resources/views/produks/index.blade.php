@@ -23,6 +23,7 @@
                     <th>Kode</th>
                     <th>Nama</th>
                     <th>Tipe</th>
+                    <th>Satuan</th>
                     <th>Deskripsi</th>
                     <th>Aksi</th>
                 </tr>
@@ -34,6 +35,7 @@
                             <td>{{ $produk->kode }}</td>
                             <td>{{ $produk->nama }}</td>
                             <td>{{ $produk->tipe->nama ?? '-' }}</td>
+                            <td>{{ $produk->satuan }}</td>
                             <td>{{ $produk->deskripsi }}</td>
                             <td class="text-center">
                               <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -85,6 +87,10 @@
               </div>
             </div>
             <div class="mb-3">
+              <label for="satuan" class="col-form-label">Satuan</label>
+              <input type="text" class="form-control" name="satuan" id="add_satuan" required>
+            </div>
+            <div class="mb-3">
               <label for="deskripsi" class="col-form-label">Deskripsi</label>
               <textarea class="form-control" name="deskripsi" id="add_deskripsi" required></textarea>
             </div>
@@ -122,6 +128,10 @@
                   @endforeach
                 </select>
               </div>
+            </div>
+            <div class="mb-3">
+              <label for="satuan" class="col-form-label">Satuan</label>
+              <input type="text" class="form-control" name="satuan" id="edit_satuan" required>
             </div>
             <div class="mb-3">
               <label for="deskripsi" class="col-form-label">Deskripsi</label>
