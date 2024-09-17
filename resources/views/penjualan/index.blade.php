@@ -341,6 +341,7 @@
                         const isRetur = row.retur === true || row.retur === 'true';
                         const isDO = row.do === true || row.do === 'true';
                         const isNoForm = row.all_no_form === true || row.all_no_form === 'true';
+                        const jmldikirim = row.jmldikirim === true || row.jmldikirim === 'true';
                         var dropdownHtml = `
                             <div class="dropdown">
                                 <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
@@ -377,7 +378,7 @@
                                                     </a>`;
                                     }
                                 }
-                                if (row.distribusi === 'Dikirim' && userPermissions.includes('dopenjualan.create')) {
+                                if (row.distribusi === 'Dikirim' && userPermissions.includes('dopenjualan.create') && !jmldikirim) {
                                     if(!isNoForm || row.lokasi.tipe_lokasi != 1 && row.status == 'DIKONFIRMASI') {
                                     dropdownHtml += `<a class="dropdown-item" href="${window.routes.dopenjualanCreate.replace('__ID__', row.id)}">
                                                         <img src="assets/img/icons/truck.svg" class="me-2" alt="img">Delivery Order
