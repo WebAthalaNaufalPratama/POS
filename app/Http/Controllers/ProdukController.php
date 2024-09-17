@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Produk;
 use App\Models\Tipe_Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ProdukController extends Controller
@@ -14,11 +15,70 @@ class ProdukController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $produks = Produk::with('tipe')->get();
+        if ($request->ajax()) {
+            $query = Produk::with('tipe');
+
+            // filter
+            if ($request->has('produk') && !empty($request->produk)) {
+                $query->whereIn('id', $request->produk);
+            }
+        
+            if ($request->has('tipe_produk') && $request->tipe_produk != '') {
+                $query->where('tipe_produk', $request->tipe_produk);
+            }
+
+            if ($request->has('satuan') && $request->satuan != '') {
+                $query->where('satuan', $request->satuan);
+            }
+
+            $start = $request->input('start');
+            $length = $request->input('length');
+            $order = $request->input('order')[0]['column'];
+            $dir = $request->input('order')[0]['dir'];
+            $columnName = $request->input('columns')[$order]['data'];
+
+            // search
+            $search = $request->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('kode', 'like', "%$search%")
+                    ->orWhere('nama', 'like', "%$search%")
+                    ->orWhere('tipe', 'like', "%$search%")
+                    ->orWhere('satuan', 'like', "%$search%")
+                    ->orWhere('deskripsi', 'like', "%$search%");
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $kontrakData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $kontrakData->map(function($item, $index) use ($currentPage, $perPage) {
+                $permission = Auth::user()->getAllPermissions()->pluck('name')->toArray();
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tipe_value = $item->tipe->nama;
+                $item->canEdit = in_array('produks.index', $permission);
+                $item->canDelete = in_array('produks.index', $permission);
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $request->input('draw'),
+                'recordsTotal' => Produk::count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
+        $produks = Produk::all();
         $tipe_produks = Tipe_Produk::where('kategori', 'master')->get();
-        return view('produks.index', compact('produks', 'tipe_produks'));
+        $satuans = $produks->pluck('satuan')->unique();
+        return view('produks.index', compact('tipe_produks', 'produks', 'satuans'));
     }
 
     /**
