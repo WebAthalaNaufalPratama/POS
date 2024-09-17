@@ -1061,7 +1061,7 @@
             e.preventDefault();
             var jumlah = $(this).val();
             jumlah = parseInt(jumlah) > 10 ? 10 : parseInt(jumlah);
-            console.log(jumlah)
+            // console.log(jumlah)
             $('[id^="perangkai_id_"]').each(function() {
                 $(this).select2('destroy');
                 $(this).remove();
