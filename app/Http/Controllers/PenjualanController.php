@@ -1230,7 +1230,7 @@ class PenjualanController extends Controller
                 $status = $datu['status_bayar'];
         
                 // Update the customer's status correctly
-                $updatecust = Customer::where('id', $datu['id_customer'])->update(['status_piutang' => $status]);
+                $updatecust = Customer::where('id', $req->id_customer)->update(['status_piutang' => $status]);
                 $pembayaran = Pembayaran::create($datu);
             } else {
                 $datu['invoice_penjualan_id'] = $penjualanId;
@@ -1251,7 +1251,7 @@ class PenjualanController extends Controller
                 $status = $datu['status_bayar'];
         
                 // Update the customer's status correctly
-                $updatecust = Customer::where('id', $datu['id_customer'])->update(['status_piutang' => $status]);
+                $updatecust = Customer::where('id', $req->id_customer)->update(['status_piutang' => $status]);
                 $pembayaran = Pembayaran::create($datu);
             }
         }  

@@ -787,7 +787,7 @@
                                     @endforeach
                                 </select>
                             </td>
-                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control" readonly></td>
+                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control"></td>
                             <td><input type="number" name="jumlah[]" id="jumlah_${i}" class="form-control" oninput="multiply(this)"></td>
                             <td>
                                 <select id="jenis_diskon_${i}" name="jenis_diskon[]" class="form-control" onchange="showInputType(${i})">
