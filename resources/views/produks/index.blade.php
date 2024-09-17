@@ -22,9 +22,6 @@
                     <img src="{{ asset('assets/img/icons/filter.svg') }}" alt="filter">
                   </a>
                 </div>
-                <div class="col-auto m-0">
-                  <a href="javascript:void(0);" id="clearBtn" class="btn btn-warning">Clear</a>
-                </div>
               </div>
               <table class="table w-100" id="datatable">
                   <thead>
@@ -180,17 +177,17 @@
                   <span class="text-danger">Deselect All</span>
                 </a>
                 <div id="namaProdukChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
-                    @foreach ($produks as $produk)
-                      <div class="col-lg-3 col-md-4 col-sm-6">
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="{{ $produk->id }}" id="{{ $produk->id }}">
-                              <label class="form-check-label" for="{{ $produk->id }}">
-                                  {{ $produk->nama }}
-                              </label>
-                          </div>
-                      </div>
-                      @endforeach
-                  </div>
+                  @foreach ($produks as $produk)
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ $produk->id }}" id="{{ $produk->id }}">
+                            <label class="form-check-label" for="{{ $produk->id }}">
+                                {{ $produk->nama }}
+                            </label>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
               </div>
               
               <!-- Select Tipe Produk -->
@@ -216,7 +213,7 @@
               </div>
           </div>
           <div class="modal-footer justify-content-center">
-              <button type="button" class="btn btn-secondary" id="clearBtn2">Clear</button>
+              <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
               <button type="button" class="btn btn-primary" id="filterBtn">Filter</button>
           </div>
       </div>
@@ -301,7 +298,7 @@
             $('#filterModal').modal('hide');
         });
 
-        $('#clearBtn, #clearBtn2').on('click', function() {
+        $('#clearBtn').on('click', function() {
             $('#filterModal input[type="checkbox"]').prop('checked', false);
             $('#filterTipeProduk').val('').trigger('change');
             $('#filterSatuan').val('').trigger('change');
