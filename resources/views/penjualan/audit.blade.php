@@ -420,16 +420,16 @@
                                                             @if($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
                                                                 <td>-</td>
                                                                 <td><select name="ubahapa" id="ubahapa" class="form-control">
+                                                                    <option value="tidakubah">Tidak Ubah Produk</option>    
                                                                     <option value="ubahsemua">Ubah Produk</option>
-                                                                    <option value="tidakubah">Tidak Ubah Produk</option>
                                                                 </td>
                                                                 <td></td></td>
                                                             @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
                                                                 <td>-</td>
                                                                 <td>-</td>
                                                                 <td><select name="ubahapa" id="ubahapa" class="form-control">
+                                                                    <option value="tidakubah">Tidak Ubah Produk</option>    
                                                                     <option value="ubahsemua">Ubah Produk</option>
-                                                                    <option value="tidakubah">Tidak Ubah Produk</option>
                                                                 </td>
                                                             @endif
                                                         </tr>
