@@ -177,6 +177,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{ongkir}/edit', 'OngkirController@edit')->name('ongkir.edit');
             Route::patch('/{ongkir}/update', 'OngkirController@update')->name('ongkir.update');
             Route::get('/{ongkir}/delete', 'OngkirController@destroy')->name('ongkir.destroy');
+            Route::get('/pdf', 'OngkirController@pdf')->name('ongkir.pdf');
+            Route::get('/excel', 'OngkirController@excel')->name('ongkir.excel');
         });
 
         Route::group(['prefix' => 'tradisional'], function() {

@@ -15,20 +15,18 @@ class MassSeeder extends Seeder
      */
     public function run()
     {
-        $produks = [];
+        $ongkirs = [];
 
         for ($i = 1; $i <= 100; $i++) {
-            $produks[] = [
-                'kode' => 'PRD-' . Str::random(5),
-                'nama' => 'Produk ' . $i,
-                'tipe_produk' => rand(1, 3), // Misalnya tipe produk antara 1 hingga 3
-                'deskripsi' => 'Deskripsi untuk produk ' . $i,
-                'satuan' => 'Unit', // Misalnya satuan untuk setiap produk
+            $ongkirs[] = [
+                'nama' => 'Produk ' . $i, // Value for 'nama'
+                'lokasi_id' => rand(1, 3), // Random value between 1 and 3 for 'lokasi_id'
+                'biaya' => rand(10000, 500000),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
         }
 
-        DB::table('produks')->insert($produks);
+        DB::table('ongkirs')->insert($ongkirs);
     }
 }

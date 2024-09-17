@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\OngkirExport;
 use App\Models\Lokasi;
 use App\Models\Ongkir;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OngkirController extends Controller
 {
@@ -14,11 +18,66 @@ class OngkirController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $ongkirs = Ongkir::with('lokasi')->get();
+        if ($request->ajax()) {
+            $query = Ongkir::with('lokasi');
+
+            // filter
+            if ($request->has('ongkir') && !empty($request->ongkir)) {
+                $query->whereIn('id', $request->ongkir);
+            }
+        
+            if ($request->has('lokasi') && $request->lokasi != '') {
+                $query->where('lokasi_id', $request->lokasi);
+            }
+
+            $start = $request->input('start');
+            $length = $request->input('length');
+            $order = $request->input('order')[0]['column'];
+            $dir = $request->input('order')[0]['dir'];
+            $columnName = $request->input('columns')[$order]['data'];
+
+            // search
+            $search = $request->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%")
+                    ->orWhere('biaya', 'like', "%$search%")
+                    ->orWhereHas('lokasi', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $rawData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $rawData->map(function($item, $index) use ($currentPage, $perPage) {
+                $permission = Auth::user()->getAllPermissions()->pluck('name')->toArray();
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->lokasi_value = $item->lokasi->nama;
+                $item->biaya_format = formatRupiah($item->biaya);
+                $item->canEdit = in_array('ongkir.index', $permission);
+                $item->canDelete = in_array('ongkir.index', $permission);
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $request->input('draw'),
+                'recordsTotal' => Ongkir::count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
+        $ongkirs = Ongkir::select('id', 'nama')->get();
         $lokasis = Lokasi::where('tipe_lokasi', 1)->get();
-        return view('ongkir.index', compact('ongkirs', 'lokasis'));
+        return view('ongkir.index', compact('lokasis', 'ongkirs'));
     }
 
     /**
@@ -116,5 +175,48 @@ class OngkirController extends Controller
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
+    }
+
+    public function pdf(Request $request)
+    {
+        $query = Ongkir::query();
+        // filter
+        if ($request->has('ongkir') && !empty($request->ongkir)) {
+            $query->whereIn('id', $request->ongkir);
+        }
+    
+        if ($request->has('lokasi') && $request->lokasi != '') {
+            $query->where('lokasi_id', $request->lokasi);
+        }
+
+        $data = $query->get()->map(function($item) {
+            $item->lokasi_value = $item->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('ongkir.pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('ongkir.pdf');
+    }
+
+    public function excel(Request $request)
+    {
+        $query = Ongkir::query();
+        // filter
+        if ($request->has('ongkir') && !empty($request->ongkir)) {
+            $query->whereIn('id', $request->ongkir);
+        }
+    
+        if ($request->has('lokasi') && $request->lokasi != '') {
+            $query->where('lokasi_id', $request->lokasi);
+        }
+
+        $data = $query->get()->map(function($item) {
+            $item->lokasi_value = $item->lokasi->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new OngkirExport($data), 'ongkir.xlsx');
     }
 }

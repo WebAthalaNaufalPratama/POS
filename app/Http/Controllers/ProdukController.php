@@ -48,20 +48,22 @@ class ProdukController extends Controller
                 $query->where(function($q) use ($search) {
                     $q->where('kode', 'like', "%$search%")
                     ->orWhere('nama', 'like', "%$search%")
-                    ->orWhere('tipe', 'like', "%$search%")
                     ->orWhere('satuan', 'like', "%$search%")
-                    ->orWhere('deskripsi', 'like', "%$search%");
+                    ->orWhere('deskripsi', 'like', "%$search%")
+                    ->orWhereHas('tipe', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
                 });
             }
     
             $query->orderBy($columnName, $dir);
             $recordsFiltered = $query->count();
-            $kontrakData = $query->offset($start)->limit($length)->get();
+            $rawData = $query->offset($start)->limit($length)->get();
     
             $currentPage = ($start / $length) + 1;
             $perPage = $length;
         
-            $data = $kontrakData->map(function($item, $index) use ($currentPage, $perPage) {
+            $data = $rawData->map(function($item, $index) use ($currentPage, $perPage) {
                 $permission = Auth::user()->getAllPermissions()->pluck('name')->toArray();
                 $item->no = ($currentPage - 1) * $perPage + ($index + 1);
                 $item->tipe_value = $item->tipe->nama;

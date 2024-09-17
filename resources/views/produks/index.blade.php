@@ -330,6 +330,7 @@
             $(this).addClass('d-none');
             $('#uncheckAll').removeClass('d-none');
         });
+        
         $('#uncheckAll').on('click', function() {
             $('#namaProdukChecklist input').prop('checked', false);
             $(this).addClass('d-none');
