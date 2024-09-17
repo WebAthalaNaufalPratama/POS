@@ -116,6 +116,7 @@
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA">TUNDA</option>
+                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
                                             </select>
                                         </div>
                                     </div>
@@ -308,12 +309,12 @@
                                                 <label>Masukan Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti_file" accept="image/*">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti_file" accept="image/*,.pdf">
                                                     <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <div class="custom-file-container__image-preview"></div>
+                                                <div id="filePreview"></div>
                                             </div>
                                             </div>
                                         </div>
@@ -786,7 +787,7 @@
                                     @endforeach
                                 </select>
                             </td>
-                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control" readonly></td>
+                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control"></td>
                             <td><input type="number" name="jumlah[]" id="jumlah_${i}" class="form-control" oninput="multiply(this)"></td>
                             <td>
                                 <select id="jenis_diskon_${i}" name="jenis_diskon[]" class="form-control" onchange="showInputType(${i})">
@@ -1113,6 +1114,11 @@
             }
         });
 
+        $('[id^="harga_satuan_"]').on('input', function(){
+            var inputhas = $(this).val();
+            $(this).val(formatRupiah(inputhas, 'Rp '));
+        });
+
         $('#promo_id').change(function() {
             var promo_id = $(this).select2().find(":selected").val()
             if (!promo_id) {
@@ -1210,7 +1216,7 @@
                     $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip"></i>')
                 }
             });
-        }
+        };
 
         function updateHargaSatuan(select) {
             var index = select.selectedIndex;
@@ -1222,7 +1228,7 @@
             var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
             hargaSatuanInput.val(formattedHarga);
             multiply(hargaSatuanInput);
-        }
+        };
 
         window.multiply = function(element) {
             var id;
@@ -1256,7 +1262,7 @@
                 $('#sub_total').val(formatted_total);
                 $('#total_tagihan').val(formatted_total);
             }
-        }
+        };
 
 
 
@@ -1272,33 +1278,51 @@
             // subTotalInput.val(subTotal.toFixed(2));
             var formatted_total = formatRupiah(subTotal, 'Rp ');
             subTotalInput.val(formatted_total);
-        }
+        };
 
-        $('#bukti_file').on('change', function() {
-            const file = $(this)[0].files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(this).val('');
-                return;
-            }
+        $('#bukti_file').on('change', function(event) {
+            var file = event.target.files[0];
+            var filePreviewContainer = $('#filePreview');
+
+            filePreviewContainer.html('');
+
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview').attr('src', e.target.result);
+                var fileType = file.type;
+
+                if (fileType.includes('image')) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = $('<img />', {
+                            src: e.target.result,
+                            style: 'max-width: 100%;'
+                        });
+                        filePreviewContainer.append(img);
+                    };
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
+                else if (fileType === 'application/pdf') {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var embed = $('<embed />', {
+                            src: e.target.result,
+                            type: 'application/pdf',
+                            width: '100%',
+                            height: '500px' 
+                        });
+                        filePreviewContainer.append(embed);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Unsupported file type! Please select an image or a PDF file.');
+                }
             }
         });
 
         function clearFile() {
-            $('#bukti_file').val('');
-            $('#preview').attr('src', defaultImg);
-        };
+            $('#bukti_file').val(''); 
+            $('#filePreview').html(''); 
+        }
+
 
         function calculatePromo(promo_id) {
             var data = {
@@ -1364,13 +1388,13 @@
                     console.log(error)
                 }
             });
-        }
+        };
         function parseNumber(rupiah) {
             rupiah = String(rupiah);
             rupiah = rupiah.replace(/[^\d,]/g, '');
             rupiah = rupiah.replace(',', '.');
             return parseFloat(rupiah);
-        }
+        };
 
         function Totaltagihan() {
             var subtotal = parseRupiahToNumber($('#sub_total').val()) || 0;
@@ -1406,7 +1430,7 @@
             $('#total_tagihan').val(formatRupiah(totalTagihan, 'Rp '));
             $('#sisa_bayar').val(formatRupiah(sisaBayar, 'Rp '));
             $('#jumlah_ppn').val(formatRupiah(ppn, 'Rp '));
-        }
+        };
 
 
         $('#sub_total, #jumlah_ppn, #dp, #biaya_ongkir, #total_promo, #persen_ppn').on('input', Totaltagihan);

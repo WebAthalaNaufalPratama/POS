@@ -686,7 +686,7 @@
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="submit" id="simpan" class="btn btn-primary">Simpan</button>
             </div>
             </form>
         </div>
@@ -937,6 +937,7 @@
             var data = {
                 produk_id: produk_id,
             };
+
             $.ajax({
                 url: '/getProdukTerjual',
                 type: 'GET',
@@ -945,41 +946,57 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    // console.log(data);
-                    // console.log(response.perangkai, produk_id)
                     $('#prdTerjual').val(response.produk.nama);
                     $('#prdTerjual_id').val(response.id);
                     $('#jml_produk').val(response.jumlah);
                     $('#no_form').val(response.kode_form);
                     $('#jml_perangkai').val(response.perangkai.length);
-                    $('[id^="perangkai_id"]').select2()
-                    $('[id^="perangkai_id_"]').each(function() {
-                        $(this).select2().select2('destroy');
-                        $(this).remove();
-                    });
+
+                    $('[id^="perangkai_id_"]').select2().select2('destroy').remove();
+
                     if (response.perangkai.length > 0) {
                         for (var i = 0; i < response.perangkai.length; i++) {
                             var rowPerangkai =
-                                '<select id="perangkai_id_' + i + '" name="perangkai_id[]" class="form-control">' +
+                                '<select id="perangkai_id_' + i + '" name="perangkai_id[]" class="form-control" required>' +
                                 '<option value="">Pilih Perangkai</option>' +
                                 '@foreach ($perangkai as $item)' +
                                 '<option value="{{ $item->id }}">{{ $item->nama }}</option>' +
                                 '@endforeach' +
                                 '</select>';
                             $('#div_perangkai').append(rowPerangkai);
-                            $('#div_perangkai select').each(function(index) {
-                                $(this).val(response.perangkai[index].perangkai_id);
-                            });
-                            $('#perangkai_id_' + i).select2();
+
+                            $('#perangkai_id_' + i).val(response.perangkai[i].perangkai_id).select2();
                         }
                     }
+
                     $('#modalPerangkai').modal('show');
                 },
                 error: function(xhr, status, error) {
-                    console.log(error)
+                    console.log(error);
+                }
+            });
+
+            $('#form_perangkai').on('submit', function(event) {
+                var allPerangkaiSelected = true;
+
+                $('[id^="perangkai_id_"]').each(function() {
+                    if ($(this).val() === '') {
+                        allPerangkaiSelected = false;
+                    }
+                });
+
+                if (!allPerangkaiSelected) {
+                    event.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Incomplete selection',
+                        text: 'Tolong Isi Nama Perangkai Sebelum Disimpan!',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         }
+
 
         function getDataGift(produk_id) {
             var data = {
@@ -996,6 +1013,7 @@
                 success: function(response) {
                     // console.log(response.produk.nama)
                     $('#prdTerjualGift').val(response.produk.nama);
+                    $('#kodeProduk').val(response.produk.kode);
                     $('#prdTerjualGift_id').val(response.id);
                     // console.log(response.id);
                     $('#jmlGift_produk').val(response.jumlah);
@@ -1005,6 +1023,11 @@
                     });
                     
                     $('[id^="jumlahproduk_id_"]').remove();
+                    if(response.produk.kode.slice(0, 3) === 'GFT') {
+                        $('#simpan').show();
+                    } else {
+                        $('#simpan').hide();
+                    }
                     // console.log(response);
                     var pot_bunga = 0
                     if(response.komponen.length > 0){
@@ -1055,7 +1078,7 @@
             e.preventDefault();
             var jumlah = $(this).val();
             jumlah = parseInt(jumlah) > 10 ? 10 : parseInt(jumlah);
-            console.log(jumlah)
+            // console.log(jumlah)
             $('[id^="perangkai_id_"]').each(function() {
                 $(this).select2('destroy');
                 $(this).remove();

@@ -234,7 +234,7 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga, 0, ',', '.',) }}" onchange="calculateTotal({{ $i }})" readonly></td>
+                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" class="form-control" value="{{ 'Rp '. number_format($komponen->harga, 0, ',', '.',) }}" onchange="calculateTotal({{ $i }})" ></td>
                                                     <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" oninput="multiply($(this))" class="form-control" value="{{ $komponen->jumlah }}" onchange="calculateTotal({{ $i }})"></td>
                                                     <td>
                                                         <select id="jenis_diskon_{{ $i }}" name="jenis_diskon[]" class="form-control" onchange="showInputType({{ $i }})">
@@ -420,16 +420,16 @@
                                                             @if($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Finance']))
                                                                 <td>-</td>
                                                                 <td><select name="ubahapa" id="ubahapa" class="form-control">
+                                                                    <option value="tidakubah">Tidak Ubah Produk</option>    
                                                                     <option value="ubahsemua">Ubah Produk</option>
-                                                                    <option value="tidakubah">Tidak Ubah Produk</option>
                                                                 </td>
                                                                 <td></td></td>
                                                             @elseif($penjualans->status == 'DIKONFIRMASI' && $user->hasRole(['Auditor']))
                                                                 <td>-</td>
                                                                 <td>-</td>
                                                                 <td><select name="ubahapa" id="ubahapa" class="form-control">
+                                                                    <option value="tidakubah">Tidak Ubah Produk</option>    
                                                                     <option value="ubahsemua">Ubah Produk</option>
-                                                                    <option value="tidakubah">Tidak Ubah Produk</option>
                                                                 </td>
                                                             @endif
                                                         </tr>
@@ -960,6 +960,11 @@
             var index = element.id.split("_")[2]; // Extract the index from the ID
             showInputType(index);
         });
+    });
+
+    $('[id^="harga_satuan_"]').on('input', function(){
+        var inputhas = $(this).val();
+        $(this).val(formatRupiah(inputhas, 'Rp '));
     });
 
     function calculateTotal(index) {

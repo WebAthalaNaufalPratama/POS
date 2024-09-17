@@ -349,11 +349,11 @@ class FormPerangkaiController extends Controller
             }
 
             if (!$allStockAvailable) {
-                return redirect(route('inven_galeri.create'))->with('fail', 'Data Produk Belum Ada Di Inventory');
+                return redirect()->back()->with('fail', 'Data Produk Belum Ada Di Inventory');
             }
 
             if (!$cekstokproduk) {
-                return redirect(route('inven_galeri.create'))->with('fail', "Stok untuk produk {$komponen->nama_produk} tidak mencukupi!");
+                return redirect()->back()->with('fail', "Stok untuk produk {$komponen->nama_produk} tidak mencukupi!");
             }
         }
 
