@@ -17,12 +17,30 @@
         <div class="card-body">
             <div class="table-responsive">
               <div class="row mb-2">
-                <div class="col-auto m-0 pe-0">
-                  <a href="javascript:void(0);" class="btn btn-primary p-1 d-flex justify-content-center items-align-center" data-bs-toggle="modal" data-bs-target="#filterModal">
-                    <img src="{{ asset('assets/img/icons/filter.svg') }}" alt="filter">
-                  </a>
+                <div class="col-12 d-flex justify-content-between align-items-center">
+                  <!-- Tombol Filter di Kiri -->
+                  <div class="col-auto pe-0">
+                    <a href="javascript:void(0);" class="btn btn-primary p-1 d-flex justify-content-center align-items-center" data-bs-toggle="modal" data-bs-target="#filterModal">
+                      <img src="{{ asset('assets/img/icons/filter.svg') }}" alt="filter">
+                    </a>
+                  </div>
+              
+                  <!-- Tombol PDF & Excel di Kanan -->
+                  <div class="col-auto">
+                    @if(in_array('produks.pdf', $thisUserPermissions))
+                    <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
+                      <img src="/assets/img/icons/pdf.svg" alt="PDF" style="height: 1rem;" /> PDF
+                    </button>
+                    @endif
+                    @if(in_array('produks.excel', $thisUserPermissions))
+                    <button class="btn btn-outline-success" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="excel()">
+                      <img src="/assets/img/icons/excel.svg" alt="EXCEL" style="height: 1rem;" /> EXCEL
+                    </button>
+                    @endif
+                  </div>
                 </div>
               </div>
+              
               <table class="table w-100" id="datatable">
                   <thead>
                     <tr>
@@ -390,6 +408,76 @@
             });
           }
       });
+    }
+    function pdf() {
+        var filterNamaProduk = [];
+        $('#namaProdukChecklist input:checked').each(function() {
+            filterNamaProduk.push($(this).val());
+        });
+        
+        var filterTipeProduk = $('#filterTipeProduk').val();
+        var filterSatuan = $('#filterSatuan').val();
+
+        var desc = 'Cetak laporan tanpa filter';
+        if (filterNamaProduk.length > 0 || filterTipeProduk || filterSatuan) {
+            desc = 'Cetak laporan dengan filter';
+        }
+
+        Swal.fire({
+            title: 'Cetak PDF?',
+            text: desc,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Cetak',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var url = "{{ route('produks.pdf') }}" + '?' + $.param({
+                    produk: filterNamaProduk,
+                    tipe_produk: filterTipeProduk,
+                    satuan: filterSatuan,
+                });
+
+                window.open(url);
+            }
+        });
+    }
+    function excel() {
+        var filterNamaProduk = [];
+        $('#namaProdukChecklist input:checked').each(function() {
+            filterNamaProduk.push($(this).val());
+        });
+        
+        var filterTipeProduk = $('#filterTipeProduk').val();
+        var filterSatuan = $('#filterSatuan').val();
+
+        var desc = 'Cetak laporan tanpa filter';
+        if (filterNamaProduk.length > 0 || filterTipeProduk || filterSatuan) {
+            desc = 'Cetak laporan dengan filter';
+        }
+
+        Swal.fire({
+            title: 'Cetak Excel?',
+            text: desc,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Cetak',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var url = "{{ route('produks.excel') }}" + '?' + $.param({
+                    produk: filterNamaProduk,
+                    tipe_produk: filterTipeProduk,
+                    satuan: filterSatuan,
+                });
+
+                window.location.href = url;
+            }
+        });
     }
     </script>
 @endsection

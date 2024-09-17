@@ -111,6 +111,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{produk}/edit', 'ProdukController@edit')->name('produks.edit');
             Route::patch('/{produk}/update', 'ProdukController@update')->name('produks.update');
             Route::get('/{produk}/delete', 'ProdukController@destroy')->name('produks.destroy');
+            Route::get('/{produk}/delete', 'ProdukController@destroy')->name('produks.destroy');
+            Route::get('/pdf', 'ProdukController@pdf')->name('produks.pdf');
+            Route::get('/excel', 'ProdukController@excel')->name('produks.excel');
         });
 
         Route::group(['prefix' => 'tipe_produks'], function() {

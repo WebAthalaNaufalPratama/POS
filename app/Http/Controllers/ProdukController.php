@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProdukExport;
 use App\Models\Produk;
 use App\Models\Tipe_Produk;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProdukController extends Controller
 {
@@ -190,5 +193,56 @@ class ProdukController extends Controller
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
+    }
+
+    public function pdf(Request $request)
+    {
+        $query = Produk::query();
+        // filter
+        if ($request->has('produk') && !empty($request->produk)) {
+            $query->whereIn('id', $request->produk);
+        }
+    
+        if ($request->has('tipe_produk') && $request->tipe_produk != '') {
+            $query->where('tipe_produk', $request->tipe_produk);
+        }
+
+        if ($request->has('satuan') && $request->satuan != '') {
+            $query->where('satuan', $request->satuan);
+        }
+
+        $data = $query->get()->map(function($item) {
+            $item->tipe_value = $item->tipe->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('produks.pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('produk.pdf');
+    }
+
+    public function excel(Request $request)
+    {
+        $query = Produk::query();
+        // filter
+        if ($request->has('produk') && !empty($request->produk)) {
+            $query->whereIn('id', $request->produk);
+        }
+    
+        if ($request->has('tipe_produk') && $request->tipe_produk != '') {
+            $query->where('tipe_produk', $request->tipe_produk);
+        }
+
+        if ($request->has('satuan') && $request->satuan != '') {
+            $query->where('satuan', $request->satuan);
+        }
+
+        $data = $query->get()->map(function($item) {
+            $item->tipe_value = $item->tipe->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new ProdukExport($data), 'produk.xlsx');
     }
 }
