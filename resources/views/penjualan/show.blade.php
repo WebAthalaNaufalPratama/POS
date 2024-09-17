@@ -686,7 +686,7 @@
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="submit" id="simpan" class="btn btn-primary">Simpan</button>
             </div>
             </form>
         </div>
@@ -996,6 +996,7 @@
                 success: function(response) {
                     // console.log(response.produk.nama)
                     $('#prdTerjualGift').val(response.produk.nama);
+                    $('#kodeProduk').val(response.produk.kode);
                     $('#prdTerjualGift_id').val(response.id);
                     // console.log(response.id);
                     $('#jmlGift_produk').val(response.jumlah);
@@ -1005,6 +1006,11 @@
                     });
                     
                     $('[id^="jumlahproduk_id_"]').remove();
+                    if(response.produk.kode.slice(0, 3) === 'GFT') {
+                        $('#simpan').show();
+                    } else {
+                        $('#simpan').hide();
+                    }
                     // console.log(response);
                     var pot_bunga = 0
                     if(response.komponen.length > 0){
