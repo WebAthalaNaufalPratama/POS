@@ -246,6 +246,8 @@ class PenjualanController extends Controller
                 return redirect()->back()->with('fail', 'Customer Belum Bisa Melakukan Transaksi');                                                                                                                                                                                                                                                                                                                                                    
             }
         }
+
+        $user = Auth::user();
           
         $data['dibuat_id'] = Auth::user()->id;
         if ($req->hasFile('bukti_file')) {
@@ -314,6 +316,7 @@ class PenjualanController extends Controller
             $data['no_invoice'] = $prefix . str_pad($increment, 3, '0', STR_PAD_LEFT);
         }
 
+        $penjualan = Penjualan::create($data);
         if ($req->dp > 0 && $req->status == 'DIKONFIRMASI' && !$user->hasRole(['Auditor', 'Finance'])) {
             if ($req->hasFile('bukti')) {
                 $file = $req->file('bukti');
@@ -322,7 +325,7 @@ class PenjualanController extends Controller
                 $datu['bukti'] = $filePath;
             }
             if ($req->sisa_bayar == 0) {
-                $datu['invoice_penjualan_id'] = $penjualanId;
+                $datu['invoice_penjualan_id'] = $penjualan->id;
                 if($lokasi->tipe_lokasi == 1) {
                         $number = 1;
                         $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
@@ -343,7 +346,7 @@ class PenjualanController extends Controller
                 $updatecust = Customer::where('id', $req->id_customer)->update(['status_piutang' => $status]);
                 $pembayaran = Pembayaran::create($datu);
             } else {
-                $datu['invoice_penjualan_id'] = $penjualanId;
+                $datu['invoice_penjualan_id'] = $penjualan->id;
                 if($lokasi->tipe_lokasi == 1) {
                         $number = 1;
                         $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
@@ -365,8 +368,6 @@ class PenjualanController extends Controller
                 $pembayaran = Pembayaran::create($datu);
             }
         }  
-
-        $penjualan = Penjualan::create($data);
         $updatecust = Customer::where('id', $data['id_customer'])->update([
             'status_piutang' => 'BELUM LUNAS',
             'status_buka' => 'TUTUP',

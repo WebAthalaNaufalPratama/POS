@@ -927,18 +927,27 @@
 
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
-            var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); // Mengonversi format Rupiah menjadi numerik
+            var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); 
             var produk = [];
             var tipe_produk = [];
+            var produk_count = [];
 
             $('select[id^="nama_produk_"]').each(function() {
-                produk.push($(this).val());
+                var selected_produk = $(this).val();
+                produk.push(selected_produk);
                 tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
+
+                if (produk_count[selected_produk]) {
+                    produk_count[selected_produk]++;
+                } else {
+                    produk_count[selected_produk] = 1; 
+                }
             });
 
-            $(this).html('<span class="spinner-border spinner-border-sm me-2"></span>'); // Menambahkan penutupan span yang hilang
-            checkPromo(total_transaksi, tipe_produk, produk);
+            $(this).html('<span class="spinner-border spinner-border-sm me-2"></span>'); 
+            checkPromo(total_transaksi, tipe_produk, produk, produk_count);
         });
+
 
 
         $('#cara_bayar').change(function() {
@@ -1120,7 +1129,7 @@
         });
 
         $('#promo_id').change(function() {
-            var promo_id = $(this).select2().find(":selected").val()
+            var promo_id = $(this).select2().find(":selected").val();
             if (!promo_id) {
                 $('#total_promo').val(0);
                 total_harga();
@@ -1173,13 +1182,14 @@
         });
 
 
-        function checkPromo(total_transaksi, tipe_produk, produk) {
+        function checkPromo(total_transaksi, tipe_produk, produk, produk_count) {
             $('#total_promo').val(0);
             Totaltagihan();
             var data = {
                 total_transaksi: total_transaksi,
                 tipe_produk: tipe_produk,
-                produk: produk
+                produk: produk,
+                produk_count: produk_count
             };
             $.ajax({
                 url: '/checkPromo',
@@ -1336,11 +1346,40 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
+                    var produk_count = {}; 
+
+                    $('select[id^="nama_produk_"]').each(function(index, element) {
+                        var thisProduk = $(this).val();
+                        var selected_produk = response.ketentuan_produk;
+                        var jumlah = parseInt($('[id^="jumlah_"]').eq(index).val()) || 0;
+                        if (selected_produk == thisProduk) {
+                            if (produk_count[thisProduk]) {
+                                produk_count[thisProduk] += jumlah;
+                            } else {
+                                produk_count[thisProduk] = jumlah; 
+                            }
+                        }
+                    });
+
                     var total_transaksi = parseRupiahToNumber($('#sub_total').val());
+                    
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            $('select[id^="nama_produk_"]').each(function(index, element) {
+                                var thisProduk = $(this).val();
+                                var selected_produk = response.ketentuan_produk;
+                                var subtotal = parseInt($('[id^="harga_total_"]').eq(index).val()) || 0;
+                                if (selected_produk == thisProduk) {
+                                    if (produk_count[thisProduk]) {
+                                        produk_count[thisProduk] += subtotal * parseInt(response.diskon_persen) / 100;
+                                    } else {
+                                        produk_count[thisProduk] = subtotal * parseInt(response.diskon_persen) / 100; 
+                                    }
+                                }
+                            });
+                            // total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            total_promo = produk_count;
                             // console.log(total_promo);
                             break;
                         case 'nominal':
@@ -1353,13 +1392,16 @@
                             break;
                         case 'poin':
                             var pointInput = parseFloat($('#point_dipakai').val()) || 0;
+                            var productCode = response.ketentuan_produk;
+                            var quantity = produk_count[productCode] || 0;
 
-                            if ($('#cek_point').prop('checked')) {
+                            if ($('#cek_point').prop('checked') && response.ketentuan != 'produk') {
                                 total_promo = 'poin ' + response.diskon_poin;
+                            }else if(response.ketentuan == 'produk'){
+                                total_promo = 'poin ' + response.diskon_poin * quantity;
                             }else{
                                 total_promo = 'poin ' + response.diskon_poin;
                             }
-                            
                             break;
                         case 'produk':
                             total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
