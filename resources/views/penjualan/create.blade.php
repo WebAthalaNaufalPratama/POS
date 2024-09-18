@@ -1366,20 +1366,20 @@
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
-                            $('select[id^="nama_produk_"]').each(function(index, element) {
-                                var thisProduk = $(this).val();
-                                var selected_produk = response.ketentuan_produk;
-                                var subtotal = parseInt($('[id^="harga_total_"]').eq(index).val()) || 0;
-                                if (selected_produk == thisProduk) {
-                                    if (produk_count[thisProduk]) {
-                                        produk_count[thisProduk] += subtotal * parseInt(response.diskon_persen) / 100;
-                                    } else {
-                                        produk_count[thisProduk] = subtotal * parseInt(response.diskon_persen) / 100; 
-                                    }
-                                }
-                            });
-                            // total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
-                            total_promo = produk_count;
+                            // $('select[id^="nama_produk_"]').each(function(index, element) {
+                            //     var thisProduk = $(this).val();
+                            //     var selected_produk = response.ketentuan_produk;
+                            //     var subtotal = parseInt($('[id^="harga_total_"]').eq(index).val()) || 0;
+                            //     if (selected_produk == thisProduk) {
+                            //         if (produk_count[thisProduk]) {
+                            //             produk_count[thisProduk] += subtotal * parseInt(response.diskon_persen) / 100;
+                            //         } else {
+                            //             produk_count[thisProduk] = subtotal * parseInt(response.diskon_persen) / 100; 
+                            //         }
+                            //     }
+                            // });
+                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            // total_promo = produk_count;
                             // console.log(total_promo);
                             break;
                         case 'nominal':
