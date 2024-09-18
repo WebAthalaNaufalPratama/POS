@@ -5,12 +5,76 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Rekening;
 use App\Models\Lokasi;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class RekeningController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $query = Rekening::with('lokasi');
+
+            // filter
+            // if ($request->has('produk') && !empty($request->produk)) {
+            //     $query->whereIn('id', $request->produk);
+            // }
+        
+            // if ($request->has('tipe_produk') && $request->tipe_produk != '') {
+            //     $query->where('tipe_produk', $request->tipe_produk);
+            // }
+
+            // if ($request->has('satuan') && $request->satuan != '') {
+            //     $query->where('satuan', $request->satuan);
+            // }
+
+            $start = $request->input('start');
+            $length = $request->input('length');
+            $order = $request->input('order')[0]['column'];
+            $dir = $request->input('order')[0]['dir'];
+            $columnName = $request->input('columns')[$order]['data'];
+
+            // search
+            $search = $request->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('jenis', 'like', "%$search%")
+                    ->orWhere('bank', 'like', "%$search%")
+                    ->orWhere('nomor_rekening', 'like', "%$search%")
+                    ->orWhere('nama_akun', 'like', "%$search%")
+                    ->orWhere('saldo_awal', 'like', "%$search%")
+                    ->orWhereHas('lokasi', function($c) use($search){
+                        $c->where('nama', 'like', "%$search%");
+                    });
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $rawData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $rawData->map(function($item, $index) use ($currentPage, $perPage) {
+                $permission = Auth::user()->getAllPermissions()->pluck('name')->toArray();
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->saldo_awal_format = formatRupiah($item->saldo_awal);
+                $item->saldo_akhir_format = formatRupiah($item->saldo_akhir);
+                $item->lokasi_value = $item->lokasi->nama;
+                $item->canEdit = in_array('rekening.index', $permission);
+                $item->canDelete = in_array('rekening.index', $permission);
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $request->input('draw'),
+                'recordsTotal' => Rekening::count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
         $rekenings = Rekening::all();
         $lokasis = Lokasi::all();
         return view('rekening.index', compact('rekenings', 'lokasis'));
@@ -36,17 +100,21 @@ class RekeningController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'bank' => 'required',
-            'nomor_rekening' => 'required|numeric|unique:rekenings,nomor_rekening',
-            'nama_akun' => 'required',
+            'bank' => 'nullable',
+            'nomor_rekening' => 'nullable|numeric|unique:rekenings,nomor_rekening',
+            'nama_akun' => 'nullable',
             'lokasi_id' => 'required|exists:lokasis,id',
             'saldo_awal' => 'nullable'
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        if ($req->jenis === 'Cash' && Rekening::where('lokasi_id', $req->lokasi_id)->exists()) {
+            return redirect()->back()->withInput()->with('fail', 'Data sudah ada');
+        }
         $data = $req->except(['_token', '_method']);
 
         // save data
+        $data['saldo_akhir'] = $data['saldo_awal'];
         $check = Rekening::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
         return redirect()->back()->with('success', 'Data tersimpan');
@@ -87,9 +155,9 @@ class RekeningController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'bank' => 'required',
-            'nomor_rekening' => 'required|numeric|unique:rekenings,nomor_rekening,'.$rekening,
-            'nama_akun' => 'required',
+            'bank' => 'nullable',
+            'nomor_rekening' => 'nullable|numeric|unique:rekenings,nomor_rekening,'.$rekening,
+            'nama_akun' => 'nullable',
             'lokasi_id' => 'required|exists:lokasis,id',
             'saldo_awal' => 'nullable'
         ]);

@@ -16,20 +16,22 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="datatable">
                 <thead>
                 <tr>
                     <th>No</th>
+                    <th>Jenis</th>
                     <th>Bank</th>
                     <th>Nomor Rekening</th>
                     <th>Nama Akun</th>
                     <th>Lokasi</th>
                     <th>Saldo Awal</th>
+                    <th>Saldo Akhir</th>
                     <th class="text-center">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($rekenings as $rekening)
+                    {{-- @foreach ($rekenings as $rekening)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $rekening->bank }}</td>
@@ -51,7 +53,7 @@
                               </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -71,17 +73,30 @@
         <div class="modal-body">
           <form id="addForm" action="{{ route('rekening.store') }}" method="POST">
             @csrf
-            <div class="mb-3">
-              <label for="bank" class="col-form-label">Bank</label>
-              <input type="text" class="form-control" name="bank" id="add_bank" required>
+            <div class="mb-3 d-flex justify-content-center gap-5">
+              <div class="text-left">
+                <input type="radio" class="form-check-input" name="jenis" id="add_jenis_rekening" value="Rekening" checked required>
+                <label for="jenis_rekening" class="form-check-label">Rekening</label>
+              </div>
+              
+              <div class="text-right">
+                <input type="radio" class="form-check-input" name="jenis" id="add_jenis_cash" value="Cash" required>
+                <label for="jenis_cash" class="form-check-label">Cash</label>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
-              <input type="text" class="form-control hide-arrow" name="nomor_rekening" id="add_nomor_rekening" oninput="validateDigit(this, 16)" required>
-            </div>
-            <div class="mb-3">
-              <label for="nama_akun" class="col-form-label">Nama Akun</label>
-              <input type="text" class="form-control" name="nama_akun" id="add_nama_akun" required>
+            <div class="add_rekening">
+              <div class="mb-3">
+                <label for="bank" class="col-form-label">Bank</label>
+                <input type="text" class="form-control" name="bank" id="add_bank" required>
+              </div>
+              <div class="mb-3">
+                <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
+                <input type="text" class="form-control hide-arrow" name="nomor_rekening" id="add_nomor_rekening" oninput="validateDigit(this, 16)" required>
+              </div>
+              <div class="mb-3">
+                <label for="nama_akun" class="col-form-label">Nama Akun</label>
+                <input type="text" class="form-control" name="nama_akun" id="add_nama_akun" required>
+              </div>
             </div>
             <div class="mb-3">
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
@@ -118,17 +133,30 @@
           <form id="editForm" action="rekening/0/update" method="POST">
             @csrf
             @method('PATCH')
-            <div class="mb-3">
-              <label for="bank" class="col-form-label">Bank</label>
-              <input type="text" class="form-control" name="bank" id="edit_bank" required>
+            <div class="mb-3 d-flex justify-content-center gap-5">
+              <div class="text-left">
+                <input type="radio" class="form-check-input" name="jenis" id="edit_jenis_rekening" value="Rekening" checked required>
+                <label for="jenis_rekening" class="form-check-label">Rekening</label>
+              </div>
+              
+              <div class="text-right">
+                <input type="radio" class="form-check-input" name="jenis" id="edit_jenis_cash" value="Cash" required>
+                <label for="jenis_cash" class="form-check-label">Cash</label>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
-              <input type="text" class="form-control hide-arrow" name="nomor_rekening" id="edit_nomor_rekening" oninput="validateDigit(this, 16)" required>
-            </div>
-            <div class="mb-3">
-              <label for="nama_akun" class="col-form-label">Nama Akun</label>
-              <input type="text" class="form-control" name="nama_akun" id="edit_nama_akun" required>
+            <div class="edit_rekening">
+              <div class="mb-3">
+                <label for="bank" class="col-form-label">Bank</label>
+                <input type="text" class="form-control" name="bank" id="edit_bank" required>
+              </div>
+              <div class="mb-3">
+                <label for="nomor_rekening" class="col-form-label">Nomor Rekening</label>
+                <input type="text" class="form-control hide-arrow" name="nomor_rekening" id="edit_nomor_rekening" oninput="validateDigit(this, 16)" required>
+              </div>
+              <div class="mb-3">
+                <label for="nama_akun" class="col-form-label">Nama Akun</label>
+                <input type="text" class="form-control" name="nama_akun" id="edit_nama_akun" required>
+              </div>
             </div>
             <div class="mb-3">
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
@@ -161,6 +189,151 @@
     <script>
     $(document).ready(function() {
         $('#add_lokasi_id, #edit_lokasi_id').select2()
+
+        $('#add_jenis_cash').on('change', function(){
+          $('.add_rekening input').attr('required', false);
+          $('.add_rekening').addClass('d-none');
+        })
+
+        $('#add_jenis_rekening').on('change', function(){
+          $('.add_rekening input').attr('required', true);
+          $('.add_rekening').removeClass('d-none');
+        })
+
+        $('#edit_jenis_cash').on('change', function(){
+          $('.edit_rekening input').attr('required', false);
+          $('.edit_rekening').addClass('d-none');
+        })
+
+        $('#edit_jenis_rekening').on('change', function(){
+          $('.edit_rekening input').attr('required', true);
+          $('.edit_rekening').removeClass('d-none');
+        })
+
+        const columns = [
+            { data: 'no', name: 'no', orderable: false },
+            {
+              data: 'jenis',
+              name: 'jenis',
+              render: function (data) {
+                  let badgeClass;
+                  switch (data) {
+                      case 'Cash':
+                          badgeClass = 'bg-lightgreen';
+                          break;
+                      case 'Rekening':
+                          badgeClass = 'bg-lightblue';
+                          break;
+                      default:
+                          badgeClass = 'bg-lightgrey';
+                          break;
+                  }
+
+                  return `<span class="badges ${badgeClass}">${data || '-'}</span>`;
+              }
+            },
+            { data: 'bank', name: 'bank', defaultContent: '-' },
+            { data: 'nomor_rekening', name: 'nomor_rekening', orderable: false, defaultContent: '-' },
+            { data: 'nama_akun', name: 'nama_akun', defaultContent: '-' },
+            { 
+              data: 'lokasi', 
+              name: 'lokasi',
+              render: function(data, type, row) {
+                return row.lokasi.nama;
+              }
+            },
+            { 
+              data: 'saldo_awal', 
+              name: 'saldo_awal',
+              render: function(data, type, row) {
+                return row.saldo_awal_format;
+              }
+            },
+            { 
+              data: 'saldo_akhir', 
+              name: 'saldo_akhir',
+              render: function(data, type, row) {
+                return row.saldo_akhir_format;
+              }
+            },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    let actionsHtml = `
+                        <div class="text-center">
+                            <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                    `;
+
+                    if (row.canEdit) {
+                        actionsHtml += `
+                            <li>
+                                <a href="javascript:void(0);" onclick="getData(${row.id})" data-bs-toggle="modal" data-bs-target="#editrekening" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                            </li>
+                        `;
+                    }
+
+                    if (row.canDelete) {
+                        actionsHtml += `
+                            <li>
+                                <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData(${row.id})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                            </li>
+                        `;
+                    }
+
+                    actionsHtml += `
+                            </ul>
+                        </div>
+                    `;
+
+                    return actionsHtml;
+                }
+            }
+        ]
+
+        let table = initDataTable('#datatable', {
+            ajaxUrl: "{{ route('rekening.index') }}",
+            columns: columns,
+            order: [[1, 'asc']],
+            searching: true,
+            lengthChange: true,
+            pageLength: 10,
+        }, {
+            // produk: '#namaProdukChecklist',
+            // tipe_produk: '#filterTipeProduk',
+            // satuan: '#filterSatuan',
+        });
+
+        // $('#filterBtn').on('click', function() {
+        //     table.ajax.reload();
+        //     $('#filterModal').modal('hide');
+        // });
+
+        // $('#clearBtn').on('click', function() {
+        //     $('#filterModal input[type="checkbox"]').prop('checked', false);
+        //     $('#filterTipeProduk').val('').trigger('change');
+        //     $('#filterSatuan').val('').trigger('change');
+        //     table.ajax.reload();
+        //     $('#uncheckAll').addClass('d-none');
+        //     $('#checkAll').removeClass('d-none');
+        // });
+
+        // $('#checkAll').on('click', function() {
+        //     $('#namaProdukChecklist input').prop('checked', true);
+        //     $(this).addClass('d-none');
+        //     $('#uncheckAll').removeClass('d-none');
+        // });
+        
+        // $('#uncheckAll').on('click', function() {
+        //     $('#namaProdukChecklist input').prop('checked', false);
+        //     $(this).addClass('d-none');
+        //     $('#checkAll').removeClass('d-none');
+        // });
     });
     $(document).on('input', '#add_nomor_rekening, #edit_nomor_rekening', function() {
         let input = $(this);
@@ -232,11 +405,19 @@
             success: function(response) {
                 $('#global-loader-transparent').hide();
                 $('#editForm').attr('action', 'rekening/'+id+'/update');
+                if(response.jenis == 'Cash'){
+                  $('#edit_jenis_cash').attr('checked', true);
+                  $('#edit_jenis_cash').trigger('change');
+                } else {
+                  $('#edit_jenis_rekening').attr('checked', true);
+                  $('#edit_jenis_rekening').trigger('change');
+                }
                 $('#edit_bank').val(response.bank)
                 $('#edit_nomor_rekening').val(response.nomor_rekening)
                 $('#edit_nama_akun').val(response.nama_akun)
                 $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
                 $('#edit_saldo_awal').val(formatNumber(response.saldo_awal))
+                $('#edit_saldo_akhir').val(formatNumber(response.saldo_akhir))
 
                 $('#editrekening').modal('show');
             },
