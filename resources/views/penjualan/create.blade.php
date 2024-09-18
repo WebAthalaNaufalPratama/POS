@@ -1354,7 +1354,7 @@
                         var jumlah = parseInt($('[id^="jumlah_"]').eq(index).val()) || 0;
                         if (selected_produk == thisProduk) {
                             if (produk_count[thisProduk]) {
-                                produk_count[thisProduk] += jumlah;;
+                                produk_count[thisProduk] += jumlah;
                             } else {
                                 produk_count[thisProduk] = jumlah; 
                             }

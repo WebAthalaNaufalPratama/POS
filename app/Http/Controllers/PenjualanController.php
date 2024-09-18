@@ -246,6 +246,8 @@ class PenjualanController extends Controller
                 return redirect()->back()->with('fail', 'Customer Belum Bisa Melakukan Transaksi');                                                                                                                                                                                                                                                                                                                                                    
             }
         }
+
+        $user = Auth::user();
           
         $data['dibuat_id'] = Auth::user()->id;
         if ($req->hasFile('bukti_file')) {
