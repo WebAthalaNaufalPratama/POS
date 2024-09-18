@@ -16,7 +16,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-            <table class="table datanew">
+            <table class="table" id="datatable">
                 <thead>
                 <tr>
                     <th>No</th>
@@ -30,7 +30,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($promos as $promo)
+                    {{-- @foreach ($promos as $promo)
                         <tr>
                             <td>{{ $loop->iteration ?? '-' }}</td>
                             <td>{{ $promo->nama ?? '-' }}</td>
@@ -53,7 +53,7 @@
                               </ul>
                             </td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
                 </tbody>
             </table>
             </div>
@@ -161,16 +161,26 @@
                 <label for="diskon_poin" class="col-form-label">Poin</label>
                 <input type="text" class="form-control" name="diskon_poin" id="add_diskon_poin" required>
             </div>
-            <div class="mb-3">
-                <label for="lokasi_id" class="col-form-label">Lokasi</label>
-                <div class="form-group">
-                    <select class="select2" name="lokasi_id" id="add_lokasi_id" required>
-                        <option value="">Pilih Lokasi</option>
-                        @foreach($lokasis as $lokasi)
-                            <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <div class="mb-3" >
+              <label for="addLokasiChecklist" class="form-label me-3">Pilih Lokasi</label>
+              <a href="javascript:void(0);" id="addCheckAll">
+                <span class="text-primary">Select All</span>
+              </a>
+              <a href="javascript:void(0);" class="d-none" id="addUncheckAll">
+                <span class="text-danger">Deselect All</span>
+              </a>
+              <div id="addLokasiChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
+                @foreach ($lokasis as $lokasi)
+                  <div class="col-6">
+                      <div class="form-check">
+                          <input class="form-check-input" name="lokasi_id[]" type="checkbox" value="{{ $lokasi->id }}" id="add_{{ $lokasi->id }}">
+                          <label class="form-check-label" for="{{ $lokasi->id }}">
+                              {{ $lokasi->nama }}
+                          </label>
+                      </div>
+                  </div>
+                  @endforeach
+              </div>
             </div>
         </div>
         <div class="modal-footer justify-content-center">
@@ -280,15 +290,25 @@
                 <label for="diskon_poin" class="col-form-label">Poin</label>
                 <input type="text" class="form-control" name="diskon_poin" id="edit_diskon_poin" required>
             </div>
-            <div class="mb-3">
-              <label for="lokasi_id" class="col-form-label">Lokasi</label>
-              <div class="form-group">
-                <select class="select2" name="lokasi_id" id="edit_lokasi_id" required>
-                  <option value="">Pilih Tipe</option>
-                  @foreach($lokasis as $lokasi)
-                    <option value="{{ $lokasi->id }}">{{ $lokasi->nama }}</option>
+            <div class="mb-3" >
+              <label for="editLokasiChecklist" class="form-label me-3">Pilih Lokasi</label>
+              <a href="javascript:void(0);" id="editCheckAll">
+                <span class="text-primary">Select All</span>
+              </a>
+              <a href="javascript:void(0);" class="d-none" id="editUncheckAll">
+                <span class="text-danger">Deselect All</span>
+              </a>
+              <div id="editLokasiChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
+                @foreach ($lokasis as $lokasi)
+                  <div class="col-6">
+                      <div class="form-check">
+                          <input class="form-check-input" name="lokasi_id[]" type="checkbox" value="{{ $lokasi->id }}" id="edit_{{ $lokasi->id }}">
+                          <label class="form-check-label" for="{{ $lokasi->id }}">
+                              {{ $lokasi->nama }}
+                          </label>
+                      </div>
+                  </div>
                   @endforeach
-                </select>
               </div>
             </div>
         </div>
@@ -485,6 +505,141 @@
       }
     });
 
+    // add form
+    $('#addCheckAll').on('click', function() {
+        $('#addLokasiChecklist input').prop('checked', true);
+        $(this).addClass('d-none');
+        $('#addUncheckAll').removeClass('d-none');
+    });
+    $('#addUncheckAll').on('click', function() {
+        $('#addLokasiChecklist input').prop('checked', false);
+        $(this).addClass('d-none');
+        $('#addCheckAll').removeClass('d-none');
+    });
+
+    // edit form
+    $('#editCheckAll').on('click', function() {
+        $('#editLokasiChecklist input').prop('checked', true);
+        $(this).addClass('d-none');
+        $('#editUncheckAll').removeClass('d-none');
+    });
+    $('#editUncheckAll').on('click', function() {
+        $('#editLokasiChecklist input').prop('checked', false);
+        $(this).addClass('d-none');
+        $('#editCheckAll').removeClass('d-none');
+    });
+
+    const columns = [
+        { data: 'no', name: 'no', orderable: false },
+        { data: 'nama', name: 'nama' },
+        { 
+            data: 'tanggal_mulai', 
+            name: 'tanggal_mulai', 
+            render: function(data, type, row) {
+                return row.tanggal_mulai_format;
+            } 
+        },
+        { 
+            data: 'tanggal_berakhir', 
+            name: 'tanggal_berakhir', 
+            render: function(data, type, row) {
+                return row.tanggal_berakhir_format;
+            } 
+        },
+        { data: 'ketentuan', name: 'ketentuan' },
+        { data: 'diskon', name: 'diskon' },
+        { 
+          data: 'lokasi', 
+          name: 'lokasi',
+          render: function(data, type, row) {
+            if (Array.isArray(data)) {
+                // Convert array to <ul> <li> list
+                return '<ul>' + data.map(function(item) {
+                    return '<li>- ' + item + '</li>';
+                }).join('') + '</ul>';
+            }
+            return '<ul><li>' + data + '</li></ul>';
+          }
+         },
+        {
+            data: 'action',
+            name: 'action',
+            orderable: false,
+            searchable: false,
+            render: function(data, type, row) {
+                let actionsHtml = `
+                    <div class="text-center">
+                        <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                `;
+
+                if (row.canEdit) {
+                    actionsHtml += `
+                        <li>
+                            <a href="javascript:void(0);" onclick="getData(${row.id})" data-bs-toggle="modal" data-bs-target="#editpromo" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                        </li>
+                    `;
+                }
+
+                if (row.canDelete) {
+                    actionsHtml += `
+                        <li>
+                            <a href="#" class="dropdown-item" href="javascript:void(0);" onclick="deleteData(${row.id})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
+                        </li>
+                    `;
+                }
+
+                actionsHtml += `
+                        </ul>
+                    </div>
+                `;
+
+                return actionsHtml;
+            }
+        }
+    ]
+
+    let table = initDataTable('#datatable', {
+        ajaxUrl: "{{ route('promo.index') }}",
+        columns: columns,
+        order: [[1, 'asc']],
+        searching: true,
+        lengthChange: true,
+        pageLength: 10,
+    }, {
+        produk: '#namaProdukChecklist',
+        tipe_produk: '#filterTipeProduk',
+        satuan: '#filterSatuan',
+    });
+
+    // $('#filterBtn').on('click', function() {
+    //     table.ajax.reload();
+    //     $('#filterModal').modal('hide');
+    // });
+
+    // $('#clearBtn').on('click', function() {
+    //     $('#filterModal input[type="checkbox"]').prop('checked', false);
+    //     $('#filterTipeProduk').val('').trigger('change');
+    //     $('#filterSatuan').val('').trigger('change');
+    //     table.ajax.reload();
+    //     $('#uncheckAll').addClass('d-none');
+    //     $('#checkAll').removeClass('d-none');
+    // });
+
+    // $('#checkAll').on('click', function() {
+    //     $('#namaProdukChecklist input').prop('checked', true);
+    //     $(this).addClass('d-none');
+    //     $('#uncheckAll').removeClass('d-none');
+    // });
+    
+    // $('#uncheckAll').on('click', function() {
+    //     $('#namaProdukChecklist input').prop('checked', false);
+    //     $(this).addClass('d-none');
+    //     $('#checkAll').removeClass('d-none');
+    // });
+
     $(document).on('input', '#add_diskon_poin, #edit_diskon_poin, #add_ketentuan_min_transaksi, #edit_ketentuan_min_transaksi, #add_diskon_nominal, #edit_diskon_nominal', function() {
         let input = $(this);
         let value = input.val();
@@ -581,7 +736,28 @@
                 if(response.diskon == 'produk'){
                  $('#edit_diskon_free_produk').val(response.diskon_free_produk).trigger('change')
                 }
-                $('#edit_lokasi_id').val(response.lokasi_id).trigger('change')
+
+                const lokasiIdJson = response.lokasi_id;
+                lokasiIds = JSON.parse(lokasiIdJson);
+    
+                if (!Array.isArray(lokasiIds)) {
+                  lokasiIds = [response.lokasi_id.toString()];
+                }
+                $('#editLokasiChecklist input').each(function() {
+                    const checkbox = $(this);
+                    const id = checkbox.val();
+                    checkbox.prop('checked', lokasiIds.includes(id));
+                });
+
+                const allChecked = $('#editLokasiChecklist input:checkbox').length === $('#editLokasiChecklist input:checkbox:checked').length;
+                if (allChecked) {
+                    $('#editCheckAll').addClass('d-none');
+                    $('#editUncheckAll').removeClass('d-none');
+                } else {
+                    $('#editCheckAll').removeClass('d-none');
+                    $('#editUncheckAll').addClass('d-none');
+                }
+                
             },
             error: function(error) {
                 toastr.error('Ambil data error', 'Error', {
