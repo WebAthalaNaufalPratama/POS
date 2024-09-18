@@ -71,7 +71,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
         </div>
         <div class="modal-body">
-          <form action="{{ route('promo.store') }}" method="POST">
+          <form id="addForm" action="{{ route('promo.store') }}" method="POST">
             @csrf
             <div class="mb-3">
               <label for="nama" class="col-form-label">Nama</label>
@@ -120,7 +120,7 @@
             </div>
             <div class="mb-3" id="div_add_ketentuan_min_transaksi" style="display: none">
               <label for="ketentuan_min_transaksi" class="col-form-label">Minimal Transaksi</label>
-              <input type="number" class="form-control" name="ketentuan_min_transaksi" id="add_ketentuan_min_transaksi" required>
+              <input type="text" class="form-control" name="ketentuan_min_transaksi" id="add_ketentuan_min_transaksi" required>
             </div>
             <div class="mb-3">
               <label for="diskon" class="col-form-label">Diskon</label>
@@ -147,7 +147,7 @@
             </div>
             <div class="mb-3" id="div_add_diskon_nominal" style="display: none">
                 <label for="diskon_nominal" class="col-form-label">Nominal Diskon</label>
-                <input type="number" class="form-control" name="diskon_nominal" id="add_diskon_nominal" required>
+                <input type="text" class="form-control" name="diskon_nominal" id="add_diskon_nominal" required>
             </div>
             <div class="mb-3" id="div_add_diskon_persen" style="display: none">
                 <label for="diskon_persen" class="col-form-label">Persen Diskon</label>
@@ -159,7 +159,7 @@
             </div>
             <div class="mb-3" id="div_add_diskon_poin" style="display: none">
                 <label for="diskon_poin" class="col-form-label">Poin</label>
-                <input type="number" class="form-control" name="diskon_poin" id="add_diskon_poin" required>
+                <input type="text" class="form-control" name="diskon_poin" id="add_diskon_poin" required>
             </div>
             <div class="mb-3">
                 <label for="lokasi_id" class="col-form-label">Lokasi</label>
@@ -239,7 +239,7 @@
             </div>
             <div class="mb-3" id="div_edit_ketentuan_min_transaksi" style="display: none">
               <label for="ketentuan_min_transaksi" class="col-form-label">Minimal Transaksi</label>
-              <input type="number" class="form-control" name="ketentuan_min_transaksi" id="edit_ketentuan_min_transaksi" required>
+              <input type="text" class="form-control" name="ketentuan_min_transaksi" id="edit_ketentuan_min_transaksi" required>
             </div>
             <div class="mb-3">
               <label for="diskon" class="col-form-label">Diskon</label>
@@ -266,7 +266,7 @@
             </div>
             <div class="mb-3" id="div_edit_diskon_nominal" style="display: none">
                 <label for="diskon_nominal" class="col-form-label">Nominal Diskon</label>
-                <input type="number" class="form-control" name="diskon_nominal" id="edit_diskon_nominal" required>
+                <input type="text" class="form-control" name="diskon_nominal" id="edit_diskon_nominal" required>
             </div>
             <div class="mb-3" id="div_edit_diskon_persen" style="display: none">
                 <label for="diskon_persen" class="col-form-label">Persen Diskon</label>
@@ -278,7 +278,7 @@
             </div>
             <div class="mb-3" id="div_edit_diskon_poin" style="display: none">
                 <label for="diskon_poin" class="col-form-label">Poin</label>
-                <input type="number" class="form-control" name="diskon_poin" id="edit_diskon_poin" required>
+                <input type="text" class="form-control" name="diskon_poin" id="edit_diskon_poin" required>
             </div>
             <div class="mb-3">
               <label for="lokasi_id" class="col-form-label">Lokasi</label>
@@ -485,6 +485,52 @@
       }
     });
 
+    $(document).on('input', '#add_diskon_poin, #edit_diskon_poin, #add_ketentuan_min_transaksi, #edit_ketentuan_min_transaksi, #add_diskon_nominal, #edit_diskon_nominal', function() {
+        let input = $(this);
+        let value = input.val();
+        let cursorPosition = this.selectionStart;
+        
+        if (!isNumeric(cleanNumber(value))) {
+          value = value.replace(/[^\d]/g, "");
+        }
+
+        value = cleanNumber(value);
+        let formattedValue = formatNumber(value);
+        
+        input.val(formattedValue);
+        this.setSelectionRange(cursorPosition, cursorPosition);
+      });
+
+      $('#addForm').on('submit', function(e) {
+          // Add input number cleaning for specific inputs
+          let inputs = $('#addForm').find('#add_diskon_poin, #add_ketentuan_min_transaksi, #add_diskon_nominal');
+          inputs.each(function() {
+              let input = $(this);
+              let value = input.val();
+              let cleanedValue = cleanNumber(value);
+
+              // Set the cleaned value back to the input
+              input.val(cleanedValue);
+          });
+
+          return true;
+      });
+
+      $('#editForm').on('submit', function(e) {
+          // Add input number cleaning for specific inputs
+          let inputs = $('#editForm').find('#edit_diskon_poin, #edit_ketentuan_min_transaksi, #edit_diskon_nominal');
+          inputs.each(function() {
+              let input = $(this);
+              let value = input.val();
+              let cleanedValue = cleanNumber(value);
+
+              // Set the cleaned value back to the input
+              input.val(cleanedValue);
+          });
+
+          return true;
+      });
+
     function checkPersen(input_id, validation_id, submit_id){
       var persen = $('#'+input_id).val();
       var int_persen = parseInt(persen);
@@ -516,7 +562,7 @@
                  $('#edit_ketentuan_tipe_produk').val(response.ketentuan_tipe_produk).trigger('change')
                 }
                 if(response.ketentuan == 'min_transaksi'){
-                 $('#edit_ketentuan_min_transaksi').val(response.ketentuan_min_transaksi)
+                 $('#edit_ketentuan_min_transaksi').val(formatNumber(response.ketentuan_min_transaksi))
                 }
                 if(response.ketentuan == 'produk'){
                  $('#edit_ketentuan_produk').val(response.ketentuan_produk).trigger('change')
@@ -527,10 +573,10 @@
                  $('#edit_diskon_persen').val(response.diskon_persen)
                 }
                 if(response.diskon == 'nominal'){
-                 $('#edit_diskon_nominal').val(response.diskon_nominal)
+                 $('#edit_diskon_nominal').val(formatNumber(response.diskon_nominal))
                 }
                 if(response.diskon == 'poin'){
-                 $('#edit_diskon_poin').val(response.diskon_poin)
+                 $('#edit_diskon_poin').val(formatNumber(response.diskon_poin))
                 }
                 if(response.diskon == 'produk'){
                  $('#edit_diskon_free_produk').val(response.diskon_free_produk).trigger('change')

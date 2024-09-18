@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="/assets/plugins/toastr/toatr.css" />
 
   <link rel="stylesheet" href="/assets/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
 
   <link rel="stylesheet" href="/assets/plugins/fontawesome/css/fontawesome.min.css">
   <link rel="stylesheet" href="/assets/plugins/fontawesome/css/all.min.css">
@@ -589,6 +590,7 @@
 
     <script src="/assets/js/jquery.dataTables.min.js"></script>
     <script src="/assets/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
 
     <script src="/assets/js/bootstrap.bundle.min.js"></script>
 
@@ -800,7 +802,15 @@
                       }
                       // filter
                       $.each(filters, function(key, value) {
-                          d[key] = $(value).val();
+                        if ($(value).find('input[type="checkbox"]').length > 0) { // jika checklist
+                            let selectedValues = [];
+                            $(value).find('input[type="checkbox"]:checked').each(function() {
+                                selectedValues.push($(this).val());
+                            });
+                            d[key] = selectedValues;
+                        } else {
+                            d[key] = $(value).val();
+                        }
                       });
                   },
                   dataSrc: function(json) {
@@ -819,13 +829,16 @@
               searchDelay: 1000,
               lengthChange: options.lengthChange !== undefined ? options.lengthChange : true,
               pageLength: options.pageLength || 10,
-              lengthMenu: [ [5, 10, 25, 50], [5, 10, 25, 50] ],
+              lengthMenu: [ [5, 10, 25, 50, 100], [5, 10, 25, 50, 100] ],
               responsive: true,
               autoWidth: true,
               info: false,
+              fixedHeader: true,
+              scrollY: '400px',
+              scrollCollapse: true,
               language: {
                   url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Indonesian.json',
-              }
+              },
           };
 
           let dataTableOptions = $.extend({}, defaultOptions, options);

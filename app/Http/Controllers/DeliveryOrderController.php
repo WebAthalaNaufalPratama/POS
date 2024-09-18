@@ -185,7 +185,7 @@ class DeliveryOrderController extends Controller
             'driver' => 'required',
             'customer_id' => 'required',
             'pic' => 'required',
-            'handphone' => 'required|numeric|digits_between:11,13',
+            'handphone' => 'required|numeric',
             'alamat' => 'required',
         ]);
 
@@ -528,7 +528,7 @@ class DeliveryOrderController extends Controller
                 'driver' => 'required',
                 'customer_id' => 'required',
                 'pic' => 'required',
-                'handphone' => 'required|numeric|digits_between:11,13',
+                'handphone' => 'required|numeric',
                 'alamat' => 'required',
             ]);
 
