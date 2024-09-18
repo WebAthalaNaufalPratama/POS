@@ -1362,10 +1362,24 @@
                     });
 
                     var total_transaksi = parseRupiahToNumber($('#sub_total').val());
+                    
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
-                            total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            $('select[id^="nama_produk_"]').each(function(index, element) {
+                                var thisProduk = $(this).val();
+                                var selected_produk = response.ketentuan_produk;
+                                var subtotal = parseInt($('[id^="harga_total_"]').eq(index).val()) || 0;
+                                if (selected_produk == thisProduk) {
+                                    if (produk_count[thisProduk]) {
+                                        produk_count[thisProduk] += subtotal * parseInt(response.diskon_persen) / 100;
+                                    } else {
+                                        produk_count[thisProduk] = subtotal * parseInt(response.diskon_persen) / 100; 
+                                    }
+                                }
+                            });
+                            // total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            total_promo = produk_count;
                             // console.log(total_promo);
                             break;
                         case 'nominal':
@@ -1381,10 +1395,12 @@
                             var productCode = response.ketentuan_produk;
                             var quantity = produk_count[productCode] || 0;
 
-                            if ($('#cek_point').prop('checked')) {
+                            if ($('#cek_point').prop('checked') && response.ketentuan != 'produk') {
+                                total_promo = 'poin ' + response.diskon_poin;
+                            }else if(response.ketentuan == 'produk'){
                                 total_promo = 'poin ' + response.diskon_poin * quantity;
                             }else{
-                                total_promo = 'poin ' + response.diskon_poin * quantity;
+                                total_promo = 'poin ' + response.diskon_poin;
                             }
                             break;
                         case 'produk':
