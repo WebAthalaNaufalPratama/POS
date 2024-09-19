@@ -848,7 +848,7 @@
             });
         });
 
-        $('input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"]').each(function() {
+        $('input[id^="nama_produk"], input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"]').each(function() {
             var $this = $(this);
             var span = $('<span>').text($this.val()).css({
                 'font': $this.css('font'),  
@@ -871,8 +871,8 @@
             span.remove();
         }
 
-        $('[id^=nama_produk]').select2();
-        $('[id^=nama_produk]').prop('disabled', true);
+        // $('[id^=nama_produk]').select2();
+        // $('[id^=nama_produk]').prop('disabled', true);
 
 
         $(document).on('change', '[id^=nama_produk]', function() {
