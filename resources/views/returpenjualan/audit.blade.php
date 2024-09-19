@@ -296,7 +296,8 @@
                                                     Tidak Bisa Ubah
                                                 </td>
                                                 <td>
-                                                    <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                    <!-- <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah ?? '' }}" readonly> -->
+                                                    Tidak Bisa Ubah
                                                 </td>
                                             @elseif($perPendapatan)
                                                 @foreach ($perPendapatan as $noRETUR => $items)
@@ -1072,7 +1073,7 @@
             });
         });
 
-        $('input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"], input[id^=alasan]').each(function() {
+        $('select[id^="nama_produk"], input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"], input[id^=alasan]').each(function() {
             var $this = $(this);
             var span = $('<span>').text($this.val()).css({
                 'font': $this.css('font'),  
@@ -1095,8 +1096,8 @@
             span.remove();
         }
 
-        $('[id^=nama_produk]').select2();
-        $('[id^=nama_produk]').prop('disabled', true);
+        // $('[id^=nama_produk]').select2();
+        // $('[id^=nama_produk]').prop('disabled', true);
 
         $('#status').change(function(){
             var status = $(this).val();
