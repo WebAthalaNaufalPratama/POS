@@ -286,7 +286,7 @@
                                                             Tidak Bisa Ubah
                                                         </td>
                                                         <td>
-                                                        <!-- <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly> -->
+                                                        <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" style="display:none;" readonly>
                                                          Tidak Bisa Ubah
                                                         </td>
                                                     @elseif ($perPendapatan)
@@ -1107,6 +1107,7 @@
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
                     $('[id^=kondisitradproduk]').show();
+                    $('[id^=jumlahtradproduk]').show();
                     hargaSatuanInput.prop('readonly', true);
                 } else {
                     $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur, #do, #ceksub').hide();
@@ -1117,7 +1118,6 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(harga);
-                    $('[id^=kondisitradproduk]').hide();
                     hargaSatuanInput.prop('readonly', true);
                 }
             });
@@ -1145,8 +1145,12 @@
                 if(komplain == 'refund') {
                     diskonInput.val(0);
                     diskonInput.prop('readonly', true);
+                    $('[id^=kondisitradproduk]').hide();
+                    $('[id^=jumlahtradproduk]').hide();
                 } else if(komplain == 'diskon') {
                     diskonInput.prop('readonly', false);
+                    $('[id^=kondisitradproduk]').hide();
+                    $('[id^=jumlahtradproduk]').hide();
                     // showInputType(index);
                 } else if(komplain == 'retur'){
                     diskonInput.val(0);
