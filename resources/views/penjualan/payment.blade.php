@@ -722,6 +722,9 @@
             <form action="{{ route('pembayaran.store', ['invoice_penjualan_id' => $penjualans->id])}}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
+                    @foreach ($customers as $customer)
+                        <input type="hidden" value="{{ $customer->id }}" name="id_customer"></i>
+                    @endforeach
                     <div class="form-group">
                         <label for="no_invoice">Nomor Invoice</label>
                         <input type="text" class="form-control" id="no_invoice_byr" name="no_invoice_bayar" placeholder="Nomor Invoice" required readonly>

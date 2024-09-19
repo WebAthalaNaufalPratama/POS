@@ -248,10 +248,12 @@ class PembayaranController extends Controller
             // dd($cek);
             if ($cek <= 0) {
                 $data['status_bayar'] = 'LUNAS';
+                $updatecust = Customer::where('id', $req->id_customer)->update(['status_piutang' => 'LUNAS']);
                 $pembayaran = Pembayaran::create($data);
                 return redirect()->back()->with('success', 'Tagihan sudah Lunas');
             } else {
                 $data['status_bayar'] = 'BELUM LUNAS';
+                $updatecust = Customer::where('id', $req->id_customer)->update(['status_piutang' => 'BELUM LUNAS']);
                 $pembayaran = Pembayaran::create($data);
             }
         } else {

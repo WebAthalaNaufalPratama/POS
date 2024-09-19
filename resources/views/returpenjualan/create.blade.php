@@ -198,7 +198,7 @@
                                         <h5>Produk Komplain</h5>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table">
+                                        <table class="table datanew">
                                             <thead>
                                                 <tr>
                                                     @if($penjualans->distribusi == 'Dikirim')
@@ -398,14 +398,15 @@
                                                     </select>
                                                     </td>
                                                     @if($isTRDSelected)
-                                                        <td>Tidak Ada Komponen</td>
+                                                        <td>Tidak Bisa Ubah</td>
                                                         <td>
-                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect">
+                                                            <!-- <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect">
                                                                 <option value=""> Pilih Kondisi </option>
                                                                 @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                                 @endforeach
-                                                            </select>
+                                                            </select> -->
+                                                            Tidak Bisa Ubah
                                                         </td>
                                                         <td>
                                                         <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
@@ -459,9 +460,9 @@
                                                     <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" required></td>
                                                     <td>
                                                         @if ($i == 0)
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove btn-lg"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @else
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove btn-lg"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -845,6 +846,33 @@
             });
         });
 
+        $('input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"]').each(function() {
+            var $this = $(this);
+            var span = $('<span>').text($this.val()).css({
+                'font': $this.css('font'),  
+                'visibility': 'hidden',   
+                'white-space': 'pre'      
+            }).appendTo('body');
+            $this.width(span.width() + 10);  
+            span.remove();
+        });
+
+        function adjustWidth(input) {
+            var $input = $(input);
+
+            var span = $('<span>').text($input.val()).css({
+                'font': $input.css('font'),   
+                'visibility': 'hidden',       
+                'white-space': 'pre'          
+            }).appendTo('body');
+            $input.width(span.width() + 10);  
+            span.remove();
+        }
+
+        $('[id^=nama_produk]').select2();
+        $('[id^=nama_produk]').prop('disabled', true);
+
+
         $(document).on('change', '[id^=nama_produk]', function() {
             var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
             var selectedOption = $(this).find(':selected');
@@ -1008,6 +1036,16 @@
             Totaltagihan();
         });
 
+        $('.btn_remove').css({
+            'width': '50px',   
+            'height': '50px'   
+        });
+
+        $('.btn_remove img').css({
+            'width': '100%',    
+            'height': '100%'    
+        });
+
         function Totaltagihan() {
             var biayaOngkir = parseFloat(parseRupiahToNumber($('#biaya_pengiriman').val())) || 0;
             var totalTagihan = biayaOngkir;
@@ -1143,6 +1181,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp'));
+                    adjustWidth(hargaSatuanInput);
                     hargaSatuanInput.prop('readonly', true);
                 }
             });
@@ -1158,6 +1197,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
+                    adjustWidth(totalhargaInput);
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
@@ -1315,9 +1355,11 @@
                         alert('Nominal tidak boleh melebihi harga total');
                         diskonValue = 0;
                         $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
+                        adjustWidth($('#diskon_' + index));
                     } else {
                         hargaTotal -= diskonValue;
                         $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
+                        adjustWidth($('#diskon_' + index));
                     }
                 } else if (selectedValue === "persen" && !isNaN(diskonValue)) {
                     if (diskonValue > 100) {
