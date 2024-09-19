@@ -350,25 +350,30 @@
             width: 100%; /* Makes sure the select box uses available width */
         }
 
-    .table-responsive::-webkit-scrollbar {
-        height: 15px; /* Ukuran tinggi scrollbar horizontal */
-    }
+        /* Scrollbar untuk .table-responsive dan .dataTables_scrollBody */
+        .table-responsive::-webkit-scrollbar,
+        .dataTables_scrollBody::-webkit-scrollbar {
+            height: 10px; /* Ukuran tinggi scrollbar horizontal */
+        }
 
-    /* Mengatur warna background track scrollbar */
-    .table-responsive::-webkit-scrollbar-track {
-        background: #f1f1f1; 
-    }
+        /* Mengatur warna background track scrollbar untuk .table-responsive dan .dataTables_scrollBody */
+        .table-responsive::-webkit-scrollbar-track,
+        .dataTables_scrollBody::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
 
-    /* Mengatur warna dan bentuk scrollbar */
-    .table-responsive::-webkit-scrollbar-thumb {
-        background-color:#ff9f43; /* Warna scrollbar */
-        border-radius: 10px; /* Membuat ujung scrollbar melengkung */
-    }
+        /* Mengatur warna dan bentuk scrollbar untuk .table-responsive dan .dataTables_scrollBody */
+        .table-responsive::-webkit-scrollbar-thumb,
+        .dataTables_scrollBody::-webkit-scrollbar-thumb {
+            background-color: #ff9f43; /* Warna scrollbar */
+            border-radius: 10px; /* Membuat ujung scrollbar melengkung */
+        }
 
-    /* Mengubah warna scrollbar saat di-hover */
-    .table-responsive::-webkit-scrollbar-thumb:hover {
-        background-color: #ff9430; /* Warna scrollbar saat dihover */
-    }
+        /* Mengubah warna scrollbar saat di-hover untuk .table-responsive dan .dataTables_scrollBody */
+        .table-responsive::-webkit-scrollbar-thumb:hover,
+        .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+            background-color: #ff9430; /* Warna scrollbar saat dihover */
+        }
 
   </style>
   
