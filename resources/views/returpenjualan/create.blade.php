@@ -277,7 +277,7 @@
                                                     
                                                         <td>Tidak Bisa Ubah</td>
                                                         <td>
-                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect" display="none">
+                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect" style="display:none;">
                                                                 <option value=""> Pilih Kondisi </option>
                                                                 @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
@@ -1117,6 +1117,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(harga);
+                    $('[id^=kondisitradproduk]').hide();
                     hargaSatuanInput.prop('readonly', true);
                 }
             });
