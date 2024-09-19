@@ -1073,15 +1073,20 @@
             });
         });
 
-        $('select[id^="nama_produk_"], input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"], input[id^=alasan]').each(function() {
+        $('select[id^="nama_produk"], input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"]').each(function() {
             var $this = $(this);
-            var span = $('<span>').text($this.val()).css({
-                'font': $this.css('font'),  
-                'visibility': 'hidden',   
-                'white-space': 'pre'      
-            }).appendTo('body');
-            $this.width(span.width() + 10);  
-            span.remove();
+
+            if ($this.is('input')) { 
+                var span = $('<span>').text($this.val()).css({
+                    'font': $this.css('font'),  
+                    'visibility': 'hidden',   
+                    'white-space': 'pre'      
+                }).appendTo('body');
+                $this.width(span.width() + 10);  
+                span.remove();
+            } else if ($this.is('select')) {
+                $this.css('width', 'auto');
+            }
         });
 
         function adjustWidth(input) {
