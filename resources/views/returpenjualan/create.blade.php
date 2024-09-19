@@ -282,25 +282,25 @@
                                                     </td>
                                                     @if($isTRDSelected)
                                                         @foreach($selectedTRDDetails as $index => $komponen)
-                                                            <tr>
-                                                                <td>
-                                                                    <input type="text" name="namatradproduk_{{ $i }}[]" id="namatradproduk_{{ $i }}_{{ $index }}" class="form-control namatrad-{{ $i }}" placeholder="Kondisi Produk" value="{{ $komponen['nama_produk'] }}" style="display:none;" readonly>
-                                                                    <span id="noubah">Tidak Bisa Ubah</span>
-                                                                </td>
-                                                                <td>
-                                                                    <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" data-produk="{{ $komponen['kondisi'] }}" class="form-control kondisitrad-{{ $i }} myselect" style="display:none;">
-                                                                        <option value=""> Pilih Kondisi </option>
-                                                                        @foreach ($kondisis as $kondisi)
-                                                                            <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                    <span id="noubah">Tidak Bisa Ubah</span>
-                                                                </td>
-                                                                <td>
-                                                                    <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}_{{ $index }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $komponen['kondisi'] }}" value="{{ $komponen['jumlah'] }}" style="display:none;" readonly>
-                                                                    <span id="noubah">Tidak Bisa Ubah</span>
-                                                                </td>
-                                                            </tr>
+                                                            
+                                                        <td>
+                                                            <input type="text" name="namatradproduk_{{ $i }}[]" id="namatradproduk_{{ $i }}_{{ $index }}" class="form-control namatrad-{{ $i }}" placeholder="Kondisi Produk" value="{{ $komponen['nama_produk'] }}" style="display:none;" readonly>
+                                                            <span id="noubah">Tidak Bisa Ubah</span>
+                                                        </td>
+                                                        <td>
+                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" data-produk="{{ $komponen['kondisi'] }}" class="form-control kondisitrad-{{ $i }} myselect" style="display:none;">
+                                                                <option value=""> Pilih Kondisi </option>
+                                                                @foreach ($kondisis as $kondisi)
+                                                                    <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $komponen['kondisi'] ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            <span id="noubah">Tidak Bisa Ubah</span>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}_{{ $index }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $komponen['kondisi'] }}" value="{{ $komponen['jumlah'] }}" style="display:none;" readonly>
+                                                            <span id="noubah">Tidak Bisa Ubah</span>
+                                                        </td>
+                                                            
                                                         @endforeach
                                                     @elseif ($perPendapatan)
                                                         @php
