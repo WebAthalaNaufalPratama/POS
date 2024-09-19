@@ -251,7 +251,7 @@
                                                                     if ($komponen->kondisi) {
                                                                         foreach($kondisis as $kondisi) {
                                                                             if($kondisi->id == $komponen->kondisi) {
-                                                                                // Set selected TRD code based on condition
+                                                                                $selectedTrdName = $komponen->nama_produk;
                                                                                 $selectedTRDKode = $kondisi->nama;
                                                                                 $selectedTRDJumlah = $komponen->jumlah;
                                                                             }
@@ -275,7 +275,10 @@
                                                     </td>
                                                     @if($isTRDSelected)
                                                     
-                                                        <td>Tidak Bisa Ubah</td>
+                                                        <td>
+                                                        <input type="text" name="namatradproduk_{{ $i }}[]" id="namatradproduk_{{ $i }}" class="form-control namatrad-{{ $i }}" placeholder="Kondisi Produk" value="{{ $selectedTrdName }}" style="display:none;" readonly>
+                                                            Tidak Bisa Ubah
+                                                        </td>
                                                         <td>
                                                             <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect" style="display:none;">
                                                                 <option value=""> Pilih Kondisi </option>
@@ -1106,6 +1109,7 @@
                     $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur, #do').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
+                    $('[id^=namatradproduk]').show();
                     $('[id^=kondisitradproduk]').show();
                     $('[id^=jumlahtradproduk]').show();
                     $('[id^=noubah]').hide();
@@ -1132,6 +1136,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(totalharga);
+                    $('[id^=namatradproduk]').hide();
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
                     $('[id^=noubah]').show();
@@ -1149,11 +1154,13 @@
                 if(komplain == 'refund') {
                     diskonInput.val(0);
                     diskonInput.prop('readonly', true);
+                    $('[id^=namatradproduk]').hide();
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
                     $('[id^=noubah]').show();
                 } else if(komplain == 'diskon') {
                     diskonInput.prop('readonly', false);
+                    $('[id^=namatradproduk]').hide();
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
                     $('[id^=noubah]').show();
@@ -1202,6 +1209,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp'));
+                    $('[id^=namatradproduk]').hide();
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
                     $('[id^=noubah]').show();
@@ -1221,6 +1229,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
+                    $('[id^=namatradproduk]').hide();
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
                     $('[id^=noubah]').show();
