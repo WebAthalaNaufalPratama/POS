@@ -1106,6 +1106,7 @@
                     $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur, #do').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
+                    $('[id^=kondisitradproduk]').show();
                     hargaSatuanInput.prop('readonly', true);
                 } else {
                     $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur, #do, #ceksub').hide();
