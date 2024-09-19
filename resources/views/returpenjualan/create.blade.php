@@ -283,11 +283,11 @@
                                                                 <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                                 @endforeach
                                                             </select>
-                                                            Tidak Bisa Ubah
+                                                            <span id="noubah">Tidak Bisa Ubah</span>
                                                         </td>
                                                         <td>
                                                         <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" style="display:none;" readonly>
-                                                         Tidak Bisa Ubah
+                                                        <span id="noubah">Tidak Bisa Ubah</span>
                                                         </td>
                                                     @elseif ($perPendapatan)
                                                         @php
@@ -1108,6 +1108,7 @@
                     hargaSatuanInput.val(0);
                     $('[id^=kondisitradproduk]').show();
                     $('[id^=jumlahtradproduk]').show();
+                    $('[id^=noubah]').hide();
                     hargaSatuanInput.prop('readonly', true);
                 } else {
                     $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman, #cekretur, #do, #ceksub').hide();
@@ -1133,6 +1134,7 @@
                     totalhargaInput.val(totalharga);
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
+                    $('[id^=noubah]').show();
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
@@ -1149,10 +1151,12 @@
                     diskonInput.prop('readonly', true);
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
+                    $('[id^=noubah]').show();
                 } else if(komplain == 'diskon') {
                     diskonInput.prop('readonly', false);
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
+                    $('[id^=noubah]').show();
                     // showInputType(index);
                 } else if(komplain == 'retur'){
                     diskonInput.val(0);
@@ -1200,6 +1204,7 @@
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp'));
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
+                    $('[id^=noubah]').show();
                     adjustWidth(hargaSatuanInput);
                     hargaSatuanInput.prop('readonly', true);
                 }
@@ -1218,6 +1223,7 @@
                     totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
                     $('[id^=kondisitradproduk]').hide();
                     $('[id^=jumlahtradproduk]').hide();
+                    $('[id^=noubah]').show();
                     adjustWidth(totalhargaInput);
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
