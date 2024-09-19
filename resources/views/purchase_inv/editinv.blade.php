@@ -447,7 +447,7 @@ Carbon::setLocale('id');
                                                         <input type="text" class="form-control" id="status_buat" value="{{ $inv_po->status_dibuat }}" readonly>
                                                     </td>
                                                     <td id="status_dibuku">
-                                                        <select id="status" name="status_dibuku" class="form-control select2">
+                                                        <select id="status" name="status_dibuku" class="form-control">
                                                             <option disabled>Pilih Status</option>
                                                             <option value="MENUNGGU PEMBAYARAN" {{ $inv_po->status_dibuku == 'MENUNGGU PEMBAYARAN' || $inv_po->status_dibuku == null ? 'selected' : '' }}>MENUNGGU PEMBAYARAN</option>
                                                             @if( $inv_po->sisa == 0 || ($inv_po->sisa == 0 && $inv_po->retur->sisa == 0))
@@ -613,6 +613,14 @@ Carbon::setLocale('id');
         if ($('#edit_preview').attr('src') === '') {
             $('#edit_preview').attr('src', defaultImg);
         }
+        $('#myModalbayar').on('shown.bs.modal', function () {
+            $('.select2').select2({
+                dropdownParent: $('#myModalbayar') // Mengikat dropdown ke modal
+            });
+        });
+
+
+
         $('#bukti').on('change', function() {
             const file = $(this)[0].files[0];
             if (file.size > 2 * 1024 * 1024) { 
@@ -634,6 +642,7 @@ Carbon::setLocale('id');
             }
         });
     });
+
     function formatRupiah(angka) {
             var reverse = angka.toString().split('').reverse().join('');
             var ribuan = reverse.match(/\d{1,3}/g);

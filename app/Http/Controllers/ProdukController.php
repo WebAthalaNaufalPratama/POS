@@ -20,7 +20,7 @@ class ProdukController extends Controller
         $tipe_produks = Tipe_Produk::where('kategori', 'master')->get();
         return view('produks.index', compact('produks', 'tipe_produks'));
     }
-
+ 
     /**
      * Show the form for creating a new resource.
      *
@@ -64,6 +64,55 @@ class ProdukController extends Controller
         $check = Produk::create($data);
         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
         return redirect()->back()->with('success', 'Data tersimpan');
+    }
+
+    public function store_produk_po(Request $req)
+    {
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'nama' => 'required',
+            'tipe_produk' => 'required|integer',
+            'deskripsi' => 'required',
+        ]);
+    
+        if ($validator->fails()) {
+            // Mengembalikan error dalam format JSON untuk AJAX
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()->all()
+            ], 400);
+        }
+    
+        $data = $req->except(['_token', '_method']);
+    
+        // Penentuan kode produk
+        $latestProduks = Produk::withTrashed()->orderBy('kode', 'desc')->get();
+        if(count($latestProduks) < 1){
+            $getKode = 'PRD-000001';
+        } else {
+            $lastProduk = $latestProduks->first();
+            $kode = explode('-', $lastProduk->kode);
+            $getKode = 'PRD-' . str_pad((int)$kode[1] + 1, 6, '0', STR_PAD_LEFT);
+        }
+        $data['kode'] = $getKode;
+    
+        // Simpan data
+        $produk = Produk::create($data);
+    
+        if (!$produk) {
+            // Jika gagal menyimpan, kembalikan pesan error
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data'
+            ], 500);
+        }
+    
+        // Mengembalikan respons sukses dengan data produk yang baru dibuat
+        return response()->json([
+            'success' => true,
+            'message' => 'Data tersimpan',
+            'produk' => $produk
+        ]);
     }
 
     /**

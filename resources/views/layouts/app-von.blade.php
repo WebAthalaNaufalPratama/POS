@@ -348,6 +348,27 @@
         select {
             width: 100%; /* Makes sure the select box uses available width */
         }
+
+    .table-responsive::-webkit-scrollbar {
+        height: 15px; /* Ukuran tinggi scrollbar horizontal */
+    }
+
+    /* Mengatur warna background track scrollbar */
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+    }
+
+    /* Mengatur warna dan bentuk scrollbar */
+    .table-responsive::-webkit-scrollbar-thumb {
+        background-color:#ff9f43; /* Warna scrollbar */
+        border-radius: 10px; /* Membuat ujung scrollbar melengkung */
+    }
+
+    /* Mengubah warna scrollbar saat di-hover */
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background-color: #ff9430; /* Warna scrollbar saat dihover */
+    }
+
   </style>
   
   @yield('css')
