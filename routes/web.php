@@ -107,6 +107,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::group(['prefix' => 'produks'], function() {
             Route::get('/', 'ProdukController@index')->name('produks.index');
             Route::post('/store', 'ProdukController@store')->name('produks.store');
+            Route::post('/store_produk', 'ProdukController@store_produk_po')->name('produks_po.store');
             Route::get('/{produk}/show', 'ProdukController@show')->name('produks.show');
             Route::get('/{produk}/edit', 'ProdukController@edit')->name('produks.edit');
             Route::patch('/{produk}/update', 'ProdukController@update')->name('produks.update');
@@ -164,6 +165,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
         Route::group(['prefix' => 'supplier'], function() {
             Route::get('/', 'SupplierController@index')->name('supplier.index');
             Route::post('/store', 'SupplierController@store')->name('supplier.store');
+            Route::post('/store_sup_po', 'SupplierController@store_sup_po')->name('supplier_po.store');
             Route::get('/{supplier}/show', 'SupplierController@show')->name('supplier.show');
             Route::get('/{supplier}/edit', 'SupplierController@edit')->name('supplier.edit');
             Route::patch('/{supplier}/update', 'SupplierController@update')->name('supplier.update');

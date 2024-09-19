@@ -134,15 +134,27 @@
                         <div class="row justify-content-around">
                             <div class="col-md-12 border rounded pt-3 me-1 mt-2">
                                 <div class="form-row row">
-                                    <div class="mb-4">
-                                        <h5>List Produk</h5>
+                                    <div class="page-header">
+                                        <div class="page-title">
+                                            <h4>List Produk</h4>
+                                        </div>
+                                        {{-- <div class="page-btn">
+                                            <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addproduk" class="btn btn-added">
+                                                <img src="{{ asset('assets/img/icons/plus.svg') }}" alt="img" class="me-1" />Tambah Produk
+                                            </a>
+                                                                                    
+                                        </div> --}}
                                     </div>
+
+                                   
+
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>
                                                 <tr>
                                                     <th>Kode Produk</th>
                                                     <th>Nama Produk</th>
+                                                    <th></th>
                                                     <th>Jumlah Dikirim</th>
                                                     <th>Jumlah Diterima</th>
                                                     <th>Kondisi</th>
@@ -155,6 +167,7 @@
                                                         <input type="text" name="kode[]" id="kode_0" class="form-control" value="{{ old('kode.0') }}" readonly>
                                                     </td>
                                                     <td>
+  
                                                         <select id="produk_0" name="produk[]" class="form-control" onchange="showInputType(0)">
                                                             <option value="">----- Pilih Produk ----</option>
                                                             @foreach ($produks as $produk)
@@ -163,7 +176,18 @@
                                                                 </option>
                                                             @endforeach
                                                         </select>
+                                            
                                                     </td>
+                                                    <td>
+                                                       
+
+                                                        <div class="input-group-append">
+                                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addproduk">
+                                                                <img src="/assets/img/icons/plus1.svg" alt="img" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+ 
                                                     <td>
                                                         <input type="number" name="qtykrm[]" id="qtykrm_0" class="form-control" onchange="calculateTotal(0)" value="{{ old('qtykrm.0') }}" min="0">
                                                     </td>
@@ -230,52 +254,90 @@
 </div>
 </div>
 </div>
-<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Tambah Supplier</h5>
-          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+<!-- Modal "Tambah Produk" -->
+<div class="modal fade" id="addproduk" tabindex="-1" aria-labelledby="addproduklabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addproduklabel">Tambah Produk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-tambah-produk" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="nama" class="col-form-label">Nama</label>
+                        <input type="text" class="form-control" name="nama" id="add_nama" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipe_produk" class="col-form-label">Tipe Produk</label>
+                        <select class="select2 form-control" name="tipe_produk" id="add_tipe_produk" required>
+                            <option value="">Pilih Tipe</option>
+                            @foreach ($tipe_produks as $tipe_produk)
+                                <option value="{{ $tipe_produk->id }}">{{ $tipe_produk->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="deskripsi" class="col-form-label">Deskripsi</label>
+                        <textarea class="form-control" name="deskripsi" id="add_deskripsi" required></textarea>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-primary" id="simpan-produk">Simpan</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="modal-body">
-            <form id="supplierForm" action="{{ route('supplier.store') }}" method="POST">
-                @csrf
-            <div class="mb-3">
-              <label for="nama" class="form-label">Nama Supplier</label>
-              <input type="text" class="form-control" id="nama" name="nama" required>
-            </div>
-            <div class="mb-3">
-              <label for="pic" class="form-label">PIC</label>
-              <input type="text" class="form-control" id="pic" name="pic">
-            </div>
-            <div class="mb-3">
-              <label for="handphone" class="form-label">Handphone</label>
-              <input type="text" class="form-control" id="handphone" name="handphone">
-            </div>
-            <div class="mb-3">
-              <label for="alamat" class="form-label">Alamat</label>
-              <textarea class="form-control" id="alamat" name="alamat" rows="3"></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="tanggal_bergabung" class="form-label">Tanggal bergabung</label>
-              <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung" value="{{ now()->format('Y-m-d') }}">
-            </div>
-            <div class="mb-3">
-              <label for="tipe_supplier" class="form-label">Tipe Supplier</label>
-              <select class="form-control" id="tipe_supplier" name="tipe_supplier">
-                <option value="tradisional">Tradisional</option>
-                {{-- <option value="inden">Inden</option> --}}
-              </select>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-primary">Simpan</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
 </div>
+<!-- Modal tambah supplier -->
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Tambah Supplier</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="supplierForm">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama Supplier</label>
+                        <input type="text" class="form-control" id="nama" name="nama" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pic" class="form-label">PIC</label>
+                        <input type="text" class="form-control" id="pic" name="pic">
+                    </div>
+                    <div class="mb-3">
+                        <label for="handphone" class="form-label">Handphone</label>
+                        <input type="text" class="form-control" id="handphone" name="handphone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="alamat" class="form-label">Alamat</label>
+                        <textarea class="form-control" id="alamat" name="alamat" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggal_bergabung" class="form-label">Tanggal bergabung</label>
+                        <input type="date" class="form-control" id="tanggal_bergabung" name="tanggal_bergabung" value="{{ now()->format('Y-m-d') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipe_supplier" class="form-label">Tipe Supplier</label>
+                        <select class="form-control" id="tipe_supplier" name="tipe_supplier">
+                            <option value="tradisional">Tradisional</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @endsection
   
@@ -283,12 +345,123 @@
 <script>
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
+    document.getElementById('supplierForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Mencegah form submit biasa
+
+            let formData = new FormData(this);
+
+            fetch('{{ route("supplier_po.store") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Tambahkan opsi supplier baru ke dalam select
+                    let supplierSelect = document.getElementById('id_supplier');
+                    let option = new Option(data.supplier.nama, data.supplier.id, true, true);
+                    supplierSelect.add(option);
+                    
+                    // Tutup modal setelah berhasil simpan
+                    $('#myModal').modal('hide');
+
+                    // Reset form
+                    document.getElementById('supplierForm').reset();
+                    toastr.success('Berhasil Menambah Supplier', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                    });
+                } else {
+                    // Tampilkan error jika ada
+                    console.error('Error:', data.message);
+                    toastr.warning('Gagal Menambah Supplier', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                toastr.warning('Gagal Menambah Supplier', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        rtl: false,
+                    });
+            });
+        });
+
     function clearFile(){
             $('#bukti').val('');
             $('#preview').attr('src', defaultImg);
         }
 
     $(document).ready(function() {
+
+
+    $('#form-tambah-produk').on('submit', function(e) {
+    e.preventDefault();
+    
+    let formData = {
+        _token: "{{ csrf_token() }}",
+        nama: $('#add_nama').val(),
+        tipe_produk: $('#add_tipe_produk').val(),
+        deskripsi: $('#add_deskripsi').val()
+    };
+
+    $.ajax({
+        url: "{{ route('produks_po.store') }}",
+        type: "POST",
+        data: formData,
+       success: function(response) {
+            if (response.success) {
+                // Tambahkan produk baru ke dalam select
+                let newOption = new Option(response.produk.nama, response.produk.id, false, true);
+                $(newOption).data('kode', response.produk.kode); // Set data-kode
+                $('#produk_0').append(newOption).trigger('change');
+
+                // Pilih produk baru dan perbarui input kode
+                $('#produk_0').val(response.produk.id).trigger('change'); // Pilih produk baru
+                $('#kode_0').val(response.produk.kode); // Perbarui kode produk
+
+                // Tutup modal
+                $('#addproduk').modal('hide');
+
+                // Reset form modal
+                $('#form-tambah-produk')[0].reset();
+
+                toastr.success('Berhasil Menambah produk', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                });
+
+                // Perbarui Select2
+                $('#produk_0').select2(); // Tambahkan ini jika perlu
+            }
+        },
+
+        error: function(xhr) {
+            // Tampilkan error jika ada masalah
+            if (xhr.status === 400) {
+                alert(xhr.responseJSON.errors.join("\n"));
+            } else {
+                toastr.warning('Gagal Menambah Produk', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    rtl: false,
+                });
+            }
+        }
+    });
+});
+
+
+
 
     document.getElementById('returCheckbox').addEventListener('change', function() {
         var returDropdown = document.getElementById('returDropdown');
@@ -332,10 +505,12 @@
           
         });
 
-        // Ketika terjadi perubahan pada dropdown produk
         $('#produk_0').on('change', function() {
             // Ambil nilai kode dari atribut data
             var kode_produk = $(this).find(':selected').data('kode');
+            
+            // Log untuk debugging
+            console.log('Kode Produk:', kode_produk);
 
             // Masukkan nilai kode ke input kode
             $('#kode_0').val(kode_produk);
@@ -343,6 +518,7 @@
             // Tutup dropdown Select2
             $('#produk_0').select2('close');
         });
+
 
     var i = 1;
     $('#add').click(function(){
@@ -392,6 +568,21 @@
     });
     });
 
+    function showInputType(index) {
+        // Ambil nilai dari select option yang dipilih
+        let selectedOption = document.getElementById(`produk_${index}`).value;
 
+        // Ambil data atribut dari produk yang dipilih, misalnya kode produk
+        let kodeProduk = document.getElementById(`produk_${index}`).options[document.getElementById(`produk_${index}`).selectedIndex].getAttribute('data-kode');
+
+        // Logika yang ingin diterapkan, misalnya menampilkan input tambahan berdasarkan produk yang dipilih
+        if (selectedOption) {
+            console.log("Produk ID yang dipilih: " + selectedOption);
+            console.log("Kode Produk: " + kodeProduk);
+            // Implementasikan logika tambahan di sini
+        } else {
+            console.log("Tidak ada produk yang dipilih");
+        }
+    }
 </script>
 @endsection

@@ -217,6 +217,7 @@ class InitialSeeder extends Seeder
         // purchasing
             $purchasingPermissionList = [
                 'pembelian',
+                'produk_po',
                 'pembelianpo',
                 'invoicebeli',
                 'invoicebiasa',
@@ -234,6 +235,7 @@ class InitialSeeder extends Seeder
                 'pembayaranbeli.index',
                 'retur_purchase.update',
                 'supplier',
+                'supplier_po',
                 'mutasighgalery',
                 'mutasigalerygalery',
                 'mutasiindengh',

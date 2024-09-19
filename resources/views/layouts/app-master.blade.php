@@ -29,6 +29,29 @@
       .float-right {
         float: right;
       }
+  
+/* Mengatur lebar scrollbar horizontal */
+    .table-responsive::-webkit-scrollbar {
+        height: 15px; /* Ukuran tinggi scrollbar horizontal */
+    }
+
+    /* Mengatur warna background track scrollbar */
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+    }
+
+    /* Mengatur warna dan bentuk scrollbar */
+    .table-responsive::-webkit-scrollbar-thumb {
+        background-color: #888; /* Warna scrollbar */
+        border-radius: 10px; /* Membuat ujung scrollbar melengkung */
+    }
+
+    /* Mengubah warna scrollbar saat di-hover */
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background-color: #555; /* Warna scrollbar saat dihover */
+    }
+
+
     </style>
 
     

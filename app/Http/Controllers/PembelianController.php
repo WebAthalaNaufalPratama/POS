@@ -19,6 +19,7 @@ use App\Models\Produkbeli;
 use App\Models\Rekening;
 use App\Models\Returpembelian;
 use App\Models\Supplier;
+use App\Models\Tipe_Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -959,8 +960,11 @@ class PembelianController extends Controller
         $suppliers = Supplier::where('tipe_supplier','tradisional')->get();
         $lokasis = Lokasi::whereIn('tipe_lokasi', [1, 3, 4])->get();
         $kondisis = Kondisi::get();
+
+        $produks = Produk::with('tipe')->get();
+        $tipe_produks = Tipe_Produk::where('kategori', 'master')->get();
     
-        return view('purchase_po.create', compact('produks', 'suppliers', 'lokasis', 'kondisis', 'nomor_po'));
+        return view('purchase_po.create', compact('produks','produks','tipe_produks', 'suppliers', 'lokasis', 'kondisis', 'nomor_po'));
     }
 
     public function createinden()
