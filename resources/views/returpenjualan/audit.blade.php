@@ -285,14 +285,15 @@
                                                 @endforeach
                                             </select>
                                             @if($isTRDSelected)
-                                                <td>Tidak Ada Komponen</td>
+                                                <td>Tidak Bisa Ubah</td>
                                                 <td>
-                                                    <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" >
+                                                    <!-- <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" >
                                                         <option value=""> Pilih Kondisi </option>
                                                         @foreach ($kondisis as $kondisi)
                                                         <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                         @endforeach
-                                                    </select>
+                                                    </select> -->
+                                                    Tidak Bisa Ubah
                                                 </td>
                                                 <td>
                                                     <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
@@ -1071,6 +1072,32 @@
             });
         });
 
+        $('input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"], input[id^=alasan]').each(function() {
+            var $this = $(this);
+            var span = $('<span>').text($this.val()).css({
+                'font': $this.css('font'),  
+                'visibility': 'hidden',   
+                'white-space': 'pre'      
+            }).appendTo('body');
+            $this.width(span.width() + 10);  
+            span.remove();
+        });
+
+        function adjustWidth(input) {
+            var $input = $(input);
+
+            var span = $('<span>').text($input.val()).css({
+                'font': $input.css('font'),   
+                'visibility': 'hidden',       
+                'white-space': 'pre'          
+            }).appendTo('body');
+            $input.width(span.width() + 10);  
+            span.remove();
+        }
+
+        $('[id^=nama_produk]').select2();
+        $('[id^=nama_produk]').prop('disabled', true);
+
         $('#status').change(function(){
             var status = $(this).val();
             if(status == 'DIBATALKAN')
@@ -1119,6 +1146,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(totalharga);
+                    adjustWidth(totalhargaInput);
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
@@ -1179,6 +1207,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp '));
+                    adjustWidth(hargaSatuanInput);
                     hargaSatuanInput.prop('readonly', true);
                     $('[id^=diskon_]').each(function() {
                         $(this).trigger('change');
@@ -1195,6 +1224,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
+                    adjustWidth(totalhargaInput);
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
@@ -1243,6 +1273,16 @@
             var hargaTotal = parseFloat($('#harga_' + index).val()) || 0; 
 
             $('[id^=diskon_' + index + ']').trigger('input');
+        });
+
+        $('.btn_remove').css({
+            'width': '50px',   
+            'height': '50px'   
+        });
+
+        $('.btn_remove img').css({
+            'width': '100%',    
+            'height': '100%'    
         });
 
         $('[id^=diskon_]').on('change', function(){
