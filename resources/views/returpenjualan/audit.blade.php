@@ -296,7 +296,8 @@
                                                     Tidak Bisa Ubah
                                                 </td>
                                                 <td>
-                                                    <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
+                                                    <!-- <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly> -->
+                                                    Tidak Bisa Ubah
                                                 </td>
                                             @elseif($perPendapatan)
                                                 @foreach ($perPendapatan as $noRETUR => $items)

@@ -848,7 +848,7 @@
             });
         });
 
-        $('input[id^="nama_produk"], input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"]').each(function() {
+        $('select[id^="nama_produk"], input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"]').each(function() {
             var $this = $(this);
             var span = $('<span>').text($this.val()).css({
                 'font': $this.css('font'),  
