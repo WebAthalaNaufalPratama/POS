@@ -1131,6 +1131,8 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(totalharga);
+                    $('[id^=kondisitradproduk]').hide();
+                    $('[id^=jumlahtradproduk]').hide();
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
@@ -1196,6 +1198,8 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp'));
+                    $('[id^=kondisitradproduk]').hide();
+                    $('[id^=jumlahtradproduk]').hide();
                     adjustWidth(hargaSatuanInput);
                     hargaSatuanInput.prop('readonly', true);
                 }
@@ -1212,6 +1216,8 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
+                    $('[id^=kondisitradproduk]').hide();
+                    $('[id^=jumlahtradproduk]').hide();
                     adjustWidth(totalhargaInput);
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
