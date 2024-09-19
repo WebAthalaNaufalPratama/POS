@@ -350,29 +350,29 @@
             width: 100%; /* Makes sure the select box uses available width */
         }
 
-        /* Scrollbar untuk .table-responsive dan .dataTables_scrollBody */
-        .table-responsive::-webkit-scrollbar,
-        .dataTables_scrollBody::-webkit-scrollbar {
-            height: 10px; /* Ukuran tinggi scrollbar horizontal */
+        /* Scrollbar untuk .table-responsive, .dataTables_scrollBody, html, dan body */
+        ::-webkit-scrollbar {
+            width: 10px; /* Lebar scrollbar vertikal */
+            height: 10px; /* Tinggi scrollbar horizontal */
         }
 
-        /* Mengatur warna background track scrollbar untuk .table-responsive dan .dataTables_scrollBody */
-        .table-responsive::-webkit-scrollbar-track,
-        .dataTables_scrollBody::-webkit-scrollbar-track {
+        /* Mengatur warna background track scrollbar */
+        ::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
 
-        /* Mengatur warna dan bentuk scrollbar untuk .table-responsive dan .dataTables_scrollBody */
-        .table-responsive::-webkit-scrollbar-thumb,
-        .dataTables_scrollBody::-webkit-scrollbar-thumb {
+        /* Mengatur warna dan bentuk scrollbar */
+        ::-webkit-scrollbar-thumb {
             background-color: #ff9f43; /* Warna scrollbar */
             border-radius: 10px; /* Membuat ujung scrollbar melengkung */
         }
 
-        /* Mengubah warna scrollbar saat di-hover untuk .table-responsive dan .dataTables_scrollBody */
-        .table-responsive::-webkit-scrollbar-thumb:hover,
-        .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+        /* Mengubah warna scrollbar saat di-hover */
+        ::-webkit-scrollbar-thumb:hover {
             background-color: #ff9430; /* Warna scrollbar saat dihover */
+        }
+        table {
+          min-width: 100%;
         }
 
   </style>
@@ -860,6 +860,7 @@
               autoWidth: true,
               info: false,
               fixedHeader: true,
+              scrollX: '100%',
               scrollY: '400px',
               scrollCollapse: true,
               language: {
