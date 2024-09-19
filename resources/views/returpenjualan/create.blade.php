@@ -91,15 +91,15 @@
                                         <div class="form-group">
                                             <div class="form-group">
                                             <div class="custom-file-container" data-upload-id="myFirstImage">
-                                                <label>Masukan Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
+                                                <label>Masukan Bukti Retur <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*,.pdf">
                                                     <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <div class="custom-file-container__image-preview"></div>
+                                                <div id="filePreview"></div>
                                             </div>
                                             </div>
                                         </div>
@@ -198,7 +198,7 @@
                                         <h5>Produk Komplain</h5>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table">
+                                        <table class="table datanew">
                                             <thead>
                                                 <tr>
                                                     @if($penjualans->distribusi == 'Dikirim')
@@ -398,14 +398,15 @@
                                                     </select>
                                                     </td>
                                                     @if($isTRDSelected)
-                                                        <td>Tidak Ada Komponen</td>
+                                                        <td>Tidak Bisa Ubah</td>
                                                         <td>
-                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect">
+                                                            <!-- <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect">
                                                                 <option value=""> Pilih Kondisi </option>
                                                                 @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                                 @endforeach
-                                                            </select>
+                                                            </select> -->
+                                                            Tidak Bisa Ubah
                                                         </td>
                                                         <td>
                                                         <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
@@ -459,9 +460,9 @@
                                                     <td><input type="text" name="totalharga[]" id="totalharga_{{ $i }}" class="form-control" required></td>
                                                     <td>
                                                         @if ($i == 0)
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove btn-lg"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @else
-                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
+                                                        <button type="button" name="remove" id="{{ $i }}" class="btn btn_remove btn-lg"><img src="/assets/img/icons/delete.svg" alt="svg"></button>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -845,6 +846,33 @@
             });
         });
 
+        $('input[id^="no_do_"], input[id^="komponengiftproduk"], select[id^="jenis_diskon"]').each(function() {
+            var $this = $(this);
+            var span = $('<span>').text($this.val()).css({
+                'font': $this.css('font'),  
+                'visibility': 'hidden',   
+                'white-space': 'pre'      
+            }).appendTo('body');
+            $this.width(span.width() + 10);  
+            span.remove();
+        });
+
+        function adjustWidth(input) {
+            var $input = $(input);
+
+            var span = $('<span>').text($input.val()).css({
+                'font': $input.css('font'),   
+                'visibility': 'hidden',       
+                'white-space': 'pre'          
+            }).appendTo('body');
+            $input.width(span.width() + 10);  
+            span.remove();
+        }
+
+        $('[id^=nama_produk]').select2();
+        $('[id^=nama_produk]').prop('disabled', true);
+
+
         $(document).on('change', '[id^=nama_produk]', function() {
             var id = $(this).attr('id').split('_')[2]; // Ambil bagian angka ID
             var selectedOption = $(this).find(':selected');
@@ -900,30 +928,47 @@
 
         validateNumericInput();
 
-        $('#bukti_file').on('change', function() {
-            const file = $(this)[0].files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(this).val('');
-                return;
-            }
+        $('#bukti_file').on('change', function(event) {
+            var file = event.target.files[0];
+            var filePreviewContainer = $('#filePreview');
+
+            filePreviewContainer.html('');
+
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview').attr('src', e.target.result);
+                var fileType = file.type;
+
+                if (fileType.includes('image')) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = $('<img />', {
+                            src: e.target.result,
+                            style: 'max-width: 100%;'
+                        });
+                        filePreviewContainer.append(img);
+                    };
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
+                else if (fileType === 'application/pdf') {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var embed = $('<embed />', {
+                            src: e.target.result,
+                            type: 'application/pdf',
+                            width: '100%',
+                            height: '500px' 
+                        });
+                        filePreviewContainer.append(embed);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Unsupported file type! Please select an image or a PDF file.');
+                }
             }
         });
 
         function clearFile() {
-            $('#bukti_file').val('');
-            $('#preview').attr('src', defaultImg);
+            $('#bukti_file').val(''); 
+            $('#filePreview').html(''); 
         };
 
         $('[id^=jumlah2]').on('input', function(){
@@ -989,6 +1034,16 @@
             var ongkirValue = parseFloat(selectedOption.data('biaya_pengiriman')) || 0;
             $('#biaya_pengiriman').val(formatRupiah(ongkirValue, 'Rp '));
             Totaltagihan();
+        });
+
+        $('.btn_remove').css({
+            'width': '50px',   
+            'height': '50px'   
+        });
+
+        $('.btn_remove img').css({
+            'width': '100%',    
+            'height': '100%'    
         });
 
         function Totaltagihan() {
@@ -1126,6 +1181,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var harga = (hargaProduk / jumlahProduk) * jumlah;
                     hargaSatuanInput.val(formatRupiah(harga, 'Rp'));
+                    adjustWidth(hargaSatuanInput);
                     hargaSatuanInput.prop('readonly', true);
                 }
             });
@@ -1141,6 +1197,7 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(formatRupiah(totalharga, 'Rp '));
+                    adjustWidth(totalhargaInput);
                     totalhargaInput.prop('readonly', true); 
                 } else if(komplain == 'retur'){
                     totalhargaInput.val(0);
@@ -1298,9 +1355,11 @@
                         alert('Nominal tidak boleh melebihi harga total');
                         diskonValue = 0;
                         $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
+                        adjustWidth($('#diskon_' + index));
                     } else {
                         hargaTotal -= diskonValue;
                         $('#diskon_' + index).val(formatRupiah(diskonValue, 'Rp '));
+                        adjustWidth($('#diskon_' + index));
                     }
                 } else if (selectedValue === "persen" && !isNaN(diskonValue)) {
                     if (diskonValue > 100) {

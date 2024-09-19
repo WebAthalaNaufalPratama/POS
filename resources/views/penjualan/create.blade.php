@@ -116,6 +116,7 @@
                                             <select id="status" name="status" class="form-control" required>
                                                 <option value="">Pilih Status</option>
                                                 <option value="TUNDA">TUNDA</option>
+                                                <option value="DIKONFIRMASI">DIKONFIRMASI</option>
                                             </select>
                                         </div>
                                     </div>
@@ -201,7 +202,7 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)" readonly></td>
+                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" class="form-control" onchange="calculateTotal(0)"></td>
                                                     <td><input type="number" name="jumlah[]" id="jumlah_0" class="form-control" oninput="multiply($(this))" onchange="calculateTotal(0)"></td>
                                                     <td>
                                                         <select id="jenis_diskon_0" name="jenis_diskon[]" class="form-control" onchange="showInputType(0)">
@@ -308,12 +309,12 @@
                                                 <label>Masukan Bukti Invoice <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti_file" accept="image/*">
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti_file" accept="image/*,.pdf">
                                                     <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
                                                 <span class="text-danger">max 2mb</span>
-                                                <div class="custom-file-container__image-preview"></div>
+                                                <div id="filePreview"></div>
                                             </div>
                                             </div>
                                         </div>
@@ -446,6 +447,7 @@
                             <select class="select2 form-control" name="tipe" id="add_tipe" required>
                                 <option value="">Pilih Tipe</option>
                                 <option value="tradisional">tradisional</option>
+                                <option value="premium">premium</option>
                             </select>
                         </div>
                     </div>
@@ -609,19 +611,22 @@
     generateInvoiceBayar(kode);
 </script>
 <script>
-    // Function to update date to today's date
-    function updateDate(element) {
-        var today = new Date().toISOString().split('T')[0];
-        element.value = today;
-    }
+    $(document).ready(function() {
+        // Function to update date to today's date
+        function updateDate(selector) {
+            var today = new Date().toISOString().split('T')[0];
+            $(selector).val(today);
+        }
 
-    // Call the function to set the date to today's date initially
-    updateDate(document.getElementById('tanggal_invoice'));
-    updateDate(document.getElementById('jatuh_tempo'));
-    @foreach($produks as $index => $produk)
-    updateDate(document.getElementById('tglrangkai_{{ $index }}'), '{{ $index }}');
-    @endforeach
-    updateDate(document.getElementById('tanggalbayar'));
+        // Call the function to set the date to today's date initially
+        updateDate('#tanggal_invoice');
+        updateDate('#jatuh_tempo');
+        updateDate('#tanggalbayar');
+        
+        @foreach($produks as $index => $produk)
+            updateDate('#tglrangkai_{{ $index }}');
+        @endforeach
+    });
 </script>
 <script>
     function formatRupiah(angka, prefix) {
@@ -782,7 +787,7 @@
                                     @endforeach
                                 </select>
                             </td>
-                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control" readonly></td>
+                            <td><input type="text" name="harga_satuan[]" id="harga_satuan_${i}" onchange="calculateTotal(0)" class="form-control"></td>
                             <td><input type="number" name="jumlah[]" id="jumlah_${i}" class="form-control" oninput="multiply(this)"></td>
                             <td>
                                 <select id="jenis_diskon_${i}" name="jenis_diskon[]" class="form-control" onchange="showInputType(${i})">
@@ -922,18 +927,27 @@
 
         $('#btnCheckPromo').click(function(e) {
             e.preventDefault();
-            var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); // Mengonversi format Rupiah menjadi numerik
+            var total_transaksi = parseRupiahToNumber($('#total_tagihan').val()); 
             var produk = [];
             var tipe_produk = [];
+            var produk_count = [];
 
             $('select[id^="nama_produk_"]').each(function() {
-                produk.push($(this).val());
+                var selected_produk = $(this).val();
+                produk.push(selected_produk);
                 tipe_produk.push($(this).select2().find(":selected").data("tipe_produk"));
+
+                if (produk_count[selected_produk]) {
+                    produk_count[selected_produk]++;
+                } else {
+                    produk_count[selected_produk] = 1; 
+                }
             });
 
-            $(this).html('<span class="spinner-border spinner-border-sm me-2"></span>'); // Menambahkan penutupan span yang hilang
-            checkPromo(total_transaksi, tipe_produk, produk);
+            $(this).html('<span class="spinner-border spinner-border-sm me-2"></span>'); 
+            checkPromo(total_transaksi, tipe_produk, produk, produk_count);
         });
+
 
 
         $('#cara_bayar').change(function() {
@@ -1109,8 +1123,13 @@
             }
         });
 
+        $('[id^="harga_satuan_"]').on('input', function(){
+            var inputhas = $(this).val();
+            $(this).val(formatRupiah(inputhas, 'Rp '));
+        });
+
         $('#promo_id').change(function() {
-            var promo_id = $(this).select2().find(":selected").val()
+            var promo_id = $(this).select2().find(":selected").val();
             if (!promo_id) {
                 $('#total_promo').val(0);
                 total_harga();
@@ -1163,13 +1182,14 @@
         });
 
 
-        function checkPromo(total_transaksi, tipe_produk, produk) {
+        function checkPromo(total_transaksi, tipe_produk, produk, produk_count) {
             $('#total_promo').val(0);
             Totaltagihan();
             var data = {
                 total_transaksi: total_transaksi,
                 tipe_produk: tipe_produk,
-                produk: produk
+                produk: produk,
+                produk_count: produk_count
             };
             $.ajax({
                 url: '/checkPromo',
@@ -1206,7 +1226,7 @@
                     $('#btnCheckPromo').html('<i class="fa fa-search" data-bs-toggle="tooltip"></i>')
                 }
             });
-        }
+        };
 
         function updateHargaSatuan(select) {
             var index = select.selectedIndex;
@@ -1218,7 +1238,7 @@
             var formattedHarga = formatRupiah(hargaProduk, 'Rp ');
             hargaSatuanInput.val(formattedHarga);
             multiply(hargaSatuanInput);
-        }
+        };
 
         window.multiply = function(element) {
             var id;
@@ -1252,7 +1272,7 @@
                 $('#sub_total').val(formatted_total);
                 $('#total_tagihan').val(formatted_total);
             }
-        }
+        };
 
 
 
@@ -1268,33 +1288,51 @@
             // subTotalInput.val(subTotal.toFixed(2));
             var formatted_total = formatRupiah(subTotal, 'Rp ');
             subTotalInput.val(formatted_total);
-        }
+        };
 
-        $('#bukti_file').on('change', function() {
-            const file = $(this)[0].files[0];
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(this).val('');
-                return;
-            }
+        $('#bukti_file').on('change', function(event) {
+            var file = event.target.files[0];
+            var filePreviewContainer = $('#filePreview');
+
+            filePreviewContainer.html('');
+
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview').attr('src', e.target.result);
+                var fileType = file.type;
+
+                if (fileType.includes('image')) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = $('<img />', {
+                            src: e.target.result,
+                            style: 'max-width: 100%;'
+                        });
+                        filePreviewContainer.append(img);
+                    };
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
+                else if (fileType === 'application/pdf') {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var embed = $('<embed />', {
+                            src: e.target.result,
+                            type: 'application/pdf',
+                            width: '100%',
+                            height: '500px' 
+                        });
+                        filePreviewContainer.append(embed);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Unsupported file type! Please select an image or a PDF file.');
+                }
             }
         });
 
         function clearFile() {
-            $('#bukti_file').val('');
-            $('#preview').attr('src', defaultImg);
-        };
+            $('#bukti_file').val(''); 
+            $('#filePreview').html(''); 
+        }
+
 
         function calculatePromo(promo_id) {
             var data = {
@@ -1308,11 +1346,40 @@
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
+                    var produk_count = {}; 
+
+                    $('select[id^="nama_produk_"]').each(function(index, element) {
+                        var thisProduk = $(this).val();
+                        var selected_produk = response.ketentuan_produk;
+                        var jumlah = parseInt($('[id^="jumlah_"]').eq(index).val()) || 0;
+                        if (selected_produk == thisProduk) {
+                            if (produk_count[thisProduk]) {
+                                produk_count[thisProduk] += jumlah;
+                            } else {
+                                produk_count[thisProduk] = jumlah; 
+                            }
+                        }
+                    });
+
                     var total_transaksi = parseRupiahToNumber($('#sub_total').val());
+                    
                     var total_promo;
                     switch (response.diskon) {
                         case 'persen':
+                            // $('select[id^="nama_produk_"]').each(function(index, element) {
+                            //     var thisProduk = $(this).val();
+                            //     var selected_produk = response.ketentuan_produk;
+                            //     var subtotal = parseInt($('[id^="harga_total_"]').eq(index).val()) || 0;
+                            //     if (selected_produk == thisProduk) {
+                            //         if (produk_count[thisProduk]) {
+                            //             produk_count[thisProduk] += subtotal * parseInt(response.diskon_persen) / 100;
+                            //         } else {
+                            //             produk_count[thisProduk] = subtotal * parseInt(response.diskon_persen) / 100; 
+                            //         }
+                            //     }
+                            // });
                             total_promo = total_transaksi * parseInt(response.diskon_persen) / 100;
+                            // total_promo = produk_count;
                             // console.log(total_promo);
                             break;
                         case 'nominal':
@@ -1325,13 +1392,16 @@
                             break;
                         case 'poin':
                             var pointInput = parseFloat($('#point_dipakai').val()) || 0;
+                            var productCode = response.ketentuan_produk;
+                            var quantity = produk_count[productCode] || 0;
 
-                            if ($('#cek_point').prop('checked')) {
+                            if ($('#cek_point').prop('checked') && response.ketentuan != 'produk') {
                                 total_promo = 'poin ' + response.diskon_poin;
+                            }else if(response.ketentuan == 'produk'){
+                                total_promo = 'poin ' + response.diskon_poin * quantity;
                             }else{
                                 total_promo = 'poin ' + response.diskon_poin;
                             }
-                            
                             break;
                         case 'produk':
                             total_promo = response.free_produk.kode + '-' + response.free_produk.nama;
@@ -1360,13 +1430,13 @@
                     console.log(error)
                 }
             });
-        }
+        };
         function parseNumber(rupiah) {
             rupiah = String(rupiah);
             rupiah = rupiah.replace(/[^\d,]/g, '');
             rupiah = rupiah.replace(',', '.');
             return parseFloat(rupiah);
-        }
+        };
 
         function Totaltagihan() {
             var subtotal = parseRupiahToNumber($('#sub_total').val()) || 0;
@@ -1402,7 +1472,7 @@
             $('#total_tagihan').val(formatRupiah(totalTagihan, 'Rp '));
             $('#sisa_bayar').val(formatRupiah(sisaBayar, 'Rp '));
             $('#jumlah_ppn').val(formatRupiah(ppn, 'Rp '));
-        }
+        };
 
 
         $('#sub_total, #jumlah_ppn, #dp, #biaya_ongkir, #total_promo, #persen_ppn').on('input', Totaltagihan);

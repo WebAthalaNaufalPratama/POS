@@ -112,6 +112,9 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{produk}/edit', 'ProdukController@edit')->name('produks.edit');
             Route::patch('/{produk}/update', 'ProdukController@update')->name('produks.update');
             Route::get('/{produk}/delete', 'ProdukController@destroy')->name('produks.destroy');
+            Route::get('/{produk}/delete', 'ProdukController@destroy')->name('produks.destroy');
+            Route::get('/pdf', 'ProdukController@pdf')->name('produks.pdf');
+            Route::get('/excel', 'ProdukController@excel')->name('produks.excel');
         });
 
         Route::group(['prefix' => 'tipe_produks'], function() {
@@ -176,6 +179,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{ongkir}/edit', 'OngkirController@edit')->name('ongkir.edit');
             Route::patch('/{ongkir}/update', 'OngkirController@update')->name('ongkir.update');
             Route::get('/{ongkir}/delete', 'OngkirController@destroy')->name('ongkir.destroy');
+            Route::get('/pdf', 'OngkirController@pdf')->name('ongkir.pdf');
+            Route::get('/excel', 'OngkirController@excel')->name('ongkir.excel');
         });
 
         Route::group(['prefix' => 'tradisional'], function() {
@@ -186,6 +191,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{tradisional}/edit', 'ProdukJualController@edit')->name('tradisional.edit');
             Route::patch('/{tradisional}/update', 'ProdukJualController@update')->name('tradisional.update');
             Route::get('/{tradisional}/delete', 'ProdukJualController@destroy')->name('tradisional.destroy');
+            Route::get('/pdf', 'ProdukJualController@tradisional_pdf')->name('tradisional.pdf');
+            Route::get('/excel', 'ProdukJualController@tradisional_excel')->name('tradisional.excel');
         });
 
         Route::group(['prefix' => 'gift'], function() {
@@ -196,6 +203,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{gift}/edit', 'ProdukJualController@edit')->name('gift.edit');
             Route::patch('/{gift}/update', 'ProdukJualController@update')->name('gift.update');
             Route::get('/{gift}/delete', 'ProdukJualController@destroy')->name('gift.destroy');
+            Route::get('/pdf', 'ProdukJualController@gift_pdf')->name('gift.pdf');
+            Route::get('/excel', 'ProdukJualController@gift_excel')->name('gift.excel');
         });
 
         Route::group(['prefix'=> 'customer'], function() {

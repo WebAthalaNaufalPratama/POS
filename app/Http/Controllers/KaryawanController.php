@@ -43,7 +43,7 @@ class KaryawanController extends Controller
             'nama' => 'required',
             'jabatan' => 'required|exists:jabatans,nama',
             'lokasi_id' => 'required|exists:lokasis,id',
-            'handphone' => 'required|numeric|digits_between:11,13',
+            'handphone' => 'required|numeric',
             'alamat' => 'required',
             'user_id' => 'nullable|exists:users,id'
         ]);
@@ -104,7 +104,7 @@ class KaryawanController extends Controller
             'nama' => 'required',
             'jabatan' => 'required|exists:jabatans,nama',
             'lokasi_id' => 'required|exists:lokasis,id',
-            'handphone' => 'required|numeric|digits_between:11,13',
+            'handphone' => 'required|numeric',
             'alamat' => 'required',
             'user_id' => 'nullable|exists:users,id'
         ]);

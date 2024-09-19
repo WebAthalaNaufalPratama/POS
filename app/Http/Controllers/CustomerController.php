@@ -48,7 +48,7 @@ class CustomerController extends Controller
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
             'tipe' => 'required|in:sewa,tradisional,premium',
-            'handphone' => 'required|numeric|digits_between:11,13|unique:customers,handphone',
+            'handphone' => 'required|numeric|unique:customers,handphone',
             'alamat' => 'required',
             'tanggal_lahir' => 'required|date|before_or_equal:today',
             'tanggal_bergabung' => 'required|date|before_or_equal:today',
@@ -116,7 +116,7 @@ class CustomerController extends Controller
         $validator = Validator::make($req->all(), [
             'nama' => 'required',
             'tipe' => 'required|in:sewa,tradisional,premium',
-            'handphone' => 'required|numeric|digits_between:11,13|unique:customers,handphone,' . $customer->id,
+            'handphone' => 'required|numeric|unique:customers,handphone,' . $customer->id,
             'alamat' => 'required',
             'tanggal_lahir' => 'required|date|before_or_equal:today',
             'tanggal_bergabung' => 'required|date|before_or_equal:today',

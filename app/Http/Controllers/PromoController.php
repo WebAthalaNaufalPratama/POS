@@ -8,14 +8,84 @@ use App\Models\Lokasi;
 use App\Models\Produk_Jual;
 use App\Models\Tipe_Produk;
 use App\Models\Karyawan;
+use App\Models\Penjualan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class PromoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $query = Promo::query();
+
+            // filter
+            // if ($request->has('produk') && !empty($request->produk)) {
+            //     $query->whereIn('id', $request->produk);
+            // }
+        
+            // if ($request->has('tipe_produk') && $request->tipe_produk != '') {
+            //     $query->where('tipe_produk', $request->tipe_produk);
+            // }
+
+            // if ($request->has('satuan') && $request->satuan != '') {
+            //     $query->where('satuan', $request->satuan);
+            // }
+
+            $start = $request->input('start');
+            $length = $request->input('length');
+            $order = $request->input('order')[0]['column'];
+            $dir = $request->input('order')[0]['dir'];
+            $columnName = $request->input('columns')[$order]['data'];
+
+            // search
+            $search = $request->input('search.value');
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%")
+                    ->orWhere('tanggal_mulai', 'like', "%$search%")
+                    ->orWhere('tanggal_berakhir', 'like', "%$search%")
+                    ->orWhere('ketentuan', 'like', "%$search%")
+                    ->orWhere('diskon', 'like', "%$search%")
+                    ->orWhereRaw('JSON_CONTAINS(lokasi_id, ?)', [json_encode($search)]);
+                });
+            }
+    
+            $query->orderBy($columnName, $dir);
+            $recordsFiltered = $query->count();
+            $rawData = $query->offset($start)->limit($length)->get();
+    
+            $currentPage = ($start / $length) + 1;
+            $perPage = $length;
+        
+            $data = $rawData->map(function($item, $index) use ($currentPage, $perPage) {
+                $permission = Auth::user()->getAllPermissions()->pluck('name')->toArray();
+                $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                $item->tanggal_mulai_format = formatTanggalInd($item->tanggal_mulai);
+                $item->tanggal_berakhir_format = formatTanggalInd($item->tanggal_berakhir);
+                $item->canEdit = in_array('promo.index', $permission);
+                $item->canDelete = in_array('promo.index', $permission);
+
+                $decodedLokasiIds = json_decode($item->lokasi_id, true);
+                if (is_array($decodedLokasiIds)) {
+                    $lokasiIds = $decodedLokasiIds;
+                } else {
+                    $lokasiIds = [$item->lokasi_id];
+                }
+                $lokasiNames = Lokasi::whereIn('id', $lokasiIds)->pluck('nama')->toArray();
+                $item->lokasi = $lokasiNames;
+                return $item;
+            });
+
+            return response()->json([
+                'draw' => $request->input('draw'),
+                'recordsTotal' => Promo::count(),
+                'recordsFiltered' => $recordsFiltered,
+                'data' => $data,
+            ]);
+
+        }
         $promos = Promo::orderByDesc('id')->get();
         $lokasis = Lokasi::all();
         $produk_juals = Produk_Jual::all();
@@ -43,20 +113,25 @@ class PromoController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:promos,nama',
             'tanggal_mulai' => 'required',
             'tanggal_berakhir' => 'required',
             'ketentuan' => 'required',
             'diskon' => 'required',
-            'lokasi_id' => 'required',
+            'lokasi_id' => 'required|array|min:1',
         ]);
         $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->with('fail', $error);
+        }
         $data = $req->except(['_token', '_method']);
-
-        // save data
+        $data['lokasi_id'] = json_encode($req->lokasi_id);
+        
+        // Save data
         $check = Promo::create($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        if (!$check) {
+            return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        }
         return redirect()->back()->with('success', 'Data tersimpan');
     }
 
@@ -95,21 +170,39 @@ class PromoController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:promos,nama,' . $promo,
             'tanggal_mulai' => 'required',
             'tanggal_berakhir' => 'required',
             'ketentuan' => 'required',
             'diskon' => 'required',
-            'lokasi_id' => 'required',
+            'lokasi_id' => 'required|array|min:1',
         ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
 
-        // update data
-        $check = Promo::find($promo)->update($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
-        return redirect()->back()->with('success', 'Data berhsail diperbarui');
+        $error = $validator->errors()->all();
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->with('fail', $error);
+        }
+
+        // cek jika promo sudah terpakai
+        $isUsed = Penjualan::where('promo_id', $promo)->exists();
+        if ($isUsed) {
+            return redirect()->back()->withInput()->with('fail', 'Promo sudah terpakai dan tidak dapat diubah');
+        }
+
+        // Prepare the data for updating
+        $data = $req->except(['_token', '_method']);
+        $data['lokasi_id'] = json_encode($req->lokasi_id);
+
+        // Update the promo data
+        $promoToUpdate = Promo::find($promo);
+        if (!$promoToUpdate) {
+            return redirect()->back()->withInput()->with('fail', 'Promo tidak ditemukan');
+        }
+        $check = $promoToUpdate->update($data);
+        if (!$check) {
+            return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
+        }
+        return redirect()->back()->with('success', 'Data berhasil diperbarui');
     }
 
     /**
@@ -141,12 +234,12 @@ class PromoController extends Controller
         $tanggalSekarang = Carbon::now()->toDateString();
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
-        $semualokasi = Lokasi::where('nama', 'Semua Lokasi')->first();
+        $semualokasi = Lokasi::pluck('id');
         // check promo minimal transaksi
         $promoMinTransaksi = [];
         $minTransaksi = Promo::where(function($query) use ($lokasi, $semualokasi) {
             $query->where('lokasi_id', $lokasi->lokasi_id)
-                  ->orWhere('lokasi_id', $semualokasi->id);
+                  ->orWhereIn('lokasi_id', $semualokasi->toArray());
         })->where('ketentuan', 'min_transaksi')->where('ketentuan_min_transaksi', '<', intval($data['total_transaksi']))->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
         if($minTransaksi->isNotEmpty()){
             foreach ($minTransaksi as $item) {
@@ -158,7 +251,7 @@ class PromoController extends Controller
         foreach ($data['produk'] as $item) {
             $checkProduk = Promo::where(function($query) use ($lokasi, $semualokasi) {
                 $query->where('lokasi_id', $lokasi->lokasi_id)
-                      ->orWhere('lokasi_id', $semualokasi->id);
+                  ->orWhereIn('lokasi_id', $semualokasi->toArray());
             })->where('ketentuan', 'produk')->where('ketentuan_produk', $item)->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
             if($checkProduk->isNotEmpty()){
                 foreach ($checkProduk as $item) {
@@ -172,7 +265,7 @@ class PromoController extends Controller
         foreach ($data['tipe_produk'] as $item) {
             $checkTipeProduk = Promo::where(function($query) use ($lokasi, $semualokasi) {
                 $query->where('lokasi_id', $lokasi->lokasi_id)
-                      ->orWhere('lokasi_id', $semualokasi->id);
+                  ->orWhereIn('lokasi_id', $semualokasi->toArray());
             })->where('ketentuan', 'tipe_produk')->where('ketentuan_tipe_produk', $item)->whereDate('tanggal_mulai', '<=', $tanggalSekarang)->whereDate('tanggal_berakhir', '>=', $tanggalSekarang)->get();
             if($checkTipeProduk->isNotEmpty()){
                 foreach ($checkTipeProduk as $item) {

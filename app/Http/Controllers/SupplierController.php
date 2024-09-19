@@ -39,10 +39,10 @@ class SupplierController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:suppliers,nama',
             'pic' => 'required',
             'tipe_supplier' => 'required',
-            'handphone' => 'required|numeric|digits_between:11,13',
+            'handphone' => 'required|unique:suppliers,handphone',
             'alamat' => 'required',
             'tanggal_bergabung' => 'required',
         ]);
@@ -111,10 +111,10 @@ class SupplierController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'nama' => 'required',
+            'nama' => 'required|unique:suppliers,nama,'.$supplier,
             'pic' => 'required',
             'tipe_supplier' => 'required',
-            'handphone' => 'required|numeric|digits_between:11,13',
+            'handphone' => 'required|unique:suppliers,handphone,'.$supplier,
             'alamat' => 'required',
             'tanggal_bergabung' => 'required',
         ]);
