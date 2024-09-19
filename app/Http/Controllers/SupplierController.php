@@ -56,6 +56,27 @@ class SupplierController extends Controller
         return redirect()->back()->with('success', 'Data tersimpan');
     }
 
+    public function store_sup_po(Request $request)
+    {
+        $validatedData = $request->validate([
+            'nama' => 'required|string|max:255',
+            'pic' => 'nullable|string|max:255',
+            'handphone' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
+            'tanggal_bergabung' => 'required|date',
+            'tipe_supplier' => 'required|string',
+        ]);
+
+        $supplier = Supplier::create($validatedData);
+
+        // Return data supplier baru dalam format JSON
+        return response()->json([
+            'success' => true,
+            'supplier' => $supplier
+        ]);
+}
+
+
     /**
      * Display the specified resource.
      *
