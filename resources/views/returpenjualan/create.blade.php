@@ -274,14 +274,15 @@
                                                     </select>
                                                     </td>
                                                     @if($isTRDSelected)
+                                                    
                                                         <td>Tidak Bisa Ubah</td>
                                                         <td>
-                                                            <!-- <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect">
+                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }} myselect" display="none">
                                                                 <option value=""> Pilih Kondisi </option>
                                                                 @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
                                                                 @endforeach
-                                                            </select> -->
+                                                            </select>
                                                             Tidak Bisa Ubah
                                                         </td>
                                                         <td>
