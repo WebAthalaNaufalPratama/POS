@@ -279,7 +279,7 @@
                                                         <!-- @endif -->
                                                     @endforeach
                                                     </select>
-                                                    </td>
+                                                    
                                                     @if($isTRDSelected)
                                                         @foreach($selectedTRDDetails as $index => $komponen)
                                                             
