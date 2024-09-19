@@ -16,6 +16,10 @@ class Komponen_Produk_Jual extends Model
         return $this->belongsTo(Kondisi::class, 'kondisi', 'id');
     }
 
+    public function dataKondisi(){
+        return $this->belongsTo(Kondisi::class, 'kondisi', 'id');
+    }
+
     public function produk_jual(){
         return $this->belongsTo(Produk_Jual::class, 'produk_jual_id', 'id');
     }

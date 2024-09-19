@@ -20,7 +20,7 @@
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="nama">Nama</label>
-                                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Produk" value="{{ $getProdukJual->nama }}" required>
+                                    <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Produk" value="{{ old('nama') ?? $getProdukJual->nama }}" required>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="tipe_produk">Tipe Produk</label>
@@ -29,22 +29,22 @@
                             </div>
                             <div class="form-row row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="harga">Harga</label>
+                                    <label for="harga">Harga Pokok</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="text" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ $getProdukJual->harga }}" aria-describedby="inputGroupPrepend2" required readonly>
+                                        <input type="text" class="form-control" id="harga" name="harga" placeholder="Harga Produk" value="{{ old('harga') ?? $getProdukJual->harga }}" aria-describedby="inputGroupPrepend2" required readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="harga_jual">Harga Jual</label>
                                     <div class="input-group">
                                         <span class="input-group-text" id="inputGroupPrepend2">Rp</span>
-                                        <input type="text" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="{{ $getProdukJual->harga_jual }}" aria-describedby="inputGroupPrepend2" required>
+                                        <input type="text" class="form-control" id="harga_jual" name="harga_jual" placeholder="Harga Jual Produk" value="{{ old('harga_jual') ?? $getProdukJual->harga_jual }}" aria-describedby="inputGroupPrepend2" required>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Deskripsi</label>
-                                    <textarea rows="5" cols="5" class="form-control" placeholder="Deskripsi Produk" name="deskripsi" required>{{ $getProdukJual->deskripsi }}</textarea>
+                                    <textarea rows="5" cols="5" class="form-control" placeholder="Deskripsi Produk" name="deskripsi" required>{{ old('deskripsi') ?? $getProdukJual->deskripsi }}</textarea>
                                 </div>
                             </div>
                             <div class="form-row row">
@@ -58,68 +58,87 @@
                                                 <th>Harga Satuan</th>
                                                 <th>Jumlah</th>
                                                 <th>Harga Total</th>
-                                                <th></th>
+                                                <th style="min-width: 50px;"></th>
                                             </tr>
                                         </thead>
                                         <tbody id="dynamic_field">
-                                            @if(count($getKomponen) < 1)
-                                            <tr>
-                                                <td>
-                                                    <select id="kode_produk" name="kode_produk[]" class="form-control" required>
-                                                        <option value="">Pilih Produk</option>
-                                                        @foreach ($produks as $produk)
-                                                            <option value="{{ $produk->kode }}">{{ $produk->nama }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <select id="kondisi" name="kondisi[]" class="form-control" required>
-                                                        <option value="">Pilih Kondisi</option>
-                                                        @foreach ($kondisi as $item)
-                                                            <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td><input type="text" name="harga_satuan[]" id="harga_satuan_0" oninput="multiply(this)" class="form-control" required></td>
-                                                <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply(this)" class="form-control" required></td>
-                                                <td><input type="text" name="harga_total[]" id="harga_total_0" class="form-control" required></td>
-                                                <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
-                                            </tr>
-                                            @endif
-                                            @php
-                                                $i = 0;
-                                            @endphp
-                                            @foreach ($getKomponen as $komponen)
-                                                <tr id="row{{ $i }}">
+                                            @if(old('kode_produk'))
+                                                @foreach(old('kode_produk', ['']) as $key => $kodeProdukOld)
+                                                <tr>
                                                     <td>
-                                                        <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" required>
+                                                        <select id="kode_produk_{{ $key }}" name="kode_produk[]" class="form-control" required>
                                                             <option value="">Pilih Produk</option>
                                                             @foreach ($produks as $produk)
-                                                                <option value="{{ $produk->kode }}" {{ $komponen->kode_produk == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
+                                                                <option value="{{ $produk->kode }}" {{ $produk->kode == old('kode_produk.'.$key) ? 'selected' : '' }}>
+                                                                    {{ $produk->nama }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" required>
+                                                        <select id="kondisi_{{ $key }}" name="kondisi[]" class="form-control" required>
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisi as $item)
-                                                                <option value="{{ $item->id }}" {{ $komponen->kondisi == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                                                <option value="{{ $item->id }}" {{ $item->id == old('kondisi.'.$key) ? 'selected' : '' }}>
+                                                                    {{ $item->nama }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </td>
-                                                    <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" value="{{ $komponen->harga_satuan }}" oninput="multiply(this)" class="form-control" required></td>
-                                                    <td><input type="number" name="jumlah[]" id="jumlah_{{ $i }}" value="{{ $komponen->jumlah }}" oninput="multiply(this)" class="form-control" required></td>
-                                                    <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" value="{{ $komponen->harga_total }}" class="form-control" required></td>
-                                                    @if ($i == 0)
-                                                        <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
-                                                    @else
-                                                        <td><a href="javascript:void(0);" class="btn_remove" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
-                                                    @endif
-                                                    @php
-                                                        $i++;
-                                                    @endphp
+                                                    <td>
+                                                        <input type="text" name="harga_satuan[]" id="harga_satuan_{{ $key }}" value="{{ old('harga_satuan.'.$key) }}" oninput="multiply({{ $key }})" class="form-control" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" name="jumlah[]" id="jumlah_{{ $key }}" value="{{ old('jumlah.'.$key) }}" oninput="multiply({{ $key }})" class="form-control" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="harga_total[]" id="harga_total_{{ $key }}" value="{{ old('harga_total.'.$key) }}" class="form-control" required readonly>
+                                                    </td>
+                                                    <td>
+                                                        @if($key == 0)
+                                                        <a href="javascript:void(0);" id="add"><img src="{{ asset('assets/img/icons/plus.svg') }}" style="color: #90ee90" alt="svg"></a>
+                                                        @else
+                                                        <a href="javascript:void(0);" class="btn_remove" id="{{ $key }}"><img src="{{ asset('assets/img/icons/delete.svg') }}" alt="svg"></a>
+                                                        @endif
+                                                    </td>
                                                 </tr>
-                                            @endforeach
+                                                @endforeach
+                                            @else
+                                                @php
+                                                    $i = 0;
+                                                @endphp
+                                                @foreach ($getKomponen as $komponen)
+                                                    <tr id="row{{ $i }}">
+                                                        <td>
+                                                            <select id="kode_produk_{{ $i }}" name="kode_produk[]" class="form-control" required>
+                                                                <option value="">Pilih Produk</option>
+                                                                @foreach ($produks as $produk)
+                                                                    <option value="{{ $produk->kode }}" {{ $komponen->kode_produk == $produk->kode ? 'selected' : '' }}>{{ $produk->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select id="kondisi_{{ $i }}" name="kondisi[]" class="form-control" required>
+                                                                <option value="">Pilih Kondisi</option>
+                                                                @foreach ($kondisi as $item)
+                                                                    <option value="{{ $item->id }}" {{ $komponen->kondisi == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" name="harga_satuan[]" id="harga_satuan_{{ $i }}" value="{{ $komponen->harga_satuan }}" oninput="multiply({{ $i }})" class="form-control" required></td>
+                                                        <td><input type="number" step="0.01" name="jumlah[]" id="jumlah_{{ $i }}" value="{{ $komponen->jumlah }}" oninput="multiply({{ $i }})" class="form-control" required></td>
+                                                        <td><input type="text" name="harga_total[]" id="harga_total_{{ $i }}" value="{{ $komponen->harga_total }}" class="form-control" required readonly></td>
+                                                        @if ($i == 0)
+                                                            <td><a href="javascript:void(0);" id="add"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a></td>
+                                                        @else
+                                                            <td><a href="javascript:void(0);" class="btn_remove" id="{{ $i }}"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>
+                                                        @endif
+                                                        @php
+                                                            $i++;
+                                                        @endphp
+                                                    </tr>
+                                                @endforeach
+                                            @endif
                                         </tbody>
                                     </table>
                                 </div>
@@ -181,11 +200,12 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            let inputs = $('#editForm').find('[id^=harga]');
+            let inputs = $('#editForm').find('[id^=harga_satuan], #harga, #harga_jual, [id^=harga_total]');
             inputs.each(function() {
                 let input = $(this);
                 let value = input.val();
-                let formattedValue = formatNumber(value);
+                let formattedDecimal = value.replace('.', ',');
+                let formattedValue = formatNumber(formattedDecimal);
 
                 // Set the cleaned value back to the input
                 input.val(formattedValue);
@@ -210,8 +230,8 @@
                 '@endforeach' +
                 '</select>' +
                 '</td>' +
-                '<td><input type="text" name="harga_satuan[]" id="harga_satuan_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
-                '<td><input type="number" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(this)" class="form-control" required></td>' +
+                '<td><input type="text" name="harga_satuan[]" id="harga_satuan_' + i + '" oninput="multiply(' + i + ')" class="form-control" required></td>' +
+                '<td><input type="number" step="0.01" name="jumlah[]" id="jumlah_' + i + '" oninput="multiply(' + i + ')" class="form-control" required></td>' +
                 '<td><input type="text" name="harga_total[]" id="harga_total_' + i + '" class="form-control" required readonly></td>' +
                 '<td><a href="javascript:void(0);" class="btn_remove" id="'+ i +'"><img src="/assets/img/icons/delete.svg" alt="svg"></a></td>' +
                 '</tr>';
@@ -219,7 +239,7 @@
                 $('#kode_produk_' + i + ', #kondisi_' + i).select2();
                 i++
             });
-            $(document).on('input', '[id^=harga], [id^=jumlah]', function() {
+            $(document).on('input', '[id^=harga]', function() {
                 let input = $(this);
                 let value = input.val();
                 
@@ -235,8 +255,7 @@
             $(document).on('click', '.btn_remove', function() {
                 var button_id = $(this).attr("id");
                 $('#row'+button_id+'').remove();
-                multiply($('#harga_satuan_0'))
-                multiply($('#jumlah_0'))
+                multiply(0)
             });
             $('#editForm').on('submit', function(e) {
                 let inputs = $('#editForm').find('[id^=harga]');
@@ -244,55 +263,50 @@
                     let input = $(this);
                     let value = input.val();
                     let cleanedValue = cleanNumber(value);
+                    let formattedHargaPokok = cleanedValue.replace(',', '.');
 
-                    input.val(cleanedValue);
+                    input.val(formattedHargaPokok);
                 });
 
                 return true;
             });
         });
-        function multiply(element) {
-            var value = $(element).val().trim();
-            if (value === "") {
-                $(element).val(0);
-                value = 0;
-            } else {
-                if (!value.startsWith("0.")) {
-                    value = value.replace(/^0+/, '');
-                    $(element).val(value);
-                }
-            }
+        function multiply(id){
+            let harga_satuan = cleanNumber($('#harga_satuan_'+id).val())
+            let jumlah = $('#jumlah_'+id).val()
 
-            if (!isNumeric(cleanNumber(value))) {
-                return;
-            }
-            var id = 0
-            var jumlah = 0
-            var harga_satuan = 0
-            var jenis = $(element).attr('id')
-            if(jenis.split('_').length == 2){
-                id = $(element).attr('id').split('_')[1];
-                jumlah = $(element).val();
-                harga_satuan = $('#harga_satuan_' + id).val() || 0;
-                if (harga_satuan) {
-                    $('#harga_total_'+id).val(formatNumber(cleanNumber(harga_satuan) * jumlah))
-                }
-            } else if(jenis.split('_').length == 3){
-                id = $(element).attr('id').split('_')[2];
-                harga_satuan = $(element).val();
-                jumlah = $('#jumlah_' + id).val() || 0;
-                if (jumlah) {
-                    $('#harga_total_'+id).val(formatNumber(cleanNumber(harga_satuan) * jumlah))
-                }
-            }
+            let harga_total = (harga_satuan * jumlah);
+            let decimalPlaces = harga_total % 1 !== 0 ? 2 : 0;
+            harga_total = harga_total.toFixed(decimalPlaces);
 
+            let parts = harga_total.split('.');
+            let formattedInteger = formatNumber(parts[0]);
+            let formattedTotal = formattedInteger;
+            if (parts[1] && parts[1] !== '00') { 
+                formattedTotal += ',' + parts[1];
+            }
+            $('#harga_total_' + id).val(formattedTotal); 
+
+            calculateHargaPokok()
+        }
+
+        function calculateHargaPokok(){
             var inputs = $('input[name="harga_total[]"]');
             var total = 0;
             inputs.each(function() {
-                total += parseInt(cleanNumber($(this).val())) || 0;
+                let harga_total = cleanNumber($(this).val());
+                let formattedHargaTotal = harga_total.replace(',', '.');
+                total += parseFloat(formattedHargaTotal);
             });
-            $('#harga').val(formatNumber(total))
-            $('#harga_jual').val(formatNumber(total))
+            let decimalPlaces = total % 1 !== 0 ? 2 : 0;
+            total = total.toFixed(decimalPlaces);
+            let parts = total.split('.');
+            let formattedInteger = formatNumber(parts[0]);
+            let formattedTotal = formattedInteger;
+            if (parts[1] && parts[1] !== '00') { 
+                formattedTotal += ',' + parts[1];
+            }
+            $('#harga').val(formattedTotal)
         }
     </script>
 @endsection

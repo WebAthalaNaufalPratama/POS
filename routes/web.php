@@ -189,6 +189,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{tradisional}/edit', 'ProdukJualController@edit')->name('tradisional.edit');
             Route::patch('/{tradisional}/update', 'ProdukJualController@update')->name('tradisional.update');
             Route::get('/{tradisional}/delete', 'ProdukJualController@destroy')->name('tradisional.destroy');
+            Route::get('/pdf', 'ProdukJualController@tradisional_pdf')->name('tradisional.pdf');
+            Route::get('/excel', 'ProdukJualController@tradisional_excel')->name('tradisional.excel');
         });
 
         Route::group(['prefix' => 'gift'], function() {
@@ -199,6 +201,8 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{gift}/edit', 'ProdukJualController@edit')->name('gift.edit');
             Route::patch('/{gift}/update', 'ProdukJualController@update')->name('gift.update');
             Route::get('/{gift}/delete', 'ProdukJualController@destroy')->name('gift.destroy');
+            Route::get('/pdf', 'ProdukJualController@gift_pdf')->name('gift.pdf');
+            Route::get('/excel', 'ProdukJualController@gift_excel')->name('gift.excel');
         });
 
         Route::group(['prefix'=> 'customer'], function() {

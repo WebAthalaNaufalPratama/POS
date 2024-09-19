@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\GiftlExport;
+use App\Exports\TradisionalExport;
 use App\Models\Komponen_Produk_Jual;
 use App\Models\Kondisi;
 use App\Models\Produk;
 use App\Models\Produk_Jual;
 use App\Models\Tipe_Produk;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Activitylog\Models\Activity;
 
 class ProdukJualController extends Controller
@@ -109,7 +113,7 @@ class ProdukJualController extends Controller
                 'deskripsi' => 'required',
                 'kode_produk*' => 'required|exists:produks,kode',
                 'kondisi*' => 'required|exists:kondisis,id',
-                'jumlah*' => 'required|integer|min:0',
+                'jumlah*' => 'required|numeric|min:0',
                 'harga_total*' => 'required|integer|min:0',
             ]);
             $error = $validator->errors()->all();
@@ -243,7 +247,6 @@ class ProdukJualController extends Controller
      */
     public function update(Request $req, $produk_Jual)
     {
-        // dd($req);
         $path = $req->path();
         $path = explode('/', $path);
         $jenis = $path[0];
@@ -252,7 +255,7 @@ class ProdukJualController extends Controller
             $validator = Validator::make($req->all(), [
                 'kode_produk' => 'required',
                 'nama' => 'required',
-                'harga' => 'required|integer',
+                'harga' => 'required|numeric',
                 'harga_jual' => 'required|integer',
                 'deskripsi' => 'required',
             ]);
@@ -302,7 +305,7 @@ class ProdukJualController extends Controller
             $validator = Validator::make($req->all(), [
                 'kode_produk' => 'required',
                 'nama' => 'required',
-                'harga' => 'required|integer',
+                'harga' => 'required|numeric',
                 'harga_jual' => 'required|integer',
                 'deskripsi' => 'required',
             ]);
@@ -369,5 +372,59 @@ class ProdukJualController extends Controller
             $getKomponen->each->delete();
         }
         return response()->json(['msg' => 'Data berhasil dihapus']);
+    }
+
+    public function tradisional_pdf(Request $request)
+    {
+        $query = Produk_Jual::where('tipe_produk', 5)->with('komponen.tipe', 'komponen.dataKondisi');
+
+        $data = $query->get()->map(function($item) {
+            $item->tipe_value = $item->tipe->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('tradisional.pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('tradisional.pdf');
+    }
+
+    public function tradisional_excel(Request $request)
+    {
+        $query = Produk_Jual::where('tipe_produk', 5)->with('komponen.tipe', 'komponen.dataKondisi');
+
+        $data = $query->get()->map(function($item) {
+            $item->tipe_value = $item->tipe->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new TradisionalExport($data), 'tradisional.xlsx');
+    }
+
+    public function gift_pdf(Request $request)
+    {
+        $query = Produk_Jual::where('tipe_produk', 6)->with('komponen.tipe', 'komponen.dataKondisi');
+
+        $data = $query->get()->map(function($item) {
+            $item->tipe_value = $item->tipe->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        $pdf = Pdf::loadView('gift.pdf', compact('data'))->setPaper('a4', 'landscape');;
+        return $pdf->stream('gift.pdf');
+    }
+
+    public function gift_excel(Request $request)
+    {
+        $query = Produk_Jual::where('tipe_produk', 6)->with('komponen.tipe', 'komponen.dataKondisi');
+
+        $data = $query->get()->map(function($item) {
+            $item->tipe_value = $item->tipe->nama;
+            return $item;
+        });
+
+        if($data->isEmpty()) return redirect()->back()->with('fail', 'Data kosong');
+        return Excel::download(new GiftlExport($data), 'gift.xlsx');
     }
 }
