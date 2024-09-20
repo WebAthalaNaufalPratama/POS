@@ -263,7 +263,7 @@
                     }
                 }
             @endphp
-            <option value="{{ $produk->id }}" data-harga="{{ $harga->harga_jual }}" data-jumlahproduk="{{ $harga->jumlah }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+            <option value="{{ $pj->produk->id }}" data-harga="{{ $harga->harga_jual }}" data-jumlahproduk="{{ $harga->jumlah }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
                 {{ $pj->produk->nama }}
             </option>
         @endforeach
@@ -290,6 +290,7 @@
             <span>Tidak Bisa Ubah</span>
         </td>
     @endforeach
+
                                                     @elseif ($perPendapatan)
                                                         @php
                                                             $items = $perPendapatan[$deliveryOrder->no_do] ?? [];
