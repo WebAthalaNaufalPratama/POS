@@ -966,7 +966,7 @@ class ReturpenjualanController extends Controller
             'kodegiftproduk_', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk',
             'jumlah', 'alasan', 'diskon', 'jenis_diskon', 'harga', 'totalharga',
             'namaproduk2', 'jumlah2', 'satuan2', 'keterangan2', 'nama_produk', 'file',
-            'kondisitradproduk_', 'jumlahtradproduk_', 'kode_produk2', 'idgiftproduk_', 'kode_produk'
+            'kondisitradproduk_', 'jumlahtradproduk_', 'kode_produk2', 'idgiftproduk_', 'kode_produk', 'kodetradproduk_', 'namatradproduk_'
         ];
         
         // Filter kunci berdasarkan awalan yang ditentukan
