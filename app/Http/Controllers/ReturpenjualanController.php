@@ -581,14 +581,14 @@ class ReturpenjualanController extends Controller
                         foreach ($produkCollection as $getProduk) {
                             $komponen_produk_terjual = Komponen_Produk_Terjual::create([
                                 'produk_terjual_id' => $produk_terjual->id,
-                                'kode_produk' => $komponen->kode_produk,
-                                'nama_produk' => $komponen->nama_produk,
-                                'tipe_produk' => $komponen->tipe_produk,
+                                'kode_produk' => $getProduk['produk']->kode_produk,
+                                'nama_produk' => $getProduk['produk']->nama_produk,
+                                'tipe_produk' => $getProduk['produk']->tipe_produk,
                                 'kondisi' => $getProduk['kondisi'],
-                                'deskripsi' => $komponen->deskripsi,
+                                'deskripsi' => $getProduk['produk']->deskripsi,
                                 'jumlah' => $getProduk['jumlah'],
-                                'harga_satuan' => $komponen->harga_satuan,
-                                'harga_total' => $komponen->harga_total
+                                'harga_satuan' => 0,
+                                'harga_total' => 0
                             ]);
 
                             if (!$komponen_produk_terjual) {
