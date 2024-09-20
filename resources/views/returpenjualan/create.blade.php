@@ -273,7 +273,7 @@
                                                     </td>
                                                     <td>
                                                         @foreach($selectedTRDDetails as $index => $komponen)
-                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" class="form-control kondisitrad-{{ $i }}" style="display:none;" readonly>
+                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" class="form-control kondisitrad-{{ $i }}" style="display:none;">
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->nama }}" {{ $kondisi->id == $komponen['kondisi'] ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
@@ -408,7 +408,7 @@
                                                         </td>
                                                         <td>
                                                             @foreach($selectedTRDDetails as $index => $komponen)
-                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" class="form-control kondisitrad-{{ $i }}" style="display:none;" readonly>
+                                                            <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" class="form-control kondisitrad-{{ $i }}" style="display:none;" >
                                                                 <option value="">Pilih Kondisi</option>
                                                                 @foreach ($kondisis as $kondisi)
                                                                     <option value="{{ $kondisi->nama }}" {{ $kondisi->id == $komponen['kondisi'] ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
