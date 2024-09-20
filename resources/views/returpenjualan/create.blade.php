@@ -259,8 +259,12 @@
                                                                         }
                                                                     }
                                                                 @endphp
-                                                                <option value="{{ $pj->produk->id }}" data-harga="{{ $harga->harga_jual }}" data-jumlahproduk="{{ $harga->jumlah }}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
-                                                                    {{ $pj->produk->nama }}
+                                                                <option value="{{ $produk->id }}" data-harga="{{ $harga->harga_jual }}" data-jumlahproduk="{{ $harga->jumlah}}" data-diskon="{{ $harga->diskon}}" {{ $isSelectedTRD || $isSelectedGFT ? 'selected' : '' }}>
+                                                                    @if (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'TRD' && $isSelectedTRD)
+                                                                        {{ $pj->produk->nama }}
+                                                                    @elseif (isset($pj->produk->kode) && substr($pj->produk->kode, 0, 3) === 'GFT' && $isSelectedGFT)
+                                                                        {{ $pj->produk->nama }}
+                                                                    @endif
                                                                 </option>
                                                             @endforeach
                                                         </select>

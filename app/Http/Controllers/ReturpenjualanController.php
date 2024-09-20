@@ -916,7 +916,7 @@ class ReturpenjualanController extends Controller
 
     public function auditretur_update(Request $req)
     {
-        // dd($req);
+        dd($req);
         $retur = $req->input('penjualan');
         $returId = ReturPenjualan::where('id', $retur)->first();
         $returpenjualan = DeliveryOrder::where('no_referensi', $returId->no_retur)->first();
