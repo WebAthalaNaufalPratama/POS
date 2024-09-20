@@ -1113,6 +1113,10 @@
 
             if(komplain == 'retur') {
                 $('#gantiproduk').show();
+                $('[id^=namatradproduk]').show();
+                $('[id^=kondisitradproduk]').show();
+                $('[id^=jumlahtradproduk]').show();
+                $('[id^=noubah]').hide();
                 $('[id^=harga_]').each(function() {
                     var hargaSatuanInput = $(this);
                     var index = hargaSatuanInput.attr('id').split('_')[1];
@@ -1121,10 +1125,7 @@
                     $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
-                    $('[id^=namatradproduk]').show();
-                    $('[id^=kondisitradproduk]').show();
-                    $('[id^=jumlahtradproduk]').show();
-                    $('[id^=noubah]').hide();
+                    
                     hargaSatuanInput.prop('readonly', true);
                 });
 
@@ -1151,6 +1152,10 @@
                 // updateSubTotal();
             } else {
                 $('#gantiproduk').hide();
+                $('[id^=namatradproduk]').hide();
+                $('[id^=kondisitradproduk]').hide();
+                $('[id^=jumlahtradproduk]').hide();
+                $('[id^=noubah]').show();
                 $('[id^=harga_]').each(function() {
                     var hargaSatuanInput = $(this);
                     var index = hargaSatuanInput.attr('id').split('_')[1];
@@ -1173,10 +1178,6 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(totalharga);
-                    $('[id^=namatradproduk]').hide();
-                    $('[id^=kondisitradproduk]').hide();
-                    $('[id^=jumlahtradproduk]').hide();
-                    $('[id^=noubah]').show();
                     totalhargaInput.prop('readonly', true);
                 });
 
