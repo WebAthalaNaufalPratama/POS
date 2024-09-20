@@ -1305,19 +1305,19 @@ class ReturpenjualanController extends Controller
                     $kondisi_key = 'kondisitradproduk_' . $i;
                     $jumlah_key = 'jumlahtradproduk_' . $i;
 
-                    if (isset($data[$kondisi_key]) && is_array($data[$kondisi_key])) {
+                    if (isset($req->$kondisi_key) && is_array($req->$kondisi_key)) {
                         // for ($index = 0; $index < count($data[$kondisi_key]); $index++) {
                         //     $kondisi = Kondisi::where('nama', $data[$kondisi_key][$index])->value('id');
                         //     $jumlah = $data[$jumlah_key][$index];
                         $produkCollection = collect();
 
-                        foreach ($data[$komponen_key] as $index => $kodeProduk) {
+                        foreach ($req->$komponen_key as $index => $kodeProduk) {
                             $produk = Produk::where('kode', $kodeProduk)->first();
                             if ($produk) {
                                 $produkCollection->push([
                                     'produk' => $produk,
-                                    'kondisi' => isset($data[$kondisi_key][$index]) ? Kondisi::where('nama', $data[$kondisi_key][$index])->value('id') : null,
-                                    'jumlah' => isset($data[$jumlah_key][$index]) ? $data[$jumlah_key][$index] : 0,
+                                    'kondisi' => isset($req->$kondisi_key[$index]) ? Kondisi::where('nama', $req->$kondisi_key[$index])->value('id') : null,
+                                    'jumlah' => isset($req->$jumlah_key[$index]) ? $req->$jumlah_key[$index] : 0,
                                 ]);
                             }
                         }
