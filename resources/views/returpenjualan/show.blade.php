@@ -1121,6 +1121,10 @@
                     $('#tanggalkirim, #penerima, #driver, #alamat, #bukti_kirim, #biaya_pengiriman').show();
                     biayakirim.prop('readonly', false);
                     hargaSatuanInput.val(0);
+                    $('[id^=namatradproduk]').show();
+                    $('[id^=kondisitradproduk]').show();
+                    $('[id^=jumlahtradproduk]').show();
+                    $('[id^=noubah]').hide();
                     hargaSatuanInput.prop('readonly', true);
                 });
 
@@ -1169,6 +1173,10 @@
                     var jumlah = $('#jumlah_' + index).val();
                     var totalharga = hargaSatuan * jumlah;
                     totalhargaInput.val(totalharga);
+                    $('[id^=namatradproduk]').hide();
+                    $('[id^=kondisitradproduk]').hide();
+                    $('[id^=jumlahtradproduk]').hide();
+                    $('[id^=noubah]').show();
                     totalhargaInput.prop('readonly', true);
                 });
 
