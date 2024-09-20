@@ -557,40 +557,53 @@ class ReturpenjualanController extends Controller
                 }
             }elseif ($cekgfttrd == 'TRD') {
                 if($req->komplain == 'retur'){
+                    $komponen_key = 'namatradproduk_' . $i;
                     $kondisi_key = 'kondisitradproduk_' . $i;
                     $jumlah_key = 'jumlahtradproduk_' . $i;
 
                     if (isset($data[$kondisi_key]) && is_array($data[$kondisi_key])) {
-                        for ($index = 0; $index < count($data[$kondisi_key]); $index++) {
-                            $kondisi = Kondisi::where('nama', $data[$kondisi_key][$index])->value('id');
-                            $jumlah = $data[$jumlah_key][$index];
+                        // for ($index = 0; $index < count($data[$kondisi_key]); $index++) {
+                        //     $kondisi = Kondisi::where('nama', $data[$kondisi_key][$index])->value('id');
+                        //     $jumlah = $data[$jumlah_key][$index];
+                        $produkCollection = collect();
 
-                            foreach ($getProdukJual->komponen as $komponen) {
-                                $komponen_produk_terjual = Komponen_Produk_Terjual::create([
-                                    'produk_terjual_id' => $produk_terjual->id,
-                                    'kode_produk' => $komponen->kode_produk,
-                                    'nama_produk' => $komponen->nama_produk,
-                                    'tipe_produk' => $komponen->tipe_produk,
-                                    'kondisi' => $kondisi,
-                                    'deskripsi' => $komponen->deskripsi,
-                                    'jumlah' => $jumlah,
-                                    'harga_satuan' => $komponen->harga_satuan,
-                                    'harga_total' => $komponen->harga_total
+                        foreach ($data[$komponen_key] as $index => $kodeProduk) {
+                            $produk = Produk::where('kode', $kodeProduk)->first();
+                            if ($produk) {
+                                $produkCollection->push([
+                                    'produk' => $produk,
+                                    'kondisi' => isset($data[$kondisi_key][$index]) ? Kondisi::where('nama', $data[$kondisi_key][$index])->value('id') : null,
+                                    'jumlah' => isset($data[$jumlah_key][$index]) ? $data[$jumlah_key][$index] : 0,
                                 ]);
+                            }
+                        }
 
-                                if (!$komponen_produk_terjual) {
-                                    return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
-                                }
+                        foreach ($produkCollection as $getProduk) {
+                            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                                'produk_terjual_id' => $produk_terjual->id,
+                                'kode_produk' => $komponen->kode_produk,
+                                'nama_produk' => $komponen->nama_produk,
+                                'tipe_produk' => $komponen->tipe_produk,
+                                'kondisi' => $getProduk['kondisi'],
+                                'deskripsi' => $komponen->deskripsi,
+                                'jumlah' => $getProduk['jumlah'],
+                                'harga_satuan' => $komponen->harga_satuan,
+                                'harga_total' => $komponen->harga_total
+                            ]);
 
-                                if($lokasi->tipe_lokasi == 1 && $req->status == 'DIKONFIRMASI' && $req->komplain != 'diskon'){
-                                    $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
-                                    if ($stok) {
-                                        $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
-                                        $stok->update();
-                                    }
+                            if (!$komponen_produk_terjual) {
+                                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data komponen produk terjual');
+                            }
+
+                            if($lokasi->tipe_lokasi == 1 && $req->status == 'DIKONFIRMASI' && $req->komplain != 'diskon'){
+                                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen_produk_terjual->kode_produk)->where('kondisi_id', $komponen_produk_terjual->kondisi)->first();
+                                if ($stok) {
+                                    $stok->jumlah = intval($stok->jumlah) + (intval($komponen_produk_terjual->jumlah) * intval($produk_terjual->jumlah));
+                                    $stok->update();
                                 }
                             }
                         }
+                        // }
                     }
                 }else{
                     foreach ($getProdukJual->komponen as $komponen) {
@@ -916,7 +929,7 @@ class ReturpenjualanController extends Controller
 
     public function auditretur_update(Request $req)
     {
-        dd($req);
+        // dd($req);
         $retur = $req->input('penjualan');
         $returId = ReturPenjualan::where('id', $retur)->first();
         $returpenjualan = DeliveryOrder::where('no_referensi', $returId->no_retur)->first();
