@@ -1342,10 +1342,10 @@ class ReturpenjualanController extends Controller
                             }
 
                             if($lokasi->tipe_lokasi == 1 && $req->status == 'DIKONFIRMASI'){
-                                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $komponen->kode_produk)->where('kondisi_id', $kondisi)->first();
+                                $stok = InventoryGallery::where('lokasi_id', $req->lokasi_id)->where('kode_produk', $getProduk['produk']->kode)->where('kondisi_id', $getProduk['kondisi'])->first();
                                 // dd($stok);
                                 if ($stok) {
-                                    $stok->jumlah = intval($stok->jumlah) + (intval($jumlah) * intval($getProdukJual->jumlah));
+                                    $stok->jumlah = intval($stok->jumlah) + (intval($getProduk['jumlah']) * intval($getProdukJual->jumlah));
                                     // dd($getProdukJual->jumlah);
                                     $stok->update();
                                 }
