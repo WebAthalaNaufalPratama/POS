@@ -1323,7 +1323,7 @@ class ReturpenjualanController extends Controller
                         }
 
                         foreach ($produkCollection as $getProduk) {
-                            $komponen_produk_terjual = Komponen_Produk_Terjual::create([
+                            $komponen_produk_terjual = Komponen_Produk_Terjual::where('produk_terjual_id', $getProdukJual->id)->where('id', $getProduk['id'])->update([
                                 'produk_terjual_id' => $getProdukJual->id,
                                 'kode_produk' => $getProduk['produk']->kode,
                                 'nama_produk' => $getProduk['produk']->nama,
