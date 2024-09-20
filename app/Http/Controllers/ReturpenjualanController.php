@@ -557,7 +557,7 @@ class ReturpenjualanController extends Controller
                 }
             }elseif ($cekgfttrd == 'TRD') {
                 if($req->komplain == 'retur'){
-                    $komponen_key = 'namatradproduk_' . $i;
+                    $komponen_key = 'kodetradproduk_' . $i;
                     $kondisi_key = 'kondisitradproduk_' . $i;
                     $jumlah_key = 'jumlahtradproduk_' . $i;
 
