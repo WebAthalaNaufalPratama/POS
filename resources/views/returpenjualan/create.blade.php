@@ -248,11 +248,13 @@
                                                                             $selectedTRDDetails = []; // Reset selected TRD details
 
                                                                             foreach ($pj->komponen as $komponen) {
-                                                                                $selectedTRDDetails[] = [
-                                                                                    'nama_produk' => $komponen->nama_produk,
-                                                                                    'kondisi' => $komponen->kondisi,
-                                                                                    'jumlah' => $komponen->jumlah
-                                                                                ];
+                                                                                if($komponen->produk->tipe_produk == 1 ||  $komponen->produk->tipe_produk == 2){
+                                                                                    $selectedTRDDetails[] = [
+                                                                                        'nama_produk' => $komponen->nama_produk,
+                                                                                        'kondisi' => $komponen->kondisi,
+                                                                                        'jumlah' => $komponen->jumlah
+                                                                                    ];
+                                                                                }
                                                                             }
                                                                         }
                                                                     }
@@ -378,11 +380,13 @@
                                                                     $selectedTRDKode = '';
                                                                     $selectedTRDDetails = [];
                                                                     foreach ($pj->komponen as $komponen) {
-                                                                        $selectedTRDDetails[] = [
-                                                                            'nama_produk' => $komponen->nama_produk,
-                                                                            'kondisi' => $komponen->kondisi,
-                                                                            'jumlah' => $komponen->jumlah
-                                                                        ];
+                                                                        if($komponen->produk->tipe_produk == 1 ||  $komponen->produk->tipe_produk == 2){
+                                                                            $selectedTRDDetails[] = [
+                                                                                'nama_produk' => $komponen->nama_produk,
+                                                                                'kondisi' => $komponen->kondisi,
+                                                                                'jumlah' => $komponen->jumlah
+                                                                            ];
+                                                                        }
                                                                     }
                                                                 }
                                                             }
