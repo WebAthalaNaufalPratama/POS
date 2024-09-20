@@ -263,6 +263,7 @@
                                                             $selectedTRDDetails = [];
                                                             foreach ($pj->komponen as $komponen) {
                                                                 $selectedTRDDetails[] = [
+                                                                    'idTrad' => $komponen->id,
                                                                     'kodeTrad' => $komponen->kode_produk,
                                                                     'nama_produk' => $komponen->nama_produk,
                                                                     'kondisi' => $komponen->kondisi,
@@ -286,6 +287,7 @@
                                             @if($isTRDSelected)
                                             <td>
                                                         @foreach($selectedTRDDetails as $index => $komponen)
+                                                        <input type="hidden" name="idtradproduk_{{ $i }}[]" id="idtradproduk_{{ $i }}_{{ $index }}" class="form-control idtrad-{{ $i }}" value="{{ $komponen['idTrad'] }}" style="display:none;" readonly>
                                                         <input type="hidden" name="kodetradproduk_{{ $i }}[]" id="kodetradproduk_{{ $i }}_{{ $index }}" class="form-control namatrad-{{ $i }}" value="{{ $komponen['kodeTrad'] }}" style="display:none;" readonly>
                                                         <input type="text" name="namatradproduk_{{ $i }}[]" id="namatradproduk_{{ $i }}_{{ $index }}" class="form-control namatrad-{{ $i }}" value="{{ $komponen['nama_produk'] }}" style="display:none;" readonly>
                                                         <span id="noubah">Tidak Bisa Ubah</span>
