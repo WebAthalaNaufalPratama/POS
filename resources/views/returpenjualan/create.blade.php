@@ -248,17 +248,11 @@
                                                                             $selectedTRDDetails = []; // Reset selected TRD details
 
                                                                             foreach ($pj->komponen as $komponen) {
-                                                                                if ($komponen->kondisi) {
-                                                                                    foreach ($kondisis as $kondisi) {
-                                                                                        if ($kondisi->id == $komponen->kondisi) {
-                                                                                            $selectedTRDDetails[] = [
-                                                                                                'nama_produk' => $komponen->nama_produk,
-                                                                                                'kondisi' => $kondisi->nama,
-                                                                                                'jumlah' => $komponen->jumlah
-                                                                                            ];
-                                                                                        }
-                                                                                    }
-                                                                                }
+                                                                                $selectedTRDDetails[] = [
+                                                                                    'nama_produk' => $komponen->nama_produk,
+                                                                                    'kondisi' => $komponen->kondisi,
+                                                                                    'jumlah' => $komponen->jumlah
+                                                                                ];
                                                                             }
                                                                         }
                                                                     }
