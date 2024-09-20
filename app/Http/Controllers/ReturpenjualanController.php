@@ -965,7 +965,7 @@ class ReturpenjualanController extends Controller
         $prefixes = [
             'kodegiftproduk_', 'komponengiftproduk', 'kondisigiftproduk', 'jumlahgiftproduk',
             'jumlah', 'alasan', 'diskon', 'jenis_diskon', 'harga', 'totalharga',
-            'namaproduk2', 'jumlah2', 'satuan2', 'keterangan2', 'nama_produk', 'file',
+            'namaproduk2', 'jumlah2', 'satuan2', 'keterangan2', 'nama_produk', 'file', 'idtradproduk_',
             'kondisitradproduk_', 'jumlahtradproduk_', 'kode_produk2', 'idgiftproduk_', 'kode_produk', 'kodetradproduk_', 'namatradproduk_'
         ];
         
