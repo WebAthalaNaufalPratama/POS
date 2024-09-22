@@ -428,10 +428,12 @@
                                                         <td><input type="text" name="satuan2[]" id="satuan2_{{$i}}" class="form-control" value="{{$produk->satuan}}" readonly></td>
                                                         <td><input type="text" name="keterangan2[]" id="keterangan2_{{$i}}" class="form-control" value="{{$produk->keterangan}}" readonly></td>
                                                         <td>
-                                                            @if($produk->no_form == null && $produk->produk->tipe_produk == 1)
+                                                            @if($produk->no_form == null)
+                                                            @if($produk->produk->tipe_produk == 1)
                                                             <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                 Set Gift
                                                             </button>
+                                                            @endif
                                                             <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalPerangkai">Perangkai</button></td>
                                                             @endif
                                                         </td>
