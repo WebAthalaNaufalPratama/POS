@@ -272,7 +272,7 @@
                                                     </td>
                                                     <td>
                                                         @foreach($selectedTRDDetails as $index => $komponen)
-                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" class="form-control kondisitrad-{{ $i }}" style="display:none;">
+                                                        <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" class="form-control kondisitrad-{{ $i }}" style="display:none;" readonly>
                                                             <option value="">Pilih Kondisi</option>
                                                             @foreach ($kondisis as $kondisi)
                                                                 <option value="{{ $kondisi->nama }}" {{ $kondisi->id == $komponen['kondisi'] ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
@@ -428,7 +428,7 @@
                                                         <td><input type="text" name="satuan2[]" id="satuan2_{{$i}}" class="form-control" value="{{$produk->satuan}}" readonly></td>
                                                         <td><input type="text" name="keterangan2[]" id="keterangan2_{{$i}}" class="form-control" value="{{$produk->keterangan}}" readonly></td>
                                                         <td>
-                                                            @if($produk->no_form == null)
+                                                            @if($produk->no_form == null && $produk->produk->tipe_produk == 1)
                                                             <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                 Set Gift
                                                             </button>
@@ -996,6 +996,12 @@
                 $(this).select2('destroy');
                 $(this).remove();
             });
+
+            if(response.produk.kode.slice(0, 3) === 'GFT') {
+                $('#simpan').show();
+            } else {
+                $('#simpan').hide();
+            }
             $('[id^="jumlahproduk_id_"]').remove();
             if (jumlah < 1) return 0;
             for (var i = 0; i < jumlah; i++) {
