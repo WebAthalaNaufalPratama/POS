@@ -301,7 +301,7 @@
                                                 </a>`;
                             }
 
-                            if (lokasiTipe == 2 && row.status === 'DIKONFIRMASI' && !userRoles.includes('Auditor') && !userRoles.includes('Finance')) {
+                            if (lokasiTipe == 2 && row.status === 'DIKONFIRMASI' && data.komplain == 'retur' && !userRoles.includes('Auditor') && !userRoles.includes('Finance')) {
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiOutletCreate.replace('__ID__', row.id)}">
                                                     <img src="assets/img/icons/truck.svg" class="me-2" alt="img">Mutasi Outlet Ke Galery
                                                 </a>`;
