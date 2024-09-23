@@ -200,7 +200,9 @@
                                                     @endphp
                                                     @endphp
                                                     @if($produk->no_form == null && $karyawan->lokasi->tipe_lokasi == 1)
+                                                    @if($produk->produk->tipe_produk == 1)
                                                         <td><button id="btnGift_0" data-produk_gift="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
+                                                    @endif
                                                         <td><button id="btnPerangkai_0" data-produk="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                     @endif
                                                     <!-- <td><button type="button" name="pic[]" id="pic_0" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->
@@ -248,7 +250,9 @@
                                                             $user = Auth::user();
                                                         @endphp
                                                         @if($komponen->no_form == null && $karyawan->lokasi->tipe_lokasi == 1)
+                                                        @if($produk->produk->tipe_produk == 1)
                                                             <td><button id="btnGift_{{ $i }}" data-produk_gift="{{ $komponen->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGift w-100">Set Gift</button></td>
+                                                        @endif
                                                             <td><button id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                         @endif
                                                         <!-- <td><button type="button" id="btnPerangkai_{{ $i }}" data-produk="{{ $komponen->id }}" class="btn btn-warning" data-toggle="modal" data-target="#picModal_0" onclick="copyDataToModal(0)">PIC Perangkai</button></td> -->

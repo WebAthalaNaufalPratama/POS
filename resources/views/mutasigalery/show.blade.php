@@ -161,18 +161,22 @@
                                                             $user = Auth::user();
                                                         @endphp
                                                         @if($user->hasRole(['AdminGallery', 'KasirGallery', 'KasirOutlet']) && $produk->no_form == null)
+                                                        @if($produk->produk->tipe_produk == 1)
                                                         <td>
                                                             <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                 Set Gift
                                                             </button>
                                                         </td>
+                                                        @endif
                                                         <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalPerangkai">Perangkai</button></td>
                                                         @elseif($user->hasRole(['Auditor', 'Finance', 'SuperAdmin']) && $produk->no_form == null)
+                                                        @if($produk->produk->tipe_produk == 1)
                                                             <td>
                                                                 <button id="btnGift_{{$i}}" data-produk_gift="{{ $produk->id}}" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalGiftCoba">
                                                                     Set Gift
                                                                 </button>
                                                             </td>
+                                                            @endif
                                                             <td><button id="btnPerangkai_0" data-produk="{{ $produk->id}}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPerangkai w-100">Perangkai</button></td>
                                                         @endif
                                                     </tr>
