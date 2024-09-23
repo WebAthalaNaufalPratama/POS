@@ -108,7 +108,7 @@ class RekeningController extends Controller
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        if ($req->jenis === 'Cash' && Rekening::where('lokasi_id', $req->lokasi_id)->exists()) {
+        if (Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_id)->exists()) {
             return redirect()->back()->withInput()->with('fail', 'Data sudah ada');
         }
         $data = $req->except(['_token', '_method']);
@@ -164,6 +164,9 @@ class RekeningController extends Controller
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
         $data = $req->except(['_token', '_method']);
+        if (Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_id)->where('id', '!=', $rekening)->exists()) {
+            return redirect()->back()->withInput()->with('fail', 'Data sudah ada');
+        }
 
         // update data
         $check = Rekening::find($rekening)->update($data);

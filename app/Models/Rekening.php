@@ -26,4 +26,17 @@ class Rekening extends Model
         return $this->hasMany(Pembayaran::class);
     }
 
+    public function addSaldo($value = 0)
+    {
+        $value = is_numeric($value) ? $value : 0;
+        $this->saldo_akhir += $value;
+        $this->save();
+    }
+
+    public function subtractSaldo($value = 0)
+    {
+        $value = is_numeric($value) ? $value : 0;
+        $this->saldo_akhir -= $value;
+        $this->save();
+    }
 }

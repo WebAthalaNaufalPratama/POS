@@ -11,9 +11,9 @@
         <div class="col-lg-6 col-md-6 col-sm-12 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-end gap-2">
           <div class="d-flex flex-column flex-md-row w-100">
             <select class="form-select select2 w-100 w-md-auto" name="rekening" id="filterRekening">
-              <option value="">Rekening</option>
+              <option value="">Semua Rekening</option>
               @foreach($rekenings as $rekening)
-              <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
+              <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun ?? 'Cash' }}</option>
             @endforeach
             </select>
           </div>
@@ -38,7 +38,7 @@
                 <div class="col-8" style="background-color: #28a745; color: white;">
                     <div class="card-body">
                         <h3 class="mb-0">Rp. <span class="counters-rupiah" data-count="{{ $saldoMasuk }}"></span></h3>
-                        <p class="mb-0">Saldo Masuk</p>
+                        <p class="mb-0">Kas Masuk</p>
                         <hr class="my-2">
                         <div class="small">
                             <p class="mb-1">Rekening: Rp. <span class="counters-rupiah" data-count="{{ $saldoMasukRekening }}"></span></p>
@@ -58,7 +58,7 @@
                 <div class="col-8" style="background-color: #ff006a; color: white;">
                     <div class="card-body">
                         <h3 class="mb-0">Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluar }}"></span></h3>
-                        <p class="mb-0">Saldo Keluar</p>
+                        <p class="mb-0">Kas Keluar</p>
                         <hr class="my-2">
                         <div class="small">
                             <p class="mb-1">Rekening: Rp. <span class="counters-rupiah" data-count="{{ $saldoKeluarRekening }}"></span></p>
@@ -1068,30 +1068,42 @@
           var metode = $('#keluar_metode').val();
         }
         if(jenis != 'Pemindahan Saldo') {
-            $('div.pemindahan_saldo').addClass('d-none');
-            $('div.pemindahan_saldo select').each(function(){
-                $(this).attr('disabled', true).prop('required', false);
-            });
-            $('div.lainnya').removeClass('d-none');
-            $('#edit_keluar_lokasi').attr('disabled', false).prop('required', true);
-            if(metode == 'Cash'){
-                $('#edit_keluar_rekening_penerima').attr('disabled', true).prop('required', false);
-                $('#edit_keluar_rekening_pengirim').attr('disabled', true).prop('required', false);
-            }
+          $('div.pemindahan_saldo').addClass('d-none');
+          $('div.pemindahan_saldo select').each(function(){
+              $(this).prop('disabled', true).prop('required', false);
+          });
+          $('div.lainnya').removeClass('d-none');
+          $('#keluar_lokasi').prop('disabled', false).prop('required', true);
+          $('#edit_keluar_lokasi').prop('disabled', false).prop('required', true);
+          if(metode == 'Cash'){
+              $('#keluar_rekening').prop('disabled', false).prop('required', true);
+              $('#edit_keluar_rekening').prop('disabled', false).prop('required', true);
           } else {
-            $('div.lainnya').addClass('d-none');
-            $('div.lainnya select').each(function(){
-                $(this).attr('disabled', true).prop('required', false);
-            });
-            
-            $('div.pemindahan_saldo').removeClass('d-none');
-            $('div.pemindahan_saldo select').each(function(){
-                $(this).attr('disabled', false).prop('required', true);
-            });
-            if(metode == 'Cash'){
-                $('#edit_keluar_rekening_penerima').attr('disabled', true).prop('required', false);
-                $('#edit_keluar_rekening_pengirim').attr('disabled', true).prop('required', false);
-            }
+              $('#keluar_rekening').prop('disabled', false).prop('required', true);
+              $('#edit_keluar_rekening').prop('disabled', false).prop('required', true);
+          }
+        } else {
+          $('div.lainnya').addClass('d-none');
+          $('div.lainnya select').each(function(){
+              $(this).attr('disabled', true).prop('required', false);
+          });
+          
+          $('div.pemindahan_saldo').removeClass('d-none');
+          $('div.pemindahan_saldo select').each(function(){
+              $(this).attr('disabled', false).prop('required', true);
+          });
+          if(metode == 'Cash'){
+            console.log('cash')
+              $('#edit_keluar_rekening_penerima').prop('disabled', true).prop('required', false);
+              $('#edit_keluar_rekening_pengirim').prop('disabled', true).prop('required', false);
+              $('keluar_rekening_penerima').prop('disabled', true).prop('required', false);
+              $('keluar_rekening_pengirim').prop('disabled', true).prop('required', false);
+          } else {
+              $('#edit_keluar_rekening_penerima').prop('disabled', false).prop('required', true);
+              $('#edit_keluar_rekening_pengirim').prop('disabled', false).prop('required', true);
+              $('keluar_rekening_penerima').prop('disabled', false).prop('required', true);
+              $('keluar_rekening_pengirim').prop('disabled', false).prop('required', true);
+          }
         }
     });
     $('#masuk_metode').on('change', function() {
@@ -1133,9 +1145,9 @@
     $('#keluar_metode').on('change', function() {
       var value = $(this).val();
       if(value == 'Transfer'){
-        $('#keluar_rekening_pengirim').attr('disabled', false);
-        $('#keluar_rekening_penerima').attr('disabled', false);
-        $('#keluar_rekening').attr('disabled', false);
+        $('#keluar_rekening_pengirim').prop('disabled', false);
+        $('#keluar_rekening_penerima').prop('disabled', false);
+        $('#keluar_rekening').prop('disabled', false);
         $('#keluar_rekening_pengirim').prop('required', true);
         $('#keluar_rekening_penerima').prop('required', true);
         $('#keluar_rekening').prop('required', true);
@@ -1146,9 +1158,9 @@
           .removeClass('col-12')
           .addClass('col-6');
       } else {
-        $('#keluar_rekening_pengirim').attr('disabled', true);
-        $('#keluar_rekening_penerima').attr('disabled', true);
-        $('#keluar_rekening').attr('disabled', true);
+        $('#keluar_rekening_pengirim').prop('disabled', true);
+        $('#keluar_rekening_penerima').prop('disabled', true);
+        $('#keluar_rekening').prop('disabled', true);
         $('#keluar_rekening_pengirim').prop('required', false);
         $('#keluar_rekening_penerima').prop('required', false);
         $('#keluar_rekening').prop('required', false);
@@ -1380,7 +1392,7 @@
     function populateRekening(data, id, selectedRekening) {
       var rekeningElement = $('#'+id);
       rekeningElement.attr('disabled', false);
-      rekeningElement.attr('required', true);
+      rekeningElement.attr('required', false);
       rekeningElement.empty();
       rekeningElement.append('<option value="">Rekening</option>');
       
