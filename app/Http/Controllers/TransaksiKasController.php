@@ -27,27 +27,35 @@ class TransaksiKasController extends Controller
         // Define the base query for incoming and outgoing transactions
         $queryMasuk = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_pengirim', 'rek_penerima');
         $queryKeluar = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_pengirim', 'rek_penerima');
-        $queryRekening = Rekening::query();
+        $querySaldo = Rekening::query();
 
         // Apply filters for location and rekening if provided
         if ($req->lokasi) {
             $queryMasuk->where('lokasi_penerima', $req->lokasi);
             $queryKeluar->where('lokasi_pengirim', $req->lokasi);
-            $queryRekening->where('lokasi_id', $req->lokasi);
+            $querySaldo->where('lokasi_id', $req->lokasi);
         } else {
             $queryMasuk->whereHas('lok_penerima', fn($q) => $q->where('operasional_id', 1));
             $queryKeluar->whereHas('lok_pengirim', fn($q) => $q->where('operasional_id', 1));
             $dataLokasi = Lokasi::where('operasional_id', 1)->pluck('id');
-            $queryRekening->whereIn('lokasi_id', $dataLokasi);
+            $querySaldo->whereIn('lokasi_id', $dataLokasi);
         }
 
         if ($req->rekening) {
-            $queryMasuk->where('rekening_penerima', $req->rekening);
-            $queryKeluar->where('rekening_pengirim', $req->rekening);
-            $queryRekening->where('id', $req->rekening);
+            $getRekening = Rekening::find($req->rekening);
+            if($getRekening->jenis == 'Rekening'){
+                $queryMasuk->where('rekening_penerima', $req->rekening);
+                $queryKeluar->where('rekening_pengirim', $req->rekening);
+            } else {
+                $queryMasuk->whereNull('rekening_penerima')->where('lokasi_penerima', $getRekening->lokasi_id);
+                $queryKeluar->whereNull('rekening_pengirim')->where('lokasi_pengirim', $getRekening->lokasi_id);
+            }
+            $querySaldo->where('id', $req->rekening);
         }
 
-        $saldoAwal = $queryRekening->sum('saldo_awal');
+        $saldoRekening = (clone $querySaldo)->where('jenis', 'Rekening')->sum('saldo_akhir');
+        $saldoCash = (clone $querySaldo)->where('jenis', 'Cash')->sum('saldo_akhir');
+        $saldo = $saldoCash + $saldoRekening;
         // start datatable masuk
             if ($req->ajax() && $req->table == 'masuk') {
                 $start = $req->input('start');
@@ -177,7 +185,6 @@ class TransaksiKasController extends Controller
         $saldoMasuk = $queryMasuk->clone()->where($confirmedCondition)->sum('nominal');
         $saldoKeluar = $queryKeluar->clone()->where($confirmedCondition)->sum('nominal') 
                     + $queryKeluar->clone()->where($confirmedCondition)->sum('biaya_lain');
-        $saldo = $saldoMasuk - $saldoKeluar + $saldoAwal;
 
         $saldoMasukRekening = $queryMasuk->clone()
                                 ->where($confirmedCondition)
@@ -191,7 +198,6 @@ class TransaksiKasController extends Controller
                                 ->where($confirmedCondition)
                                 ->where('metode', 'Transfer')
                                 ->sum('biaya_lain');
-        $saldoRekening = ($saldoMasukRekening - $saldoKeluarRekening) + $saldoAwal;
 
         $saldoMasukCash = $queryMasuk->clone()
                             ->where($confirmedCondition)
@@ -205,17 +211,16 @@ class TransaksiKasController extends Controller
                             ->where($confirmedCondition)
                             ->where('metode', 'Cash')
                             ->sum('biaya_lain');
-        $saldoCash = $saldoMasukCash - $saldoKeluarCash;
 
-        // Get the basic data for locations and accounts
         $rekenings = Rekening::whereHas('lokasi', fn($q) => $q->where('operasional_id', 1))->get();
+        $akuns = Akun::all();
         $lokasis = Lokasi::where('operasional_id', 1)->orWhere('tipe_lokasi', 1)->get();
 
         return view('kas_pusat.index', compact(
             'lokasis', 'rekenings', 
             'saldoMasuk', 'saldoKeluar', 'saldoMasukRekening', 
             'saldoKeluarRekening', 'saldoMasukCash', 'saldoKeluarCash', 
-            'saldo', 'saldoRekening', 'saldoCash'
+            'saldo', 'saldoRekening', 'saldoCash', 'akuns'
         ));
     }
 
@@ -237,66 +242,131 @@ class TransaksiKasController extends Controller
      */
     public function store_pusat(Request $req)
     {
-        // validasi
+        // Validasi input
         $validator = Validator::make($req->all(), [
-            'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
+            'akun_id' => 'required|exists:akuns,id',
             'metode' => 'required|in:Transfer,Cash',
-            'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
             'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
+            'lokasi_pengirim' => 'required|exists:lokasis,id',
+            'lokasi_penerima' => 'required_if:jenis,Pemindahan Saldo|exists:lokasis,id',
             'keterangan' => 'required',
             'nominal' => 'required|numeric',
+            'biaya_lain' => 'nullable|min:0',
             'tanggal' => 'required|date',
             'file' => 'required|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
-        $data['status'] = 'DIKONFIRMASI';
 
-        // cek saldo
-        if($req->metode == 'Transfer'){
-            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
-            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
-                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+        // Conditional validation
+        $validator->sometimes('rekening_penerima', 'required|exists:rekenings,id', function ($input) {
+            return $input->metode === 'Transfer' && $input->jenis === 'Pemindahan Saldo';
+        });
+        $validator->sometimes('rekening_pengirim', 'required|exists:rekenings,id', function ($input) {
+            return $input->metode === 'Transfer' && $input->jenis === 'Pemindahan Saldo';
+        });
+
+        // Jika validasi gagal
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
+        }
+
+        // Cek saldo dan validasi rekening/cash di awal
+        $totalKeluar = $req->nominal + ($req->biaya_lain ?? 0);
+
+        if ($req->metode == 'Cash') {
+            $dataPengirim = Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_pengirim)->first();
+            if (!$dataPengirim) {
+                return redirect()->back()->withInput()->with('fail', 'Data cash belum ada');
+            }
+
+            if ($dataPengirim->saldo_akhir < $totalKeluar) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo tidak mencukupi');
+            }
+
+            if ($req->jenis == 'Pemindahan Saldo') {
+                $dataPenerima = Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_penerima)->first();
+                if (!$dataPenerima) {
+                    return redirect()->back()->withInput()->with('fail', 'Data cash penerima belum ada');
+                }
             }
         } else {
-            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
-            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
-                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            // Untuk metode Transfer
+            $dataPengirim = Rekening::find($req->rekening_pengirim);
+            if (!$dataPengirim) {
+                return redirect()->back()->withInput()->with('fail', 'Data rekening pengirim belum ada');
+            }
+
+            if ($dataPengirim->saldo_akhir < $totalKeluar) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo tidak mencukupi');
+            }
+
+            if ($req->jenis == 'Pemindahan Saldo') {
+                $dataPenerima = Rekening::find($req->rekening_penerima);
+                if (!$dataPenerima) {
+                    return redirect()->back()->withInput()->with('fail', 'Data rekening penerima belum ada');
+                }
             }
         }
 
-        // store file
+        $data = $req->except(['_token', '_method']);
+
+        // Simpan file
         if ($req->hasFile('file')) {
-            // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas_pusat' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $fileName = 'kas_pusat' . date('YmdHis') . '.jpg';
             $filePath = 'bukti_transaksi_kas/' . $fileName;
         
-            // Optimize dan simpan file baru
-            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
-                ->save(storage_path('app/public/' . $filePath));
-        
-            // Hapus file lama
-            // if (!empty($pembayaran->bukti)) {
-            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
-            //     if (File::exists($oldFilePath)) {
-            //         File::delete($oldFilePath);
-            //     }
-            // }
-        
-            // Verifikasi penyimpanan file baru
-            if (File::exists(storage_path('app/public/' . $filePath))) {
-                $data['file'] = $filePath;
+            // Check file size (500KB = 500 * 1024 bytes)
+            if ($file->getSize() > 500 * 1024) {
+                Image::make($file)
+                    ->encode('jpg', 70)
+                    ->save(storage_path('app/public/' . $filePath));
             } else {
-                DB::rollBack();
+                Image::make($file)
+                    ->encode('jpg')
+                    ->save(storage_path('app/public/' . $filePath));
+            }
+        
+            // Check if the file was saved successfully
+            if (!File::exists(storage_path('app/public/' . $filePath))) {
                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
             }
+        
+            // Save the file path
+            $data['file'] = $filePath;
         }
+        
+        DB::beginTransaction();
+        try {
+            $data['status'] = 'DIKONFIRMASI';
 
-        $check = TransaksiKas::create($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-        return redirect()->back()->with('success', 'Data tersimpan');
+            // Simpan transaksi kas
+            $transaksi = TransaksiKas::create($data);
+            if (!$transaksi) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+
+            // Update saldo
+            if ($req->metode == 'Cash') {
+                $dataPengirim->subtractSaldo($totalKeluar);
+
+                if ($req->jenis == 'Pemindahan Saldo') {
+                    $dataPenerima->addSaldo($req->nominal);
+                }
+            } else {
+                $dataPengirim->subtractSaldo($totalKeluar);
+
+                if ($req->jenis == 'Pemindahan Saldo') {
+                    $dataPenerima->addSaldo($req->nominal);
+                }
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data tersimpan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -331,8 +401,9 @@ class TransaksiKasController extends Controller
      */
     public function update_pusat(Request $req, $transaksiKas)
     {
-        // validasi
+        // Validasi input
         $validator = Validator::make($req->all(), [
+            'akun_id' => 'required|exists:akuns,id',
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
             'metode' => 'required|in:Transfer,Cash',
             'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
@@ -340,10 +411,12 @@ class TransaksiKasController extends Controller
             'keterangan' => 'required',
             'nominal' => 'required|numeric',
             'tanggal' => 'required|date',
+            'file' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
+        }
 
         // Fetch existing record
         $existingTransaksi = TransaksiKas::find($transaksiKas);
@@ -351,35 +424,40 @@ class TransaksiKasController extends Controller
             return redirect()->back()->with('fail', 'Transaksi tidak ditemukan.');
         }
 
-        // cek saldo
-        if($req->metode == 'Transfer'){
+        // Cek saldo
+        $totalKeluar = $req->nominal + ($req->biaya_lain ?? 0);
+        if ($req->metode == 'Transfer') {
             $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
-            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+            if ($saldo + $existingTransaksi->nominal < $totalKeluar) {
                 return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
             }
         } else {
             $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
-            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
+            if ($saldo + $existingTransaksi->nominal < $totalKeluar) {
                 return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
             }
         }
 
-        if($req->metode == 'Cash'){
-            $data['rekening_penerima'] = null;
-            $data['rekening_pengirim'] = null;
-        }
+        $data = $req->except(['_token', '_method']);
+        $data['file'] = $existingTransaksi->file;
 
-        // store file
+        // Handle file upload
         if ($req->hasFile('file')) {
-            // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas_pusat' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $fileName = 'kas_pusat' . date('YmdHis') . '.jpg';
             $filePath = 'bukti_transaksi_kas/' . $fileName;
-        
-            // Optimize dan simpan file baru
-            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
-                ->save(storage_path('app/public/' . $filePath));
-        
+
+            // Check file size and compress if necessary
+            if ($file->getSize() > 500 * 1024) {
+                Image::make($file)
+                    ->encode('jpg', 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            } else {
+                Image::make($file)
+                    ->encode('jpg')
+                    ->save(storage_path('app/public/' . $filePath));
+            }
+
             // Hapus file lama
             if (!empty($existingTransaksi->file)) {
                 $oldFilePath = storage_path('app/public/' . $existingTransaksi->file);
@@ -387,18 +465,67 @@ class TransaksiKasController extends Controller
                     File::delete($oldFilePath);
                 }
             }
-        
+
             // Verifikasi penyimpanan file baru
             if (File::exists(storage_path('app/public/' . $filePath))) {
-                $data['file'] = $filePath;
+                $data['file'] = $filePath; // Save new file path
             } else {
-                DB::rollBack();
                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
             }
         }
-        $check = TransaksiKas::find($transaksiKas)->update($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
-        return redirect()->back()->with('success', 'Data diperbarui');
+
+        // Prepare data for update
+        $data['rekening_penerima'] = $req->metode === 'Cash' ? null : $data['rekening_penerima'];
+
+        // Update transaction
+        DB::beginTransaction();
+        try {
+            if ($req->metode == 'Cash') {
+                $dataPengirim = Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_pengirim)->first();
+                if (!$dataPengirim) {
+                    return redirect()->back()->withInput()->with('fail', 'Data cash pengirim belum ada');
+                }
+
+                $dataPengirim->addSaldo($existingTransaksi->nominal); // Revert the previous transaction
+                $dataPengirim->subtractSaldo($totalKeluar); // Subtract new amount
+
+                if ($req->jenis == 'Pemindahan Saldo') {
+                    $dataPenerima = Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_penerima)->first();
+                    if (!$dataPenerima) {
+                        return redirect()->back()->withInput()->with('fail', 'Data cash penerima belum ada');
+                    }
+                    $dataPenerima->addSaldo($req->nominal); // Add new amount to the recipient
+                }
+            } else {
+                $dataPengirim = Rekening::find($req->rekening_pengirim);
+                if (!$dataPengirim) {
+                    return redirect()->back()->withInput()->with('fail', 'Data rekening pengirim belum ada');
+                }
+
+                $dataPengirim->addSaldo($existingTransaksi->nominal); // Revert the previous transaction
+                $dataPengirim->subtractSaldo($totalKeluar); // Subtract new amount
+
+                if ($req->jenis == 'Pemindahan Saldo') {
+                    $dataPenerima = Rekening::find($req->rekening_penerima);
+                    if (!$dataPenerima) {
+                        return redirect()->back()->withInput()->with('fail', 'Data rekening penerima belum ada');
+                    }
+                    $dataPenerima->addSaldo($req->nominal); // Add new amount to the recipient
+                }
+            }
+
+            // Update the transaction record
+            $check = $existingTransaksi->update($data);
+            if (!$check) {
+                return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -420,41 +547,50 @@ class TransaksiKasController extends Controller
     {
         $queryMasuk = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim');
         $queryKeluar = TransaksiKas::with('lok_penerima', 'lok_pengirim', 'rek_penerima', 'rek_pengirim');
-        $queryRekening = Rekening::query();
+        $querySaldo = Rekening::query();
 
         $rekenings = Rekening::whereHas('lokasi', function($q){
             $q->where('tipe_lokasi', 1);
         })->get();
+        $akuns = Akun::all();
         $lokasis = Lokasi::where('tipe_lokasi', 1)->get();
 
         if($req->lokasi){
             $queryMasuk->where('lokasi_penerima', $req->lokasi);
             $queryKeluar->where('lokasi_pengirim', $req->lokasi);
             $lokasi_pengirim = $req->lokasi;
-            $rekeningKeluar = Rekening::where('lokasi_id', $req->lokasi)->get();
-            $queryRekening->where('lokasi_id', $req->lokasi);
+            $rekeningKeluar = Rekening::where('jenis', 'Rekening')->where('lokasi_id', $req->lokasi)->get();
+            $querySaldo->where('lokasi_id', $req->lokasi);
         } else {
             if(Auth::user()->hasRole('AdminGallery')){
                 $queryMasuk->where('lokasi_penerima', Auth::user()->karyawans->lokasi_id);
                 $queryKeluar->where('lokasi_pengirim', Auth::user()->karyawans->lokasi_id);
                 $lokasi_pengirim = Auth::user()->karyawans->lokasi_id;
-                $rekeningKeluar = Rekening::where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
-                $queryRekening->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
+                $rekeningKeluar = Rekening::where('jenis', 'Rekening')->where('lokasi_id', Auth::user()->karyawans->lokasi_id)->get();
+                $querySaldo->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
             } else {
                 $lokasi_pengirim = $lokasis->first()->id;
-                $rekeningKeluar = Rekening::where('lokasi_id', $lokasi_pengirim)->get();
+                $rekeningKeluar = Rekening::where('jenis', 'Rekening')->where('lokasi_id', $lokasi_pengirim)->get();
                 $queryMasuk->where('lokasi_penerima', $lokasis->first()->id);
                 $queryKeluar->where('lokasi_pengirim', $lokasis->first()->id);
-                $queryRekening->where('lokasi_id', $lokasis->first()->id);
+                $querySaldo->where('lokasi_id', $lokasis->first()->id);
             }
         }
         if($req->rekening){
-            $queryMasuk->where('rekening_penerima', $req->rekening);
-            $queryKeluar->where('rekening_pengirim', $req->rekening);
-            $queryRekening->where('id', $req->rekening);
+            $getRekening = Rekening::find($req->rekening);
+            if($getRekening->jenis == 'Rekening'){
+                $queryMasuk->where('rekening_penerima', $req->rekening);
+                $queryKeluar->where('rekening_pengirim', $req->rekening);
+            } else {
+                $queryMasuk->whereNull('rekening_penerima')->where('lokasi_penerima', $getRekening->lokasi_id);
+                $queryKeluar->whereNull('rekening_pengirim')->where('lokasi_pengirim', $getRekening->lokasi_id);
+            }
+            $querySaldo->where('id', $req->rekening);
         }
 
-        $saldoAwal = $queryRekening->sum('saldo_awal');
+        $saldoRekening = (clone $querySaldo)->where('jenis', 'Rekening')->sum('saldo_akhir');
+        $saldoCash = (clone $querySaldo)->where('jenis', 'Cash')->sum('saldo_akhir');
+        $saldo = $saldoCash + $saldoRekening;
         // start datatable masuk
             if ($req->ajax() && $req->table == 'masuk') {
                 $start = $req->input('start');
@@ -584,7 +720,6 @@ class TransaksiKasController extends Controller
         $saldoMasuk = $queryMasuk->clone()->where($confirmedCondition)->sum('nominal');
         $saldoKeluar = $queryKeluar->clone()->where($confirmedCondition)->sum('nominal') 
                     + $queryKeluar->clone()->where($confirmedCondition)->sum('biaya_lain');
-        $saldo = $saldoMasuk - $saldoKeluar + $saldoAwal;
 
         $saldoMasukRekening = $queryMasuk->clone()
                                 ->where($confirmedCondition)
@@ -598,7 +733,6 @@ class TransaksiKasController extends Controller
                                 ->where($confirmedCondition)
                                 ->where('metode', 'Transfer')
                                 ->sum('biaya_lain');
-        $saldoRekening = ($saldoMasukRekening - $saldoKeluarRekening) + $saldoAwal;
 
         $saldoMasukCash = $queryMasuk->clone()
                                 ->where($confirmedCondition)
@@ -612,13 +746,12 @@ class TransaksiKasController extends Controller
                                 ->where($confirmedCondition)
                                 ->where('metode', 'Cash')
                                 ->sum('biaya_lain');
-        $saldoCash = $saldoMasukCash - $saldoKeluarCash;
 
         return view('kas_gallery.index', compact(
             'lokasis', 'rekenings', 
             'saldoMasuk', 'saldoKeluar', 'saldoMasukRekening', 
             'saldoKeluarRekening', 'saldoMasukCash', 'saldoKeluarCash', 
-            'saldo', 'saldoRekening', 'saldoCash', 'lokasi_pengirim', 'rekeningKeluar'
+            'saldo', 'saldoRekening', 'saldoCash', 'lokasi_pengirim', 'rekeningKeluar', 'akuns'
         ));
     }
 
@@ -642,6 +775,7 @@ class TransaksiKasController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
+            'akun_id' => 'required|exists:akuns,id',
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
             'metode' => 'required|in:Transfer,Cash',
             'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
@@ -653,55 +787,83 @@ class TransaksiKasController extends Controller
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
-        if($req->jenis == 'Pemindahan Saldo'){
-            if($data['rekening_penerima'] == $data['rekening_pengirim']) return redirect()->back()->withInput()->with('fail', 'Tidak bisa transfer ke rekening yang sama');
-        }
-        $data['status'] = 'DIKONFIRMASI';
 
-        // cek saldo
-        if($req->metode == 'Transfer'){
-            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
-            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
-                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+        // Cek saldo dan validasi rekening/cash di awal
+        $totalKeluar = $req->nominal + ($req->biaya_lain ?? 0);
+
+        if ($req->metode == 'Cash') {
+            $dataPengirim = Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_pengirim)->first();
+            if (!$dataPengirim) {
+                return redirect()->back()->withInput()->with('fail', 'Data cash belum ada');
+            }
+
+            if ($dataPengirim->saldo_akhir < $totalKeluar) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo tidak mencukupi');
             }
         } else {
-            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
-            if($saldo < $req->nominal + ($req->biaya_lain ?? 0)) {
-                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            // Untuk metode Transfer
+            $dataPengirim = Rekening::find($req->rekening_pengirim);
+            if (!$dataPengirim) {
+                return redirect()->back()->withInput()->with('fail', 'Data rekening pengirim belum ada');
+            }
+
+            if ($dataPengirim->saldo_akhir < $totalKeluar) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo tidak mencukupi');
             }
         }
 
-        // store file
+        $data = $req->except(['_token', '_method']);
+
+        // Simpan file
         if ($req->hasFile('file')) {
-            // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas_gallery' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $fileName = 'kas_gallery' . date('YmdHis') . '.jpg';
             $filePath = 'bukti_transaksi_kas/' . $fileName;
         
-            // Optimize dan simpan file baru
-            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
-                ->save(storage_path('app/public/' . $filePath));
-        
-            // Hapus file lama
-            // if (!empty($pembayaran->bukti)) {
-            //     $oldFilePath = storage_path('app/public/' . $pembayaran->bukti);
-            //     if (File::exists($oldFilePath)) {
-            //         File::delete($oldFilePath);
-            //     }
-            // }
-        
-            // Verifikasi penyimpanan file baru
-            if (File::exists(storage_path('app/public/' . $filePath))) {
-                $data['file'] = $filePath;
+            // Check file size (500KB = 500 * 1024 bytes)
+            if ($file->getSize() > 500 * 1024) {
+                Image::make($file)
+                    ->encode('jpg', 70)
+                    ->save(storage_path('app/public/' . $filePath));
             } else {
-                DB::rollBack();
+                Image::make($file)
+                    ->encode('jpg')
+                    ->save(storage_path('app/public/' . $filePath));
+            }
+        
+            // Check if the file was saved successfully
+            if (!File::exists(storage_path('app/public/' . $filePath))) {
                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
             }
+        
+            // Save the file path
+            $data['file'] = $filePath;
         }
-        $check = TransaksiKas::create($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
-        return redirect()->back()->with('success', 'Data tersimpan');
+
+        DB::beginTransaction();
+        try {
+            $data['status'] = 'DIKONFIRMASI';
+
+            // Simpan transaksi kas
+            $transaksi = TransaksiKas::create($data);
+            if (!$transaksi) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+            }
+
+            // Update saldo
+            if ($req->metode == 'Cash') {
+                $dataPengirim->subtractSaldo($totalKeluar);
+            } else {
+                $dataPengirim->subtractSaldo($totalKeluar);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data tersimpan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -736,8 +898,9 @@ class TransaksiKasController extends Controller
      */
     public function update_gallery(Request $req, $transaksiKas)
     {
-        // validasi
+        // Validasi input
         $validator = Validator::make($req->all(), [
+            'akun_id' => 'required|exists:akuns,id',
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
             'metode' => 'required|in:Transfer,Cash',
             'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
@@ -745,11 +908,12 @@ class TransaksiKasController extends Controller
             'keterangan' => 'required',
             'nominal' => 'required|numeric',
             'tanggal' => 'required|date',
-            'status' => 'required|in:DIKONFIRMASI,BATAL'
+            'file' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
+        }
 
         // Fetch existing record
         $existingTransaksi = TransaksiKas::find($transaksiKas);
@@ -757,32 +921,51 @@ class TransaksiKasController extends Controller
             return redirect()->back()->with('fail', 'Transaksi tidak ditemukan.');
         }
 
-        // cek saldo
-        if($req->metode == 'Transfer'){
-            $saldo = TransaksiKas::getSaldo($req->rekening_pengirim, 'Transfer', 'DIKONFIRMASI', null, null);
-            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
-                return redirect()->back()->withInput()->with('fail', 'Saldo rekening tidak mencukupi');
+        // Cek saldo dan validasi rekening/cash di awal
+        $totalKeluar = $req->nominal + ($req->biaya_lain ?? 0);
+
+        if ($req->metode == 'Cash') {
+            $dataPengirim = Rekening::where('jenis', 'Cash')->where('lokasi_id', $req->lokasi_pengirim)->first();
+            if (!$dataPengirim) {
+                return redirect()->back()->withInput()->with('fail', 'Data cash belum ada');
+            }
+
+            if ($dataPengirim->saldo_akhir + $existingTransaksi->nominal < $totalKeluar) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo tidak mencukupi');
             }
         } else {
-            $saldo = TransaksiKas::getSaldo(null, 'Cash', 'DIKONFIRMASI', null, $req->lokasi_pengirim);
-            if($saldo + $existingTransaksi->nominal < $req->nominal + ($req->biaya_lain ?? 0)) {
-                return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
+            // Untuk metode Transfer
+            $dataPengirim = Rekening::find($req->rekening_pengirim);
+            if (!$dataPengirim) {
+                return redirect()->back()->withInput()->with('fail', 'Data rekening pengirim belum ada');
+            }
+
+            if ($dataPengirim->saldo_akhir + $existingTransaksi->nominal < $totalKeluar) {
+                return redirect()->back()->withInput()->with('fail', 'Saldo tidak mencukupi');
             }
         }
 
-        // save data
+        // Simpan file baru jika ada
+        $data = $req->except(['_token', '_method']);
         $data['file'] = $existingTransaksi->file;
-        // store file
+
         if ($req->hasFile('file')) {
             // Simpan file baru
             $file = $req->file('file');
-            $fileName = 'kas_gallery' . date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $fileName = 'kas_gallery' . date('YmdHis') . '.jpg';
             $filePath = 'bukti_transaksi_kas/' . $fileName;
-        
-            // Optimize dan simpan file baru
-            Image::make($file)->encode($file->getClientOriginalExtension(), 70)
-                ->save(storage_path('app/public/' . $filePath));
-        
+
+            // Check file size and optimize
+            if ($file->getSize() > 500 * 1024) {
+                Image::make($file)
+                    ->encode('jpg', 70)
+                    ->save(storage_path('app/public/' . $filePath));
+            } else {
+                Image::make($file)
+                    ->encode('jpg')
+                    ->save(storage_path('app/public/' . $filePath));
+            }
+
             // Hapus file lama
             if (!empty($existingTransaksi->file)) {
                 $oldFilePath = storage_path('app/public/' . $existingTransaksi->file);
@@ -790,18 +973,40 @@ class TransaksiKasController extends Controller
                     File::delete($oldFilePath);
                 }
             }
-        
+
             // Verifikasi penyimpanan file baru
             if (File::exists(storage_path('app/public/' . $filePath))) {
                 $data['file'] = $filePath;
             } else {
-                DB::rollBack();
                 return redirect()->back()->withInput()->with('fail', 'File gagal disimpan');
             }
         }
-        $check = TransaksiKas::find($transaksiKas)->update($data);
-        if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
-        return redirect()->back()->with('success', 'Data diperbarui');
+
+        // Proses update dalam transaksi
+        DB::beginTransaction();
+        try {
+            // Update saldo
+            if ($req->metode == 'Cash') {
+                $dataPengirim->addSaldo($existingTransaksi->nominal); // Revert the previous transaction amount
+                $dataPengirim->subtractSaldo($totalKeluar); // Subtract new total
+            } else {
+                $dataPengirim->addSaldo($existingTransaksi->nominal); // Revert the previous transaction amount
+                $dataPengirim->subtractSaldo($totalKeluar); // Subtract new total
+            }
+
+            // Update transaksi kas
+            $check = $existingTransaksi->update($data);
+            if (!$check) {
+                DB::rollBack();
+                return redirect()->back()->withInput()->with('fail', 'Gagal memperbarui data');
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Data diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -827,7 +1032,7 @@ class TransaksiKasController extends Controller
         ]);
         $error = $validator->errors()->all();
         if ($validator->fails()) return response()->json($error, 400);
-        $rekenings = Rekening::where('lokasi_id', $req->lokasi_id)->get();
+        $rekenings = Rekening::where('jenis', 'Rekening')->where('lokasi_id', $req->lokasi_id)->get();
         return response()->json($rekenings);
     }
 

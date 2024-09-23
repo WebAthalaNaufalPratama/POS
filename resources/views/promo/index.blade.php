@@ -551,6 +551,7 @@
         { 
           data: 'lokasi', 
           name: 'lokasi',
+          orderable: false,
           render: function(data, type, row) {
             if (Array.isArray(data)) {
                 // Convert array to <ul> <li> list

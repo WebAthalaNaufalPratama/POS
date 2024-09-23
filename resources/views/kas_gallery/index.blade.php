@@ -12,7 +12,7 @@
         <div class="col-lg-8 col-md-8 col-sm-12 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-end gap-2">
           <div class="w-100 mb-2 mb-md-0">
             <select class="select2 form-select w-100" name="lokasi" id="filterLokasi" onchange="getRekening(this, 'filterRekening')">
-              <option value="">Lokasi</option>
+              <option value="">Semua Lokasi</option>
               @foreach($lokasis as $lokasi)
                 <option value="{{ $lokasi->id }}" {{ $lokasi->id == $lokasi_pengirim ? 'selected' : '' }}>{{ $lokasi->nama }}</option>
               @endforeach
@@ -20,7 +20,7 @@
           </div>
           <div class="w-100 mb-2 mb-md-0">
             <select class="select2 form-select w-100" name="rekening" id="filterRekening" disabled>
-              <option value="">Rekening</option>
+              <option value="">Semua Rekening</option>
               @foreach($rekenings as $rekening)
               @if($rekening->lokasi_id == $lokasi_pengirim)
                 <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
@@ -43,10 +43,10 @@
         <div class="col-lg-6 col-md-6 col-sm-12 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-end gap-2">
           <div class="d-flex flex-column flex-md-row w-100">
             <select class="form-select select2 w-100" name="rekening" id="filterRekening">
-              <option value="">Rekening</option>
+              <option value="">Semua Rekening</option>
               @foreach($rekenings as $rekening)
               @if($rekening->lokasi_id == Auth::user()->karyawans->lokasi_id)
-                <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun }}</option>
+                <option value="{{ $rekening->id }}" {{ $rekening->id == request()->input('rekening') ? 'selected' : '' }}>{{ $rekening->nama_akun ?? 'Cash' }}</option>
               @endif
               @endforeach
             </select>
@@ -279,6 +279,17 @@
                   </select>
                 </div>
                 <div class="col-12 mb-2">
+                  <label for="akun_id" class="col-form-label">Akun</label>
+                  <div class="form-group mb-0">
+                    <select class="select2" name="akun_id" id="keluar_akun_id" required>
+                      <option value="">Pilih Akun</option>
+                      @foreach($akuns as $akun)
+                        <option value="{{ $akun->id }}">{{ $akun->no_akun }} - {{ $akun->nama_akun }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                </div>
+                <div class="col-12 mb-2">
                   <label for="tanggal" class="col-form-label">Tanggal</label>
                   <input type="date" class="form-control" name="tanggal" id="keluar_tanggal" value="{{ date('Y-m-d') }}" required>
                 </div>
@@ -354,6 +365,17 @@
                 <div class="col-sm-12 col-md-6 col-lg-6 mb-2" id="div_edit_keluar_tanggal">
                   <label for="tanggal" class="col-form-label">Tanggal</label>
                   <input type="date" class="form-control" name="tanggal" id="edit_keluar_tanggal" value="{{ date('Y-m-d') }}" required>
+                </div>
+                <div class="col-12 mb-2">
+                  <label for="akun_id" class="col-form-label">Akun</label>
+                  <div class="form-group mb-0">
+                    <select class="select2" name="akun_id" id="edit_keluar_akun_id" required>
+                      <option value="">Pilih Akun</option>
+                      @foreach($akuns as $akun)
+                        <option value="{{ $akun->id }}">{{ $akun->no_akun }} - {{ $akun->nama_akun }}</option>
+                      @endforeach
+                    </select>
+                  </div>
                 </div>
                 <div class="col-sm-12 col-md-12 col-lg-12 mb-2">
                   <label for="nominal" class="col-form-label">Nominal</label>
@@ -439,7 +461,7 @@
 @section('scripts')
     <script>
     $(document).ready(function() {
-        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_status, #edit_keluar_rekening_pengirim, #keluar_metode, #edit_keluar_metode').select2()
+        $('[id^=masuk_rekening_], [id^=keluar_rekening_], [id^=masuk_lokasi_], [id^=keluar_lokasi_], [id^=filterRekening], [id^=filterLokasi], #edit_keluar_status, #edit_keluar_rekening_pengirim, #keluar_metode, #edit_keluar_metode, #keluar_akun_id, #edit_keluar_akun_id').select2()
 
         // Start Datatable Masuk
           const columns1 = [
@@ -695,6 +717,7 @@
                 $('#editForm').attr('action', 'kas_gallery/'+id+'/update');
                 $('#edit_keluar_rekening_pengirim').val(response.rekening_pengirim).trigger('change')
                 $('#edit_keluar_metode').val(response.metode).trigger('change')
+                $('#edit_keluar_akun_id').val(response.akun_id).trigger('change')
                 $('#edit_keluar_tanggal').val(response.tanggal)
                 $('#edit_keluar_nominal').val(response.nominal)
                 $('#edit_keluar_biaya_lain').val(response.biaya_lain)
