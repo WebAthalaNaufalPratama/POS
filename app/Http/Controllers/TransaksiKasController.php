@@ -213,13 +213,14 @@ class TransaksiKasController extends Controller
                             ->sum('biaya_lain');
 
         $rekenings = Rekening::whereHas('lokasi', fn($q) => $q->where('operasional_id', 1))->get();
+        $akuns = Akun::all();
         $lokasis = Lokasi::where('operasional_id', 1)->orWhere('tipe_lokasi', 1)->get();
 
         return view('kas_pusat.index', compact(
             'lokasis', 'rekenings', 
             'saldoMasuk', 'saldoKeluar', 'saldoMasukRekening', 
             'saldoKeluarRekening', 'saldoMasukCash', 'saldoKeluarCash', 
-            'saldo', 'saldoRekening', 'saldoCash'
+            'saldo', 'saldoRekening', 'saldoCash', 'akuns'
         ));
     }
 
@@ -243,6 +244,7 @@ class TransaksiKasController extends Controller
     {
         // Validasi input
         $validator = Validator::make($req->all(), [
+            'akun_id' => 'required|exists:akuns,id',
             'metode' => 'required|in:Transfer,Cash',
             'jenis' => 'required|in:Lainnya,Pemindahan Saldo',
             'lokasi_pengirim' => 'required|exists:lokasis,id',
@@ -305,6 +307,8 @@ class TransaksiKasController extends Controller
             }
         }
 
+        $data = $req->except(['_token', '_method']);
+
         // Simpan file
         if ($req->hasFile('file')) {
             $file = $req->file('file');
@@ -331,10 +335,8 @@ class TransaksiKasController extends Controller
             $data['file'] = $filePath;
         }
         
-        // Proses database dalam transaction
         DB::beginTransaction();
         try {
-            $data = $req->except(['_token', '_method']);
             $data['status'] = 'DIKONFIRMASI';
 
             // Simpan transaksi kas
@@ -401,6 +403,7 @@ class TransaksiKasController extends Controller
     {
         // Validasi input
         $validator = Validator::make($req->all(), [
+            'akun_id' => 'required|exists:akuns,id',
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
             'metode' => 'required|in:Transfer,Cash',
             'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
@@ -434,6 +437,9 @@ class TransaksiKasController extends Controller
                 return redirect()->back()->withInput()->with('fail', 'Saldo cash tidak mencukupi');
             }
         }
+
+        $data = $req->except(['_token', '_method']);
+        $data['file'] = $existingTransaksi->file;
 
         // Handle file upload
         if ($req->hasFile('file')) {
@@ -469,7 +475,6 @@ class TransaksiKasController extends Controller
         }
 
         // Prepare data for update
-        $data = $req->except(['_token', '_method']);
         $data['rekening_penerima'] = $req->metode === 'Cash' ? null : $data['rekening_penerima'];
 
         // Update transaction
@@ -547,6 +552,7 @@ class TransaksiKasController extends Controller
         $rekenings = Rekening::whereHas('lokasi', function($q){
             $q->where('tipe_lokasi', 1);
         })->get();
+        $akuns = Akun::all();
         $lokasis = Lokasi::where('tipe_lokasi', 1)->get();
 
         if($req->lokasi){
@@ -745,7 +751,7 @@ class TransaksiKasController extends Controller
             'lokasis', 'rekenings', 
             'saldoMasuk', 'saldoKeluar', 'saldoMasukRekening', 
             'saldoKeluarRekening', 'saldoMasukCash', 'saldoKeluarCash', 
-            'saldo', 'saldoRekening', 'saldoCash', 'lokasi_pengirim', 'rekeningKeluar'
+            'saldo', 'saldoRekening', 'saldoCash', 'lokasi_pengirim', 'rekeningKeluar', 'akuns'
         ));
     }
 
@@ -769,6 +775,7 @@ class TransaksiKasController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
+            'akun_id' => 'required|exists:akuns,id',
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
             'metode' => 'required|in:Transfer,Cash',
             'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',
@@ -805,6 +812,8 @@ class TransaksiKasController extends Controller
             }
         }
 
+        $data = $req->except(['_token', '_method']);
+
         // Simpan file
         if ($req->hasFile('file')) {
             $file = $req->file('file');
@@ -833,7 +842,6 @@ class TransaksiKasController extends Controller
 
         DB::beginTransaction();
         try {
-            $data = $req->except(['_token', '_method']);
             $data['status'] = 'DIKONFIRMASI';
 
             // Simpan transaksi kas
@@ -892,6 +900,7 @@ class TransaksiKasController extends Controller
     {
         // Validasi input
         $validator = Validator::make($req->all(), [
+            'akun_id' => 'required|exists:akuns,id',
             'lokasi_pengirim' => 'required|numeric|exists:lokasis,id',
             'metode' => 'required|in:Transfer,Cash',
             'rekening_pengirim' => 'required_if:metode,Transfer|numeric|exists:rekenings,id',

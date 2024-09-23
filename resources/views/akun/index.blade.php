@@ -67,7 +67,7 @@
             @csrf
             <div class="mb-3">
               <label for="no_akun" class="col-form-label">Nomor akun</label>
-              <input type="text" class="form-control" name="no_akun" id="add_no_akun" oninput="validateDigit(this, 10)" required>
+              <input type="text" class="form-control" name="no_akun" id="add_no_akun" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>
@@ -95,7 +95,7 @@
             @method('PATCH')
             <div class="mb-3">
               <label for="no_akun" class="col-form-label">Nomor akun</label>
-              <input type="text" class="form-control" name="no_akun" id="edit_no_akun" oninput="validateDigit(this, 10)" required>
+              <input type="text" class="form-control" name="no_akun" id="edit_no_akun" required>
             </div>
             <div class="mb-3">
               <label for="nama_akun" class="col-form-label">Nama Akun</label>
