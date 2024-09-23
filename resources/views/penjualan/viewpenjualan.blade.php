@@ -296,6 +296,7 @@
                                                     $isTRDSelected = false; 
                                                     $selectedTRDKode = ''; 
                                                     $selectedGFTKode = ''; 
+                                                    $selectedTRDDetails = [];
                                                     if($penjualans->distribusi == 'Diambil') {
                                                         $harga = \App\Models\Produk_Terjual::where('id', $produk->no_do)->first();
                                                     }elseif($penjualans->distribusi == 'Dikirim'){
@@ -312,16 +313,14 @@
                                                             $isTRDSelected = true;
                                                             // Reset selected TRD code
                                                             $selectedTRDKode = '';
+                                                            $selectedTRDDetails = [];
                                                             foreach ($pj->komponen as $komponen) {
-                                                                if ($komponen->kondisi) {
-                                                                    foreach($kondisis as $kondisi) {
-                                                                        if($kondisi->id == $komponen->kondisi) {
-                                                                            // Set selected TRD code based on condition
-                                                                            $selectedTRDKode = $kondisi->nama;
-                                                                            $selectedTRDJumlah = $komponen->jumlah;
-                                                                        }
-                                                                    }
-                                                                }
+                                                                $selectedTRDDetails[] = [
+                                                                    'kodeTrad' => $komponen->kode_produk,
+                                                                    'nama_produk' => $komponen->nama_produk,
+                                                                    'kondisi' => $komponen->kondisi,
+                                                                    'jumlah' => $komponen->jumlah
+                                                                ];
                                                             }
                                                         }
                                                     }
@@ -338,18 +337,39 @@
                                                 @endforeach
                                             </select>
                                             @if($isTRDSelected)
-                                                <td>Tidak Ada Komponen</td>
-                                                <td>
-                                                    <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}" data-produk="{{ $selectedTRDKode }}" class="form-control kondisitrad-{{ $i }}" readonly>
-                                                        <option value=""> Pilih Kondisi </option>
-                                                        @foreach ($kondisis as $kondisi)
-                                                        <option value="{{ $kondisi->nama }}" {{ $kondisi->nama == $selectedTRDKode ? 'selected' : ''}}>{{ $kondisi->nama }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}" class="form-control jumlahtrad-{{ $i }}" placeholder="Kondisi Produk" data-produk="{{ $selectedTRDKode }}" value="{{ $selectedTRDJumlah }}" readonly>
-                                                </td>
+                                            <td>
+                                                @foreach($selectedTRDDetails as $index => $komponen)
+                                                @if($retur->komplain == 'retur')
+                                                <input type="hidden" name="kodetradproduk_{{ $i }}[]" id="kodetradproduk_{{ $i }}_{{ $index }}" class="form-control namatrad-{{ $i }}" value="{{ $komponen['kodeTrad'] }}" readonly>
+                                                <input type="text" name="namatradproduk_{{ $i }}[]" id="namatradproduk_{{ $i }}_{{ $index }}" class="form-control namatrad-{{ $i }}" value="{{ $komponen['nama_produk'] }}" readonly>
+                                                @else
+                                                <span id="noubah">Tidak Bisa Ubah</span>
+                                                @endif
+                                                @endforeach
+                                            </td>
+                                            <td>
+                                                @foreach($selectedTRDDetails as $index => $komponen)
+                                                @if($retur->komplain == 'retur')
+                                                <select name="kondisitradproduk_{{ $i }}[]" id="kondisitradproduk_{{ $i }}_{{ $index }}" class="form-control kondisitrad-{{ $i }}" readonly>
+                                                    <option value="">Pilih Kondisi</option>
+                                                    @foreach ($kondisis as $kondisi)
+                                                        <option value="{{ $kondisi->nama }}" {{ $kondisi->id == $komponen['kondisi'] ? 'selected' : '' }}>{{ $kondisi->nama }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @else
+                                                <span id="noubah">Tidak Bisa Ubah</span>
+                                                @endif
+                                                @endforeach
+                                            </td>
+                                            <td>
+                                                @foreach($selectedTRDDetails as $index => $komponen)
+                                                @if($retur->komplain == 'retur')
+                                                <input type="text" name="jumlahtradproduk_{{ $i }}[]" id="jumlahtradproduk_{{ $i }}_{{ $index }}" class="form-control jumlahtrad-{{ $i }}" value="{{ $komponen['jumlah'] }}" readonly>
+                                                @else
+                                                <span id="noubah">Tidak Bisa Ubah</span>
+                                                @endif
+                                                @endforeach
+                                            </td>
                                             @elseif($perPendapatan)
                                                 @foreach ($perPendapatan as $noRETUR => $items)
                                                     @if($noRETUR == $produk->no_retur)
@@ -1147,8 +1167,6 @@
         if (initialPembayaran) {
             $('#cara_bayar').val(initialPembayaran).trigger('change');
         }
-
-        
 
         $(document).on('click', '.btn_remove', function() {
             var button_id = $(this).attr("id");
