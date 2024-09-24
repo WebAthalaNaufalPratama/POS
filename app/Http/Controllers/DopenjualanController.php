@@ -539,7 +539,7 @@ class DopenjualanController extends Controller
         $data['customer'] = $customer->nama;
         $lokasi = Penjualan::where('no_invoice', $data['no_referensi'])->first();
         $data['tanggal_invoice'] = $lokasi->tanggal_invoice;
-        $data['lokasi'] = Lokasi::where('id', $lokasi->lokasi_id)->value('nama');
+        $data['lokasi'] = Lokasi::where('id', $lokasi->lokasi_id)->first();
         $data['produks'] = Produk_Terjual::with('komponen', 'produk')->where('no_do', $data['no_do'])->get();
         $data['driver'] = Karyawan::where('id', $data['driver'])->value('nama');
         $data['dibuat'] = User::where('id', $data['pembuat'])->value('name');

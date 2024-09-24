@@ -520,6 +520,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{mutasiGO}/auditGO', 'MutasiController@audit_GO')->name('auditmutasigalery.edit');
             Route::patch('/auditmutasiGO', 'MutasiController@audit_GOUpdate')->name('auditmutasigalery.update');
             Route::get('/{mutasiGO}/cetakmutasigalery', 'FormPerangkaiController@cetak_mutasigalery')->name('formmutasigalery.cetak');
+            Route::get('{mutasiGO}/pdfmutasipenjualan', 'MutasiController@pdfmutasipenjualan')->name('pdfmutasipenjualan.generate');
         });
 
         Route::group(['prefix' => 'mutasiOG'], function() { //adm

@@ -134,6 +134,7 @@
         mutasiOutletPayment: "{{ route('mutasigalery.payment', ['mutasiGO' => '__ID__']) }}",
         mutasiOutletyShow: "{{ route('mutasigalery.show', ['mutasiGO' => '__ID__']) }}",
         mutasiOutletView: "{{ route('mutasioutlet.view', ['mutasiOG' => '__ID__']) }}",
+        pdfMutasiPenjualan: "{{ route('pdfmutasipenjualan.generate', ['mutasiGO' => '__ID__']) }}",
     };
     
     $('#mutasiTable').DataTable({
@@ -271,6 +272,9 @@
                         }
                     }
                     if(row.status == 'DIKONFIRMASI') {
+                        dropdownHtml += `<a class="dropdown-item" href="${window.routes.pdfMutasiPenjualan.replace('__ID__', row.id)}">
+                            <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak MUTASI
+                        </a>`;
                         dropdownHtml += `
                             <a class="dropdown-item" href="${window.routes.auditmutasiedit.replace('__ID__', row.id)}"><img src="assets/img/icons/transcation.svg" class="me-2" alt="img">View</a>
                             </div>

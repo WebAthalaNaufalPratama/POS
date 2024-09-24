@@ -205,15 +205,15 @@
                 <img src="{{ base64_image(public_path('assets/img/von.png')) }}" alt="image">
             </div>
             <div class="nota-details"> 
-                <h4>{{$lokasi->nama}}<br>
-                {{$lokasi->alamat}}<br>
+                <h4>{{$pengirim->nama}}<br>
+                {{$pengirim->alamat}}<br>
                 Telp:0811676758<br>
                 www.vonflorist, IG: @vonfloris</h4>
             </div>
             <hr>
             <h2 class="text-do">
             <center>
-            DELIVERY ORDER
+            SURAT JALAN
             </center>    
             </h2>
             <hr class="do">
@@ -228,26 +228,20 @@
             <tr>
                 <th>Penerima</th>
                 <td>{{$penerima}}</td>
-                <th>Driver</th>
-                <td>{{$driver}}</td>
-                <th>Tanggal Invoice</th>
-                <td>{{date('d F Y', strtotime($tanggal_invoice))}}</td>
+                <th>Tanggal Diterima</th>
+                <td>{{date('d F Y', strtotime($tanggal_diterima))}}</td>
             </tr>
             <tr>
-                <th>No Handphone</th>
-                <td>{{$handphone}}</td>
                 <th>Pengirim</th>
-                <td>{{$customer}}</td>
+                <td>{{$pengirim->nama}}</td>
                 <th>Tanggal Pengiriman</th>
-                <td>{{date('d F Y', strtotime($tanggal_driver))}}</td>
+                <td>{{date('d F Y', strtotime($tanggal_kirim))}}</td>
             </tr>
             <tr>
-                <th>Alamat</th>
-                <td>{{$alamat}}</td>
                 <th>No Invoice</th>
-                <td>{{$no_referensi}}</td>
-                <th>Catatan</th>
-                <td>{{ $catatan }}</td>
+                <td>{{$no_mutasi}}</td>
+                <th></th>
+                <td></td>
             </tr>
         </thead>
     </table>
@@ -296,9 +290,10 @@
         <table class="tabletagihan" style="border:none;">
             <thead>
                 <tr>
-                    <th width="30%" style="border:none; text-align:center;">{{$dibuat ? $dibuat : '-'}}</th>
-                    <th width="30%" style="border:none; text-align:center;">{{$disetujui ? $disetujui : '-'}}</th>
-                    <th width="30%" style="border:none; text-align:center;">{{$diperiksa ? $diperiksa : '-'}}</th>
+                    <th width="25%" style="border:none; text-align:center;">{{$dibuat ? $dibuat : '-'}}</th>
+                    <th width="25%" style="border:none; text-align:center;">{{$diterima ? $diterima : '-'}}</th>
+                    <th width="25%" style="border:none; text-align:center;">{{$disetujui ? $disetujui : '-'}}</th>
+                    <th width="25%" style="border:none; text-align:center;">{{$diperiksa ? $diperiksa : '-'}}</th>
                 </tr>
             </thead>
         </table>
