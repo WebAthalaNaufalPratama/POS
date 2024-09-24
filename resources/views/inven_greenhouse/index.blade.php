@@ -131,9 +131,7 @@
                         <th></th>
                         <th></th>
                         <th></th>
-                        @if(!Auth::user()->hasRole('Purchasing'))
                         <th></th>
-                        @endif
                         <th></th>
                         <th></th>
                         @if(Auth::user()->hasRole('Purchasing'))
@@ -661,92 +659,11 @@
                 });
             // End Datatable Inventory
         })
-        $('#filterBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var urlString = baseUrl;
-            var first = true;
-            var symbol = '';
-
-            var Produk = $('#filterProduk').val();
-            if (Produk) {
-                var filterProduk = 'produk=' + Produk;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterProduk;
-            }
-
-            var Kondisi = $('#filterKondisi').val();
-            if (Kondisi) {
-                var filterKondisi = 'kondisi=' + Kondisi;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterKondisi;
-            }
-
-            var Gudang = $('#filterGudang').val();
-            if (Gudang) {
-                var filterGudang = 'greenhouse=' + Gudang;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterGudang;
-            }
-
-            window.location.href = urlString;
-        });
-        $('#clearBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var url = window.location.href;
-            if(url.indexOf('?') !== -1){
-                window.location.href = baseUrl;
-            }
-            return 0;
-        });
-        function deleteData(id){
-            $.ajax({
-                type: "GET",
-                url: "/inven_outlet/"+id+"/delete",
-                success: function(response) {
-                    toastr.success(response.msg, 'Success', {
-                        closeButton: true,
-                        tapToDismiss: false,
-                        rtl: false,
-                        progressBar: true
-                    });
-
-                    setTimeout(() => {
-                        location.reload()
-                    }, 2000);
-                },
-                error: function(error) {
-                    toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                        closeButton: true,
-                        tapToDismiss: false,
-                        rtl: false,
-                        progressBar: true
-                    });
-                }
-            });
-        }
         function updateFooterTotals(api) {
-                let totalJumlah = api.ajax.json().total_jumlah;
-                let totalColumn = api.columns().count();
-                $(api.column(totalColumn - 2).footer()).html('<strong>Jumlah Total:</strong>');
-                $(api.column(totalColumn - 1).footer()).html('<strong>' + (totalJumlah ? totalJumlah : 0) + '</strong>');
-            }
+            let totalJumlah = api.ajax.json().total_jumlah;
+            let totalColumn = api.columns().count();
+            $(api.column(totalColumn - 2).footer()).html('<strong>Jumlah Total:</strong>');
+            $(api.column(totalColumn - 1).footer()).html('<strong>' + (totalJumlah ? totalJumlah : 0) + '</strong>');
+        }
     </script>
 @endsection

@@ -632,6 +632,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{inven_gudang}/edit', 'InventoryGudangController@edit')->name('inven_gudang.edit');
             Route::patch('/{inven_gudang}/update', 'InventoryGudangController@update')->name('inven_gudang.update');
             Route::get('/{inven_gudang}/delete', 'InventoryGudangController@destroy')->name('inven_gudang.destroy');
+            Route::post('/ubahKondisi', 'InventoryGudangController@ubahKondisi')->name('inven_gudang.ubahKondisi');
         });
 
 
