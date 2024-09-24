@@ -453,6 +453,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{inven_galeri}/edit', 'InventoryGalleryController@edit')->name('inven_galeri.edit');
             Route::patch('/{inven_galeri}/update', 'InventoryGalleryController@update')->name('inven_galeri.update');
             Route::get('/{inven_galeri}/delete', 'InventoryGalleryController@destroy')->name('inven_galeri.destroy');
+            Route::post('/ubahKondisi', 'InventoryGalleryController@ubahKondisi')->name('inven_galeri.ubahKondisi');
         });
 
         Route::group(['prefix' => 'jabatan'], function() {

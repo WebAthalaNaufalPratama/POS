@@ -15,9 +15,11 @@ use App\Models\Produk_Terjual;
 use App\Models\Produkbeli;
 use App\Models\ProdukMutasiInden;
 use App\Models\Produkretur;
+use App\Models\Tipe_Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class InventoryGalleryController extends Controller
 {
@@ -28,11 +30,18 @@ class InventoryGalleryController extends Controller
      */
     public function index(Request $req)
     {
-        $produks = InventoryGallery::with('kondisi', 'produk', 'gallery')->when(Auth::user()->karyawans, function ($query) {
+        $produks = InventoryGallery::with('kondisi', 'produk.tipe', 'gallery')->when(Auth::user()->karyawans, function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->orderBy('kode_produk')->orderBy('kondisi_id')->get();
+        $uniqueProduks = $produks->groupBy('kode_produk')->map(function ($items) {
+            return [
+                'kode_produk' => $items->first()->kode_produk,
+                'nama_produk' => $items->first()->produk->nama
+            ];
+        })->values();
         $namaproduks = InventoryGallery::with('produk')->get()->unique('kode_produk');
         $kondisis = Kondisi::all();
+        $tipe_produks = Tipe_Produk::where('kategori', 'Master')->get();
         $user = Auth::user();
         
         $galleries = Lokasi::where('tipe_lokasi', 1)->get();
@@ -53,14 +62,16 @@ class InventoryGalleryController extends Controller
                     });
                 }
                 
-                if ($req->produk) {
-                    $query->where('kode_produk', $req->input('produk'));
+                if ($req->has('produk') && !empty($req->produk)) {
+                    $query->whereIn('kode_produk', $req->produk);
                 }
-                if ($req->kondisi) {
-                    $query->where('kondisi_id', $req->input('kondisi'));
+                if ($req->filled('tipe_produk')) {
+                    $query->whereHas('produk.tipe', function ($q) use ($req) {
+                        $q->whereIn('id', (array) $req->tipe_produk);
+                    });
                 }
-                if ($req->gallery) {
-                    $query->where('lokasi_id', $req->input('gallery'));
+                if ($req->has('kondisi') && !empty($req->kondisi)) {
+                    $query->whereIn('kondisi_id', $req->kondisi);
                 }
             
                 $start = $req->input('start');
@@ -97,14 +108,17 @@ class InventoryGalleryController extends Controller
                 $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
                     $item->no = ($currentPage - 1) * $perPage + ($index + 1);
                     $item->min_stok = $item->min_stok ?? 0;
+                    $item->tipe_produk = $item->produk->tipe->nama;
                     return $item;
                 });
+                $total_jumlah = $data->sum('jumlah');
 
                 return response()->json([
                     'draw' => $req->input('draw'),
                     'recordsTotal' => InventoryGallery::count(),
                     'recordsFiltered' => $recordsFiltered,
                     'data' => $data,
+                    'total_jumlah' => $total_jumlah,
                 ]);
 
             }
@@ -112,7 +126,7 @@ class InventoryGalleryController extends Controller
 
         // start datatable pemakaian sendiri
             if ($req->ajax() && $req->table == 'pemakaian_sendiri') {
-                $query2 = PemakaianSendiri::with(['karyawan', 'produk', 'lokasi', 'kondisi'])->orderBy('tanggal', 'desc')->orderByDesc('id');
+                $query2 = PemakaianSendiri::with(['karyawan', 'produk.tipe', 'lokasi', 'kondisi'])->orderBy('tanggal', 'desc')->orderByDesc('id');
                 if ($req->produk2) {
                     $query2->where('produk_id', $req->input('produk2'));
                 }
@@ -171,14 +185,18 @@ class InventoryGalleryController extends Controller
                     $item->nama_karyawan = $item->karyawan->nama;
                     $item->nama_gallery = $item->lokasi->nama;
                     $item->tanggal = $item->tanggal == null ? '' : tanggalindo($item->tanggal);
+                    $item->tipe_produk = $item->produk->tipe->nama;
                     return $item;
                 });
+
+                $total_jumlah = $data2->sum('jumlah');
 
                 return response()->json([
                     'draw' => $req->input('draw'),
                     'recordsTotal' => PemakaianSendiri::count(),
                     'recordsFiltered' => $recordsFiltered,
                     'data' => $data2,
+                    'total_jumlah' => $total_jumlah,
                 ]);
 
             }
@@ -538,7 +556,7 @@ class InventoryGalleryController extends Controller
 
             }
         // end datatble log
-        return view('inven_galeri.index', compact('produks', 'karyawans', 'lokasis', 'galleries', 'kondisis', 'namaproduks'));
+        return view('inven_galeri.index', compact('produks', 'karyawans', 'lokasis', 'galleries', 'kondisis', 'namaproduks', 'tipe_produks', 'uniqueProduks'));
     }
 
     /**
@@ -566,25 +584,54 @@ class InventoryGalleryController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'kode_produk' => 'required',
-            'kondisi_id' => 'required|integer',
-            'lokasi_id' => 'required',
-            'jumlah' => 'required',
-            'min_stok' => 'required',
+            'kode_produk.*' => 'required',
+            'kondisi_id.*' => 'required|integer',
+            'lokasi_id.*' => 'required',
+            'jumlah.*' => 'required|integer|min:1',
+            'min_stok.*' => 'required|integer|min:0',
         ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
 
-        // check duplikasi
-        $duplicate = InventoryGallery::where('kode_produk', $data['kode_produk'])->where('kondisi_id', $data['kondisi_id'])->where('lokasi_id', $data['lokasi_id'])->first();
-        if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->withErrors($validator);
+        }
 
-         // save data inven galeri
-         $check = InventoryGallery::create($data);
-         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        DB::beginTransaction();
 
-         return redirect(route('inven_galeri.index'))->with('success', 'Data tersimpan');
+        try {
+            foreach ($req->kode_produk as $index => $kode_produk) {
+                $kondisi_id = $req->kondisi_id[$index];
+                $lokasi_id = $req->lokasi_id[$index];
+                $jumlah = $req->jumlah[$index];
+                $min_stok = $req->min_stok[$index];
+
+                // Cek duplikat
+                $duplicate = InventoryGallery::where('kode_produk', $kode_produk)
+                                            ->where('kondisi_id', $kondisi_id)
+                                            ->where('lokasi_id', $lokasi_id)
+                                            ->first();
+
+                if ($duplicate) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', "Produk {$kode_produk} dengan kondisi dan lokasi tersebut sudah ada.");
+                }
+
+                // Simpan data
+                InventoryGallery::create([
+                    'kode_produk' => $kode_produk,
+                    'kondisi_id' => $kondisi_id,
+                    'lokasi_id' => $lokasi_id,
+                    'jumlah' => $jumlah,
+                    'min_stok' => $min_stok,
+                ]);
+            }
+
+            DB::commit();
+            return redirect(route('inven_galeri.index'))->with('success', 'Data berhasil disimpan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -664,5 +711,68 @@ class InventoryGalleryController extends Controller
         $check = $data->delete();
         if(!$check) return response()->json(['msg' => 'Gagal menghapus data'], 400);
         return response()->json(['msg' => 'Data berhasil dihapus']);
+    }
+
+    public function ubahKondisi(Request $req)
+    {
+        // validasi
+        $validator = Validator::make($req->all(), [
+            'produk_id.*' => 'required|exists:produks,id',
+            'kondisi_akhir.*' => 'required|integer|exists:kondisis,id',
+            'jumlah.*' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->withErrors($validator);
+        }
+
+        foreach ($req->produk_id as $index => $produk_id) {
+            $stok = $req->input("jumlah.$index");
+            $produk = InventoryGallery::find($produk_id);
+
+            // cek stok apakah mencukupi
+            if (!$produk || $produk->jumlah < $stok) {
+                return redirect()->back()->withInput()->with('fail', "Stok tidak mencukupi untuk produk : " . $produk->produk->nama);
+            }
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($req->produk_id as $index => $produk_id) {
+                $kondisi_akhir_id = $req->input("kondisi_akhir.$index");
+                $jumlah = $req->input("jumlah.$index");
+
+                $produk = InventoryGallery::find($produk_id);
+
+                $produk->update([
+                    'jumlah' => $produk->jumlah - $jumlah
+                ]);
+
+                $inventory = InventoryGallery::where('kode_produk', $produk->kode_produk)
+                                            ->where('kondisi_id', $kondisi_akhir_id)
+                                            ->where('lokasi_id', $produk->lokasi_id)
+                                            ->first();
+
+                if ($inventory) {
+                    $inventory->update([
+                        'jumlah' => $inventory->jumlah + $jumlah
+                    ]);
+                } else {
+                    InventoryGallery::create([
+                        'kode_produk' => $produk->kode_produk,
+                        'kondisi_id' => $kondisi_akhir_id,
+                        'lokasi_id' => $produk->lokasi_id,
+                        'jumlah' => $jumlah,
+                        'min_stok' => $produk->min_stok,
+                    ]);
+                }
+            }
+            DB::commit();
+            return redirect(route('inven_galeri.index'))->with('success', 'Data tersimpan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
     }
 }
