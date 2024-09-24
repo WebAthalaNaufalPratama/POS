@@ -35,7 +35,6 @@ class InventoryGreenhouseController extends Controller
         $greenhouses = Lokasi::where('tipe_lokasi', 3)->get();
         $kondisis = Kondisi::all();
         $namaproduks = InventoryGreenHouse::with('produk')->get()->unique('kode_produk');
-        $user = Auth::user();
 
         // start datatable inventory
             if ($req->ajax() && $req->table == 'inventory') {

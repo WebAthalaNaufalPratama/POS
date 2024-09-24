@@ -32,7 +32,6 @@ class InventoryGudangController extends Controller
         $tipe_produks = Tipe_Produk::where('kategori', 'Master')->get();
         $kondisis = Kondisi::all();
         $gudangs = Lokasi::where('tipe_lokasi', 4)->get();
-        $user = Auth::user();
 
         // start datatable inventory
             if ($req->ajax() && $req->table == 'inventory') {
