@@ -20,6 +20,7 @@ use App\Models\Karyawan;
 use App\Models\Rekening;
 use App\Models\Promo;
 use App\Models\Ongkir;
+use App\Models\User;
 use App\Models\Penjualan;
 use App\Models\Pembayaran;
 use App\Models\InventoryGallery;
@@ -34,6 +35,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\File;
+use PDF;
 
 class MutasiController extends Controller
 {
@@ -3323,6 +3325,31 @@ class MutasiController extends Controller
             return redirect()->back()->with('fail', 'Gagal Mengupdate data');
         }
 
+    }
+
+    public function pdfmutasipenjualan($dopenjualan)
+    {
+        $data = Mutasi::find($dopenjualan)->toArray();
+        $data['pengirim'] = Lokasi::where('id', $data['pengirim'])->first();
+        $data['penerima'] = Lokasi::where('id', $data['penerima'])->value('nama');
+        if(substr($data['no_mutasi'], 0, 3) == 'MGO'){
+            $data['produks'] = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigo', $data['no_mutasi'])->get();
+        }elseif(substr($data['no_mutasi'], 0, 3) == 'MGG'){
+            $data['produks'] = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigg', $data['no_mutasi'])->get();
+        }elseif(substr($data['no_mutasi'], 0, 3) == 'MOG'){
+            $data['produks'] = Produk_Terjual::with('komponen', 'produk')->where('no_mutasiog', $data['no_mutasi'])->get();
+        }elseif(substr($data['no_mutasi'], 0, 3) == 'MGA'){
+            $data['produks'] = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigag', $data['no_mutasi'])->get();
+        }
+        
+        $data['dibuat'] = User::where('id', $data['pembuat_id'])->value('name');
+        $data['diterima'] = User::where('id', $data['penerima_id'])->value('name');
+        $data['disetujui'] =User::where('id', $data['dibukukan_id'])->value('name');
+        $data['diperiksa'] = User::where('id', $data['diperiksa_id'])->value('name');
+        // dd($data);
+        $pdf = PDF::loadView('mutasigalery.pdfsemuamutasi', $data);
+    
+        return $pdf->stream($data['no_mutasi'] . '_DELIVERY ORDER.pdf');
     }
 
 

@@ -137,7 +137,8 @@
             auditmutasighgaleryEdit: "{{ route('auditmutasighgalery.edit', ['mutasiGG' => '__ID__']) }}",
             mutasiGGalleryShow: "{{ route('mutasighgalery.show', ['mutasiGG' => '__ID__']) }}",
             mutasiGGalleryPayment: "{{ route('mutasighgalery.payment', ['mutasiGG' => '__ID__']) }}",
-            mutasiGGalleryView: "{{ route('mutasighgalery.view', ['mutasiGG' => '__ID__']) }}"
+            mutasiGGalleryView: "{{ route('mutasighgalery.view', ['mutasiGG' => '__ID__']) }}",
+            pdfMutasiPenjualan: "{{ route('pdfmutasipenjualan.generate', ['mutasiGO' => '__ID__']) }}",
         };
 
         // Initialize DataTable
@@ -270,6 +271,9 @@
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.auditmutasighgaleryEdit.replace('__ID__', row.id)}"><img src="assets/img/icons/edit-5.svg" class="me-2" alt="img">Edit</a>`;
                             }else{
                                 dropdownHtml += `<a class="dropdown-item" href="${window.routes.mutasiGGalleryPayment.replace('__ID__', row.id)}"><img src="assets/img/icons/dollar-square.svg" class="me-2" alt="img">Bayar</a>`;
+                                dropdownHtml += `<a class="dropdown-item" href="${window.routes.pdfMutasiPenjualan.replace('__ID__', row.id)}">
+                                    <img src="assets/img/icons/printer.svg" class="me-2" alt="img">Cetak MUTASI
+                                </a>`;
                             }
                         }
 
