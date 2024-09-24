@@ -8,11 +8,12 @@
         body {
             font-family: Arial, sans-serif;
             font-size:12px;
+            margin: 0;
         }
 
         /* Container styles */
         .container {
-            width: 90%;
+            width: 100%;
             margin: 0 auto;
         }
 
@@ -48,7 +49,7 @@
             margin: 10px 0 -100px 0; 
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 11px;
         }
         
         header .nota-details span {
@@ -146,7 +147,9 @@
         .rekening{
             width: 50%;
         }
-
+        table.custome_style{
+            width: 30%;
+        }
 
         /* Footer styles */
         footer {
@@ -155,7 +158,7 @@
             margin-top: 20px;
         }
         .garis_bawah{
-            margin-top:120px;
+            margin-top:10px;
         }
 
         @media print {
@@ -177,7 +180,7 @@
         }
 
         @page {
-            margin: 20mm;
+            margin: 10mm;
             @top-center {
                 content: element(header);
             }
@@ -197,17 +200,46 @@
                 <img src="{{ base64_image(public_path('assets/img/von.png')) }}" alt="image">
             </div>
             <div class="nota-details"> <!-- Perbaiki penulisan nama kelas -->
-                <h1>VONFLORIST</h1>
+                <h2>VONFLORIST</h2>
                 <h4><center>alamat : {{$lokasi}}</center></h4>
             </div>
             <hr>
         </header>
 
         <div class="judul">
-            <h1><center>DELIVERY ORDER</center></h1>
+            <h2><center>DELIVERY ORDER</center></h2>
         </div>
 
-        <div class="pelanggan">
+        <table>
+    <thead class="custome_style">
+        <tr>
+            <th>Penerima</th>
+            <td>{{$penerima}}</td>
+            <th>Driver</th>
+            <td>{{$driver}}</td>
+            <th>Tanggal Invoice</th>
+            <td>{{date('d F Y', strtotime($tanggal_invoice))}}</td>
+        </tr>
+        <tr>
+            <th>No Handphone</th>
+            <td>{{$handphone}}</td>
+            <th>Pengirim</th>
+            <td>{{$customer}}</td>
+            <th>Tanggal Pengiriman</th>
+            <td>{{date('d F Y', strtotime($tanggal_driver))}}</td>
+        </tr>
+        <tr>
+            <th>Alamat</th>
+            <td>{{$alamat}}</td>
+            <th>No Invoice</th>
+            <td>{{$no_referensi}}</td>
+            <th>Catatan</th>
+            <td>{{ $catatan }}</td>
+        </tr>
+    </thead>
+</table>
+
+        <!-- <div class="pelanggan">
             <p>Penerima</p>
             <p>No Handphone</p>
             <p>Alamat</p>
@@ -233,7 +265,7 @@
             <p>: {{$no_referensi}}</p>
             <p>: {{date('d F Y', strtotime($tanggal_invoice))}}</p>
             <p>: {{date('d F Y', strtotime($tanggal_driver))}}</p>
-        </div>
+        </div> -->
 
         <hr class="garis_bawah">
 
@@ -283,7 +315,34 @@
             </tr>
         </table>
 
-        <div class="pembuat">
+        <table class="tabletagihan">
+            <thead>
+                <tr>
+                    <th>Pembuat</th>
+                    <th>Dibukukan</th>
+                    <th>Auditor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td height="20px"></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>{{$dibuat ? $dibuat : '-'}}</td>
+                    <td>{{$disetujui ? $disetujui : '-'}}</td>
+                    <td>{{$diperiksa ? $diperiksa : '-'}}</td>
+                </tr>
+                <tr>
+                    <td>{{$tanggal_pembuat ? date('d F Y', strtotime($tanggal_pembuat)) : '-'}}</td>
+                    <td>{{$tanggal_penyetuju ? date('d F Y', strtotime($tanggal_penyetuju)) : '-'}}</td>
+                    <td>{{$tanggal_pemeriksa ? date('d F Y', strtotime($tanggal_pemeriksa)) : '-'}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- <div class="pembuat">
                 <p>Pembuat</p>
                 <br>
                 <br>
@@ -313,7 +372,7 @@
                 <p>{{$tanggal_pemeriksa ? date('d F Y', strtotime($tanggal_pemeriksa)) : '-'}}</p>
                 </div>
         </div>
-        </center>
+        </center> -->
 
         <footer>
             <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
