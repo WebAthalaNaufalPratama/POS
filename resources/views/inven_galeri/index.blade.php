@@ -500,6 +500,31 @@
                       @endforeach
                   </div>
                 </div>
+
+                @unlessrole('AdminGallery')
+                <!-- Select Lokasi -->
+                <div class="mb-3" >
+                  <label for="lokasiChecklist" class="form-label me-3">Pilih Lokasi</label>
+                  <a href="javascript:void(0);" id="checkAllLokasi">
+                    <span class="text-primary">Select All</span>
+                  </a>
+                  <a href="javascript:void(0);" class="d-none" id="uncheckAllLokasi">
+                    <span class="text-danger">Deselect All</span>
+                  </a>
+                  <div id="lokasiChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
+                    @foreach ($galleries as $item)
+                      <div class="col-lg-3 col-md-4 col-sm-6">
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="{{ $item->id }}" id="{{ $item->id }}">
+                              <label class="form-check-label" for="{{ $item->id }}">
+                                  {{ $item->nama }}
+                              </label>
+                          </div>
+                      </div>
+                      @endforeach
+                  </div>
+                </div>
+                @endunlessrole
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" id="clearBtnInventory">Clear</button>
@@ -757,6 +782,7 @@
                     produk: '#namaProdukChecklist',
                     tipe_produk: '#tipeProdukChecklist',
                     kondisi: '#kondisiChecklist',
+                    lokasi: '#lokasiChecklist',
                 }, 'inventory'); 
 
                 const handleSearch = debounce(function() {
@@ -777,6 +803,8 @@
                     $('#checkAllTipe').removeClass('d-none');
                     $('#uncheckAllKondisi').addClass('d-none');
                     $('#checkAllKondisi').removeClass('d-none');
+                    $('#uncheckAllLokasi').addClass('d-none');
+                    $('#checkAllLokasi').removeClass('d-none');
                 });
 
                 $('#checkAllProduk').on('click', function() {
@@ -814,6 +842,20 @@
                     $(this).addClass('d-none');
                     $('#checkAllKondisi').removeClass('d-none');
                 });
+
+                @unlessrole('AdminGallery')
+                $('#checkAllLokasi').on('click', function() {
+                    $('#lokasiChecklist input').prop('checked', true);
+                    $(this).addClass('d-none');
+                    $('#uncheckAllLokasi').removeClass('d-none');
+                });
+                
+                $('#uncheckAllLokasi').on('click', function() {
+                    $('#lokasiChecklist input').prop('checked', false);
+                    $(this).addClass('d-none');
+                    $('#checkAllLokasi').removeClass('d-none');
+                });
+                @endunlessrole
             // End Datatable Inventory
 
             // Start Datatable Pemakaian Sendiri

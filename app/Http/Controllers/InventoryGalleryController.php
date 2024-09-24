@@ -73,6 +73,9 @@ class InventoryGalleryController extends Controller
                 if ($req->has('kondisi') && !empty($req->kondisi)) {
                     $query->whereIn('kondisi_id', $req->kondisi);
                 }
+                if ($req->has('lokasi') && !empty($req->lokasi)) {
+                    $query->whereIn('lokasi_id', $req->lokasi);
+                }
             
                 $start = $req->input('start');
                 $length = $req->input('length');
