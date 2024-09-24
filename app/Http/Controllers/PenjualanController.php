@@ -378,7 +378,13 @@ class PenjualanController extends Controller
             $kata_pertama = $produk[0];
             $data['nama_produk'] = array_merge([$kata_pertama], $data['nama_produk']);
         }
-        
+        // nambah produk jika dapet promo produk
+        $promo = Promo::where('id', $data['promo_id'])->first();
+        if ($req->status == 'DIKONFIRMASI' && $promo->diskon_free_produk != null) {
+            $produk = explode('-', $data['total_promo']);
+            $kata_pertama = $produk[0];
+            $data['nama_produk'] = array_merge([$kata_pertama], $data['nama_produk']);
+        }
         $lokasi = Lokasi::where('id', $req->lokasi_id)->first();
         if($lokasi->tipe_lokasi == 1){
             if ($penjualan) {
