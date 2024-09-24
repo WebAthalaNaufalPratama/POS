@@ -579,6 +579,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function()
             Route::get('/{inven_greenhouse}/edit', 'InventoryGreenhouseController@edit')->name('inven_greenhouse.edit');
             Route::patch('/{inven_greenhouse}/update', 'InventoryGreenhouseController@update')->name('inven_greenhouse.update');
             Route::get('/{inven_greenhouse}/delete', 'InventoryGreenhouseController@destroy')->name('inven_greenhouse.destroy');
+            Route::post('/ubahKondisi', 'InventoryGreenhouseController@ubahKondisi')->name('inven_greenhouse.ubahKondisi');
         });
 
         //purchase

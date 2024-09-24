@@ -30,7 +30,7 @@ class InventoryGalleryController extends Controller
      */
     public function index(Request $req)
     {
-        $produks = InventoryGallery::with('kondisi', 'produk.tipe', 'gallery')->when(Auth::user()->karyawans, function ($query) {
+        $produks = InventoryGallery::with('kondisi', 'produk.tipe', 'gallery')->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('lokasi_id', Auth::user()->karyawans->lokasi_id);
         })->orderBy('kode_produk')->orderBy('kondisi_id')->get();
         $uniqueProduks = $produks->groupBy('kode_produk')->map(function ($items) {
@@ -568,7 +568,7 @@ class InventoryGalleryController extends Controller
     {
         $produks = Produk::all();
         $kondisi = Kondisi::all();
-        $gallery = Lokasi::where('tipe_lokasi', 1)->when(Auth::user()->karyawans, function ($query) {
+        $gallery = Lokasi::where('tipe_lokasi', 1)->when(Auth::user()->hasRole('AdminGallery'), function ($query) {
             return $query->where('id', Auth::user()->karyawans->lokasi_id);
         })->get();
         return view('inven_galeri.create', compact('produks', 'kondisi', 'gallery'));
@@ -606,9 +606,9 @@ class InventoryGalleryController extends Controller
 
                 // Cek duplikat
                 $duplicate = InventoryGallery::where('kode_produk', $kode_produk)
-                                            ->where('kondisi_id', $kondisi_id)
-                                            ->where('lokasi_id', $lokasi_id)
-                                            ->first();
+                ->where('kondisi_id', $kondisi_id)
+                ->where('lokasi_id', $lokasi_id)
+                ->first();
 
                 if ($duplicate) {
                     DB::rollBack();
@@ -717,7 +717,7 @@ class InventoryGalleryController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'produk_id.*' => 'required|exists:produks,id',
+            'produk_id.*' => 'required|exists:inventory_galleries,id',
             'kondisi_akhir.*' => 'required|integer|exists:kondisis,id',
             'jumlah.*' => 'required|integer|min:1',
         ]);
@@ -750,9 +750,9 @@ class InventoryGalleryController extends Controller
                 ]);
 
                 $inventory = InventoryGallery::where('kode_produk', $produk->kode_produk)
-                                            ->where('kondisi_id', $kondisi_akhir_id)
-                                            ->where('lokasi_id', $produk->lokasi_id)
-                                            ->first();
+                ->where('kondisi_id', $kondisi_akhir_id)
+                ->where('lokasi_id', $produk->lokasi_id)
+                ->first();
 
                 if ($inventory) {
                     $inventory->update([
