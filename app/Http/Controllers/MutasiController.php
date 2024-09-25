@@ -2246,9 +2246,6 @@ class MutasiController extends Controller
                 {
                     foreach($produkmutasi->komponen as $komponen)
                     {
-                        // $komponen->update([
-                        //     'kondisi_diterima' => $data['kondisi_diterima'][$i],
-                        // ]);
                         $stok = InventoryGallery::where('lokasi_id', $req->penerima)
                                                 ->where('kode_produk', $komponen->kode_produk)
                                                 // ->where('kondisi_id', $data['kondisi_diterima'][$i])
@@ -2277,20 +2274,7 @@ class MutasiController extends Controller
                                                 ->where('kode_produk', $komponen->kode_produk)
                                                 ->where('kondisi_id', $komponen->kondisi_diterima)
                                                 ->first();
-                        if ($stok) {
-                            // $stoklama = InventoryGallery::where('lokasi_id', $req->penerima)
-                            //     ->where('kode_produk', $komponen->kode_produk)
-                            //     ->where('kondisi_id', $komponen->kondisi_diterima)
-                            //     ->first();
-                            // if($stoklama) {
-                            //     $stoklama->jumlah -= intval($produkmutasi->jumlah_diterima);
-                            //     $stoklama->update();
-                            // }
-    
-                            // $komponen->update([
-                            //     'kondisi_diterima' => $data['kondisi_diterima'][$i],
-                            // ]);
-                            
+                        if ($stok) {             
                             if ($stok) {
                                 $stok->jumlah += intval($komponen->jumlah);
                             }
@@ -2383,19 +2367,7 @@ class MutasiController extends Controller
                                                 ->where('kode_produk', $komponen->kode_produk)
                                                 ->where('kondisi_id', $komponen->kondisi_diterima)
                                                 ->first();
-                        if ($stok) {                      
-                            // $stoklama = InventoryGreenhouse::where('lokasi_id', $req->penerima)
-                            //                         ->where('kode_produk', $komponen->kode_produk)
-                            //                         ->where('kondisi_id', $komponen->kondisi_diterima)
-                            //                         ->first();
-                            // if($stoklama) {
-                            //     $stoklama->jumlah -= intval($produkmutasi->jumlah_diterima);
-                            //     $stoklama->update();
-                            // }
-                            // $komponen->update([
-                            //     'kondisi_diterima' => $data['kondisi_diterima'][$i],
-                            // ]);
-                            
+                        if ($stok) {                                               
                             if ($stok) {
                                 $stok->jumlah += intval($komponen->jumlah);
                             } 
@@ -2459,9 +2431,6 @@ class MutasiController extends Controller
                 {
                     foreach($produkmutasi->komponen as $komponen)
                     {
-                        // $komponen->update([
-                        //     'kondisi_diterima' => $data['kondisi_diterima'][$i],
-                        // ]);
                         $stok = InventoryGudang::where('lokasi_id', $req->penerima)
                                                 ->where('kode_produk', $komponen->kode_produk)
                                                 ->where('kondisi_id', $komponen->kondisi_diterima)
@@ -2490,21 +2459,7 @@ class MutasiController extends Controller
                                                 ->where('kondisi_id', $komponen->kondisi_diterima)
                                                 ->first();
                         if($stok){
-                            // $stoklama = InventoryGudang::where('lokasi_id', $req->penerima)
-                            //                         ->where('kode_produk', $komponen->kode_produk)
-                            //                         ->where('kondisi_id', $komponen->kondisi_diterima)
-                            //                         ->first();
-                            // if($stoklama) {
-                            //     $stoklama->jumlah -= intval($produkmutasi->jumlah_diterima);
-                            //     $stoklama->update();
-                            // }
-                            // $komponen->update([
-                            //     'kondisi_diterima' => $data['kondisi_diterima'][$i],
-                            // ]);
-                            
                             if ($stok) {
-                                // $stok->jumlah -= intval($produkmutasi->jumlah_diterima);
-                                // $stok->update();
                                 $stok->jumlah += intval($komponen->jumlah);
                             }
                             $stok->update();
@@ -2534,25 +2489,15 @@ class MutasiController extends Controller
         $lokasis = Lokasi::all();
         $mutasis = Mutasi::with('produkMutasi')->find($mutasi);
         $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasigg', $mutasis->no_mutasi)->get();
-        // dd($produks);
-        foreach($produks as $produk)
-        {
-            // dd($produk);
-        }
-        
-        // $produks = Produk_Terjual::with('komponen', 'produk')->where('no_mutasi', $mutasis->no_mutasi)->get();
         foreach($mutasis->produkMutasi as $produk)
         {
             $coba[] = $produk->id;
         }
-        // $produks = Produk_Jual::with('komponen.kondisi')->get();
         $kondisis = Kondisi::all();
         $produkjuals = InventoryGreenHouse::all();
         $bankpens = Rekening::all();
         $ongkirs = Ongkir::all();
         $produkKomponens = Produk::where('tipe_produk', 1)->orWhere('tipe_produk', 2)->get();
-
-        // dd($mutasis);
         return view('mutasighgalery.view', compact('produkKomponens','produkjuals','ongkirs','bankpens','kondisis','produks','mutasis', 'lokasis'));
     }
 
@@ -2611,12 +2556,9 @@ class MutasiController extends Controller
 
     public function audit_GOUpdate(Request $req)
     {
-        // dd($req);
-
         $mutasis = $req->input('mutasiGO');
         $mutasipenjualan = Mutasi::where('id', $mutasis)->first();
         $data = $req->except(['_method', '_token','ubahapa', 'jumlah_dikirim', 'jumlah_diterima', 'mutasiGO', 'nama_produk', 'kode_produk']);
-        // dd($data);
 
         if ($req->hasFile('bukti')) {
             // Simpan file baru

@@ -165,6 +165,7 @@ class InitialSeeder extends Seeder
                 'auditdopenjualan',
                 'pdfdopenjualan.generate',
                 'pembayaran.index',
+                'pdfmutasipenjualan.generate',
                 'mutasi.paymentmutasi',
                 'dopenjualan',
                 'komponenpenjualan.store',
