@@ -91,7 +91,7 @@
                         <th>Gudang</th>
                         <th>Minimal Stok</th>
                         <th>Jumlah</th>
-                        @if(Auth::user()->hasRole('Purchasing'))
+                        @if(in_array('inven_gudang.show', $thisUserPermissions) || in_array('inven_gudang.edit', $thisUserPermissions))
                         <th class="text-center">Aksi</th>
                         @endif
                     </tr>
@@ -132,7 +132,7 @@
                         <th></th>
                         <th></th>
                         <th></th>
-                        @if(Auth::user()->hasRole('Purchasing'))
+                        @if(in_array('inven_gudang.show', $thisUserPermissions) || in_array('inven_gudang.edit', $thisUserPermissions))
                         <th></th>
                         @endif
                     </tr>
@@ -570,7 +570,7 @@
                     { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
                     { data: 'min_stok', name: 'min_stok' },
                     { data: 'jumlah', name: 'jumlah' },
-                    @if(Auth::user()->hasRole('Purchasing'))
+                    @if(in_array('inven_gudang.show', $thisUserPermissions) || in_array('inven_gudang.edit', $thisUserPermissions))
                     {
                         data: 'action',
                         name: 'action',

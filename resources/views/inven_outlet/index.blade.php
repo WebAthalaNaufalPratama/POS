@@ -80,12 +80,15 @@
                         <th>Nama Produk</th>
                         <th>Kode Produk</th>
                         <th>Tipe Produk</th>
+                        @if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchase'))
+                        <th>Harga Jual</th>
+                        @endif
                         @if(!Auth::user()->hasRole('KasirOutlet'))
                         <th>Outlet</th>
                         @endif
                         <th>Minimal Stok</th>
                         <th>Jumlah</th>
-                        @if(Auth::user()->hasRole('KasirOutlet'))
+                        @if(in_array('inven_outlet.show', $thisUserPermissions) || in_array('inven_outlet.edit', $thisUserPermissions))
                         <th class="text-center">Aksi</th>
                         @endif
                     </tr>
@@ -123,12 +126,15 @@
                             <th></th>
                             <th></th>
                             <th></th>
+                            @if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchase'))
+                            <th></th>
+                            @endif
                             @if(!Auth::user()->hasRole('KasirOutlet'))
                             <th></th>
                             @endif
                             <th></th>
                             <th></th>
-                            @if(Auth::user()->hasRole('KasirOutlet'))
+                            @if(in_array('inven_outlet.show', $thisUserPermissions) || in_array('inven_outlet.edit', $thisUserPermissions))
                             <th></th>
                             @endif
                         </tr>
@@ -334,15 +340,24 @@
             // Start Datatable Inventory
             const columns = [
                     { data: 'no', name: 'no', orderable: false },
-                    { data: 'produk.nama', name: 'produk.nama', orderable: false },
+                    { data: 'produk.nama', name: 'produk.nama' },
                     { data: 'kode_produk', name: 'kode_produk' },
-                    { data: 'tipe_produk', name: 'tipe_produk', orderable: false },
+                    { data: 'tipe_produk', name: 'tipe_produk' },
+                    @if(Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Purchase'))
+                    { 
+                        data: 'harga_jual', 
+                        name: 'harga_jual',
+                        render: function(data, type, row) {
+                            return row.harga_jual_format;
+                        }
+                    },
+                    @endif
                     @if(!Auth::user()->hasRole('KasirOutlet'))
                     { data: 'outlet.nama', name: 'outlet.nama', orderable: false },
                     @endif
                     { data: 'min_stok', name: 'min_stok' },
                     { data: 'jumlah', name: 'jumlah' },
-                    @if(Auth::user()->hasRole('KasirOutlet'))
+                    @if(in_array('inven_outlet.show', $thisUserPermissions) || in_array('inven_outlet.edit', $thisUserPermissions))
                     {
                         data: 'action',
                         name: 'action',

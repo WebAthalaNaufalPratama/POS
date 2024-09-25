@@ -92,7 +92,7 @@
                         <th>Greenhouse</th>
                         <th>Minimal Stok</th>
                         <th>Jumlah</th>
-                        @if(Auth::user()->hasRole('Purchasing'))
+                        @if(in_array('inven_greenhouse.show', $thisUserPermissions) || in_array('inven_greenhouse.edit', $thisUserPermissions))
                         <th class="text-center">Aksi</th>
                         @endif
                     </tr>
@@ -134,7 +134,7 @@
                         <th></th>
                         <th></th>
                         <th></th>
-                        @if(Auth::user()->hasRole('Purchasing'))
+                        @if(in_array('inven_greenhouse.show', $thisUserPermissions) || in_array('inven_greenhouse.edit', $thisUserPermissions))
                         <th></th>
                         @endif
                     </tr>
@@ -574,14 +574,14 @@
             // Start Datatable Inventory
                 const columns = [
                     { data: 'no', name: 'no', orderable: false },
-                    { data: 'produk.nama', name: 'produk.nama', orderable: false },
+                    { data: 'produk.nama', name: 'produk.nama' },
                     { data: 'kode_produk', name: 'kode_produk' },
                     { data: 'tipe_produk', name: 'tipe_produk', orderable: false },
                     { data: 'kondisi.nama', name: 'kondisi.nama', orderable: false },
                     { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
                     { data: 'min_stok', name: 'min_stok' },
                     { data: 'jumlah', name: 'jumlah' },
-                    @if(Auth::user()->hasRole('Purchasing'))
+                    @if(in_array('inven_greenhouse.show', $thisUserPermissions) || in_array('inven_greenhouse.edit', $thisUserPermissions))
                     {
                         data: 'action',
                         name: 'action',

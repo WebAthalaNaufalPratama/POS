@@ -92,6 +92,7 @@ class InventoryOutletController extends Controller
                     $item->no = ($currentPage - 1) * $perPage + ($index + 1);
                     $item->min_stok = $item->min_stok ?? 0;
                     $item->tipe_produk = $item->produk->tipe->nama;
+                    $item->harga_jual_format = formatRupiah($item->produk->harga_jual);
                     return $item;
                 });
                 $total_jumlah = $data->sum('jumlah');
