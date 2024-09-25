@@ -21,10 +21,10 @@
                         </a>
                     </div>
                 </div>
-
             </div>
+        </div>
         <div class="card-body">
-            <div class="row ps-2 pe-2">
+            {{-- <div class="row ps-2 pe-2">
                 <div class="col-sm-2 ps-0 pe-0">
                     <select id="filterProduk" name="filterProduk" class="form-control" title="Produk">
                         <option value="">Pilih Produk</option>
@@ -47,55 +47,94 @@
                     <a href="javascript:void(0);" id="filterBtn" data-base-url="{{ route('inven_outlet.index') }}" class="btn btn-info">Filter</a>
                     <a href="javascript:void(0);" id="clearBtn" data-base-url="{{ route('inven_outlet.index') }}" class="btn btn-warning">Clear</a>
                 </div>
-            </div>
+            </div> --}}
             <div class="table-responsive">
-            <table class="table datanew" style="width: 100%">
-                <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Kode Produk</th>
-                    <th>Nama Produk</th>
-                    @if(!Auth::user()->hasRole('KasirOutlet'))
-                    <th>Outlet</th>
-                    @endif
-                    <th>Jumlah</th>
-                    <th>Minimal Stok</th>
-                    <th class="text-center">Aksi</th>
-                </tr>
-                </thead>
-                <tbody>
-                    @foreach ($data as $item)
+                <div class="row mb-2">
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+                      <!-- Tombol Filter di Kiri -->
+                      <div class="col-auto pe-0">
+                        <a href="javascript:void(0);" class="btn btn-primary p-1 d-flex justify-content-center align-items-center" data-bs-toggle="modal" data-bs-target="#filterModalInventory">
+                          <img src="{{ asset('assets/img/icons/filter.svg') }}" alt="filter">
+                        </a>
+                      </div>
+                  
+                      <!-- Tombol PDF & Excel di Kanan -->
+                      <div class="col-auto">
+                        {{-- @if(in_array('produks.pdf', $thisUserPermissions))
+                        <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
+                          <img src="/assets/img/icons/pdf.svg" alt="PDF" style="height: 1rem;" /> PDF
+                        </button>
+                        @endif
+                        @if(in_array('produks.excel', $thisUserPermissions))
+                        <button class="btn btn-outline-success" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="excel()">
+                          <img src="/assets/img/icons/excel.svg" alt="EXCEL" style="height: 1rem;" /> EXCEL
+                        </button>
+                        @endif --}}
+                      </div>
+                    </div>
+                </div>
+                <table class="table" id="inventory" style="width: 100%">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Produk</th>
+                        <th>Kode Produk</th>
+                        <th>Tipe Produk</th>
+                        @if(!Auth::user()->hasRole('KasirOutlet'))
+                        <th>Outlet</th>
+                        @endif
+                        <th>Minimal Stok</th>
+                        <th>Jumlah</th>
+                        @if(Auth::user()->hasRole('KasirOutlet'))
+                        <th class="text-center">Aksi</th>
+                        @endif
+                    </tr>
+                    </thead>
+                    <tbody id="dynamic_field">
+                        {{-- @foreach ($data as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item->kode_produk ?? '-' }}</td>
+                                <td>{{ $item->produk->nama ?? '-' }}</td>
+                                @if(!Auth::user()->hasRole('KasirOutlet'))
+                                <td>{{ $item->outlet->nama ?? '-' }}</td>
+                                @endif
+                                <td>{{ $item->jumlah ?? '-' }}</td>
+                                <td>{{ $item->min_stok ?? '-' }}</td>
+                                <td class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="{{ route('inven_outlet.show', ['inven_outlet' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('inven_outlet.edit', ['inven_outlet' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        @endforeach --}}
+                    </tbody>
+                    <tfoot>
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->kode_produk ?? '-' }}</td>
-                            <td>{{ $item->produk->nama ?? '-' }}</td>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
                             @if(!Auth::user()->hasRole('KasirOutlet'))
-                            <td>{{ $item->outlet->nama ?? '-' }}</td>
+                            <th></th>
                             @endif
-                            <td>{{ $item->jumlah ?? '-' }}</td>
-                            <td>{{ $item->min_stok ?? '-' }}</td>
-                            <td class="text-center">
-                                <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="{{ route('inven_outlet.show', ['inven_outlet' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ route('inven_outlet.edit', ['inven_outlet' => $item->id]) }}" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
-                                    </li>
-                                    {{-- <li>
-                                        <a href="#" class="dropdown-item" onclick="deleteData({{ $item->id }})"><img src="assets/img/icons/delete1.svg" class="me-2" alt="img">Delete</a>
-                                    </li> --}}
-                                </ul>
-                            </td>
+                            <th></th>
+                            <th></th>
+                            @if(Auth::user()->hasRole('KasirOutlet'))
+                            <th></th>
+                            @endif
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </tfoot>
+                </table>
             </div>
-        </div>
         </div>
     </div>
 </div>
@@ -197,93 +236,218 @@
       </div>
     </div>
 </div>
+<div class="modal fade" id="filterModalInventory" tabindex="-1" aria-labelledby="filterModalInvenlabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalInvenlabel">Filter Inventory</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                  <img src="assets/img/icons/closes.svg" alt="">
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Checklist Nama Produk -->
+                <div class="mb-3" >
+                  <label for="namaProdukChecklist" class="form-label me-3">Pilih Nama Produk</label>
+                  <a href="javascript:void(0);" id="checkAllProduk">
+                    <span class="text-primary">Select All</span>
+                  </a>
+                  <a href="javascript:void(0);" class="d-none" id="uncheckAllProduk">
+                    <span class="text-danger">Deselect All</span>
+                  </a>
+                  <div id="namaProdukChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
+                    @foreach ($uniqueProduks as $produk)
+                      <div class="col-lg-3 col-md-4 col-sm-6">
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="{{ $produk['kode_produk'] }}" id="{{ $produk['kode_produk'] }}">
+                              <label class="form-check-label" for="{{ $produk['kode_produk'] }}">
+                                  {{ $produk['nama_produk'] }}
+                              </label>
+                          </div>
+                      </div>
+                      @endforeach
+                  </div>
+                </div>
+
+                <!-- Select Tipe Produk -->
+                <div class="mb-3" >
+                  <label for="tipeProdukChecklist" class="form-label me-3">Pilih Tipe Produk</label>
+                  <a href="javascript:void(0);" id="checkAllTipe">
+                    <span class="text-primary">Select All</span>
+                  </a>
+                  <a href="javascript:void(0);" class="d-none" id="uncheckAllTipe">
+                    <span class="text-danger">Deselect All</span>
+                  </a>
+                  <div id="tipeProdukChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
+                    @foreach ($tipe_produks as $item)
+                      <div class="col-lg-3 col-md-4 col-sm-6">
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="{{ $item->id }}" id="{{ $item->id }}">
+                              <label class="form-check-label" for="{{ $item->id }}">
+                                  {{ $item->nama }}
+                              </label>
+                          </div>
+                      </div>
+                      @endforeach
+                  </div>
+                </div>
+
+                @unlessrole('KasirOutlet')
+                <!-- Select Lokasi -->
+                <div class="mb-3" >
+                    <label for="lokasiChecklist" class="form-label me-3">Pilih Lokasi</label>
+                    <a href="javascript:void(0);" id="checkAllLokasi">
+                      <span class="text-primary">Select All</span>
+                    </a>
+                    <a href="javascript:void(0);" class="d-none" id="uncheckAllLokasi">
+                      <span class="text-danger">Deselect All</span>
+                    </a>
+                    <div id="lokasiChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
+                      @foreach ($outlets as $item)
+                        <div class="col-lg-3 col-md-4 col-sm-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ $item->id }}" id="{{ $item->id }}">
+                                <label class="form-check-label" for="{{ $item->id }}">
+                                    {{ $item->nama }}
+                                </label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endunlessrole
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" id="clearBtnInventory">Clear</button>
+                <button type="button" class="btn btn-primary" id="filterBtnInventory">Filter</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
     <script>
         $(document).ready(function(){
-            $('select[id^=filter]').select2()
-        })
-        $('#filterBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var urlString = baseUrl;
-            var first = true;
-            var symbol = '';
+            $('select').select2()
 
-            var Produk = $('#filterProduk').val();
-            // console.log(Produk);
-            if (Produk) {
-                var filterProduk = 'produk=' + Produk;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterProduk;
-            }
-
-            var Outlet = $('#filterOutlet').val();
-            if (Outlet) {
-                var filterOutlet = 'outlet=' + Outlet;
-                if (first == true) {
-                    symbol = '?';
-                    first = false;
-                } else {
-                    symbol = '&';
-                }
-                urlString += symbol;
-                urlString += filterOutlet;
-            }
-            window.location.href = urlString;
-        });
-        $('#clearBtn').click(function(){
-            var baseUrl = $(this).data('base-url');
-            var url = window.location.href;
-            if(url.indexOf('?') !== -1){
-                window.location.href = baseUrl;
-            }
-            return 0;
-        });
-        function deleteData(id){
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Data ini akan dihapus secara permanen!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type: "GET",
-                        url: "/inven_outlet/"+id+"/delete",
-                        success: function(response) {
-                            toastr.success(response.msg, 'Success', {
-                                closeButton: true,
-                                tapToDismiss: false,
-                                rtl: false,
-                                progressBar: true
-                            });
-            
-                            setTimeout(() => {
-                                location.reload()
-                            }, 2000);
-                        },
-                        error: function(error) {
-                            toastr.error(JSON.parse(error.responseText).msg, 'Error', {
-                                closeButton: true,
-                                tapToDismiss: false,
-                                rtl: false,
-                                progressBar: true
-                            });
+            // Start Datatable Inventory
+            const columns = [
+                    { data: 'no', name: 'no', orderable: false },
+                    { data: 'produk.nama', name: 'produk.nama', orderable: false },
+                    { data: 'kode_produk', name: 'kode_produk' },
+                    { data: 'tipe_produk', name: 'tipe_produk', orderable: false },
+                    @if(!Auth::user()->hasRole('KasirOutlet'))
+                    { data: 'outlet.nama', name: 'outlet.nama', orderable: false },
+                    @endif
+                    { data: 'min_stok', name: 'min_stok' },
+                    { data: 'jumlah', name: 'jumlah' },
+                    @if(Auth::user()->hasRole('KasirOutlet'))
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="text-center">
+                                    <a class="action-set" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="true">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="inven_outlet/${row.id}/show" class="dropdown-item"><img src="assets/img/icons/eye1.svg" class="me-2" alt="img">Detail</a>
+                                        </li>
+                                        <li>
+                                            <a href="inven_outlet/${row.id}/edit" class="dropdown-item"><img src="assets/img/icons/edit.svg" class="me-2" alt="img">Edit</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            `;
                         }
-                    });
-                }
-            });
+                    }
+                    @endif
+                ];
+
+                let table = initDataTable('#inventory', {
+                    ajaxUrl: "{{ route('inven_outlet.index') }}",
+                    columns: columns,
+                    order: [[2, 'asc']],
+                    searching: true,
+                    lengthChange: true,
+                    pageLength: 5,
+                    drawCallback: function(settings) {
+                        let api = this.api();
+                        updateFooterTotals(api);
+                    }
+                }, {
+                    produk: '#namaProdukChecklist',
+                    tipe_produk: '#tipeProdukChecklist',
+                    lokasi: '#lokasiChecklist',
+                }, 'inventory'); 
+
+                const handleSearch = debounce(function() {
+                    table.ajax.reload();
+                }, 5000); // Adjust the debounce delay as needed
+
+                $('#filterBtnInventory').on('click', function() {
+                    table.ajax.reload();
+                    $('#filterModalInventory').modal('hide');
+                });
+
+                $('#clearBtnInventory').on('click', function() {
+                    $('#filterModalInventory input[type="checkbox"]').prop('checked', false);
+                    table.ajax.reload();
+                    $('#uncheckAllProduk').addClass('d-none');
+                    $('#checkAllProduk').removeClass('d-none');
+                    $('#uncheckAllTipe').addClass('d-none');
+                    $('#checkAllTipe').removeClass('d-none');
+                    $('#uncheckAllLokasi').addClass('d-none');
+                    $('#checkAllLokasi').removeClass('d-none');
+                });
+
+                $('#checkAllProduk').on('click', function() {
+                    $('#namaProdukChecklist input').prop('checked', true);
+                    $(this).addClass('d-none');
+                    $('#uncheckAllProduk').removeClass('d-none');
+                });
+                
+                $('#uncheckAllProduk').on('click', function() {
+                    $('#namaProdukChecklist input').prop('checked', false);
+                    $(this).addClass('d-none');
+                    $('#checkAllProduk').removeClass('d-none');
+                });
+
+                $('#checkAllTipe').on('click', function() {
+                    $('#tipeProdukChecklist input').prop('checked', true);
+                    $(this).addClass('d-none');
+                    $('#uncheckAllTipe').removeClass('d-none');
+                });
+                
+                $('#uncheckAllTipe').on('click', function() {
+                    $('#tipeProdukChecklist input').prop('checked', false);
+                    $(this).addClass('d-none');
+                    $('#checkAllTipe').removeClass('d-none');
+                });
+
+                $('#checkAllLokasi').on('click', function() {
+                    $('#lokasiChecklist input').prop('checked', true);
+                    $(this).addClass('d-none');
+                    $('#uncheckAllLokasi').removeClass('d-none');
+                });
+                
+                $('#uncheckAllLokasi').on('click', function() {
+                    $('#lokasiChecklist input').prop('checked', false);
+                    $(this).addClass('d-none');
+                    $('#checkAllLokasi').removeClass('d-none');
+                });
+            // End Datatable Inventory
+        })
+        function updateFooterTotals(api) {
+            let totalJumlah = api.ajax.json().total_jumlah;
+            let totalColumn = api.columns().count();
+            $(api.column(totalColumn - 2).footer()).html('<strong>Jumlah Total:</strong>');
+            $(api.column(totalColumn - 1).footer()).html('<strong>' + (totalJumlah ? totalJumlah : 0) + '</strong>');
         }
     </script>
 @endsection

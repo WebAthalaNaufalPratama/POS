@@ -210,6 +210,11 @@ class InventoryIndenController extends Controller
     {
         // Validation rules for dynamic fields
         $validator = Validator::make($req->all(), [
+            'kode_produk' => 'required|array',
+            'bulan_inden' => 'required|array',
+            'supplier_id' => 'required|array',
+            'kode_produk_inden' => 'required|array',
+            'jumlah' => 'required|array',
             'kode_produk.*' => 'required',
             'bulan_inden.*' => 'required',
             'supplier_id.*' => 'required|integer',
@@ -219,7 +224,7 @@ class InventoryIndenController extends Controller
 
         // Check if validation fails
         if ($validator->fails()) {
-            return redirect()->back()->withInput()->withErrors($validator);
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
         }
 
         DB::beginTransaction();

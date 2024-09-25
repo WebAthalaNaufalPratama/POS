@@ -212,7 +212,7 @@ class InventoryGudangController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withInput()->withErrors($validator);
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
         }
 
         DB::beginTransaction();
@@ -309,13 +309,16 @@ class InventoryGudangController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
+            'produk_id' => 'required|array',
+            'kondisi_akhir' => 'required|array',
+            'jumlah' => 'required|array',
             'produk_id.*' => 'required|exists:inventory_gudangs,id',
             'kondisi_akhir.*' => 'required|integer|exists:kondisis,id',
             'jumlah.*' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withInput()->withErrors($validator);
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
         }
 
         foreach ($req->produk_id as $index => $produk_id) {

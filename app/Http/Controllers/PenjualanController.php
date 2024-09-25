@@ -715,7 +715,7 @@ class PenjualanController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withInput()->withErrors($validator);
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
         }
 
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
@@ -767,7 +767,7 @@ class PenjualanController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withInput()->withErrors($validator);
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
         }
 
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
@@ -887,7 +887,7 @@ class PenjualanController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withInput()->withErrors($validator);
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
         }
 
         $data = $req->except(['_token', '_method', 'route', 'produk_id', 'perangkai_id', 'prdTerjual_id']);
