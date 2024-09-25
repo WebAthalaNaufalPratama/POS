@@ -54,7 +54,7 @@ class InventoryGalleryController extends Controller
 
         // start datatable inventory
             if ($req->ajax() && $req->table == 'inventory') {
-                if($user->hasRole(['Purchasing', 'Auditor', 'Finance'])) {
+                if($user->hasRole(['Purchasing', 'Auditor', 'Finance', 'SuperAdmin'])) {
                     $query = InventoryGallery::with('produk', 'gallery', 'kondisi')->orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc');
                 }else{
                     $query = InventoryGallery::with('produk', 'gallery', 'kondisi')->orderBy('kode_produk', 'asc')->orderBy('kondisi_id', 'asc')->when(Auth::user()->karyawans, function ($q) {

@@ -88,7 +88,9 @@
                     <th>Nama Produk</th>
                     <th>Tipe Produk</th>
                     <th>Jumlah</th>
-                    <th class="text-center">Aksi</th>
+                    @if(in_array('inven_inden.show', $thisUserPermissions) || in_array('inven_inden.edit', $thisUserPermissions))
+                        <th class="text-center">Aksi</th>
+                    @endif
                 </tr>
                 </thead>
                 <tbody>
@@ -116,6 +118,20 @@
                         </tr>
                     @endforeach --}}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        @if(in_array('inven_inden.show', $thisUserPermissions) || in_array('inven_inden.edit', $thisUserPermissions))
+                        <th></th>
+                        @endif
+                    </tr>
+                </tfoot>
             </table>
             </div>
         </div>
@@ -332,7 +348,7 @@
                     { data: 'produk.nama', name: 'produk.nama', orderable: false },
                     { data: 'tipe_produk', name: 'tipe_produk', orderable: false },
                     { data: 'jumlah', name: 'jumlah' },
-                    @if(Auth::user()->hasRole('Purchasing'))
+                    @if(in_array('inven_inden.show', $thisUserPermissions) || in_array('inven_inden.edit', $thisUserPermissions))
                     {
                         data: 'action',
                         name: 'action',
