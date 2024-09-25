@@ -10,11 +10,7 @@
                     <h4>Inventory Gallery</h4>
                 </div>
                 <div class="page-btn">
-                    <div class="d-flex">
-                        <a href="javascript::void(0);" data-bs-target="#modalUbahKondisi" data-bs-toggle="modal" class="btn btn-info me-2 d-flex justify-content-center align-items-center"><img src="assets/img/icons/loop.svg" alt="img" class="me-1" /></a>
-                        <a href="{{ route('inven_galeri.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
-
-                    </div>
+                    <a href="{{ route('inven_galeri.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1" />Tambah Inventory</a>
                 </div>
             </div>
         </div>
@@ -62,8 +58,11 @@
                       </div>
                   
                       <!-- Tombol PDF & Excel di Kanan -->
-                      {{-- <div class="col-auto">
-                        @if(in_array('produks.pdf', $thisUserPermissions))
+                      <div class="col-auto">
+                        @if(in_array('inven_galeri.ubahKondisi', $thisUserPermissions))
+                        <a href="javascript::void(0);" data-bs-target="#modalUbahKondisi" data-bs-toggle="modal" class="btn btn-info me-2 d-flex justify-content-center align-items-center"><img src="assets/img/icons/loop.svg" alt="img" class="me-1" /></a>
+                        @endif
+                        {{-- @if(in_array('produks.pdf', $thisUserPermissions))
                         <button class="btn btn-outline-danger" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="pdf()">
                           <img src="/assets/img/icons/pdf.svg" alt="PDF" style="height: 1rem;" /> PDF
                         </button>
@@ -72,17 +71,17 @@
                         <button class="btn btn-outline-success" style="height: 2.5rem; padding: 0.5rem 1rem; font-size: 1rem;" onclick="excel()">
                           <img src="/assets/img/icons/excel.svg" alt="EXCEL" style="height: 1rem;" /> EXCEL
                         </button>
-                        @endif
-                      </div> --}}
+                        @endif --}}
+                      </div>
                     </div>
-                  </div>
+                </div>
             <table class="table" id="inventory" style="width: 100%">
                 <thead>
                 <tr>
                     <th>No</th>
-                    <th>Tipe Produk</th>
-                    <th>Kode Produk</th>
                     <th>Nama Produk</th>
+                    <th>Kode Produk</th>
+                    <th>Tipe Produk</th>
                     <th>Kondisi</th>
                     @if(!Auth::user()->hasRole('AdminGallery'))
                     <th>Gallery</th>
@@ -501,6 +500,31 @@
                       @endforeach
                   </div>
                 </div>
+
+                @unlessrole('AdminGallery')
+                <!-- Select Lokasi -->
+                <div class="mb-3" >
+                  <label for="lokasiChecklist" class="form-label me-3">Pilih Lokasi</label>
+                  <a href="javascript:void(0);" id="checkAllLokasi">
+                    <span class="text-primary">Select All</span>
+                  </a>
+                  <a href="javascript:void(0);" class="d-none" id="uncheckAllLokasi">
+                    <span class="text-danger">Deselect All</span>
+                  </a>
+                  <div id="lokasiChecklist" class="row" style="max-height: 300px; overflow-y: auto;border: 1px solid #ddd;">
+                    @foreach ($galleries as $item)
+                      <div class="col-lg-3 col-md-4 col-sm-6">
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="{{ $item->id }}" id="{{ $item->id }}">
+                              <label class="form-check-label" for="{{ $item->id }}">
+                                  {{ $item->nama }}
+                              </label>
+                          </div>
+                      </div>
+                      @endforeach
+                  </div>
+                </div>
+                @endunlessrole
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary" id="clearBtnInventory">Clear</button>
@@ -508,7 +532,7 @@
             </div>
         </div>
     </div>
-  </div>
+</div>
 {{-- modal end --}}
 @endsection
 
@@ -707,9 +731,9 @@
             // Start Datatable Inventory
                 const columns = [
                     { data: 'no', name: 'no', orderable: false },
-                    { data: 'tipe_produk', name: 'tipe_produk', orderable: false },
-                    { data: 'kode_produk', name: 'kode_produk' },
                     { data: 'produk.nama', name: 'produk.nama', orderable: false },
+                    { data: 'kode_produk', name: 'kode_produk' },
+                    { data: 'tipe_produk', name: 'tipe_produk', orderable: false },
                     { data: 'kondisi.nama', name: 'kondisi.nama', orderable: false },
                     @if(!Auth::user()->hasRole('AdminGallery'))
                     { data: 'gallery.nama', name: 'gallery.nama', orderable: false },
@@ -758,6 +782,7 @@
                     produk: '#namaProdukChecklist',
                     tipe_produk: '#tipeProdukChecklist',
                     kondisi: '#kondisiChecklist',
+                    lokasi: '#lokasiChecklist',
                 }, 'inventory'); 
 
                 const handleSearch = debounce(function() {
@@ -778,6 +803,8 @@
                     $('#checkAllTipe').removeClass('d-none');
                     $('#uncheckAllKondisi').addClass('d-none');
                     $('#checkAllKondisi').removeClass('d-none');
+                    $('#uncheckAllLokasi').addClass('d-none');
+                    $('#checkAllLokasi').removeClass('d-none');
                 });
 
                 $('#checkAllProduk').on('click', function() {
@@ -815,6 +842,20 @@
                     $(this).addClass('d-none');
                     $('#checkAllKondisi').removeClass('d-none');
                 });
+
+                @unlessrole('AdminGallery')
+                $('#checkAllLokasi').on('click', function() {
+                    $('#lokasiChecklist input').prop('checked', true);
+                    $(this).addClass('d-none');
+                    $('#uncheckAllLokasi').removeClass('d-none');
+                });
+                
+                $('#uncheckAllLokasi').on('click', function() {
+                    $('#lokasiChecklist input').prop('checked', false);
+                    $(this).addClass('d-none');
+                    $('#checkAllLokasi').removeClass('d-none');
+                });
+                @endunlessrole
             // End Datatable Inventory
 
             // Start Datatable Pemakaian Sendiri
@@ -899,15 +940,16 @@
 
             function updateFooterTotals(api) {
                 let totalJumlah = api.ajax.json().total_jumlah;
-
-                $(api.column(5).footer()).html('<strong>Jumlah Total:</strong>');
-                $(api.column(6).footer()).html('<strong>' + (totalJumlah ? totalJumlah : 0) + '</strong>');
+                let totalColumn = api.columns().count();
+                $(api.column(totalColumn - 2).footer()).html('<strong>Jumlah Total:</strong>');
+                $(api.column(totalColumn - 1).footer()).html('<strong>' + (totalJumlah ? totalJumlah : 0) + '</strong>');
             }
             function updateFooterTotals2(api) {
                 let totalJumlah = api.ajax.json().total_jumlah;
 
-                $(api.column(6).footer()).html('<strong>Jumlah Total:</strong>');
-                $(api.column(7).footer()).html('<strong>' + (totalJumlah ? totalJumlah : 0) + '</strong>');
+                let totalColumn = api.columns().count();
+                $(api.column(totalColumn - 2).footer()).html('<strong>Jumlah Total:</strong>');
+                $(api.column(totalColumn - 1).footer()).html('<strong>' + (totalJumlah ? totalJumlah : 0) + '</strong>');
             }
         });   
     </script>

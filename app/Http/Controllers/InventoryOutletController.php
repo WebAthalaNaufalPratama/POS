@@ -17,7 +17,9 @@ use App\Models\Karyawan;
 use App\Models\DeliveryOrder;
 use App\Models\Mutasi;
 use App\Models\ReturPenjualan;
+use App\Models\Tipe_Produk;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class InventoryOutletController extends Controller
@@ -29,11 +31,83 @@ class InventoryOutletController extends Controller
      */
     public function index(Request $req)
     {
+        $produks = InventoryOutlet::with('produk.tipe', 'outlet')->orderBy('kode_produk')->orderBy('kondisi_id')->get();
+        $uniqueProduks = $produks->groupBy('kode_produk')->map(function ($items) {
+            return [
+                'kode_produk' => $items->first()->kode_produk,
+                'nama_produk' => $items->first()->produk->nama
+            ];
+        })->values();
+        $tipe_produks = Tipe_Produk::where('kategori', 'Jual')->get();
         $namaproduks = InventoryOutlet::with('produk')->get()->unique('kode_produk');
         $outlets = Lokasi::where('tipe_lokasi', 2)->get();
         $user = Auth::user();
         $lokasi = Karyawan::where('user_id', $user->id)->first();
-        if($user->hasRole(['KasirOutlet', 'Auditor', 'Finance'])) {
+
+        // start datatable inventory
+            if ($req->ajax() && $req->table == 'inventory') {
+                $query = InventoryOutlet::with('produk', 'outlet')->orderBy('kode_produk', 'asc');
+                
+                if ($req->has('produk') && !empty($req->produk)) {
+                    $query->whereIn('kode_produk', $req->produk);
+                }
+                if ($req->filled('tipe_produk')) {
+                    $query->whereHas('produk', function ($q) use ($req) {
+                        $q->whereIn('tipe_produk', (array) $req->tipe_produk);
+                    });
+                }
+                if ($req->has('lokasi') && !empty($req->lokasi)) {
+                    $query->whereIn('lokasi_id', $req->lokasi);
+                }
+            
+                $start = $req->input('start');
+                $length = $req->input('length');
+                $order = $req->input('order')[0]['column'];
+                $dir = $req->input('order')[0]['dir'];
+                $columnName = $req->input('columns')[$order]['data'];
+
+                // search
+                $search = $req->input('search.value');
+                if (!empty($search)) {
+                    $query->where(function($q) use ($search) {
+                        $q->where('jumlah', 'like', "%$search%")
+                        ->orWhere('kode_produk', 'like', "%$search%")
+                        ->orWhereHas('outlet', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        })
+                        ->orWhereHas('produk', function($c) use($search){
+                            $c->where('nama', 'like', "%$search%");
+                        });
+                    });
+                }
+        
+                $query->orderBy($columnName, $dir);
+                $recordsFiltered = $query->count();
+                $tempData = $query->offset($start)->limit($length)->get();
+        
+                $currentPage = ($start / $length) + 1;
+                $perPage = $length;
+            
+                $data = $tempData->map(function($item, $index) use ($currentPage, $perPage) {
+                    $item->no = ($currentPage - 1) * $perPage + ($index + 1);
+                    $item->min_stok = $item->min_stok ?? 0;
+                    $item->tipe_produk = $item->produk->tipe->nama;
+                    return $item;
+                });
+                $total_jumlah = $data->sum('jumlah');
+
+                return response()->json([
+                    'draw' => $req->input('draw'),
+                    'recordsTotal' => InventoryOutlet::count(),
+                    'recordsFiltered' => $recordsFiltered,
+                    'data' => $data,
+                    'total_jumlah' => $total_jumlah,
+                ]);
+
+            }
+        // end datatable inventory
+
+        if($user->hasRole(['KasirOutlet', 'Auditor', 'Finance', 'SuperAdmin'])) {
             $arraylokasi = $lokasi->lokasi_id;
             $query = InventoryOutlet::where('lokasi_id', $arraylokasi);
             if ($req->produk) {
@@ -43,6 +117,7 @@ class InventoryOutletController extends Controller
                 $query->where('lokasi_id', $req->input('outlet'));
             }
             $data = $query->get();
+
             $penjualan = Penjualan::where('lokasi_id', $arraylokasi)->where('distribusi', 'Diambil')->get() ?? null;
             $mergedriwayat =[];
             $do = DeliveryOrder::where('lokasi_pengirim', $arraylokasi)->get() ?? null;
@@ -103,7 +178,7 @@ class InventoryOutletController extends Controller
                 ->all();
         }
         
-        return view('inven_outlet.index', compact('data', 'riwayat', 'namaproduks', 'outlets'));
+        return view('inven_outlet.index', compact('riwayat', 'namaproduks', 'outlets', 'uniqueProduks', 'produks', 'tipe_produks'));
     }
 
     /**
@@ -117,7 +192,9 @@ class InventoryOutletController extends Controller
         $kondisi = Kondisi::all();
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
-        $outlets = Lokasi::where('id', $karyawan->lokasi_id)->get();
+        $outlets = Lokasi::where('tipe_lokasi', 2)->when(Auth::user()->hasRole('KasirOutlet'), function ($query) {
+            return $query->where('id', Auth::user()->karyawans->lokasi_id);
+        })->get();
         return view('inven_outlet.create', compact('produks', 'kondisi', 'outlets'));
     }
 
@@ -131,24 +208,54 @@ class InventoryOutletController extends Controller
     {
         // validasi
         $validator = Validator::make($req->all(), [
-            'kode_produk' => 'required',
-            'lokasi_id' => 'required',
-            'jumlah' => 'required',
-            'min_stok' => 'required',
+            'kode_produk' => 'required|array',
+            'lokasi_id' => 'required|array',
+            'jumlah' => 'required|array',
+            'min_stok' => 'required|array',
+            'kode_produk.*' => 'required',
+            'lokasi_id.*' => 'required|integer',
+            'jumlah.*' => 'required|integer|min:1',
+            'min_stok.*' => 'required|integer|min:0',
         ]);
-        $error = $validator->errors()->all();
-        if ($validator->fails()) return redirect()->back()->withInput()->with('fail', $error);
-        $data = $req->except(['_token', '_method']);
 
-        // check duplikasi
-        $duplicate = InventoryOutlet::where('kode_produk', $data['kode_produk'])->where('lokasi_id', $data['lokasi_id'])->first();
-        if($duplicate) return redirect()->back()->withInput()->with('fail', 'Produk sudah ada');
+        if ($validator->fails()) {
+            return redirect()->back()->withInput()->with('fail', $validator->errors()->all());
+        }
 
-         // save data inven galeri
-         $check = InventoryOutlet::create($data);
-         if(!$check) return redirect()->back()->withInput()->with('fail', 'Gagal menyimpan data');
+        DB::beginTransaction();
 
-         return redirect()->back()->withInput()->with('success', 'Data tersimpan');
+        try {
+            foreach ($req->kode_produk as $index => $kode_produk) {
+                $lokasi_id = $req->lokasi_id[$index];
+                $jumlah = $req->jumlah[$index];
+                $min_stok = $req->min_stok[$index];
+
+                // Cek duplikat
+                $duplicate = InventoryOutlet::where('kode_produk', $kode_produk)
+                    ->where('lokasi_id', $lokasi_id)
+                    ->first();
+
+                if ($duplicate) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('fail', "Produk {$kode_produk} dengan lokasi tersebut sudah ada.");
+                }
+
+                // Simpan data
+                InventoryOutlet::create([
+                    'kode_produk' => $kode_produk,
+                    'lokasi_id' => $lokasi_id,
+                    'jumlah' => $jumlah,
+                    'min_stok' => $min_stok,
+                ]);
+            }
+
+            DB::commit();
+            return redirect(route('inven_outlet.index'))->with('success', 'Data berhasil disimpan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('fail', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
     }
 
     /**

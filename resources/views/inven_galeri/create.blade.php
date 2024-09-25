@@ -23,6 +23,53 @@
                                 </tr>
                             </thead>
                             <tbody id="dynamic_field">
+                                @forelse (old('kode_produk', ['']) as $key => $kodeProdukOld)
+                                <tr id="row_{{ $key }}">
+                                    <td>
+                                        <select id="kode_produk_{{ $key }}" name="kode_produk[]" class="form-control" required>
+                                            <option value="">Pilih Produk</option>
+                                            @foreach ($produks as $item)
+                                                <option value="{{ $item->kode }}" {{ $item->kode == old('kode_produk.'.$key) ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="kondisi_id_{{ $key }}" name="kondisi_id[]" class="form-control" required>
+                                            <option value="">Pilih Kondisi</option>
+                                            @foreach ($kondisi as $item)
+                                                <option value="{{ $item->id }}" {{ $item->id == old('kondisi_id.'.$key) ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select id="lokasi_id_{{ $key }}" name="lokasi_id[]" class="form-control" required>
+                                            @if(count($gallery) == 1)
+                                                @foreach ($gallery as $item)
+                                                    <option value="{{ $item->id }}" {{ $item->id == old('lokasi_id.'.$key) ? 'selected' : '' }}>{{ $item->nama }}</option>
+                                                @endforeach
+                                            @else
+                                            <option value="">Pilih Gallery</option>
+                                                @foreach ($gallery as $item)
+                                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" name="jumlah[]" id="jumlah_{{ $key }}" oninput="validateMinZero(this, 10000)" value="{{ old('jumlah.'.$key) }}" required>
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" name="min_stok[]" id="min_stok_{{ $key }}" oninput="validateMinZero(this, 100)" value="{{ old('min_stok.'.$key) }}" required>
+                                    </td>
+                                    <td>
+                                        @if($key == 0)
+                                        <a href="javascript:void(0);" id="add_row"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a>
+                                        @else
+                                        <a href="javascript:void(0);" id="{{ $key }}" class="remove_row"><img src="/assets/img/icons/delete.svg" style="color: #ff6666" alt="svg"></a>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
                                 <tr id="row_0">
                                     <td>
                                         <select id="kode_produk_0" name="kode_produk[]" class="form-control" required>
@@ -64,6 +111,7 @@
                                         <a href="javascript:void(0);" id="add_row"><img src="/assets/img/icons/plus.svg" style="color: #90ee90" alt="svg"></a>
                                     </td>
                                 </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
