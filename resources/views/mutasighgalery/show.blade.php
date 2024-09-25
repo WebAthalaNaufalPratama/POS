@@ -137,53 +137,72 @@
                                             <table class="table">
                                                 <thead>
                                                     <tr>
-                                                        <th>Nama</th>
-                                                        <th>Jumlah Dikirim</th>
-                                                        <th>Jumlah Diterima</th>
-                                                        <th>Kondisi Diterima</th>
+                                                        <th width="30%">Nama</th>
+                                                        <th width="30%">Jumlah Dikirim</th>
+                                                        <!-- <th>Jumlah Diterima</th>
+                                                        <th>Kondisi Diterima</th> -->
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
-                                                @if(count($produks) > 0)
-                                                    @php
-                                                    $i = 0;
-                                                    @endphp
-                                                    @foreach ($produks as $produk)
-                                                    <tr id="row{{ $i }}">
-                                                        <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
-                                                                <option value="">Pilih Produk</option>
-                                                                @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
-                                                                    {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
-                                                                </option>
-                                                                @endforeach
-                                                            </select>
-                                                            <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
-                                                        </td> 
-                                                        <td>
-                                                            <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly>
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
-                                                        </td>
-                                                        <td>
-                                                            <select id="kondisi_diterima_{{ $i }}" name="kondisi_diterima[]" class="form-control">
-                                                                <option value="">Pilih Kondisi</option>
-                                                                @foreach ($kondisis as $kondisi)
-                                                                <option value="{{ $kondisi->id }}"  {{ $kondisi->id == $produk->komponen[0]->kondisi_diterima ? 'selected' : '' }}>
-                                                                    {{ $kondisi->nama }}
-                                                                </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    @php
-                                                    $i++;
-                                                    @endphp
-                                                    @endforeach
-                                                @endif
+                                                    @if(count($produks) > 0)
+                                                        @php $i = 0; @endphp
+                                                        @foreach ($produks as $produk)
+                                                        <tr id="row{{ $i }}">
+                                                            <td>
+                                                                <select id="nama_produk_{{ $i }}" name="nama_produk_{{ $i }}" class="form-control" disabled>
+                                                                    <option value="">Pilih Produk</option>
+                                                                    @foreach ($produkjuals as $pj)
+                                                                    <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
+                                                                        {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
+                                                                    </option>
+                                                                    @endforeach
+                                                                </select>
+                                                                <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
+                                                            </td> 
+                                                            <td>
+                                                                <input type="number" name="jumlah_dikirim_{{ $i }}" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly>
+                                                            </td>
+                                                            <!-- <td>
+                                                                <input type="number" name="jumlah_diterima_{{ $i }}" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}">
+                                                            </td>
+                                                            <td>
+                                                                <select id="kondisi_diterima_{{ $i }}" name="kondisi_diterima_{{ $i }}" class="form-control">
+                                                                    <option value="">Pilih Kondisi</option>
+                                                                    @foreach ($kondisis as $kondisi)
+                                                                    <option value="{{ $kondisi->id }}"  {{ $kondisi->id == $produk->komponen[0]->kondisi_diterima ? 'selected' : '' }}>
+                                                                        {{ $kondisi->nama }}
+                                                                    </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </td> -->
+                                                            <td>
+                                                                <button type="button" name="add_subproduct" class="btn btn-success add-subproduct" data-parent-id="{{ $i }}">Add Sub Product</button>
+                                                            </td>
+                                                        </tr>
 
+                                                        <!-- Placeholder for sub-products -->
+                                                        <tr>
+                                                            <td colspan="5">
+                                                                <table class="table">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Nama Sub-Produk</th>
+                                                                            <th>Jumlah Dikirim</th>
+                                                                            <th>Jumlah Diterima</th>
+                                                                            <th>Kondisi Diterima</th>
+                                                                            <th>Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="subproduct_field_{{ $i }}">
+                                                                        <!-- Sub-produk akan ditambahkan di sini -->
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+
+                                                        @php $i++; @endphp
+                                                        @endforeach
+                                                    @endif
                                                 </tbody>
                                             </table>
                                         </div>
@@ -535,80 +554,91 @@
                         </tr>`;
 
             $('#dynamic_field').append(newRow);
-
-            // var picModal = `<div class="modal fade" id="picModal_${i}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            //                     <div class="modal-dialog" role="document">
-            //                         <div class="modal-content">
-            //                             <div class="modal-header">
-            //                                 <h5 class="modal-title" id="exampleModalLabel">Form PIC Perangkai ${i}</h5>
-            //                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            //                                     <span aria-hidden="true">&times;</span>
-            //                                 </button>
-            //                             </div>
-            //                             <div class="modal-body">
-            //                                 <div class="form-group">
-            //                                     <label for="tglrangkai_${i}">Tanggal Rangkaian</label>
-            //                                     <input type="date" class="form-control" id="tglrangkai_${i}" name="tglrangkai_${i}">
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jnsrangkai_${i}">Jenis Rangkaian</label>
-            //                                     <input type="text" class="form-control" id="jnsrangkai_${i}" name="jnsrangkai_${i}" value="penjualan" readonly>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="no_invoice_rangkai_${i}">Nomor Invoice</label>
-            //                                     <input type="text" class="form-control" id="no_invoice_rangkai_${i}" name="no_invoice_rangkai_${i}" placeholder="Nomor Invoice" onchange="generateInvoice(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="jumlahStaff_${i}">Jumlah Staff Perangkai</label>
-            //                                     <input type="text" class="form-control" id="jumlahStaff_${i}" name="jumlahStaff_${i}" placeholder="Jumlah Staff Perangkai" onchange="generateStaffInput(this)" required>
-            //                                 </div>
-            //                                 <div class="form-group">
-            //                                     <label for="staffPerangkaiContainer_${i}">Pilih PIC Perangkai</label>
-            //                                     <div id="staffPerangkaiContainer_${i}"></div>
-            //                                 </div>
-            //                                 <div class="table-responsive">
-            //                                     <table class="table">
-            //                                         <thead>
-            //                                             <tr>
-            //                                                 <th>Nama</th>
-            //                                                 <th>Jumlah</th>
-            //                                                 <th></th>
-            //                                             </tr>
-            //                                         </thead>
-            //                                         <tbody id="dynamic_field">
-            //                                             <tr>
-            //                                                 <td>
-            //                                                     <select id="nama_produk" name="nama_produk[]" class="form-control">
-            //                                                         <option value="">Pilih Produk</option>`;
-
-            // @foreach($produks as $produk)
-            // picModal += `<option value="{{ $produk->id }}" data-harga="{{ $produk->harga_jual }}">{{ $produk->nama }}</option>`;
-            // @endforeach
-
-            // picModal += `                    </select>
-            //                                                     <input type="hidden" name="kode_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="tipe_produk[]" style="display: none;">
-            //                                                     <input type="hidden" name="deskripsi_komponen[]" style="display: none;">
-            //                                                 </td>
-            //                                                 <td><input type="number" name="jumlah[]" id="jumlah_0" oninput="multiply($(this))" class="form-control"></td>
-            //                                             </tr>
-            //                                         </tbody>
-            //                                     </table>
-            //                                 </div>
-            //                             </div>
-            //                             <div class="modal-footer justify-content-center">
-            //                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-            //                             </div>
-            //                         </div>
-            //                     </div>
-            //                 </div>`;
-
-
-            // $('body').append(picModal);
-
-
             $('#nama_produk_' + i + ', #jenis_diskon_' + i).select2();
             i++
+        });
+
+        var subProductCount = {};
+        var jumlahProduk = {};
+        
+        @foreach ($produks as $index => $produk)
+        subProductCount[{{ $index }}] = 0;
+        jumlahProduk[{{ $index }}] = {{ $produk->jumlah }};
+        @endforeach
+
+        $('.add-subproduct').click(function() {
+            var parentId = $(this).data('parent-id');
+            var subIndex = subProductCount[parentId]; 
+            subProductCount[parentId]++;
+
+            var mainProductName = $('#nama_produk_' + parentId + ' option:selected').text().trim(); 
+            var mainProductAmount = $('#jumlah_dikirim_' + parentId).val(); 
+            var totalJumlahDiterima = 0;
+            $('#subproduct_field_' + parentId + ' input[name^="jumlah_sub_diterima_"]').each(function() {
+                var jumlahDiterima = parseInt($(this).val()) || 0; 
+                totalJumlahDiterima += jumlahDiterima; 
+            });
+            var currentJumlahProduk = jumlahProduk[parentId]; 
+            console.log(currentJumlahProduk);
+
+            if (totalJumlahDiterima >= currentJumlahProduk) {
+                swal.fire({
+                    title: "Error",
+                    text: "Total jumlah diterima tidak boleh lebih dari " + currentJumlahProduk,
+                    icon: "error",
+                    confirmButtonText: "Close",
+                });
+                return; 
+            }
+
+            var newSubProductRow = `
+            <tr id="sub_row_${parentId}_${subIndex}">
+                <td>
+                    <input type="text" name="nama_sub_produk_${parentId}[]" class="form-control" style="text-align: left;" placeholder="Nama Sub-Produk" value="${mainProductName}" readonly>
+                </td>
+                <td>
+                    <input type="number" name="jumlah_sub_dikirim_${parentId}[]" class="form-control" placeholder="Jumlah Dikirim" value="${mainProductAmount}" readonly>
+                </td>
+                <td>
+                    <input type="number" name="jumlah_sub_diterima_${parentId}[]" class="form-control" placeholder="Jumlah Diterima">
+                </td>
+                <td>
+                    <select name="kondisi_sub_diterima_${parentId}[]" class="form-control">
+                        <option value="">Pilih Kondisi</option>
+                        @foreach ($kondisis as $kondisi)
+                        <option value="{{ $kondisi->id }}">{{ $kondisi->nama }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger remove-subproduct" data-parent-id="${parentId}" data-sub-index="${subIndex}">Remove</button>
+                </td>
+            </tr>`;
+
+            $('#subproduct_field_' + parentId).append(newSubProductRow);
+
+            $('#subproduct_field_' + parentId).on('input', `input[name="jumlah_sub_diterima_${parentId}[]"]`, function() {
+                var jumlahDiterima = parseInt($(this).val()) || 0; 
+                totalJumlahDiterima += jumlahDiterima;
+                if (totalJumlahDiterima > currentJumlahProduk) {
+                    swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Total jumlah diterima tidak boleh lebih dari " + currentJumlahProduk,
+                        confirmButtonText: "Close"
+                    });
+                    totalJumlahDiterima -= jumlahDiterima;
+                    total = currentJumlahProduk - totalJumlahDiterima;
+                    $(this).val(total); 
+                }
+            });  
+        });
+
+        // Remove sub-product row
+        $(document).on('click', '.remove-subproduct', function() {
+            var parentId = $(this).data('parent-id');
+            var subIndex = $(this).data('sub-index');
+            $('#sub_row_' + parentId + '_' + subIndex).remove();
         });
 
         $(document).on('click', '.btn_remove', function() {

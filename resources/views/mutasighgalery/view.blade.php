@@ -141,47 +141,56 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody id="dynamic_field">
-                                                @if(count($produks) > 0)
-                                                    @php
-                                                    $i = 0;
-                                                    @endphp
-                                                    @foreach ($produks as $produk)
-                                                    <tr id="row{{ $i }}">
-                                                        <td>
-                                                            <select id="nama_produk_{{ $i }}" name="nama_produk[]" class="form-control" disabled>
-                                                                <option value="">Pilih Produk</option>
-                                                                @foreach ($produkjuals as $pj)
-                                                                <option value="{{ $produk->id }}" data-tipe_produk="{{ $pj->tipe_produk }}" {{ $pj->kode_produk == $produk->komponen[0]->kode_produk && $pj->kondisi_id == $produk->komponen[0]->kondisi ? 'selected' : '' }}>
-                                                                    {{ $pj->produk->nama }} - {{ $pj->kondisi->nama }}
-                                                                </option>
-                                                                @endforeach
-                                                            </select>
-                                                            <input type="hidden" name="nama_produk[]" value="{{ $produk->id }}">
-                                                        </td> 
-                                                        <td>
-                                                            <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $produk->jumlah }}" readonly>
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah_diterima }}" data-produk-id="{{ $produk->id }}" readonly>
-                                                        </td>
-                                                        <td>
-                                                            <select id="kondisi_diterima_{{ $i }}" name="kondisi_diterima[]" class="form-control" readonly>
-                                                                <option value="">Pilih Kondisi</option>
-                                                                @foreach ($kondisis as $kondisi)
-                                                                <option value="{{ $kondisi->id }}"  {{ $kondisi->id == $produk->komponen[0]->kondisi_diterima ? 'selected' : '' }}>
-                                                                    {{ $kondisi->nama }}
-                                                                </option>
-                                                                @endforeach
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    @php
-                                                    $i++;
-                                                    @endphp
-                                                    @endforeach
-                                                @endif
+                                                    @if(count($produks) > 0)
+                                                        @php
+                                                            $i = 0;
+                                                        @endphp
+                                                        @foreach ($produks as $prod)
+                                                            @php
+                                                                $shown = false;
+                                                                $rowCount = count($prod->komponen); // Menghitung jumlah baris yang dibutuhkan untuk setiap produk
+                                                            @endphp
+                                                            @foreach ($prod->komponen as $index => $produk)
+                                                                <tr id="row{{ $i }}">
+                                                                    @if(!$shown)
+                                                                        <td rowspan="{{ $rowCount }}" class="align-middle">
+                                                                            {{-- Nama produk hanya ditampilkan sekali dan berada di tengah --}}
+                                                                            <input type="text" name="nama_produk[]" value="{{ $produk->nama_produk }}" class="form-control" readonly>
+                                                                        </td> 
+                                                                        <td rowspan="{{ $rowCount }}" class="align-middle">
+                                                                            {{-- Jumlah dikirim hanya ditampilkan sekali dan berada di tengah --}}
+                                                                            <input type="number" name="jumlah_dikirim[]" id="jumlah_dikirim_{{ $i }}" class="form-control" value="{{ $prod->jumlah }}" readonly>
+                                                                        </td>
+                                                                        @php
+                                                                            $shown = true; // Tandai bahwa nama produk dan jumlah sudah ditampilkan
+                                                                        @endphp
+                                                                    @endif
 
+                                                                    {{-- Kolom untuk jumlah diterima --}}
+                                                                    <td>
+                                                                        <input type="number" name="jumlah_diterima[]" id="jumlah_diterima_{{ $i }}" class="form-control jumlah_diterima" value="{{ $produk->jumlah }}" data-produk-id="{{ $produk->id }}" readonly>
+                                                                    </td>
+
+                                                                    {{-- Kolom untuk kondisi diterima --}}
+                                                                    <td>
+                                                                        <select id="kondisi_diterima_{{ $i }}" name="kondisi_diterima[]" class="form-control" readonly>
+                                                                            <option value="">Pilih Kondisi</option>
+                                                                            @foreach ($kondisis as $kondisi)
+                                                                                <option value="{{ $kondisi->id }}"  {{ $kondisi->id == $produk->kondisi_diterima ? 'selected' : '' }}>
+                                                                                    {{ $kondisi->nama }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </td>
+                                                                </tr>
+                                                                @php
+                                                                    $i++;
+                                                                @endphp
+                                                            @endforeach
+                                                        @endforeach
+                                                    @endif
                                                 </tbody>
+
                                             </table>
                                         </div>
                                 </div>
