@@ -119,12 +119,12 @@
                                                 <label>Bukti Mutasi <a href="javascript:void(0)" id="clearFile" class="custom-file-container__image-clear" onclick="clearFile()" title="Clear Image"></a>
                                                 </label>
                                                 <label class="custom-file-container__custom-file">
-                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*" >
+                                                    <input type="file" id="bukti_file" class="custom-file-container__custom-file__custom-file-input" name="bukti" accept="image/*,.pdf" >
                                                     <span class="custom-file-container__custom-file__custom-file-control"></span>
                                                 </label>
-                                                <span class="text-danger">max 2mb</span>
-                                                <div class="image-preview">
-                                                    <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" />
+                                                <span class="text-danger" >max 2mb</span>
+                                                <div id="filePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}">
+                                                    <!-- <img id="imagePreview" src="{{ $mutasis->bukti ? '/storage/' . $mutasis->bukti : '' }}" /> -->
                                                 </div>
                                                 
                                             </div>
@@ -623,29 +623,41 @@
             subTotalInput.val(subTotal.toFixed(2));
         }
 
-        $('#bukti_file').on('change', function() {
-            const file = $(this)[0].files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                $('#imagePreview').attr('src', e.target.result);
-            }
-            reader.readAsDataURL(event.target.files[0]);
-            if (file.size > 2 * 1024 * 1024) {
-                toastr.warning('Ukuran file tidak boleh lebih dari 2mb', {
-                    closeButton: true,
-                    tapToDismiss: false,
-                    rtl: false,
-                    progressBar: true
-                });
-                $(this).val('');
-                return;
-            }
+        $('#bukti_file').on('change', function(event) {
+            var file = event.target.files[0];
+            var filePreviewContainer = $('#filePreview');
+
+            filePreviewContainer.html('');
+
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview').attr('src', e.target.result);
+                var fileType = file.type;
+
+                if (fileType.includes('image')) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = $('<img />', {
+                            src: e.target.result,
+                            style: 'max-width: 100%;'
+                        });
+                        filePreviewContainer.append(img);
+                    };
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
+                else if (fileType === 'application/pdf') {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var embed = $('<embed />', {
+                            src: e.target.result,
+                            type: 'application/pdf',
+                            width: '100%',
+                            height: '500px' 
+                        });
+                        filePreviewContainer.append(embed);
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Unsupported file type! Please select an image or a PDF file.');
+                }
             }
         });
 
@@ -653,9 +665,6 @@
             $('#bukti_file').val('');
             $('#preview').attr('src', defaultImg);
         };
-
-
-       
     });
 </script>
 

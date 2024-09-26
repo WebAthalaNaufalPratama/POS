@@ -1728,6 +1728,41 @@ class MutasiController extends Controller
             ]);
         }
         for ($i = 0; $i < count($data['nama_produk']); $i++) {
+            $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigg', $req->no_mutasi)
+                                            ->where('id', $data['nama_produk'][$i])
+                                            ->first();
+            if($produkmutasi->jumlah_diterima != null) {
+                foreach($produkmutasi->komponen as $komponen){
+                    $stoklama = InventoryGallery::where('lokasi_id', $req->penerima)
+                            ->where('kode_produk', $komponen->kode_produk)
+                            ->where('kondisi_id', $komponen->kondisi_diterima)
+                            ->first();
+                    if($stoklama) {
+                        $stoklama->jumlah -= intval($produkmutasi->jumlah_diterima);
+                        $stoklama->update();
+                    }
+                }
+            }
+            $deletekomponen = Komponen_Produk_Terjual::where('produk_terjual_id', $data['nama_produk'][$i])->forceDelete();
+            foreach($data['nama_sub_produk_'. $i] as $index => $kompon){
+                $pisahkan = explode(' - ', $data['nama_sub_produk_'. $i][$index]);
+                $pisahkankondisi = $data['kondisi_sub_diterima_'. $i][$index];
+                $pisahkanjumlah = $data['jumlah_sub_diterima_'. $i][$index];
+                $produk = Produk::where('nama', $pisahkan[0])->first();
+                $kondisiproduk = Kondisi::where('nama', $pisahkan[1])->first();
+                $ubahkomponen = Komponen_Produk_Terjual::create([
+                    'produk_terjual_id' => $data['nama_produk'][$i],
+                    'kode_produk' => $produk->kode,
+                    'nama_produk' => $pisahkan[0],
+                    'tipe_produk' => $produk->tipe_produk,
+                    'kondisi' => $kondisiproduk->id,
+                    'kondisi_diterima' => $pisahkankondisi,
+                    'deskripsi' => $produk->deskripsi,
+                    'jumlah' => $pisahkanjumlah,
+                    'harga_satuan' => 0,
+                    'harga_total' => 0,
+                ]);
+            }
             $produkmutasi = Produk_Terjual::with('komponen')->where('no_mutasigag', $req->no_mutasi)
                                         ->where('id', $data['nama_produk'][$i])
                                         ->first();
@@ -1735,12 +1770,12 @@ class MutasiController extends Controller
             {
                 foreach($produkmutasi->komponen as $komponen)
                 {
-                    $komponen->update([
-                        'kondisi_diterima' => $data['kondisi_diterima'][$i],
-                    ]);
+                    // $komponen->update([
+                    //     'kondisi_diterima' => $data['kondisi_diterima'][$i],
+                    // ]);
                     $stok = InventoryGallery::where('lokasi_id', $req->penerima)
                                             ->where('kode_produk', $komponen->kode_produk)
-                                            ->where('kondisi_id', $data['kondisi_diterima'][$i])
+                                            ->where('kondisi_id', $komponen->kondisi)
                                             ->first();
                     if ($stok) {
                         $stok->jumlah += intval($data['jumlah_diterima'][$i]);
@@ -1750,8 +1785,9 @@ class MutasiController extends Controller
                     }
                 }
                 if ($produkmutasi) {
+                    $jumlahditerima = array_sum($data['jumlah_sub_diterima_'. $i]);
                     $produkmutasi->update([
-                        'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        'jumlah_diterima' => $jumlahditerima,
                     ]);
                 } else {
                     return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
@@ -1761,26 +1797,26 @@ class MutasiController extends Controller
                 {
                     $stok = InventoryGallery::where('lokasi_id', $req->penerima)
                                             ->where('kode_produk', $komponen->kode_produk)
-                                            ->where('kondisi_id', $data['kondisi_diterima'][$i])
+                                            ->where('kondisi_id', $komponen->kondisi)
                                             ->first();
                     if($stok){
-                        $stoklama = InventoryGallery::where('lokasi_id', $req->penerima)
-                            ->where('kode_produk', $komponen->kode_produk)
-                            ->where('kondisi_id', $komponen->kondisi_diterima)
-                            ->first();
+                        // $stoklama = InventoryGallery::where('lokasi_id', $req->penerima)
+                        //     ->where('kode_produk', $komponen->kode_produk)
+                        //     ->where('kondisi_id', $komponen->kondisi_diterima)
+                        //     ->first();
                     
-                        if($stoklama) {
-                            $stoklama->jumlah -= intval($produkmutasi->jumlah_diterima);
-                            $stoklama->update();
-                        }
+                        // if($stoklama) {
+                        //     $stoklama->jumlah -= intval($produkmutasi->jumlah_diterima);
+                        //     $stoklama->update();
+                        // }
 
-                        $komponen->update([
-                            'kondisi_diterima' => $data['kondisi_diterima'][$i],
-                        ]);
+                        // $komponen->update([
+                        //     'kondisi_diterima' => $data['kondisi_diterima'][$i],
+                        // ]);
                         
                         
                         if ($stok) {
-                            $stok->jumlah += intval($data['jumlah_diterima'][$i]);
+                            $stok->jumlah += intval($komponen->jumlah);
                             $stok->update();
                         }
                     }else{
@@ -1789,8 +1825,9 @@ class MutasiController extends Controller
                     
                 }
                 if ($produkmutasi) {
+                    $jumlahditerima = array_sum($data['jumlah_sub_diterima_'. $i]);
                     $produkmutasi->update([
-                        'jumlah_diterima' => $data['jumlah_diterima'][$i],
+                        'jumlah_diterima' => $jumlahditerima,
                     ]);
                 } else {
                     return redirect()->back()->withInput()->with('fail', 'Produk Mutasi tidak ditemukan');
